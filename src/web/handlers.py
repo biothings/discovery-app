@@ -9,7 +9,6 @@ import tornado.gen
 from tornado.httputil import url_concat
 from jinja2 import Environment, FileSystemLoader
 import torngithub
-from api.es import ESQuery
 from torngithub import json_encode, json_decode
 
 import config
@@ -44,25 +43,20 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class MainHandler(BaseHandler):
     def get(self):
-        slug = self.request.host.split(".")[0]
-        #print("Host: {} - Slug: {}".format(self.request.host, slug))
-        if slug.lower() not in ['www', 'dev']:
-            # try to get a registered subdomain/tag
-            esq = ESQuery()
-            api_id = esq.get_api_id_from_slug(slug)
-            if api_id:
-                swaggerUI_file = "smartapi-ui.html"
-                swagger_template = templateEnv.get_template(swaggerUI_file)
-                swagger_output = swagger_template.render(apiID = api_id)
-                self.write(swagger_output)
-                return
         index_file = "index.html"
         index_template = templateEnv.get_template(index_file)
         index_output = index_template.render()
         self.write(index_output)
 
+class ViewerHandler(BaseHandler):
+    def get(self):
+        viewer_file = "viewer.html"
+        viewer_template = templateEnv.get_template(viewer_file)
+        viewer_output = viewer_template.render()
+        self.write(viewer_output)
 
 
 APP_LIST = [
     (r"/", MainHandler),
+    (r"/viewer", ViewerHandler),
 ]

@@ -9,7 +9,6 @@ import tornado.web
 import tornado.escape
 from tornado.options import define, options
 
-from api.handlers import APP_LIST as api_app_list
 from web.handlers import APP_LIST as web_app_list
 import config
 
@@ -60,7 +59,6 @@ APP_LIST = [
 ]
 
 APP_LIST += add_apps('', web_app_list)
-APP_LIST += add_apps('api', api_app_list)
 
 
 settings = {

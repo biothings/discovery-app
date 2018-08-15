@@ -1,0 +1,32 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div id="viewer">
+  <h1>Viewer</h1>
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+<script>
+
+var app = new Vue({
+      el: '#viewer',
+			data: function(){
+				return {
+
+				}
+			},
+			methods:{
+
+			},
+			mounted:function(){
+
+
+			}
+		});
+
+
+</script>
+{% include "footer.html" %}
+{% endblock %}
