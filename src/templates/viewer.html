@@ -1,24 +1,47 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<div id="viewer">
+<div id="viewer" class="container">
   <h1>Viewer</h1>
+  <button @click="reqFile">Get JSON-LD Graph</button>
+  <hr />
+  <template v-if="graph.length">
+    <ul class="list-group">
+      <template v-for="(item,i) in graph">
+        <li v-if="getID(item)" v-html="getID(item)" class="list-group-item text-dark"></li>
+      </template>
+    </ul>
+  </template>
 </div>
 
 {% endblock %}
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script>
-
 var app = new Vue({
       el: '#viewer',
 			data: function(){
 				return {
-
+          graph: []
 				}
 			},
 			methods:{
-
+        getID(rawdata){
+          if (rawdata.hasOwnProperty('rdfs:label')) {
+            return rawdata['rdfs:label']
+          }else{
+            return false;
+          }
+        },
+        reqFile: function(){
+          axios.get('/static/misc/person.jsonld').then(res=>{
+            console.log(res.data);
+            this.graph = res.data['@graph']
+          }).catch(err=>{
+            throw err;
+          })
+        }
 			},
 			mounted:function(){
 
