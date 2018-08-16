@@ -48,15 +48,23 @@ class MainHandler(BaseHandler):
         index_output = index_template.render()
         self.write(index_output)
 
-class ViewerHandler(BaseHandler):
-    def get(self):
-        viewer_file = "viewer.html"
-        viewer_template = templateEnv.get_template(viewer_file)
-        viewer_output = viewer_template.render()
-        self.write(viewer_output)
+class SchemaHandler(BaseHandler):
+    def get(self, yourQuery=None):
+        template_file = "viewer.html"
+        schema_template = templateEnv.get_template(template_file)
+        if yourQuery:
+            schema_output = schema_template.render(Context=json.dumps({"Query": yourQuery, "Content": True}))
+        elif self.get_argument('q', False):
+            schema_output = schema_template.render(Context=json.dumps({"Query": '', "Content": False}))
+        else:
+            schema_output = schema_template.render(Context=json.dumps({}))
+        self.write(schema_output)
 
 
 APP_LIST = [
     (r"/", MainHandler),
-    (r"/viewer", ViewerHandler),
+    # (r"/viewer", ViewerHandler),
+    # (r"/viewer/(.+)/?", SchemaHandler),
+    (r"/viewer/(.+)/?", SchemaHandler),
+    (r"/viewer/?", SchemaHandler),
 ]
