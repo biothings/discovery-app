@@ -1926,7 +1926,7 @@
       "rdfs:comment": "An additional name for a Person, can be used for a middle name.",
       "rdfs:label": "additionalName",
       "schema:domainIncludes": {
-        "@id": "schema:Person"
+        "@id": "Person"
       },
       "schema:rangeIncludes": {
         "@id": "schema:Text"
