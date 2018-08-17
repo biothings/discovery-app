@@ -1,11 +1,20 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<div id="viewer" class="container">
-  <h1>Viewer</h1>
-  <button @click="reqFile">Get JSON-LD Graph</button>
-  <hr />
-  <h1>{{schemaClass}}</h1>
+<div id="viewer" class="container" style="min-height: 70vh;">
+  <div v-if="noResults" class="text-center">
+    <h2>No Class or Properties Found</h2>
+  </div>
+  <h1 class="text-dark" v-if='schemaClass' v-html='schemaClass'></h1>
+  <h1 class="text-dark" v-if='property' v-html='property'></h1>
+  <template v-if="subclass && schemaClass">
+    <a :href="'/viewer/'+subclass" v-html="subclass"></a>
+    >
+    <a :href="'/viewer/'+schemaClass" v-html="schemaClass"></a>
+  </template>
+  <template v-if="schemaClass">
+    <p v-html="classInfo['rdfs:comment']"></p>
+  </template>
   <table class="table" v-if="properties.length" style="margin-bottom: 40px">
   <thead class="thead-dark">
     <tr>
@@ -16,8 +25,10 @@
   </thead>
   <tbody v-for="(item,i) in properties">
     <tr >
-      <th><a :href='"/viewer/"+getTitle(item)' v-html=getTitle(item)></a></th>
-      <td v-html=getType(item)>TYPE</td>
+      <td><a :href='"/viewer/"+getTitle(item)' v-html=getTitle(item)></a></td>
+      <td>
+        <a style="margin:5px;" v-for="(type,i) in getType(item)" :href="'/viewer/'+type" v-html='type'></a>
+      </td>
       <td v-html=getDescription(item)></td>
     </tr>
   </tbody>
@@ -36,32 +47,47 @@ var app = new Vue({
           graph: [],
           query:'',
           schemaClass:'',
-          properties:[]
+          properties:[],
+          property:'',
+          classes:[],
+          noResults: false,
+          subclass: '',
+          classInfo:{}
 				}
 			},
 			methods:{
-        shapeData(dataGraph){
-          for (var i = 0; i < dataGraph.length; i++) {
-            if (rawdata.hasOwnProperty('rdfs:label')) {
-              return rawdata['rdfs:label']
-            }else{
-              return false;
-            }
+        determinePath(){
+          if (this.getClass()) {
+            console.log('PATH: CLASS')
+            this.getClassProperties()
+          }else if (!this.getClass()){
+            console.log('PATH: PROPERTY')
+            this.getPropertyInfo()
+          }
+          if(!this.properties.length){
+            this.noResults = true;
           }
         },
         getTitle: function(data){
           if (data.hasOwnProperty('rdfs:label')) {
             return data["rdfs:label"];
           }else{
+            //console.log(data)
             return 'no property name available'
           }
         },
         getType: function(data){
-          if (data.hasOwnProperty("@type")) {
-            return data["@type"];
-          }else{
-            return 'no type available'
+          let types=[];
+          if (data.hasOwnProperty("schema:rangeIncludes")) {
+            if (_.isArray(data["schema:rangeIncludes"])) {
+              for (var i = 0; i < data['schema:rangeIncludes'].length; i++) {
+                types.push(data['schema:rangeIncludes'][i]['@id'].slice(7));
+              }
+            }else if(_.isObject(data["schema:rangeIncludes"])){
+              types.push(data['schema:rangeIncludes']['@id'].slice(7));
+            }
           }
+          return types;
         },
         getDescription: function(data){
           if (data.hasOwnProperty("rdfs:comment")) {
@@ -72,33 +98,34 @@ var app = new Vue({
         },
         reqFile: function(){
           axios.get('/static/misc/person.jsonld').then(res=>{
-            //console.log(res.data);
             this.graph = res.data['@graph']
-            this.getClass();
+            this.determinePath()
           }).catch(err=>{
             throw err;
           })
         },
-        getClassProperties: function(){
-          let resultsArray = [];
-          for (var i = 0; i < this.graph.length; i++) {
-            if ( !_.isArray(this.graph[i]["schema:domainIncludes"]) && this.graph[i]['@type'] === "rdf:Property") {
-              //console.log('NOT array',this.graph[i]);
-              if (this.graph[i]["schema:domainIncludes"]['@id'].toLowerCase() === this.query ) {
-                console.log('pushing',this.graph[i]);
-                resultsArray.push(this.graph[i]);
-              }
-            }else if(_.isArray(this.graph[i]["schema:domainIncludes"]) && this.graph[i]['@type'] === "rdf:Property"){
-              //console.log('IS array',this.graph[i]);
-              for (var x = 0; i < this.graph[i]["schema:domainIncludes"].length; x++) {
-                if (this.graph[i]["schema:domainIncludes"][x].toLowerCase() === this.query) {
-                  console.log('pushing',this.graph[i]);
-                  resultsArray.push(this.graph[i]);
-                }
+        getClassProperties(){
+            for (var i = 0; i < this.graph.length; i++) {
+              if (this.graph[i].hasOwnProperty('schema:domainIncludes') && this.graph[i]["@type"] === "rdf:Property") {
+                console.log('has domainIncludes',this.graph[i])
+                this.extractPropertyInfo(this.graph[i]);
               }
             }
+        },
+        extractPropertyInfo(data){
+          if ( _.isArray(data['schema:domainIncludes']) ) {
+            for (var i = 0; i < data['schema:domainIncludes'].length; i++) {
+              if (data["schema:domainIncludes"][i]['@id'].toLowerCase() === 'schema:'+this.query || data["schema:domainIncludes"][i]['@id'].toLowerCase() === this.query) {
+                this.properties.push(data);
+              }
+            }
+          }else if( _.isObject(data['schema:domainIncludes']) ){
+            if (data["schema:domainIncludes"]['@id'].toLowerCase() === 'schema:'+this.query || data["schema:domainIncludes"]['@id'].toLowerCase() === this.query ) {
+              this.properties.push(data);
+            }
           }
-          this.properties = _.orderBy(resultsArray, "rdfs:label", 'asc');
+          this.properties = _.orderBy(this.properties, [user => user['rdfs:label'].toLowerCase()], ['asc']);
+
         },
         getClass(){
           let results = [];
@@ -106,20 +133,38 @@ var app = new Vue({
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query) {
               console.log('class found',this.graph[i]["rdfs:label"]);
               this.schemaClass = this.graph[i]["rdfs:label"];
+              this.classInfo= this.graph[i];
+              this.getSubclass(this.graph[i]);
             }
           }
           if (this.schemaClass) {
-            this.getClassProperties()
+            return true;
           }else{
-            //look for properties
+            return false;
           }
+        },
+        getSubclass(data){
+          if (data.hasOwnProperty("rdfs:subClassOf")) {
+            this.subclass = data["rdfs:subClassOf"]['@id'].slice(7);
+          }
+        },
+        getPropertyInfo(){
+          let results =[];
+          for (var i = 0; i < this.graph.length; i++) {
+            if (this.graph[i].hasOwnProperty('@type') && this.graph[i]["rdfs:label"].toLowerCase() === this.query.toLowerCase()) {
+              console.log('property found',this.graph[i]["rdfs:label"]);
+              this.property = this.graph[i]["rdfs:label"];
+              results.push(this.graph[i])
+            }
+          }
+          this.properties = results;
         }
 			},
 			mounted:function(){
         let context = {{Context}}
          if ( context.Content ) {
            console.log('Context Query = ',context.Query);
-           this.query = context.Query;
+           this.query = context.Query.toLowerCase();
          }
         this.reqFile()
 			}
