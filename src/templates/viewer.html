@@ -16,8 +16,11 @@
       </template>
     </div>
     <div class="col-sm-10">
-      <div v-if="noResults" class="text-center">
-        <h2>No Class or Properties Found</h2>
+      <div v-if="noResults" class="text-center jumbotron" style="margin-top:40px;">
+        <h2 class="text-muted">No Results For That Item</h2>
+        <p class="text-muted">
+          Item my be out of scope or non-existent in the document
+        </p>
       </div>
       <h1 class="text-dark" v-if='schemaClass' v-text='schemaClass'></h1>
       <h1 class="text-dark" v-if='property' v-text='property'></h1>
@@ -29,7 +32,7 @@
       <template v-if="schemaClass">
         <p v-html="classInfo['rdfs:comment']"></p>
       </template>
-      <table class="table table-responsive " v-if="properties.length" style="margin-bottom: 40px">
+      <table class="table" v-if="properties.length" style="margin-bottom: 40px">
       <thead class="bg-dark text-light">
         <tr>
           <th scope="col">Property</th>
@@ -54,10 +57,10 @@
           Used on these types
         </li>
         <li v-if="!propertyInfo['schema:domainIncludes']['@id']" class="list-group-item" v-for="(item,i) in propertyInfo['schema:domainIncludes']">
-          <a :href="'/viewer/'+item['@id'].slice(7)" v-html="item['@id'].slice(7)"></a>
+          <a :href="'/viewer/'+item['@id'].slice(7)" v-text="item['@id'].slice(7)"></a>
         </li>
         <li v-else class="list-group-item" >
-          <a :href="'/viewer/'+propertyInfo['schema:domainIncludes']['@id']" v-html="propertyInfo['schema:domainIncludes']['@id']"></a>
+          <a :href="'/viewer/'+propertyInfo['schema:domainIncludes']['@id']" v-text="propertyInfo['schema:domainIncludes']['@id'].slice(7)"></a>
         </li>
       </ul>
     </template>
@@ -102,7 +105,15 @@ var app = new Vue({
         },
         getTitle: function(data){
           if (data.hasOwnProperty('rdfs:label')) {
-            return data["rdfs:label"];
+            if (_.isObject(data['rdfs:label'])) {
+              if (data['rdfs:label'].hasOwnProperty('@value')) {
+                return data['rdfs:label']['@value']
+              }else{
+                return data['rdfs:label'];
+              }
+            }else if (_.isString(data['rdfs:label'])) {
+              return data["rdfs:label"];
+            }
           }else{
             //console.log(data)
             return 'no property name available'
@@ -157,14 +168,13 @@ var app = new Vue({
               this.properties.push(data);
             }
           }
-          // this.properties = _.orderBy(this.properties, [user => user['rdfs:label'].toLowerCase()], ['asc']);
-
+          this.properties = _.sortBy(this.properties, [user => user['rdfs:label']], ['asc']);
         },
         getClass(){
           let results = [];
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query) {
-              console.log('class found',this.graph[i]["rdfs:label"]);
+              //console.log('class found',this.graph[i]["rdfs:label"]);
               this.schemaClass = this.graph[i]["rdfs:label"];
               this.classInfo= this.graph[i];
               this.getSubclass(this.graph[i]);
@@ -193,8 +203,8 @@ var app = new Vue({
         getPropertyInfo(){
           let results =[];
           for (var i = 0; i < this.graph.length; i++) {
-            if (this.graph[i].hasOwnProperty('@type') && this.graph[i].hasOwnProperty("rdfs:label") && this.graph[i]["rdfs:label"].toLowerCase() === this.query.toLowerCase()) {
-              console.log('property found',this.graph[i]["rdfs:label"]);
+            if (this.graph[i].hasOwnProperty("rdfs:label") && this.graph[i]["rdfs:label"] === this.query.toLowerCase()) {
+              //console.log('property found',this.graph[i]["rdfs:label"]);
               this.property = this.graph[i]["rdfs:label"];
               this.propertyInfo = this.graph[i];
               results.push(this.graph[i])
