@@ -4,8 +4,8 @@
 
 <main id="index">
   <div class="container">
-    <div class="jumbotron" style="margin-top: 40px;">
-      <h2>View an available class in this schema</h2>
+    <div class="jumbotron mainBackDark text-light" style="margin-top: 40px;">
+      <h1 class="fourEM">Available Schemas</h1>
       <form>
         <div class="form-row align-items-center">
           <div class="col-auto my-1">
@@ -13,18 +13,8 @@
             <select @change='handleChange' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
               <option selected>Choose...</option>
               <option v-for="item in availableClasses" :value="item" v-text="item"></option>
-
             </select>
           </div>
-        </div>
-      </form>
-    </div>
-    <div class="jumbotron">
-      <h2>Submit Schema</h2>
-      <form>
-        <div class="form-group">
-          <label for="exampleFormControlFile1">Example file input</label>
-          <input disabled type="file" class="form-control-file" id="exampleFormControlFile1">
         </div>
       </form>
     </div>
@@ -45,7 +35,7 @@ var app = new Vue({
 			},
       methods:{
         reqFile: function(){
-          axios.get('/static/misc/book.jsonld').then(res=>{
+          axios.get('/static/misc/schema.jsonld').then(res=>{
             this.graph = res.data['@graph']
             this.getAvailableClasses()
           }).catch(err=>{
@@ -59,7 +49,7 @@ var app = new Vue({
             results.push(this.graph[i]["rdfs:label"]);
           }
         }
-        this.availableClasses = results;
+        this.availableClasses = results.sort();
       },
       handleChange: function(e){
         window.location.href = "/viewer/"+e.target.value;
