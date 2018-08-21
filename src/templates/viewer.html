@@ -37,14 +37,11 @@
         </p>
       </div>
       <div class="jumbotron" v-if='schemaClass'>
-        <h1 class="fourEM mainTextDark" v-if='schemaClass' v-text='schemaClass'></h1>
+        <h1 class="fourEM mainTextDark bold" v-if='schemaClass' v-text='schemaClass'></h1>
         <template v-if="subclass && schemaClass">
           <span style="font-size: 1.2em;" v-for="item in lineageArray">
-            <!-- <a :href="'/viewer/'+subclass" class="mainTextLight font-weight-bold" v-text="subclass"></a>
-            >
-            <a :href="'/viewer/'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a> -->
             <a class="mainTextLight font-weight-bold" :href="'/viewer/'+item['@id'].slice(7)" v-text='item["@id"].slice(7)'></a>
-            >
+            &gt;
           </span>
           <a style="font-size: 1.2em;" :href="'/viewer/'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a>
         </template>
@@ -52,7 +49,7 @@
           <p v-html="classInfo['rdfs:comment']"></p>
         </template>
       </div>
-      <h1 class="fourEM mainTextDark" v-if='property' v-text='property'></h1>
+      <h1 class="fourEM mainTextDark bold" v-if='property' v-text='property'></h1>
       <table class="table table-responsive" v-if="properties.length" style="margin-bottom: 40px">
       <thead class="mainBackDark text-light">
         <tr>
@@ -154,15 +151,14 @@ var app = new Vue({
               }
             }
           }
-
         },
-        shapeData(data){
-
+        shapeData(){
+          for (var i = 0; i < this.lineageArray.length; i++) {
+            this.lineageArray[i]
+          }
         },
         handleFilter(e){
           if (e.target.value !== 'Choose...') {
-            // this.query = e.target.value.toLowerCase();
-            // this.determinePath();
             window.location.href = "/viewer/"+e.target.value;
           }
         },
@@ -307,7 +303,7 @@ var app = new Vue({
             default:
               results = fullList;
               results = fullList.filter(word => word["rdfs:label"][0] === target);
-              this.filterResults = results;
+              this.filterResults =  _.sortBy(results, [user => user['rdfs:label']], ['asc']);
           }
         },
         getSubclass(data){
