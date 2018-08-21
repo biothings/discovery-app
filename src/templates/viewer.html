@@ -3,12 +3,6 @@
 {% include "header.html" %}
 <div id="viewer" class="container" style="min-height: 70vh;">
   <div class="row" style="margin-top:40px;">
-    <!-- <div class="col-sm-12 col-md-12 col-lg-12 mainBackDark text-light padding20">
-      <form class="form-inline my-2 my-lg-0">
-        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-      </form>
-    </div> -->
     <div class="col-lg-2">
       <template v-if="availableClasses">
         <ul class="list-group">
@@ -29,7 +23,7 @@
             <!-- <a href="#" @click='handleFilter(item)' v-text='item' v-bind:class="{'active': query === item}"></a> -->
             <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
               <option selected v-text='"Choose..."'></option>
-              <option v-for="(item,i) in filterResults" :value="item" v-text="item"></option>
+              <option v-for="(item,i) in filterResults" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
             </select>
           </li>
         </ul>
@@ -44,18 +38,21 @@
       </div>
       <div class="jumbotron" v-if='schemaClass'>
         <h1 class="fourEM mainTextDark" v-if='schemaClass' v-text='schemaClass'></h1>
-        <h1 class="text-dark fourEM" v-if='property' v-text='property'></h1>
         <template v-if="subclass && schemaClass">
-          <span style="font-size: 1.2em;">
-            <a :href="'/viewer/'+subclass" class="mainTextLight font-weight-bold" v-text="subclass"></a>
+          <span style="font-size: 1.2em;" v-for="item in lineageArray">
+            <!-- <a :href="'/viewer/'+subclass" class="mainTextLight font-weight-bold" v-text="subclass"></a>
             >
-            <a :href="'/viewer/'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a>
+            <a :href="'/viewer/'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a> -->
+            <a class="mainTextLight font-weight-bold" :href="'/viewer/'+item['@id'].slice(7)" v-text='item["@id"].slice(7)'></a>
+            >
           </span>
+          <a style="font-size: 1.2em;" :href="'/viewer/'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a>
         </template>
         <template v-if="schemaClass">
           <p v-html="classInfo['rdfs:comment']"></p>
         </template>
       </div>
+      <h1 class="fourEM mainTextDark" v-if='property' v-text='property'></h1>
       <table class="table table-responsive" v-if="properties.length" style="margin-bottom: 40px">
       <thead class="mainBackDark text-light">
         <tr>
@@ -116,7 +113,9 @@
 {% endblock %}
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script> -->
 <script src="/static/js/lodash.js"></script>
+<script src="/static/js/networkx.js"></script>
 <script>
 var app = new Vue({
       el: '#viewer',
@@ -137,19 +136,40 @@ var app = new Vue({
           subclass: '',
           classInfo:{},
           availableClasses:[],
-          filterResults:[]
+          filterResults:[],
+          //lineage
+          lineageArray:[]
 				}
 			},
 			methods:{
+        getClassLineage(classInfo){
+          let subclass ='';
+          this.getAvailableClasses();
+          if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isObject(classInfo["rdfs:subClassOf"])) {
+            subclass = classInfo["rdfs:subClassOf"]['@id'];
+            for (var i = 0; i < this.availableClasses.length; i++) {
+              if (this.availableClasses[i]['@id'] === subclass) {
+                this.lineageArray.unshift(this.availableClasses[i])
+                this.getClassLineage(this.availableClasses[i])
+              }
+            }
+          }
+
+        },
+        shapeData(data){
+
+        },
         handleFilter(e){
           if (e.target.value !== 'Choose...') {
-            this.query = e.target.value.toLowerCase();
-            this.determinePath();
+            // this.query = e.target.value.toLowerCase();
+            // this.determinePath();
+            window.location.href = "/viewer/"+e.target.value;
           }
         },
         determinePath(){
           if (this.getClass()) {
             console.log('PATH: CLASS')
+            this.property='';
             this.getClassProperties()
           }else if (!this.getClass()){
             console.log('PATH: PROPERTY')
@@ -171,7 +191,6 @@ var app = new Vue({
               return data["rdfs:label"];
             }
           }else{
-            //console.log(data)
             return 'no property name available'
           }
         },
@@ -197,7 +216,6 @@ var app = new Vue({
         },
         reqFile: function(){
           axios.get('/static/misc/schema.jsonld').then(res=>{
-            // console.log('graph',res.data['@graph'])
             this.graph = res.data['@graph']
             this.determinePath()
             this.getAvailableClasses()
@@ -256,9 +274,9 @@ var app = new Vue({
           let results = [];
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query) {
-              //console.log('class found',this.graph[i]["rdfs:label"]);
               this.schemaClass = this.graph[i]["rdfs:label"];
               this.classInfo= this.graph[i];
+              this.getClassLineage(this.classInfo)
               this.getSubclass(this.graph[i]);
             }
           }
@@ -272,7 +290,7 @@ var app = new Vue({
           let results = [];
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class") {
-              results.push(this.graph[i]["rdfs:label"]);
+              results.push(this.graph[i]);
             }
           }
           this.availableClasses = results.sort();
@@ -288,7 +306,7 @@ var app = new Vue({
               break;
             default:
               results = fullList;
-              results = fullList.filter(word => word[0] === target);
+              results = fullList.filter(word => word["rdfs:label"][0] === target);
               this.filterResults = results;
           }
         },
@@ -298,12 +316,13 @@ var app = new Vue({
           }
         },
         getPropertyInfo(){
-          console.log("query",this.query);
           let results =[];
           for (var i = 0; i < this.graph.length; i++) {
             //check if label is obj or array
             if (this.graph[i].hasOwnProperty("rdfs:label") && this.graph[i]["rdfs:label"].toString().toLowerCase() === this.query.toLowerCase()) {
               this.property = this.graph[i]["rdfs:label"];
+              console.log('prop label found')
+              console.log(this.graph[i]["rdfs:label"])
               this.propertyInfo = this.graph[i];
               results.push(this.graph[i])
             }
