@@ -63,8 +63,6 @@ class SchemaHandler(BaseHandler):
 
 APP_LIST = [
     (r"/", MainHandler),
-    # (r"/viewer", ViewerHandler),
-    # (r"/viewer/(.+)/?", SchemaHandler),
-    (r"/viewer/(.+)/?", SchemaHandler),
-    (r"/viewer/?", SchemaHandler),
+    (r"/(.+)/?", SchemaHandler),
+    # (r"/?", SchemaHandler),
 ]

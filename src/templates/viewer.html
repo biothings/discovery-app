@@ -30,20 +30,14 @@
       </template>
     </div>
     <div class="col-sm-10">
-      <div v-if="noResults" class="text-center jumbotron" style="margin-top:40px;">
-        <h2 class="text-muted">No Results For That Item</h2>
-        <p class="text-muted">
-          Item my be out of scope or non-existent in the document
-        </p>
-      </div>
       <div class="jumbotron" v-if='schemaClass'>
         <h1 class="fourEM mainTextDark bold" v-if='schemaClass' v-text='schemaClass'></h1>
         <template v-if="subclass && schemaClass">
           <span style="font-size: 1.2em;" v-for="item in lineageArray">
-            <a class="mainTextLight font-weight-bold" :href="'/viewer/'+item['@id'].slice(7)" v-text='item["@id"].slice(7)'></a>
+            <a class="mainTextLight font-weight-bold" :href="'/'+item['@id'].slice(7)" v-text='item["@id"].slice(7)'></a>
             &gt;
           </span>
-          <a style="font-size: 1.2em;" :href="'/viewer/'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a>
+          <a style="font-size: 1.2em;" :href="'/'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a>
         </template>
         <template v-if="schemaClass">
           <p v-html="classInfo['rdfs:comment']"></p>
@@ -58,38 +52,22 @@
           <th scope="col">Description</th>
         </tr>
       </thead>
-      <tbody v-for="(item,i) in properties">
-        <tr >
+      <tbody>
+        <tr v-for="(item,i) in properties">
           <td>
-            <a class="font-weight-bold" :href='"/viewer/"+getTitle(item)' v-html=getTitle(item)></a></td>
+            <a class="font-weight-bold" :href='"/"+getTitle(item)' v-html=getTitle(item)></a></td>
           <td>
-            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'/viewer/'+type" v-html='type'></a>
+            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'/'+type" v-html='type'></a>
           </td>
           <td v-html=getDescription(item)></td>
         </tr>
       </tbody>
     </table>
-    <!-- <template v-if="subclass">
-      <h1 class="fourEM mainTextLight" v-text='subclass'></h1>
-      <table class="table table-responsive" style="margin-bottom: 40px">
-      <thead class="mainBackLight text-light">
-        <tr>
-          <th scope="col">Property</th>
-          <th scope="col">Expected Type</th>
-          <th scope="col">Description</th>
-        </tr>
-      </thead>
-      <tbody v-for="(item,i) in parentProperties">
-        <tr >
-          <td>
-            <a class="font-weight-bold" :href='"/viewer/"+getTitle(item)' v-html=getTitle(item)></a></td>
-          <td>
-            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'/viewer/'+type" v-html='type'></a>
-          </td>
-          <td v-html=getDescription(item)></td>
-        </tr>
-      </tbody>
-    </template> -->
+    <template v-else>
+      <div class="text-center mainBackDark text-light padding20" style="margin-bottom: 40px">
+        This schema has no properties ot it's own
+      </div>
+    </template>
 
     <span v-if="subclass" v-for="(parent,i) in parentDisplayResults">
       <h1 class="fourEM mainTextLight" v-html='parent["className"]'></h1>
@@ -104,9 +82,9 @@
       <tbody>
         <tr v-for="item in parent['props']">
           <td>
-            <a class="font-weight-bold" :href='"/viewer/"+getTitle(item)' v-html=getTitle(item)></a></td>
+            <a class="font-weight-bold" :href='"/"+getTitle(item)' v-html=getTitle(item)></a></td>
           <td>
-            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'/viewer/'+type" v-html='type'></a>
+            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'/'+type" v-html='type'></a>
           </td>
           <td v-html=getDescription(item)></td>
         </tr>
@@ -120,10 +98,10 @@
           Used on these types
         </li>
         <li v-if="!propertyInfo['schema:domainIncludes']['@id']" class="list-group-item" v-for="(item,i) in propertyInfo['schema:domainIncludes']">
-          <a :href="'/viewer/'+item['@id'].slice(7)" v-text="item['@id'].slice(7)"></a>
+          <a :href="'/'+item['@id'].slice(7)" v-text="item['@id'].slice(7)"></a>
         </li>
         <li v-else class="list-group-item" >
-          <a :href="'/viewer/'+propertyInfo['schema:domainIncludes']['@id']" v-text="propertyInfo['schema:domainIncludes']['@id'].slice(7)"></a>
+          <a :href="'/'+propertyInfo['schema:domainIncludes']['@id']" v-text="propertyInfo['schema:domainIncludes']['@id'].slice(7)"></a>
         </li>
       </ul>
     </template>
@@ -135,8 +113,8 @@
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script> -->
-<script src="/static/js/lodash.js"></script>
-<script src="/static/js/networkx.js"></script>
+<script src="./static/js/lodash.js"></script>
+<script src="./static/js/networkx.js"></script>
 <script>
 var app = new Vue({
       el: '#viewer',
@@ -153,7 +131,6 @@ var app = new Vue({
           property:'',
           propertyInfo:{},
           classes:[],
-          noResults: false,
           subclass: '',
           classInfo:{},
           availableClasses:[],
@@ -161,7 +138,8 @@ var app = new Vue({
           //lineage
           lineageArray:[],
           displayResults:[],
-          parentDisplayResults:[]
+          parentDisplayResults:[],
+          additionalPaths:[]
 				}
 			},
 			methods:{
@@ -177,10 +155,43 @@ var app = new Vue({
               }
             }
           }
+          if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isArray(classInfo["rdfs:subClassOf"])) {
+            this.findPaths(classInfo);
+          }
 
         },
+        findPaths(classInfo){
+          let arr = classInfo["rdfs:subClassOf"];
+          let parentArray =[];
+          let subclass = '';
+          for (var i = 0; i < arr.length; i++) {
+            //console.log('looking for subclass of ', arr[i]["@id"].slice(7))
+            subclass = parentArray.unshift(arr[i]["@id"].slice(7));
+            subclass = this.returnSubclass(arr[i]["@id"].slice(7));
+            while (subclass) {
+              if (subclass) {
+                parentArray.unshift(subclass);
+                subclass = this.returnSubclass(subclass);
+              }
+            }
+            this.additionalPaths.push(parentArray);
+            console.log('additional Paths', this.additionalPaths);
+          }
+
+        },
+        returnSubclass(className){
+          let classInfo = this.returnClass(className);
+          console.log('found class info ',classInfo);
+          let subclass = '';
+          if (classInfo.hasOwnProperty("rdfs:subClassOf") && !_.isArray(classInfo["rdfs:subClassOf"])) {
+              subclass = classInfo["rdfs:subClassOf"]['@id'].slice(7);
+              console.log('sub ', subclass);
+              return subclass;
+          }else{
+            return false;
+          }
+        },
         getParentData(){
-          console.log('parent array ', this.lineageArray)
           for (var i = 0; i < this.lineageArray.length; i++) {
             let parent = this.returnClass(this.lineageArray[i]);
             let props = this.returnProps(this.lineageArray[i]);
@@ -195,11 +206,22 @@ var app = new Vue({
           this.parentDisplayResults.unshift(obj);
         },
         returnClass(classInfo){
-          for (var i = 0; i < this.graph.length; i++) {
-            if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === classInfo["rdfs:label"].toLowerCase()) {
-              return this.graph[i];
+          if (_.isObject(classInfo)) {
+            for (var i = 0; i < this.graph.length; i++) {
+              if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === classInfo["rdfs:label"].toLowerCase()) {
+                return this.graph[i];
+              }
             }
           }
+
+          if (_.isString(classInfo)) {
+            for (var i = 0; i < this.graph.length; i++) {
+              if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === classInfo.toLowerCase()) {
+                return this.graph[i];
+              }
+            }
+          }
+
         },
         returnProps(classInfo){
           let properties = [];
@@ -226,7 +248,7 @@ var app = new Vue({
         },
         handleFilter(e){
           if (e.target.value !== 'Choose...') {
-            window.location.href = "/viewer/"+e.target.value;
+            window.location.href = "/"+e.target.value;
           }
         },
         determinePath(){
@@ -237,9 +259,6 @@ var app = new Vue({
           }else if (!this.getClass()){
             console.log('PATH: PROPERTY')
             this.getPropertyInfo()
-          }
-          if(!this.properties.length){
-            // this.noResults = true;
           }
         },
         getTitle: function(data){
@@ -278,7 +297,7 @@ var app = new Vue({
           }
         },
         reqFile: function(){
-          axios.get('/static/misc/schema.jsonld').then(res=>{
+          axios.get('./static/misc/schema.jsonld').then(res=>{
             this.graph = res.data['@graph']
             this.determinePath()
             this.getAvailableClasses()
@@ -385,8 +404,6 @@ var app = new Vue({
             //check if label is obj or array
             if (this.graph[i].hasOwnProperty("rdfs:label") && this.graph[i]["rdfs:label"].toString().toLowerCase() === this.query.toLowerCase()) {
               this.property = this.graph[i]["rdfs:label"];
-              console.log('prop label found')
-              console.log(this.graph[i]["rdfs:label"])
               this.propertyInfo = this.graph[i];
               results.push(this.graph[i])
             }
@@ -397,7 +414,7 @@ var app = new Vue({
 			mounted:function(){
         let context = {{Context}}
          if ( context.Content ) {
-           console.log('Context Query = ',context.Query);
+           //console.log('Context Query = ',context.Query);
            this.query = context.Query.toLowerCase();
          }
 
