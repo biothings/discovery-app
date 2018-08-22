@@ -375,10 +375,8 @@ var app = new Vue({
           }
         },
         getSubclass(data){
-          if (data.hasOwnProperty("rdfs:subClassOf")) {
-            if (_.isObject(data["rdfs:subClassOf"])) {
+          if (data.hasOwnProperty("rdfs:subClassOf") && !_.isArray(data["rdfs:subClassOf"])) {
               this.subclass = data["rdfs:subClassOf"]['@id'].slice(7);
-            }
           }
         },
         getPropertyInfo(){
