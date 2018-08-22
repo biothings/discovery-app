@@ -69,7 +69,7 @@
         </tr>
       </tbody>
     </table>
-    <template v-if="subclass">
+    <!-- <template v-if="subclass">
       <h1 class="fourEM mainTextLight" v-text='subclass'></h1>
       <table class="table table-responsive" style="margin-bottom: 40px">
       <thead class="mainBackLight text-light">
@@ -89,7 +89,31 @@
           <td v-html=getDescription(item)></td>
         </tr>
       </tbody>
-    </template>
+    </template> -->
+
+    <span v-if="subclass" v-for="(parent,i) in parentDisplayResults">
+      <h1 class="fourEM mainTextLight" v-html='parent["className"]'></h1>
+      <table class="table table-responsive" style="margin-bottom: 40px">
+      <thead class="mainBackLight text-light">
+        <tr>
+          <th scope="col">Property</th>
+          <th scope="col">Expected Type</th>
+          <th scope="col">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in parent['props']">
+          <td>
+            <a class="font-weight-bold" :href='"/viewer/"+getTitle(item)' v-html=getTitle(item)></a></td>
+          <td>
+            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'/viewer/'+type" v-html='type'></a>
+          </td>
+          <td v-html=getDescription(item)></td>
+        </tr>
+      </tbody>
+    </span>
+
+
     <template v-if='property'>
       <ul class="list-group" style="max-width: 50vw;">
         <li class="list-group-item bg-dark text-light">
@@ -135,7 +159,9 @@ var app = new Vue({
           availableClasses:[],
           filterResults:[],
           //lineage
-          lineageArray:[]
+          lineageArray:[],
+          displayResults:[],
+          parentDisplayResults:[]
 				}
 			},
 			methods:{
@@ -151,11 +177,52 @@ var app = new Vue({
               }
             }
           }
+
         },
-        shapeData(){
+        getParentData(){
+          console.log('parent array ', this.lineageArray)
           for (var i = 0; i < this.lineageArray.length; i++) {
-            this.lineageArray[i]
+            let parent = this.returnClass(this.lineageArray[i]);
+            let props = this.returnProps(this.lineageArray[i]);
+            this.shapeData(parent,props);
           }
+        },
+        shapeData(parent,props){
+          let obj = {
+            'className' : parent["rdfs:label"],
+            'props' : props
+          }
+          this.parentDisplayResults.unshift(obj);
+        },
+        returnClass(classInfo){
+          for (var i = 0; i < this.graph.length; i++) {
+            if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === classInfo["rdfs:label"].toLowerCase()) {
+              return this.graph[i];
+            }
+          }
+        },
+        returnProps(classInfo){
+          let properties = [];
+
+            for (var i = 0; i < this.graph.length; i++) {
+
+              if (this.graph[i].hasOwnProperty('schema:domainIncludes') && this.graph[i]["@type"] === "rdf:Property") {
+                if ( _.isArray(this.graph[i]['schema:domainIncludes']) ) {
+                  for (var x = 0; x < this.graph[i]['schema:domainIncludes'].length; x++) {
+                    if (this.graph[i]["schema:domainIncludes"][x]['@id'].toLowerCase() === 'schema:'+classInfo["rdfs:label"].toLowerCase() || this.graph[i]["schema:domainIncludes"][x]['@id'].toLowerCase() === classInfo["rdfs:label"].toLowerCase()) {
+                      properties.push(this.graph[i]);
+                    }
+                  }
+                }else if( _.isObject(this.graph[i]['schema:domainIncludes']) ){
+                  if (this.graph[i]["schema:domainIncludes"]['@id'].toLowerCase() === 'schema:'+classInfo["rdfs:label"].toLowerCase() || this.graph[i]["schema:domainIncludes"]['@id'].toLowerCase() === classInfo["rdfs:label"].toLowerCase() ) {
+                    properties.push(this.graph[i]);
+                  }
+                }
+                properties = _.sortBy(properties, [user => user['rdfs:label']], ['asc']);
+              }
+
+            }
+            return properties;
         },
         handleFilter(e){
           if (e.target.value !== 'Choose...') {
@@ -273,6 +340,7 @@ var app = new Vue({
               this.schemaClass = this.graph[i]["rdfs:label"];
               this.classInfo= this.graph[i];
               this.getClassLineage(this.classInfo)
+              this.getParentData();
               this.getSubclass(this.graph[i]);
             }
           }
@@ -308,7 +376,9 @@ var app = new Vue({
         },
         getSubclass(data){
           if (data.hasOwnProperty("rdfs:subClassOf")) {
-            this.subclass = data["rdfs:subClassOf"]['@id'].slice(7);
+            if (_.isObject(data["rdfs:subClassOf"])) {
+              this.subclass = data["rdfs:subClassOf"]['@id'].slice(7);
+            }
           }
         },
         getPropertyInfo(){
