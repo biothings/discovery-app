@@ -30,7 +30,7 @@
     <div class="jumbotron mainBackDark text-light text-center" style="margin-top: 40px;">
       <h1 class="twoEM">View Your Schema</h1>
       <form class="col-sm-6" style="margin: 0 auto;">
-        <input required ref="my_input" class="form-control" type="url" placeholder="Paste Raw Data Link Here">
+        <input autocomplete="true" required ref="my_input" class="form-control" type="url" placeholder="Paste Raw Data Link Here">
         <button @click.prevent="getFormValues()" style="margin:10px;" class="btn mainBackLight text-light" type="submit">Send</button>
       </form>
     </div>
