@@ -248,7 +248,7 @@ var app = new Vue({
         findDisplaySchema(){
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class"){
-              window.location.href = "/"+this.graph[i]["rdfs:label"];
+              this.query = this.graph[i]["rdfs:label"];
             }
           }
         },

@@ -80,7 +80,7 @@ var app = new Vue({
           }
         },
         reqFile: function(){
-          axios.get('/static/misc/schema.jsonld').then(res=>{
+          axios.get('./static/misc/schema.jsonld').then(res=>{
             this.graph = res.data['@graph']
             this.getAvailableClasses()
           }).catch(err=>{
