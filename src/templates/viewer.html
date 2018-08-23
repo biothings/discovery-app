@@ -84,11 +84,6 @@
         This schema has no properties of it's own
       </div>
     </template>
-    <template v-if="userURL">
-      <div class="text-center text-muted jumbotron" style="margin-bottom: 40px">
-        <h2><i class="fas fa-arrow-circle-left mainTextDark"></i> Select a schema to start</h2>
-      </div>
-    </template>
 
     <span v-if="subclass" v-for="(parent,i) in parentDisplayResults">
       <h1 :id='parent["className"]' class="fourEM mainTextLight" v-html='parent["className"]'></h1>
@@ -250,7 +245,17 @@ var app = new Vue({
             window.location.href = "/"+e.target.value;
           }
         },
+        findDisplaySchema(){
+          for (var i = 0; i < this.graph.length; i++) {
+            if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class"){
+              window.location.href = "/"+this.graph[i]["rdfs:label"];
+            }
+          }
+        },
         determinePath(){
+          if(this.userURL){
+            this.findDisplaySchema()
+          }
           if (this.getClass()) {
             console.log('PATH: CLASS')
             this.property='';
