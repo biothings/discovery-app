@@ -28,10 +28,25 @@
           </li>
         </ul>
       </template>
+
+      <!-- sideNav -->
+      <template v-if="lineageArray.length">
+        <ul class="list-group d-none d-sm-none d-md-block" style="margin-top:100px; position: fixed; top: 40vh; box-shadow: 1px 5px 20px #8a8a8a;">
+          <li class="list-group-item mainBackLight text-light text-center">
+            Page Navigation
+          </li>
+          <li class="list-group-item text-center noPadding" >
+            <a class="nav-link" :href="'#'+schemaClass" v-text='schemaClass'></a>
+          </li>
+          <li class="list-group-item text-center noPadding" v-for="item in lineageArray.slice().reverse()">
+            <a class="nav-link" :href="'#'+item['@id'].slice(7)" v-text="item['@id'].slice(7)"></a>
+          </li>
+        </ul>
+      </template>
     </div>
     <div class="col-sm-10">
       <div class="jumbotron" v-if='schemaClass'>
-        <h1 class="fourEM mainTextDark bold" v-if='schemaClass' v-text='schemaClass'></h1>
+        <h1 class="fourEM mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
         <template v-if="subclass && schemaClass">
           <span style="font-size: 1.2em;" v-for="item in lineageArray">
             <a class="mainTextLight font-weight-bold" :href="'/'+item['@id'].slice(7)" v-text='item["@id"].slice(7)'></a>
@@ -63,14 +78,20 @@
         </tr>
       </tbody>
     </table>
-    <template v-else>
+    <template v-if="!properties.length && !userURL">
       <div class="text-center mainBackDark text-light padding20" style="margin-bottom: 40px">
-        This schema has no properties ot it's own
+        <i class="fas fa-exclamation-circle mainTextLight"></i>
+        This schema has no properties of it's own
+      </div>
+    </template>
+    <template v-if="userURL">
+      <div class="text-center text-muted jumbotron" style="margin-bottom: 40px">
+        <h2><i class="fas fa-arrow-circle-left mainTextDark"></i> Select a schema to start</h2>
       </div>
     </template>
 
     <span v-if="subclass" v-for="(parent,i) in parentDisplayResults">
-      <h1 class="fourEM mainTextLight" v-html='parent["className"]'></h1>
+      <h1 :id='parent["className"]' class="fourEM mainTextLight" v-html='parent["className"]'></h1>
       <table class="table table-responsive" style="margin-bottom: 40px">
       <thead class="mainBackLight text-light">
         <tr>
@@ -135,11 +156,11 @@ var app = new Vue({
           classInfo:{},
           availableClasses:[],
           filterResults:[],
-          //lineage
           lineageArray:[],
           displayResults:[],
           parentDisplayResults:[],
-          additionalPaths:[]
+          additionalPaths:[],
+          userURL:''
 				}
 			},
 			methods:{
@@ -156,36 +177,14 @@ var app = new Vue({
             }
           }
           if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isArray(classInfo["rdfs:subClassOf"])) {
-            this.findPaths(classInfo);
-          }
-
-        },
-        findPaths(classInfo){
-          let arr = classInfo["rdfs:subClassOf"];
-          let parentArray =[];
-          let subclass = '';
-          for (var i = 0; i < arr.length; i++) {
-            //console.log('looking for subclass of ', arr[i]["@id"].slice(7))
-            subclass = parentArray.unshift(arr[i]["@id"].slice(7));
-            subclass = this.returnSubclass(arr[i]["@id"].slice(7));
-            while (subclass) {
-              if (subclass) {
-                parentArray.unshift(subclass);
-                subclass = this.returnSubclass(subclass);
-              }
-            }
-            this.additionalPaths.push(parentArray);
-            console.log('additional Paths', this.additionalPaths);
           }
 
         },
         returnSubclass(className){
           let classInfo = this.returnClass(className);
-          console.log('found class info ',classInfo);
           let subclass = '';
           if (classInfo.hasOwnProperty("rdfs:subClassOf") && !_.isArray(classInfo["rdfs:subClassOf"])) {
               subclass = classInfo["rdfs:subClassOf"]['@id'].slice(7);
-              console.log('sub ', subclass);
               return subclass;
           }else{
             return false;
@@ -297,7 +296,15 @@ var app = new Vue({
           }
         },
         reqFile: function(){
-          axios.get('./static/misc/schema.jsonld').then(res=>{
+          let url = '';
+          if (this.userURL) {
+            url = this.userURL;
+          }
+          else{
+            url = './static/misc/schema.jsonld';
+          }
+          console.log('using ', url)
+          axios.get(url).then(res=>{
             this.graph = res.data['@graph']
             this.determinePath()
             this.getAvailableClasses()
@@ -414,16 +421,19 @@ var app = new Vue({
 			mounted:function(){
         let context = {{Context}}
          if ( context.Content ) {
-           //console.log('Context Query = ',context.Query);
+           console.log('Context  ',context);
            this.query = context.Query.toLowerCase();
          }
 
 			},
       created:function(){
+          let context = {{Context}}
+          if (context.hasOwnProperty('URL')) {
+            this.userURL = context.URL;
+          }
           this.reqFile()
       }
 		});
-
 
 </script>
 {% include "footer.html" %}

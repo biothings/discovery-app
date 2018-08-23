@@ -43,10 +43,19 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class MainHandler(BaseHandler):
     def get(self):
-        index_file = "index.html"
-        index_template = templateEnv.get_template(index_file)
-        index_output = index_template.render()
-        self.write(index_output)
+        url = self.get_argument('url', None)
+        if url:
+            print(url)
+            template_file = "viewer.html"
+            schema_template = templateEnv.get_template(template_file)
+            schema_output = schema_template.render(Context=json.dumps({"Query": '', "Content": True, 'URL': url}))
+            self.write(schema_output)
+        else:
+            index_file = "index.html"
+            index_template = templateEnv.get_template(index_file)
+            index_output = index_template.render()
+            self.write(index_output)
+
 
 class SchemaHandler(BaseHandler):
     def get(self, yourQuery=None):
@@ -61,8 +70,9 @@ class SchemaHandler(BaseHandler):
         self.write(schema_output)
 
 
+
 APP_LIST = [
-    (r"/", MainHandler),
+    (r"/?", MainHandler),
     (r"/(.+)/?", SchemaHandler),
     # (r"/?", SchemaHandler),
 ]
