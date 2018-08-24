@@ -62,7 +62,7 @@ var app = new Vue({
           this.sendRequest()
         },
         sendRequest(){
-          window.location.href = "/?url="+this.output;
+          window.location.href = "./?url="+this.output;
         },
         handleFilter(e){
           let target = e.target.value;
@@ -97,7 +97,7 @@ var app = new Vue({
         this.availableClasses = results.sort();
       },
       handleChange: function(e){
-        window.location.href = "/"+e.target.value;
+        window.location.href = "./"+e.target.value;
       }
     },
     mounted:function(){

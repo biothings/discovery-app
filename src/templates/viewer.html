@@ -3,6 +3,9 @@
 {% include "header.html" %}
 <div id="viewer" class="container" style="min-height: 70vh;">
   <div class="row" style="margin-top:40px;">
+    <div class="col-sm-12">
+      <div id="canvas" height="500px"></div>
+    </div>
     <div class="col-lg-2">
       <template v-if="availableClasses">
         <ul class="list-group">
@@ -19,8 +22,6 @@
 
           </li>
           <li class="list-group-item" v-if='filter'>
-            <!-- <a :href="'/viewer/'+item" v-text='item' v-bind:class="{'active': query === item}"></a> -->
-            <!-- <a href="#" @click='handleFilter(item)' v-text='item' v-bind:class="{'active': query === item}"></a> -->
             <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
               <option selected v-text='"Choose..."'></option>
               <option v-for="(item,i) in filterResults" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
@@ -49,10 +50,10 @@
         <h1 class="fourEM mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
         <template v-if="subclass && schemaClass">
           <span style="font-size: 1.2em;" v-for="item in lineageArray">
-            <a class="mainTextLight font-weight-bold" :href="'/'+item['@id'].slice(7)" v-text='item["@id"].slice(7)'></a>
+            <a class="mainTextLight font-weight-bold" :href="'./'+item['@id'].slice(7)" v-text='item["@id"].slice(7)'></a>
             &gt;
           </span>
-          <a style="font-size: 1.2em;" :href="'/'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a>
+          <a style="font-size: 1.2em;" :href="'./'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a>
         </template>
         <template v-if="schemaClass">
           <p v-html="classInfo['rdfs:comment']"></p>
@@ -70,9 +71,9 @@
       <tbody>
         <tr v-for="(item,i) in properties">
           <td>
-            <a class="font-weight-bold" :href='"/"+getTitle(item)' v-html=getTitle(item)></a></td>
+            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td>
           <td>
-            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'/'+type" v-html='type'></a>
+            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
           </td>
           <td v-html=getDescription(item)></td>
         </tr>
@@ -98,9 +99,9 @@
       <tbody>
         <tr v-for="item in parent['props']">
           <td>
-            <a class="font-weight-bold" :href='"/"+getTitle(item)' v-html=getTitle(item)></a></td>
+            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td>
           <td>
-            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'/'+type" v-html='type'></a>
+            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
           </td>
           <td v-html=getDescription(item)></td>
         </tr>
@@ -114,10 +115,10 @@
           Used on these types
         </li>
         <li v-if="!propertyInfo['schema:domainIncludes']['@id']" class="list-group-item" v-for="(item,i) in propertyInfo['schema:domainIncludes']">
-          <a :href="'/'+item['@id'].slice(7)" v-text="item['@id'].slice(7)"></a>
+          <a :href="'./'+item['@id'].slice(7)" v-text="item['@id'].slice(7)"></a>
         </li>
         <li v-else class="list-group-item" >
-          <a :href="'/'+propertyInfo['schema:domainIncludes']['@id']" v-text="propertyInfo['schema:domainIncludes']['@id'].slice(7)"></a>
+          <a :href="'./'+propertyInfo['schema:domainIncludes']['@id']" v-text="propertyInfo['schema:domainIncludes']['@id'].slice(7)"></a>
         </li>
       </ul>
     </template>
@@ -130,6 +131,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script> -->
 <script src="./static/js/lodash.js"></script>
+<script src="https://d3js.org/d3.v3.js"     ></script>
 <script src="./static/js/networkx.js"></script>
 <script>
 var app = new Vue({
@@ -155,10 +157,63 @@ var app = new Vue({
           displayResults:[],
           parentDisplayResults:[],
           additionalPaths:[],
-          userURL:''
+          userURL:'',
+          nxG: null
 				}
 			},
 			methods:{
+        returnFullClassInfo(name){
+          this.getAvailableClasses();
+            for (var i = 0; i < this.availableClasses.length; i++) {
+              if (this.availableClasses[i].hasOwnProperty('@type') && this.availableClasses[i]['@type'] === "rdfs:Class" && this.availableClasses[i]["rdfs:label"].toLowerCase() === name.toString().toLowerCase()) {
+                console.log('found one ',this.availableClasses[i]["rdfs:label"])
+                return this.availableClasses[i]["rdfs:label"]
+              }
+            }
+          },
+          makeGraph(){
+          this.nxG = new jsnx.Graph();
+          let grabFrom = this.availableClasses;
+
+          for (var i = 0; i < grabFrom.length; i++) {
+            if (grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isObject(grabFrom[i]["rdfs:subClassOf"])) {
+              console.log(_.isObject(grabFrom[i]["rdfs:subClassOf"]))
+              this.addNode(grabFrom[i]["@id"]);
+              this.addNode(grabFrom[i]["rdfs:subClassOf"]["@id"]);
+              this.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"]["@id"])
+            }
+            else if(grabFrom[i].hasOwnProperty("rdfs:subClassOf") && !_.isObject(grabFrom[i]["rdfs:subClassOf"])){
+              // console.log('arr detected')
+              this.addNode(grabFrom[i]["@id"]);
+              for (var x = 0; x < grabFrom[i]["rdfs:subClassOf"].length; x++) {
+                // console.log('add arr node ', grabFrom[i]["rdfs:subClassOf"][x]["@id"])
+                this.addNode(grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
+                this.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"][x]["@id"])
+              }
+            }
+          }
+          this.drawGraph();
+        },
+        drawGraph(){
+          jsnx.draw(this.nxG, {
+            element: '#canvas',
+            weighted: true,
+            edgeStyle: {
+                'stroke-width': 5
+            },
+            height:400,
+            labelStyle: {fill: '#4736a1'},
+            withLabels: true,
+            nodeLabels: 'label'
+          });
+        },
+        addNode(className){
+          this.nxG.addNode(className,{'label':className});
+        },
+        addEdge(class1,class2){
+          console.log('adding edge: ', class1, class2);
+          this.nxG.addEdge(class1,class2);
+        },
         getClassLineage(classInfo){
           let subclass ='';
           this.getAvailableClasses();
@@ -242,7 +297,7 @@ var app = new Vue({
         },
         handleFilter(e){
           if (e.target.value !== 'Choose...') {
-            window.location.href = "/"+e.target.value;
+            window.location.href = "./"+e.target.value;
           }
         },
         findDisplaySchema(){
@@ -260,6 +315,7 @@ var app = new Vue({
             console.log('PATH: CLASS')
             this.property='';
             this.getClassProperties()
+            // this.makeGraph()
           }else if (!this.getClass()){
             console.log('PATH: PROPERTY')
             this.getPropertyInfo()
