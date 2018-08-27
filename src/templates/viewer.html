@@ -31,16 +31,13 @@
       </template>
 
       <!-- sideNav -->
-      <template v-if="lineageArray.length">
+      <template v-if="parentDisplayResults.length">
         <ul class="list-group d-none d-sm-none d-md-block" style="margin-top:100px; position: fixed; top: 40vh; box-shadow: 1px 5px 20px #8a8a8a;">
           <li class="list-group-item mainBackLight text-light text-center">
             Page Navigation
           </li>
-          <li class="list-group-item text-center noPadding" >
-            <a class="nav-link" :href="'#'+schemaClass" v-text='schemaClass'></a>
-          </li>
-          <li class="list-group-item text-center noPadding" v-for="item in lineageArray.slice().reverse()">
-            <a class="nav-link" :href="'#'+item['@id'].slice(7)" v-text="item['@id'].slice(7)"></a>
+          <li class="list-group-item text-center noPadding" v-for="item in parentDisplayResults.slice().reverse()">
+            <a class="nav-link" :href="'#'+item.slice(7)" v-text="item.slice(7)"></a>
           </li>
         </ul>
       </template>
@@ -48,12 +45,22 @@
     <div class="col-sm-10">
       <div class="jumbotron" v-if='schemaClass'>
         <h1 class="fourEM mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
-        <template v-if="subclass && schemaClass">
+        <!-- <template v-if="subclass && schemaClass">
           <span style="font-size: 1.2em;" v-for="item in lineageArray">
             <a class="mainTextLight font-weight-bold" :href="'./'+item['@id'].slice(7)" v-text='item["@id"].slice(7)'></a>
             &gt;
           </span>
           <a style="font-size: 1.2em;" :href="'./'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a>
+        </template> -->
+        <template v-if='allPaths.length'>
+          <ul>
+            <li v-for="path in allPaths">
+              <span v-for="(item,index) in path">
+                <a class="mainTextLight font-weight-bold" :href="'./'+item.slice(7)" v-text="item.slice(7)"></a>
+                <span v-if="index !== path.length-1">&gt;</span>
+              </span>
+            </li>
+          </ul>
         </template>
         <template v-if="schemaClass">
           <p v-html="classInfo['rdfs:comment']"></p>
@@ -158,10 +165,124 @@ var app = new Vue({
           parentDisplayResults:[],
           additionalPaths:[],
           userURL:'',
-          nxG: null
+          nxG: null,
+          allPaths:[],
+          edgeGraph: []
 				}
 			},
 			methods:{
+        allIndices(arr, val){
+            var indices = [],
+                i;
+            for (i = 0; i < arr.length; i++) {
+                if (arr[i] === val) {
+                    indices.push(i);
+                }
+            }
+            return indices;
+        },
+        hasEdgeBeenFollowedInPath({ edge, path }) {
+            var indices = this.allIndices(path, edge.from);
+            return indices.some(i => path[i + 1] === edge.to);
+        },
+        nodes(graph, node){
+          // console.log('nodes fn',graph, node);
+          return graph.reduce((p, c) => {
+              (c[0] === node) && p.push(c[1]);
+              return p;
+          }, []);
+        },
+        memoize(fn){
+          const cache = new Map();
+          return function() {
+              var key = JSON.stringify(arguments);
+              var cached = cache.get(key);
+              if (cached) {
+                  return cached;
+              }
+              cached = fn.apply(this, arguments)
+              cache.set(key, cached);
+              return cached;;
+          };
+        },
+        paths(graph =[],from, to, path =[]){
+          var self= this;
+          // console.log('paths fn', to,from);
+          const linkedNodes = self.memoize(self.nodes.bind(null, graph));
+          return explore(from, to);
+
+          function explore(currNode, to, paths = []) {
+              // console.log('explore ',currNode, to)
+              path.push(currNode);
+              for (let linkedNode of linkedNodes(currNode)) {
+                  if (linkedNode === to) {
+                      let result = path.slice(); // copy values
+                      result.push(to);
+                      paths.push(result);
+                      continue;
+                  }
+                  // do not re-explore edges
+                  // console.log('hasEdgeBeenFollowedInPath ',currNode, linkedNode)
+                  if (!self.hasEdgeBeenFollowedInPath({
+                          edge: {
+                              from: currNode,
+                              to: linkedNode
+                          },
+                          path
+                      })) {
+                      explore(linkedNode, to, paths);
+                  }
+              }
+              path.pop(); // sub-graph fully explored
+              return paths;
+          }
+        },
+        getAllPaths(){
+          //shortest path using networkX
+          console.log('lineage array ',this.lineageArray);
+          let from = this.lineageArray[0]["@id"];
+          let to = this.classInfo["@id"];
+          console.log("from to",from, to)
+          let path = jsnx.shortestPath(this.nxG, {source: from,target: to});
+          // let path = jsnx.dijkstraPath(this.nxG, {source:'schema:Thing',target:"schema:"+className});
+          console.log('shorttest path is: ',path)
+          // console.log('shorttest path is: ',path.get('schema:Thing'))
+
+          // console.log('GRAPH', JSON.parse(JSON.stringify(this.edgeGraph)))
+          let g = JSON.parse(JSON.stringify(this.edgeGraph));
+
+          let res = this.paths(g,path[0],path[path.length-1])
+          // let res = this.paths(graph,'a','a')
+          console.log('RES', res);
+          this.allPaths = res;
+          this.getUniqueContent(res)
+        },
+        getUniqueContent(paths){
+
+          var finalArr = [];
+
+          Array.prototype.unique = function() {
+              var a = this.concat();
+              for(var i=0; i<a.length; ++i) {
+                  for(var j=i+1; j<a.length; ++j) {
+                      if(a[i] === a[j])
+                          a.splice(j--, 1);
+                  }
+              }
+
+              return a;
+          };
+
+          for (var i = 0; i < paths.length; i++) {
+            if (paths[i+1]) {
+              finalArr =paths[i].concat(paths[i+1]).unique();
+            }else{
+              finalArr = paths[0];
+            }
+          }
+          this.parentDisplayResults = finalArr;
+          console.log('DISPLAY RES', this.parentDisplayResults)
+        },
         returnFullClassInfo(name){
           this.getAvailableClasses();
             for (var i = 0; i < this.availableClasses.length; i++) {
@@ -173,51 +294,60 @@ var app = new Vue({
           },
           makeGraph(){
           this.nxG = new jsnx.Graph();
+          this.getAvailableClasses();
           let grabFrom = this.availableClasses;
 
           for (var i = 0; i < grabFrom.length; i++) {
-            if (grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isObject(grabFrom[i]["rdfs:subClassOf"])) {
-              console.log(_.isObject(grabFrom[i]["rdfs:subClassOf"]))
+            if (grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(grabFrom[i]["rdfs:subClassOf"]) ) {
               this.addNode(grabFrom[i]["@id"]);
               this.addNode(grabFrom[i]["rdfs:subClassOf"]["@id"]);
               this.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"]["@id"])
             }
-            else if(grabFrom[i].hasOwnProperty("rdfs:subClassOf") && !_.isObject(grabFrom[i]["rdfs:subClassOf"])){
-              // console.log('arr detected')
+            else if(grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isArray(grabFrom[i]["rdfs:subClassOf"]) ){
               this.addNode(grabFrom[i]["@id"]);
               for (var x = 0; x < grabFrom[i]["rdfs:subClassOf"].length; x++) {
-                // console.log('add arr node ', grabFrom[i]["rdfs:subClassOf"][x]["@id"])
                 this.addNode(grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
                 this.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"][x]["@id"])
               }
             }
           }
-          this.drawGraph();
+          console.log('NXG', this.nxG);
+          this.getClassLineage(this.classInfo);
+          this.getAllPaths();
+          // this.drawGraph();
         },
         drawGraph(){
           jsnx.draw(this.nxG, {
             element: '#canvas',
             weighted: true,
             edgeStyle: {
-                'stroke-width': 5
+                'stroke-width': 5,
+                'fill': '#fc506d'
             },
             height:400,
             labelStyle: {fill: '#4736a1'},
             withLabels: true,
-            nodeLabels: 'label'
+            nodeLabels: 'label',
+            nodeStyle: {
+                'stroke': '#fc506d',
+                'fill': '#fc506d',
+                'cursor': 'pointer'
+            }
           });
         },
         addNode(className){
           this.nxG.addNode(className,{'label':className});
         },
         addEdge(class1,class2){
-          console.log('adding edge: ', class1, class2);
           this.nxG.addEdge(class1,class2);
+          let node = [class2,class1];
+          // console.log('adding node..',node)
+          this.edgeGraph.push(node);
         },
         getClassLineage(classInfo){
           let subclass ='';
           this.getAvailableClasses();
-          if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isObject(classInfo["rdfs:subClassOf"])) {
+          if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(classInfo["rdfs:subClassOf"])) {
             subclass = classInfo["rdfs:subClassOf"]['@id'];
             for (var i = 0; i < this.availableClasses.length; i++) {
               if (this.availableClasses[i]['@id'] === subclass) {
@@ -227,6 +357,13 @@ var app = new Vue({
             }
           }
           if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isArray(classInfo["rdfs:subClassOf"])) {
+            subclass = classInfo["rdfs:subClassOf"][0]['@id'];
+            for (var i = 0; i < this.availableClasses.length; i++) {
+              if (this.availableClasses[i]['@id'] === subclass) {
+                this.lineageArray.unshift(this.availableClasses[i])
+                this.getClassLineage(this.availableClasses[i])
+              }
+            }
           }
 
         },
@@ -314,8 +451,8 @@ var app = new Vue({
           if (this.getClass()) {
             console.log('PATH: CLASS')
             this.property='';
-            this.getClassProperties()
-            // this.makeGraph()
+            this.getClassProperties();
+            this.makeGraph();
           }else if (!this.getClass()){
             console.log('PATH: PROPERTY')
             this.getPropertyInfo()
@@ -426,8 +563,8 @@ var app = new Vue({
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query) {
               this.schemaClass = this.graph[i]["rdfs:label"];
               this.classInfo= this.graph[i];
-              this.getClassLineage(this.classInfo)
-              this.getParentData();
+              // this.getClassLineage(this.classInfo)
+              // this.getParentData();
               this.getSubclass(this.graph[i]);
             }
           }
