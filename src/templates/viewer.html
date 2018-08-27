@@ -3,8 +3,8 @@
 {% include "header.html" %}
 <div id="viewer" class="container" style="min-height: 70vh;">
   <div class="row" style="margin-top:40px;">
-    <div class="col-sm-12">
-      <div id="canvas" height="500px"></div>
+    <div class="col-sm-10 offset-sm-2">
+      <div id="canvas" style="border:2px solid #EAECEF;"></div>
     </div>
     <div class="col-lg-2">
       <template v-if="availableClasses">
@@ -45,18 +45,11 @@
     <div class="col-sm-10">
       <div class="jumbotron" v-if='schemaClass'>
         <h1 class="fourEM mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
-        <!-- <template v-if="subclass && schemaClass">
-          <span style="font-size: 1.2em;" v-for="item in lineageArray">
-            <a class="mainTextLight font-weight-bold" :href="'./'+item['@id'].slice(7)" v-text='item["@id"].slice(7)'></a>
-            &gt;
-          </span>
-          <a style="font-size: 1.2em;" :href="'./'+schemaClass" class="mainTextDark font-weight-bold" v-text="schemaClass"></a>
-        </template> -->
         <template v-if='allPaths.length'>
           <ul>
             <li v-for="path in allPaths">
               <span v-for="(item,index) in path">
-                <a class="mainTextLight font-weight-bold" :href="'./'+item.slice(7)" v-text="item.slice(7)"></a>
+                <a :class="[ index !== path.length-1 ? 'mainTextLight' : 'mainTextDark']" class="font-weight-bold" :href="'./'+item.slice(7)" v-text="item.slice(7)"></a>
                 <span v-if="index !== path.length-1">&gt;</span>
               </span>
             </li>
@@ -93,9 +86,9 @@
       </div>
     </template>
 
-    <span v-if="subclass" v-for="(parent,i) in parentDisplayResults">
+    <span v-if="parentClassesAndProps.length" v-for="(parent,i) in parentClassesAndProps">
       <h1 :id='parent["className"]' class="fourEM mainTextLight" v-html='parent["className"]'></h1>
-      <table class="table table-responsive" style="margin-bottom: 40px">
+      <table v-if="parent['props'].length" class="table table-responsive" style="margin-bottom: 40px">
       <thead class="mainBackLight text-light">
         <tr>
           <th scope="col">Property</th>
@@ -114,7 +107,13 @@
         </tr>
       </tbody>
     </span>
-
+  </table>
+  <template v-else>
+    <div class="text-center mainBackDark text-light padding20" style="margin-bottom: 40px">
+      <i class="fas fa-exclamation-circle mainTextLight"></i>
+      This schema has no properties of it's own
+    </div>
+  </template>
 
     <template v-if='property'>
       <ul class="list-group" style="max-width: 50vw;">
@@ -167,7 +166,8 @@ var app = new Vue({
           userURL:'',
           nxG: null,
           allPaths:[],
-          edgeGraph: []
+          edgeGraph: [],
+          parentClassesAndProps:[]
 				}
 			},
 			methods:{
@@ -186,7 +186,6 @@ var app = new Vue({
             return indices.some(i => path[i + 1] === edge.to);
         },
         nodes(graph, node){
-          // console.log('nodes fn',graph, node);
           return graph.reduce((p, c) => {
               (c[0] === node) && p.push(c[1]);
               return p;
@@ -207,12 +206,10 @@ var app = new Vue({
         },
         paths(graph =[],from, to, path =[]){
           var self= this;
-          // console.log('paths fn', to,from);
           const linkedNodes = self.memoize(self.nodes.bind(null, graph));
           return explore(from, to);
 
           function explore(currNode, to, paths = []) {
-              // console.log('explore ',currNode, to)
               path.push(currNode);
               for (let linkedNode of linkedNodes(currNode)) {
                   if (linkedNode === to) {
@@ -222,7 +219,6 @@ var app = new Vue({
                       continue;
                   }
                   // do not re-explore edges
-                  // console.log('hasEdgeBeenFollowedInPath ',currNode, linkedNode)
                   if (!self.hasEdgeBeenFollowedInPath({
                           edge: {
                               from: currNode,
@@ -238,24 +234,17 @@ var app = new Vue({
           }
         },
         getAllPaths(){
-          //shortest path using networkX
-          console.log('lineage array ',this.lineageArray);
           let from = this.lineageArray[0]["@id"];
           let to = this.classInfo["@id"];
-          console.log("from to",from, to)
           let path = jsnx.shortestPath(this.nxG, {source: from,target: to});
-          // let path = jsnx.dijkstraPath(this.nxG, {source:'schema:Thing',target:"schema:"+className});
           console.log('shorttest path is: ',path)
-          // console.log('shorttest path is: ',path.get('schema:Thing'))
 
-          // console.log('GRAPH', JSON.parse(JSON.stringify(this.edgeGraph)))
           let g = JSON.parse(JSON.stringify(this.edgeGraph));
 
           let res = this.paths(g,path[0],path[path.length-1])
-          // let res = this.paths(graph,'a','a')
-          console.log('RES', res);
           this.allPaths = res;
-          this.getUniqueContent(res)
+          this.getUniqueContent(res);
+          this.getParentData();
         },
         getUniqueContent(paths){
 
@@ -281,7 +270,7 @@ var app = new Vue({
             }
           }
           this.parentDisplayResults = finalArr;
-          console.log('DISPLAY RES', this.parentDisplayResults)
+
         },
         returnFullClassInfo(name){
           this.getAvailableClasses();
@@ -311,20 +300,50 @@ var app = new Vue({
               }
             }
           }
-          console.log('NXG', this.nxG);
           this.getClassLineage(this.classInfo);
           this.getAllPaths();
-          // this.drawGraph();
+          // this.drawGraph(this.nxG);
+          this.makeQueryGraph();
         },
-        drawGraph(){
-          jsnx.draw(this.nxG, {
+        makeQueryGraph(){
+          let smallG = new jsnx.Graph();
+          let arr = [];
+          let grabFrom = arr;
+          for (var i = 0; i < this.parentDisplayResults.length; i++) {
+            console.log('looking for', this.parentDisplayResults[i])
+            arr.push( this.returnClass(this.parentDisplayResults[i]) )
+          }
+
+          console.log('ARR',arr)
+
+          for (var i = 0; i < grabFrom.length; i++) {
+            if (grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(grabFrom[i]["rdfs:subClassOf"]) ) {
+              smallG.addNode(grabFrom[i]["@id"],{'label':grabFrom[i]["@id"]});
+              smallG.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"]["@id"]);
+            }
+            else if(grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isArray(grabFrom[i]["rdfs:subClassOf"]) ){
+              smallG.addNode(grabFrom[i]["@id"]);
+              for (var x = 0; x < grabFrom[i]["rdfs:subClassOf"].length; x++) {
+                smallG.addNode(grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
+                smallG.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
+              }
+            }
+          }
+          this.drawGraph(smallG);
+        },
+        drawGraph(g){
+          jsnx.draw(g, {
             element: '#canvas',
             weighted: true,
             edgeStyle: {
-                'stroke-width': 5,
+                'stroke-width': 10,
                 'fill': '#fc506d'
             },
-            height:400,
+            layoutAttr: {
+                charge: -800,
+                linkDistance: 100
+            },
+            height:300,
             labelStyle: {fill: '#4736a1'},
             withLabels: true,
             nodeLabels: 'label',
@@ -378,18 +397,21 @@ var app = new Vue({
           }
         },
         getParentData(){
-          for (var i = 0; i < this.lineageArray.length; i++) {
-            let parent = this.returnClass(this.lineageArray[i]);
-            let props = this.returnProps(this.lineageArray[i]);
+          console.log('getParentData happening',this.parentDisplayResults )
+          for (var i = 0; i < this.parentDisplayResults.length-1; i++) {
+            let parent = this.parentDisplayResults[i];
+            let props = this.returnProps(this.parentDisplayResults[i]);
             this.shapeData(parent,props);
           }
         },
         shapeData(parent,props){
+          // console.log('shaping data', parent)
           let obj = {
-            'className' : parent["rdfs:label"],
+            'className' : parent.slice(7),
             'props' : props
           }
-          this.parentDisplayResults.unshift(obj);
+          this.parentClassesAndProps.unshift(obj);
+          // console.log('parentClassesAndProps', this.parentClassesAndProps)
         },
         returnClass(classInfo){
           if (_.isObject(classInfo)) {
@@ -402,7 +424,7 @@ var app = new Vue({
 
           if (_.isString(classInfo)) {
             for (var i = 0; i < this.graph.length; i++) {
-              if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === classInfo.toLowerCase()) {
+              if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === classInfo.toLowerCase() || this.graph[i]["@id"] === classInfo ) {
                 return this.graph[i];
               }
             }
@@ -417,12 +439,12 @@ var app = new Vue({
               if (this.graph[i].hasOwnProperty('schema:domainIncludes') && this.graph[i]["@type"] === "rdf:Property") {
                 if ( _.isArray(this.graph[i]['schema:domainIncludes']) ) {
                   for (var x = 0; x < this.graph[i]['schema:domainIncludes'].length; x++) {
-                    if (this.graph[i]["schema:domainIncludes"][x]['@id'].toLowerCase() === 'schema:'+classInfo["rdfs:label"].toLowerCase() || this.graph[i]["schema:domainIncludes"][x]['@id'].toLowerCase() === classInfo["rdfs:label"].toLowerCase()) {
+                    if (this.graph[i]["schema:domainIncludes"][x]['@id'] === classInfo || this.graph[i]["schema:domainIncludes"][x]['@id'] === classInfo["rdfs:label"]) {
                       properties.push(this.graph[i]);
                     }
                   }
                 }else if( _.isObject(this.graph[i]['schema:domainIncludes']) ){
-                  if (this.graph[i]["schema:domainIncludes"]['@id'].toLowerCase() === 'schema:'+classInfo["rdfs:label"].toLowerCase() || this.graph[i]["schema:domainIncludes"]['@id'].toLowerCase() === classInfo["rdfs:label"].toLowerCase() ) {
+                  if (this.graph[i]["schema:domainIncludes"]['@id'] === classInfo || this.graph[i]["schema:domainIncludes"]['@id'] === classInfo["rdfs:label"]) {
                     properties.push(this.graph[i]);
                   }
                 }
@@ -564,7 +586,6 @@ var app = new Vue({
               this.schemaClass = this.graph[i]["rdfs:label"];
               this.classInfo= this.graph[i];
               // this.getClassLineage(this.classInfo)
-              // this.getParentData();
               this.getSubclass(this.graph[i]);
             }
           }
