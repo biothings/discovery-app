@@ -3,7 +3,7 @@
 {% include "header.html" %}
 <div id="viewer" class="container" style="min-height: 70vh;">
   <div class="row" style="margin-top:40px;">
-    <div class="col-sm-10 offset-sm-2">
+    <div class="col-sm-10 offset-sm-2 d-none d-sm-none d-md-block">
       <div id="canvas" style="border:2px solid #EAECEF;"></div>
     </div>
     <div class="col-lg-2">
@@ -44,7 +44,7 @@
     </div>
     <div class="col-sm-10">
       <div class="jumbotron" v-if='schemaClass'>
-        <h1 class="fourEM mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
+        <h1 class="mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
         <template v-if='allPaths.length'>
           <ul>
             <li v-for="path in allPaths">
@@ -66,7 +66,7 @@
           <p v-html="classInfo['rdfs:comment']"></p>
         </template>
       </div>
-      <h1 class="fourEM mainTextDark bold" v-if='property' v-text='property'></h1>
+      <h1 class="mainTextDark bold" v-if='property' v-text='property'></h1>
       <table class="table table-responsive" v-if="properties.length" style="margin-bottom: 40px">
       <thead class="mainBackDark text-light">
         <tr>
@@ -94,7 +94,7 @@
     </template>
 
     <span v-if="parentClassesAndProps.length" v-for="(parent,i) in parentClassesAndProps">
-      <h1 :id='parent["className"]' class="fourEM mainTextLight" v-html='parent["className"]'></h1>
+      <h1 :id='parent["className"]' class="mainTextLight" v-html='parent["className"]'></h1>
       <table v-if="parent['props'].length" class="table table-responsive" style="margin-bottom: 40px">
       <thead class="mainBackLight text-light">
         <tr>
