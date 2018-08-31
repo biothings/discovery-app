@@ -1,11 +1,41 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
+g.nodes g.node:last-child circle{
+  fill: #9886f4 !important;
+}
+
+g.nodes g.node:last-child text{
+  font-size: 1.5em !important;
+}
+
+.node-name{
+  margin:0;
+}
+
+.navigation{
+  opacity: .7;
+  margin-top:100px;
+  position: fixed; top: 40vh;
+  box-shadow: 0px 0px 0px #4b4b4b;
+  z-index:100;
+  transition: all .5s;
+}
+
+.navigation:hover{
+  box-shadow: 1px 5px 20px #4b4b4b;
+  opacity: 1;
+}
+
+.description{
+  background: #d7d7d7;
+  border-radius: 10px;
+}
+
+</style>
 <div id="viewer" class="container" style="min-height: 70vh;">
   <div class="row" style="margin-top:40px;">
-    <div class="col-sm-10 offset-sm-2 d-none d-sm-none d-md-block">
-      <div id="canvas" style="border:2px solid #EAECEF;"></div>
-    </div>
     <div class="col-lg-2">
       <template v-if="availableClasses">
         <ul class="list-group">
@@ -32,41 +62,46 @@
 
       <!-- sideNav -->
       <template v-if="parentDisplayResults.length">
-        <ul class="list-group d-none d-sm-none d-md-block" style="margin-top:100px; position: fixed; top: 40vh; box-shadow: 1px 5px 20px #4b4b4b; z-index:100;">
-          <li class="list-group-item mainBackLight text-light text-center">
+        <ul class="list-group d-none d-sm-none d-md-block navigation">
+          <li class="list-group-item mainBackLight text-light text-center font-weight-bold">
             Page Navigation
           </li>
-          <li class="list-group-item text-center noPadding" v-for="item in parentDisplayResults.slice().reverse()">
-            <a class="nav-link" :href="'#'+removePrefix(item)" v-text="removePrefix(item)"></a>
+          <li class="list-group-item noPadding" v-for="item in parentDisplayResults.slice().reverse()">
+            <a class="nav-link" :href="'#'+removePrefix(item)" ><i class="fas fa-arrow-alt-circle-right mainTextLight"></i> <span v-text="removePrefix(item)"></span></a>
           </li>
         </ul>
       </template>
     </div>
     <div class="col-sm-10">
+      <div id="canvas" class="d-none d-sm-none d-md-block"></div>
       <div class="jumbotron" v-if='schemaClass'>
-        <h1 class="mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
-        <template v-if='allPaths.length'>
-          <ul>
-            <li v-for="path in allPaths">
-              <span v-for="(item,index) in path">
-                <a :class="[ index !== path.length-1 ? 'mainTextLight' : 'mainTextDark']" class="font-weight-bold" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
-                <span v-if="index !== path.length-1">&gt;</span>
-              </span>
-            </li>
-          </ul>
-        </template>
-        <template v-else>
-          <span v-if="subclass">
-            <a class="mainTextLight font-weight-bold" :href="'./'+subclass" v-text='subclass'></a>
-            &gt;
-          </span>
-          <a class="mainTextDark font-weight-bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
-        </template>
-        <template v-if="schemaClass">
-          <p v-html="classInfo['rdfs:comment']"></p>
-        </template>
+        <div >
+          <button @click="toggleGraph" class="d-none d-sm-none d-md-block btn themeButton text-light float-right" ><i class="fas fa-draw-polygon"></i> Graph</button>
+          <h1 class="mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
+          <template v-if='allPaths.length'>
+            <ul>
+              <li v-for="path in allPaths">
+                <span v-for="(item,index) in path">
+                  <a :class="[ index !== path.length-1 ? 'mainTextLight' : 'mainTextDark']" class="font-weight-bold" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
+                  <span v-if="index !== path.length-1">&gt;</span>
+                </span>
+              </li>
+            </ul>
+          </template>
+          <template v-else>
+            <span v-if="subclass">
+              <a class="mainTextLight font-weight-bold" :href="'./'+subclass" v-text='subclass'></a>
+              &gt;
+            </span>
+            <a class="mainTextDark font-weight-bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
+          </template>
+          <template v-if="schemaClass">
+            <p v-html="classInfo['rdfs:comment']" class="padding20 description mainTextDark"></p>
+          </template>
+        </div>
       </div>
       <h1 class="mainTextDark bold" v-if='property' v-text='property'></h1>
+      <h1 class="mainTextDark bold" v-if='schemaClass' v-text='schemaClass'></h1>
       <table class="table table-responsive" v-if="properties.length" style="margin-bottom: 40px">
       <thead class="mainBackDark text-light">
         <tr>
@@ -82,16 +117,38 @@
           <td>
             <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
           </td>
-          <td v-html=getDescription(item)></td>
+          <td v-html=getDescription(item) class="mainTextDark"></td>
         </tr>
       </tbody>
     </table>
     <template v-if="!properties.length && !userURL">
       <div class="text-center mainBackDark text-light padding20" style="margin-bottom: 40px">
         <i class="fas fa-exclamation-circle mainTextLight"></i>
-        This schema has no properties of it's own
+        This class has no properties of it's own
       </div>
     </template>
+    <div class="row" v-if='propertyInfo["@id"]'>
+      <div class="col-sm-6">
+        <ul class="list-group" style="max-width: 50vw;">
+          <li class="list-group-item mainBackLight text-light font-weight-bold">
+            Used on these types
+          </li>
+          <li class="list-group-item" v-for="(item,i) in usedOnTheseTypes">
+              <a :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-sm-6">
+        <ul class="list-group" style="max-width: 50vw;">
+          <li class="list-group-item mainBackLight text-light font-weight-bold">
+            Values expected to be one of these types
+          </li>
+          <li class="list-group-item" v-for="(item,i) in rangeIncludes">
+              <a :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
+          </li>
+        </ul>
+      </div>
+    </div>
 
     <span v-if="parentClassesAndProps.length" v-for="(parent,i) in parentClassesAndProps">
       <h1 :id='parent["className"]' class="mainTextLight" v-html='parent["className"]'></h1>
@@ -110,7 +167,7 @@
           <td>
             <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
           </td>
-          <td v-html=getDescription(item)></td>
+          <td v-html=getDescription(item) class="mainTextDark"></td>
         </tr>
       </tbody>
     </span>
@@ -118,23 +175,11 @@
   <template v-else>
     <div class="text-center mainBackLight text-light padding20" style="margin-bottom: 40px">
       <i class="fas fa-exclamation-circle"></i>
-      This schema has no properties of it's own
+      This class has no properties of it's own
     </div>
   </template>
 
-    <template v-if='property'>
-      <ul class="list-group" style="max-width: 50vw;">
-        <li class="list-group-item bg-dark text-light">
-          Used on these types
-        </li>
-        <li v-if="!propertyInfo['schema:domainIncludes']['@id']" class="list-group-item" v-for="(item,i) in propertyInfo['schema:domainIncludes']">
-          <a :href="'./'+removePrefix(item['@id'])" v-text="removePrefix(item['@id'])"></a>
-        </li>
-        <li v-else class="list-group-item" >
-          <a :href="'./'+propertyInfo['schema:domainIncludes']['@id']" v-text="removePrefix(propertyInfo['schema:domainIncludes']['@id'])"></a>
-        </li>
-      </ul>
-    </template>
+
     </div>
   </div>
 </div>
@@ -174,10 +219,19 @@ var app = new Vue({
           nxG: null,
           allPaths:[],
           edgeGraph: [],
-          parentClassesAndProps:[]
+          parentClassesAndProps:[],
+          usedOnTheseTypes: [],
+          rangeIncludes: [],
+          showGraph: false,
 				}
 			},
 			methods:{
+        toggleGraph(){
+          this.showGraph = !this.showGraph;
+          if (this.showGraph) {
+            this.makeQueryGraph();
+          }
+        },
         removePrefix(text){
           let arr = text.split(':');
           text = arr[arr.length-1];
@@ -250,7 +304,6 @@ var app = new Vue({
             let from = this.lineageArray[0]["@id"];
             let to = this.classInfo["@id"];
             let path = jsnx.shortestPath(this.nxG, {source: from,target: to});
-            console.log('shorttest path is: ',path)
 
             let g = JSON.parse(JSON.stringify(this.edgeGraph));
 
@@ -258,13 +311,6 @@ var app = new Vue({
             this.allPaths = res;
             this.getUniqueContent(res);
             this.getParentData();
-          }else{
-            // if (this.subclass) {
-            //   let sc = this.subclass;
-            //   let className = this.schemaClass;
-            //   console.log(sc, className)
-            //   this.lineageArray =[sc,className];
-            // }
           }
         },
         getUniqueContent(paths){
@@ -321,13 +367,11 @@ var app = new Vue({
                 }
               }
             }
-          }else{
-            //
           }
           this.getClassLineage(this.classInfo);
           this.getAllPaths();
           // this.drawGraph(this.nxG);
-          this.makeQueryGraph();
+          // this.makeQueryGraph();
         },
         makeQueryGraph(){
           let smallG = new jsnx.Graph();
@@ -344,15 +388,19 @@ var app = new Vue({
                 smallG.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"]["@id"]);
               }
               else if(grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isArray(grabFrom[i]["rdfs:subClassOf"]) ){
-                smallG.addNode(grabFrom[i]["@id"]);
+                // smallG.addNode(grabFrom[i]["@id"]);
                 for (var x = 0; x < grabFrom[i]["rdfs:subClassOf"].length; x++) {
                   smallG.addNode(grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
                   smallG.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
+                  //go one level deeper if exists
+                  let sc = this.returnClass(grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
+                  if (sc.hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(sc["rdfs:subClassOf"])) {
+                    smallG.addEdge(sc["@id"],sc["rdfs:subClassOf"]["@id"]);
+                  }
                 }
               }
             }
           }else{
-            console.log('classInfo',this.classInfo)
             smallG.addNode(this.classInfo["@id"],{'label':this.classInfo["@id"]});
           }
           this.drawGraph(smallG);
@@ -363,7 +411,7 @@ var app = new Vue({
             weighted: true,
             edgeStyle: {
                 'stroke-width': 10,
-                'fill': '#fc506d'
+                'fill': '#b4b4b4'
             },
             layoutAttr: {
                 charge: -800,
@@ -375,7 +423,7 @@ var app = new Vue({
             nodeLabels: 'label',
             nodeStyle: {
                 'stroke': '#fc506d',
-                'fill': '#fc506d',
+                'fill': '#fc8c9f',
                 'cursor': 'pointer'
             }
           });
@@ -586,24 +634,18 @@ var app = new Vue({
           }
         },
         extractPropertyInfo(data){
-          //console.log('looking at ',data, this.query)
           if ( _.isArray(data['schema:domainIncludes']) ) {
-            // console.log('ARRAY')
             for (var i = 0; i < data['schema:domainIncludes'].length; i++) {
               let idValue = data["schema:domainIncludes"][i]['@id'].split(':');
               idValue = idValue[idValue.length-1];
-              // console.log(id);
               if (idValue.toLowerCase() === this.query.toLowerCase()) {
-              console.log('pushing', data);
                 this.properties.push(data);
               }
             }
           }else if( _.isPlainObject(data['schema:domainIncludes']) ){
-            // console.log('OBJECT')
             let idValue = data["schema:domainIncludes"]['@id'].split(':');
             idValue = idValue[idValue.length-1];
             if (idValue.toLowerCase() === this.query.toLowerCase() ) {
-                console.log('pushing', data);
               this.properties.push(data);
             }
           }
@@ -669,26 +711,49 @@ var app = new Vue({
             let sc = data["rdfs:subClassOf"]['@id'].split(':');
             sc = sc[sc.length-1];
             this.subclass = sc;
+            return data["rdfs:subClassOf"]['@id'];
           }
         },
         getPropertyInfo(){
-          let results =[];
+          let res =[];
           for (var i = 0; i < this.graph.length; i++) {
-            //check if label is obj or array
-            if (this.graph[i].hasOwnProperty("rdfs:label") && this.graph[i]["rdfs:label"].toString().toLowerCase() === this.query.toLowerCase()) {
+            if (this.graph[i].hasOwnProperty("rdfs:label") && this.graph[i]["rdfs:label"] === this.query) {
               this.property = this.graph[i]["rdfs:label"];
+              res.push(this.graph[i]);
               this.propertyInfo = this.graph[i];
-              results.push(this.graph[i])
             }
           }
-          this.properties = results;
+          this.properties = res;
+          this.parsePropertyInfo();
+        },
+        parsePropertyInfo(){
+          let res =[];
+          let range = [];
+          if (this.propertyInfo.hasOwnProperty("schema:domainIncludes") && _.isPlainObject(this.propertyInfo["schema:domainIncludes"])) {
+            res.push(this.propertyInfo["schema:domainIncludes"]["@id"]);
+          }
+          else if(this.propertyInfo.hasOwnProperty("schema:domainIncludes") && _.isArray(this.propertyInfo["schema:domainIncludes"])){
+            for (var i = 0; i < this.propertyInfo["schema:domainIncludes"].length; i++) {
+              res.push(this.propertyInfo["schema:domainIncludes"][i]["@id"]);
+            }
+          }
+          if (this.propertyInfo.hasOwnProperty("schema:rangeIncludes") && _.isPlainObject(this.propertyInfo["schema:rangeIncludes"])) {
+            range.push(this.propertyInfo["schema:rangeIncludes"]["@id"]);
+          }
+          else if(this.propertyInfo.hasOwnProperty("schema:rangeIncludes") && _.isArray(this.propertyInfo["schema:rangeIncludes"])){
+            for (var i = 0; i < this.propertyInfo["schema:rangeIncludes"].length; i++) {
+              range.push(this.propertyInfo["schema:domainIncludes"][i]["@id"]);
+            }
+          }
+          this.usedOnTheseTypes = res;
+          this.rangeIncludes = range;
         }
 			},
 			mounted:function(){
         let context = {{Context}}
          if ( context.Content ) {
            console.log('Context  ',context);
-           this.query = context.Query.toLowerCase();
+           this.query = context.Query;
          }
 
 			},

@@ -7,6 +7,10 @@ h1, h2, h3, h4, h4{
   font-family: mainFont !important;
 }
 
+.margin20{
+  margin:20px !important;
+}
+
 .mainFont{
   font-family: mainFont !important;
 }
@@ -33,6 +37,16 @@ h1, h2, h3, h4, h4{
 
 .mainBackDark{
   background: #4736a1 !important;
+}
+
+.themeButton{
+  border: 1px white solid !important;
+  background: #4736a1 !important;
+}
+
+.themeButton:hover{
+  border: 1px white solid !important;
+  background: #fc506d !important;
 }
 
 .mainBackLight{
