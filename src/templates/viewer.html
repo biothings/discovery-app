@@ -548,12 +548,12 @@ var app = new Vue({
             this.findDisplaySchema()
           }
           if (this.getClass()) {
-            console.log('PATH: CLASS')
+            // console.log('PATH: CLASS')
             this.property='';
             this.getClassProperties();
             this.makeGraph();
           }else if (!this.getClass()){
-            console.log('PATH: PROPERTY')
+            // console.log('PATH: PROPERTY')
             this.getPropertyInfo()
           }
         },
@@ -752,7 +752,7 @@ var app = new Vue({
 			mounted:function(){
         let context = {{Context}}
          if ( context.Content ) {
-           console.log('Context  ',context);
+           // console.log('Context  ',context);
            this.query = context.Query;
          }
 
