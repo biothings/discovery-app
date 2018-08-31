@@ -2,10 +2,17 @@
 {% block content %}
 {% include "header.html" %}
 
-<main id="index">
+<main id="index" style="min-height:70vh;">
   <div class="container">
-    <div class="jumbotron gradientVertical text-light text-center" style="margin-top: 40px;">
-      <h1 class="twoEM">Schemas</h1>
+    <div class="jumbotron mainBackDark text-light text-center" style="margin-top: 40px;">
+      <h1 >Schema Viewer</h1>
+      <button type="button" @click="handleChoice('our')" class="btn themeButton text-light margin20">View Our Schema</button>
+      <button type="button" @click="handleChoice('your')" class="btn themeButton text-light margin20">View Your Schema</button>
+    </div>
+
+    <div v-if="ourSchema" class="jumbotron gradientVertical text-light text-center" style="margin-top: 40px;">
+      <h1 class="twoEM">Our Schema</h1>
+      <h4>View any of the available classes in this schema</h4>
       <form>
         <div class="form-row align-items-center">
           <div class="col-sm-6" style="margin: 0 auto;">
@@ -15,7 +22,7 @@
             </select>
             <template v-if='filter'>
               <hr />
-                <h3 class="mainTextLight font-weight-bold twoEM" v-text='filter'></h3>
+                <h3 class="text-light font-weight-bold twoEM" v-text='filter'></h3>
               <hr />
             </template>
             <select @change='handleChange' v-if="filter"  class="custom-select" id="inlineFormCustomSelect">
@@ -27,11 +34,12 @@
       </form>
     </div>
 
-    <div class="jumbotron mainBackDark text-light text-center" style="margin-top: 40px;">
+    <div v-if="yourSchema" class="jumbotron gradientVertical text-light text-center" style="margin-top: 40px;">
       <h1 class="twoEM">View Your Schema</h1>
+      <h4>Copy the <b>raw</b> link to your data and paste it here</h4>
       <form class="col-sm-6" style="margin: 0 auto;">
-        <input autocomplete="true" required ref="my_input" class="form-control" type="url" placeholder="Paste Raw Data Link Here">
-        <button @click.prevent="getFormValues()" style="margin:10px;" class="btn mainBackLight text-light" type="submit">Send</button>
+        <input autocomplete="true" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here">
+        <button @click.prevent="getFormValues()" style="margin:10px;" class="btn mainBackDark text-light" type="submit">Send</button>
       </form>
     </div>
   </div>
@@ -51,10 +59,34 @@ var app = new Vue({
           availableClasses:[],
           graph:[],
           filterResults :[],
-          output:''
+          output:'',
+          yourSchema:false,
+          ourSchema: false,
+          linkPrefix:'./'
 				}
 			},
       methods:{
+        buildLink(){
+          if (this.yourSchema) {
+            this.linkPrefix= './cd2h/';
+          }else{
+            this.linkPrefix= './schema/';
+          }
+        },
+        handleChoice(choice){
+          switch (choice) {
+            case 'our':
+              this.ourSchema = true;
+              this.yourSchema = false;
+              break;
+            case 'your':
+              this.yourSchema = true;
+              this.ourSchema = false;
+              break;
+            default:
+              console.log('INVALID CHOICE!')
+          }
+        },
         getFormValues () {
           this.output = this.$refs.my_input.value;
           console.log('output',this.output);
