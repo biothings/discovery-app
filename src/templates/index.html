@@ -4,14 +4,18 @@
 
 <main id="index" style="min-height:70vh;">
   <div class="container">
-    <div class="jumbotron mainBackDark text-light text-center" style="margin-top: 40px;">
-      <h1 >Schema Viewer</h1>
-      <button type="button" @click="handleChoice('our')" class="btn themeButton text-light margin20">View Our Schema</button>
+    <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
+      <img class="margin20" src="/static/img/cd2h-logo.png" style="width:50vw" alt="logo"/>
+      <h2 class="mainTextDark">CD2H Schema Viewer</h2>
+      <p class="text-muted">A Project of the CD2H Data Workgroup</p>
+      <hr />
+      <button type="button" @click="handleChoice('our')" class="btn themeButton text-light margin20">Schema.org Core Schema</button>
       <button type="button" @click="handleChoice('your')" class="btn themeButton text-light margin20">View Your Schema</button>
     </div>
 
+
     <div v-if="ourSchema" class="jumbotron gradientVertical text-light text-center" style="margin-top: 40px;">
-      <h1 class="twoEM">Our Schema</h1>
+      <h1 class="twoEM">Schema.org Core Schema</h1>
       <h4>View any of the available classes in this schema</h4>
       <form>
         <div class="form-row align-items-center">
