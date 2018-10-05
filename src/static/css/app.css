@@ -7,6 +7,22 @@ h1, h2, h3, h4, h4{
   font-family: mainFont !important;
 }
 
+.userImage{
+  border: 2px solid #9a6ad0;
+  width: 30px;
+  border-radius: 10px;
+  transition: 1s border;
+}
+
+.userButton{
+  background: #4736a1 !important;
+  color: white;
+  border-radius: 5px;
+  border: 2px solid #fc506d;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
 .margin20{
   margin:20px !important;
 }

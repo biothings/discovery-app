@@ -10,7 +10,7 @@ import tornado.escape
 from tornado.options import define, options
 
 from web.handlers import APP_LIST as web_app_list
-# import config
+import config
 
 src_path = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 if src_path not in sys.path:
@@ -62,7 +62,7 @@ APP_LIST += add_apps('', web_app_list)
 
 
 settings = {
-    "cookie_secret": ''
+    "cookie_secret": config.COOKIE_SECRET
 }
 if options.debug:
     settings.update({
