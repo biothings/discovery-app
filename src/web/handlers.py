@@ -14,8 +14,7 @@ from torngithub import json_encode, json_decode
 import config
 import json
 import logging
-# log = logging.getLogger("smartapi")
-log = logging.getLogger("schemaapp")
+log = logging.getLogger("smartapi")
 
 settings = {
     "cookie_secret": config.COOKIE_SECRET
