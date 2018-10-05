@@ -14,8 +14,12 @@ from torngithub import json_encode, json_decode
 import config
 import json
 import logging
-log = logging.getLogger("smartapi")
+# log = logging.getLogger("smartapi")
+log = logging.getLogger("schemaapp")
 
+settings = {
+    "cookie_secret": config.COOKIE_SECRET
+}
 
 src_path = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 if src_path not in sys.path:
@@ -69,10 +73,73 @@ class SchemaHandler(BaseHandler):
             schema_output = schema_template.render(Context=json.dumps({}))
         self.write(schema_output)
 
+class LoginHandler(BaseHandler):
+    def get(self):
+        xsrf = self.xsrf_token
+        login_file = "login.html"
+        login_template = templateEnv.get_template(login_file)
+        path = config.GITHUB_CALLBACK_PATH
+        _next = self.get_argument("next", "/")
+        if _next != "/":
+            path += "?next={}".format(_next)
+        login_output = login_template.render(path=path, xsrf=xsrf)
+        self.write(login_output)
+
+
+class LogoutHandler(BaseHandler):
+    def get(self):
+        self.clear_cookie("user")
+        self.redirect(self.get_argument("next", "/"))
+
+
+class GithubLoginHandler(tornado.web.RequestHandler, torngithub.GithubMixin):
+    @tornado.gen.coroutine
+    def get(self):
+        # we can append next to the redirect uri, so the user gets the
+        # correct URL on login
+        redirect_uri = url_concat(self.request.protocol +
+                                  "://" + self.request.host +
+                                  config.GITHUB_CALLBACK_PATH,
+                                  {"next": self.get_argument('next', '/')})
+
+        # if we have a code, we have been authorized so we can log in
+        if self.get_argument("code", False):
+            user = yield self.get_authenticated_user(
+                redirect_uri=redirect_uri,
+                client_id=config.GITHUB_CLIENT_ID,
+                client_secret=config.GITHUB_CLIENT_SECRET,
+                code=self.get_argument("code")
+            )
+            if user:
+                log.info('logged in user from github: ' + str(user))
+                self.set_secure_cookie("user", json_encode(user))
+            else:
+                self.clear_cookie("user")
+            self.redirect(self.get_argument("next", "/"))
+            return
+
+        # otherwise we need to request an authorization code
+        yield self.authorize_redirect(
+            redirect_uri=redirect_uri,
+            client_id=config.GITHUB_CLIENT_ID,
+            extra_params={"scope": config.GITHUB_SCOPE, "foo": 1}
+        )
+
+class UserInfoHandler(BaseHandler):
+    def get(self):
+        current_user = self.get_current_user() or {}
+        for key in ['access_token', 'id']:
+            if key in current_user:
+                del current_user[key]
+        self.return_json(current_user)
 
 
 APP_LIST = [
     (r"/?", MainHandler),
+    (r"/user/?", UserInfoHandler),
+    (r"/login/?", LoginHandler),
+    (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),
+    (r"/logout/?", LogoutHandler),
     (r"/(.+)/?", SchemaHandler),
     # (r"/?", SchemaHandler),
 ]
