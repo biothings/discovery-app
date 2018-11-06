@@ -1,3 +1,46 @@
+:root {
+    --main: #006476;
+    --sec:#5C3069;
+}
+
+/* BOOTSTRAP OVERRRIDE */
+.form-control {
+  padding:1.2em !important;
+  border-radius: 20px !important;
+}
+
+.hidden {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* BOOTSTRAP OVERRRIDE */
+
+pre code {
+  background-color: #eee;
+  border: 1px solid #999;
+  display: block;
+  padding: 20px;
+  overflow: scroll;
+  text-align: left;
+}
+
+.loader{
+  position: fixed;
+  z-index: 100;
+  top: calc(50% - 100px) !important;
+  left: calc(50% - 100px) !important;
+}
+
+.medals{
+  position: fixed;
+  z-index: 100;
+  top: calc(50% - 100px) !important;
+  left: 20px;
+}
+
+
+
 @font-face {
     font-family: mainFont;
     src: url('../misc/Josefin.ttf');
@@ -7,18 +50,26 @@ h1, h2, h3, h4, h4{
   font-family: mainFont !important;
 }
 
+#keywords span.badge:hover{
+  background: #d63939;
+}
+
+.pointer{
+  cursor: pointer;
+}
+
 .userImage{
-  border: 2px solid #9a6ad0;
+  border: 2px solid white;
   width: 30px;
-  border-radius: 10px;
+  border-radius: 50px;
   transition: 1s border;
 }
 
 .userButton{
-  background: #4736a1 !important;
+  background: var(--main) !important;
   color: white;
   border-radius: 5px;
-  border: 2px solid #fc506d;
+  border: 2px solid var(--sec);
   padding-left: 3px;
   padding-right: 3px;
 }
@@ -52,29 +103,29 @@ h1, h2, h3, h4, h4{
 }
 
 .mainBackDark{
-  background: #4736a1 !important;
+  background: var(--main) !important;
 }
 
 .themeButton{
   border: 1px white solid !important;
-  background: #4736a1 !important;
+  background: var(--main) !important;
 }
 
 .themeButton:hover{
   border: 1px white solid !important;
-  background: #fc506d !important;
+  background: var(--sec) !important;
 }
 
 .mainBackLight{
-  background: #fc506d !important;
+  background: var(--sec) !important;
 }
 
 .mainTextDark{
-   color: #4736a1 !important;
+   color: var(--main) !important;
 }
 
 .mainTextLight{
-   color: #fc506d !important;
+   color: var(--sec) !important;
 }
 
 .highlight{
@@ -95,24 +146,24 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 }
 
 .gradientVertical{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#931f55+0,fc506d+100 */
-  background: #931f55; /* Old browsers */
-  background: -moz-linear-gradient(top, #931f55 0%, #fc506d 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top, #931f55 0%,#fc506d 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom, #931f55 0%,#fc506d 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#931f55', endColorstr='#fc506d',GradientType=0 ); /* IE6-9 */
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/var(--main)+0,fc506d+100 */
+  background: var(--main); /* Old browsers */
+  background: -moz-linear-gradient(top, var(--main) 0%, var(--sec) 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, var(--main) 0%,var(--sec) 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, var(--main) 0%,var(--sec) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), endColorstr=var(--sec),GradientType=0 ); /* IE6-9 */
 }
 
 .gradientHorizontal{
-background: #931f55; /* Old browsers */
-background: -moz-linear-gradient(left, #931f55 0%, #fc506d 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(left, #931f55 0%,#fc506d 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to right, #931f55 0%,#fc506d 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#931f55', endColorstr='#fc506d',GradientType=1 ); /* IE6-9 */
+background: var(--main); /* Old browsers */
+background: -moz-linear-gradient(left, var(--main) 0%, var(--sec) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(left, var(--main) 0%,var(--sec) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to right, var(--main) 0%,var(--sec) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), endColorstr=var(--sec),GradientType=1 ); /* IE6-9 */
 }
 
 .animatedBack{
-  background: linear-gradient(270deg, #4736a1, #fc506d);
+  background: linear-gradient(270deg, var(--main), var(--sec));
   background-size: 400% 400%;
 
   -webkit-animation: AnimationName 30s ease infinite;
