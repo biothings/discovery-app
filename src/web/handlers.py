@@ -132,9 +132,17 @@ class UserInfoHandler(BaseHandler):
                 del current_user[key]
         self.return_json(current_user)
 
+class GuideHandler(BaseHandler):
+    def get(self):
+        doc_file = "guide.html"
+        guide_template = templateEnv.get_template(doc_file)
+        guide_output = guide_template.render()
+        self.write(guide_output)
+
 
 APP_LIST = [
     (r"/?", MainHandler),
+    (r"/guide/?", GuideHandler),
     (r"/user/?", UserInfoHandler),
     (r"/login/?", LoginHandler),
     (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),

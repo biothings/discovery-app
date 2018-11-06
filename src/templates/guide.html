@@ -1,0 +1,596 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<main id="guide" style="min-height:70vh;">
+
+  <div v-if=loading class="loader">
+    <img src="./static/img/ripple.svg"/>
+  </div>
+
+  <div class="medals">
+    <ul class="list-group">
+      <li v-if='achievements.complete' class="list-group-item swing-in-left-fwd achievement">
+        <i class="fas fa-medal text-primary"></i> Completed Required Fields
+      </li>
+      <li v-if='achievements.helpMe' class="list-group-item swing-in-left-fwd achievement">
+        <i class="fas fa-medal text-primary"></i> Help Me!
+      </li>
+      <li v-if='achievements.submitData' class="list-group-item swing-in-left-fwd achievement">
+        <i class="fas fa-medal text-primary"></i> All Done!
+      </li>
+      <li v-if='achievements.errors' class="list-group-item swing-in-left-fwd achievement">
+        <i class="fas fa-medal text-primary"></i> Not So Fast
+      </li>
+    </ul>
+  </div>
+
+  <div class="container">
+    <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
+      <h2 class="mainTextDark">GUIDE</h2>
+
+
+      <template>
+        <div class="jumbotron text-muted">
+          <h3>Host your Dataset</h3>
+          <p class="col-sm-6" style="margin: 0 auto;">
+            You may choose to host your dataset in any of these suggestions:
+          </p>
+          <hr />
+          <ul class="list-group col-sm-6" style="margin:0 auto;">
+            <li class="list-group-item">
+              <a href="https://figshare.com/" target="_blank">
+              <img width="220px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Figshare_logo.svg/1280px-Figshare_logo.svg.png" alt="FigShare"/></a>
+            </li>
+            <li class="list-group-item">
+              <a href="https://zenodo.org/" target="_blank">
+                <img width="220px" src="https://about.zenodo.org/static/img/logos/zenodo-gradient-square.svg" alt="Zenodo"/>
+              </a>
+            </li>
+            <li class="list-group-item">
+              <a href="https://dataverse.org/" target="_blank">
+                <img width="220px" src="https://dataverse.org/files/dataverseorg/files/dataverse_r_project.png" alt="Dataverse"/>
+              </a>
+            </li>
+            <li class="list-group-item">
+              <h3 class="text-muted"><i class="fas fa-home"></i> Your own website</h3>
+            </li>
+          </ul>
+        </div>
+      </template>
+
+      <template>
+        <div class="jumbotron text-muted">
+          <h3>Review Your Dataset</h3>
+          <p class="col-sm-6" style="margin: 0 auto;">
+            Submit your dataset for review. We will review your dataset for existing metadata and let you edit existing metadata and add missing metadata.
+          </p>
+          <hr />
+          <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
+            <div class="form-group">
+              <label for="urlform">Paste your dataset URL here:</label>
+              <input data-parsley-trigger="change" id="urlform" autocomplete="on" required ref="dataset_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
+              <button :disabled="!link" @change="getFormValues()" @click.prevent="getFormValues(); achievements.submitData= true" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
+            </div>
+          </form>
+        </div>
+      </template>
+
+      <template>
+        <div class="jumbotron text-muted">
+          <h3>License Chooser</h3>
+          <p class="col-sm-6" style="margin: 0 auto;">
+            This tool helps you determine which Creative Commons License is right for you in a couple of easy steps.
+          </p>
+          <hr />
+          <form id="licenseForm" class="col-sm-6" style="margin: 0 auto;">
+            <div class="form-group">
+              <table v-if="licenseHelp" class="table table-sm table-striped table-secondary fade-in" style="font-size:.8em;">
+                <thead>
+                  <th colspan="2">
+                    Allow commercial uses of your work
+                  </th>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="align-middle">
+                      Yes
+                    </td>
+                    <td>
+                      The licensor permits others to copy, distribute, display, and perform the work, as well as make and distribute derivative works based on it.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="align-middle">
+                      Yes, as long as others share alike
+                    </td>
+                    <td>
+                      The licensor permits others to create and distribute derivative works, but only under the same or a compatible license.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="align-middle">
+                      No
+                    </td>
+                    <td>
+                      The licensor permits others to copy, distribute, display, and perform the work, but not distribute derivative works based on it.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <label for="ControlSelect1">Allow adaptations of your work to be shared? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp; achievements.helpMe = true" data-tippy="Show Help"></i></label>
+              <form  class="col-sm-6" style="margin: 0 auto;">
+              <select data-parsley-trigger="change" @change="getLicense" ref="license1" class="form-control form-control-sm" id="ControlSelect1" required="">
+                <option selected>Choose...</option>
+                <option>Yes</option>
+                <option>No</option>
+                <option>Yes, as long as others share alike</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <table v-if="licenseHelp" class="table table-sm table-striped table-secondary fade-in" style="font-size:.8em;">
+                <thead>
+                  <th colspan="2">
+                    Allow commercial uses of your work
+                  </th>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="align-middle">
+                      Yes
+                    </td>
+                    <td>
+                      The licensor permits others to copy, distribute, display, and perform the work, including for commercial purposes.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="align-middle">
+                      No
+                    </td>
+                    <td>
+                      The licensor permits others to copy, distribute, display, and perform the work for non-commercial purposes only.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <label for="eontrolSelect2">Allow commercial uses of your work? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp; achievements.helpMe = true" data-tippy="Show Help"></i></label>
+              <form  class="col-sm-6" style="margin: 0 auto;">
+              <select data-parsley-trigger="change" @change="getLicense" ref="license2" class="form-control form-control-sm" id="ControlSelect2" required="">
+                <option selected>Choose...</option>
+                <option>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+
+          </form>
+          <template v-if="licenseInfo">
+            <div class="alert alert-success col-sm-6 fade-in" role="alert" style="margin: 0 auto;">
+              <h4>License Selected:</h4>
+              <h2 class="font-weight-bold" v-text="typeLicense"></h2>
+              <span class="badge badge-success" v-text="licenseAbbreviation"></span>
+              <div class="alert alert-info mt-2" role="alert">
+                Form has been updated!
+              </div>
+              <hr />
+              <a target="_blank" :href="licenseLink">More Info</a>
+            </div>
+          </template>
+
+        </div>
+      </template>
+
+
+
+      <template>
+        <div class="jumbotron text-muted">
+          <h2>Metadata</h2>
+          <p class="col-sm-6" style="margin: 0 auto;">
+            Fill out or edit your metadata.
+          </p>
+          <p>
+            <a data-tippy="Load Cancer FigShare Example" href="#" class="badge badge-pill badge-secondary pointer mt-2" @click.prevent="requestData('./static/misc/cancer.jsonld')"><i class="fas fa-file-download"></i> Load Example</a>
+          </p>
+          <hr />
+          <form id="metadataForm" autocomplete="off" class="col-sm-6" style="margin: 0 auto;">
+            <div class="form-group row">
+              <label for="name" class="col-sm-2 col-form-label col-form-label-sm">
+                Name* <br />
+                <i class="fas fa-question-circle" data-tippy="A descriptive name of a dataset."></i>
+              </label>
+              <div class="col-sm-10">
+                <input autocomplete="off" v-model="metadata.name" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="name" placeholder="Enter text here" required="">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="description" class=" col-form-label col-form-label-sm">
+                Description* <br />
+                <i class="fas fa-question-circle" data-tippy="A short summary describing a dataset."></i>
+              </label>
+              <textarea required="" rows="7" v-model="metadata.description" class="form-control" id="description" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
+              <div class="col-sm-12 text-center">
+                <small><span v-text="metadata.description.length">0</span> Characters</small>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="keywords" class="col-sm-2 col-form-label col-form-label-sm">
+                Keywords <br />
+                <i class="fas fa-question-circle" data-tippy="Keywords summarizing the dataset."></i>
+              </label>
+              <div class="col-sm-9">
+                <input ref="keywordInput" autocomplete="off" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="keywords" placeholder="Enter new keyword here">
+              </div>
+              <div class="col-sm-1">
+                <button @click.prevent="addKeyword" class="btn btn-secondary btn-sm"><i class="fas fa-plus-circle"></i></button>
+              </div>
+              <div id="keywords">
+                <template v-for="text in keywords">
+                  <span @click="removeKeyword(text)" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
+                  </span>
+                </template>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="version" class="col-sm-2 col-form-label col-form-label-sm">
+                Version* <br />
+                <i class="fas fa-question-circle" data-tippy="The version number for the dataset."></i>
+              </label>
+              <div class="col-sm-10">
+                <input autocomplete="off" v-model="metadata.version" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="version" placeholder="Enter text here" required="">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="url" class="col-sm-2 col-form-label col-form-label-sm">
+                URL* <br />
+                <i class="fas fa-question-circle" data-tippy="Location of a page describing the dataset."></i>
+              </label>
+              <div class="col-sm-10">
+                <input autocomplete="off" v-model="metadata.url" data-parsley-trigger="change" type="url" class="form-control form-control-sm" id="url" placeholder="Enter URL here" required="">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="SameAs" class="col-sm-2 col-form-label col-form-label-sm">
+                Same As* <br />
+                <i class="fas fa-question-circle" data-tippy="A link to a page that provides more information about the same dataset, usually in a different repository."></i>
+              </label>
+              <div class="col-sm-10">
+                <input autocomplete="off" v-model="metadata.sameAs" data-parsley-trigger="change" type="url" class="form-control form-control-sm" id="SameAs" placeholder="Enter URL here" required="">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="variablesMeasured" class="col-sm-2 col-form-label col-form-label-sm">
+                Variables Measured <br />
+                <i class="fas fa-question-circle" data-tippy="The variable that this dataset measures. For example, temperature or pressure."></i>
+                <i class="fas fa-info-circle text-info" data-tippy="The variableMeasured property is proposed and pending standardization at schema.org."></i>
+              </label>
+              <div class="col-sm-10">
+                <input autocomplete="off" v-model="metadata.variablesMeasured" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="variablesMeasured" placeholder="Enter text here">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="license" class="col-sm-2 col-form-label col-form-label-sm">
+                License* <i class="fas fa-question-circle pointer" @click.prevent="scrollTo('licenseForm')" data-tippy="Get help choosing the right license"></i>
+              </label>
+              <div class="col-sm-10">
+                <input disabled v-model="licenseAbbreviation" v-model="metadata.license" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="license" placeholder="Use License Chooser Tool" required="">
+                <!-- <select class="form-control" id="license" data-parsley-trigger="change" required="" v-model="licenseAbbreviation">
+                  <option value="">Choose..</option>
+                  <option value="CC BY 4.0">Attribution 4.0 International (CC BY 4.0)</option>
+                  <option value="CC BY-ND 4.0">Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)</option>
+                  <option value="CC BY-SA 4.0">Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)</option>
+                  <option value="CC BY-NC 4.0">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</option>
+                  <option value="CC BY-NC-ND 4.0">Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)</option>
+                  <option value="CC BY-NC-SA 4.0">Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</option>
+                </select> -->
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="thumbnailUrl" class="col-sm-2 col-form-label col-form-label-sm">
+                Thumbnail URL <i class="fas fa-question-circle pointer" data-tippy="An image thumbnail of your content."></i>
+              </label>
+              <div class="col-sm-10">
+                <input ref="imageURL" v-model="metadata.thumbnailUrl" data-parsley-trigger="change" type="url" class="form-control form-control-sm" id="thumbnailUrl" placeholder="Enter URL here">
+              </div>
+              <div class="text-center col-sm-12">
+                <img alt="thumbnailUrl" v-if="metadata.thumbnailUrl" width="200px" :src="metadata.thumbnailUrl" />
+              </div>
+            </div>
+
+            <template v-if="otherFields.length">
+              <div class="text-muted mb-3 alert alert-secondary">
+                <small>Other Fields Found:</small>
+                <span class="badge badge-secondary mr-1" v-for="field in otherFields" v-text="field"></span>
+              </div>
+            </template>
+
+            <div>
+              <input type="submit" class="btn themeButton text-light" value="Submit">
+            </div>
+          </form>
+        </div>
+      </template>
+
+      <template>
+        <div id="result" class="jumbotron text-muted">
+          <h3>Code</h3>
+          <p class="col-sm-6" style="margin: 0 auto;">
+            Copy and paste this code inside a script tag.
+          </p>
+          <hr />
+          <div class="alert alert-secondary">
+            <span class="mr-3" :class='{hidden: !achievements.complete}' data-tippy="Completed Required Fields">
+              <i class="fas fa-medal text-success fa-2x"></i> Completed Required Fields
+            </span>
+            <span class="mr-3" :class='{hidden: !achievements.helpMe}' data-tippy="Help Me!">
+              <i class="fas fa-medal text-success fa-2x"></i>
+            </span>
+            <span class="mr-3" :class='{hidden: !achievements.submitData}' data-tippy="All Done!">
+              <i class="fas fa-medal text-success fa-2x"></i>
+            </span>
+            <span class="mr-3" :class='{hidden: !achievements.errors}' data-tippy="Not So Fast">
+              <i class="fas fa-medal text-success fa-2x" title="Not So Fast!"></i>
+            </span>
+          </div>
+          </hr>
+          <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
+            <div class="form-group">
+              <label for="result">Your Code:</label>
+              <div class="form-group">
+                <pre>
+                  <code id="result" v-text="result">
+                  </code>
+                </pre>
+              </div>
+            </div>
+          </form>
+        </div>
+      </template>
+
+
+    </div>
+  </div>
+</main>
+<script type="text/javascript">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="./static/js/lodash.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
+<script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+<script>
+var app = new Vue({
+      el: '#guide',
+			data: function(){
+				return {
+          loading: false,
+          data:null,
+          link:'',
+          licenseInfo:false,
+          typeLicense:'',
+          licenseAbbreviation:'',
+          licenseLink:'',
+          licenseHelp: false,
+          metadata:{
+            "name":'',
+            "description":'',
+            "keywords": '',
+            "version":'',
+            "url":'',
+            "sameAs":'',
+            "variablesMeasured":'',
+            "thumbnailUrl":'',
+            "license": ''
+          },
+          otherFields:[],
+          keywords:[],
+          result:'',
+          achievements:{
+            'complete100':false,
+            'helpMe': false,
+            'complete':false,
+            'submitData': false,
+            'errors': false
+          },
+          datasetInput:false
+
+
+				}
+			},
+      watch:{
+        keywords: function (newKW, oldKW) {
+          let str = newKW.join(',');
+          this.metadata.keywords = str;
+        },
+        typeLicense: function(oldLic, newLic){
+          this.metadata.license = this.licenseAbbreviation;
+        }
+      },
+      methods:{
+        // getAchievements(){
+        //   let check = true;
+        //   Object.keys(this.metadata).forEach(function(key,index) {
+        //     if (!this.metadata[key]) {
+        //       check = false;
+        //     }
+        //   });
+        //   if (check) {
+        //     this.achievements.complete100 = true;
+        //   }
+        //   return false;
+        // },
+        prettify(){
+          var str = JSON.stringify(this.metadata, null, 2);
+          this.result = str;
+          this.achievements.complete = true;
+          this.scrollTo('result');
+        },
+        addKeyword(){
+          let value = this.$refs.keywordInput.value;
+          this.keywords.push(value);
+          this.$refs.keywordInput.value = '';
+        },
+        removeKeyword(tagName){
+          for (var i = 0; i < this.keywords.length; i++) {
+            if (this.keywords[i] === tagName) {
+              this.keywords.splice(i,1);
+            }
+          }
+        },
+        loadingOn(){
+          var self = this;
+          self.loading = true;
+        },
+        loadingOff(){
+          var self = this;
+          setTimeout(function(){
+             self.loading = false;
+           }, 500);
+        },
+        getLicense(){
+          let question1 = this.$refs.license1.value;
+          let question2 = this.$refs.license2.value;
+
+          switch (question1+'|'+question2) {
+            case "Yes|Yes":
+              this.licenseInfo = true;
+              this.typeLicense = 'Attribution 4.0 International';
+              this.licenseLink = 'http://creativecommons.org/licenses/by/4.0/';
+              this.licenseAbbreviation = 'CC BY 4.0';
+              break;
+            case "No|Yes":
+              this.licenseInfo = true;
+              this.typeLicense = 'Attribution-NoDerivatives 4.0 International';
+              this.licenseLink = 'http://creativecommons.org/licenses/by-nd/4.0/';
+              this.licenseAbbreviation = 'CC BY-ND 4.0';
+              break;
+            case "Yes, as long as others share alike|Yes":
+              this.licenseInfo = true;
+              this.typeLicense = 'Attribution-ShareAlike 4.0 International';
+              this.licenseLink = 'http://creativecommons.org/licenses/by-sa/4.0/';
+              this.licenseAbbreviation = 'CC BY-SA 4.0';
+              break;
+            case "Yes|No":
+              this.licenseInfo = true;
+              this.typeLicense = 'Attribution-NonCommercial 4.0 International';
+              this.licenseLink = 'http://creativecommons.org/licenses/by-nc/4.0/';
+              this.licenseAbbreviation = 'CC BY-NC 4.0';
+              break;
+            case "No|No":
+              this.licenseInfo = true;
+              this.typeLicense = 'Attribution-NonCommercial-NoDerivatives 4.0 International';
+              this.licenseAbbreviation = 'CC BY-NC-ND 4.0';
+              this.licenseLink = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
+              break;
+            case "Yes, as long as others share alike|No":
+              this.licenseInfo = true;
+              this.typeLicense = 'Attribution-NonCommercial-ShareAlike 4.0 International';
+              this.licenseAbbreviation = 'CC BY-NC-SA 4.0';
+              this.licenseLink = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
+              break;
+            default:
+              this.licenseInfo = false;
+              this.typeLicense = "We had trouble with your input, please try this link:";
+              this.licenseAbbreviation = '';
+              this.licenseLink = 'https://creativecommons.org/choose/';
+              break;
+
+          }
+
+        },
+        getFormValues () {
+          this.link = this.$refs.dataset_input.value;
+          this.requestData(this.link);
+        },
+        scrollTo(anchor){
+          document.querySelector("#"+anchor).scrollIntoView({
+            behavior: 'smooth'
+          });
+        },
+        requestData(url){
+          var self = this;
+          self.loading = true;
+          self.loadingOn();
+          axios.get(url).then(res=>{
+            self.data = res.data;
+            self.loadingOff();
+            self.parseData();
+            //scroll to form
+            self.scrollTo('metadataForm');
+          }).catch(err=>{
+            throw err;
+            swal(
+              'Oops, something went wrong!',
+              err,
+              'Error'
+            );
+          })
+        },
+        parseData(){
+          let self = this;
+          let data = this.data;
+          Object.keys(data).forEach(function(key,index) {
+              switch (key) {
+                case 'name':
+                  self.metadata['name'] = data[key];
+                  break;
+                case 'description':
+                  self.metadata['description'] = data[key];
+                  break;
+                case 'keywords':
+                  self.keywords = data[key].split(",");
+                  break;
+                case 'sameAs':
+                  self.metadata['sameAs'] = data[key];
+                  break;
+                case 'version':
+                  self.metadata['version'] = data[key];
+                  break;
+                case 'url':
+                  self.metadata['url'] = data[key];
+                  break;
+                case 'thumbnailUrl':
+                  self.metadata['thumbnailUrl'] = data[key];
+                  break;
+                case 'license':
+                  self.licenseAbbreviation = data[key];
+                  break;
+                case 'variablesMeasured':
+                  self.metadata['variablesMeasured'] = data[key];
+                  break;
+                default:
+                  self.otherFields.push(key);
+                  break;
+              }
+          });
+        }
+    },
+    mounted:function(){
+      var self = this;
+      $(function () {
+        $('#metadataForm').parsley().on('field:validated', function() {
+          var err = $('.parsley-error').length;
+          if (err > 5) {
+            self.achievements.errors = true;
+          }
+        })
+        .on('form:submit', function() {
+          console.log("SUBMITTED");
+          self.prettify();
+          return false; // Don't submit form for this demo
+        });
+
+        $('#licenseForm').parsley().on('field:validated', function() {
+        });
+
+        $('#linkForm').parsley().on('field:validated', function() {
+        })
+        .on('form:submit', function() {
+          return false; // Don't submit form for this demo
+        });
+      });
+    },
+    created: function(){
+    }
+  })
+</script>
+{% include "footer.html" %}
+{% endblock %}
