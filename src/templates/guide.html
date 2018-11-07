@@ -7,23 +7,6 @@
     <img src="./static/img/ripple.svg"/>
   </div>
 
-  <div class="medals">
-    <ul class="list-group">
-      <li v-if='achievements.complete' class="list-group-item swing-in-left-fwd achievement">
-        <i class="fas fa-medal text-primary"></i> Completed Required Fields
-      </li>
-      <li v-if='achievements.helpMe' class="list-group-item swing-in-left-fwd achievement">
-        <i class="fas fa-medal text-primary"></i> Help Me!
-      </li>
-      <li v-if='achievements.submitData' class="list-group-item swing-in-left-fwd achievement">
-        <i class="fas fa-medal text-primary"></i> All Done!
-      </li>
-      <li v-if='achievements.errors' class="list-group-item swing-in-left-fwd achievement">
-        <i class="fas fa-medal text-primary"></i> Not So Fast
-      </li>
-    </ul>
-  </div>
-
   <div class="container">
     <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
       <h2 class="mainTextDark">GUIDE</h2>
@@ -68,10 +51,13 @@
           <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
             <div class="form-group">
               <label for="urlform">Paste your dataset URL here:</label>
-              <input data-parsley-trigger="change" id="urlform" autocomplete="on" required ref="dataset_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
-              <button :disabled="!link" @change="getFormValues()" @click.prevent="getFormValues(); achievements.submitData= true" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
+              <input data-parsley-trigger="change" v-model="link" id="urlform" autocomplete="on" required ref="dataset_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
+              <button :disabled="!link.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
             </div>
           </form>
+          <div>
+            <span v-if="fieldsFoundCount && link" class="text-success h4 text-weigth-lighter" v-text="fieldsFoundCount+' Fields Found'"></span>
+          </div>
         </div>
       </template>
 
@@ -117,7 +103,7 @@
                   </tr>
                 </tbody>
               </table>
-              <label for="ControlSelect1">Allow adaptations of your work to be shared? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp; achievements.helpMe = true" data-tippy="Show Help"></i></label>
+              <label for="ControlSelect1">Allow adaptations of your work to be shared? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp;" data-tippy="Show Help"></i></label>
               <form  class="col-sm-6" style="margin: 0 auto;">
               <select data-parsley-trigger="change" @change="getLicense" ref="license1" class="form-control form-control-sm" id="ControlSelect1" required="">
                 <option selected>Choose...</option>
@@ -153,7 +139,7 @@
                   </tr>
                 </tbody>
               </table>
-              <label for="eontrolSelect2">Allow commercial uses of your work? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp; achievements.helpMe = true" data-tippy="Show Help"></i></label>
+              <label for="eontrolSelect2">Allow commercial uses of your work? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp;" data-tippy="Show Help"></i></label>
               <form  class="col-sm-6" style="margin: 0 auto;">
               <select data-parsley-trigger="change" @change="getLicense" ref="license2" class="form-control form-control-sm" id="ControlSelect2" required="">
                 <option selected>Choose...</option>
@@ -224,7 +210,7 @@
               </div>
               <div id="keywords">
                 <template v-for="text in keywords">
-                  <span @click="removeKeyword(text)" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
+                  <span @click="removeKeyword(text)" data-tippy-placement="bottom" data-tippy="Remove" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
                   </span>
                 </template>
               </div>
@@ -271,7 +257,7 @@
                 License* <i class="fas fa-question-circle pointer" @click.prevent="scrollTo('licenseForm')" data-tippy="Get help choosing the right license"></i>
               </label>
               <div class="col-sm-10">
-                <input disabled v-model="licenseAbbreviation" v-model="metadata.license" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="license" placeholder="Use License Chooser Tool" required="">
+                <input disabled v-model="licenseAbbreviation" v-model="metadata.license" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="license" placeholder="Use License Chooser Tool">
                 <!-- <select class="form-control" id="license" data-parsley-trigger="change" required="" v-model="licenseAbbreviation">
                   <option value="">Choose..</option>
                   <option value="CC BY 4.0">Attribution 4.0 International (CC BY 4.0)</option>
@@ -303,7 +289,9 @@
             </template>
 
             <div>
-              <input type="submit" class="btn themeButton text-light" value="Submit">
+              <!-- <input type="submit" @click.prevent='clearForm()' class="btn themeButton text-light" value="Submit"> -->
+              <input type="button" class="btn themeButton text-light" @click.prevent='validate("metadataForm")' value="Submit">
+              <input type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
             </div>
           </form>
         </div>
@@ -316,31 +304,17 @@
             Copy and paste this code inside a script tag.
           </p>
           <hr />
-          <div class="alert alert-secondary">
-            <span class="mr-3" :class='{hidden: !achievements.complete}' data-tippy="Completed Required Fields">
-              <i class="fas fa-medal text-success fa-2x"></i> Completed Required Fields
-            </span>
-            <span class="mr-3" :class='{hidden: !achievements.helpMe}' data-tippy="Help Me!">
-              <i class="fas fa-medal text-success fa-2x"></i>
-            </span>
-            <span class="mr-3" :class='{hidden: !achievements.submitData}' data-tippy="All Done!">
-              <i class="fas fa-medal text-success fa-2x"></i>
-            </span>
-            <span class="mr-3" :class='{hidden: !achievements.errors}' data-tippy="Not So Fast">
-              <i class="fas fa-medal text-success fa-2x" title="Not So Fast!"></i>
-            </span>
-          </div>
-          </hr>
           <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
             <div class="form-group">
               <label for="result">Your Code:</label>
               <div class="form-group">
-                <pre>
-                  <code id="result" v-text="result">
+                <pre >
+                  <code id="resultCode" v-html="result">
                   </code>
                 </pre>
               </div>
             </div>
+          </input>
           </form>
         </div>
       </template>
@@ -362,7 +336,7 @@ var app = new Vue({
 			data: function(){
 				return {
           loading: false,
-          data:null,
+          data:{},
           link:'',
           licenseInfo:false,
           typeLicense:'',
@@ -383,14 +357,9 @@ var app = new Vue({
           otherFields:[],
           keywords:[],
           result:'',
-          achievements:{
-            'complete100':false,
-            'helpMe': false,
-            'complete':false,
-            'submitData': false,
-            'errors': false
-          },
-          datasetInput:false
+          datasetInput:false,
+          fieldsFoundCount: 0,
+          validForm:false
 
 
 				}
@@ -405,22 +374,57 @@ var app = new Vue({
         }
       },
       methods:{
-        // getAchievements(){
-        //   let check = true;
-        //   Object.keys(this.metadata).forEach(function(key,index) {
-        //     if (!this.metadata[key]) {
-        //       check = false;
-        //     }
-        //   });
-        //   if (check) {
-        //     this.achievements.complete100 = true;
-        //   }
-        //   return false;
-        // },
-        prettify(){
+        clearForm(){
+          this.metadata = {
+            "name":'',
+            "description":'',
+            "keywords": '',
+            "version":'',
+            "url":'',
+            "sameAs":'',
+            "variablesMeasured":'',
+            "thumbnailUrl":'',
+            "license": ''
+          };
+          this.typeLicense='';
+          this.licenseAbbreviation='';
+          this.licenseLink='';
+          this.keywords=[];
+          this.otherFields=[];
+        },
+        validate(formID){
+          let res = $('#'+formID).parsley().validate();
+          if (res) {
+            this.validForm = true;
+            this.makeScript();
+            swal({
+              type: 'success',
+              toast: true,
+              title: 'Form Submitted',
+              showConfirmButton: false,
+              position: 'bottom-start',
+              timer: 2500
+            });
+          }else{
+            swal({
+              type: 'error',
+              toast: true,
+              title: 'Oops...Form Incomplete',
+              showConfirmButton: false,
+              position: 'bottom-start',
+              timer: 2500
+            });
+            this.validForm = false;
+          }
+        },
+        makeScript(){
           var str = JSON.stringify(this.metadata, null, 2);
-          this.result = str;
-          this.achievements.complete = true;
+          var script=document.createElement('script');
+          script.type='application/ld+json';
+          script.text = str;
+          this.result = script;
+          console.log(this.result);
+          document.getElementById("resultCode").appendChild(script);
           this.scrollTo('result');
         },
         addKeyword(){
@@ -497,12 +501,37 @@ var app = new Vue({
 
         },
         getFormValues () {
-          this.link = this.$refs.dataset_input.value;
-          this.requestData(this.link);
+          this.requestPageHTML(this.link);
         },
         scrollTo(anchor){
           document.querySelector("#"+anchor).scrollIntoView({
             behavior: 'smooth'
+          });
+        },
+        requestPageHTML(url){
+          var self = this;
+          self.loadingOn();
+          //anyorigin is potentially a resource we have to pay for if use is too high
+          $.getJSON('http://anyorigin.com/go?url='+encodeURIComponent(url)+'&callback=?', function(data){        	// console.log(data)
+            self.loadingOff();
+            let parser  = new DOMParser();
+            let htmlDoc = parser.parseFromString(data.contents, "text/html");
+            // console.log(htmlDoc);
+            var txt = htmlDoc.querySelector('script[type="application/ld+json"]');
+            if (!txt) {
+              swal({
+                type: 'error',
+                title: 'Oops...',
+                text: "We couldn't find your dataset",
+                footer: 'Make sure your dataset is enclosed in a "script" tag with "type=application/ld+json" then try again.'
+              });
+            }else{
+              txt = txt.textContent;
+              var res = JSON.parse(txt);
+              self.data = res;
+              self.parseData();
+              self.scrollTo('metadataForm');
+            }
           });
         },
         requestData(url){
@@ -513,15 +542,17 @@ var app = new Vue({
             self.data = res.data;
             self.loadingOff();
             self.parseData();
-            //scroll to form
             self.scrollTo('metadataForm');
           }).catch(err=>{
             throw err;
-            swal(
-              'Oops, something went wrong!',
-              err,
-              'Error'
-            );
+            swal({
+              type: 'error',
+              toast: true,
+              title: 'Oops...Something Went Wrong',
+              showConfirmButton: false,
+              position: 'center',
+              timer: 2500
+            });
           })
         },
         parseData(){
@@ -531,30 +562,43 @@ var app = new Vue({
               switch (key) {
                 case 'name':
                   self.metadata['name'] = data[key];
+                  self.fieldsFoundCount++;
                   break;
                 case 'description':
                   self.metadata['description'] = data[key];
+                  self.fieldsFoundCount++;
                   break;
                 case 'keywords':
-                  self.keywords = data[key].split(",");
+                  if (_.isArray(data[key])) {
+                    self.keywords = data[key];
+                  }else if (_.isString(data[key])) {
+                    self.keywords = data[key].split(",");
+                  }
+                  self.fieldsFoundCount++;
                   break;
                 case 'sameAs':
                   self.metadata['sameAs'] = data[key];
+                  self.fieldsFoundCount++;
                   break;
                 case 'version':
                   self.metadata['version'] = data[key];
+                  self.fieldsFoundCount++;
                   break;
                 case 'url':
                   self.metadata['url'] = data[key];
+                  self.fieldsFoundCount++;
                   break;
                 case 'thumbnailUrl':
                   self.metadata['thumbnailUrl'] = data[key];
+                  self.fieldsFoundCount++;
                   break;
                 case 'license':
                   self.licenseAbbreviation = data[key];
+                  self.fieldsFoundCount++;
                   break;
                 case 'variablesMeasured':
                   self.metadata['variablesMeasured'] = data[key];
+                  self.fieldsFoundCount++;
                   break;
                 default:
                   self.otherFields.push(key);
@@ -569,12 +613,12 @@ var app = new Vue({
         $('#metadataForm').parsley().on('field:validated', function() {
           var err = $('.parsley-error').length;
           if (err > 5) {
-            self.achievements.errors = true;
+            // self.achievements.errors = true;
           }
         })
         .on('form:submit', function() {
           console.log("SUBMITTED");
-          self.prettify();
+          self.makeScript();
           return false; // Don't submit form for this demo
         });
 
