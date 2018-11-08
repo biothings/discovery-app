@@ -7,6 +7,7 @@
 .form-control {
   padding:1.2em !important;
   border-radius: 20px !important;
+  box-shadow: inset 0 0 10px grey !important;
 }
 
 .hidden {
@@ -19,10 +20,13 @@
 pre code {
   background-color: #eee;
   border: 1px solid #999;
+  border-radius: 5px;
   display: block;
   padding: 20px;
   overflow: scroll;
   text-align: left;
+  max-height: 40vh;
+  box-shadow: inset 0 0 10px grey;
 }
 
 .loader{
@@ -31,15 +35,6 @@ pre code {
   top: calc(50% - 100px) !important;
   left: calc(50% - 100px) !important;
 }
-
-.medals{
-  position: fixed;
-  z-index: 100;
-  top: calc(50% - 100px) !important;
-  left: 20px;
-}
-
-
 
 @font-face {
     font-family: mainFont;

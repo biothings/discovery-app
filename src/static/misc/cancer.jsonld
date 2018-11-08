@@ -1,48 +1,28 @@
 {
     "@context": "http://schema.org",
     "@type": "Dataset",
-    "@id": "https://doi.org/10.1371/journal.pone.0056162",
-    "dateCreated": "2013-02-13T01:52:58Z",
-    "datePublished": "2013-02-13T01:52:58Z",
-    "dateModified": "2015-12-02T13:18:30Z",
-    "name": "PBOV1 Is a Human De Novo Gene with Tumor-Specific Expression That Is Associated with a Positive Clinical Outcome of Cancer",
-    "description": "PBOV1 is a known human protein-coding gene with an uncharacterized function. We have previously found that PBOV1 lacks orthologs in non-primate genomes and is expressed in a wide range of tumor types. Here we report that PBOV1 protein-coding sequence is human-specific and has originated de novo in the primate evolution through a series of frame-shift and stop codon mutations. We profiled PBOV1 expression in multiple cancer and normal tissue samples and found that it was expressed in 19 out of 34 tumors of various origins but completely lacked expression in any of the normal adult or fetal human tissues. We found that, unlike the cancer/testis antigens that are typically controlled by CpG island-containing promoters, PBOV1 was expressed from a GC-poor TATA-containing promoter which was not influenced by CpG demethylation and was inactive in testis. Our analysis of public microarray data suggests that PBOV1 activation in tumors could be dependent on the Hedgehog signaling pathway. Despite the recent de novo origin and the lack of identifiable functional signatures, a missense SNP in the PBOV1 coding sequence has been previously associated with an increased risk of breast cancer. Using publicly available microarray datasets, we found that high levels of PBOV1 expression in breast cancer and glioma samples were significantly associated with a positive outcome of the cancer disease. We also found that PBOV1 was highly expressed in primary but not in recurrent high-grade gliomas, suggesting the presence of a negative selection against PBOV1-expressing cancer cells. Our findings could contribute to the understanding of the mechanisms behind de novo gene origin and the possible role of tumors in this process.\n\n",
-    "url": "https://figshare.com/articles/PBOV1_Is_a_Human_De_Novo_Gene_with_Tumor_Specific_Expression_That_Is_Associated_with_a_Positive_Clinical_Outcome_of_Cancer__/156778",
-    "discussionUrl": "https://figshare.com/articles/PBOV1_Is_a_Human_De_Novo_Gene_with_Tumor_Specific_Expression_That_Is_Associated_with_a_Positive_Clinical_Outcome_of_Cancer__/156778",
-    "sameAs": "https://figshare.com/articles/PBOV1_Is_a_Human_De_Novo_Gene_with_Tumor_Specific_Expression_That_Is_Associated_with_a_Positive_Clinical_Outcome_of_Cancer__/156778",
+    "@id": "",
+    "dateCreated": "",
+    "datePublished": "",
+    "dateModified": "",
+    "name": "The Name Of Your Dataset",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    "discussionUrl": "https://schema.org/",
+    "url": "https://schema.org/",
+    "sameAs": "https://schema.org/",
     "version": "1",
-    "keywords": "pbov1, tumor-specific, cancer, Cancer, Evolutionary Biology, Immunology",
+    "keywords": "keyword1, keyword2",
     "variablesMeasured": "none",
-    "thumbnailUrl": "https://s3-eu-west-1.amazonaws.com/ppreviews-plos-725668748/485208/thumb.png",
+    "thumbnailUrl": "",
     "publisher": {
         "@type": "Organization",
-        "name": "PLOS ONE"
+        "name": ""
     },
     "creator": [
 
       {
         "@type": "Person",
-        "name": "Nikolay Samusik"
-      }
-
-      ,{
-        "@type": "Person",
-        "name": "Larisa Krukovskaya"
-      }
-
-      ,{
-        "@type": "Person",
-        "name": "Irina Meln"
-      }
-
-      ,{
-        "@type": "Person",
-        "name": "Evgeny Shilov"
-      }
-
-      ,{
-        "@type": "Person",
-        "name": "Andrey P. Kozlov"
+        "name": "Name Lastname"
       }
 
 
@@ -51,8 +31,8 @@
 
       {
         "@type": "DataDownload",
-        "contentUrl": "https://ndownloader.figshare.com/files/485208",
-        "license": "https://creativecommons.org/licenses/by/4.0/"
+        "contentUrl": "",
+        "license": ""
       }
 
 

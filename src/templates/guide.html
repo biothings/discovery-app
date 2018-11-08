@@ -9,14 +9,16 @@
 
   <div class="container">
     <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
-      <h2 class="mainTextDark">GUIDE</h2>
-
+      <h2 class="text-muted"><i class="fas fa-map-signs"></i> GUIDE</h2>
+      <p class="text-muted">
+        This guide will help you to add or modify existign metadata to an existing dataset or you can create a new dataset from
+      </p>
 
       <template>
         <div class="jumbotron text-muted">
           <h3>Host your Dataset</h3>
           <p class="col-sm-6" style="margin: 0 auto;">
-            You may choose to host your dataset in any of these suggestions:
+            Here's a few suggestions where you may host your dataset:
           </p>
           <hr />
           <ul class="list-group col-sm-6" style="margin:0 auto;">
@@ -56,14 +58,18 @@
             </div>
           </form>
           <div>
-            <span v-if="fieldsFoundCount && link" class="text-success h5 text-weigth-lighter" v-text="fieldsFoundCount+' fields currently filled out'"></span>
+            <span v-if="fieldsFoundCount && link" class="text-success h5 font-weigth-light" v-text="fieldsFoundCount+' fields found and filled out'"></span>
           </div>
+          <hr />
+          <h5 class="font-weight-light">Don't Have A Dataset? That's OK!</h5>
+          <a href="#" @click.prevent="scrollTo('metadataForm')">Start From Scratch</a>
         </div>
       </template>
 
       <template>
         <div class="jumbotron text-muted">
-          <h3>License Chooser</h3>
+          <h3>License Chooser*</h3>
+          <small>(*Required)</small>
           <p class="col-sm-6" style="margin: 0 auto;">
             This tool helps you determine which Creative Commons License is right for you in a couple of easy steps.
           </p>
@@ -103,13 +109,13 @@
                   </tr>
                 </tbody>
               </table>
-              <label for="ControlSelect1">Allow adaptations of your work to be shared? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp;" data-tippy="Show Help"></i></label>
+              <label for="ControlSelect1">Allow adaptations of your work to be shared? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp;achievementPopup('Help Me!')" data-tippy="Show Help"></i></label>
               <form  class="col-sm-6" style="margin: 0 auto;">
               <select data-parsley-trigger="change" @change="getLicense" ref="license1" class="form-control form-control-sm" id="ControlSelect1" required="">
                 <option selected>Choose...</option>
-                <option>Yes</option>
-                <option>No</option>
-                <option>Yes, as long as others share alike</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                <option value="Yes, as long as others share alike">Yes, as long as others share alike</option>
               </select>
             </div>
 
@@ -139,12 +145,12 @@
                   </tr>
                 </tbody>
               </table>
-              <label for="eontrolSelect2">Allow commercial uses of your work? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp;" data-tippy="Show Help"></i></label>
+              <label for="eontrolSelect2">Allow commercial uses of your work? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp; achievementPopup('Help Me!')" data-tippy="Show Help"></i></label>
               <form  class="col-sm-6" style="margin: 0 auto;">
               <select data-parsley-trigger="change" @change="getLicense" ref="license2" class="form-control form-control-sm" id="ControlSelect2" required="">
                 <option selected>Choose...</option>
-                <option>Yes</option>
-                <option>No</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
               </select>
             </div>
 
@@ -170,11 +176,12 @@
       <template>
         <div class="jumbotron text-muted">
           <h2>Metadata</h2>
+          <small>(*Required)</small>
           <p class="col-sm-6" style="margin: 0 auto;">
             Fill out or edit your metadata.
           </p>
           <p>
-            <a data-tippy="Load Cancer FigShare Example" href="#" class="badge badge-pill badge-secondary pointer mt-2" @click.prevent="loadExample('./static/misc/cancer.jsonld')"><i class="fas fa-file-download"></i> Load Example</a>
+            <a data-tippy="Load Cancer FigShare Example" href="#" class="badge badge-pill badge-secondary pointer mt-2 p-2" @click.prevent="loadExample('./static/misc/cancer.jsonld')"><i class="fas fa-question-circle"></i> Load Example</a>
           </p>
           <hr />
           <form id="metadataForm" autocomplete="off" class="col-sm-6" style="margin: 0 auto;">
@@ -289,9 +296,8 @@
             </template>
 
             <div>
-              <!-- <input type="submit" @click.prevent='clearForm()' class="btn themeButton text-light" value="Submit"> -->
-              <input type="button" class="btn themeButton text-light" @click.prevent='validate("metadataForm")' value="Submit">
-              <input type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
+              <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light" @click.prevent='validate("metadataForm")' value="Submit">
+              <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
             </div>
           </form>
         </div>
@@ -301,12 +307,11 @@
         <div id="result" class="jumbotron text-muted">
           <h3>Code</h3>
           <p class="col-sm-6" style="margin: 0 auto;">
-            Copy and paste this code inside a script tag.
+            Copy and paste this code in your site's HTMl code.
           </p>
           <hr />
           <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
             <div class="form-group">
-              <label for="result">Your Code:</label>
               <div class="form-group">
                 <pre >
                   <code id="resultCode" @click="selectText('resultCode')">
@@ -316,6 +321,15 @@
             </div>
           </input>
           </form>
+        </div>
+      </template>
+
+      <template v-if="achievements.length">
+        <div class="container bg-muted">
+          <h5 class="text-muted font-weight-light">Achievements Unlocked</h5>
+          <div class="m-1 badge-pill badge badge-secondary p-2" v-for="ach in achievements">
+            <i class="fas fa-trophy"></i> <span v-text="ach"></span>
+          </div>
         </div>
       </template>
 
@@ -359,9 +373,8 @@ var app = new Vue({
           result:'',
           datasetInput:false,
           fieldsFoundCount: 0,
-          validForm:false
-
-
+          validForm:false,
+          achievements:[]
 				}
 			},
       watch:{
@@ -376,6 +389,26 @@ var app = new Vue({
       methods:{
         selectText(containerid) {
           window.getSelection().selectAllChildren( document.getElementById( containerid ) );
+        },
+        achievementPopup(title){
+
+          if (this.achievements.indexOf(title) === -1) {
+            this.achievements.push(title);
+            setTimeout(function(){
+              swal({
+                imageUrl: './static/img/trophy.svg',
+                imageHeight: 50,
+                imageAlt: 'Trophy',
+                toast: true,
+                timer: 3000,
+                showConfirmButton: false,
+                title: title,
+                footer:'Achievement Unlocked',
+                position: 'center-start'
+              });
+            }, 1000);
+          }
+
         },
         clearForm(){
           this.metadata = {
@@ -395,6 +428,7 @@ var app = new Vue({
           this.keywords=[];
           this.otherFields=[];
           this.fieldsFoundCount= 0;
+          this.achievements = [];
         },
         validate(formID){
           let res = $('#'+formID).parsley().validate();
@@ -421,8 +455,14 @@ var app = new Vue({
             this.validForm = false;
           }
         },
+        mergeOldAndNewData(){
+          var newData = _.extend({}, this.data, this.metadata);
+          this.data = newData;
+        },
         makeScript(){
-          var str = JSON.stringify(this.metadata, null, 2);
+          this.mergeOldAndNewData();
+          this.achievementPopup('Done and Done');
+          var str = JSON.stringify(this.data, null, 2);
           var script = "<script type=\"application/ld+json\">" + str + "<\/script>"
           this.result = script;
           console.log(this.result);
@@ -518,9 +558,9 @@ var app = new Vue({
             self.loadingOff();
             let parser  = new DOMParser();
             let htmlDoc = parser.parseFromString(data.contents, "text/html");
-            // console.log(htmlDoc);
             var txt = htmlDoc.querySelector('script[type="application/ld+json"]');
             if (!txt) {
+              self.achievementPopup("Nothing To See Here...");
               swal({
                 type: 'error',
                 title: 'Oops...',
@@ -528,6 +568,7 @@ var app = new Vue({
                 footer: 'Make sure your dataset is enclosed in a "script" tag with "type=application/ld+json" then try again.'
               });
             }else{
+              self.achievementPopup("Who's Got Data? You Do!");
               txt = txt.textContent;
               var res = JSON.parse(txt);
               self.data = res;
@@ -541,6 +582,7 @@ var app = new Vue({
           self.loading = true;
           self.loadingOn();
           axios.get(url).then(res=>{
+            self.achievementPopup("Show Me The Way, Master Kenobi");
             self.data = res.data;
             self.loadingOff();
             self.parseData();
@@ -615,13 +657,12 @@ var app = new Vue({
         $('#metadataForm').parsley().on('field:validated', function() {
           var err = $('.parsley-error').length;
           if (err > 5) {
-            // self.achievements.errors = true;
+            self.achievementPopup('Not So Fast!');
           }
         })
         .on('form:submit', function() {
-          console.log("SUBMITTED");
           self.makeScript();
-          return false; // Don't submit form for this demo
+          return false;
         });
 
         $('#licenseForm').parsley().on('field:validated', function() {
@@ -630,7 +671,7 @@ var app = new Vue({
         $('#linkForm').parsley().on('field:validated', function() {
         })
         .on('form:submit', function() {
-          return false; // Don't submit form for this demo
+          return false;
         });
       });
     },
