@@ -6,7 +6,7 @@
   <div class="container">
     <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
       <img class="margin20" src="./static/img/cd2h-logo.png" style="width:50vw; max-width: 1100px;" alt="logo"/>
-      <h2 class="mainTextDark">CD2H Schema Viewer</h2>
+      <h2 class="mainTextDark">CD2H Data Discovery Engine</h2>
       <p class="text-muted">A Project of the CD2H Data Workgroup</p>
       <hr />
       <a role="button" href="./guide" class="btn btn-default themeButton text-light margin20">Guide</a>
@@ -15,13 +15,13 @@
     </div>
 
 
-    <div v-if="ourSchema" class="jumbotron gradientVertical text-light text-center" style="margin-top: 40px;">
+    <div v-if="ourSchema" class="jumbotron mainBackLight text-light text-center" style="margin-top: 40px;">
       <h1 class="twoEM">Schema.org Core Schema</h1>
       <h4>View any of the available classes in this schema</h4>
       <form>
         <div class="form-row align-items-center">
           <div class="col-sm-6" style="margin: 0 auto;">
-            <select @change='handleFilter' class="custom-select " id="inlineFormCustomSelect">
+            <select class="form-control" @change='handleFilter' class="custom-select " id="inlineFormCustomSelect">
               <option selected>Filter by...</option>
               <option v-for="letter in alphabet" :value="letter" v-text="letter"></option>
             </select>
@@ -30,7 +30,7 @@
                 <h3 class="text-light font-weight-bold twoEM" v-text='filter'></h3>
               <hr />
             </template>
-            <select @change='handleChange' v-if="filter"  class="custom-select" id="inlineFormCustomSelect">
+            <select class="form-control" @change='handleChange' v-if="filter"  class="custom-select" id="inlineFormCustomSelect">
               <option selected v-text='"Choose..."'></option>
               <option v-for="(item,i) in filterResults" :value="item" v-text="item"></option>
             </select>
@@ -39,7 +39,7 @@
       </form>
     </div>
 
-    <div v-if="yourSchema" class="jumbotron gradientVertical text-light text-center" style="margin-top: 40px;">
+    <div v-if="yourSchema" class="jumbotron mainBackLight text-light text-center" style="margin-top: 40px;">
       <h1 class="twoEM">View Your Schema</h1>
       <h4>Copy the <b>raw</b> link to your data and paste it here</h4>
       <form class="col-sm-6" style="margin: 0 auto;">

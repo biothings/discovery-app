@@ -60,9 +60,6 @@
           <div>
             <span v-if="fieldsFoundCount && link" class="text-success h5 font-weigth-light" v-text="fieldsFoundCount+' fields found and filled out'"></span>
           </div>
-          <hr />
-          <h5 class="font-weight-light">Don't Have A Dataset? That's OK!</h5>
-          <a href="#" @click.prevent="scrollTo('metadataForm')">Start From Scratch</a>
         </div>
       </template>
 
@@ -553,8 +550,10 @@ var app = new Vue({
         requestPageHTML(url){
           var self = this;
           self.loadingOn();
-          //anyorigin is potentially a resource we have to pay for if use is too high
-          $.getJSON('http://anyorigin.com/go?url='+encodeURIComponent(url)+'&callback=?', function(data){        	// console.log(data)
+          //https://multiverso.me/AllOrigins/
+          //HTTPS https://allorigins.me/get?url=
+          // Gets around the CORS blocking issue
+          $.getJSON('http://allorigins.me/get?url='+encodeURIComponent(url)+'&callback=?', function(data){        	// console.log(data)
             self.loadingOff();
             let parser  = new DOMParser();
             let htmlDoc = parser.parseFromString(data.contents, "text/html");
