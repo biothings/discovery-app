@@ -1,6 +1,11 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
+
+
+</style>
+
 <main id="guide" style="min-height:70vh;">
 
   <div v-if=loading class="loader">
@@ -16,6 +21,7 @@
 
       <template>
         <div class="jumbotron text-muted">
+          <div class="numberCircle">1</div>
           <h3>Host your Dataset Metadata</h3>
           <p class="col-sm-6" style="margin: 0 auto;">
             Here's a few suggestions where you may host your dataset:
@@ -23,8 +29,9 @@
           <hr />
           <ul class="list-group col-sm-6" style="margin:0 auto;">
             <li class="list-group-item">
-              <a href="https://figshare.com/" target="_blank">
-              <img width="220px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Figshare_logo.svg/1280px-Figshare_logo.svg.png" alt="FigShare"/></a>
+              <a href="https://dataverse.org/" target="_blank">
+                <img width="220px" src="https://dataverse.org/files/dataverseorg/files/dataverse_r_project.png" alt="Dataverse"/>
+              </a>
             </li>
             <li class="list-group-item">
               <a href="https://zenodo.org/" target="_blank">
@@ -32,9 +39,8 @@
               </a>
             </li>
             <li class="list-group-item">
-              <a href="https://dataverse.org/" target="_blank">
-                <img width="220px" src="https://dataverse.org/files/dataverseorg/files/dataverse_r_project.png" alt="Dataverse"/>
-              </a>
+              <a href="https://figshare.com/" target="_blank">
+              <img width="220px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Figshare_logo.svg/1280px-Figshare_logo.svg.png" alt="FigShare"/></a>
             </li>
             <li class="list-group-item">
               <h3 class="text-muted"><i class="fas fa-home"></i> Your own website</h3>
@@ -51,6 +57,10 @@
                 <input data-parsley-trigger="change" v-model="link" id="urlform" autocomplete="on" required ref="dataset_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
                 <button :disabled="!link.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
               </div>
+              <small class="badge badge-pill badge-secondary pointer"
+              @click="link = 'https://figshare.com/articles/Should_we_treat_patients_with_only_one_set_of_positive_blood_cultures_for_extensively_drug-resistant_i_Acinetobacter_baumannii_i_the_same_as_multiple_sets_/5187139'">
+                <i class="fas fa-question-circle"></i> Example URL
+              </small>
             </form>
             <div>
               <span v-if="fieldsFoundCount && link" class="text-success h5 font-weigth-light" v-text="fieldsFoundCount+' fields found and filled out'"></span>
@@ -62,6 +72,7 @@
 
       <template>
         <div class="jumbotron text-muted">
+          <div class="numberCircle">2</div>
           <h3>License Chooser*</h3>
           <small>(*Required)</small>
           <p class="col-sm-6" style="margin: 0 auto;">
@@ -105,7 +116,7 @@
               </table>
               <label for="ControlSelect1">Allow adaptations of your work to be shared? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp;achievementPopup('Help Me!')" data-tippy="Show Help"></i></label>
               <form  class="col-sm-6" style="margin: 0 auto;">
-              <select data-parsley-trigger="change" @change="getLicense" ref="license1" class="form-control form-control-sm" id="ControlSelect1" required="">
+              <select data-parsley-trigger="change" @change="getLicense()" ref="license1" class="form-control form-control-sm" id="ControlSelect1" required="">
                 <option selected>Choose...</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
@@ -139,18 +150,57 @@
                   </tr>
                 </tbody>
               </table>
-              <label for="eontrolSelect2">Allow commercial uses of your work? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp; achievementPopup('Help Me!')" data-tippy="Show Help"></i></label>
-              <form  class="col-sm-6" style="margin: 0 auto;">
-              <select data-parsley-trigger="change" @change="getLicense" ref="license2" class="form-control form-control-sm" id="ControlSelect2" required="">
+              <label for="ControlSelect2">Allow commercial uses of your work? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp; achievementPopup('Help Me!')" data-tippy="Show Help"></i></label>
+            <form  class="col-sm-6" style="margin: 0 auto;">
+              <select data-parsley-trigger="change" @change="getLicense()" ref="license2" class="form-control form-control-sm" id="ControlSelect2" required="">
                 <option selected>Choose...</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
               </select>
-            </div>
+            </form>
+          </div>
 
-          </form>
+          <template >
+            <div class="form-group" id="thirdQuestionBlock" style="display: none;">
+              <table v-if="licenseHelp" class="table table-sm table-striped table-secondary fade-in" style="font-size:.8em;">
+                <thead>
+                  <th colspan="2">
+                    Impose legal requirement for attribution?
+                  </th>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="align-middle">
+                      Yes
+                    </td>
+                    <td>
+                      The licensor permits others to share and adapt work but must give attribution. Choosing this often creates a barrier to data integration efforts in the community. Community norms are already quite effective at giving authors attribution.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="align-middle">
+                      No
+                    </td>
+                    <td>
+                      The licensor effectively relinquishes all copyright and similar rights that he or she holds in a work and dedicating those rights to the public domain. Community norms are already quite effective at giving authors attribution regardless.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <label for="ControlSelect3">Impose legal requirement for attribution? <i class="fas fa-question-circle pointer" @click="licenseHelp = !licenseHelp; achievementPopup('Help Me!')" data-tippy="Show Help"></i></label>
+              <form  class="col-sm-6" style="margin: 0 auto;">
+                <select data-parsley-trigger="change" @change="getLicense()" ref="license3" class="form-control form-control-sm" id="ControlSelect3" required="">
+                  <option selected>Choose...</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </form>
+            </div>
+          </template>
+
+
           <template v-if="licenseInfo">
-            <div class="alert alert-success col-sm-6 fade-in" role="alert" style="margin: 0 auto;">
+            <div class="alert alert-success fade-in" role="alert" style="margin: 0 auto;">
               <h4>License Selected:</h4>
               <h2 class="font-weight-bold" v-text="typeLicense"></h2>
               <span class="badge badge-success" v-text="licenseAbbreviation"></span>
@@ -165,9 +215,146 @@
         </div>
       </template>
 
-
-
       <template>
+          <div class="flipcard">
+            <div class="jumbotron text-muted face front">
+              <button style="position:absolute; right: 10px; top:10px; transform: scale(.7);" class="btn btn-secondary" @click='flipView()'>Switch View</button>
+              <div class="numberCircle">3</div>
+              <h2>Metadata</h2>
+              <small>(*Required)</small>
+              <p class="col-sm-6" style="margin: 0 auto;">
+                Fill out or edit your metadata.
+              </p>
+              <p>
+                <a data-tippy="Load Cancer FigShare Example" href="#" class="badge badge-pill badge-secondary pointer mt-2 p-2" @click.prevent="loadExample('./static/misc/example.jsonld')"><i class="fas fa-question-circle"></i> Load Example</a>
+              </p>
+              <hr />
+              <div class="row">
+                <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-6">
+                  <div class="form-group row">
+                    <label for="name" class="col-sm-2 col-form-label col-form-label-sm">
+                      Name* <br />
+                      <i class="fas fa-question-circle" data-tippy="A descriptive name of a dataset."></i>
+                    </label>
+                    <div class="col-sm-10">
+                      <input autocomplete="off" v-model="metadata.name" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="name" placeholder="Enter text here" required="">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="description" class=" col-form-label col-form-label-sm">
+                      Description* <br />
+                      <i class="fas fa-question-circle" data-tippy="A short summary describing a dataset."></i>
+                    </label>
+                    <textarea required="" rows="7" v-model="metadata.description" class="form-control" id="description" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
+                    <div class="col-sm-12 text-center">
+                      <small><span v-text="metadata.description.length">0</span> Characters</small>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="keywords" class="col-sm-2 col-form-label col-form-label-sm">
+                      Keywords <br />
+                      <i class="fas fa-question-circle" data-tippy="Keywords summarizing the dataset."></i>
+                    </label>
+                    <div class="col-sm-9">
+                      <input ref="keywordInput" autocomplete="off" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="keywords" placeholder="Enter new keyword here">
+                    </div>
+                    <div class="col-sm-1">
+                      <button @click.prevent="addKeyword" class="btn btn-secondary btn-sm"><i class="fas fa-plus-circle"></i></button>
+                    </div>
+                    <div id="keywords">
+                      <template v-for="text in keywords">
+                        <span title="Delete" @click="removeKeyword(text)" data-tippy-placement="bottom" data-tippy="Remove" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
+                        </span>
+                      </template>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="version" class="col-sm-2 col-form-label col-form-label-sm">
+                      Version* <br />
+                      <i class="fas fa-question-circle" data-tippy="The version number for the dataset."></i>
+                    </label>
+                    <div class="col-sm-10">
+                      <input autocomplete="off" v-model="metadata.version" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="version" placeholder="Enter text here" required="">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="url" class="col-sm-2 col-form-label col-form-label-sm">
+                      URL* <br />
+                      <i class="fas fa-question-circle" data-tippy="Location of a page describing the dataset."></i>
+                    </label>
+                    <div class="col-sm-10">
+                      <input autocomplete="off" v-model="metadata.url" data-parsley-trigger="change" type="url" class="form-control form-control-sm" id="url" placeholder="Enter URL here" required="">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="SameAs" class="col-sm-2 col-form-label col-form-label-sm">
+                      Same As* <br />
+                      <i class="fas fa-question-circle" data-tippy="A link to a page that provides more information about the same dataset, usually in a different repository."></i>
+                    </label>
+                    <div class="col-sm-10">
+                      <input autocomplete="off" v-model="metadata.sameAs" data-parsley-trigger="change" type="url" class="form-control form-control-sm" id="SameAs" placeholder="Enter URL here" required="">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="variablesMeasured" class="col-sm-2 col-form-label col-form-label-sm">
+                      Variables Measured <br />
+                      <i class="fas fa-question-circle" data-tippy="The variable that this dataset measures. For example, temperature or pressure."></i>
+                      <i class="fas fa-info-circle text-info" data-tippy="The variableMeasured property is proposed and pending standardization at schema.org."></i>
+                    </label>
+                    <div class="col-sm-10">
+                      <input autocomplete="off" v-model="metadata.variablesMeasured" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="variablesMeasured" placeholder="Enter text here">
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="license" class="col-sm-2 col-form-label col-form-label-sm">
+                      License* <i class="fas fa-question-circle pointer" @click.prevent="scrollTo('licenseForm')" data-tippy="Get help choosing the right license"></i>
+                    </label>
+                    <div class="col-sm-10">
+                      <input required="" disabled v-model="licenseAbbreviation" v-model="metadata.license" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="license" placeholder="Use License Chooser Tool">
+                    </div>
+                  </div>
+
+                  <template v-if="otherFields.length">
+                    <div class="text-muted mb-3 alert alert-secondary">
+                      <small>Other Fields Found:</small>
+                      <span class="badge badge-secondary mr-1" v-for="field in otherFields" v-text="field"></span>
+                    </div>
+                  </template>
+
+                  <div>
+                    <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light" @click.prevent='validate("metadataForm")' value="Submit">
+                    <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
+                  </div>
+                </form>
+
+                <div class="col-sm-12 col-md-6">
+                  <pre :disabled='!editCodeMode' class="form-control margin20 text-left bg-secondary text-light padding20 context" id="sideCode"></pre>
+                </div>
+              </div>
+
+
+            </div>
+            <div class="jumbotron face back text-secondary">
+              <button style="position:absolute; right: 10px; top:10px; transform: scale(.7);" class="btn text-secondary btn-light" @click='flipView()'>Switch View</button>
+              <h2>Clean View</h2>
+              <div class="form-group bg-secondary">
+                <label for="progressCode">Dataset Metadata</label>
+                <pre class="margin20 text-left font-weight-bold" style="height:50vh" id="progressCode"></pre>
+                <!-- <textarea :disabled='!editCodeMode' class="form-control margin20" id="progressCode" rows="20"></textarea> -->
+                <!-- <button @click="editCodeMode = !editCodeMode" class="btn text-secondary btn-light" role="button">
+                  <span v-if='!editCodeMode'>Locked <i class="fas fa-lock"></i></span>
+                  <span v-else>Unlocked <i class="fas fa-lock-open"></i></span>
+                </button> -->
+              </div>
+              <!-- <div>
+                <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light" @click.prevent='validate("metadataForm")' value="Submit">
+                <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
+              </div> -->
+            </div>
+          </div>
+      </template>
+
+      <!-- <template>
         <div class="jumbotron text-muted">
           <h2>Metadata</h2>
           <small>(*Required)</small>
@@ -275,16 +462,17 @@
             </div>
           </form>
         </div>
-      </template>
+      </template> -->
 
       <template>
         <div id="result" class="jumbotron text-muted">
+          <div class="numberCircle">4</div>
           <h3>Code</h3>
           <p class="col-sm-6" style="margin: 0 auto;">
             Copy and paste this code in your site's HTML code.
           </p>
           <hr />
-          <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
+          <form id="linkForm" class="col-sm-11" style="margin: 0 auto;">
             <div class="form-group">
               <div class="form-group">
                 <pre >
@@ -293,7 +481,6 @@
                 </pre>
               </div>
             </div>
-          </input>
           </form>
         </div>
       </template>
@@ -316,6 +503,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="./static/js/lodash.js"></script>
+<script src="./static/js/renderjson.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
@@ -347,19 +535,44 @@ var app = new Vue({
           datasetInput:false,
           fieldsFoundCount: 0,
           validForm:false,
-          achievements:[]
+          achievements:[],
+          editCodeMode: false
 				}
 			},
       watch:{
+        metadata: {
+          handler:function(oldM, newM){
+            renderjson.set_show_to_level(7);
+						$('#sideCode').html( renderjson(newM) );
+          },
+          deep: true
+        },
         keywords: function (newKW, oldKW) {
           let str = newKW.join(',');
           this.metadata.keywords = str;
         },
         typeLicense: function(oldLic, newLic){
           this.metadata.license = this.licenseAbbreviation;
+          // this.renderProgress();
         }
       },
       methods:{
+        renderProgress(){
+          // var str = JSON.stringify(this.metadata, null, 2);
+          // var progressCode = str;
+          // document.getElementById("progressCode").textContent=progressCode;
+          renderjson.set_show_to_level(7);
+          $('#progressCode').html( renderjson(this.metadata) );
+        },
+        flipView(){
+
+          if ($('.flipcard').hasClass("flipped")) {
+              $('.flipcard').removeClass('flipped');
+          } else {
+              $('.flipcard').addClass('flipped');
+              this.renderProgress();
+          }
+        },
         selectText(containerid) {
           window.getSelection().selectAllChildren( document.getElementById( containerid ) );
         },
@@ -402,6 +615,7 @@ var app = new Vue({
           this.otherFields=[];
           this.fieldsFoundCount= 0;
           this.achievements = [];
+          this.renderProgress();
         },
         validate(formID){
           let res = $('#'+formID).parsley().validate();
@@ -413,8 +627,8 @@ var app = new Vue({
               toast: true,
               title: 'Form Submitted',
               showConfirmButton: false,
-              position: 'bottom-start',
-              timer: 2500
+              position: 'top',
+              timer: 4500
             });
           }else{
             swal({
@@ -422,11 +636,12 @@ var app = new Vue({
               toast: true,
               title: 'Oops...Form Incomplete',
               showConfirmButton: false,
-              position: 'bottom-start',
-              timer: 2500
+              position: 'top',
+              timer: 4500
             });
             this.validForm = false;
           }
+          this.renderProgress();
         },
         mergeOldAndNewData(){
           var newData = _.extend({}, this.data, this.metadata);
@@ -438,7 +653,6 @@ var app = new Vue({
           var str = JSON.stringify(this.data, null, 2);
           var script = "<script type=\"application/ld+json\">" + str + "<\/script>"
           this.result = script;
-          console.log(this.result);
           document.getElementById("resultCode").textContent=script;
           this.scrollTo('result');
         },
@@ -464,55 +678,88 @@ var app = new Vue({
              self.loading = false;
            }, 500);
         },
-        getLicense(){
+        getLicense(specialCase){
           let question1 = this.$refs.license1.value;
           let question2 = this.$refs.license2.value;
 
-          switch (question1+'|'+question2) {
-            case "Yes|Yes":
-              this.licenseInfo = true;
-              this.typeLicense = 'Attribution 4.0 International';
-              this.licenseLink = 'http://creativecommons.org/licenses/by/4.0/';
-              this.licenseAbbreviation = 'CC BY 4.0';
-              break;
-            case "No|Yes":
-              this.licenseInfo = true;
-              this.typeLicense = 'Attribution-NoDerivatives 4.0 International';
-              this.licenseLink = 'http://creativecommons.org/licenses/by-nd/4.0/';
-              this.licenseAbbreviation = 'CC BY-ND 4.0';
-              break;
-            case "Yes, as long as others share alike|Yes":
-              this.licenseInfo = true;
-              this.typeLicense = 'Attribution-ShareAlike 4.0 International';
-              this.licenseLink = 'http://creativecommons.org/licenses/by-sa/4.0/';
-              this.licenseAbbreviation = 'CC BY-SA 4.0';
-              break;
-            case "Yes|No":
-              this.licenseInfo = true;
-              this.typeLicense = 'Attribution-NonCommercial 4.0 International';
-              this.licenseLink = 'http://creativecommons.org/licenses/by-nc/4.0/';
-              this.licenseAbbreviation = 'CC BY-NC 4.0';
-              break;
-            case "No|No":
-              this.licenseInfo = true;
-              this.typeLicense = 'Attribution-NonCommercial-NoDerivatives 4.0 International';
-              this.licenseAbbreviation = 'CC BY-NC-ND 4.0';
-              this.licenseLink = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
-              break;
-            case "Yes, as long as others share alike|No":
-              this.licenseInfo = true;
-              this.typeLicense = 'Attribution-NonCommercial-ShareAlike 4.0 International';
-              this.licenseAbbreviation = 'CC BY-NC-SA 4.0';
-              this.licenseLink = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
-              break;
-            default:
-              this.licenseInfo = false;
-              this.typeLicense = "We had trouble with your input, please try this link:";
-              this.licenseAbbreviation = '';
-              this.licenseLink = 'https://creativecommons.org/choose/';
-              break;
-
+          if (specialCase) {
+            switch (specialCase) {
+              case 'No':
+                this.licenseInfo = true;
+                this.typeLicense = 'No Rights Reserved';
+                this.licenseLink = 'https://creativecommons.org/share-your-work/public-domain/cc0/';
+                this.licenseAbbreviation = 'CC0';
+                break;
+              case "Yes":
+                this.licenseInfo = true;
+                this.typeLicense = 'Attribution 4.0 International';
+                this.licenseLink = 'http://creativecommons.org/licenses/by/4.0/';
+                this.licenseAbbreviation = 'CC BY 4.0';
+                break;
+              default:
+                this.licenseInfo = false;
+                this.typeLicense = "We had trouble with your input, please try this link:";
+                this.licenseAbbreviation = '';
+                this.licenseLink = 'https://creativecommons.org/choose/';
+                this.thirdQuestion = false;
+                break;
+            }
+          }else{
+            switch (question1+'|'+question2) {
+              case "Yes|Yes":
+                // Special Case
+                //display third question
+                $('#thirdQuestionBlock').show();
+                let question3 = this.$refs['license3'].value;
+                this.getLicense(question3);
+                break;
+              case "No|Yes":
+                this.licenseInfo = true;
+                this.typeLicense = 'Attribution-NoDerivatives 4.0 International';
+                this.licenseLink = 'http://creativecommons.org/licenses/by-nd/4.0/';
+                this.licenseAbbreviation = 'CC BY-ND 4.0';
+                $('#thirdQuestionBlock').hide();
+                break;
+              case "Yes, as long as others share alike|Yes":
+                this.licenseInfo = true;
+                this.typeLicense = 'Attribution-ShareAlike 4.0 International';
+                this.licenseLink = 'http://creativecommons.org/licenses/by-sa/4.0/';
+                this.licenseAbbreviation = 'CC BY-SA 4.0';
+                $('#thirdQuestionBlock').hide();
+                break;
+              case "Yes|No":
+                this.licenseInfo = true;
+                this.typeLicense = 'Attribution-NonCommercial 4.0 International';
+                this.licenseLink = 'http://creativecommons.org/licenses/by-nc/4.0/';
+                this.licenseAbbreviation = 'CC BY-NC 4.0';
+                $('#thirdQuestionBlock').hide();
+                break;
+              case "No|No":
+                this.licenseInfo = true;
+                this.typeLicense = 'Attribution-NonCommercial-NoDerivatives 4.0 International';
+                this.licenseAbbreviation = 'CC BY-NC-ND 4.0';
+                this.licenseLink = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
+                $('#thirdQuestionBlock').hide();
+                break;
+              case "Yes, as long as others share alike|No":
+                this.licenseInfo = true;
+                this.typeLicense = 'Attribution-NonCommercial-ShareAlike 4.0 International';
+                this.licenseAbbreviation = 'CC BY-NC-SA 4.0';
+                this.licenseLink = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
+                $('#thirdQuestionBlock').hide();
+                break;
+              default:
+                this.licenseInfo = false;
+                this.typeLicense = "We had trouble with your input, please try this link:";
+                this.licenseAbbreviation = '';
+                this.licenseLink = 'https://creativecommons.org/choose/';
+                $('#thirdQuestionBlock').hide();
+                break;
+            }
           }
+
+
+
 
         },
         getFormValues () {
@@ -527,9 +774,9 @@ var app = new Vue({
           var self = this;
           self.loadingOn();
           //https://multiverso.me/AllOrigins/
-          //HTTPS https://allorigins.me/get?url=
+          //http://api.allorigins.ml/get?url=
           // Gets around the CORS blocking issue
-          $.getJSON('http://allorigins.me/get?url='+encodeURIComponent(url)+'&callback=?', function(data){        	// console.log(data)
+          $.getJSON('http://api.allorigins.ml/get?url='+encodeURIComponent(url)+'&callback=?', function(data){        	// console.log(data)
             self.loadingOff();
             let parser  = new DOMParser();
             let htmlDoc = parser.parseFromString(data.contents, "text/html");
@@ -570,7 +817,7 @@ var app = new Vue({
               title: 'Oops...Something Went Wrong',
               showConfirmButton: false,
               position: 'center',
-              timer: 2500
+              timer: 4500
             });
           })
         },
@@ -607,10 +854,6 @@ var app = new Vue({
                   self.metadata['url'] = data[key];
                   self.fieldsFoundCount++;
                   break;
-                case 'thumbnailUrl':
-                  self.metadata['thumbnailUrl'] = data[key];
-                  self.fieldsFoundCount++;
-                  break;
                 case 'license':
                   self.licenseAbbreviation = data[key];
                   self.fieldsFoundCount++;
@@ -620,7 +863,10 @@ var app = new Vue({
                   self.fieldsFoundCount++;
                   break;
                 default:
-                  self.otherFields.push(key);
+                  self.metadata[key] = data[key];
+                  if ( !_.includes(["@context", "@type", "@id"], key)) {
+                    self.otherFields.push(key);
+                  }
                   break;
               }
           });
