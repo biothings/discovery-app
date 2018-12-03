@@ -824,6 +824,7 @@ var app = new Vue({
         parseData(){
           let self = this;
           let data = this.data;
+          self.fieldsFoundCount = 0;
           Object.keys(data).forEach(function(key,index) {
               switch (key) {
                 case 'name':
