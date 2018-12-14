@@ -12,6 +12,8 @@
       <a role="button" href="./guide" class="btn btn-default themeButton text-light margin20">Guide</a>
       <button type="button" @click="handleChoice('our')" class="btn themeButton text-light margin20">Schema.org Core Schema</button>
       <button type="button" @click="handleChoice('your')" class="btn themeButton text-light margin20">View Your Schema</button>
+      <a href="./whatever/test" class="btn btn-primary margin20">TEST LINK</a>
+
     </div>
 
 
@@ -42,9 +44,16 @@
     <div v-if="yourSchema" class="jumbotron mainBackLight text-light text-center" style="margin-top: 40px;">
       <h1 class="twoEM">View Your Schema</h1>
       <h4>Copy the <b>raw</b> link to your data and paste it here</h4>
-      <form class="col-sm-6" style="margin: 0 auto;">
-        <input autocomplete="true" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here">
-        <button @click.prevent="getFormValues()" style="margin:10px;" class="btn mainBackDark text-light" type="submit">Send</button>
+      <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
+        <div class="form-group">
+          <label for="urlform">Paste your URL here:</label>
+          <input data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="on" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
+          <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
+        </div>
+        <small class="badge badge-pill badge-secondary pointer"
+        @click="input = 'https://schema.org/Dataset.jsonld'">
+          <i class="fas fa-question-circle"></i> Example URL
+        </small>
       </form>
     </div>
   </div>
@@ -64,10 +73,11 @@ var app = new Vue({
           availableClasses:[],
           graph:[],
           filterResults :[],
-          output:'',
+          input:'',
           yourSchema:false,
           ourSchema: false,
-          linkPrefix:'./'
+          linkPrefix:'./',
+          data: null
 				}
 			},
       methods:{
@@ -93,13 +103,40 @@ var app = new Vue({
           }
         },
         getFormValues () {
-          this.output = this.$refs.my_input.value;
-          console.log('output',this.output);
+          this.input = this.$refs.my_input.value;
+          // console.log('input',this.input);
           this.$refs.my_input.value = '';
           this.sendRequest()
         },
+        // sendRequest(){
+        //   window.location.href = "./?url="+this.input;
+        // },
         sendRequest(){
-          window.location.href = "./?url="+this.output;
+          axios.get(this.input).then(res=>{
+            this.data = res.data;
+            let result = res.data['@graph'];
+            for (var i = 0; i < result.length; i++) {
+              if (result[i].hasOwnProperty('@type') && result[i]['@type'] === "rdfs:Class"){
+                this.makeURLandRedirect(result[i]);
+              }
+            }
+          }).catch(err=>{
+            throw err;
+          })
+        },
+        makeURLandRedirect(obj){
+          let arr = obj['@id'].split(':');
+
+          localStorage.setItem('datasetData', JSON.stringify(this.data));
+
+          window.location.href = "./"+arr[0]+"/"+arr[1];
+          // let url = "./"+arr[0]+"/"+arr[1];
+          //
+          // axios.get(url,this.data).then(res=>{
+          //   console.log('POST res', res.data)
+          // }).catch(err=>{
+          //   throw err;
+          // })
         },
         handleFilter(e){
           let target = e.target.value;
@@ -134,7 +171,8 @@ var app = new Vue({
         this.availableClasses = results.sort();
       },
       handleChange: function(e){
-        window.location.href = "./"+e.target.value;
+        let value = e.target.value;
+        window.location.href = "./schema-org/"+value+"/";
       }
     },
     mounted:function(){

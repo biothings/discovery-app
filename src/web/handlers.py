@@ -60,11 +60,12 @@ class MainHandler(BaseHandler):
             self.write(index_output)
 
 
-class SchemaHandler(BaseHandler):
+class SchemaOrgHandler(BaseHandler):
     def get(self, yourQuery=None):
-        template_file = "viewer.html"
+        template_file = "schema.html"
         schema_template = templateEnv.get_template(template_file)
         if yourQuery:
+            print("QUERY "+yourQuery);
             schema_output = schema_template.render(Context=json.dumps({"Query": yourQuery, "Content": True}))
         elif self.get_argument('q', False):
             schema_output = schema_template.render(Context=json.dumps({"Query": '', "Content": False}))
@@ -139,6 +140,13 @@ class GuideHandler(BaseHandler):
         guide_output = guide_template.render()
         self.write(guide_output)
 
+class ViewerHandler(BaseHandler):
+    def get(self, namespace=None, className=None):
+        test_file = "viewer.html"
+        test_template = templateEnv.get_template(test_file)
+        test_output = test_template.render(Context=json.dumps({"namespace": namespace, "query": className}))
+        self.write(test_output)
+
 
 APP_LIST = [
     (r"/?", MainHandler),
@@ -147,6 +155,8 @@ APP_LIST = [
     (r"/login/?", LoginHandler),
     (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),
     (r"/logout/?", LogoutHandler),
-    (r"/(.+)/?", SchemaHandler),
-    # (r"/?", SchemaHandler),
+    (r"/schema-org/(.+)/", SchemaOrgHandler),
+    (r"/(.+)/(.*)/?", ViewerHandler),
+
+    # (r"/?", RegistryHandler),
 ]
