@@ -76,7 +76,7 @@ g.nodes g.node:last-child text{
 
     </div>
     <div class="col-sm-9">
-      <h1>Schema Visualizer</h1>
+      <h1 class="text-muted">Schema.org Core Schema</h1>
       <div id="canvas" class="d-none d-sm-none d-md-block"></div>
       <div class="jumbotron" v-if='schemaClass'>
         <div >
@@ -191,10 +191,11 @@ g.nodes g.node:last-child text{
 {% endblock %}
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script> -->
 <script src="/static/js/lodash.js"></script>
 <script src="https://d3js.org/d3.v3.js"     ></script>
 <script src="/static/js/networkx.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsonld@1.0.0/dist/jsonld.min.js"></script>
+
 <script>
 var app = new Vue({
       el: '#viewer',
@@ -601,16 +602,21 @@ var app = new Vue({
           }
         },
         reqFile: function(){
-
-            var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
-
-            console.log('retreived data', retrievedObject);
-
-            this.graph = retrievedObject['@graph'];
-
+          let url = '';
+          if (this.userURL) {
+            url = this.userURL;
+          }
+          else{
+            url = '/static/misc/schema.jsonld';
+          }
+          // console.log('using ', url)
+          axios.get(url).then(res=>{
+            this.graph = res.data['@graph']
             this.determinePath()
             this.getAvailableClasses()
-
+          }).catch(err=>{
+            throw err;
+          })
         },
         getClassProperties(){
           this.properties = [];
@@ -666,7 +672,6 @@ var app = new Vue({
         },
         getClass(){
           let results = [];
-          console.log("QUERY ",  this.query)
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query ||
           this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query.toLowerCase()) {
@@ -751,17 +756,18 @@ var app = new Vue({
 			},
 			mounted:function(){
         let context = {{Context}}
-         if ( context ) {
-           console.log('Context YOUR OWN  ',context);
-           this.query = context.query;
-           this.reqFile()
+         if ( context.Content ) {
+           console.log('Context  ',context);
+           this.query = context.Query;
          }
+
 			},
       created:function(){
           let context = {{Context}}
           if (context.hasOwnProperty('URL')) {
             this.userURL = context.URL;
           }
+          this.reqFile()
       }
 		});
 
