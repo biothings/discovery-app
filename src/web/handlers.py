@@ -155,7 +155,7 @@ APP_LIST = [
     (r"/login/?", LoginHandler),
     (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),
     (r"/logout/?", LogoutHandler),
-    (r"/schema-org/(.+)/", SchemaOrgHandler),
+    (r"/schema-org/(.+)/?", SchemaOrgHandler),
     (r"/(.+)/(.*)/?", ViewerHandler),
 
     # (r"/?", RegistryHandler),
