@@ -117,7 +117,9 @@ g.nodes g.node:last-child text{
       <tbody>
         <tr v-for="(item,i) in properties">
           <td>
-            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td>
+            <!-- <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a> -->
+            <a class="font-weight-bold" :href='"./"+getPropertyHREF(item)' v-html=getTitle(item)></a>
+          </td>
           <td>
             <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
           </td>
@@ -195,6 +197,7 @@ g.nodes g.node:last-child text{
 <script src="/static/js/lodash.js"></script>
 <script src="https://d3js.org/d3.v3.js"     ></script>
 <script src="/static/js/networkx.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsonld@1.0.0/dist/jsonld.min.js"></script>
 <script>
 var app = new Vue({
       el: '#viewer',
@@ -204,6 +207,7 @@ var app = new Vue({
           filter:'',
           dataSetURL : 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/Dataset.jsonld',
           graph: [],
+          context: {},
           query:'',
           schemaClass:'',
           properties:[],
@@ -230,6 +234,19 @@ var app = new Vue({
 				}
 			},
 			methods:{
+        getPropertyHREF(propertyObj){
+          // console.log(propertyObj);
+
+          jsonld.compact(propertyObj, this.context, function(err, compacted){
+            jsonld.expand(compacted, function(err, expanded) {
+              // console.log(expanded[0]['@id']);
+              let link = expanded[0]['@id'];
+              console.log(link);
+              return link;
+            });
+          });
+
+        },
         toggleGraph(){
           this.showGraph = !this.showGraph;
           if (this.showGraph) {
@@ -607,6 +624,7 @@ var app = new Vue({
             console.log('retreived data', retrievedObject);
 
             this.graph = retrievedObject['@graph'];
+            this.context = retrievedObject['@context'];
 
             this.determinePath()
             this.getAvailableClasses()

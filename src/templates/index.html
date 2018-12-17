@@ -130,13 +130,7 @@ var app = new Vue({
           localStorage.setItem('datasetData', JSON.stringify(this.data));
 
           window.location.href = "./"+arr[0]+"/"+arr[1];
-          // let url = "./"+arr[0]+"/"+arr[1];
-          //
-          // axios.get(url,this.data).then(res=>{
-          //   console.log('POST res', res.data)
-          // }).catch(err=>{
-          //   throw err;
-          // })
+
         },
         handleFilter(e){
           let target = e.target.value;
@@ -172,7 +166,7 @@ var app = new Vue({
       },
       handleChange: function(e){
         let value = e.target.value;
-        window.location.href = "./schema-org/"+value+"/";
+        window.location.href = "./schema-org/"+value;
       }
     },
     mounted:function(){
