@@ -118,7 +118,7 @@ g.nodes g.node:last-child text{
         <tr v-for="(item,i) in properties">
           <td>
             <!-- <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a> -->
-            <a class="font-weight-bold" :href='"./"+getPropertyHREF(item)' v-html=getTitle(item)></a>
+            <a class="font-weight-bold" :href='"./"+compactSchema(item)' v-html=getTitle(item)></a>
           </td>
           <td>
             <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
@@ -234,17 +234,24 @@ var app = new Vue({
 				}
 			},
 			methods:{
-        getPropertyHREF(propertyObj){
-          // console.log(propertyObj);
+        async compactSchema(propertyObj){
 
-          jsonld.compact(propertyObj, this.context, function(err, compacted){
-            jsonld.expand(compacted, function(err, expanded) {
-              // console.log(expanded[0]['@id']);
-              let link = expanded[0]['@id'];
-              console.log(link);
-              return link;
-            });
+          const compacted = jsonld.compact(propertyObj, this.context);
+          const expanded = await compacted.then(compactedRes=>{
+            this.extendSchema(compactedRes);
           });
+        },
+        async extendSchema(data){
+
+          const expanded = jsonld.expand(data);
+          const link = await expanded.then(expandedRes=>{
+            // console.log(expandedRes)
+            let linkFinal = expandedRes[0]['@id'];
+            // console.log('returning ',linkFinal);
+            return linkFinal;
+          });
+
+          console.log(link)
 
         },
         toggleGraph(){
