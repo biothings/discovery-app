@@ -115,10 +115,12 @@ g.nodes g.node:last-child text{
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item,i) in properties">
+        <!-- <tr v-for="(item,i) in properties"> -->
+        <tr v-for="(item,i) in checkLinks(properties)">
           <td>
             <!-- <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a> -->
-            <a class="font-weight-bold" :href='"./"+compactSchema(item)' v-html=getTitle(item)></a>
+            <!-- <a class="font-weight-bold" :href='"./"+compactSchema(item)' v-html=getTitle(item)></a> -->
+            <a class="font-weight-bold" :href='item.link' v-html=getTitle(item)></a>
           </td>
           <td>
             <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
@@ -234,6 +236,61 @@ var app = new Vue({
 				}
 			},
 			methods:{
+        async checkLinks(myList){
+
+          var self = this;
+
+          console.log('My List Input: ',myList)
+
+          for (var x = 0; x < myList.length; x++) {
+
+            let query = self.removePrefix(myList[x]['@id']);
+
+            for (var i = 0; i < self.graph.length; i++) {
+              //CHECK IF A CLASS EXISTS
+              if (self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class"
+               && self.graph[i]["rdfs:label"].toLowerCase() === query
+               || self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class"
+               && self.graph[i]["rdfs:label"].toLowerCase() === query.toLowerCase())
+                {
+                  myList[x]['link'] = './'+query;
+                }
+                else if (self.graph[i].hasOwnProperty("rdfs:label") && self.graph[i]["rdfs:label"] === query)
+                // CHECK IF A PROPERTY EXISTS
+                  {
+                    // myList[x]['link'] = './'+query;
+
+                    // jsonld.expand({'@context':self.context, ...myList[x]}, function(err, expanded) {
+                    //    let linkFinal = expanded[0]['@id'];
+                    //    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
+                    // });
+
+                    const compacted = await jsonld.compact(myList[x], self.context);
+                    const expanded = await jsonld.expand(compacted);
+                    let linkFinal = expanded[0]['@id'];
+                    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
+
+                  }
+                else{
+                  // ELSE EXPAND AND LINK OUT
+
+                  const compacted = await jsonld.compact(myList[x], self.context);
+                  const expanded = await jsonld.expand(compacted);
+                  let linkFinal = expanded[0]['@id'];
+                  myList[x] = Object.assign({'link':linkFinal}, myList[x]);
+
+                  // jsonld.expand({'@context':self.context, ...myList[x]}, function(err, expanded) {
+                  //    console.log('expanded',expanded)
+                  //    let linkFinal = expanded[0]['@id'];
+                  //    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
+                  // });
+
+                }
+            }
+          }
+          console.log('FINAL LIST', myList)
+          return myList;
+        },
         async compactSchema(propertyObj){
 
           const compacted = jsonld.compact(propertyObj, this.context);
@@ -247,11 +304,12 @@ var app = new Vue({
           const link = await expanded.then(expandedRes=>{
             // console.log(expandedRes)
             let linkFinal = expandedRes[0]['@id'];
-            // console.log('returning ',linkFinal);
+            console.log('returning ',linkFinal);
             return linkFinal;
           });
+          return link;
 
-          console.log(link)
+          // console.log(linkFinal)
 
         },
         toggleGraph(){
@@ -641,7 +699,6 @@ var app = new Vue({
           this.properties = [];
             for (var i = 0; i < this.graph.length; i++) {
               if (this.graph[i].hasOwnProperty('schema:domainIncludes') && this.graph[i]["@type"] === "rdf:Property") {
-                // console.log('extracting', this.graph[i])
                 this.extractPropertyInfo(this.graph[i]);
               }
             }
