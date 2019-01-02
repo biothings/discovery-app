@@ -118,9 +118,11 @@ g.nodes g.node:last-child text{
         <!-- <tr v-for="(item,i) in properties"> -->
         <tr v-for="(item,i) in checkLinks(properties)">
           <td>
-            <!-- <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a> -->
-            <!-- <a class="font-weight-bold" :href='"./"+compactSchema(item)' v-html=getTitle(item)></a> -->
+            <!-- <a class="font-weight-bold" :href='getLink(item)' v-html=getTitle(item)></a> -->
             <a class="font-weight-bold" :href='item.link' v-html=getTitle(item)></a>
+            <template v-if="item.linkOut">
+              <i class="fas fa-external-link-square-alt mainTextDark"></i>
+            </template>
           </td>
           <td>
             <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
@@ -169,9 +171,15 @@ g.nodes g.node:last-child text{
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in parent['props']">
+        <!-- <tr v-for="item in parent['props']"> -->
+        <tr v-for="item in checkLinks(parent['props'])">
           <td>
-            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td>
+            <!-- <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td> -->
+            <a class="font-weight-bold" :href='item.link' v-html=getTitle(item)></a>
+            <template v-if="item.linkOut">
+              <i class="fas fa-external-link-square-alt mainTextLight"></i>
+            </template>
+          </td>
           <td>
             <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
           </td>
@@ -233,14 +241,13 @@ var app = new Vue({
           usedOnTheseTypes: [],
           rangeIncludes: [],
           showGraph: false,
+          namespace : ''
 				}
 			},
 			methods:{
-        async checkLinks(myList){
+        checkLinks(myList){
 
           var self = this;
-
-          console.log('My List Input: ',myList)
 
           for (var x = 0; x < myList.length; x++) {
 
@@ -248,70 +255,103 @@ var app = new Vue({
 
             for (var i = 0; i < self.graph.length; i++) {
               //CHECK IF A CLASS EXISTS
-              if (self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class"
-               && self.graph[i]["rdfs:label"].toLowerCase() === query
-               || self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class"
-               && self.graph[i]["rdfs:label"].toLowerCase() === query.toLowerCase())
+              if (self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class" && self.graph[i]["rdfs:label"].toLowerCase() === query.toLowerCase())
                 {
-                  myList[x]['link'] = './'+query;
+                  myList[x] = Object.assign({'link':'./'+query, 'linkOut': false}, myList[x]);
                 }
-                else if (self.graph[i].hasOwnProperty("rdfs:label") && self.graph[i]["rdfs:label"] === query)
                 // CHECK IF A PROPERTY EXISTS
+                else if (self.graph[i].hasOwnProperty("rdfs:label") && self.graph[i]["rdfs:label"] === query)
                   {
-                    // myList[x]['link'] = './'+query;
-
-                    // jsonld.expand({'@context':self.context, ...myList[x]}, function(err, expanded) {
-                    //    let linkFinal = expanded[0]['@id'];
-                    //    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
-                    // });
-
-                    const compacted = await jsonld.compact(myList[x], self.context);
-                    const expanded = await jsonld.expand(compacted);
-                    let linkFinal = expanded[0]['@id'];
-                    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
-
+                    myList[x] = Object.assign({'link':'./'+query, 'linkOut': false}, myList[x]);
                   }
+                // ELSE EXPAND AND LINK OUT
                 else{
-                  // ELSE EXPAND AND LINK OUT
+                  if (self.context[self.namespace]) {
 
-                  const compacted = await jsonld.compact(myList[x], self.context);
-                  const expanded = await jsonld.expand(compacted);
-                  let linkFinal = expanded[0]['@id'];
-                  myList[x] = Object.assign({'link':linkFinal}, myList[x]);
+                    var linkExpanded = self.context[self.namespace]+query;
+                    myList[x] = Object.assign({'link':linkExpanded, 'linkOut': true}, myList[x]);
 
-                  // jsonld.expand({'@context':self.context, ...myList[x]}, function(err, expanded) {
-                  //    console.log('expanded',expanded)
-                  //    let linkFinal = expanded[0]['@id'];
-                  //    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
-                  // });
-
+                  }else{
+                    myList[x] = Object.assign({'link':'', 'linkOut': false}, myList[x]);
+                  }
                 }
             }
           }
-          console.log('FINAL LIST', myList)
           return myList;
         },
-        async compactSchema(propertyObj){
-
-          const compacted = jsonld.compact(propertyObj, this.context);
-          const expanded = await compacted.then(compactedRes=>{
-            this.extendSchema(compactedRes);
-          });
-        },
-        async extendSchema(data){
-
-          const expanded = jsonld.expand(data);
-          const link = await expanded.then(expandedRes=>{
-            // console.log(expandedRes)
-            let linkFinal = expandedRes[0]['@id'];
-            console.log('returning ',linkFinal);
-            return linkFinal;
-          });
-          return link;
-
-          // console.log(linkFinal)
-
-        },
+        // async checkLinks(myList){
+        //
+        //   var self = this;
+        //
+        //   console.log('My List Input: ',myList)
+        //
+        //   for (var x = 0; x < myList.length; x++) {
+        //
+        //     let query = self.removePrefix(myList[x]['@id']);
+        //
+        //     for (var i = 0; i < self.graph.length; i++) {
+        //       //CHECK IF A CLASS EXISTS
+        //       if (self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class"
+        //        && self.graph[i]["rdfs:label"].toLowerCase() === query
+        //        || self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class"
+        //        && self.graph[i]["rdfs:label"].toLowerCase() === query.toLowerCase())
+        //         {
+        //           myList[x]['link'] = './'+query;
+        //         }
+        //         else if (self.graph[i].hasOwnProperty("rdfs:label") && self.graph[i]["rdfs:label"] === query)
+        //         // CHECK IF A PROPERTY EXISTS
+        //           {
+        //             // myList[x]['link'] = './'+query;
+        //
+        //             // jsonld.expand({'@context':self.context, ...myList[x]}, function(err, expanded) {
+        //             //    let linkFinal = expanded[0]['@id'];
+        //             //    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
+        //             // });
+        //
+        //             const compacted = await jsonld.compact(myList[x], self.context);
+        //             const expanded = await jsonld.expand(compacted);
+        //             let linkFinal = expanded[0]['@id'];
+        //             myList[x] = Object.assign({'link':linkFinal}, myList[x]);
+        //
+        //           }
+        //         else{
+        //           // ELSE EXPAND AND LINK OUT
+        //
+        //           const compacted = await jsonld.compact(myList[x], self.context);
+        //           const expanded = await jsonld.expand(compacted);
+        //           let linkFinal = expanded[0]['@id'];
+        //           myList[x] = Object.assign({'link':linkFinal}, myList[x]);
+        //
+        //           // jsonld.expand({'@context':self.context, ...myList[x]}, function(err, expanded) {
+        //           //    console.log('expanded',expanded)
+        //           //    let linkFinal = expanded[0]['@id'];
+        //           //    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
+        //           // });
+        //
+        //         }
+        //     }
+        //   }
+        //   console.log('FINAL LIST', myList)
+        //   return myList;
+        // },
+        // async compactSchema(propertyObj){
+        //
+        //   const compacted = jsonld.compact(propertyObj, this.context);
+        //   const expanded = await compacted.then(compactedRes=>{
+        //     this.extendSchema(compactedRes);
+        //   });
+        // },
+        // async extendSchema(data){
+        //
+        //   const expanded = jsonld.expand(data);
+        //   const link = await expanded.then(expandedRes=>{
+        //     // console.log(expandedRes)
+        //     let linkFinal = expandedRes[0]['@id'];
+        //     console.log('returning ',linkFinal);
+        //     return linkFinal;
+        //   });
+        //   return link;
+        // },
         toggleGraph(){
           this.showGraph = !this.showGraph;
           if (this.showGraph) {
@@ -456,8 +496,6 @@ var app = new Vue({
           }
           this.getClassLineage(this.classInfo);
           this.getAllPaths();
-          // this.drawGraph(this.nxG);
-          // this.makeQueryGraph();
         },
         makeQueryGraph(){
           let smallG = new jsnx.Graph();
@@ -474,7 +512,6 @@ var app = new Vue({
                 smallG.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"]["@id"]);
               }
               else if(grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isArray(grabFrom[i]["rdfs:subClassOf"]) ){
-                // smallG.addNode(grabFrom[i]["@id"]);
                 for (var x = 0; x < grabFrom[i]["rdfs:subClassOf"].length; x++) {
                   smallG.addNode(grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
                   smallG.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
@@ -520,7 +557,6 @@ var app = new Vue({
         addEdge(class1,class2){
           this.nxG.addEdge(class1,class2);
           let node = [class2,class1];
-          // console.log('adding node..',node)
           this.edgeGraph.push(node);
         },
         getClassLineage(classInfo){
@@ -558,7 +594,6 @@ var app = new Vue({
           }
         },
         getParentData(){
-          // console.log('getParentData happening',this.parentDisplayResults )
           for (var i = 0; i < this.parentDisplayResults.length-1; i++) {
             let parent = this.parentDisplayResults[i];
             let props = this.returnProps(this.parentDisplayResults[i]);
@@ -566,13 +601,11 @@ var app = new Vue({
           }
         },
         shapeData(parent,props){
-          // console.log('shaping data', parent)
           let obj = {
             'className' : this.removePrefix(parent),
             'props' : props
           }
           this.parentClassesAndProps.unshift(obj);
-          // console.log('parentClassesAndProps', this.parentClassesAndProps)
         },
         returnClass(classInfo){
           if (_.isObject(classInfo)) {
@@ -621,11 +654,9 @@ var app = new Vue({
           }
         },
         findDisplaySchema(){
-          // console.log('findschema',this.graph)
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class"){
               this.query = this.graph[i]["rdfs:label"];
-              // this.getClass();
             }
           }
         },
@@ -837,6 +868,9 @@ var app = new Vue({
            console.log('Context YOUR OWN  ',context);
            this.query = context.query;
            this.reqFile()
+         }
+         if (context.hasOwnProperty('namespace')) {
+           this.namespace = context.namespace;
          }
 			},
       created:function(){
