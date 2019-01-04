@@ -33,6 +33,9 @@ g.nodes g.node:last-child text{
   border-radius: 10px;
 }
 
+.fa-external-link-alt{
+  font-size: small !important;
+}
 </style>
 <div id="viewer" class="container" style="min-height: 70vh;">
   <div class="row" style="margin-top:40px;">
@@ -119,9 +122,9 @@ g.nodes g.node:last-child text{
         <tr v-for="(item,i) in checkLinks(properties)">
           <td>
             <!-- <a class="font-weight-bold" :href='getLink(item)' v-html=getTitle(item)></a> -->
-            <a class="font-weight-bold" :href='item.link' v-html=getTitle(item)></a>
+            <a class="font-weight-bold" :target="[item.linkOut ? '_blank' : '_self']" :href='item.link' v-html=getTitle(item)></a>
             <template v-if="item.linkOut">
-              <i class="fas fa-external-link-square-alt mainTextDark"></i>
+              <i class="fas fa-external-link-alt mainTextDark"></i>
             </template>
           </td>
           <td>
@@ -175,9 +178,9 @@ g.nodes g.node:last-child text{
         <tr v-for="item in checkLinks(parent['props'])">
           <td>
             <!-- <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td> -->
-            <a class="font-weight-bold" :href='item.link' v-html=getTitle(item)></a>
+            <a class="font-weight-bold" :target="[item.linkOut ? '_blank' : '_self']" :href='item.link' v-html=getTitle(item)></a>
             <template v-if="item.linkOut">
-              <i class="fas fa-external-link-square-alt mainTextLight"></i>
+              <i class="fas fa-external-link-alt mainTextLight"></i>
             </template>
           </td>
           <td>
@@ -205,7 +208,7 @@ g.nodes g.node:last-child text{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script> -->
 <script src="/static/js/lodash.js"></script>
-<script src="https://d3js.org/d3.v3.js"     ></script>
+<script src="https://d3js.org/d3.v3.js"></script>
 <script src="/static/js/networkx.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsonld@1.0.0/dist/jsonld.min.js"></script>
 <script>
@@ -251,6 +254,8 @@ var app = new Vue({
 
           for (var x = 0; x < myList.length; x++) {
 
+            // console.log('My List Input: ',myList[x])
+
             let query = self.removePrefix(myList[x]['@id']);
 
             for (var i = 0; i < self.graph.length; i++) {
@@ -268,7 +273,10 @@ var app = new Vue({
                 else{
                   if (self.context[self.namespace]) {
 
-                    var linkExpanded = self.context[self.namespace]+query;
+                    let arr = myList[x]['@id'].split(':');
+                    let text = arr[arr.length-1];
+                    let prefix = arr[0];
+                    var linkExpanded = self.context[prefix]+text;
                     myList[x] = Object.assign({'link':linkExpanded, 'linkOut': true}, myList[x]);
 
                   }else{
