@@ -4,30 +4,29 @@
 
 <main id="index" style="min-height:70vh;">
   <div class="container">
-    <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
+    <div class="jumbotron bg-light text-center padding20" style="margin-top: 40px;">
       <img class="margin20" src="./static/img/cd2h-logo.png" style="width:30vw; max-width: 300px;" alt="logo"/>
-      <h1 class="mainTextLight"><span class="text-muted">CD2H</span> <b>D</b>ata <span class="mainTextDark"><b>D</b>iscovery</span> <b>E</b>ngine</h1>
-      <img src="./static/img/dde-logo-o.svg" width="200px" class="margin20"/>
-      <p class="text-muted caps">A Project of the CD2H Data Workgroup</p>
-      <hr />
+      <h1 class="mainTextLight caps"><span class="text-muted">CD2H</span> <b>D</b>ata <span class="mainTextDark"><b>D</b>iscovery</span> <b>E</b>ngine</h1>
+      <img src="./static/img/dde-logo-o.svg" width="200px" class="margin20 mb-9"/>
+      <h4 class="text-muted caps">A Project of the CD2H Data Workgroup</h4>
     </div>
 
-    <div class="jumbotron" style="margin-bottom:15vh;">
+    <div class="jumbotron bg-light" style="margin-bottom:15vh;">
       <div class="d-flex flex-row justify-content-center flex-wrap">
         <div class="col-sm-4 text-center swing-in-left-fwd">
           <h1 class="text-muted">GUIDE</h1>
           <p class="text-muted caps">Add or modify existing metadata</p>
-          <a role="button" href="./guide" class="btn btn-default themeButton text-light margin20">Go</a>
+          <a role="button" href="./guide" class="btn pulse themeButton text-light margin20">Go</a>
         </div>
         <div class="col-sm-4 text-center swing-in-left-fwd">
           <h1 class="text-muted">SCHEMA.ORG</h1>
           <p class="text-muted caps">View schema examples from schema.org</p>
-          <button type="button" class="btn themeButton text-light margin20" data-toggle="modal" data-target="#schemaOrgModal">Go</button>
+          <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#schemaOrgModal">Go</button>
         </div>
         <div class="col-sm-4 text-center swing-in-left-fwd">
           <h1 class="text-muted">VISUALIZER</h1>
           <p class="text-muted caps">View and expand your schema structure</p>
-          <button v-if="user.login" type="button" class="btn themeButton text-light margin20" data-toggle="modal" data-target="#yourSchemaModal">Go</button>
+          <button v-if="user.login" type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#yourSchemaModal">Go</button>
           <button v-else class="btn btn-secondary margin20" disabled>Login Required</button>
         </div>
       </div>
@@ -37,13 +36,13 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title mainTextDark" id="exampleModalLabel">Schema.org Core Schema</h5>
+            <h5 class="modal-title mainTextDark caps" id="exampleModalLabel">Schema.org Core Schema</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true" class="mainTextLight">&times;</span>
             </button>
           </div>
           <div class="modal-body mainBackLight text-light text-center">
-            <h4>View any of the available classes in this schema</h4>
+            <p>View any of the available classes in this schema</p>
             <form>
               <div class="form-row align-items-center">
                 <div class="col-sm-6" style="margin: 0 auto;">
@@ -75,13 +74,13 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title mainTextDark" id="exampleModalLabel">View Your Schema</h5>
+            <h5 class="modal-title mainTextDark caps" id="exampleModalLabel">View Your Schema</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true" class="mainTextLight">&times;</span>
             </button>
           </div>
           <div class="modal-body mainBackDark text-light text-center">
-            <h4>Copy the <b>raw</b> link to your data and paste it here</h4>
+            <p>Copy the <b>raw</b> link to your data and paste it here</p>
             <form id="linkForm" class="col-sm-11" style="margin: 0 auto;">
               <div class="form-group">
                 <label for="urlform">Paste your URL here:</label>
