@@ -5,8 +5,10 @@
 <main id="index" style="min-height:70vh;">
   <div class="container">
     <div class="jumbotron bg-light text-center padding20" style="margin-top: 40px;">
-      <img class="margin20" src="./static/img/cd2h-logo.png" style="width:30vw; max-width: 300px;" alt="logo"/>
-      <h1 class="mainTextLight caps"><span class="text-muted">CD2H</span> <b>D</b>ata <span class="mainTextDark"><b>D</b>iscovery</span> <b>E</b>ngine</h1>
+      <a data-tippy="Learn More About CD2H" target="_blank" href="https://ctsa.ncats.nih.gov/cd2h/">
+        <img class="margin20" src="./static/img/cd2h-logo.png" style="width:30vw; max-width: 300px;" alt="logo"/>
+      </a>
+      <h1 class="text-muted caps">CD2H Data Discovery Engine</h1>
       <img src="./static/img/dde-logo-o.svg" width="200px" class="margin20 mb-9"/>
       <h4 class="text-muted caps">A Project of the CD2H Data Workgroup</h4>
     </div>
@@ -14,17 +16,17 @@
     <div class="jumbotron bg-light" style="margin-bottom:15vh;">
       <div class="d-flex flex-row justify-content-center flex-wrap">
         <div class="col-sm-4 text-center swing-in-left-fwd">
-          <h1 class="text-muted">GUIDE</h1>
+          <h1 class="text3D">GUIDE</h1>
           <p class="text-muted caps">Add or modify existing metadata</p>
           <a role="button" href="./guide" class="btn pulse themeButton text-light margin20">Go</a>
         </div>
         <div class="col-sm-4 text-center swing-in-left-fwd">
-          <h1 class="text-muted">SCHEMA.ORG</h1>
+          <h1 class="text3D">SCHEMA.ORG</h1>
           <p class="text-muted caps">View schema examples from schema.org</p>
           <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#schemaOrgModal">Go</button>
         </div>
         <div class="col-sm-4 text-center swing-in-left-fwd">
-          <h1 class="text-muted">VISUALIZER</h1>
+          <h1 class="text3D">VISUALIZER</h1>
           <p class="text-muted caps">View and expand your schema structure</p>
           <button v-if="user.login" type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#yourSchemaModal">Go</button>
           <button v-else class="btn btn-secondary margin20" disabled>Login Required</button>
