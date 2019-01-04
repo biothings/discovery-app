@@ -1,18 +1,89 @@
-<header>
+{% block content %}
+<style>
+
+#navbar #logo {
+  font-size: 1em;
+  font-weight: bold;
+  transition: 0.4s;
+}
+
+.navbar {
+  padding-top: 25px;
+  padding-bottom: 25px;
+  background: #cfcfcf;
+  transition: all 0.3s;
+}
+
+.navbar.compressed {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background: white;
+  color: grey;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+body{
+  padding-top: 40px;
+}
+
+#navPhotoLink{
+  background: var(--sec);
+  color: var(--light);
+  border-radius: 20px;
+  text-align: center;
+}
+
+
+</style>
+<header id="header">
 <title>CD2H Data Discovery Engine</title>
-<nav class="navbar-expand-lg navbar navbar-light">
+<nav class="navbar navbar-expand-md navbar-light fixed-top">
   <a class="navbar-brand" href="#">
     <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="">
   </a>
-  <a class="navbar-brand mainFont caps" href="/"><b>CD2H</b> Data Discovery Engine</a>
+  <a id="logo" class="navbar-brand mainFont caps" href="/"><b>CD2H</b> Data Discovery Engine</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
   <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-    <ul class="navbar-nav " id="user_link">
+    <ul class="navbar-nav" id="user_link">
       <li class="nav-item"><a class="nav-link" href="./">Home</a></li>
     </ul>
   </div>
   </nav>
 </header>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="./static/js/lodash.js"></script>
+<script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+<script>
+var app = new Vue({
+      el: '#header',
+			data: function(){
+				return {
+
+				}
+			},
+      methods:{
+        scrollFunction() {
+          if ($(window).scrollTop() >= 20) {
+            $(".navbar").addClass("compressed ");
+          } else {
+            $(".navbar").removeClass("compressed ");
+          }
+
+        }
+    },
+    mounted:function(){
+      var self = this;
+      window.onscroll = function() {self.scrollFunction()};
+
+    },
+    created: function(){
+
+    }
+  })
+</script>
+{% endblock %}
