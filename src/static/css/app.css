@@ -422,6 +422,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), e
 .up:hover,
 .up:focus {
   box-shadow: inset 0 -3.25em 0 0 var(--hover);
+  color: white !important;
 }
 
 .slide:hover,
@@ -442,8 +443,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), e
 }
 
 .pulse {
-  --color: var(--sec);
-  --hover: var(--sec);
+  --color: var(--main);
+  --hover: var(--main);
 }
 
 .close {
@@ -457,12 +458,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), e
 }
 
 .up {
-  --color: #e4cb58;
-  --hover: #94e458;
+  --color: var(--light);
+  --hover: var(--main);
 }
 
 .slide {
-  --color: #8fc866;
+  --color: white;
   --hover: #66c887;
 }
 

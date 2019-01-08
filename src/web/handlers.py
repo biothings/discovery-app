@@ -140,6 +140,20 @@ class GuideHandler(BaseHandler):
         guide_output = guide_template.render()
         self.write(guide_output)
 
+class DashboardHandler(BaseHandler):
+    def get(self):
+        doc_file = "dashboard.html"
+        dashboard_template = templateEnv.get_template(doc_file)
+        dashboard_output = dashboard_template.render()
+        self.write(dashboard_output)
+
+class PlaygroundHandler(BaseHandler):
+    def get(self):
+        doc_file = "playground.html"
+        playground_template = templateEnv.get_template(doc_file)
+        playground_output = playground_template.render()
+        self.write(playground_output)
+
 class ViewerHandler(BaseHandler):
     def get(self, namespace=None, className=None):
         test_file = "viewer.html"
@@ -151,6 +165,8 @@ class ViewerHandler(BaseHandler):
 APP_LIST = [
     (r"/?", MainHandler),
     (r"/guide/?", GuideHandler),
+    (r"/dashboard/?", DashboardHandler),
+    (r"/schema-playground/?", PlaygroundHandler),
     (r"/user/?", UserInfoHandler),
     (r"/login/?", LoginHandler),
     (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),
