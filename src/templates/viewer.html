@@ -48,7 +48,7 @@ g.nodes g.node:last-child text{
           <li class="list-group-item">
             <select @change='handleChange' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
               <option selected>Filter by...</option>
-              <option v-for="letter in alphabet" :value="letter" v-text="letter"></option>
+              <option v-for="letter in filterLetters" :value="letter" v-text="letter"></option>
             </select>
           </li>
           <li class="list-group-item text-light mainBackDark twoEM text-center" v-if='filter' v-text='filter'>
@@ -132,6 +132,12 @@ g.nodes g.node:last-child text{
           </td>
           <td v-html=getDescription(item) class="mainTextDark"></td>
         </tr>
+        <tr>
+          <td colspan="3">
+            <a class="btn btn-primary text-light" @click="addFieldForm()">Add Field</a>
+            <!-- <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#addFieldModal">Add New</button> -->
+          </td>
+        </tr>
       </tbody>
     </table>
     <template v-if="!properties.length && !userURL">
@@ -198,9 +204,49 @@ g.nodes g.node:last-child text{
     </div>
   </template>
 
-
     </div>
   </div>
+
+  <div class="modal fade" id="addFieldModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title mainTextDark caps" id="exampleModalLabel">Add Field</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" class="mainTextLight">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body mainBackDark text-light text-center">
+          <form>
+            <div class="form-group">
+              <label for="exampleFormControlInput1">Property Name</label>
+              <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="Text">
+            </div>
+            <div class="form-group">
+              <label for="exampleFormControlSelect1">Sub-Fileds?</label>
+              <select class="form-control" id="exampleFormControlSelect1">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="exampleFormControlTextarea1">Comments/Description</label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
 </div>
 
 {% endblock %}
@@ -211,6 +257,8 @@ g.nodes g.node:last-child text{
 <script src="https://d3js.org/d3.v3.js"></script>
 <script src="/static/js/networkx.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsonld@1.0.0/dist/jsonld.min.js"></script>
+<script src="/static/js/autocomplete.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 var app = new Vue({
       el: '#viewer',
@@ -244,10 +292,80 @@ var app = new Vue({
           usedOnTheseTypes: [],
           rangeIncludes: [],
           showGraph: false,
-          namespace : ''
+          namespace : '',
+          addFieldCounter: 0,
+          filterLetters:[]
 				}
 			},
+      watch:{
+        addFieldCounter: function(oldC,newC){
+          this.graph =
+          this.determinePath();
+        }
+      },
 			methods:{
+        autocomplete(){
+          var words = ['boat', 'bear', 'dog', 'drink', 'elephant', 'fruit'];
+
+            $(document).ready(function(){
+            	$('#tags').autocomplete({
+            		hints: words
+            	});
+            });
+        },
+        addFieldForm(){
+          Swal({
+            title: 'Property Name',
+            input: 'text',
+            inputAttributes: {
+              autocapitalize: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Look up',
+            showLoaderOnConfirm: true,
+            preConfirm: (login) => {
+              return fetch(`//api.github.com/users/${login}`)
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error(response.statusText)
+                  }
+                  return response.json()
+                })
+                .catch(error => {
+                  Swal.showValidationMessage(
+                    `Request failed: ${error}`
+                  )
+                })
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            if (result.value) {
+              Swal({
+                title: `${result.value.login}'s avatar`,
+                imageUrl: result.value.avatar_url
+              })
+            }
+          })
+        },
+        addField(){
+          this.addFieldCounter++;
+
+          this.graph.push({
+            '@id': "schema:NEWPROP",
+            '@type': "rdf:Property",
+            'rdfs:comment': "THIS IS A TEST DECRIPTION",
+            'rdfs:label': "NEWPROP",
+            'schema:domainIncludes': {
+              '@id': "schema:Dataset"
+            },
+            'schema:rangeIncludes': {
+              '@id': "schema:TEST TYPE"
+            },
+            'schema:sameAs': {
+              '@id': "schema:Dataset"
+            }
+          });
+        },
         checkLinks(myList){
 
           var self = this;
@@ -811,6 +929,20 @@ var app = new Vue({
             }
           }
           this.availableClasses = results.sort();
+          this.getFilters();
+        },
+        getFilters(){
+          let letters = [];
+          let self = this;
+          for (var i = 0; i < self.availableClasses.length; i++) {
+
+            let q = self.removePrefix(self.availableClasses[i]["@id"])[0];
+
+            if ( !letters.includes(q) ) {
+              letters.push( q );
+            }
+          }
+          this.filterLetters = letters.sort();
         },
         handleChange: function(e){
           let target = e.target.value;
@@ -880,6 +1012,7 @@ var app = new Vue({
          if (context.hasOwnProperty('namespace')) {
            this.namespace = context.namespace;
          }
+
 			},
       created:function(){
           let context = {{Context}}
