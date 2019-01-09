@@ -164,9 +164,9 @@ class VisualizerHandler(BaseHandler):
 
 APP_LIST = [
     (r"/?", MainHandler),
-    (r"/guide/?", GuideHandler),
-    (r"/dashboard/?", DashboardHandler),
     (r"/schema-playground/?", PlaygroundHandler),
+    (r"/dashboard/?", DashboardHandler),
+    (r"/guide/?", GuideHandler),
     (r"/user/?", UserInfoHandler),
     (r"/login/?", LoginHandler),
     (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),
