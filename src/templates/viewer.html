@@ -36,6 +36,13 @@ g.nodes g.node:last-child text{
 .fa-external-link-alt{
   font-size: small !important;
 }
+
+.small{
+  font-size: small;
+}
+.table thead th{
+  vertical-align: middle;
+}
 </style>
 <div id="viewer" class="container" style="min-height: 70vh;padding-top:40px;">
   <div class="row" style="margin-top:40px;">
@@ -118,26 +125,33 @@ g.nodes g.node:last-child text{
         </tr>
       </thead>
       <tbody>
-        <!-- <tr v-for="(item,i) in properties"> -->
-        <tr v-for="(item,i) in checkLinks(properties)">
+        <tr v-for="(item,i) in properties">
+        <!-- <tr v-for="(item,i) in checkLinks(properties)"> -->
           <td>
-            <!-- <a class="font-weight-bold" :href='getLink(item)' v-html=getTitle(item)></a> -->
-            <a class="font-weight-bold" :target="[item.linkOut ? '_blank' : '_self']" :href='item.link' v-html=getTitle(item)></a>
-            <template v-if="item.linkOut">
+            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a>
+            <!-- <a class="font-weight-bold" :target="[item.linkOut ? '_blank' : '_self']" :href='item.link' v-html=getTitle(item)></a> -->
+            <!-- <template v-if="item.linkOut">
               <i class="fas fa-external-link-alt mainTextDark"></i>
-            </template>
+            </template> -->
           </td>
           <td>
-            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
+            <!-- <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a> -->
+            <template v-for="(type,i) in getType(item)">
+              <a style="display: block;" :href="generateLink(type)">
+                <span v-html='type'></span>
+                <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
+              </a>
+
+            </template>
           </td>
           <td v-html=getDescription(item) class="mainTextDark"></td>
         </tr>
-        <tr>
+        <!-- <tr>
           <td colspan="3">
             <a class="btn btn-primary text-light" @click="addFieldForm()">Add Field</a>
-            <!-- <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#addFieldModal">Add New</button> -->
+            <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#addFieldModal">Add New</button>
           </td>
-        </tr>
+        </tr> -->
       </tbody>
     </table>
     <template v-if="!properties.length && !userURL">
@@ -180,17 +194,24 @@ g.nodes g.node:last-child text{
         </tr>
       </thead>
       <tbody>
-        <!-- <tr v-for="item in parent['props']"> -->
-        <tr v-for="item in checkLinks(parent['props'])">
+        <tr v-for="item in parent['props']">
+        <!-- <tr v-for="item in checkLinks(parent['props'])"> -->
           <td>
-            <!-- <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td> -->
-            <a class="font-weight-bold" :target="[item.linkOut ? '_blank' : '_self']" :href='item.link' v-html=getTitle(item)></a>
+            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td>
+            <!-- <a class="font-weight-bold" :target="[item.linkOut ? '_blank' : '_self']" :href='item.link' v-html=getTitle(item)></a>
             <template v-if="item.linkOut">
               <i class="fas fa-external-link-alt mainTextLight"></i>
-            </template>
+            </template> -->
           </td>
           <td>
-            <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a>
+            <!-- <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a> -->
+            <template v-for="(type,i) in getType(item)">
+              <a style="display: block;" :href="generateLink(type)">
+                <span v-html='type'></span>
+                <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
+              </a>
+
+            </template>
           </td>
           <td v-html=getDescription(item) class="mainTextDark"></td>
         </tr>
@@ -257,14 +278,12 @@ g.nodes g.node:last-child text{
 <script src="https://d3js.org/d3.v3.js"></script>
 <script src="/static/js/networkx.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsonld@1.0.0/dist/jsonld.min.js"></script>
-<script src="/static/js/autocomplete.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 var app = new Vue({
       el: '#viewer',
 			data: function(){
 				return {
-          alphabet : ['ALL','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
           filter:'',
           dataSetURL : 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/Dataset.jsonld',
           graph: [],
@@ -304,15 +323,6 @@ var app = new Vue({
         }
       },
 			methods:{
-        autocomplete(){
-          var words = ['boat', 'bear', 'dog', 'drink', 'elephant', 'fruit'];
-
-            $(document).ready(function(){
-            	$('#tags').autocomplete({
-            		hints: words
-            	});
-            });
-        },
         addFieldForm(){
           Swal({
             title: 'Property Name',
@@ -366,41 +376,77 @@ var app = new Vue({
             }
           });
         },
+        generateLink(query){
+          var self = this;
+          var link = ''
+          for (var i = 0; i < self.graph.length; i++) {
+            //IF OBJECT
+            if (_.isPlainObject(self.graph[i]["rdfs:label"])) {
+              // console.log(self.graph[i]["rdfs:label"]['@value'])
+              if (self.graph[i]["rdfs:label"]['@value'] === query)
+                {
+                  link = './'+query;
+                }
+                else{
+                  var linkExpanded = self.context[self.namespace]+query;
+                  link = linkExpanded;
+                }
+            }
+            //IF NOT OBJECT
+            else{
+              // console.log(self.graph[i]["rdfs:label"])
+              if (self.graph[i]["rdfs:label"] === query)
+                {
+                  console.log(self.graph[i]["rdfs:label"], query)
+                  link = './'+query;
+                }
+                else{
+                  var linkExpanded = self.context[self.namespace]+query;
+                  link = linkExpanded;
+                }
+            }
+
+          }
+          return link;
+        },
         checkLinks(myList){
 
           var self = this;
 
           for (var x = 0; x < myList.length; x++) {
 
-            // console.log('My List Input: ',myList[x])
-
             let query = self.removePrefix(myList[x]['@id']);
-
             for (var i = 0; i < self.graph.length; i++) {
-              //CHECK IF A CLASS EXISTS
-              if (self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class" && self.graph[i]["rdfs:label"].toLowerCase() === query.toLowerCase())
-                {
-                  myList[x] = Object.assign({'link':'./'+query, 'linkOut': false}, myList[x]);
-                }
-                // CHECK IF A PROPERTY EXISTS
-                else if (self.graph[i].hasOwnProperty("rdfs:label") && self.graph[i]["rdfs:label"] === query)
+
+              //IF OBJECT
+              if (_.isPlainObject(self.graph[i]["rdfs:label"])) {
+                if (self.graph[i]["rdfs:label"]['@value'] === query)
                   {
                     myList[x] = Object.assign({'link':'./'+query, 'linkOut': false}, myList[x]);
                   }
-                // ELSE EXPAND AND LINK OUT
-                else{
-                  if (self.context[self.namespace]) {
-
-                    let arr = myList[x]['@id'].split(':');
-                    let text = arr[arr.length-1];
-                    let prefix = arr[0];
-                    var linkExpanded = self.context[prefix]+text;
-                    myList[x] = Object.assign({'link':linkExpanded, 'linkOut': true}, myList[x]);
-
-                  }else{
-                    myList[x] = Object.assign({'link':'', 'linkOut': false}, myList[x]);
+              }
+              //IF NOT OBJECT
+              else{
+                if (self.graph[i]["rdfs:label"] === query)
+                  {
+                    myList[x] = Object.assign({'link':'./'+query, 'linkOut': false}, myList[x]);
                   }
-                }
+                  // ELSE EXPAND AND LINK OUT
+                  else{
+                    if (self.context[self.namespace]) {
+
+                      let arr = myList[x]['@id'].split(':');
+                      let text = arr[arr.length-1];
+                      let prefix = arr[0];
+                      var linkExpanded = self.context[prefix]+text;
+                      myList[x] = Object.assign({'link':linkExpanded, 'linkOut': true}, myList[x]);
+
+                    }else{
+                      myList[x] = Object.assign({'link':'', 'linkOut': false}, myList[x]);
+                    }
+                  }
+              }
+
             }
           }
           return myList;
@@ -1005,7 +1051,7 @@ var app = new Vue({
 			mounted:function(){
         let context = {{Context}}
          if ( context ) {
-           console.log('Context YOUR OWN  ',context);
+           // console.log('Context YOUR OWN  ',context);
            this.query = context.query;
            this.reqFile()
          }
