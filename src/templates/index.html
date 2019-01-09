@@ -3,7 +3,7 @@
 {% include "header.html" %}
 
 <main id="index" style="min-height:70vh;">
-  <div class="container">
+  <div class="">
     <div class="jumbotron bg-light text-center padding20" style="margin-top: 40px;">
       <a data-tippy="Learn More About CD2H" target="_blank" href="https://ctsa.ncats.nih.gov/cd2h/">
         <img class="margin20" src="./static/img/cd2h-logo.png" style="width:30vw; max-width: 300px;" alt="logo"/>
@@ -13,23 +13,22 @@
       <h4 class="text-muted caps">A Project of the CD2H Data Workgroup</h4>
     </div>
 
-    <div class="jumbotron bg-light" style="margin-bottom:15vh;">
-      <div class="d-flex flex-row justify-content-center flex-wrap">
+    <div class="jumbotron mainBackLight" style="margin-bottom:15vh;">
+      <div class="container d-flex flex-row justify-content-center flex-wrap">
         <div class="col-sm-4 text-center swing-in-left-fwd">
           <h1 class="text3D">GUIDE</h1>
-          <p class="text-muted caps">Add or modify existing metadata</p>
+          <p class="caps text-light">Make your dateset more discoverable</p>
           <a role="button" href="./guide" class="btn pulse themeButton text-light margin20">Go</a>
         </div>
         <div class="col-sm-4 text-center swing-in-left-fwd">
-          <h1 class="text3D">SCHEMA.ORG</h1>
-          <p class="text-muted caps">View schema examples from schema.org</p>
+          <h1 class="text3D">VIEW</h1>
+          <p class="caps text-light">Browse the core schema.org schemas</p>
           <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#schemaOrgModal">Go</button>
         </div>
         <div class="col-sm-4 text-center swing-in-left-fwd">
-          <h1 class="text3D">VISUALIZER</h1>
-          <p class="text-muted caps">View and expand your schema structure</p>
-          <button v-if="user.login" type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#yourSchemaModal">Go</button>
-          <button v-else class="btn btn-secondary margin20" disabled>Login Required</button>
+          <h1 class="text3D">BUILD</h1>
+          <p class="caps text-light">Customize and host your own metadata schema</p>
+          <a role="button" href="./schema-playground" class="btn pulse themeButton text-light margin20">Go</a>
         </div>
       </div>
     </div>
@@ -72,36 +71,6 @@
       </div>
     </div>
 
-    <div class="modal fade" id="yourSchemaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title mainTextDark caps" id="exampleModalLabel">View Your Schema</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true" class="mainTextLight">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body mainBackDark text-light text-center">
-            <p>Copy the <b>raw</b> link to your data and paste it here</p>
-            <form id="linkForm" class="col-sm-11" style="margin: 0 auto;">
-              <div class="form-group">
-                <label for="urlform">Paste your URL here:</label>
-                <input style="margin:auto;" data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="on" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
-                <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
-              </div>
-              <small class="badge badge-pill badge-secondary pointer"
-              @click="input = 'https://schema.org/Dataset.jsonld'">
-                <i class="fas fa-question-circle" data-tippy="Load Schema.org Dataset Example"></i> Example URL
-              </small>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <ul class="bg-bubbles">
 		<li></li>
 		<li></li>
@@ -117,8 +86,6 @@
 
   </div>
 </main>
-<script type="text/javascript">
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="./static/js/lodash.js"></script>
@@ -142,7 +109,7 @@ var app = new Vue({
       methods:{
         checkLoggedUser(){
           var self = this;
-          axios.get('/user').then(res=>{
+          axios.get('./user').then(res=>{
             if (res.data.login) {
               self.user = res.data;
             }
