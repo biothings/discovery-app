@@ -147,7 +147,7 @@ class DashboardHandler(BaseHandler):
         dashboard_output = dashboard_template.render()
         self.write(dashboard_output)
 
-class PlaygroundHandler(BaseHandler):
+class PGHandler(BaseHandler):
     def get(self):
         doc_file = "playground.html"
         playground_template = templateEnv.get_template(doc_file)
@@ -166,7 +166,7 @@ APP_LIST = [
     (r"/?", MainHandler),
     (r"/schema-playground/?", PlaygroundHandler),
     (r"/dashboard/?", DashboardHandler),
-    (r"/guide/?", PlaygroundHandler),
+    (r"/guide/?", GuideHandler),
     (r"/user/?", UserInfoHandler),
     (r"/login/?", LoginHandler),
     (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),
