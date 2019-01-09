@@ -164,7 +164,7 @@ class VisualizerHandler(BaseHandler):
 
 APP_LIST = [
     (r"/?", MainHandler),
-    (r"/schema-playground/?", PlaygroundHandler),
+    (r"/schema-playground/?", PGHandler),
     (r"/dashboard/?", DashboardHandler),
     (r"/guide/?", GuideHandler),
     (r"/user/?", UserInfoHandler),
