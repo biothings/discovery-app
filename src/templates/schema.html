@@ -45,7 +45,7 @@ g.nodes g.node:last-child text{
           <li class="list-group-item">
             <select @change='handleChange' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
               <option selected>Filter by...</option>
-              <option v-for="letter in alphabet" :value="letter" v-text="letter"></option>
+              <option v-for="letter in filterLetters" :value="letter" v-text="letter"></option>
             </select>
           </li>
           <li class="list-group-item text-light mainBackDark twoEM text-center" v-if='filter' v-text='filter'>
@@ -201,7 +201,7 @@ var app = new Vue({
       el: '#viewer',
 			data: function(){
 				return {
-          alphabet : ['ALL','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
+          filterLetters : [],
           filter:'',
           dataSetURL : 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/Dataset.jsonld',
           graph: [],
@@ -607,7 +607,7 @@ var app = new Vue({
             url = this.userURL;
           }
           else{
-            url = '/static/misc/schema.jsonld';
+            url = './static/misc/schema.jsonld';
           }
           // console.log('using ', url)
           axios.get(url).then(res=>{
@@ -695,6 +695,20 @@ var app = new Vue({
             }
           }
           this.availableClasses = results.sort();
+          this.getFilters();
+        },
+        getFilters(){
+          let letters = [];
+          let self = this;
+          for (var i = 0; i < self.availableClasses.length; i++) {
+
+            let q = self.removePrefix(self.availableClasses[i]["@id"])[0];
+
+            if ( !letters.includes(q) ) {
+              letters.push( q );
+            }
+          }
+          this.filterLetters = letters.sort();
         },
         handleChange: function(e){
           let target = e.target.value;

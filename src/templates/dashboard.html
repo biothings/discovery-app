@@ -1,0 +1,87 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<style>
+  .status{
+    border-radius: 100%;
+    min-width: 10px;
+    min-height: 10px;
+    display: inline-block;
+  }
+
+  .circle{
+    border-radius: 100%;
+  }
+</style>
+<div id="dashboard" class="container" style="min-height: 70vh;padding-top:60px;">
+  <h1 class="text3D">My Dashboard</h1>
+  <div class="jumbotron">
+    <div class="row">
+      <div class="col-sm-2 text-center">
+        <img class="margin20 circle" :src="user.avatar_url" style="width:90%; max-width: 150px;" alt="logo"/>
+        <h5  v-text="user.name" v-text="user.name"></h5>
+        <a v-text="'@'+user.login" target="_blank" :href="'http://www.github.com/'+user.login">
+        </a>
+      </div>
+      <div class="col-sm-10">
+        <div>
+          <div class="numberCircle mainBackLight" v-text="tests.length"></div> Registered Datasets
+        </div>
+        <ul class="list-group">
+          <li v-for="test in tests" class="list-group-item list-group-item-action slit-in-vertical">
+            <span class="status bg-success" data-tippy="OK"></span> <a class="link" v-text="test.name"></a>
+              <button class="btn btn-default up">
+                VIEW
+              </button>
+              <button class="btn btn-default up">
+                SHARE
+              </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="/static/js/lodash.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script> -->
+<script>
+var app = new Vue({
+      el: '#dashboard',
+			data: function(){
+				return {
+          user:{},
+          tests:[{'name':'DATASET TEST'},{'name':'DATASET TEST'},{'name':'DATASET TEST'},]
+				}
+			},
+      watch:{
+
+      },
+			methods:{
+        checkLoggedUser(){
+          var self = this;
+          axios.get('/user').then(res=>{
+            if (res.data.login) {
+              self.user = res.data;
+              console.log('setting user data dashboard')
+            }
+          }).catch(err=>{
+            throw err;
+          });
+        },
+			},
+			mounted:function(){
+
+
+			},
+      created:function(){
+        this.checkLoggedUser()
+      }
+		});
+
+</script>
+{% include "footer.html" %}
+{% endblock %}

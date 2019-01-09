@@ -5,7 +5,7 @@ function check_user(){
         if (result.login){
             if (result.avatar_url){
               $('#navPhoto').attr("src", result.avatar_url);
-              html += "<li class='nav-item'><a class='nav-link pulse' id='navPhotoLink' href='./dashboard'>"+result.login+" <img id='navPhoto' class='userImage' src='"+result.avatar_url+"' alt='user photo'></a></li>";
+              html += "<li class='nav-item'><a class='nav-link pulse' id='navPhotoLink' href='./dashboard/'>"+result.login+" <img id='navPhoto' class='userImage' src='"+result.avatar_url+"' alt='user photo'></a></li>";
           }
           html += "<li class='nav-item'><a class='nav-link' href='./logout?next=" + window.location.pathname + "'>Logout</a></li>";
         }else{
