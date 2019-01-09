@@ -166,7 +166,7 @@ APP_LIST = [
     (r"/?", MainHandler),
     (r"/schema-playground/?", PlaygroundHandler),
     (r"/dashboard/?", DashboardHandler),
-    (r"/guide/?", GuideHandler),
+    (r"/guide/?", PlaygroundHandler),
     (r"/user/?", UserInfoHandler),
     (r"/login/?", LoginHandler),
     (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),
