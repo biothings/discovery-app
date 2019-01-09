@@ -11,14 +11,15 @@ from jinja2 import Environment, FileSystemLoader
 import torngithub
 from torngithub import json_encode, json_decode
 
-import config
+from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
+
 import json
 import logging
 log = logging.getLogger("smartapi")
 
-settings = {
-    "cookie_secret": config.COOKIE_SECRET
-}
+
+GITHUB_CALLBACK_PATH = "/oauth"
+GITHUB_SCOPE = ""
 
 src_path = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 if src_path not in sys.path:
@@ -31,17 +32,12 @@ templateLoader = FileSystemLoader(searchpath=TEMPLATE_PATH)
 templateEnv = Environment(loader=templateLoader, cache_size=0)
 
 
-class BaseHandler(tornado.web.RequestHandler):
+class BaseHandler(BioThingsBaseHandler):
     def get_current_user(self):
         user_json = self.get_secure_cookie("user")
         if not user_json:
             return None
         return json_decode(user_json)
-
-    def return_json(self, data):
-        _json_data = json_encode(data)
-        self.set_header("Content-Type", "application/json; charset=UTF-8")
-        self.write(_json_data)
 
 
 class MainHandler(BaseHandler):
@@ -78,7 +74,7 @@ class LoginHandler(BaseHandler):
         xsrf = self.xsrf_token
         login_file = "login.html"
         login_template = templateEnv.get_template(login_file)
-        path = config.GITHUB_CALLBACK_PATH
+        path = GITHUB_CALLBACK_PATH
         _next = self.get_argument("next", "/")
         if _next != "/":
             path += "?next={}".format(_next)
@@ -92,22 +88,22 @@ class LogoutHandler(BaseHandler):
         self.redirect(self.get_argument("next", "/"))
 
 
-class GithubLoginHandler(tornado.web.RequestHandler, torngithub.GithubMixin):
+class GithubLoginHandler(BaseHandler, torngithub.GithubMixin):
     @tornado.gen.coroutine
     def get(self):
         # we can append next to the redirect uri, so the user gets the
         # correct URL on login
         redirect_uri = url_concat(self.request.protocol +
                                   "://" + self.request.host +
-                                  config.GITHUB_CALLBACK_PATH,
+                                  GITHUB_CALLBACK_PATH,
                                   {"next": self.get_argument('next', '/')})
 
         # if we have a code, we have been authorized so we can log in
         if self.get_argument("code", False):
             user = yield self.get_authenticated_user(
                 redirect_uri=redirect_uri,
-                client_id=config.GITHUB_CLIENT_ID,
-                client_secret=config.GITHUB_CLIENT_SECRET,
+                client_id=self.web_settings.GITHUB_CLIENT_ID,
+                client_secret=self.web_settings.GITHUB_CLIENT_SECRET,
                 code=self.get_argument("code")
             )
             if user:
@@ -121,8 +117,8 @@ class GithubLoginHandler(tornado.web.RequestHandler, torngithub.GithubMixin):
         # otherwise we need to request an authorization code
         yield self.authorize_redirect(
             redirect_uri=redirect_uri,
-            client_id=config.GITHUB_CLIENT_ID,
-            extra_params={"scope": config.GITHUB_SCOPE, "foo": 1}
+            client_id=self.web_settings.GITHUB_CLIENT_ID,
+            extra_params={"scope": GITHUB_SCOPE, "foo": 1}
         )
 
 class UserInfoHandler(BaseHandler):
@@ -153,7 +149,7 @@ APP_LIST = [
     (r"/guide/?", GuideHandler),
     (r"/user/?", UserInfoHandler),
     (r"/login/?", LoginHandler),
-    (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),
+    (GITHUB_CALLBACK_PATH, GithubLoginHandler),
     (r"/logout/?", LogoutHandler),
     (r"/schema-org/(.+)/?", SchemaOrgHandler),
     (r"/(.+)/(.*)/?", ViewerHandler),
