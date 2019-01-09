@@ -154,7 +154,7 @@ class PlaygroundHandler(BaseHandler):
         playground_output = playground_template.render()
         self.write(playground_output)
 
-class ViewerHandler(BaseHandler):
+class VisualizerHandler(BaseHandler):
     def get(self, namespace=None, className=None):
         test_file = "viewer.html"
         test_template = templateEnv.get_template(test_file)
@@ -172,7 +172,7 @@ APP_LIST = [
     (config.GITHUB_CALLBACK_PATH, GithubLoginHandler),
     (r"/logout/?", LogoutHandler),
     (r"/schema-org/(.+)/?", SchemaOrgHandler),
-    (r"/(.+)/(.*)/?", ViewerHandler),
+    (r"/(.+)/(.*)/?", VisualizerHandler),
 
     # (r"/?", RegistryHandler),
 ]
