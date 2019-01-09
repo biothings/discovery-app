@@ -1,5 +1,5 @@
 function check_user(){
-    $.ajax({url: "/user", success: function(result){
+    $.ajax({url: "./user", success: function(result){
         var html = "";
         var side_html = "";
         if (result.login){
