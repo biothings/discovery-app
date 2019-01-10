@@ -607,7 +607,7 @@ var app = new Vue({
             url = this.userURL;
           }
           else{
-            url = './static/misc/schema.jsonld';
+            url = '/static/misc/schema.jsonld';
           }
           // console.log('using ', url)
           axios.get(url).then(res=>{
