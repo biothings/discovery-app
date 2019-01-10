@@ -17,7 +17,6 @@ import json
 import logging
 log = logging.getLogger("smartapi")
 
-
 GITHUB_CALLBACK_PATH = "/oauth"
 GITHUB_SCOPE = ""
 
@@ -26,11 +25,8 @@ if src_path not in sys.path:
     sys.path.append(src_path)
 
 TEMPLATE_PATH = os.path.join(src_path, 'templates/')
-
-
 templateLoader = FileSystemLoader(searchpath=TEMPLATE_PATH)
 templateEnv = Environment(loader=templateLoader, cache_size=0)
-
 
 class BaseHandler(BioThingsBaseHandler):
     def get_current_user(self):
@@ -156,7 +152,6 @@ class VisualizerHandler(BaseHandler):
         test_template = templateEnv.get_template(test_file)
         test_output = test_template.render(Context=json.dumps({"namespace": namespace, "query": className}))
         self.write(test_output)
-
 
 APP_LIST = [
     (r"/?", MainHandler),
