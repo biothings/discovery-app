@@ -11,8 +11,7 @@ ES_INDEX_SETTINGS = {
         'api': {
             "dynamic": False,
             "properties": {
-                "user": {"type": "text"},
-                "url":  {"type": "text"}
+                "user": {"type": "text"}
             }
         }
     }
