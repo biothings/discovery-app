@@ -38,3 +38,8 @@ class APIHandler(BaseHandler):
             else:
                 self.return_json(
                     {'success': False, 'error': 'Parameter "url" not found.'})
+
+    def get(self, api_id):
+        esq = ESQuery()
+        res = esq.exists(api_id)
+        self.return_json(res)

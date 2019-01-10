@@ -31,3 +31,6 @@ class ESQuery():
 
     def save_doc(self, **kwargs):
         return self._es.index(index=self._index, doc_type=self._doc_type, body=kwargs, refresh=True)
+
+    def exists(self, api_id):
+        return self._es.exists(index=self._index, doc_type=self._doc_type, id=api_id)
