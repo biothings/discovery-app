@@ -1,5 +1,6 @@
 function check_user(){
-    $.ajax({url: "./user", success: function(result){
+    $.ajax({url: "/user", success: function(result){
+        console.log('/USER')
         var html = "";
         var side_html = "";
         if (result.login){
@@ -14,7 +15,8 @@ function check_user(){
         }
         // Append new items to navigation
         $("#user_link").append(html)
-    }});
+    },
+  cache: false});
 };
 
 $(function(){
