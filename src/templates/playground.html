@@ -18,6 +18,11 @@
         <input style="margin:auto;" data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="on" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
         <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
       </div>
+      <div v-if="suggestedURL" class="alert alert-warning">
+        <p>We noticed that was not a GitHub raw data link.<br /> We have converted it to: </p>
+        <p><a style="word-break: break-all;" target="_blank" class="small" :href="suggestedURL" v-text="suggestedURL"></a></p>
+        <button class="btn btn-warning text-light pointer" @click.prevent="input = suggestedURL">Use this link</button>
+      </div>
       <small class="badge badge-pill badge-secondary pointer mr-1"
       @click="input = 'https://schema.org/Dataset.jsonld'">
         <i class="fas fa-question-circle" data-tippy="Schema.org Dataset"></i> Example URL
@@ -30,6 +35,10 @@
       @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/Dataset.jsonld'">
         <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> Example URL
       </small>
+      <small class="badge badge-pill badge-warning pointer mr-1"
+      @click="input = 'https://github.com/data2health/schemas/blob/master/Dataset/Dataset.jsonld'">
+        <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> Example URL
+      </small>
     </form>
   </div>
 </div>
@@ -38,18 +47,54 @@
 {% block extra_scripts %}
 <script src="./static/js/parsley.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 var app = new Vue({
       el: '#playground',
 			data: function(){
 				return {
-          input: ''
+          input: '',
+          suggestedURL:''
 				}
 			},
       watch:{
-
+        input: function(value, oldValue){
+          if (value.includes('blob') || value.includes('github.com')) {
+            this.suggestedURL = value.replace('blob/', '')
+            .replace('github.com', 'raw.githubusercontent.com')
+            .replace('www.github.com', 'raw.githubusercontent.com');;
+          }
+        }
       },
 			methods:{
+        checkURL(){
+          let url = this.input;
+          if (url.includes('blob')) {
+
+            url = url.replace('blob', 'raw');
+
+            Swal({
+              title: 'Link Converted',
+              imageUrl: "./static/img/dde-logo-o.svg",
+              imageHeight: 100,
+              imageAlt: 'Warning',
+              html:
+                '<p>We noticed that was not a raw data link. We have converted it to: </p> ' +
+                '<p><a target="_blank" href="'+url+'">'+url+'</a></p>' +
+                '<p>Proceed with this link?</p>',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'Yes, use this link!'
+            }).then((result) => {
+              if (result.value) {
+                return url;
+              }
+            });
+          }else{
+            return url;
+          }
+        },
         getFormValues () {
           this.input = this.$refs.my_input.value;
           this.$refs.my_input.value = '';
@@ -78,8 +123,7 @@ var app = new Vue({
         },
 			},
 			mounted:function(){
-        $('#linkForm').parsley().on('field:validated', function() {
-        })
+        $('#linkForm').parsley();
 
 			},
       created:function(){
