@@ -1,10 +1,12 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
 
+</style>
 <main id="index" style="min-height:70vh;">
   <div class="">
-    <div class="jumbotron bg-light text-center padding20" style="margin-top: 40px;">
+    <div class="jumbotron bg-light text-center padding20 hero mb-0" style="margin-top: 40px;">
       <a data-tippy="Learn More About CD2H" target="_blank" href="https://ctsa.ncats.nih.gov/cd2h/">
         <img class="margin20" src="./static/img/cd2h-logo.png" style="width:30vw; max-width: 300px;" alt="logo"/>
       </a>
@@ -12,25 +14,78 @@
       <img src="./static/img/dde-logo-o.svg" width="200px" class="margin20 mb-9"/>
       <h4 class="text-muted caps">A Project of the CD2H Data Workgroup</h4>
     </div>
+    <div class="jumbotron bg-warning">
+      <h1>POST</h1>
+      <form>
+        <input v-model="testURL" type="url"/>
+        <button class="btn btn-warning" type="button" @click.prevent="sendTest()">Send</button>
+      </form>
+    </div>
 
-    <div class="jumbotron mainBackLight" style="margin-bottom:15vh;">
+    <div class="jumbotron mainBackLight mb-0">
       <div class="container d-flex flex-row justify-content-center flex-wrap">
-        <div class="col-sm-4 text-center swing-in-left-fwd">
-          <h1 class="text3D">GUIDE</h1>
+        <div class="col-sm-3 text-center swing-in-left-fwd">
+          <!-- <h1 class="text3D">VIEW</h1> -->
+          <div class="link-wrapper">
+            <a class="link hover-1" href="#registry"><h1 class="text3D">REGISTRY</h1></a>
+          </div>
+          <p class="caps text-light">View all registered datasets</p>
+          <a role="button" class="btn pulse themeButton text-light margin20" href="#registry">Go</a>
+        </div>
+        <div class="col-sm-3 text-center swing-in-left-fwd">
+          <!-- <h1 class="text3D">GUIDE</h1> -->
+          <div class="link-wrapper">
+            <a class="link hover-1" href="./guide" ><h1 class="text3D">GUIDE</h1></a>
+          </div>
           <p class="caps text-light">Make your dateset more discoverable</p>
           <a role="button" href="./guide" class="btn pulse themeButton text-light margin20">Go</a>
         </div>
-        <div class="col-sm-4 text-center swing-in-left-fwd">
-          <h1 class="text3D">VIEW</h1>
+        <!-- <a class="itemHover" href="#" title="">
+          <div class="mainBackLight"></div>
+          <span>
+            <h3>Lorem ipsum</h3>
+            <p>Aliquam egestas tortor vel libero pulvinar, ut iaculis leo facilisis. Praesent pretium mattis dapibus.</p>
+          </span>
+        </a> -->
+        <div class="col-sm-3 text-center swing-in-left-fwd">
+          <!-- <h1 class="text3D">VIEW</h1> -->
+          <div class="link-wrapper">
+            <a class="link hover-1" href="#" data-toggle="modal" data-target="#schemaOrgModal"><h1 class="text3D">VIEW</h1></a>
+          </div>
           <p class="caps text-light">Browse the core schema.org schemas</p>
           <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#schemaOrgModal">Go</button>
         </div>
-        <div class="col-sm-4 text-center swing-in-left-fwd">
-          <h1 class="text3D">BUILD</h1>
+        <div class="col-sm-3 text-center swing-in-left-fwd">
+          <!-- <h1 class="text3D">BUILD</h1> -->
+          <div class="link-wrapper">
+            <a class="link hover-1" href="./schema-playground" ><h1 class="text3D">BUILD</h1></a>
+          </div>
           <p class="caps text-light">Customize and host your own metadata schema</p>
           <a role="button" href="./schema-playground" class="btn pulse themeButton text-light margin20">Go</a>
         </div>
       </div>
+    </div>
+
+    <div id="registry" class="jumbotron">
+      <h2>REGISTRY</h2>
+      <p v-text="registryTotal+' datasets'">
+      </p>
+      <ul class="list-group">
+        <template v-if="registry.length"v-for="item in registry">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <h4 v-text="'Test'"></h4>
+            <small >
+              <a v-text="item.url" :href="item.url" target="_blank"></a>
+            </small>
+            <a role="button" class="btn btn-default up">
+              View
+            </a>
+          </li>
+        </template>
+        <li v-if="!registry.length" class="text-center text-muted list-group-item">
+          All registered datasets will appear here.
+        </li>
+      </ul>
     </div>
 
     <div class="modal fade" id="schemaOrgModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -71,18 +126,18 @@
       </div>
     </div>
 
-    <ul class="bg-bubbles">
-		<li></li>
-		<li></li>
-		<li></li>
-		<li></li>
-		<li></li>
-		<li></li>
-		<li></li>
-		<li></li>
-		<li></li>
-		<li></li>
-	</ul>
+    <!-- <ul class="bg-bubbles">
+  		<li></li>
+  		<li></li>
+  		<li></li>
+  		<li></li>
+  		<li></li>
+  		<li></li>
+  		<li></li>
+  		<li></li>
+  		<li></li>
+  		<li></li>
+  	</ul> -->
 
   </div>
 </main>
@@ -103,10 +158,55 @@ var app = new Vue({
           input:'',
           linkPrefix:'./',
           data: null,
-          user:{}
+          user:{},
+          testName:'discovery',
+          testURL:'',
+          registry:[],
+          registryTotal:'0'
+
 				}
 			},
+      watch:{
+        // sort: function(sort){
+        //   var self = this;
+        //   switch (sort) {
+        //     case 'Alpabethically A-Z':
+        //     self.apis = _.sortBy(self.apis,'info.title');
+        //       break;
+        //     case 'Alpabethically Z-A':
+        //     self.apis = _.sortBy(self.apis,'info.title').reverse();
+        //     break;
+        //     case 'Recently Updated':
+        //     self.apis = _.sortBy(self.apis,'._meta.timestamp').reverse();
+        //     break;
+        //     case 'Search Relevance':
+        //     self.search();
+        //     break;
+        //     default:
+        //     self.apis = _.sortBy(self.apis,'info.title');
+        //   }
+        // }
+      },
       methods:{
+        getAll(){
+          axios.get('/query?q="test_user"').then(res=>{
+            this.registry = res.data.hits;
+            this.registryTotal = res.data.total;
+          }).catch(err=>{
+            throw err;
+          });
+        },
+        sendTest(){
+          let data={
+            'test_code': this.testName,
+            'url': this.testURL
+          };
+          axios.post('/registry',data).then(res=>{
+
+          }).catch(err=>{
+
+          });
+        },
         checkLoggedUser(){
           var self = this;
           axios.get('./user').then(res=>{
@@ -189,12 +289,45 @@ var app = new Vue({
     },
     mounted:function(){
       this.reqFile();
+      this.getAll();
       this.checkLoggedUser();
     },
     created: function(){
       this.getAvailableClasses();
     }
+
   })
+
+  // Smooth Scroll-To
+
+  $('a[href*="#"]')
+    .not('[href="#"]')
+    .not('[href="#0"]')
+    .click(function(event) {
+      if (
+        location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '')
+        &&
+        location.hostname == this.hostname
+      ) {
+        var target = $(this.hash);
+        target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+        if (target.length) {
+          event.preventDefault();
+          $('html, body').animate({
+            scrollTop: target.offset().top
+          }, 1000, function() {
+            var $target = $(target);
+            $target.focus();
+            if ($target.is(":focus")) {
+              return false;
+            } else {
+              $target.attr('tabindex','-1');
+              $target.focus();
+            };
+          });
+        }
+      }
+    });
 </script>
 {% include "footer.html" %}
 {% endblock %}

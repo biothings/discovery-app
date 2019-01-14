@@ -25,17 +25,22 @@
       </div>
       <div class="col-sm-10">
         <div>
-          <div class="numberCircle mainBackLight" v-text="tests.length"></div> Registered Datasets
+          <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Datasets
         </div>
         <ul class="list-group">
-          <li v-for="test in tests" class="list-group-item list-group-item-action slit-in-vertical">
-            <span class="status bg-success" data-tippy="OK"></span> <a class="link" v-text="test.name"></a>
+          <li v-if="dashboard.length" v-for="item in dashboard" class="list-group-item list-group-item-action slit-in-vertical">
+            <span class="status bg-success" data-tippy="OK"></span> <a class="link" v-text="item.url"></a>
               <button class="btn btn-default up">
                 VIEW
               </button>
               <button class="btn btn-default up">
                 SHARE
               </button>
+          </li>
+          <li v-else>
+            <p>
+              No registered data.
+            </p>
           </li>
         </ul>
       </div>
@@ -54,13 +59,22 @@ var app = new Vue({
 			data: function(){
 				return {
           user:{},
-          tests:[{'name':'DATASET TEST'},{'name':'DATASET TEST'},{'name':'DATASET TEST'},]
+          dashboard:[],
+          dashboardTotal:"0"
 				}
 			},
       watch:{
 
       },
 			methods:{
+        getAll(){
+          axios.get('/query?q="test_user"').then(res=>{
+            this.dashboard = res.data.hits;
+            this.dashboardTotal = res.data.total;
+          }).catch(err=>{
+            throw err;
+          });
+        },
         checkLoggedUser(){
           var self = this;
           axios.get('/user').then(res=>{
@@ -74,8 +88,7 @@ var app = new Vue({
         },
 			},
 			mounted:function(){
-
-
+        this.getAll();
 			},
       created:function(){
         this.checkLoggedUser()

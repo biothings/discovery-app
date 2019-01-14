@@ -1,6 +1,6 @@
 function check_user(){
     $.ajax({url: "/user", success: function(result){
-        console.log('/USER')
+        // console.log('/USER')
         var html = "";
         var side_html = "";
         if (result.login){
