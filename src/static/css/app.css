@@ -479,3 +479,172 @@ font-weight: bold;
 font-family: Helvetica;
 text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0,0,0,.1), 0 0 5px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.3), 0 3px 5px rgba(0,0,0,.2), 0 5px 10px rgba(0,0,0,.25), 0 10px 10px rgba(0,0,0,.2), 0 20px 20px rgba(0,0,0,.15);
 }
+
+.link {
+  display: inline-block;
+  position: relative;
+  text-decoration: none;
+  padding: 10px 0;
+  color: #fff;
+}
+.link:hover{
+  text-decoration: none !important;
+}
+.link-wrapper {
+  position: relative;
+  display: block;
+  padding: 20px 0;
+}
+.inner-wrapper {
+  position: relative;
+  display: inline-block;
+}
+/* hover styles */
+.hover-1:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--main);
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s;
+}
+.hover-1:hover:after {
+  transform-origin: bottom left;
+  transform: scaleX(1);
+}
+
+.itemHover {
+  position: relative;
+  float: left;
+  width: 350px;
+  height: 210px;
+  overflow: visible;
+  margin: 20px;
+  display: block;
+  background-color: #000;
+  text-decoration: none;
+}
+
+.itemHover div {
+  position: relative;
+  z-index: 1;
+  width: 358px;
+  height: 218px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  -webkit-background-size: cover;
+  overflow: hidden;
+
+  -webkit-box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.2);
+
+  -webkit-transform: translate(-4px, -4px);
+  -moz-transform: translate(-4px, -4px);
+  -ms-transform: translate(-4px, -4px);
+  -o-transform: translate(-4px, -4px);
+  transform: translate(-4px, -4px);
+
+  -webkit-transition: width 0.2s, height 0.2s, -webkit-transform 0.2s,
+    -webkit-box-shadow 0.2s;
+  -moz-transition: width 0.2s, height 0.2s, -moz-transform 0.2s, box-shadow 0.2s;
+  transition: width 0.2s, height 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.itemHover div:before {
+  content: "";
+  display: block;
+  width: 600px;
+  height: 400px;
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  background: var(--sec);
+  filter: progid:DXImageTransform.Microsoft.gradient(
+      startColorstr="#e6000000",
+      endColorstr="#00000000",
+      GradientType=1
+    ); /* IE6-9 */
+
+  -webkit-transition: all 1s ease-in-out;
+  -moz-transition: all 1s ease-in-out;
+  -ms-transition: all 1s ease-in-out;
+  -o-transition: all 1s ease-in-out;
+  transition: all 1s ease-in-out;
+}
+.itemHover:hover div:before {
+  opacity: 0.7;
+}
+
+.itemHover:hover div {
+  width: 366px;
+  height: 226px;
+
+  -webkit-box-shadow: 0 0 3px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 3px 4px rgba(0, 0, 0, 0.2);
+
+  -webkit-transform: translate(-8px, -8px);
+  -moz-transform: translate(-8px, -8px);
+  -ms-transform: translate(-8px, -8px);
+  -o-transform: translate(-8px, -8px);
+  transform: translate(-8px, -8px);
+}
+
+.itemHover:active div {
+  width: 358px;
+  height: 218px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  -webkit-transform: translate(-4px, -4px);
+  -moz-transform: translate(-4px, -4px);
+  -ms-transform: translate(-4px, -4px);
+  -o-transform: translate(-4px, -4px);
+  transform: translate(-4px, -4px);
+}
+
+.itemHover span {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  z-index: 20;
+  padding: 15px 20px;
+  bottom: 0px;
+  left: 0;
+}
+
+.itemHover span h3 {
+  color: #fff;
+  text-transform: uppercase;
+  margin: 0;
+}
+.itemHover:hover span h3 {
+}
+.itemHover span p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  opacity: 0;
+  max-height: 0;
+  -webkit-transition: all 1s ease-in-out;
+  -moz-transition: all 1s ease-in-out;
+  -ms-transition: all 1s ease-in-out;
+  -o-transition: all 1s ease-in-out;
+  transition: all 1s ease-in-out;
+}
+.itemHover:hover span p {
+  opacity: 1;
+  max-height: 200px;
+}
+
+.hero{
+  background-image: url('../img/back.svg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+}

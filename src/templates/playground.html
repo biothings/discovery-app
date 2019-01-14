@@ -110,6 +110,11 @@ var app = new Vue({
               }
             }
           }).catch(err=>{
+            Swal(
+                'Something went wrong.',
+                'Make sure your GitHub link links directly to your data page or raw data',
+                'error'
+              );
             throw err;
           })
         },
