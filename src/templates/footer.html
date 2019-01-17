@@ -3,8 +3,14 @@
   <div class="container padding20">
     <p class="rights text-muted text-center" style="margin:0px;">
       <small>
-        <span>©  </span><span class="copyright-year">2018</span><span> </span><span>All Rights Reserved.</span>
+        <span>©  </span><span class="copyright-year"><span id="year"></span></span><span> </span><span>All Rights Reserved.</span>
       </small>
     </p>
   </div>
 </footer>
+<script>
+var currentTime = new Date()
+var year = currentTime.getFullYear()
+var myelement = document.getElementById("year");
+    myelement.innerHTML= year;
+</script>
