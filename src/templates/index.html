@@ -24,19 +24,14 @@
       <img src="./static/img/dde-logo-o.svg" width="200px" class="margin20 mb-9"/>
       <h4 class="text-muted caps">A Project of the CD2H Data Workgroup</h4>
     </div>
-    <div class="jumbotron bg-warning">
-      <h1>POST</h1>
-      <form>
-        <input v-model="testURL" type="url"/>
-        <button class="btn btn-warning" type="button" @click.prevent="sendTest()">Send</button>
-      </form>
-    </div>
 
-    <div class="jumbotron bg-secondary mb-0">
+    <div class="jumbotron animatedBack mb-0">
       <div class="container d-flex flex-row justify-content-center flex-wrap">
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <!-- <h1 class="text3D">VIEW</h1> -->
+
           <div class="link-wrapper">
+            <img src="./static/img/R.svg" width="30%" alt="R"/>
             <a class="link hover-1" href="#registry"><h1 class="text3D">REGISTRY</h1></a>
           </div>
           <p class="caps text-light">View all registered datasets</p>
@@ -44,7 +39,9 @@
         </div>
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <!-- <h1 class="text3D">GUIDE</h1> -->
+
           <div class="link-wrapper">
+            <img src="./static/img/G.svg" width="30%" alt="G"/>
             <a class="link hover-1" href="./guide" ><h1 class="text3D">GUIDE</h1></a>
           </div>
           <p class="caps text-light">Make your dateset more discoverable</p>
@@ -59,7 +56,9 @@
         </a> -->
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <!-- <h1 class="text3D">VIEW</h1> -->
+
           <div class="link-wrapper">
+            <img src="./static/img/V.svg" width="30%" alt="V"/>
             <a class="link hover-1" href="#" data-toggle="modal" data-target="#schemaOrgModal"><h1 class="text3D">VIEW</h1></a>
           </div>
           <p class="caps text-light">Browse the core schema.org schemas</p>
@@ -67,7 +66,9 @@
         </div>
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <!-- <h1 class="text3D">BUILD</h1> -->
+
           <div class="link-wrapper">
+            <img src="./static/img/B.svg" width="30%" alt="B"/>
             <a class="link hover-1" href="./schema-playground" ><h1 class="text3D">BUILD</h1></a>
           </div>
           <p class="caps text-light">Customize and host your own metadata schema</p>
@@ -80,12 +81,18 @@
       <div class="row">
         <div class="col-sm-12 col-md-9 col-lg-6" style="margin:auto;">
           <h2>REGISTRY</h2>
+          <div>
+            <form class="form-group">
+              <input v-model="testURL" type="url" class="form-control"/>
+              <button class="btn btn-outline-warning" type="button" @click.prevent="sendTest()">Post Test</button>
+            </form>
+          </div>
           <div class="bg-light padding20">
             <form>
               <div class="form-group form-row">
                 <input class="form-control col-6" id="search_query" type="text" v-model="query" name="query" placeholder="Search Registry" >
                 <button class="col btn ml-2 themeButton text-light pulse" type="button" @click.prevent="search(query)">Search</button>
-                <button class="col btn ml-2 btn-danger" type="button" @click.prevent="query='';search(query)">Clear</button>
+                <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';search(query)">Clear</button>
               </div>
             </form>
             <div class="form-group form-inline m-0 ">
@@ -98,14 +105,17 @@
               </select>
             </div>
           </div>
+          <div id="searching" class="progress" style="display:none;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-secondary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+          </div>
           <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
 
             <!-- <p >
               <div class="numberCircle mainBackLight m-0" v-text="registryTotal"></div> Results
             </p> -->
           </div>
-          <ul class="list-group" style="border:solid 5px var(--gray)">
-            <li class="list-group-item d-flex justify-content-between align-items-center text-muted p-1">
+          <ul class="list-group" style="border-top:solid 3px var(--gray)">
+            <li class="list-group-item d-flex justify-content-between align-items-center text-muted p-1" style="background:#d0d0d0;">
               <small >
                 Name
               </small>
@@ -118,17 +128,17 @@
             </li>
             <template v-if="registry.length" v-for="(item,index) in registry">
               <li class="list-group-item d-flex justify-content-between align-items-center">
-                <a href="#" data-toggle="modal" data-target="#DetailsModal" v-text="'Test Name'">Go</a>
+                <a class="font-weight-bold" @click="selectedRegistryItem=item" href="#" data-toggle="modal" data-target="#DetailsModal" v-text="item.user"></a>
                 <small >
                   <a v-text="item.url" :href="item.url" target="_blank"></a>
                 </small>
-                <a role="button" class="btn btn-default up">
+                <a role="button" :href="item.url" class="btn btn-outline-secondary up">
                   Go
                 </a>
               </li>
             </template>
             <li v-if="!registry.length" class="text-center text-muted list-group-item">
-              All registered datasets will appear here.
+              No Results
             </li>
           </ul>
           <div class="bg-light">
@@ -200,30 +210,17 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <p class="modal-title caps" id="exampleModalLabel">Details</p>
+            <p class="modal-title caps" id="exampleModalLabel" v-text='selectedRegistryItem.url'></p>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body text-secondary">
-            <p>View any of the available classes in this schema</p>
+            <p v-text='selectedRegistryItem'></p>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- <ul class="bg-bubbles">
-  		<li></li>
-  		<li></li>
-  		<li></li>
-  		<li></li>
-  		<li></li>
-  		<li></li>
-  		<li></li>
-  		<li></li>
-  		<li></li>
-  		<li></li>
-  	</ul> -->
 
   </div>
 </main>
@@ -245,7 +242,6 @@ var app = new Vue({
           linkPrefix:'./',
           data: null,
           user:{},
-          testName:'discovery',
           testURL:'',
           registry:[],
           registryTotal:'0',
@@ -254,6 +250,7 @@ var app = new Vue({
           page: 1,
           pages: 1,
           perPage: 20,
+          selectedRegistryItem:{}
 				}
 			},
       watch:{
@@ -290,10 +287,15 @@ var app = new Vue({
               };
             }
 
-            axios.get('/api/query?size=100', params).then(function (response) {
+            $('#searching').show();
+
+            axios.get('/query?size=100', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
-              self.calculatePages();
+              if (self.registryTotal) {
+                self.calculatePages();
+              }
+              $('#searching').hide();
             });
         },
         calculatePages: function () {
@@ -324,7 +326,6 @@ var app = new Vue({
         },
         sendTest(){
           let data={
-            'test_code': this.testName,
             'namespace':'/bts/Test',
             'url': this.testURL
           };

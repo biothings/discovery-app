@@ -12,37 +12,89 @@
   .circle{
     border-radius: 100%;
   }
+
+  .dashboardUserBox{
+    border-radius: 20px;
+  }
+  .dashboardUserBox img{
+    border:2px solid var(--light)
+  }
 </style>
-<div id="dashboard" class="container" style="min-height: 70vh;padding-top:60px;">
-  <h1 class="text3D">My Dashboard</h1>
+<div id="dashboard" class="container" style="min-height: 70vh;padding-top:80px;">
+  <h1 class="text-muted">My Dashboard</h1>
   <div class="jumbotron">
     <div class="row">
       <div class="col-sm-2 text-center">
-        <img class="margin20 circle" :src="user.avatar_url" style="width:90%; max-width: 150px;" alt="logo"/>
-        <h5  v-text="user.name" v-text="user.name"></h5>
-        <a v-text="'@'+user.login" target="_blank" :href="'http://www.github.com/'+user.login">
-        </a>
+        <div class="bg-secondary padding20 dashboardUserBox">
+          <img class="circle" :src="user.avatar_url" width="80%" alt="logo" style="max-width:200px;"/>
+          <p class="text-light mt-4"  v-text="user.name" v-text="user.name"></p>
+          <a data-tippy="Go to GitHub profile" class="badge badge-light" v-text="'@'+user.login" target="_blank" :href="'http://www.github.com/'+user.login">
+          </a>
+        </div>
       </div>
       <div class="col-sm-10">
         <div>
           <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Datasets
         </div>
-        <ul class="list-group">
-          <li v-if="dashboard.length" v-for="item in dashboard" class="list-group-item list-group-item-action slit-in-vertical">
-            <span class="status bg-success" data-tippy="OK"></span> <a class="link" v-text="item.url"></a>
-              <button class="btn btn-default up">
-                VIEW
-              </button>
-              <button class="btn btn-default up">
-                SHARE
-              </button>
-          </li>
-          <li v-else>
-            <p>
-              No registered data.
-            </p>
-          </li>
-        </ul>
+        <table class="table">
+          <thead class="bg-secondary text-light">
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Source URL</th>
+              <th scope="col">NameSpace</th>
+              <th scope="col">Visualize</th>
+              <th scope="col">Download</th>
+              <th scope="col">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-if="dashboard.length">
+              <tr v-for="item in dashboard">
+                <td>
+                  <span class="status bg-success" ></span> <span v-text="'TEST NAME'"></span>
+                </td>
+                <td>
+                  <a target="_blank" :href="item.url">
+                    <span v-text="item.url"></span> <i class="fas fa-external-link-alt"></i>
+                  </a>
+                </td>
+                <td>
+                  <a target="_blank" :href="item.url" v-text="item.url"></a>
+                </td>
+                <td>
+                  <button class="btn btn-outline-secondary up">
+                    Visualize
+                  </button>
+                </td>
+                <td>
+                  <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Download
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                      <a class="dropdown-item" href="#">JSON-LD</a>
+                      <a class="dropdown-item" href="#">JSON</a>
+                      <a class="dropdown-item" href="#">YAML</a>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <button class="btn btn-outline-secondary fill">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </template>
+            <template v-else>
+              <tr>
+                <td colspan="6" class="text-center text-muted">
+                  No Data
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+
       </div>
     </div>
   </div>
