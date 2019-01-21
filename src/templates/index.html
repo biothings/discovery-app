@@ -35,7 +35,7 @@
             <a class="link hover-1" href="#registry"><h1 class="text3D">REGISTRY</h1></a>
           </div>
           <p class="caps text-light">View all registered datasets</p>
-          <a role="button" class="btn pulse themeButton text-light margin20" href="#registry">Go</a>
+          <!-- <a role="button" class="btn pulse themeButton text-light margin20" href="#registry">Go</a> -->
         </div>
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <!-- <h1 class="text3D">GUIDE</h1> -->
@@ -45,7 +45,7 @@
             <a class="link hover-1" href="./guide" ><h1 class="text3D">GUIDE</h1></a>
           </div>
           <p class="caps text-light">Make your dateset more discoverable</p>
-          <a role="button" href="./guide" class="btn pulse themeButton text-light margin20">Go</a>
+          <!-- <a role="button" href="./guide" class="btn pulse themeButton text-light margin20">Go</a> -->
         </div>
         <!-- <a class="itemHover" href="#" title="">
           <div class="mainBackLight"></div>
@@ -62,7 +62,7 @@
             <a class="link hover-1" href="#" data-toggle="modal" data-target="#schemaOrgModal"><h1 class="text3D">VIEW</h1></a>
           </div>
           <p class="caps text-light">Browse the core schema.org schemas</p>
-          <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#schemaOrgModal">Go</button>
+          <!-- <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#schemaOrgModal">Go</button> -->
         </div>
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <!-- <h1 class="text3D">BUILD</h1> -->
@@ -72,7 +72,7 @@
             <a class="link hover-1" href="./schema-playground" ><h1 class="text3D">BUILD</h1></a>
           </div>
           <p class="caps text-light">Customize and host your own metadata schema</p>
-          <a role="button" href="./schema-playground" class="btn pulse themeButton text-light margin20">Go</a>
+          <!-- <a role="button" href="./schema-playground" class="btn pulse themeButton text-light margin20">Go</a> -->
         </div>
       </div>
     </div>
@@ -128,7 +128,7 @@
             </li>
             <template v-if="registry.length" v-for="(item,index) in registry">
               <li class="list-group-item d-flex justify-content-between align-items-center">
-                <a class="font-weight-bold" @click="selectedRegistryItem=item" href="#" data-toggle="modal" data-target="#DetailsModal" v-text="item.user"></a>
+                <a class="font-weight-bold" @click="selectedRegistryItem=item" href="#" data-toggle="modal" data-target="#DetailsModal" v-text="item.user.login"></a>
                 <small >
                   <a v-text="item.url" :href="item.url" target="_blank"></a>
                 </small>
@@ -316,7 +316,7 @@ var app = new Vue({
           // this.$set(item, 'showDetails', !api.showDetails);
         },
         getAll(){
-          axios.get('/query?q="test_user"').then(res=>{
+          axios.get('/query?q="__all__"').then(res=>{
             this.registry = res.data.hits;
             this.registryTotal = res.data.total;
             this.calculatePages();

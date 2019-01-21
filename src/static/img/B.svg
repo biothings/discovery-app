@@ -31,8 +31,16 @@
 			animation: flickerAnimation 5s;
 			animation-iteration-count:3;
 	}
+	.animate-flicker2 {
+		 -webkit-animation: flickerAnimation 5s;
+		 -moz-animation: flickerAnimation 5s;
+		 -o-animation: flickerAnimation 5s;
+			animation: flickerAnimation 5s;
+			animation-iteration-count:3;
+			animation-delay:.5s;
+	}
 </style>
 <polygon class="st0" points="174,78 174,32 34,32 34,264 266,264 266,124 174,124 "/>
 <polygon class="st0 animate-flicker" points="222.5,32 222.5,75.5 179,75.5 179,119 266,119 266,32 "/>
-<rect x="179" y="32" class="st0 animate-flicker" width="39" height="39"/>
+<rect x="179" y="32" class="st0 animate-flicker2" width="39" height="39"/>
 </svg>
