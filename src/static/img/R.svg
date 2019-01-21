@@ -4,38 +4,36 @@
 	 viewBox="0 0 300 300" style="enable-background:new 0 0 300 300;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:#FFFFFF;}
-	@keyframes flickerAnimation {
-		0%   { opacity:1; }
-		50%  { opacity:0; }
-		100% { opacity:1; }
-	}
-	@-o-keyframes flickerAnimation{
-		0%   { opacity:1; }
-		50%  { opacity:0; }
-		100% { opacity:1; }
-	}
-	@-moz-keyframes flickerAnimation{
-		0%   { opacity:1; }
-		50%  { opacity:0; }
-		100% { opacity:1; }
-	}
-	@-webkit-keyframes flickerAnimation{
-		0%   { opacity:1; }
-		50%  { opacity:0; }
-		100% { opacity:1; }
-	}
-	.animate-flicker {
-		 -webkit-animation: flickerAnimation 5s;
-		 -moz-animation: flickerAnimation 5s;
-		 -o-animation: flickerAnimation 5s;
-			animation: flickerAnimation 5s;
-			animation-iteration-count:3;
-	}
+	@keyframes Ani {
+    0% {
+        -webkit-transform: translateX(-90px);
+				-ms-transform: translateX(-90px);
+				transform: translateX(-90px);
+			  -moz-transform:translateX(-90px); /* Firefox */
+			  -o-transform:translateX(-90px); /* Opera */
+				opacity: 0;
+    }
+    100% {
+        -webkit-transform: translateX(0px);
+				-ms-transform: translateX(0px);
+				transform: translateX(0px);
+				moz-transform:translateX(0px); /* Firefox */
+			  -o-transform:translateX(0px); /* Opera */
+				opacity: 1;
+    }
+}
+
+		.Ani {
+		    animation: Ani 3s linear;
+		    -webkit-animation: Ani 3s linear;
+				-webkit-animation-iteration-count: 5; /* Safari 4.0 - 8.0 */
+				animation-iteration-count: 5;
+		}
 </style>
 <g>
 	<g>
 		<polygon class="st0" points="34,32 34,124 86,124 114,150 86,176 34,176 34,264 266,264 266,32 		"/>
 	</g>
-	<polygon class="st0 animate-flicker" points="107,150 83.9,128.55 34,128.55 34,171.45 83.9,171.45 	"/>
+	<polygon class="st0 Ani" points="107,150 83.9,128.55 34,128.55 34,171.45 83.9,171.45 	"/>
 </g>
 </svg>

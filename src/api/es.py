@@ -8,10 +8,18 @@ ES_INDEX_NAME = 'discovery'
 ES_DOC_TYPE = 'api'
 ES_INDEX_SETTINGS = {
     "mappings": {
-        'api': {
-            "dynamic": False,
+        "api": {
+            "dynamic": True,
             "properties": {
-                "user": {"type": "text"}
+                "name":    { "type": "text"  },
+                "url":     { "type": "text"  },
+                "slug":     { "type": "text"  },
+                "private":     { "type": "boolean"  },
+                "user":      { "type": "object" },
+                "created":  {
+                  "type":   "date",
+                  "format": "strict_date_optional_time||epoch_millis"
+                }
             }
         }
     }
@@ -34,3 +42,13 @@ class ESQuery():
 
     def exists(self, api_id):
         return self._es.exists(index=self._index, doc_type=self._doc_type, id=api_id)
+        # if api_id == '__all__':
+        #     query = {
+        #         "query": {
+        #             "match_all": {}
+        #         }
+        #     }
+        #     res = self._es.search(index=self._index, doc_type=self._doc_type, body=query)
+        #     return res
+        # else:
+        #     return self._es.exists(index=self._index, doc_type=self._doc_type, id=api_id)
