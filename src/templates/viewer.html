@@ -99,7 +99,24 @@ g.nodes g.node:last-child text{
     <div class="col-sm-1">
 
     </div>
-    <div class="col-sm-9">
+    <!-- IF NO QUERY -->
+    <div v-if="!query" class="col-sm-9">
+      <h1 class="text-muted" v-text="'Class Definitions Found'"></h1>
+      <p class="text-muted">
+        Select a class to visualize
+      </p>
+      <ul class="list-group">
+        <li class="list-group-item list-group-item-action" v-for="(item,i) in availableClassesNames">
+          <h1 class="text-muted" v-text="item.group "></h1>
+          <ul>
+            <li v-for="def in item.children">
+              <a :href="namespace+'/'+def" v-text="def"></a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div v-else class="col-sm-9">
       <h1>Schema Visualizer</h1>
       <div id="canvas" class="d-none d-sm-none d-md-block"></div>
       <div class="jumbotron" v-if='schemaClass'>
@@ -325,16 +342,10 @@ var app = new Vue({
           rangeIncludes: [],
           showGraph: false,
           namespace : '',
-          addFieldCounter: 0,
-          filterLetters:[]
+          filterLetters:[],
+          availableClassesNames:[]
 				}
 			},
-      watch:{
-        addFieldCounter: function(oldC,newC){
-          this.graph =
-          this.determinePath();
-        }
-      },
 			methods:{
         addFieldForm(){
           Swal({
@@ -979,6 +990,7 @@ var app = new Vue({
           }
         },
         getAvailableClasses(){
+          console.log('making list')
           let results = [];
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class") {
@@ -986,14 +998,36 @@ var app = new Vue({
             }
           }
           this.availableClasses = results.sort();
+          this.getAvailableClassesNames();
           this.getFilters();
+        },
+        getAvailableClassesNames(){
+          var self = this;
+          let res =[];
+          for (var i = 0; i < self.availableClasses.length; i++) {
+            res.push(self.availableClasses[i]['rdfs:label']);
+          }
+          // res = res.sort();
+
+          let data = res.reduce((r, e) => {
+            let group = e[0];
+            if(!r[group]) r[group] = {group, children: [e]}
+            else r[group].children.push(e);
+            return r;
+          }, {})
+
+          res = Object.values(data)
+
+          self.availableClassesNames= _.orderBy(res, ['group'], ['asc']);
+          console.log(res)
+
         },
         getFilters(){
           let letters = [];
           let self = this;
           for (var i = 0; i < self.availableClasses.length; i++) {
 
-            let q = self.removePrefix(self.availableClasses[i]["@id"])[0];
+            let q = self.availableClasses[i]["rdfs:label"][0];
 
             if ( !letters.includes(q) ) {
               letters.push( q );

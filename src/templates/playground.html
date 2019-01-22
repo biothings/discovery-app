@@ -39,6 +39,10 @@
       @click="input = 'https://github.com/data2health/schemas/blob/master/Dataset/Dataset.jsonld'">
         <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> Example URL
       </small>
+      <small class="badge badge-pill badge-primary pointer mr-1"
+      @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
+        <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> Example URL Multiple
+      </small>
     </form>
   </div>
 </div>
@@ -103,9 +107,9 @@ var app = new Vue({
         sendRequest(){
           axios.get(this.input).then(res=>{
             this.data = res.data;
-            let result = res.data['@graph'];
-            for (var i = 0; i < result.length; i++) {
-              if (result[i].hasOwnProperty('@type') && result[i]['@type'] === "rdfs:Class"){
+            let graph = res.data['@graph'];
+            for (var i = 0; i < graph.length; i++) {
+              if (graph[i].hasOwnProperty('@type') && graph[i]['@type'] === "rdfs:Class"){
                 this.makeURLandRedirect(result[i]);
               }
             }
@@ -123,7 +127,8 @@ var app = new Vue({
 
           localStorage.setItem('datasetData', JSON.stringify(this.data));
 
-          window.location.href = "./"+arr[0]+"/"+arr[1];
+          // window.location.href = "./"+arr[0]+"/"+arr[1];
+          window.location.href = "./"+arr[0]+"/";
 
         },
 			},
