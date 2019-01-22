@@ -110,7 +110,7 @@ var app = new Vue({
             let graph = res.data['@graph'];
             for (var i = 0; i < graph.length; i++) {
               if (graph[i].hasOwnProperty('@type') && graph[i]['@type'] === "rdfs:Class"){
-                this.makeURLandRedirect(result[i]);
+                this.makeURLandRedirect(graph[i]);
               }
             }
           }).catch(err=>{
