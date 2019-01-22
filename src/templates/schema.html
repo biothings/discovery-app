@@ -702,7 +702,7 @@ var app = new Vue({
           let self = this;
           for (var i = 0; i < self.availableClasses.length; i++) {
 
-            let q = self.removePrefix(self.availableClasses[i]["@id"])[0];
+            let q = self.availableClasses[i]["rdfs:label"][0];
 
             if ( !letters.includes(q) ) {
               letters.push( q );
@@ -780,6 +780,8 @@ var app = new Vue({
           let context = {{Context}}
           if (context.hasOwnProperty('URL')) {
             this.userURL = context.URL;
+            console.log("URL!!!!!!!!!!!!!!!", this.userURL)
+
           }
           this.reqFile()
       }

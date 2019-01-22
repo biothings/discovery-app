@@ -316,9 +316,10 @@ var app = new Vue({
           // this.$set(item, 'showDetails', !api.showDetails);
         },
         getAll(){
-          axios.get('/query?q="__all__"').then(res=>{
+          axios.get('/query?q="marcodarko"').then(res=>{
             this.registry = res.data.hits;
             this.registryTotal = res.data.total;
+            console.log(this.registry)
             this.calculatePages();
           }).catch(err=>{
             throw err;
@@ -326,8 +327,10 @@ var app = new Vue({
         },
         sendTest(){
           let data={
-            'namespace':'/bts/Test',
-            'url': this.testURL
+            'slug':'/bts/Test',
+            'url': this.testURL,
+            'private': false,
+            'name':'Dataset'
           };
           axios.post('/registry',data).then(res=>{
 

@@ -57,7 +57,6 @@ class SchemaOrgHandler(BaseHandler):
         template_file = "schema.html"
         schema_template = templateEnv.get_template(template_file)
         if yourQuery:
-            print("QUERY "+yourQuery);
             schema_output = schema_template.render(Context=json.dumps({"Query": yourQuery, "Content": True}))
         elif self.get_argument('q', False):
             schema_output = schema_template.render(Context=json.dumps({"Query": '', "Content": False}))
