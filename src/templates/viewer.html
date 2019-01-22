@@ -628,6 +628,7 @@ var app = new Vue({
             let g = JSON.parse(JSON.stringify(this.edgeGraph));
 
             let res = this.paths(g,path[0],path[path.length-1])
+            console.log(res)
             this.allPaths = res;
             this.getUniqueContent(res);
             this.getParentData();
@@ -754,12 +755,23 @@ var app = new Vue({
           this.edgeGraph.push(node);
         },
         getClassLineage(classInfo){
+          console.log(classInfo)
           let subclass ='';
           this.getAvailableClasses();
-          if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(classInfo["rdfs:subClassOf"])) {
+          if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isString(classInfo["rdfs:subClassOf"])) {
+            subclass = classInfo["rdfs:subClassOf"];
+            for (var i = 0; i < this.availableClasses.length; i++) {
+              if (this.availableClasses[i]['@id'] === subclass) {
+                this.lineageArray.unshift(this.availableClasses[i])
+                this.getClassLineage(this.availableClasses[i])
+              }
+            }
+          }
+          else if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(classInfo["rdfs:subClassOf"])) {
             subclass = classInfo["rdfs:subClassOf"]['@id'];
             for (var i = 0; i < this.availableClasses.length; i++) {
               if (this.availableClasses[i]['@id'] === subclass) {
+                console.log('pushing',this.availableClasses[i])
                 this.lineageArray.unshift(this.availableClasses[i])
                 this.getClassLineage(this.availableClasses[i])
               }
@@ -825,7 +837,12 @@ var app = new Vue({
             for (var i = 0; i < this.graph.length; i++) {
 
               if (this.graph[i].hasOwnProperty('schema:domainIncludes') && this.graph[i]["@type"] === "rdf:Property") {
-                if ( _.isArray(this.graph[i]['schema:domainIncludes']) ) {
+                if ( _.isString(this.graph[i]['schema:domainIncludes']) ) {
+                  if (this.graph[i]["schema:domainIncludes"] === classInfo || this.graph[i]["schema:domainIncludes"] === classInfo["rdfs:label"]) {
+                    properties.push(this.graph[i]);
+                  }
+                }
+                else if ( _.isArray(this.graph[i]['schema:domainIncludes']) ) {
                   for (var x = 0; x < this.graph[i]['schema:domainIncludes'].length; x++) {
                     if (this.graph[i]["schema:domainIncludes"][x]['@id'] === classInfo || this.graph[i]["schema:domainIncludes"][x]['@id'] === classInfo["rdfs:label"]) {
                       properties.push(this.graph[i]);
@@ -886,7 +903,12 @@ var app = new Vue({
         getType: function(data){
           let types=[];
           if (data.hasOwnProperty("schema:rangeIncludes")) {
-            if (_.isArray(data["schema:rangeIncludes"])) {
+            if (_.isString(data["schema:rangeIncludes"])) {
+              let type = data['schema:rangeIncludes'].split(':');
+              type = type[type.length-1];
+              types.push(type);
+            }
+            else if (_.isArray(data["schema:rangeIncludes"])) {
               for (var i = 0; i < data['schema:rangeIncludes'].length; i++) {
                 let type = data['schema:rangeIncludes'][i]['@id'].split(':');
                 type = type[type.length-1];
@@ -940,7 +962,14 @@ var app = new Vue({
           }
         },
         extractPropertyInfo(data){
-          if ( _.isArray(data['schema:domainIncludes']) ) {
+          if ( _.isString(data['schema:domainIncludes']) ) {
+              let idValue = data["schema:domainIncludes"].split(':');
+              idValue = idValue[idValue.length-1];
+              if (idValue.toLowerCase() === this.query.toLowerCase()) {
+                this.properties.push(data);
+              }
+          }
+          else if ( _.isArray(data['schema:domainIncludes']) ) {
             for (var i = 0; i < data['schema:domainIncludes'].length; i++) {
               let idValue = data["schema:domainIncludes"][i]['@id'].split(':');
               idValue = idValue[idValue.length-1];
@@ -958,14 +987,22 @@ var app = new Vue({
           this.properties = _.sortBy(this.properties, [user => user['rdfs:label']], ['asc']);
         },
         extractParentPropertyInfo(data){
-          if ( _.isArray(data['schema:domainIncludes']) ) {
+          if ( _.isString(data['schema:domainIncludes']) ) {
+              let idValue = data["schema:domainIncludes"].split(':');
+              idValue = idValue[idValue.length-1];
+              if (idValue.toLowerCase() === this.subclass.toLowerCase() || idValue.toLowerCase() === this.namespace+':'+this.subclass.toLowerCase()) {
+                console.log('MATCH')
+                this.parentProperties.push(data);
+              }
+          }
+          else if ( _.isArray(data['schema:domainIncludes']) ) {
             for (var i = 0; i < data['schema:domainIncludes'].length; i++) {
-              if (data["schema:domainIncludes"][i]['@id'].toLowerCase() === 'schema:'+this.subclass.toLowerCase() || data["schema:domainIncludes"][i]['@id'].toLowerCase() === this.subclass.toLowerCase()) {
+              if (data["schema:domainIncludes"][i]['@id'].toLowerCase() === this.namespace+':'+this.subclass.toLowerCase() || data["schema:domainIncludes"][i]['@id'].toLowerCase() === this.subclass.toLowerCase()) {
                 this.parentProperties.push(data);
               }
             }
           }else if( _.isObject(data['schema:domainIncludes']) ){
-            if (data["schema:domainIncludes"]['@id'].toLowerCase() === 'schema:'+this.subclass.toLowerCase() || data["schema:domainIncludes"]['@id'].toLowerCase() === this.subclass.toLowerCase() ) {
+            if (data["schema:domainIncludes"]['@id'].toLowerCase() === this.namespace+':'+this.subclass.toLowerCase() || data["schema:domainIncludes"]['@id'].toLowerCase() === this.subclass.toLowerCase() ) {
               this.parentProperties.push(data);
             }
           }
@@ -990,7 +1027,6 @@ var app = new Vue({
           }
         },
         getAvailableClasses(){
-          console.log('making list')
           let results = [];
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class") {
@@ -1019,7 +1055,7 @@ var app = new Vue({
           res = Object.values(data)
 
           self.availableClassesNames= _.orderBy(res, ['group'], ['asc']);
-          console.log(res)
+          // console.log(res)
 
         },
         getFilters(){
