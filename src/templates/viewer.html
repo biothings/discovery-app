@@ -110,7 +110,7 @@ g.nodes g.node:last-child text{
           <h1 class="text-muted" v-text="item.group "></h1>
           <ul>
             <li v-for="def in item.children">
-              <a :href="namespace+'/'+def" v-text="def"></a>
+              <a :href="'./'+def" v-text="def"></a>
             </li>
           </ul>
         </li>
