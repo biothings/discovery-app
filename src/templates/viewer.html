@@ -101,20 +101,46 @@ g.nodes g.node:last-child text{
     </div>
     <!-- IF NO QUERY -->
     <div v-if="!query" class="col-sm-9">
-      <h1 class="text-muted" v-text="'Class Definitions Found'"></h1>
-      <p class="text-muted">
-        Select a class to visualize
-      </p>
-      <ul class="list-group">
-        <li class="list-group-item list-group-item-action" v-for="(item,i) in availableClassesNames">
-          <h1 class="text-muted" v-text="item.group "></h1>
-          <ul>
-            <li v-for="def in item.children">
-              <a :href="'./'+def" v-text="def"></a>
-            </li>
-          </ul>
-        </li>
-      </ul>
+      <div class="padding20">
+        <button @click="switchView()" class="btn btn-secondary up text-light">
+          <span v-if="viewAlphabetical"> Alphabetical View</span>
+          <span v-else> Hierarchical View</span>
+        </button>
+      </div>
+      <div v-if="viewAlphabetical">
+        <form class="col-sm-6 pl-0">
+          <div class="input-group mb-2">
+            <div class="input-group-prepend">
+              <div class="input-group-text">Search</div>
+            </div>
+            <input type="text" v-model='searchQuery' class="form-control" id="inlineFormInputGroup" placeholder="Enter text here">
+          </div>
+          <div>
+            <ul>
+              <li v-for='item in searchResults'>
+                <a :href='"./"+item["rdfs:label"]' v-text='item["rdfs:label"]'></a>
+              </li>
+            </ul>
+          </div>
+        </form>
+        <h1 class="text-muted">Alphabetical</h1>
+        <p class="text-muted">
+          Select a class
+        </p>
+        <ul class="list-group">
+          <li class="list-group-item list-group-item-action" v-for="(item,i) in availableClassesNames">
+            <h1 class="text-muted" v-text="item.group "></h1>
+            <ul>
+              <li v-for="def in item.children">
+                <a :href="'./'+def" v-text="def"></a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div v-else>
+        <h1 class="text-muted">Hierarchical</h1>
+      </div>
     </div>
     <div v-else class="col-sm-9">
       <h1>Schema Visualizer</h1>
@@ -145,8 +171,20 @@ g.nodes g.node:last-child text{
           </template>
         </div>
       </div>
+      <div class="padding20 bg-light">
+        <p>
+          Properties with <a class="mainTextDark" :href="'./'+schemaClass" v-text="schemaClass"></a> as Expected Type
+        </p>
+        <ul>
+          <li v-for="item in rangeFromClassResults">
+            <a class="font-weight-bold" :href='"./"+item' v-text="item"></a></td>
+          </li>
+        </ul>
+      </div>
       <h1 class="mainTextDark bold" v-if='property' v-text='property'></h1>
-      <h1 class="mainTextDark bold" v-if='schemaClass' v-text='schemaClass'></h1>
+      <h1 class="mainTextDark" v-if='schemaClass'>
+        Properties of <a class="mainTextDark bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
+      </h1>
       <table class="table table-responsive" v-if="properties.length" style="margin-bottom: 40px">
       <thead class="mainBackDark text-light">
         <tr>
@@ -215,7 +253,9 @@ g.nodes g.node:last-child text{
     </div>
 
     <span v-if="parentClassesAndProps.length" v-for="(parent,i) in parentClassesAndProps">
-      <h1 :id='parent["className"]' class="mainTextLight" v-html='parent["className"]'></h1>
+      <h1 :id='parent["className"]' class="mainTextLight">
+        Properties of <a class="mainTextLight bold" :href="'./'+parent['className']" v-html='parent["className"]'></a>
+      </h1>
       <table v-if="parent['props'].length" class="table table-responsive" style="margin-bottom: 40px">
       <thead class="mainBackLight text-light">
         <tr>
@@ -254,8 +294,8 @@ g.nodes g.node:last-child text{
       This class has no properties of it's own
     </div>
   </template>
-
     </div>
+
   </div>
 
   <div class="modal fade" id="addFieldModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -343,69 +383,58 @@ var app = new Vue({
           showGraph: false,
           namespace : '',
           filterLetters:[],
-          availableClassesNames:[]
+          availableClassesNames:[],
+          rangeFromClassResults:[],
+          searchQuery:'',
+          searchResults:[],
+          viewAlphabetical: true
 				}
 			},
+      watch:{
+        searchQuery:function(newQ,oldQ) {
+          if (newQ.length) {
+            let result = _.filter(this.availableClasses, function(o) {
+                if (o['rdfs:label'].toLowerCase().includes(newQ.toLowerCase())) {
+                  return o;
+                }
+            });
+              this.searchResults = result;
+          }else{
+            this.searchResults = [];
+          }
+        }
+      },
 			methods:{
-        addFieldForm(){
-          Swal({
-            title: 'Property Name',
-            input: 'text',
-            inputAttributes: {
-              autocapitalize: 'off'
-            },
-            showCancelButton: true,
-            confirmButtonText: 'Look up',
-            showLoaderOnConfirm: true,
-            preConfirm: (login) => {
-              return fetch(`//api.github.com/users/${login}`)
-                .then(response => {
-                  if (!response.ok) {
-                    throw new Error(response.statusText)
-                  }
-                  return response.json()
-                })
-                .catch(error => {
-                  Swal.showValidationMessage(
-                    `Request failed: ${error}`
-                  )
-                })
-            },
-            allowOutsideClick: () => !Swal.isLoading()
-          }).then((result) => {
-            if (result.value) {
-              Swal({
-                title: `${result.value.login}'s avatar`,
-                imageUrl: result.value.avatar_url
-              })
-            }
-          })
+        switchView(){
+          this.viewAlphabetical = !this.viewAlphabetical;
         },
-        addField(){
-          this.addFieldCounter++;
+        getRangeFromClass(){
+          let self = this;
+          let query =self.query;
 
-          this.graph.push({
-            '@id': "schema:NEWPROP",
-            '@type': "rdf:Property",
-            'rdfs:comment': "THIS IS A TEST DECRIPTION",
-            'rdfs:label': "NEWPROP",
-            'schema:domainIncludes': {
-              '@id': "schema:Dataset"
-            },
-            'schema:rangeIncludes': {
-              '@id': "schema:TEST TYPE"
-            },
-            'schema:sameAs': {
-              '@id': "schema:Dataset"
+          for (var i = 0; i < self.graph.length; i++) {
+            if (self.graph[i].hasOwnProperty("schema:rangeIncludes") && _.isPlainObject(self.graph[i]["schema:rangeIncludes"])) {
+              let current = self.removePrefix(self.graph[i]["schema:rangeIncludes"]["@id"]);
+              if (current === query) {
+                self.rangeFromClassResults.push(self.graph[i]["rdfs:label"])
+              }
             }
-          });
+            if (self.graph[i].hasOwnProperty("schema:rangeIncludes") && _.isArray(self.graph[i]["schema:rangeIncludes"])) {
+              for (var x = 0; x < self.graph['schema:rangeIncludes'].length; x++) {
+                let current = self.removePrefix(self.graph[i]['schema:rangeIncludes'][x]["@id"]);
+                if (current === query) {
+                  self.rangeFromClassResults.push(self.graph[i]["rdfs:label"])
+                }
+              }
+            }
+          }
+          // console.log("RESULTS ",self.rangeFromClassResults)
         },
         generateLink(query){
           var self = this;
           var link = ''
           for (var i = 0; i < self.graph.length; i++) {
             //IF OBJECT
-            // console.log(self.graph[i]["rdfs:label"])
             if (_.isPlainObject(self.graph[i]["rdfs:label"])) {
               if (self.graph[i]["rdfs:label"]['@value'] === query)
                 {
@@ -628,7 +657,6 @@ var app = new Vue({
             let g = JSON.parse(JSON.stringify(this.edgeGraph));
 
             let res = this.paths(g,path[0],path[path.length-1])
-            console.log(res)
             this.allPaths = res;
             this.getUniqueContent(res);
             this.getParentData();
@@ -691,6 +719,7 @@ var app = new Vue({
           }
           this.getClassLineage(this.classInfo);
           this.getAllPaths();
+          this.getRangeFromClass();
         },
         makeQueryGraph(){
           let smallG = new jsnx.Graph();
@@ -755,23 +784,12 @@ var app = new Vue({
           this.edgeGraph.push(node);
         },
         getClassLineage(classInfo){
-          console.log(classInfo)
           let subclass ='';
           this.getAvailableClasses();
-          if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isString(classInfo["rdfs:subClassOf"])) {
-            subclass = classInfo["rdfs:subClassOf"];
-            for (var i = 0; i < this.availableClasses.length; i++) {
-              if (this.availableClasses[i]['@id'] === subclass) {
-                this.lineageArray.unshift(this.availableClasses[i])
-                this.getClassLineage(this.availableClasses[i])
-              }
-            }
-          }
-          else if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(classInfo["rdfs:subClassOf"])) {
+          if (classInfo.hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(classInfo["rdfs:subClassOf"])) {
             subclass = classInfo["rdfs:subClassOf"]['@id'];
             for (var i = 0; i < this.availableClasses.length; i++) {
               if (this.availableClasses[i]['@id'] === subclass) {
-                console.log('pushing',this.availableClasses[i])
                 this.lineageArray.unshift(this.availableClasses[i])
                 this.getClassLineage(this.availableClasses[i])
               }
@@ -933,7 +951,7 @@ var app = new Vue({
 
             var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
 
-            console.log('retreived data', retrievedObject);
+            // console.log('retreived data', retrievedObject);
 
             this.graph = retrievedObject['@graph'];
             this.context = retrievedObject['@context'];
@@ -987,15 +1005,7 @@ var app = new Vue({
           this.properties = _.sortBy(this.properties, [user => user['rdfs:label']], ['asc']);
         },
         extractParentPropertyInfo(data){
-          if ( _.isString(data['schema:domainIncludes']) ) {
-              let idValue = data["schema:domainIncludes"].split(':');
-              idValue = idValue[idValue.length-1];
-              if (idValue.toLowerCase() === this.subclass.toLowerCase() || idValue.toLowerCase() === this.namespace+':'+this.subclass.toLowerCase()) {
-                console.log('MATCH')
-                this.parentProperties.push(data);
-              }
-          }
-          else if ( _.isArray(data['schema:domainIncludes']) ) {
+          if ( _.isArray(data['schema:domainIncludes']) ) {
             for (var i = 0; i < data['schema:domainIncludes'].length; i++) {
               if (data["schema:domainIncludes"][i]['@id'].toLowerCase() === this.namespace+':'+this.subclass.toLowerCase() || data["schema:domainIncludes"][i]['@id'].toLowerCase() === this.subclass.toLowerCase()) {
                 this.parentProperties.push(data);
@@ -1055,7 +1065,6 @@ var app = new Vue({
           res = Object.values(data)
 
           self.availableClassesNames= _.orderBy(res, ['group'], ['asc']);
-          // console.log(res)
 
         },
         getFilters(){
@@ -1132,7 +1141,6 @@ var app = new Vue({
 			mounted:function(){
         let context = {{Context}}
          if ( context ) {
-           // console.log('Context YOUR OWN  ',context);
            this.query = context.query;
            this.reqFile()
          }
