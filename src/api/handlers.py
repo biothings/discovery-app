@@ -17,13 +17,10 @@ class BaseHandler(BaseESRequestHandler):
 class APIHandler(BaseHandler):
     def post(self):
         req = tornado.escape.json_decode(self.request.body)
-        test_code = req.get('test_code')
         url = req.get('url','').lower()
+        slug = req.get('slug','').lower()
 
-        if test_code == 'discovery':
-            user = 'test_user'
-        else:
-            user = self.get_current_user()
+        user = self.get_current_user()
 
         if not user:
             res = {'success': False,
@@ -31,13 +28,13 @@ class APIHandler(BaseHandler):
             self.set_status(401)
             self.return_json(res)
         else:
-            if url:
+            if url and slug:
                 esq = ESQuery()
-                res = esq.save_doc(url=url, user=user)
+                res = esq.save_doc(url=url, user=user, slug=slug, private=False, archived=False)
                 self.return_json(res)
             else:
                 self.return_json(
-                    {'success': False, 'error': 'Parameter "url" not found.'})
+                    {'success': False, 'error': 'Parameters "url" and/or "slug" not found.'})
 
     def get(self, api_id):
         esq = ESQuery()

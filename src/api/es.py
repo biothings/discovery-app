@@ -5,25 +5,38 @@ import logging
 
 ES_HOST = 'localhost:9200'
 ES_INDEX_NAME = 'discovery'
-ES_DOC_TYPE = 'api'
+ES_DOC_TYPE = 'doc'
 ES_INDEX_SETTINGS = {
     "mappings": {
-        "api": {
-            "dynamic": True,
+        "doc": {
+            "dynamic_templates": [
+                # this must be the last template
+                {
+                    "template_1": {
+                        "match": "*",
+                        "match_mapping_type": "string",
+                        "mapping": {
+                            "type": "text",
+                            "index": True,
+                            "ignore_malformed": True,
+                            "fields": {
+                                "raw": {
+                                    "type": "keyword"
+                                }
+                            }
+                        }
+                    }
+                }
+            ],
             "properties": {
-                "name":    { "type": "text"  },
-                "url":     { "type": "text"  },
-                "slug":     { "type": "text"  },
-                "private":     { "type": "boolean"  },
-                "user":      { "type": "object" },
-                "created":  {
-                  "type":   "date",
-                  "format": "strict_date_optional_time||epoch_millis"
+                "~raw": {
+                    "type": "binary"
                 }
             }
         }
     }
 }
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -42,13 +55,3 @@ class ESQuery():
 
     def exists(self, api_id):
         return self._es.exists(index=self._index, doc_type=self._doc_type, id=api_id)
-        # if api_id == '__all__':
-        #     query = {
-        #         "query": {
-        #             "match_all": {}
-        #         }
-        #     }
-        #     res = self._es.search(index=self._index, doc_type=self._doc_type, body=query)
-        #     return res
-        # else:
-        #     return self._es.exists(index=self._index, doc_type=self._doc_type, id=api_id)
