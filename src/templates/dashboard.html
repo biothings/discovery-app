@@ -120,7 +120,7 @@ var app = new Vue({
       },
 			methods:{
         getAll(){
-          axios.get('/query?q="test_user"').then(res=>{
+          axios.get('/query?q="marcodarko"').then(res=>{
             this.dashboard = res.data.hits;
             this.dashboardTotal = res.data.total;
           }).catch(err=>{

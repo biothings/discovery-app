@@ -127,7 +127,10 @@
               </small>
             </li>
             <template v-if="registry.length" v-for="(item,index) in registry">
-              <li class="list-group-item d-flex justify-content-between align-items-center">
+              <li v-text="item">
+
+              </li>
+              <!-- <li class="list-group-item d-flex justify-content-between align-items-center">
                 <a class="font-weight-bold" @click="selectedRegistryItem=item" href="#" data-toggle="modal" data-target="#DetailsModal" v-text="item.user.login"></a>
                 <small >
                   <a v-text="item.url" :href="item.url" target="_blank"></a>
@@ -135,7 +138,7 @@
                 <a role="button" :href="item.url" class="btn btn-outline-secondary up">
                   Go
                 </a>
-              </li>
+              </li> -->
             </template>
             <li v-if="!registry.length" class="text-center text-muted list-group-item">
               No Results
@@ -159,9 +162,9 @@
               <div class="col-sm-12 right-align form-group">
                 <select class="perPage form-control form-control-sm w-25 m-auto" v-model="perPage" @change="calculatePages" id="perPage">
                     <option value="" disabled selected>Shown Per Page</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
+                    <option value="20">20 per page</option>
+                    <option value="50">50 per page</option>
+                    <option value="100">100 per page</option>
                 </select>
               </div>
             </div>
@@ -274,6 +277,29 @@ var app = new Vue({
         }
       },
       methods:{
+        getQueryFilters: function(){
+            var filters = [];
+            var authorFilters = [];
+            var finalFilters = {};
+            this.tags.forEach(function(item){
+              if (item.active)
+                  filters.push(item.name);
+              });
+            if (filters.length > 0){
+              finalFilters['tags.name.raw'] = filters;
+            }
+
+            this.authors.forEach(function(item){
+              if (item.active){
+                authorFilters.push(item.name);
+              }
+              });
+            if (authorFilters.length){
+              finalFilters['info.contact.name.raw'] = authorFilters;
+            }
+
+            return finalFilters;
+        },
         search(query){
           var self = this;
 
@@ -283,9 +309,13 @@ var app = new Vue({
               var params = {
                   "params": {
                     "q": query,
+                    // 'fields': 'info,_meta,paths.path, paths.pathitem.get.summary,paths.pathitem.post.summary,paths.pathitem.delete.summary,paths.pathitem.patch.summary,paths.pathitem.put.summary,paths.pathitem.head.summary,paths.pathitem.put.summary,options.pathitem.head.summary,paths.pathitem.put.summary,paths.pathitem.trace.summary, tags,openapi,swagger,'
                   }
               };
             }
+            // var filters = this.getQueryFilters();
+            // if (filters)
+            //     params["params"]["filters"] = filters;
 
             $('#searching').show();
 
@@ -327,10 +357,8 @@ var app = new Vue({
         },
         sendTest(){
           let data={
-            'slug':'/bts/Test',
+            'slug':'/bts/Dataset',
             'url': this.testURL,
-            'private': false,
-            'name':'Dataset'
           };
           axios.post('/registry',data).then(res=>{
 
@@ -420,7 +448,7 @@ var app = new Vue({
     },
     mounted:function(){
       this.reqFile();
-      this.getAll();
+      this.search();
       this.checkLoggedUser();
     },
     created: function(){
