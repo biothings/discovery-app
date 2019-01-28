@@ -43,6 +43,45 @@ g.nodes g.node:last-child text{
 .table thead th{
   vertical-align: middle;
 }
+
+
+.text-0{
+  color: #02c4e7;
+  font-weight: 900;
+}
+.text-1{
+  color: #0193ad;
+  font-weight: 900;
+}
+.text-2{
+  color: #006476;
+  font-weight: 900;
+}
+.text-3{
+  color: #003f4a;
+  font-weight: 900;
+}
+.text-4{
+  color: #001d22;
+  font-weight: 900;
+}
+
+.bg-0{
+  background: #02c4e7;
+}
+.bg-1{
+  background: #0193ad;
+}
+.bg-2{
+  background: #006476;
+}
+.bg-3{
+  background: #003f4a;
+}
+.bg-4{
+  background: #001d22;
+}
+
 </style>
 <div id="viewer" class="container" style="min-height: 70vh;padding-top:40px;">
   <div class="row" style="margin-top:40px;">
@@ -112,7 +151,7 @@ g.nodes g.node:last-child text{
         <form class="col-sm-6 pl-0">
           <div class="input-group mb-2">
             <div class="input-group-prepend">
-              <div class="input-group-text">Search</div>
+              <div class="input-group-text">Quick Search</div>
             </div>
             <input type="text" v-model='searchQuery' class="form-control" id="inlineFormInputGroup" placeholder="Enter text here">
           </div>
@@ -125,12 +164,14 @@ g.nodes g.node:last-child text{
           </div>
         </form>
         <h1 class="text-muted">Alphabetical</h1>
-        <p class="text-muted">
-          Select a class
-        </p>
+        <ul class="pagination">
+          <li class="page-link" v-for="(item,i) in availableClassesNames">
+            <a :href="'#'+item.group" v-text="item.group"></a>
+          </li>
+        </ul>
         <ul class="list-group">
           <li class="list-group-item list-group-item-action" v-for="(item,i) in availableClassesNames">
-            <h1 class="text-muted" v-text="item.group "></h1>
+            <h1 :id="item.group" class="text-muted" v-text="item.group "></h1>
             <ul>
               <li v-for="def in item.children">
                 <a :href="'./'+def" v-text="def"></a>
@@ -142,21 +183,33 @@ g.nodes g.node:last-child text{
       <div v-else>
         <h1 class="text-muted">Hierarchical</h1>
         <div id="canvas2"></div>
+        <ul class="pagination">
+          <li class="d-inline bg-0" style="width:20px; height:20px" >
+          </li>
+          <li class="d-inline bg-1" style="width:20px; height:20px" >
+          </li>
+          <li class="d-inline bg-2" style="width:20px; height:20px" >
+          </li>
+          <li class="d-inline bg-3" style="width:20px; height:20px" >
+          </li>
+          <li class="d-inline bg-4" style="width:20px; height:20px" >
+          </li>
+        </ul>
         <ul>
           <li>
-            <a :href="'./'+rootNode" v-text="rootNode"></a>
+            <a class="text-0" :href="'./'+rootNode" v-text="rootNode"></a>
             <ul>
               <li v-for="item in getNeighbors(rootNode)">
-                <a :href="'./'+item" v-text="item"></a>
+                <a class="text-1" :href="'./'+item" v-text="item"></a>
                 <ul>
                   <li v-for="item2 in getNeighbors(item)">
-                    <a :href="'./'+item2" v-text="item2"></a>
+                    <a class="text-2" :href="'./'+item2" v-text="item2"></a>
                     <ul>
                       <li v-for="item3 in getNeighbors(item2)">
-                        <a :href="'./'+item3" v-text="item3"></a>
+                        <a class="text-3" :href="'./'+item3" v-text="item3"></a>
                         <ul>
                           <li v-for="item4 in getNeighbors(item3)">
-                            <a :href="'./'+item4" v-text="item4"></a>
+                            <a class="text-4" :href="'./'+item4" v-text="item4"></a>
                           </li>
                         </ul>
                       </li>
@@ -414,7 +467,7 @@ var app = new Vue({
           rangeFromClassResults:[],
           searchQuery:'',
           searchResults:[],
-          viewAlphabetical: false,
+          viewAlphabetical: true,
           rootNode:''
 				}
 			},
@@ -1221,6 +1274,7 @@ var app = new Vue({
           }
       }
 		});
+
 
 </script>
 {% include "footer.html" %}
