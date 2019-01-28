@@ -103,8 +103,9 @@ g.nodes g.node:last-child text{
     <div v-if="!query" class="col-sm-9">
       <div class="padding20">
         <button @click="switchView()" class="btn btn-secondary up text-light">
-          <span v-if="viewAlphabetical"> Alphabetical View</span>
-          <span v-else> Hierarchical View</span>
+          <!-- <span v-if="viewAlphabetical"> Alphabetical View</span>
+          <span v-else> Hierarchical View</span> -->
+          Toggle View
         </button>
       </div>
       <div v-if="viewAlphabetical">
@@ -140,6 +141,32 @@ g.nodes g.node:last-child text{
       </div>
       <div v-else>
         <h1 class="text-muted">Hierarchical</h1>
+        <div id="canvas2"></div>
+        <ul>
+          <li>
+            <a :href="'./'+rootNode" v-text="rootNode"></a>
+            <ul>
+              <li v-for="item in getNeighbors(rootNode)">
+                <a :href="'./'+item" v-text="item"></a>
+                <ul>
+                  <li v-for="item2 in getNeighbors(item)">
+                    <a :href="'./'+item2" v-text="item2"></a>
+                    <ul>
+                      <li v-for="item3 in getNeighbors(item2)">
+                        <a :href="'./'+item3" v-text="item3"></a>
+                        <ul>
+                          <li v-for="item4 in getNeighbors(item3)">
+                            <a :href="'./'+item4" v-text="item4"></a>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
     <div v-else class="col-sm-9">
@@ -387,7 +414,8 @@ var app = new Vue({
           rangeFromClassResults:[],
           searchQuery:'',
           searchResults:[],
-          viewAlphabetical: true
+          viewAlphabetical: false,
+          rootNode:''
 				}
 			},
       watch:{
@@ -405,6 +433,42 @@ var app = new Vue({
         }
       },
 			methods:{
+        makeHierarchyTree(){
+          // Check for query or it will run multiple times
+          if (!this.query) {
+            this.nxG = new jsnx.DiGraph();
+            let grabFrom = this.availableClasses;
+
+            if (grabFrom.length > 1) {
+              for (var i = 0; i < grabFrom.length; i++) {
+                if (grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(grabFrom[i]["rdfs:subClassOf"]) ) {
+                  this.addNode(this.removePrefix( grabFrom[i]["@id"]));
+                  this.addNode(this.removePrefix( grabFrom[i]["rdfs:subClassOf"]["@id"]));
+                  this.addEdge( this.removePrefix( grabFrom[i]["rdfs:subClassOf"]["@id"]),this.removePrefix( grabFrom[i]["@id"]));
+                }
+                else if(grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isArray(grabFrom[i]["rdfs:subClassOf"]) ){
+                  this.addNode(this.removePrefix( grabFrom[i]["@id"]));
+                  for (var x = 0; x < grabFrom[i]["rdfs:subClassOf"].length; x++) {
+                    this.addNode(this.removePrefix( grabFrom[i]["rdfs:subClassOf"][x]["@id"]));
+                    this.addEdge(this.removePrefix( grabFrom[i]["rdfs:subClassOf"][x]["@id"]),this.removePrefix( grabFrom[i]["@id"]));
+                  }
+                }
+              }
+            }
+
+            let topoRes = jsnx.topologicalSort(this.nxG);
+            let rootNode = topoRes[0];
+            this.rootNode= rootNode;
+            // this.drawGraph(this.nxG, '#canvas2');
+          }
+
+        },
+        getNeighbors(node){
+          if (node) {
+            let neighbors = this.nxG.neighbors(node);
+            return neighbors;
+          }
+        },
         switchView(){
           this.viewAlphabetical = !this.viewAlphabetical;
         },
@@ -750,11 +814,11 @@ var app = new Vue({
           }else{
             smallG.addNode(this.classInfo["@id"],{'label':this.classInfo["@id"]});
           }
-          this.drawGraph(smallG);
+          this.drawGraph(smallG, '#canvas');
         },
-        drawGraph(g){
+        drawGraph(g,container){
           jsnx.draw(g, {
-            element: '#canvas',
+            element: container,
             weighted: true,
             edgeStyle: {
                 'stroke-width': 10,
@@ -1065,6 +1129,7 @@ var app = new Vue({
           res = Object.values(data)
 
           self.availableClassesNames= _.orderBy(res, ['group'], ['asc']);
+          self.makeHierarchyTree();
 
         },
         getFilters(){
