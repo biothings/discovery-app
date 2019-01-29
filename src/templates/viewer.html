@@ -65,6 +65,22 @@ g.nodes g.node:last-child text{
   color: #001d22;
   font-weight: 900;
 }
+.text-5{
+  color: #011013;
+  font-weight: 900;
+}
+.text-6{
+  color: #230528;
+  font-weight: 900;
+}
+.text-7{
+  color: #53185b;
+  font-weight: 900;
+}
+.text-8{
+  color: #722e7c;
+  font-weight: 900;
+}
 
 .bg-0{
   background: #02c4e7;
@@ -80,6 +96,34 @@ g.nodes g.node:last-child text{
 }
 .bg-4{
   background: #001d22;
+}
+.bg-5{
+  background: #011013;
+}
+.bg-6{
+  background: #230528;
+}
+.bg-7{
+  background: #53185b;
+}
+.bg-8{
+  background: #722e7c;
+}
+
+.table-striped-main tbody tr:nth-of-type(odd){
+  background-color: rgba(81, 187, 187, 0.2);
+}
+
+.table-striped-main tbody tr:nth-of-type(even){
+  background-color: rgba(187, 187, 187, 0.1);
+}
+
+.table-striped-sec tbody tr:nth-of-type(odd){
+  background-color: rgba(169, 82, 187, 0.1);
+}
+
+.table-striped-sec tbody tr:nth-of-type(even){
+  background-color: rgba(187, 187, 187, 0.1);
 }
 
 </style>
@@ -131,6 +175,9 @@ g.nodes g.node:last-child text{
           </li>
           <li class="list-group-item noPadding" v-for="item in parentDisplayResults.slice().reverse()">
             <a class="nav-link" :href="'#'+removePrefix(item)" ><i class="fas fa-arrow-alt-circle-right mainTextLight"></i> <span v-text="removePrefix(item)"></span></a>
+          </li>
+          <li class="list-group-item noPadding">
+            <a class="nav-link" href="#bottom" ><i class="fas fa-arrow-alt-circle-right mainTextDark"></i> More</a>
           </li>
         </ul>
       </template>
@@ -194,6 +241,14 @@ g.nodes g.node:last-child text{
           </li>
           <li class="d-inline bg-4" style="width:20px; height:20px" >
           </li>
+          <li class="d-inline bg-5" style="width:20px; height:20px" >
+          </li>
+          <li class="d-inline bg-6" style="width:20px; height:20px" >
+          </li>
+          <li class="d-inline bg-7" style="width:20px; height:20px" >
+          </li>
+          <li class="d-inline bg-8" style="width:20px; height:20px" >
+          </li>
         </ul>
         <ul>
           <li>
@@ -210,6 +265,26 @@ g.nodes g.node:last-child text{
                         <ul>
                           <li v-for="item4 in getNeighbors(item3)">
                             <a class="text-4" :href="'./'+item4" v-text="item4"></a>
+                            <ul>
+                              <li v-for="item5 in getNeighbors(item4)">
+                                <a class="text-5" :href="'./'+item5" v-text="item5"></a>
+                                <ul>
+                                  <li v-for="item6 in getNeighbors(item5)">
+                                    <a class="text-6" :href="'./'+item6" v-text="item6"></a>
+                                    <ul>
+                                      <li v-for="item7 in getNeighbors(item6)">
+                                        <a class="text-7" :href="'./'+item7" v-text="item7"></a>
+                                        <ul>
+                                          <li v-for="item8 in getNeighbors(item7)">
+                                            <a class="text-8" :href="'./'+item8" v-text="item8"></a>
+                                          </li>
+                                        </ul>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                            </ul>
                           </li>
                         </ul>
                       </li>
@@ -223,17 +298,17 @@ g.nodes g.node:last-child text{
       </div>
     </div>
     <div v-else class="col-sm-9">
-      <h1>Schema Visualizer</h1>
+      <!-- <h1>Schema Visualizer</h1> -->
       <div id="canvas" class="d-none d-sm-none d-md-block"></div>
       <div class="jumbotron" v-if='schemaClass'>
         <div >
-          <button @click="toggleGraph" class="d-none d-sm-none d-md-block btn themeButton text-light float-right" ><i class="fas fa-draw-polygon"></i> Graph</button>
+          <button v-if="!showGraph" @click="toggleGraph" class="d-none d-sm-none d-md-block btn themeButton text-light float-right pulse" ><i class="fas fa-draw-polygon"></i> Graph</button>
           <h1 class="mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
           <template v-if='allPaths.length'>
             <ul>
               <li v-for="path in allPaths">
                 <span v-for="(item,index) in path">
-                  <a :class="[ index !== path.length-1 ? 'mainTextLight' : 'mainTextDark']" class="font-weight-bold" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
+                  <a :class="[ index !== path.length-1 ? 'mainTextLight' : 'mainTextDark']" class="font-weight-bold small" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
                   <span v-if="index !== path.length-1">&gt;</span>
                 </span>
               </li>
@@ -247,65 +322,63 @@ g.nodes g.node:last-child text{
             <a class="mainTextDark font-weight-bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
           </template>
           <template v-if="schemaClass">
-            <p v-html="classInfo['rdfs:comment']" class="padding20 description mainTextDark"></p>
+            <p v-html="classInfo['rdfs:comment'] || 'No Description Provided'" class="padding20 description mainTextDark"></p>
           </template>
         </div>
       </div>
-      <div class="padding20 bg-light">
-        <p>
-          Properties with <a class="mainTextDark" :href="'./'+schemaClass" v-text="schemaClass"></a> as Expected Type
-        </p>
-        <ul>
-          <li v-for="item in rangeFromClassResults">
-            <a class="font-weight-bold" :href='"./"+item' v-text="item"></a></td>
-          </li>
-        </ul>
-      </div>
+
       <h1 class="mainTextDark bold" v-if='property' v-text='property'></h1>
-      <h1 class="mainTextDark" v-if='schemaClass'>
+      <h3 class="mainTextDark" v-if='schemaClass'>
         Properties of <a class="mainTextDark bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
-      </h1>
-      <table class="table table-responsive" v-if="properties.length" style="margin-bottom: 40px">
+      </h3>
+      <table class="table table-responsive table-striped-main" v-if="properties.length" style="margin-bottom: 40px">
       <thead class="mainBackDark text-light">
         <tr>
-          <th scope="col">Property</th>
+          <th >
+            <!-- <h1 v-if='schemaClass'>
+              Properties of <a class="text-light bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
+            </h1> -->
+          </th>
+          <!-- <th scope="col">Property</th>
           <th scope="col">Expected Type</th>
-          <th scope="col">Description</th>
+          <th scope="col">Description</th> -->
         </tr>
       </thead>
       <tbody>
         <tr v-for="(item,i) in properties">
-        <!-- <tr v-for="(item,i) in checkLinks(properties)"> -->
-          <td>
-            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a>
-            <!-- <a class="font-weight-bold" :target="[item.linkOut ? '_blank' : '_self']" :href='item.link' v-html=getTitle(item)></a> -->
-            <!-- <template v-if="item.linkOut">
-              <i class="fas fa-external-link-alt mainTextDark"></i>
-            </template> -->
+          <td >
+            <a class="font-weight-bold" :href='"./"+getTitle(item)'>
+              <h5 v-html=getTitle(item)></h5>
+            </a>
+            <small v-html=getDescription(item) class=""></small>
+            <hr />
+            <small class="badge badge-light text-muted">Expected Type: </small>
+            <template v-for="(type,i) in getType(item)">
+              <a :href="generateLink(type)">
+                <small v-html='type'></small>
+                <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
+              </a>
+              <span v-if="i !== getType(item).length-1">, </span>
+            </template>
           </td>
-          <td>
-            <!-- <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a> -->
+          <!-- <td class="w-25">
+            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a>
+          </td>
+          <td class="w-25">
             <template v-for="(type,i) in getType(item)">
               <a style="display: block;" :href="generateLink(type)">
                 <span v-html='type'></span>
                 <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
               </a>
-
             </template>
           </td>
-          <td v-html=getDescription(item) class="mainTextDark"></td>
+          <td v-html=getDescription(item) class="mainTextDark w-50"></td> -->
         </tr>
-        <!-- <tr>
-          <td colspan="3">
-            <a class="btn btn-primary text-light" @click="addFieldForm()">Add Field</a>
-            <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#addFieldModal">Add New</button>
-          </td>
-        </tr> -->
       </tbody>
     </table>
     <template v-if="!properties.length && !userURL">
       <div class="text-center mainBackDark text-light padding20" style="margin-bottom: 40px">
-        <i class="fas fa-exclamation-circle mainTextLight"></i>
+        <i class="fas fa-exclamation-circle"></i>
         This class has no properties of it's own
       </div>
     </template>
@@ -333,29 +406,43 @@ g.nodes g.node:last-child text{
     </div>
 
     <span v-if="parentClassesAndProps.length" v-for="(parent,i) in parentClassesAndProps">
-      <h1 :id='parent["className"]' class="mainTextLight">
+      <h3 :id='parent["className"]' class="mainTextLight">
         Properties of <a class="mainTextLight bold" :href="'./'+parent['className']" v-html='parent["className"]'></a>
-      </h1>
-      <table v-if="parent['props'].length" class="table table-responsive" style="margin-bottom: 40px">
+      </h3>
+      <table v-if="parent['props'].length" class="table table-responsive table-striped-sec" style="margin-bottom: 40px">
       <thead class="mainBackLight text-light">
         <tr>
-          <th scope="col">Property</th>
+          <th>
+            <!-- <h1 :id='parent["className"]'>
+              Properties of <a class="text-light bold" :href="'./'+parent['className']" v-html='parent["className"]'></a>
+            </h1> -->
+          </th>
+          <!-- <th scope="col">Property</th>
           <th scope="col">Expected Type</th>
-          <th scope="col">Description</th>
+          <th scope="col">Description</th> -->
         </tr>
       </thead>
       <tbody>
         <tr v-for="item in parent['props']">
-        <!-- <tr v-for="item in checkLinks(parent['props'])"> -->
-          <td>
-            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td>
-            <!-- <a class="font-weight-bold" :target="[item.linkOut ? '_blank' : '_self']" :href='item.link' v-html=getTitle(item)></a>
-            <template v-if="item.linkOut">
-              <i class="fas fa-external-link-alt mainTextLight"></i>
-            </template> -->
+          <td >
+            <a class="font-weight-bold" :href='"./"+getTitle(item)'>
+              <h5 v-html=getTitle(item)></h5>
+            </a>
+            <small v-html=getDescription(item) class=""></small>
+            <hr />
+            <small class="badge badge-light text-muted">Expected Type: </small>
+            <template v-for="(type,i) in getType(item)">
+              <a :href="generateLink(type)" >
+                <small v-html='type'></small>
+                <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
+              </a>
+              <span v-if="i !== getType(item).length-1">, </span>
+            </template>
           </td>
-          <td>
-            <!-- <a style="display: block;" v-for="(type,i) in getType(item)" :href="'./'+type" v-html='type'></a> -->
+          <!-- <td class="w-25">
+            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td>
+          </td>
+          <td class="w-25">
             <template v-for="(type,i) in getType(item)">
               <a style="display: block;" :href="generateLink(type)">
                 <span v-html='type'></span>
@@ -363,7 +450,7 @@ g.nodes g.node:last-child text{
               </a>
             </template>
           </td>
-          <td v-html=getDescription(item) class="mainTextDark"></td>
+          <td v-html=getDescription(item) class="mainTextDark w-50"></td> -->
         </tr>
       </tbody>
     </span>
@@ -374,8 +461,52 @@ g.nodes g.node:last-child text{
       This class has no properties of it's own
     </div>
   </template>
+  </div>
+    <div id="bottom" v-if='schemaClass' class="jumbotron text-muted col-sm-12">
+      <div class="jumbotron mb-0" v-if="getRangePropertyInfoResults.length">
+        <h3>
+          Properties with <a class="mainTextDark" :href="'./'+schemaClass" v-text="schemaClass"></a> as Expected Type
+        </h3>
+        <table class="table table-responsive table-light" style="margin-bottom: 40px">
+          <thead class="">
+            <tr>
+              <th class="w-25" scope="col">Property</th>
+              <th class="w-25" scope="col">Expected Type</th>
+              <th class="w-50" scope="col">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item,i) in getRangePropertyInfoResults">
+              <td class="w-25">
+                <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a>
+              </td>
+              <td class="w-25">
+                <template v-for="(type,i) in getType(item)">
+                  <a style="display: block;" :href="generateLink(type)">
+                    <span v-html='type'></span>
+                    <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
+                  </a>
+                </template>
+              </td>
+              <td v-html=getDescription(item) class="w-50"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="jumbotron" >
+        <h3>
+          More Specific Types:
+        </h3>
+        <p>
+          Types with <a class="mainTextDark" :href="'./'+schemaClass" v-text="schemaClass"></a> as a Subclass
+        </p>
+        <ul>
+          <li v-for="item in moreSpecifTypes">
+            <a :href="'./'+item" v-text="item"></a>
+          </li>
+        </ul>
+      </div>
     </div>
-
   </div>
 
   <div class="modal fade" id="addFieldModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -465,10 +596,12 @@ var app = new Vue({
           filterLetters:[],
           availableClassesNames:[],
           rangeFromClassResults:[],
+          getRangePropertyInfoResults:[],
           searchQuery:'',
           searchResults:[],
           viewAlphabetical: true,
-          rootNode:''
+          rootNode:'',
+          moreSpecifTypes:[]
 				}
 			},
       watch:{
@@ -486,6 +619,27 @@ var app = new Vue({
         }
       },
 			methods:{
+        getMoreSpecifTypes(){
+          var self = this;
+          let res = [];
+          for (var i = 0; i < self.graph.length; i++) {
+            if (self.graph[i].hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(self.graph[i]["rdfs:subClassOf"])) {
+              let current = self.removePrefix(self.graph[i]["rdfs:subClassOf"]['@id']);
+              if (current === self.query) {
+                res.push(self.graph[i]["rdfs:label"]);
+              }
+            }
+            else if (self.graph[i].hasOwnProperty("rdfs:subClassOf") && _.isArray(self.graph[i]["rdfs:subClassOf"])) {
+              for (var x = 0; x < self.graph[i]["rdfs:subClassOf"].length; x++) {
+                let currentIndex = self.removePrefix(self.graph[i]["rdfs:subClassOf"][x]['@id']);
+                if ( currentIndex === self.query) {
+                  res.push(self.graph[i]["rdfs:subClassOf"][x]);
+                }
+              }
+            }
+          }
+          self.moreSpecifTypes = res;
+        },
         makeHierarchyTree(){
           // Check for query or it will run multiple times
           if (!this.query) {
@@ -545,7 +699,18 @@ var app = new Vue({
               }
             }
           }
-          // console.log("RESULTS ",self.rangeFromClassResults)
+          this.getRangePropertyInfo();
+        },
+        getRangePropertyInfo(){
+          var self = this;
+
+          for (var x = 0; x < self.rangeFromClassResults.length; x++) {
+            for (var i = 0; i < self.graph.length; i++) {
+              if (self.graph[i].hasOwnProperty('schema:domainIncludes') && self.graph[i]["@type"] === "rdf:Property" && self.graph[i]['rdfs:label'] === self.rangeFromClassResults[x] ) {
+                self.getRangePropertyInfoResults.push(self.graph[i]);
+              }
+            }
+          }
         },
         generateLink(query){
           var self = this;
@@ -837,6 +1002,7 @@ var app = new Vue({
           this.getClassLineage(this.classInfo);
           this.getAllPaths();
           this.getRangeFromClass();
+          this.getMoreSpecifTypes();
         },
         makeQueryGraph(){
           let smallG = new jsnx.Graph();
@@ -1137,7 +1303,7 @@ var app = new Vue({
         },
         getClass(){
           let results = [];
-          console.log("QUERY ",  this.query)
+          // console.log("QUERY ",  this.query)
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query ||
           this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query.toLowerCase()) {
