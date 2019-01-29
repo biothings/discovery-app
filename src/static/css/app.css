@@ -532,3 +532,162 @@ text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px
   background-repeat: no-repeat;
   background-attachment: scroll;
 }
+
+g.nodes g.node:last-child circle{
+  fill: #ec9ff0 !important;
+}
+
+g.nodes g.node:last-child text{
+  font-size: 1.5em !important;
+}
+
+.node-name{
+  margin:0;
+}
+
+.navigation{
+  opacity: .7;
+  margin-top:100px;
+  position: fixed; top: 40vh;
+  box-shadow: 0px 0px 0px #4b4b4b;
+  z-index:100;
+  transition: all .5s;
+}
+
+.navigation:hover{
+  box-shadow: 1px 5px 20px #4b4b4b;
+  opacity: 1;
+}
+
+.description{
+  background: #d7d7d7;
+  border-radius: 10px;
+}
+
+.fa-external-link-alt{
+  font-size: small !important;
+}
+
+.small{
+  font-size: small;
+}
+.table thead th{
+  vertical-align: middle;
+}
+
+
+.text-0{
+  color: #02c4e7;
+  font-weight: 900;
+}
+.text-1{
+  color: #0193ad;
+  font-weight: 900;
+}
+.text-2{
+  color: #006476;
+  font-weight: 900;
+}
+.text-3{
+  color: #003f4a;
+  font-weight: 900;
+}
+.text-4{
+  color: #001d22;
+  font-weight: 900;
+}
+.text-5{
+  color: #011013;
+  font-weight: 900;
+}
+.text-6{
+  color: #230528;
+  font-weight: 900;
+}
+.text-7{
+  color: #53185b;
+  font-weight: 900;
+}
+.text-8{
+  color: #722e7c;
+  font-weight: 900;
+}
+
+.bg-0{
+  background: #02c4e7;
+}
+.bg-1{
+  background: #0193ad;
+}
+.bg-2{
+  background: #006476;
+}
+.bg-3{
+  background: #003f4a;
+}
+.bg-4{
+  background: #001d22;
+}
+.bg-5{
+  background: #011013;
+}
+.bg-6{
+  background: #230528;
+}
+.bg-7{
+  background: #53185b;
+}
+.bg-8{
+  background: #722e7c;
+}
+
+.table-striped-main tbody tr:nth-of-type(odd){
+  background-color: rgba(81, 187, 187, 0.2);
+}
+
+.table-striped-main tbody tr:nth-of-type(even){
+  background-color: rgba(187, 187, 187, 0.1);
+}
+
+.table-striped-sec tbody tr:nth-of-type(odd){
+  background-color: rgba(169, 82, 187, 0.1);
+}
+
+.table-striped-sec tbody tr:nth-of-type(even){
+  background-color: rgba(187, 187, 187, 0.1);
+}
+
+ul.tree, ul.tree ul {
+    list-style: none;
+     margin: 0;
+     padding: 0;
+   }
+   ul.tree ul {
+     margin-left: 10px;
+   }
+   ul.tree li {
+     margin: 0;
+     padding: 0 7px;
+     line-height: 20px;
+     color: #369;
+     font-weight: bold;
+     border-left:1px solid rgb(100,100,100);
+
+   }
+   ul.tree li:last-child {
+       border-left:none;
+   }
+   ul.tree li:before {
+      position:relative;
+      top:-0.3em;
+      height:1em;
+      width:12px;
+      color:white;
+      border-bottom:1px solid rgb(100,100,100);
+      content:"";
+      display:inline-block;
+      left:-7px;
+   }
+   ul.tree li:last-child:before {
+      border-left:1px solid rgb(100,100,100);
+   }
