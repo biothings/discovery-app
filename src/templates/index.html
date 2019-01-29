@@ -28,51 +28,45 @@
     <div class="jumbotron animatedBack mb-0">
       <div class="container d-flex flex-row justify-content-center flex-wrap">
         <div class="col-sm-3 text-center swing-in-left-fwd">
-          <!-- <h1 class="text3D">VIEW</h1> -->
-
           <div class="link-wrapper">
-            <img src="./static/img/R.svg" width="30%" alt="R"/>
-            <a class="link hover-1" href="#registry"><h2 class="font-weight-bold text-light">REGISTRY</h2></a>
+            <a class="link hover-1" href="#registry">
+              <img class="mb-2" src="./static/img/R.svg" width="50%" alt="R"/>
+              <br />
+              <h2 class="font-weight-bold text-light">REGISTRY</h2>
+            </a>
           </div>
           <p class="caps text-light">View all registered datasets</p>
-          <!-- <a role="button" class="btn pulse themeButton text-light margin20" href="#registry">Go</a> -->
         </div>
         <div class="col-sm-3 text-center swing-in-left-fwd">
-          <!-- <h1 class="text3D">GUIDE</h1> -->
-
           <div class="link-wrapper">
-            <img src="./static/img/G.svg" width="30%" alt="G"/>
-            <a class="link hover-1" href="./guide" ><h2 class="font-weight-bold text-light">GUIDE</h2></a>
+            <a class="link hover-1" href="./guide" >
+              <img class="mb-2" src="./static/img/G.svg" width="50%" alt="G"/>
+              <br />
+              <h2 class="font-weight-bold text-light">GUIDE</h2>
+            </a>
           </div>
           <p class="caps text-light">Make your dateset more discoverable</p>
-          <!-- <a role="button" href="./guide" class="btn pulse themeButton text-light margin20">Go</a> -->
         </div>
-        <!-- <a class="itemHover" href="#" title="">
-          <div class="mainBackLight"></div>
-          <span>
-            <h3>Lorem ipsum</h3>
-            <p>Aliquam egestas tortor vel libero pulvinar, ut iaculis leo facilisis. Praesent pretium mattis dapibus.</p>
-          </span>
-        </a> -->
         <div class="col-sm-3 text-center swing-in-left-fwd">
-          <!-- <h1 class="text3D">VIEW</h1> -->
-
           <div class="link-wrapper">
-            <img src="./static/img/V.svg" width="30%" alt="V"/>
-            <a class="link hover-1" href="#" data-toggle="modal" data-target="#schemaOrgModal"><h2 class="font-weight-bold text-light">VIEW</h2></a>
+            <a class="link hover-1" href="#" data-toggle="modal" data-target="#schemaOrgModal">
+              <img class="mb-2" src="./static/img/V.svg" width="50%" alt="V"/>
+              <br />
+              <h2 class="font-weight-bold text-light">VIEW</h2>
+            </a>
           </div>
           <p class="caps text-light">Browse the core schema.org schemas</p>
-          <!-- <button type="button" class="btn pulse themeButton text-light margin20" data-toggle="modal" data-target="#schemaOrgModal">Go</button> -->
         </div>
         <div class="col-sm-3 text-center swing-in-left-fwd">
-          <!-- <h1 class="text3D">BUILD</h1> -->
 
           <div class="link-wrapper">
-            <img src="./static/img/B.svg" width="30%" alt="B"/>
-            <a class="link hover-1" href="./schema-playground" ><h2 class="font-weight-bold text-light">BUILD</h2></a>
+            <a class="link hover-1" href="./schema-playground" >
+              <img class="mb-2" src="./static/img/B.svg" width="50%" alt="B"/>
+              <br />
+              <h2 class="font-weight-bold text-light">BUILD</h2>
+            </a>
           </div>
           <p class="caps text-light">Customize and host your own metadata schema</p>
-          <!-- <a role="button" href="./schema-playground" class="btn pulse themeButton text-light margin20">Go</a> -->
         </div>
       </div>
     </div>
@@ -110,9 +104,6 @@
           </div>
           <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
 
-            <!-- <p >
-              <div class="numberCircle mainBackLight m-0" v-text="registryTotal"></div> Results
-            </p> -->
           </div>
           <ul class="list-group" style="border-top:solid 3px var(--gray)">
             <li class="list-group-item d-flex justify-content-between align-items-center text-muted p-1" style="background:#d0d0d0;">
@@ -130,15 +121,6 @@
               <li v-text="item">
 
               </li>
-              <!-- <li class="list-group-item d-flex justify-content-between align-items-center">
-                <a class="font-weight-bold" @click="selectedRegistryItem=item" href="#" data-toggle="modal" data-target="#DetailsModal" v-text="item.user.login"></a>
-                <small >
-                  <a v-text="item.url" :href="item.url" target="_blank"></a>
-                </small>
-                <a role="button" :href="item.url" class="btn btn-outline-secondary up">
-                  Go
-                </a>
-              </li> -->
             </template>
             <li v-if="!registry.length" class="text-center text-muted list-group-item">
               No Results
