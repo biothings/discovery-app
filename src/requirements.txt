@@ -7,4 +7,5 @@ torngithub==0.2.0
 Jinja2>=2.9.6
 pycurl>=7.19
 PyYAML>=3.12
+nose>=1.3.0
 git+git://github.com/biothings/biothings.api.git#egg=biothings
