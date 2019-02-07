@@ -60,12 +60,3 @@ class Schema(Document):
         self.meta.id = self.encode_url()
         self._meta.stamp()
         return super(Schema, self).save(** kwargs)
-
-# create the mappings in elasticsearch
-# Schema.init()
-
-meta = Metadata(username='namespacestd', url='https://github.com/namespacestd0/smartAPI')
-schema = Schema(clses=['biothings', 'smartapi'], props='test', _meta=meta)
-schema._meta.slug = 'dev'
-schema.props = 'es-dsl'
-schema.save()
