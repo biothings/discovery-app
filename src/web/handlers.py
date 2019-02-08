@@ -15,7 +15,7 @@ from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 
 import json
 import logging
-log = logging.getLogger("smartapi")
+log = logging.getLogger("discovery")
 
 GITHUB_CALLBACK_PATH = "/oauth"
 GITHUB_SCOPE = ""
@@ -99,7 +99,8 @@ class GithubLoginHandler(BaseHandler, torngithub.GithubMixin):
                 redirect_uri=redirect_uri,
                 client_id=self.web_settings.GITHUB_CLIENT_ID,
                 client_secret=self.web_settings.GITHUB_CLIENT_SECRET,
-                code=self.get_argument("code")
+                code=self.get_argument("code"),
+                callback=None
             )
             if user:
                 log.info('logged in user from github: ' + str(user))
