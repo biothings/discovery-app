@@ -3,7 +3,7 @@ import json
 import tornado
 from biothings.web.api.es.handlers.base_handler import BaseESRequestHandler
 
-from .es import ESQuery
+from .es import Schema, Metadata
 
 
 class BaseHandler(BaseESRequestHandler):
@@ -14,11 +14,12 @@ class BaseHandler(BaseESRequestHandler):
             return None
         return json.loads(user_json)
 
+
 class APIHandler(BaseHandler):
     def post(self):
         req = tornado.escape.json_decode(self.request.body)
-        url = req.get('url','').lower()
-        slug = req.get('slug','').lower()
+        url = req.get('url', '').lower()
+        slug = req.get('slug', '').lower()
 
         user = self.get_current_user()
 
@@ -29,14 +30,14 @@ class APIHandler(BaseHandler):
             self.return_json(res)
         else:
             if url and slug:
-                esq = ESQuery()
-                res = esq.save_doc(url=url, user=user, slug=slug, private=False, archived=False)
-                self.return_json(res)
+                meta = Metadata(user=user, url=url, slug=slug)
+                schema = Schema(_meta=meta)
+                res = schema.save()
+                self.return_json({'success': res})
             else:
                 self.return_json(
                     {'success': False, 'error': 'Parameters "url" and/or "slug" not found.'})
 
     def get(self, api_id):
-        esq = ESQuery()
-        res = esq.exists(api_id)
-        self.return_json(res)
+        s = Schema.get(id=api_id)
+        self.return_json(s.to_dict())
