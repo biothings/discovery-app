@@ -547,8 +547,10 @@ g.nodes g.node:last-child text{
 
 .navigation{
   opacity: .7;
-  margin-top:100px;
-  position: fixed; top: 40vh;
+  /* margin-top:100px; */
+  position: fixed;
+  /* top: 40vh; */
+  bottom: 40px;
   box-shadow: 0px 0px 0px #4b4b4b;
   z-index:100;
   transition: all .5s;
@@ -557,6 +559,10 @@ g.nodes g.node:last-child text{
 .navigation:hover{
   box-shadow: 1px 5px 20px #4b4b4b;
   opacity: 1;
+}
+
+.navigation li:hover a{
+  color: var(--sec);
 }
 
 .description{
@@ -612,6 +618,14 @@ g.nodes g.node:last-child text{
   color: #722e7c;
   font-weight: 900;
 }
+.text-9{
+  color: #9a4ba6;
+  font-weight: 900;
+}
+.text-10{
+  color: #c06acd;
+  font-weight: 900;
+}
 
 .bg-0{
   background: #02c4e7;
@@ -639,6 +653,12 @@ g.nodes g.node:last-child text{
 }
 .bg-8{
   background: #722e7c;
+}
+.bg-9{
+  background: #9a4ba6;
+}
+.bg-10{
+  background: #c06acd;
 }
 
 .table-striped-main tbody tr:nth-of-type(odd){

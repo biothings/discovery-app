@@ -13,6 +13,20 @@
    background-color: var(--main);
    border-color: var(--main);
  }
+
+ .mainBackDarkFade{
+    background: -moz-linear-gradient(left, var(--main) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(left, var(--main) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to right, var(--main) 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
+ }
+
+ .mainBackLightFade{
+   background: -moz-linear-gradient(left, var(--sec) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
+   background: -webkit-linear-gradient(left, var(--sec) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
+   background: linear-gradient(to right, var(--sec) 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
+ }
 </style>
 <main id="index" style="min-height:70vh;">
   <div class="">
@@ -75,6 +89,9 @@
       <div class="row">
         <div class="col-sm-12 col-md-9 col-lg-6" style="margin:auto;">
           <h2>REGISTRY</h2>
+          <!-- <div class="jumbotron animatedBack text-center mt-5">
+            <h1 class="text-light">REGISTRY</h1>
+          </div> -->
           <div>
             <form class="form-group">
               <input v-model="testURL" type="url" class="form-control"/>
@@ -106,20 +123,34 @@
 
           </div>
           <ul class="list-group" style="border-top:solid 3px var(--gray)">
-            <li class="list-group-item d-flex justify-content-between align-items-center text-muted p-1" style="background:#d0d0d0;">
-              <small >
-                Name
-              </small>
-              <small >
-                Source URL
-              </small>
-              <small >
-                Visualizer
+            <li class="list-group-item d-flex justify-content-center align-items-center text-muted p-1" style="background:#d0d0d0;">
+              <small v-if="registry.length && query" v-text="'results for '+query">
               </small>
             </li>
             <template v-if="registry.length" v-for="(item,index) in registry">
-              <li v-text="item">
-
+              <li class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="">
+                  <h5 class="d-inline">Found in <a :href="item._meta.slug" class="mb-1 font-weight-bold" v-text='item._meta.slug'></a></h5>
+                  <small>registed by <a :href='item._meta.username' v-text='item._meta.username'></a></small>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <div class="p-1 flex-fill" v-if="item.classes">
+                    <div class="mainBackDarkFade text-light badge w-100 text-left">Classes</div>
+                    <ul>
+                      <li v-for="c in item.classes">
+                        <a :href="item._meta.slug +'/'+ c" v-text="c"></a>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="p-1 flex-fill" v-if="item.properties">
+                    <div class="mainBackLightFade text-light badge w-100 text-left">Properties</div>
+                    <ul>
+                      <li v-for="p in item.properties">
+                        <a :href="item._meta.slug +'/'+ p" v-text="p"></a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </li>
             </template>
             <li v-if="!registry.length" class="text-center text-muted list-group-item">
@@ -235,7 +266,41 @@ var app = new Vue({
           page: 1,
           pages: 1,
           perPage: 20,
-          selectedRegistryItem:{}
+          selectedRegistryItem:{},
+          testRes:[
+            {
+              '_meta':{
+                'username':'marcodarko',
+                'url':'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld',
+                'slug':'bts',
+                'timestamp': Date.now().toString()
+              },
+              'classes':['BiologicalEntity','Gene','GeneticEntity'],
+              'properties':['hasPhenotype','expressedIn','hasGeneProduct'],
+              '~raw':'fhaskjhfjkahgkhdkhkjghkjhgkjdahkjhfgkjhgkjdhfk'
+            },
+            {
+              '_meta':{
+                'username':'marcodarko',
+                'url':'https://raw.githubusercontent.com/cvisb/sample_viewer_web/master/sample-viewer/src/assets/schema/dataset.json',
+                'slug':'cvisb',
+                'timestamp': Date.now().toString()
+              },
+              'classes':['BiologicalEntity','Gene','GeneticEntity'],
+              'properties':['hasPhenotype','expressedIn','hasGeneProduct'],
+              '~raw':'fhaskjhfjkahgkhdkhkjghkjhgkjdahkjhfgkjhgkjdhfk'
+            },
+            {
+              '_meta':{
+                'username':'marcodarko',
+                'url':'https://raw.githubusercontent.com/cvisb/sample_viewer_web/master/sample-viewer/src/assets/schema/dataset.json',
+                'slug':'cvisb',
+                'timestamp': Date.now().toString()
+              },
+              'classes':['BiologicalEntity','Gene','GeneticEntity'],
+              '~raw':'fhaskjhfjkahgkhdkhkjghkjhgkjdahkjhfgkjhgkjdhfk'
+            }
+          ]
 				}
 			},
       watch:{
@@ -304,6 +369,10 @@ var app = new Vue({
             axios.get('/query?size=100', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
+              // if (self.registryTotal === 0) {
+              //   console.log('reg is 0')
+              //   self.registry = self.testRes
+              // }
               if (self.registryTotal) {
                 self.calculatePages();
               }

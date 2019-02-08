@@ -14,14 +14,17 @@
 
   <div class="container">
     <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
-      <h2 class="text-muted"><i class="fas fa-map-signs"></i> GUIDE</h2>
+
+      <div class="jumbotron animatedBack text-center mt-5">
+        <h1 class="text-light">GUIDE</h1>
+      </div>
       <p class="text-muted">
-        This guide will help you to add or modify existign metadata to an existing dataset or you can create a new dataset from
+        This guide will help you to add or modify existing metadata to an existing dataset.
       </p>
 
       <template>
         <div class="jumbotron text-muted">
-          <div class="numberCircle">1</div>
+          <div class="numberCircle mainBackLight">1</div>
           <h3>Host your Dataset Metadata</h3>
           <p class="col-sm-6" style="margin: 0 auto;">
             Here's a few suggestions where you may host your dataset:
@@ -72,7 +75,7 @@
 
       <template>
         <div class="jumbotron text-muted">
-          <div class="numberCircle">2</div>
+          <div class="numberCircle mainBackLight">2</div>
           <h3>License Chooser*</h3>
           <small>(*Required)</small>
           <p class="col-sm-6" style="margin: 0 auto;">
@@ -219,7 +222,7 @@
           <div class="flipcard">
             <div class="jumbotron text-muted face front">
               <button style="position:absolute; right: 10px; top:10px; transform: scale(.7);" class="btn btn-secondary" @click='flipView()'>Switch View</button>
-              <div class="numberCircle">3</div>
+              <div class="numberCircle mainBackLight">3</div>
               <h2>Metadata</h2>
               <small>(*Required)</small>
               <p class="col-sm-6" style="margin: 0 auto;">
@@ -322,7 +325,7 @@
                   </template>
 
                   <div>
-                    <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light" @click.prevent='validate("metadataForm")' value="Submit">
+                    <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light pulse" @click.prevent='validate("metadataForm")' value="Submit">
                     <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
                   </div>
                 </form>
@@ -466,7 +469,7 @@
 
       <template>
         <div id="result" class="jumbotron text-muted">
-          <div class="numberCircle">4</div>
+          <div class="numberCircle mainBackLight">4</div>
           <h3>Code</h3>
           <p class="col-sm-6" style="margin: 0 auto;">
             Copy and paste this code in your site's HTML code.

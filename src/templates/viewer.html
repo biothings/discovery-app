@@ -3,6 +3,35 @@
 {% include "header.html" %}
 <style>
 
+.basic-breadcrumbs li {
+  margin: 0 8px 0 0;
+}
+
+.basic-breadcrumbs li a, .basic-breadcrumbs li a:link, .basic-breadcrumbs li a:visited {
+  padding: 5px 8px;
+  color: #666;
+  position: relative;
+}
+
+.basic-breadcrumbs li a:before {
+  content: "";
+  position: absolute;
+  border: 5px solid transparent;
+  border-right: none;
+  border-left: 5px solid #5a9ee8;
+  top: 50%;
+  right: -5px;
+  transform: translate(0, -50%);
+}
+
+.basic-breadcrumbs li:last-of-type a {
+  color: #5a9ee8;
+}
+
+.basic-breadcrumbs li:last-of-type a:before {
+  display: none;
+}
+
 </style>
 <div id="viewer" class="container" style="min-height: 70vh;padding-top:40px;">
   <div class="row" style="margin-top:40px;">
@@ -51,13 +80,22 @@
             Page Navigation
           </li>
           <li class="list-group-item noPadding" v-for="item in parentDisplayResults.slice().reverse()">
-            <a class="nav-link" :href="'#'+removePrefix(item)" ><i class="fas fa-arrow-alt-circle-right mainTextLight"></i> <span v-text="removePrefix(item)"></span></a>
+            <small>
+              <a class="nav-link" :href="'#'+removePrefix(item)" >
+                <i class="fas fa-arrow-alt-circle-right mainTextLight"></i> <span v-text="removePrefix(item)"></span>
+              </a>
+            </small>
           </li>
           <li class="list-group-item noPadding">
-            <a class="nav-link" href="#bottom" ><i class="fas fa-arrow-alt-circle-right mainTextDark"></i> More</a>
+            <small>
+              <a class="nav-link" href="#bottom" >
+                <i class="fas fa-arrow-alt-circle-right mainTextDark"></i> More
+              </a>
+            </small>
           </li>
         </ul>
       </template>
+
     </div>
     <div class="col-sm-1">
 
@@ -126,10 +164,14 @@
           </li>
           <li class="d-inline bg-8" style="width:20px; height:20px" >
           </li>
+          <li class="d-inline bg-9" style="width:20px; height:20px" >
+          </li>
+          <li class="d-inline bg-10" style="width:20px; height:20px" >
+          </li>
         </ul>
         <ul class="tree">
           <li>
-            <a class="text-0" :href="'./'+rootNode" v-text="rootNode"></a>
+            <a class="text-0" :href="'./'+rootNode" v-text="rootNode" ></a>
             <ul>
               <li v-for="item in getNeighbors(rootNode)">
                 <a class="text-1" :href="'./'+item" v-text="item"></a>
@@ -154,6 +196,16 @@
                                         <ul>
                                           <li v-for="item8 in getNeighbors(item7)">
                                             <a class="text-8" :href="'./'+item8" v-text="item8"></a>
+                                            <ul>
+                                              <li v-for="item9 in getNeighbors(item8)">
+                                                <a class="text-9" :href="'./'+item9" v-text="item9"></a>
+                                                <ul>
+                                                  <li v-for="item10 in getNeighbors(item9)">
+                                                    <a class="text-10" :href="'./'+item10" v-text="item10"></a>
+                                                  </li>
+                                                </ul>
+                                              </li>
+                                            </ul>
                                           </li>
                                         </ul>
                                       </li>
@@ -182,14 +234,14 @@
           <button v-if="!showGraph" @click="toggleGraph" class="d-none d-sm-none d-md-block btn themeButton text-light float-right pulse" ><i class="fas fa-draw-polygon"></i> Graph</button>
           <h1 class="mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
           <template v-if='allPaths.length'>
-            <ul>
+            <ol>
               <li v-for="path in allPaths">
                 <span v-for="(item,index) in path">
                   <a :class="[ index !== path.length-1 ? 'mainTextLight' : 'mainTextDark']" class="font-weight-bold small" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
-                  <span v-if="index !== path.length-1">&gt;</span>
+                  <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right mainTextDark"></i>&nbsp;</span>
                 </span>
               </li>
-            </ul>
+            </ol>
           </template>
           <template v-else>
             <span v-if="subclass">
@@ -339,22 +391,43 @@
     </div>
   </template>
   </div>
-    <div id="bottom" v-if='schemaClass' class="jumbotron text-muted col-sm-12">
+    <div class="col-sm-3">
+
+    </div>
+    <div id="bottom" v-if='schemaClass' class="jumbotron text-muted col-sm-9">
       <div class="jumbotron mb-0" v-if="getRangePropertyInfoResults.length">
         <h3>
-          Properties with <a class="mainTextDark" :href="'./'+schemaClass" v-text="schemaClass"></a> as Expected Type
+          Properties with <a class="mainTextDark bold" :href="'./'+schemaClass" v-text="schemaClass"></a> as Expected Type
         </h3>
-        <table class="table table-responsive table-light" style="margin-bottom: 40px">
-          <thead class="">
+        <table class="table table-responsive table-light table-striped" style="margin-bottom: 40px">
+          <thead class="mainBackDark">
             <tr>
-              <th class="w-25" scope="col">Property</th>
-              <th class="w-25" scope="col">Expected Type</th>
-              <th class="w-50" scope="col">Description</th>
+              <th>
+
+              </th>
+              <!-- <th scope="col">Property</th>
+              <th scope="col">Expected Type</th>
+              <th scope="col">Description</th> -->
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item,i) in getRangePropertyInfoResults">
-              <td class="w-25">
+              <td >
+                <a class="font-weight-bold" :href='"./"+getTitle(item)'>
+                  <h5 v-html=getTitle(item)></h5>
+                </a>
+                <small v-html=getDescription(item) class=""></small>
+                <hr />
+                <small class="badge badge-light text-muted">Expected Type: </small>
+                <template v-for="(type,i) in getType(item)">
+                  <a :href="generateLink(type)" class="mainTextDark bold">
+                    <small v-html='type'></small>
+                    <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
+                  </a>
+                  <span v-if="i !== getType(item).length-1">, </span>
+                </template>
+              </td>
+              <!-- <td class="w-25">
                 <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a>
               </td>
               <td class="w-25">
@@ -366,7 +439,7 @@
                 </template>
               </td>
               <td v-html=getDescription(item) class="w-50"></td>
-            </tr>
+            </tr> -->
           </tbody>
         </table>
       </div>
@@ -478,7 +551,7 @@ var app = new Vue({
           searchResults:[],
           viewAlphabetical: true,
           rootNode:'',
-          moreSpecifTypes:[]
+          moreSpecifTypes:[],
 				}
 			},
       watch:{
