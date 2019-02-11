@@ -397,7 +397,7 @@ var app = new Vue({
           // this.$set(item, 'showDetails', !api.showDetails);
         },
         getAll(){
-          axios.get('/query?q="marcodarko"').then(res=>{
+          axios.get('/query?q="__all__"').then(res=>{
             this.registry = res.data.hits;
             this.registryTotal = res.data.total;
             console.log(this.registry)

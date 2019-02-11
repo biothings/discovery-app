@@ -30,7 +30,7 @@ class APIHandler(BaseHandler):
             self.return_json(res)
         else:
             if url and slug:
-                meta = Metadata(user=user, url=url, slug=slug)
+                meta = Metadata(username=user, url=url, slug=slug)
                 schema = Schema(_meta=meta)
                 res = schema.save()
                 self.return_json({'success': res})
