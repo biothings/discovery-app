@@ -1,117 +1,117 @@
-import json
+'''
+Automated testing for discovery-app
+    > python tests.py
+or  > nosetests tests
+'''
 import os
-import re
-import sys
 import unittest
 
 import requests
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 
 from web.api.es import Metadata, Schema
 from elasticsearch_dsl import Index
 
-_d = json.loads    # shorthand for json decode
-_e = json.dumps    # shorthand for json encode
+FORCE_TEST = False
 
-def ask(prompt, options='YN'):
-    '''Prompt Yes or No,return the upper case 'Y' or 'N'.'''
-    options = options.upper()
-    while 1:
-        s = input(prompt+'[%s]' % '|'.join(list(options))).strip().upper()
-        if s in options:
+
+def ask(prompt):
+    '''Prompt Yes or No, return True or False '''
+    options = 'YN'
+    while True:
+        result = input(prompt+' Continue? [%s] ' %
+                       '|'.join(list(options))).strip().upper()
+        if result in options:
             break
-    return s
+    return result == 'Y'
+
 
 class DiscoveryAppTest(unittest.TestCase):
-    __test__ = True  # explicitly set this to be a test class
+    ''' Requires a running server to test against '''
+    __test__ = True
 
-    host = os.getenv("DISCOVERY_HOST", "http://discovery.biothings.io")
-    host = host.rstrip('/')
-    api = host + '/api'
+    HOST = os.getenv("DISCOVERY_HOST", "http://localhost:8000").rstrip('/')
+    API_ENDPOINT = '/api'
 
     # Setup and Teardown
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
 
-        index = Index(Schema.Index.name, Schema.Index.doc_type)
+        index = Index(Schema.Index.name)
 
         if index.exists():
-            if ask('Current indexly documents will be permenantely lost. Continue? ') == 'Y':
-                # delete the existing index
-                Index(Schema.Index.name, Schema.Index.doc_type).delete()
+            if FORCE_TEST or ask('Current indexed documents will be permenantely lost.'):
+                index.delete()
             else:
                 exit()
-        else:
-            # create new index in elasticsearch
-            Schema.init()
+
+        # create new index as defined in Schema
+        Schema.init()
 
         # add a document
-        meta = Metadata(username='namespacestd', url='https://github.com/namespacestd0/smartAPI')
-        schema = Schema(clses=['biothings', 'smartapi'], props='test', _meta=meta)
-        schema._meta.slug = 'dev'
-        schema.props = 'es-dsl'
-        schema.save()
+        meta = Metadata(username='namespacestd', slug='dev',
+                        url='https://github.com/namespacestd0/smartAPI')
+        cls.schema = Schema(
+            clses=['biothings', 'smartapi'], props='test', _meta=meta)
+        cls.schema.props = 'es-dsl'
+        cls.schema.save()
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         pass
 
     # Helper functions
 
-    def truncate(self, s, limit):
-        '''truncate a string.'''
-        if len(s) <= limit:
-            return s
-        else:
-            return s[:limit] + '...'
-
-    def get_ok(self, url):
-        res = requests.get(url)
-        assert res.status_code == 200, "status {} != 200 for GET to url: {}".format(
-            res.status_code, url)
-        return res
-
-    def get_status_code(self, url, status_code):
+    @staticmethod
+    def get_status_code(url, status_code):
+        ''' make a GET request and return json if the status codes match '''
         res = requests.get(url)
         assert res.status_code == status_code, "status {} != {} for GET to url: {}".format(
             res.status_code, status_code, url)
-        return res
+        return res.json()
 
-    def post_status_code(self, url, params, status_code):
+    @staticmethod
+    def post_status_code(url, params, status_code):
+        ''' make a POST request and return json if the status codes match '''
         headers = {'Content-type': 'application/x-www-form-urlencoded'}
-        res = requests.post(url, data = params, headers=headers)
-        assert res.status_code == status_code, "status {} != {} for url: {}\nparams: {}".format(res.status_code, status_code, url, params)
-        return res
+        res = requests.post(url, data=params, headers=headers)
+        assert res.status_code == status_code, "status {} != {} for url: {}\nparams: {}".format(
+            res.status_code, status_code, url, params)
+        return res.json()
 
-    def get_404(self, url):
-        self.get_status_code(url, 404)
+    @classmethod
+    def get_ok(cls, url):
+        ''' make a GET request and return json if server responds okay '''
+        return cls.get_status_code(url, 200)
 
-    def get_405(self, url):
-        self.get_status_code(url, 405)
+    @classmethod
+    def post_ok(cls, url, params):
+        ''' make a POST request and return json if server responds okay '''
+        return cls.post_status_code(url, params, 200)
 
-    def head_ok(self, url):
-        res = requests.head(url)
-        assert res.status_code == 200, "status {} != 200 for HEAD to url: {}".format(res.status_code, url)
-
-    def post_ok(self, url, params):
-        return self.post_status_code(url, params, 200)
-
-    def query_has_hits(self, q, query_endpoint='query'):
-        d = self.json_ok(self.get_ok(
-            self.api + '/' + query_endpoint + '?q=' + q))
-        assert d.get('total', 0) > 0 and len(d.get('hits', [])) > 0
-        return d
-
-    def json_ok(self, s, checkerror=True):
-        d = _d(s.text)
-        if checkerror:
-            assert not (isinstance(d, dict)
-                        and 'error' in d), self.truncate(str(d), 100)
-        return d
+    @classmethod
+    def query_has_hits(cls, query_keyword, endpoint='query'):
+        ''' make a GET request to a query endpoint and assert positive hits '''
+        dic = cls.get_ok(cls.HOST + '/' + endpoint + '?q=' + query_keyword)
+        assert dic.get('total', 0) > 0 and dic.get('hits', [])
+        return dic
 
     # Tests
 
-    def test_test(self):
-        pass
+    def test_es_retrive_by_id(self):
+        ''' requires ONLY es server
+        asserts es stores given doc
+        asserts doc url encodes to _id
+        asserts es retrives given doc by _id '''
+        sch = Schema.get(id='e8d6aa5ffb1003f4a882cb83ffa35b31')
+        eq_(sch.to_dict(), self.schema.to_dict())
+
+    def test_return_all(self):
+        ''' asserts biothings backend handles special query parameter __all__
+        asserts document index setting matches document meta setting '''
+        self.query_has_hits(query_keyword='__all__')
+
 
 if __name__ == '__main__':
     try:
