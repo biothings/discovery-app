@@ -18,11 +18,11 @@
         <input style="margin:auto;" data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="on" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
         <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
       </div>
-      <div v-if="suggestedURL" class="alert alert-warning">
+      <!-- <div v-if="suggestedURL" class="alert alert-warning">
         <p>We noticed that was not a GitHub raw data link.<br /> We have converted it to: </p>
         <p><a style="word-break: break-all;" target="_blank" class="small" :href="suggestedURL" v-text="suggestedURL"></a></p>
         <button class="btn btn-warning text-light pointer" @click.prevent="input = suggestedURL">Use this link</button>
-      </div>
+      </div> -->
       <small class="badge badge-pill badge-secondary pointer mr-1"
       @click="input = 'https://schema.org/Dataset.jsonld'">
         <i class="fas fa-question-circle" data-tippy="Schema.org Dataset"></i> Example URL
@@ -50,6 +50,7 @@
 {% endblock %}
 {% block extra_scripts %}
 <script src="./static/js/parsley.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
@@ -58,7 +59,8 @@ var app = new Vue({
 			data: function(){
 				return {
           input: '',
-          suggestedURL:''
+          suggestedURL:'',
+          slug:'',
 				}
 			},
       watch:{
@@ -67,15 +69,6 @@ var app = new Vue({
             this.suggestedURL = value.replace('blob/', '')
             .replace('github.com', 'raw.githubusercontent.com')
             .replace('www.github.com', 'raw.githubusercontent.com');;
-          }
-        }
-      },
-			methods:{
-        checkURL(){
-          let url = this.input;
-          if (url.includes('blob')) {
-
-            url = url.replace('blob', 'raw');
 
             Swal({
               title: 'Link Converted',
@@ -84,7 +77,7 @@ var app = new Vue({
               imageAlt: 'Warning',
               html:
                 '<p>We noticed that was not a raw data link. We have converted it to: </p> ' +
-                '<p><a target="_blank" href="'+url+'">'+url+'</a></p>' +
+                '<p><a target="_blank" href="'+this.suggestedURL+'">'+this.suggestedURL+'</a></p>' +
                 '<p>Proceed with this link?</p>',
               showCancelButton: true,
               confirmButtonColor: '#3085d6',
@@ -92,27 +85,34 @@ var app = new Vue({
               confirmButtonText: 'Yes, use this link!'
             }).then((result) => {
               if (result.value) {
-                return url;
+                this.input = this.suggestedURL;
               }
             });
-          }else{
-            return url;
           }
-        },
+        }
+      },
+			methods:{
         getFormValues () {
           this.input = this.$refs.my_input.value;
           this.$refs.my_input.value = '';
           this.sendRequest()
         },
-        sendRequest(){
-          axios.get(this.input).then(res=>{
-            this.data = res.data;
-            let graph = res.data['@graph'];
-            for (var i = 0; i < graph.length; i++) {
-              if (graph[i].hasOwnProperty('@type') && graph[i]['@type'] === "rdfs:Class"){
-                this.makeURLandRedirect(graph[i]);
-              }
+        parseData(graph){
+          for (var i = 0; i < graph.length; i++) {
+            if (graph[i].hasOwnProperty('@type') && graph[i]['@type'] === "rdfs:Class"){
+              this.makeURLandRedirect(graph[i]);
             }
+          }
+        },
+        sendRequest(){
+          let self = this;
+          axios.get(self.input).then(res=>{
+
+            self.data = res.data;
+            localStorage.setItem('datasetDataURL',self.input);
+            let graph = res.data['@graph'];
+            self.parseData(graph);
+
           }).catch(err=>{
             Swal(
                 'Something went wrong.',
@@ -124,11 +124,12 @@ var app = new Vue({
         },
         makeURLandRedirect(obj){
           let arr = obj['@id'].split(':');
+          this.slug = arr[0];
 
           localStorage.setItem('datasetData', JSON.stringify(this.data));
+          let number = Math.floor(Math.random()*90000) + 10000;
 
-          // window.location.href = "./"+arr[0]+"/"+arr[1];
-          window.location.href = "./"+arr[0]+"/";
+          window.location.href = "./"+this.slug+number+"/";
 
         },
 			},

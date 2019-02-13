@@ -27,6 +27,13 @@
    background: linear-gradient(to right, var(--sec) 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
  }
+
+ mark{
+    font-weight: bold;
+    background: transparent;
+    color: red;
+  }
+
 </style>
 <main id="index" style="min-height:70vh;">
   <div class="">
@@ -87,17 +94,17 @@
 
     <div id="registry" class="jumbotron">
       <div class="row">
-        <div class="col-sm-12 col-md-9 col-lg-6" style="margin:auto;">
-          <h2>REGISTRY</h2>
+        <div class="col-sm-12 col-md- col-lg-6" style="margin:auto;">
+          <h2 class="text-center">REGISTRY</h2>
           <!-- <div class="jumbotron animatedBack text-center mt-5">
             <h1 class="text-light">REGISTRY</h1>
           </div> -->
-          <div>
+          <!-- <div>
             <form class="form-group">
               <input v-model="testURL" type="url" class="form-control"/>
               <button class="btn btn-outline-warning" type="button" @click.prevent="sendTest()">Post Test</button>
             </form>
-          </div>
+          </div> -->
           <div class="bg-light padding20">
             <form>
               <div class="form-group form-row">
@@ -128,24 +135,26 @@
               </small>
             </li>
             <template v-if="registry.length" v-for="(item,index) in registry">
-              <li class="list-group-item list-group-item-action flex-column align-items-start">
+              <li class="list-group-item list-group-item-action flex-column align-items-start context">
                 <div class="">
-                  <h5 class="d-inline">Found in <a :href="item._meta.slug" class="mb-1 font-weight-bold" v-text='item._meta.slug'></a></h5>
-                  <small>registed by <a :href='item._meta.username' v-text='item._meta.username'></a></small>
+                  <h5 class="d-inline">
+                    <span v-if='query'>Found in</span> <a :href="item._meta.slug" class="mb-1 font-weight-bold" v-text='item._meta.slug'></a>
+                  </h5>
+                  <small class="float-right">More by <a class="text-primary pointer" @click.prevent='searchByUser(item._meta.username)' v-text='item._meta.username'></a></small>
                 </div>
                 <div class="d-flex justify-content-between">
-                  <div class="p-1 flex-fill" v-if="item.classes">
+                  <div class="p-1 flex-fill" v-if="item.clses">
                     <div class="mainBackDarkFade text-light badge w-100 text-left">Classes</div>
                     <ul>
-                      <li v-for="c in item.classes">
+                      <li v-for="c in checkString(item.clses)">
                         <a :href="item._meta.slug +'/'+ c" v-text="c"></a>
                       </li>
                     </ul>
                   </div>
-                  <div class="p-1 flex-fill" v-if="item.properties">
+                  <div class="p-1 flex-fill" v-if="item.props">
                     <div class="mainBackLightFade text-light badge w-100 text-left">Properties</div>
                     <ul>
-                      <li v-for="p in item.properties">
+                      <li v-for="p in checkString(item.props)">
                         <a :href="item._meta.slug +'/'+ p" v-text="p"></a>
                       </li>
                     </ul>
@@ -242,6 +251,8 @@
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 <script src="./static/js/lodash.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
@@ -324,6 +335,37 @@ var app = new Vue({
         }
       },
       methods:{
+        searchByUser(username){
+          var self = this;
+
+          $('#searching').show();
+
+          var context = document.querySelector(".context");
+          var instance = new Mark(context);
+          instance.unmark();
+
+          axios.get('/query?q=__all__&_meta.username='+username+'&size=100').then(function (response) {
+            self.registry = response.data.hits;
+            self.registryTotal = response.data.total;
+            self.mark(username);
+            if (self.registryTotal) {
+              self.calculatePages();
+            }
+            $('#searching').hide();
+          });
+        },
+        checkString(props){
+          if (_.isString(props)) {
+            return [props];
+          }else {
+            return props
+          }
+        },
+        mark: function(kw){
+          var context = document.querySelector(".context");
+          var instance = new Mark(context);
+          instance.mark(kw);
+        },
         getQueryFilters: function(){
             var filters = [];
             var authorFilters = [];
@@ -366,6 +408,10 @@ var app = new Vue({
 
             $('#searching').show();
 
+            var context = document.querySelector(".context");
+            var instance = new Mark(context);
+            instance.unmark();
+
             axios.get('/query?size=100', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
@@ -373,6 +419,7 @@ var app = new Vue({
               //   console.log('reg is 0')
               //   self.registry = self.testRes
               // }
+              self.mark(self.query);
               if (self.registryTotal) {
                 self.calculatePages();
               }
