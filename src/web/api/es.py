@@ -1,14 +1,14 @@
 '''
     Discovery App Elasticsearch Document Object
 '''
-import base64
 import gzip
 from datetime import datetime
 from hashlib import blake2b
 
 import requests
 
-from elasticsearch_dsl import Date, Document, InnerDoc, Keyword, Object, Text
+from elasticsearch_dsl import (Binary, Date, Document, InnerDoc, Keyword,
+                               Object, Text)
 from elasticsearch_dsl.connections import connections
 
 # Default elasticsearch connection
@@ -34,7 +34,7 @@ class Schema(Document):
     A discovery-app schema object.
     The es backend is a collection of objects of this type.
     """
-    _raw = Text()
+    locals()['~raw'] = Binary()
     clses = Keyword(multi=True)
     props = Keyword(multi=True)
     _meta = Object(Metadata, required=True)
@@ -62,25 +62,25 @@ class Schema(Document):
         return blake2b(url.encode('utf8'), digest_size=16).hexdigest()
 
     def encode_raw(self):
-        ''' Encode and compress an original schema file,
+        ''' Encode and compress an original schema file to bytes,
         automatically invoked during saving if ~raw is not set '''
         try:
             res = requests.get(self._meta.url)
             res.raise_for_status()
-            _raw = res.text.encode('utf-8')
-            _raw = base64.urlsafe_b64encode(gzip.compress(_raw)).decode('utf-8')
+            _raw = res.text.encode()
+            _raw = gzip.compress(_raw)
             return _raw
         except requests.exceptions.RequestException:
-            pass # logging
+            pass
 
     def decode_raw(self):
         ''' Decode the saved _raw field or return empty string if _raw not set '''
-        if self._raw:
-            return gzip.decompress(base64.urlsafe_b64decode(self._raw)).decode('utf-8')
+        if '~raw' in self:
+            return gzip.decompress(self['~raw']).decode()
         return ''
 
     #pylint: disable=arguments-differ
-    def save(self, refresh=False, **kwargs):
+    def save(self, ref_raw=False, **kwargs):
         '''
         Save the Schema document into elasticsearch.
         If the document doesn’t exist it is created, it is overwritten otherwise.
@@ -89,7 +89,7 @@ class Schema(Document):
         The _id will be based on a hash of the url field.
         '''
         self.meta.id = self.encode_url()
-        if refresh or not self._raw:
-            self._raw = self.encode_raw()
+        if ref_raw or '~raw' not in self:
+            self['~raw'] = self.encode_raw()
         self._meta.stamp()
         return super(Schema, self).save(** kwargs)

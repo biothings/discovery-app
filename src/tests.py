@@ -7,7 +7,7 @@ import os
 import unittest
 
 import requests
-from nose.tools import eq_
+from nose.tools import eq_, ok_
 
 from web.api.es import Metadata, Schema
 from elasticsearch_dsl import Index
@@ -46,16 +46,27 @@ class DiscoveryAppTest(unittest.TestCase):
             else:
                 exit()
 
-        # create new index as defined in Schema
+        # create new index as defined in Schema class
         Schema.init()
 
+        # test dataset
+        cls.testset = []
+
         # add a document
-        meta = Metadata(username='namespacestd', slug='dev',
-                        url='https://github.com/namespacestd0/smartAPI')
-        cls.schema = Schema(
-            clses=['biothings', 'smartapi'], props='test', _meta=meta)
-        cls.schema.props = 'es-dsl'
-        cls.schema.save()
+        url = 'https://raw.githubusercontent.com/namespacestd0/mygene.info/master/README.md'
+        meta = Metadata(username='namespacestd', slug='dev', url=url)
+        schema = Schema(clses=['biothings', 'smartapi'],
+                        props='es-dsl', _meta=meta)
+        schema.save()
+        cls.testset.append(schema)
+
+        # add another document
+        url = ('https://raw.githubusercontent.com/data2health/'
+               'schemas/biothings/biothings/biothings_curie.jsonld')
+        meta = Metadata(username='data2health', slug='d2h', url=url)
+        schema = Schema(clses='biothings', _meta=meta)
+        schema.save()
+        cls.testset.append(schema)
 
     @classmethod
     def tearDownClass(cls):
@@ -94,22 +105,34 @@ class DiscoveryAppTest(unittest.TestCase):
     def query_has_hits(cls, query_keyword, endpoint='query'):
         ''' make a GET request to a query endpoint and assert positive hits '''
         dic = cls.get_ok(cls.HOST + '/' + endpoint + '?q=' + query_keyword)
-        assert dic.get('total', 0) > 0 and dic.get('hits', [])
+        ok_(dic.get('total', 0) > 0)
+        ok_(dic.get('hits', []))
         return dic
 
     # Tests
 
-    def test_es_retrive_by_id(self):
+    def test_es_basics(self):
         ''' requires ONLY es server
         asserts es stores given doc
         asserts doc url encodes to _id
         asserts es retrives given doc by _id '''
-        sch = Schema.get(id='e8d6aa5ffb1003f4a882cb83ffa35b31')
-        eq_(sch.to_dict(), self.schema.to_dict())
+        sch = Schema.get(id=self.testset[0].meta.id)
+        eq_(sch.to_dict(), self.testset[0].to_dict())
+
+    def test_es_raw_field(self):
+        ''' requires ONLY es server
+        asserts schema doc encodes to compressed bytes
+        asserts decoding restores original doc '''
+        sch = Schema.get(id=self.testset[1].meta.id)
+        encoded = sch.encode_raw()
+        ok_(encoded, sch['~raw'])
+
+        decoded = sch.decode_raw()
+        original = requests.get(sch['_meta'].url).text
+        ok_(decoded, original)
 
     def test_return_all(self):
-        ''' asserts biothings backend handles special query parameter __all__
-        asserts document index setting matches document meta setting '''
+        ''' asserts biothings backend handles special query parameter __all__ '''
         self.query_has_hits(query_keyword='__all__')
 
 
