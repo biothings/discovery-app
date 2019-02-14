@@ -5,6 +5,7 @@ or  > nosetests tests
 '''
 import os
 import unittest
+import json
 
 import requests
 from nose.tools import eq_, ok_
@@ -26,12 +27,13 @@ def ask(prompt):
     return result == 'Y'
 
 
-class DiscoveryAppTest(unittest.TestCase):
+class DiscoveryAppAPITest(unittest.TestCase):
     ''' Requires a running server to test against '''
     __test__ = True
 
     HOST = os.getenv("DISCOVERY_HOST", "http://localhost:8000").rstrip('/')
     API_ENDPOINT = '/api'
+    HOST += API_ENDPOINT
 
     # Setup and Teardown
 
@@ -83,12 +85,12 @@ class DiscoveryAppTest(unittest.TestCase):
         return res.json()
 
     @staticmethod
-    def post_status_code(url, params, status_code):
+    def post_status_code(url, data, status_code):
         ''' make a POST request and return json if the status codes match '''
         headers = {'Content-type': 'application/x-www-form-urlencoded'}
-        res = requests.post(url, data=params, headers=headers)
+        res = requests.post(url, data=json.dumps(data), headers=headers)
         assert res.status_code == status_code, "status {} != {} for url: {}\nparams: {}".format(
-            res.status_code, status_code, url, params)
+            res.status_code, status_code, url, data)
         return res.json()
 
     @classmethod
@@ -97,9 +99,9 @@ class DiscoveryAppTest(unittest.TestCase):
         return cls.get_status_code(url, 200)
 
     @classmethod
-    def post_ok(cls, url, params):
+    def post_ok(cls, url, data):
         ''' make a POST request and return json if server responds okay '''
-        return cls.post_status_code(url, params, 200)
+        return cls.post_status_code(url, data, 200)
 
     @classmethod
     def query_has_hits(cls, query_keyword, endpoint='query'):
@@ -125,15 +127,44 @@ class DiscoveryAppTest(unittest.TestCase):
         asserts decoding restores original doc '''
         sch = Schema.get(id=self.testset[1].meta.id)
         encoded = sch.encode_raw()
-        ok_(encoded, sch['~raw'])
+        eq_(encoded, sch['~raw'])
 
         decoded = sch.decode_raw()
         original = requests.get(sch['_meta'].url).text
-        ok_(decoded, original)
+        eq_(decoded, original)
 
-    def test_return_all(self):
-        ''' asserts biothings backend handles special query parameter __all__ '''
+    def test_handlers_query_return_all(self):
+        ''' asserts special query parameter __all__ is functional '''
         self.query_has_hits(query_keyword='__all__')
+
+    def test_handlers_query_meta_slug(self):
+        ''' asserts _meta.slug field is searchable '''
+        self.query_has_hits(query_keyword='_meta.slug:dev')
+
+    def test_handlers_registry_get(self):
+        ''' asserts get request to registry retrives documents
+        acknowledges timestamp will not be in datetime format in res'''
+        res = self.get_ok(self.HOST+'/registry/'+self.testset[0].meta.id)
+        eq_(res['_meta']['url'], self.testset[0].to_dict()['_meta']['url'])
+
+    def test_handlers_registry_post(self):
+        ''' asserts props and clses (p&c) are optional,
+        asserts p&c take both str and list,
+        asserts p&c are converted to lower cases,
+        asserts update to existing doc works '''
+        doc_1 = {'url': 'http://example.com/',
+                 'slug': 'com',
+                 'props': 'ebay'}
+        doc_2 = {'url': 'http://example.org/',
+                 'slug': 'org',
+                 'props': ['cvs'],
+                 'clses': ['costco', 'MTS']}
+        ok_(self.post_ok(self.HOST+'/registry', data=doc_1)['success'])
+        ok_(self.post_ok(self.HOST+'/registry', data=doc_2)['success'])
+        self.query_has_hits(query_keyword='mts') # not MTS
+        doc_2['slug'] = 'us'
+        self.post_ok(self.HOST+'/registry', data=doc_2)
+        self.query_has_hits(query_keyword='_meta.slug:us')
 
 
 if __name__ == '__main__':

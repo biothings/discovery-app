@@ -19,7 +19,7 @@ class Metadata(InnerDoc):
     The metadata of a schema in discovery-app.
     Required fields include: a username and an URL (url).
     """
-    slug = Keyword()
+    slug = Keyword(required=True)
     username = Text(fields={'keyword': Keyword()}, required=True)
     timestamp = Date(required=True)
     url = Text(required=True)
