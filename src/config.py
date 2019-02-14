@@ -1,9 +1,11 @@
+# pylint: disable=unused-wildcard-import, wildcard-import, unused-import
+''' Discovery App Configuration
+Compatible with Biothings Web Component '''
 from biothings.web.api.es.handlers import QueryHandler
-from biothings.web.settings.default import *  # pylint: disable=unused-wildcard-import
-
+from biothings.web.settings.default import *
 from config_key import COOKIE_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-from web.api.handlers import APIHandler
-from web.handlers import APP_LIST as web_endpoint_list
+from web.api.handlers import RegistryHandler
+from web.handlers import APP_LIST as WEB_ENDPOINTS
 
 # *****************************************************************************
 # Elasticsearch variables
@@ -15,8 +17,8 @@ ES_DOC_TYPE = 'schema'
 # App URL Patterns
 # *****************************************************************************
 APP_LIST = [
-    (r"/query/?", QueryHandler),
-    (r"/registry/?", APIHandler),
-    (r"/registry/(.+)/?", APIHandler)
+    (r"/api/query/?", QueryHandler),
+    (r"/api/registry/?", RegistryHandler),
+    (r"/api/registry/(.+)/?", RegistryHandler)
 ]
-APP_LIST += web_endpoint_list
+APP_LIST += WEB_ENDPOINTS

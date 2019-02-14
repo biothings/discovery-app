@@ -1,20 +1,20 @@
-import sys
+import json
+import logging
 import os
+import sys
 
-import tornado.httpserver
+import tornado.gen
 import tornado.httpclient
+import tornado.httpserver
 import tornado.ioloop
 import tornado.web
-import tornado.gen
-from tornado.httputil import url_concat
-from jinja2 import Environment, FileSystemLoader
 import torngithub
-from torngithub import json_encode, json_decode
+from jinja2 import Environment, FileSystemLoader
+from tornado.httputil import url_concat
+from torngithub import json_decode, json_encode
 
 from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 
-import json
-import logging
 log = logging.getLogger("discovery")
 
 GITHUB_CALLBACK_PATH = "/oauth"
@@ -27,6 +27,7 @@ if src_path not in sys.path:
 TEMPLATE_PATH = os.path.join(src_path, 'templates/')
 templateLoader = FileSystemLoader(searchpath=TEMPLATE_PATH)
 templateEnv = Environment(loader=templateLoader, cache_size=0)
+
 
 class BaseHandler(BioThingsBaseHandler):
     def get_current_user(self):
@@ -43,7 +44,8 @@ class MainHandler(BaseHandler):
             print(url)
             template_file = "viewer.html"
             schema_template = templateEnv.get_template(template_file)
-            schema_output = schema_template.render(Context=json.dumps({"Query": '', "Content": True, 'URL': url}))
+            schema_output = schema_template.render(
+                Context=json.dumps({"Query": '', "Content": True, 'URL': url}))
             self.write(schema_output)
         else:
             index_file = "index.html"
@@ -57,12 +59,15 @@ class SchemaOrgHandler(BaseHandler):
         template_file = "schema.html"
         schema_template = templateEnv.get_template(template_file)
         if yourQuery:
-            schema_output = schema_template.render(Context=json.dumps({"Query": yourQuery, "Content": True}))
+            schema_output = schema_template.render(
+                Context=json.dumps({"Query": yourQuery, "Content": True}))
         elif self.get_argument('q', False):
-            schema_output = schema_template.render(Context=json.dumps({"Query": '', "Content": False}))
+            schema_output = schema_template.render(
+                Context=json.dumps({"Query": '', "Content": False}))
         else:
             schema_output = schema_template.render(Context=json.dumps({}))
         self.write(schema_output)
+
 
 class LoginHandler(BaseHandler):
     def get(self):
@@ -117,6 +122,7 @@ class GithubLoginHandler(BaseHandler, torngithub.GithubMixin):
             extra_params={"scope": GITHUB_SCOPE, "foo": 1}
         )
 
+
 class UserInfoHandler(BaseHandler):
     def get(self):
         current_user = self.get_current_user() or {}
@@ -125,12 +131,14 @@ class UserInfoHandler(BaseHandler):
                 del current_user[key]
         self.return_json(current_user)
 
+
 class GuideHandler(BaseHandler):
     def get(self):
         doc_file = "guide.html"
         guide_template = templateEnv.get_template(doc_file)
         guide_output = guide_template.render()
         self.write(guide_output)
+
 
 class DashboardHandler(BaseHandler):
     def get(self):
@@ -139,6 +147,7 @@ class DashboardHandler(BaseHandler):
         dashboard_output = dashboard_template.render()
         self.write(dashboard_output)
 
+
 class PGHandler(BaseHandler):
     def get(self):
         doc_file = "playground.html"
@@ -146,12 +155,15 @@ class PGHandler(BaseHandler):
         playground_output = playground_template.render()
         self.write(playground_output)
 
+
 class VisualizerHandler(BaseHandler):
     def get(self, namespace=None, className=None):
         test_file = "viewer.html"
         test_template = templateEnv.get_template(test_file)
-        test_output = test_template.render(Context=json.dumps({"namespace": namespace, "query": className}))
+        test_output = test_template.render(Context=json.dumps(
+            {"namespace": namespace, "query": className}))
         self.write(test_output)
+
 
 APP_LIST = [
     (r"/?", MainHandler),
