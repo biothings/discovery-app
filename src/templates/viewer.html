@@ -102,10 +102,12 @@
     </div>
     <!-- IF NO QUERY -->
     <div v-if="!query" class="col-sm-9">
+      <div class="alert alert-light w-100 padding20 text-center">
+        <h3>Register this dataset?</h3>
+        <button v-if="!slugRegistered" data-toggle="modal" data-target="#registration" class="btn themeButton text-light" > Register Now</button>
+      </div>
       <div class="padding20">
-        <button @click="switchView()" class="btn btn-secondary up text-light">
-          <!-- <span v-if="viewAlphabetical"> Alphabetical View</span>
-          <span v-else> Hierarchical View</span> -->
+        <button @click="switchView()" class="btn btn-secondary up text-light float-right">
           Toggle View
         </button>
       </div>
@@ -459,39 +461,78 @@
     </div>
   </div>
 
-  <div class="modal fade" id="addFieldModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="registration" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title mainTextDark caps" id="exampleModalLabel">Add Field</h5>
+          <h4 class="modal-title text-muted caps" id="exampleModalLabel">Registration</h4>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true" class="mainTextLight">&times;</span>
           </button>
         </div>
-        <div class="modal-body mainBackDark text-light text-center">
-          <form>
-            <div class="form-group">
-              <label for="exampleFormControlInput1">Property Name</label>
-              <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="Text">
+        <div class="modal-body text-muted text-center">
+          <template v-if="userInfo.login">
+            <form id="registrationForm">
+              <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="exampleFormControlInput1">Namespace (slug)</label>
+                <div class="col-sm-8">
+                  <template v-if="!slugInput">
+                    <div class="alert alert-info">
+                      <p>
+                        Recommended slug found in graph context: <b class="mainTextLight" v-text="namespace"></b>
+                      </p>
+                      <p>Use <b class="mainTextLight" v-text="namespace"></b> as your slug?</p>
+                      <button class="btn themeButton text-light" @click='slugInput = namespace'>Use '<b v-text="namespace"></b>'</button>
+                    </div>
+                  </template>
+                  <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="slugInput" v-model='slugInput'></textarea>
+                  <template v-if="availableSlug && slugInput.length">
+                    <small class="text-success">AVAILABLE</small>
+                  </template>
+                  <template v-if="!availableSlug && slugInput.length">
+                    <small class="text-danger">NOT AVAILABLE</small>
+                  </template>
+                  <p class="m-2" :class="[availableSlug ? 'mainTextDark' : 'text-danger']">
+                    discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
+                  </p>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="colFormLabelSm" class="col-sm-4 col-form-label col-form-label">URL</label>
+                <div class="col-sm-8">
+                  <input type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="datasetURL">
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="exampleFormControlSelect1">Classes (<span class="text-success" v-text="allAvailableClasses.length"></span>)</label>
+                <div class="col-sm-8">
+                  <select class="form-control" id="exampleFormControlSelect1">
+                    <template v-for="item in allAvailableClasses">
+                      <option v-text="item"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label class="col-sm-4 col-form-label" for="exampleFormControlSelect2">Properties (<span class="text-success" v-text="allAvailableProperties.length"></span>)</label>
+                <div class="col-sm-8">
+                  <select class="form-control" id="exampleFormControlSelect2">
+                    <template v-for="item in allAvailableProperties">
+                      <option v-text="item"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <button @click.prevent="handleSubmit()" class="btn themeButton text-light" :disabled="!availableSlug && slugInput">Submit</button>
+              </div>
+            </form>
+          </template>
+          <template v-else>
+            <div class="alert alert-warning">
+              <h4>You must be logged in to register this dataset</h4>
             </div>
-            <div class="form-group">
-              <label for="exampleFormControlSelect1">Sub-Fileds?</label>
-              <select class="form-control" id="exampleFormControlSelect1">
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="exampleFormControlTextarea1">Comments/Description</label>
-              <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </template>
         </div>
       </div>
     </div>
@@ -552,6 +593,13 @@ var app = new Vue({
           viewAlphabetical: true,
           rootNode:'',
           moreSpecifTypes:[],
+          slugRegistered: false,
+          userInfo:{},
+          allAvailableProperties:[],
+          allAvailableClasses:[],
+          slugInput:'',
+          availableSlug: false,
+          dataSetURL:''
 				}
 			},
       watch:{
@@ -566,9 +614,39 @@ var app = new Vue({
           }else{
             this.searchResults = [];
           }
+        },
+        slugInput:function(newInput, oldInput){
+          var self = this;
+          self.slugInput = self.slugInput.toLowerCase();
+          if (newInput) {
+            axios.get(`/query?q=_meta.slug:`+self.slugInput).then(function (response) {
+              console.log('slug check',response.data,newInput)
+              if (response.data.total) {
+                self.availableSlug= false;
+              }else{
+                self.availableSlug= true;
+              }
+            });
+          }
         }
       },
 			methods:{
+        handleSubmit(){
+          $('#registrationForm').parsley().validate();
+        },
+        getAllAvailableProperties(){
+          console.log('getting all props')
+          let results = [];
+          for (var i = 0; i < this.graph.length; i++) {
+            if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdf:Property") {
+              results.push(this.graph[i]['rdfs:label']);
+            }
+          }
+          this.allAvailableProperties = results.sort();
+        },
+        generateRegistrationData(){
+
+        },
         getMoreSpecifTypes(){
           var self = this;
           let res = [];
@@ -1271,13 +1349,17 @@ var app = new Vue({
         },
         getAvailableClasses(){
           let results = [];
+          let resultsForRegistration = [];
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class") {
               results.push(this.graph[i]);
+              resultsForRegistration.push(this.graph[i]['rdfs:label']);
             }
           }
           this.availableClasses = results.sort();
+          this.allAvailableClasses = resultsForRegistration.sort();
           this.getAvailableClassesNames();
+          this.getAllAvailableProperties();
           this.getFilters();
         },
         getAvailableClassesNames(){
@@ -1374,13 +1456,23 @@ var app = new Vue({
 			},
 			mounted:function(){
         let context = {{Context}}
+        let self= this;
          if ( context ) {
-           this.query = context.query;
-           this.reqFile()
+           self.query = context.query;
+           self.reqFile()
          }
          if (context.hasOwnProperty('namespace')) {
-           this.namespace = context.namespace;
+           //remove random numbers
+           self.namespace = context.namespace.replace(/[0-9]/g, '');;
          }
+
+         self.datasetURL = localStorage.getItem('datasetDataURL');
+
+         $.ajax({url: "/user", success: function(result){
+           console.log('got user info',result)
+            self.userInfo = result;
+         },
+         cache: false});
 
 			},
       created:function(){
@@ -1388,6 +1480,7 @@ var app = new Vue({
           if (context.hasOwnProperty('URL')) {
             this.userURL = context.URL;
           }
+
       }
 		});
 
