@@ -39,32 +39,28 @@
         <table class="table">
           <thead class="bg-secondary text-light">
             <tr>
-              <th scope="col">Name</th>
+              <th scope="col">Slug</th>
               <th scope="col">Source URL</th>
-              <th scope="col">NameSpace</th>
-              <th scope="col">Visualize</th>
+              <th scope="col">View</th>
               <th scope="col">Download</th>
               <th scope="col">Delete</th>
             </tr>
           </thead>
           <tbody>
-            <template v-if="dashboard.length">
+            <template v-if="dashboard && dashboard.length">
               <tr v-for="item in dashboard">
                 <td>
-                  <span class="status bg-success" ></span> <span v-text="'TEST NAME'"></span>
+                  <span class="status bg-success" ></span> <a target="_blank" :href="item.url" v-text="item._meta.slug"></a>
                 </td>
                 <td>
-                  <a target="_blank" :href="item.url">
-                    <span v-text="item.url"></span> <i class="fas fa-external-link-alt"></i>
+                  <a target="_blank" :href="item._meta.url" :title="item._meta.url">
+                    Link <i class="fas fa-external-link-alt"></i>
                   </a>
                 </td>
                 <td>
-                  <a target="_blank" :href="item.url" v-text="item.url"></a>
-                </td>
-                <td>
-                  <button class="btn btn-outline-secondary up">
+                  <a role="button" :href="'/'+item._meta.slug" class="btn btn-outline-secondary up">
                     Visualize
-                  </button>
+                  </a>
                 </td>
                 <td>
                   <div class="dropdown">
@@ -88,7 +84,7 @@
             <template v-else>
               <tr>
                 <td colspan="6" class="text-center text-muted">
-                  No Data
+                  No Contributions Yet
                 </td>
               </tr>
             </template>
@@ -120,19 +116,22 @@ var app = new Vue({
       },
 			methods:{
         getAll(){
-          axios.get('/query?q="marcodarko"').then(res=>{
-            this.dashboard = res.data.hits;
-            this.dashboardTotal = res.data.total;
-          }).catch(err=>{
-            throw err;
-          });
+          let self= this;
+          if (this.user.login) {
+            axios.get('/api/query?q=_meta.username:'+self.user.login).then(res=>{
+              self.dashboard = res.data.hits;
+              self.dashboardTotal = res.data.total;
+            }).catch(err=>{
+              throw err;
+            });
+          }
         },
         checkLoggedUser(){
           var self = this;
           axios.get('/user').then(res=>{
             if (res.data.login) {
               self.user = res.data;
-              console.log('setting user data dashboard')
+              self.getAll();
             }
           }).catch(err=>{
             throw err;
@@ -140,7 +139,7 @@ var app = new Vue({
         },
 			},
 			mounted:function(){
-        this.getAll();
+
 			},
       created:function(){
         this.checkLoggedUser()

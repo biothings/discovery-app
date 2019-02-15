@@ -34,6 +34,15 @@
     color: red;
   }
 
+  .smallButton{
+    transform: scale(.7);
+    border-radius: 10px;
+  }
+
+  .smallButton:hover{
+    background: var(--sec);
+  }
+
 </style>
 <main id="index" style="min-height:70vh;">
   <div class="">
@@ -96,15 +105,6 @@
       <div class="row">
         <div class="col-sm-12 col-md- col-lg-6" style="margin:auto;">
           <h2 class="text-center">REGISTRY</h2>
-          <!-- <div class="jumbotron animatedBack text-center mt-5">
-            <h1 class="text-light">REGISTRY</h1>
-          </div> -->
-          <!-- <div>
-            <form class="form-group">
-              <input v-model="testURL" type="url" class="form-control"/>
-              <button class="btn btn-outline-warning" type="button" @click.prevent="sendTest()">Post Test</button>
-            </form>
-          </div> -->
           <div class="bg-light padding20">
             <form>
               <div class="form-group form-row">
@@ -135,7 +135,7 @@
               </small>
             </li>
             <template v-if="registry.length" v-for="(item,index) in registry">
-              <li class="list-group-item list-group-item-action flex-column align-items-start context">
+              <li class="list-group-item list-group-item-action flex-column align-items-start context registryItem">
                 <div class="">
                   <h5 class="d-inline">
                     <span v-if='query'>Found in</span> <a :href="item._meta.slug" class="mb-1 font-weight-bold" v-text='item._meta.slug'></a>
@@ -145,19 +145,21 @@
                 <div class="d-flex justify-content-between">
                   <div class="p-1 flex-fill" v-if="item.clses">
                     <div class="mainBackDarkFade text-light badge w-100 text-left">Classes</div>
-                    <ul>
-                      <li v-for="c in checkString(item.clses)">
+                    <!-- <ul>
+                      <li v-for="c in item.clses">
                         <a :href="item._meta.slug +'/'+ c" v-text="c"></a>
                       </li>
-                    </ul>
+                    </ul> -->
+                    <registry-list :list='item.clses' :slug="item._meta.slug"></registry-list>
                   </div>
                   <div class="p-1 flex-fill" v-if="item.props">
                     <div class="mainBackLightFade text-light badge w-100 text-left">Properties</div>
-                    <ul>
-                      <li v-for="p in checkString(item.props)">
+                    <!-- <ul>
+                      <li v-for="p in item.props">
                         <a :href="item._meta.slug +'/'+ p" v-text="p"></a>
                       </li>
-                    </ul>
+                    </ul> -->
+                    <registry-list :list='item.props' :slug="item._meta.slug"></registry-list>
                   </div>
                 </div>
               </li>
@@ -256,6 +258,66 @@
 <script src="./static/js/lodash.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
+
+Vue.component('registry-list', {
+  data: function(){
+    return{
+      result:null,
+      showAll:false,
+      myList:[],
+      showButton: false
+    }
+  },
+  props: ['list','slug'],
+  methods:{
+
+
+  },
+  watch:{
+    showAll: function(newVal, oldVal){
+      if (newVal) {
+        this.myList = this.list;
+      }else{
+        this.myList = this.list.slice(0,5);
+      }
+    }
+  },
+  mounted: function(){
+
+    let self = this;
+    if (self.list.length>5) {
+      this.showButton = true;
+      self.myList = self.list.slice(0,5);
+    }else{
+      self.myList = self.list;
+    }
+
+
+  },
+  template: `<div>
+              <template v-if="showAll">
+                <div class="text-center d-block">
+                <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show Less</a>
+                </div>
+              </template>
+              <ul>
+                <li v-for="c in myList">
+                  <a :href="slug +'/'+ c" v-text="c"></a>
+                </li>
+              </ul>
+              <template v-if="!showAll && list.length>5">
+                <div class="text-center d-block">
+                <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show More (<span v-text="list.length"></span>)</a>
+                </div>
+              </template>
+              <template v-if="showAll">
+                <div class="text-center d-block">
+                <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show Less</a>
+                </div>
+              </template>
+            </div>`
+});
+
 var app = new Vue({
       el: '#index',
 			data: function(){
@@ -344,7 +406,7 @@ var app = new Vue({
           var instance = new Mark(context);
           instance.unmark();
 
-          axios.get('/query?q=__all__&_meta.username='+username+'&size=100').then(function (response) {
+          axios.get('/api/query?q=_meta.username:'+username+'&size=100').then(function (response) {
             self.registry = response.data.hits;
             self.registryTotal = response.data.total;
             self.mark(username);
@@ -353,13 +415,6 @@ var app = new Vue({
             }
             $('#searching').hide();
           });
-        },
-        checkString(props){
-          if (_.isString(props)) {
-            return [props];
-          }else {
-            return props
-          }
         },
         mark: function(kw){
           var context = document.querySelector(".context");
@@ -412,7 +467,7 @@ var app = new Vue({
             var instance = new Mark(context);
             instance.unmark();
 
-            axios.get('/query?size=100', params).then(function (response) {
+            axios.get('/api/query?size=100', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
               // if (self.registryTotal === 0) {
@@ -442,27 +497,6 @@ var app = new Vue({
         },
         toggleDetails: function (item) {
           // this.$set(item, 'showDetails', !api.showDetails);
-        },
-        getAll(){
-          axios.get('/query?q="__all__"').then(res=>{
-            this.registry = res.data.hits;
-            this.registryTotal = res.data.total;
-            console.log(this.registry)
-            this.calculatePages();
-          }).catch(err=>{
-            throw err;
-          });
-        },
-        sendTest(){
-          let data={
-            'slug':'/bts/Dataset',
-            'url': this.testURL,
-          };
-          axios.post('/registry',data).then(res=>{
-
-          }).catch(err=>{
-
-          });
         },
         checkLoggedUser(){
           var self = this;
