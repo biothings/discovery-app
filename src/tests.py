@@ -55,7 +55,7 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         # add a document
         url = 'https://raw.githubusercontent.com/namespacestd0/mygene.info/master/README.md'
         meta = Metadata(username='namespacestd', slug='dev', url=url)
-        schema = Schema(selfes=['biothings', 'smartapi'],
+        schema = Schema(clses=['biothings', 'smartapi'],
                         props='es-dsl', _meta=meta)
         schema.save()
         cls.testset.append(schema)
@@ -64,7 +64,7 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         url = ('https://raw.githubusercontent.com/data2health/'
                'schemas/biothings/biothings/biothings_curie.jsonld')
         meta = Metadata(username='data2health', slug='d2h', url=url)
-        schema = Schema(selfes='biothings', _meta=meta)
+        schema = Schema(clses='biothings', _meta=meta)
         schema.save()
         cls.testset.append(schema)
 
@@ -150,7 +150,7 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         eq_(res['_meta']['url'], self.testset[0].to_dict()['_meta']['url'])
 
     def test_handlers_registry_post(self):
-        ''' asserts props and selfes (p&c) are optional,
+        ''' asserts props and clses (p&c) are optional,
         asserts p&c take both str and list,
         asserts p&c are converted to lower cases,
         asserts update to existing doc works '''
