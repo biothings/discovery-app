@@ -92,4 +92,4 @@ class Schema(Document):
         if ref_raw or '~raw' not in self:
             self['~raw'] = self.encode_raw()
         self._meta.stamp()
-        return super(Schema, self).save(** kwargs)
+        return super().save(refresh=True, **kwargs)
