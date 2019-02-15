@@ -37,7 +37,8 @@ class RegistryHandler(BaseHandler):
             prop.lower() for prop in props]
         clses = [clses.lower()] if isinstance(clses, str) else [
             clss.lower() for clss in clses]
-        meta = Metadata(username=self.current_user, url=url, slug=slug)
+        meta = Metadata(username=self.current_user.get(
+            'login'), url=url, slug=slug)
         schema = Schema(_meta=meta, props=props, clses=clses)
         res = schema.save()
         self.return_json({'success': res})
