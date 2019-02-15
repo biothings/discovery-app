@@ -14,8 +14,7 @@ class RegistryHandler(BaseHandler):
         ''' Save or Update a document '''
 
         # Authenticate
-        user = self.get_current_user()
-        if not user:
+        if not self.current_user:
             res = {'success': False,
                    'error': 'Login with your Github account first.'}
             self.return_json(res, status_code=401)
@@ -38,7 +37,7 @@ class RegistryHandler(BaseHandler):
             prop.lower() for prop in props]
         clses = [clses.lower()] if isinstance(clses, str) else [
             clss.lower() for clss in clses]
-        meta = Metadata(username=user, url=url, slug=slug)
+        meta = Metadata(username=self.current_user, url=url, slug=slug)
         schema = Schema(_meta=meta, props=props, clses=clses)
         res = schema.save()
         self.return_json({'success': res})
