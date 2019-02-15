@@ -12,7 +12,7 @@ import requests
 from nose.tools import eq_, ok_
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application, create_signed_value
-from torngithub import json_decode, json_encode
+from torngithub import json_encode
 
 from biothings.utils.common import ask
 from config import COOKIE_SECRET
@@ -113,9 +113,17 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         ok_(dic.get('hits', []))
         return dic
 
+    def query_has_no_hits(self, query_keyword, endpoint='query'):
+        ''' make a GET request to a query endpoint and assert positive hits '''
+        dic = self.get_json_ok(
+            self.HOST + '/' + endpoint + '?q=' + query_keyword)
+        ok_(dic.get('total') == 0)
+        ok_(dic.get('hits') == [])
+        return dic
+        
     # Tests
 
-    def test_es_basics(self):
+    def test_01_es_basics(self):
         ''' requires ONLY es server
         asserts es stores given doc
         asserts doc url encodes to _id
@@ -123,7 +131,7 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         sch = Schema.get(id=self.testset[0].meta.id)
         eq_(sch.to_dict(), self.testset[0].to_dict())
 
-    def test_es_raw_field(self):
+    def test_02_es_raw_field(self):
         ''' requires ONLY es server
         asserts schema doc encodes to compressed bytes
         asserts decoding restores original doc '''
@@ -136,21 +144,21 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         original = requests.get(sch['_meta'].url).text
         eq_(decoded, original)
 
-    def test_handlers_query_return_all(self):
+    def test_03_handlers_query_return_all(self):
         ''' asserts special query parameter __all__ is functional '''
         self.query_has_hits(query_keyword='__all__')
 
-    def test_handlers_query_meta_slug(self):
+    def test_04_handlers_query_meta_slug(self):
         ''' asserts _meta.slug field is searchable '''
         self.query_has_hits(query_keyword='_meta.slug:dev')
 
-    def test_handlers_registry_get(self):
+    def test_05_handlers_registry_get(self):
         ''' asserts get request to registry retrives documents
         acknowledges timestamp will not be in datetime format in res'''
         res = self.get_json_ok(self.HOST+'/registry/'+self.testset[0].meta.id)
         eq_(res['_meta']['url'], self.testset[0].to_dict()['_meta']['url'])
 
-    def test_handlers_registry_post(self):
+    def test_06_handlers_registry_post(self):
         ''' asserts props and clses (p&c) are optional,
         asserts p&c take both str and list,
         asserts update to existing doc works '''
@@ -168,6 +176,11 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         self.post_json_ok(self.HOST+'/registry', data=doc_2)
         self.query_has_hits(query_keyword='_meta.slug:us')
 
+    def test_07_handlers_registry_delete(self):
+        ''' asserts delete a document by its _id '''
+        self.query_has_hits(query_keyword='es-dsl')
+        self.fetch(self.HOST+'/registry/'+self.testset[0].meta.id, method='DELETE')
+        self.query_has_no_hits(query_keyword='es-dsl')
 
 if __name__ == '__main__':
     try:
