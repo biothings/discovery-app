@@ -107,8 +107,8 @@
         <button v-if="!slugRegistered" data-toggle="modal" data-target="#registration" class="btn themeButton text-light" > Register Now</button>
       </div>
       <div class="padding20">
-        <button @click="switchView()" class="btn btn-secondary up text-light float-right">
-          Toggle View
+        <button @click="switchView()" class="btn btn-secondary up text-light float-right mb-4">
+          Toggle View <i class="fas fa-retweet"></i>
         </button>
       </div>
       <div v-if="viewAlphabetical">
@@ -128,7 +128,7 @@
           </div>
         </form>
         <h1 class="text-muted">Alphabetical</h1>
-        <ul class="pagination">
+        <ul class="pagination" style="overflow-x: scroll;">
           <li class="page-link" v-for="(item,i) in availableClassesNames">
             <a :href="'#'+item.group" v-text="item.group"></a>
           </li>
@@ -262,17 +262,11 @@
       <h3 class="mainTextDark" v-if='schemaClass'>
         Properties of <a class="mainTextDark bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
       </h3>
-      <table class="table table-responsive table-striped-main" v-if="properties.length" style="margin-bottom: 40px">
+      <table class="table  table-striped-main" v-if="properties.length" style="margin-bottom: 40px">
       <thead class="mainBackDark text-light">
         <tr>
           <th >
-            <!-- <h1 v-if='schemaClass'>
-              Properties of <a class="text-light bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
-            </h1> -->
           </th>
-          <!-- <th scope="col">Property</th>
-          <th scope="col">Expected Type</th>
-          <th scope="col">Description</th> -->
         </tr>
       </thead>
       <tbody>
@@ -286,24 +280,14 @@
             <small class="badge badge-light text-muted">Expected Type: </small>
             <template v-for="(type,i) in getType(item)">
               <a :href="generateLink(type)">
-                <small v-html='type'></small>
+                <small >
+                  <i class="fas fa-circle mainTextDark"></i> <span v-html='type'></span>
+                </small>
                 <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
               </a>
               <span v-if="i !== getType(item).length-1">, </span>
             </template>
           </td>
-          <!-- <td class="w-25">
-            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a>
-          </td>
-          <td class="w-25">
-            <template v-for="(type,i) in getType(item)">
-              <a style="display: block;" :href="generateLink(type)">
-                <span v-html='type'></span>
-                <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
-              </a>
-            </template>
-          </td>
-          <td v-html=getDescription(item) class="mainTextDark w-50"></td> -->
         </tr>
       </tbody>
     </table>
@@ -340,17 +324,11 @@
       <h3 :id='parent["className"]' class="mainTextLight">
         Properties of <a class="mainTextLight bold" :href="'./'+parent['className']" v-html='parent["className"]'></a>
       </h3>
-      <table v-if="parent['props'].length" class="table table-responsive table-striped-sec" style="margin-bottom: 40px">
+      <table v-if="parent['props'].length" class="table  table-striped-sec" style="margin-bottom: 40px">
       <thead class="mainBackLight text-light">
         <tr>
           <th>
-            <!-- <h1 :id='parent["className"]'>
-              Properties of <a class="text-light bold" :href="'./'+parent['className']" v-html='parent["className"]'></a>
-            </h1> -->
           </th>
-          <!-- <th scope="col">Property</th>
-          <th scope="col">Expected Type</th>
-          <th scope="col">Description</th> -->
         </tr>
       </thead>
       <tbody>
@@ -364,24 +342,14 @@
             <small class="badge badge-light text-muted">Expected Type: </small>
             <template v-for="(type,i) in getType(item)">
               <a :href="generateLink(type)" >
-                <small v-html='type'></small>
+                <small>
+                  <i class="fas fa-circle mainTextLight"></i> <span v-html='type'></span>
+                </small>
                 <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
               </a>
               <span v-if="i !== getType(item).length-1">, </span>
             </template>
           </td>
-          <!-- <td class="w-25">
-            <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a></td>
-          </td>
-          <td class="w-25">
-            <template v-for="(type,i) in getType(item)">
-              <a style="display: block;" :href="generateLink(type)">
-                <span v-html='type'></span>
-                <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
-              </a>
-            </template>
-          </td>
-          <td v-html=getDescription(item) class="mainTextDark w-50"></td> -->
         </tr>
       </tbody>
     </span>
@@ -401,15 +369,12 @@
         <h3>
           Properties with <a class="mainTextDark bold" :href="'./'+schemaClass" v-text="schemaClass"></a> as Expected Type
         </h3>
-        <table class="table table-responsive table-light table-striped" style="margin-bottom: 40px">
+        <table class="table  table-light table-striped" style="margin-bottom: 40px">
           <thead class="mainBackDark">
             <tr>
               <th>
 
               </th>
-              <!-- <th scope="col">Property</th>
-              <th scope="col">Expected Type</th>
-              <th scope="col">Description</th> -->
             </tr>
           </thead>
           <tbody>
@@ -423,36 +388,25 @@
                 <small class="badge badge-light text-muted">Expected Type: </small>
                 <template v-for="(type,i) in getType(item)">
                   <a :href="generateLink(type)" class="mainTextDark bold">
-                    <small v-html='type'></small>
+                    <small>
+                      <i class="fas fa-circle mainTextDark"></i> <span v-html='type'></span>
+                    </small>
                     <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
                   </a>
                   <span v-if="i !== getType(item).length-1">, </span>
                 </template>
               </td>
-              <!-- <td class="w-25">
-                <a class="font-weight-bold" :href='"./"+getTitle(item)' v-html=getTitle(item)></a>
-              </td>
-              <td class="w-25">
-                <template v-for="(type,i) in getType(item)">
-                  <a style="display: block;" :href="generateLink(type)">
-                    <span v-html='type'></span>
-                    <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
-                  </a>
-                </template>
-              </td>
-              <td v-html=getDescription(item) class="w-50"></td>
-            </tr> -->
           </tbody>
         </table>
       </div>
-      <div class="jumbotron" >
+      <div class="jumbotron" v-if="moreSpecifTypes && moreSpecifTypes.length">
         <h3>
           More Specific Types:
         </h3>
         <p>
           Types with <a class="mainTextDark" :href="'./'+schemaClass" v-text="schemaClass"></a> as a Subclass
         </p>
-        <ul>
+        <ul >
           <li v-for="item in moreSpecifTypes">
             <a :href="'./'+item" v-text="item"></a>
           </li>
@@ -467,30 +421,30 @@
         <div class="modal-header">
           <h4 class="modal-title text-muted caps" id="exampleModalLabel">Registration</h4>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true" class="mainTextLight">&times;</span>
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body text-muted text-center">
           <template v-if="userInfo.login">
             <form id="registrationForm">
               <div class="form-group row">
+                <div class="col-sm-12">
+                  <p v-if="!slugInput">
+                    Recommended slug found in graph context: Use <a class="badge badge-pill mainBackLight text-light pointer" @click.prevent='slugInput = namespace'><b v-text="namespace"></b></a>
+                  </p>
+                </div>
                 <label class="col-sm-4 col-form-label" for="exampleFormControlInput1">Namespace (slug)</label>
                 <div class="col-sm-8">
-                  <template v-if="!slugInput">
-                    <div class="alert alert-info">
-                      <p>
-                        Recommended slug found in graph context: <b class="mainTextLight" v-text="namespace"></b>
-                      </p>
-                      <p>Use <b class="mainTextLight" v-text="namespace"></b> as your slug?</p>
-                      <button class="btn themeButton text-light" @click='slugInput = namespace'>Use '<b v-text="namespace"></b>'</button>
-                    </div>
-                  </template>
                   <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="slugInput" v-model='slugInput'></textarea>
                   <template v-if="availableSlug && slugInput.length">
                     <small class="text-success">AVAILABLE</small>
                   </template>
                   <template v-if="!availableSlug && slugInput.length">
                     <small class="text-danger">NOT AVAILABLE</small>
+                  </template>
+                  <template v-if="invalidChars">
+                    <br />
+                    <small class="text-warning">INVALID CHARACTERS</small>
                   </template>
                   <p class="m-2" :class="[availableSlug ? 'mainTextDark' : 'text-danger']">
                     discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
@@ -500,7 +454,7 @@
               <div class="form-group row">
                 <label for="colFormLabelSm" class="col-sm-4 col-form-label col-form-label">URL</label>
                 <div class="col-sm-8">
-                  <input type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="datasetURL">
+                  <input required="" type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="datasetURL">
                 </div>
               </div>
               <div class="form-group row">
@@ -523,8 +477,17 @@
                   </select>
                 </div>
               </div>
-              <div>
-                <button @click.prevent="handleSubmit()" class="btn themeButton text-light" :disabled="!availableSlug && slugInput">Submit</button>
+              <div class="mb-4">
+                <button @click.prevent="handleSubmit()" class="btn themeButton pulse text-light" :disabled="!availableSlug && slugInput">Submit</button>
+                <button v-if="registered" type="button" class="btn btn-danger" data-dismiss="modal" aria-label="Close">
+                  Close
+                </button>
+              </div>
+              <div v-if="registered" class="mainBackDark text-light p-5">
+                <p >
+                  Your data has been added to the registry.
+                </p>
+                <a class="btn themeButton text-light pointer" :href="'/#registry'" >Registry</a>
               </div>
             </form>
           </template>
@@ -599,7 +562,9 @@ var app = new Vue({
           allAvailableClasses:[],
           slugInput:'',
           availableSlug: false,
-          dataSetURL:''
+          dataSetURL:'',
+          invalidChars: false,
+          registered: false
 				}
 			},
       watch:{
@@ -618,8 +583,16 @@ var app = new Vue({
         slugInput:function(newInput, oldInput){
           var self = this;
           self.slugInput = self.slugInput.toLowerCase();
-          if (newInput) {
-            axios.get(`/query?q=_meta.slug:`+self.slugInput).then(function (response) {
+
+          var re = /^[a-zA-Z0-9_.-]*$/;
+          if (!re.test(newInput) ) {
+            self.invalidChars = true;
+          }else{
+            self.invalidChars = false;
+          }
+
+          if (newInput && !self.invalidChars) {
+            axios.get(`/api/query?q=_meta.slug:`+self.slugInput).then(function (response) {
               console.log('slug check',response.data,newInput)
               if (response.data.total) {
                 self.availableSlug= false;
@@ -632,7 +605,47 @@ var app = new Vue({
       },
 			methods:{
         handleSubmit(){
-          $('#registrationForm').parsley().validate();
+          let self = this;
+          let valid = $('#registrationForm').parsley().validate();
+
+          if (valid) {
+            let body = {
+              'url' : self.datasetURL,
+              'clses' : self.allAvailableClasses,
+              'props' : self.allAvailableProperties,
+              'slug' : self.slugInput
+            }
+            console.log('REQ BODY',body);
+            axios.post('/api/registry',body).then(res=>{
+              console.log('POSt resposnse ',res.data)
+              if (res.data.success) {
+
+                Swal.fire({
+                  type: 'success',
+                  toast: true,
+                  position: 'top center',
+                  title: 'Registration Successful',
+                  text: "Data can now be accessed on "+window.location.origin+"/"+self.slugInput
+                });
+                self.registered = true;
+
+              }
+
+            }).catch(err=>{
+
+              Swal.fire({
+                type: 'error',
+                toast: true,
+                position: 'top center',
+                title: 'Registration Failed',
+                text: err,
+                showConfirmButton: false,
+                timer: 2000
+              });
+
+              throw err;
+            });
+          }
         },
         getAllAvailableProperties(){
           console.log('getting all props')
@@ -1082,7 +1095,8 @@ var app = new Vue({
             nodeStyle: {
                 'stroke': '#8feddc',
                 'fill': '#84dcdf',
-                'cursor': 'pointer'
+                'cursor': 'pointer',
+                'nodeShape':'s'
             }
           });
         },
