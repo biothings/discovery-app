@@ -16,9 +16,9 @@ ES_DOC_TYPE = 'schema'
 # *****************************************************************************
 # App URL Patterns
 # *****************************************************************************
-APP_LIST = [
+API_ENDPOINTS = [
     (r"/api/query/?", QueryHandler),
     (r"/api/registry/?", RegistryHandler),
     (r"/api/registry/(.+)/?", RegistryHandler)
 ]
-APP_LIST += WEB_ENDPOINTS
+APP_LIST = API_ENDPOINTS + WEB_ENDPOINTS
