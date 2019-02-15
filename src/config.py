@@ -22,3 +22,5 @@ API_ENDPOINTS = [
     (r"/api/registry/(.+)/?", RegistryHandler)
 ]
 APP_LIST = API_ENDPOINTS + WEB_ENDPOINTS
+
+DISABLE_CACHING = True
