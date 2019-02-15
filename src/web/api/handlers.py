@@ -33,10 +33,10 @@ class RegistryHandler(BaseHandler):
         # Index
         props = req.get('props', [])
         clses = req.get('clses', [])
-        props = [props.lower()] if isinstance(props, str) else [
-            prop.lower() for prop in props]
-        clses = [clses.lower()] if isinstance(clses, str) else [
-            clss.lower() for clss in clses]
+        props = [props] if isinstance(props, str) else [
+            prop for prop in props]
+        clses = [clses] if isinstance(clses, str) else [
+            clss for clss in clses]
         meta = Metadata(username=self.current_user.get(
             'login'), url=url, slug=slug)
         schema = Schema(_meta=meta, props=props, clses=clses)

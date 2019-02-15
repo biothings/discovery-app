@@ -3,6 +3,7 @@ Automated testing for discovery-app
     > python tests.py
 or  > nosetests tests
 '''
+import difflib
 import json
 import os
 import unittest
@@ -11,7 +12,7 @@ import requests
 from nose.tools import eq_, ok_
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application, create_signed_value
-from torngithub import json_encode
+from torngithub import json_decode, json_encode
 
 from biothings.utils.common import ask
 from config import COOKIE_SECRET
@@ -56,7 +57,7 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         url = 'https://raw.githubusercontent.com/namespacestd0/mygene.info/master/README.md'
         meta = Metadata(username='namespacestd', slug='dev', url=url)
         schema = Schema(clses=['biothings', 'smartapi'],
-                        props='es-dsl', _meta=meta)
+                        props=['es-dsl'], _meta=meta)
         schema.save()
         cls.testset.append(schema)
 
@@ -64,7 +65,7 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         url = ('https://raw.githubusercontent.com/data2health/'
                'schemas/biothings/biothings/biothings_curie.jsonld')
         meta = Metadata(username='data2health', slug='d2h', url=url)
-        schema = Schema(clses='biothings', _meta=meta)
+        schema = Schema(clses=['biothings'], _meta=meta)
         schema.save()
         cls.testset.append(schema)
 
@@ -83,8 +84,7 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
 
     def post_status_code(self, url, body, status_code):
         ''' make an authenticated POST request and return json if the status codes match '''
-
-        cookie_name, cookie_value = 'user', 'tester'
+        cookie_name, cookie_value = 'user', {'login':'tester'}
         secure_cookie = create_signed_value(
             COOKIE_SECRET,
             cookie_name,
@@ -129,7 +129,8 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         asserts decoding restores original doc '''
         sch = Schema.get(id=self.testset[1].meta.id)
         encoded = sch.encode_raw()
-        eq_(encoded, sch['~raw'])
+        assert encoded == sch['~raw'], difflib.SequenceMatcher(
+            a=encoded, b=sch['~raw']).get_opcodes()
 
         decoded = sch.decode_raw()
         original = requests.get(sch['_meta'].url).text
@@ -152,9 +153,7 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
     def test_handlers_registry_post(self):
         ''' asserts props and clses (p&c) are optional,
         asserts p&c take both str and list,
-        asserts p&c are converted to lower cases,
         asserts update to existing doc works '''
-        # it's normal that ~raw field will be empty due to implementation
         doc_1 = {'url': 'http://example.com/',
                  'slug': 'com',
                  'props': 'ebay'}
@@ -164,7 +163,7 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
                  'clses': ['costco', 'MTS']}
         ok_(self.post_json_ok(self.HOST+'/registry', data=doc_1)['success'])
         ok_(self.post_json_ok(self.HOST+'/registry', data=doc_2)['success'])
-        self.query_has_hits(query_keyword='mts')  # not MTS
+        self.query_has_hits(query_keyword='MTS')
         doc_2['slug'] = 'us'
         self.post_json_ok(self.HOST+'/registry', data=doc_2)
         self.query_has_hits(query_keyword='_meta.slug:us')
