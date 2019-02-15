@@ -47,3 +47,9 @@ class RegistryHandler(BaseHandler):
         ''' Retrive a document by es field _id '''
         sch = Schema.get(id=api_id)
         self.return_json(sch.to_dict())
+
+    def delete(self, api_id):
+        ''' Delete a document by es field _id '''
+        sch = Schema.get(id=api_id)
+        sch.delete(refresh=True, ignore=404)
+        self.return_json({'success': True})
