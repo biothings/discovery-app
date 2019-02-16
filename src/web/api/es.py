@@ -35,8 +35,8 @@ class Schema(Document):
     The es backend is a collection of objects of this type.
     """
     locals()['~raw'] = Binary()
-    clses = Keyword(multi=True)
-    props = Keyword(multi=True)
+    clses = Text(multi=True)
+    props = Text(multi=True)
     _meta = Object(Metadata, required=True)
 
     #pylint:disable=too-few-public-methods
