@@ -2,46 +2,18 @@
 {% block content %}
 {% include "header.html" %}
 <style>
- .resultsTab{
-  width: 20%;
-  text-align: center;
-  border-top-right-radius: 10px;
-  border-top-left-radius: 10px;
- }
+.registryImg{
+  border-radius: 100%;
+  object-fit: cover;
+  width:30px;
+  height: 30px;
+  border:2px grey solid;
+}
 
- .page-item.active .page-link{
-   background-color: var(--main);
-   border-color: var(--main);
- }
-
- .mainBackDarkFade{
-    background: -moz-linear-gradient(left, var(--main) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(left, var(--main) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to right, var(--main) 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
- }
-
- .mainBackLightFade{
-   background: -moz-linear-gradient(left, var(--sec) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
-   background: -webkit-linear-gradient(left, var(--sec) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
-   background: linear-gradient(to right, var(--sec) 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
- }
-
- mark{
-    font-weight: bold;
-    background: transparent;
-    color: red;
-  }
-
-  .smallButton{
-    transform: scale(.7);
-    border-radius: 10px;
-  }
-
-  .smallButton:hover{
-    background: var(--sec);
-  }
+.registryItem{
+  overflow-x: hidden;
+  overflow: scroll;
+}
 
 </style>
 <main id="index" style="min-height:70vh;">
@@ -103,14 +75,14 @@
 
     <div id="registry" class="jumbotron">
       <div class="row">
-        <div class="col-sm-12 col-md- col-lg-6" style="margin:auto;">
+        <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
           <h2 class="text-center">REGISTRY</h2>
           <div class="bg-light padding20">
             <form>
               <div class="form-group form-row">
                 <input class="form-control col-6" id="search_query" type="text" v-model="query" name="query" placeholder="Search Registry" >
                 <button class="col btn ml-2 themeButton text-light pulse" type="button" @click.prevent="search(query)">Search</button>
-                <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';search(query)">Clear</button>
+                <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';search(query)">Reset</button>
               </div>
             </form>
             <div class="form-group form-inline m-0 ">
@@ -137,29 +109,29 @@
             <template v-if="registry.length" v-for="(item,index) in registry">
               <li class="list-group-item list-group-item-action flex-column align-items-start context registryItem">
                 <div class="">
-                  <h5 class="d-inline">
-                    <span v-if='query'>Found in</span> <a :href="item._meta.slug" class="mb-1 font-weight-bold" v-text='item._meta.slug'></a>
-                  </h5>
-                  <small class="float-right">More by <a class="text-primary pointer" @click.prevent='searchByUser(item._meta.username)' v-text='item._meta.username'></a></small>
+                  <h2 class="d-inline">
+                    <span v-if='query'>Found in</span> <a :href="item._meta.slug+'/'" class="mb-1 font-weight-bold goLink" v-text='"/"+item._meta.slug'></a>
+                  </h2>
+                  <small class="float-right">
+                    More by <a class="text-primary pointer" @click.prevent='searchByUser(item._meta.username)' >
+                      <!-- <i class="fas fa-user-circle"> -->
+                      <registry-image :username="item._meta.username"></registry-image>
+                      </i> <span v-text='item._meta.username'></span>
+                    </a>
+                  </small>
                 </div>
                 <div class="d-flex justify-content-between">
-                  <div class="p-1 flex-fill" v-if="item.clses">
+                  <div class="p-1 flex-fill" >
                     <div class="mainBackDarkFade text-light badge w-100 text-left">Classes</div>
-                    <!-- <ul>
-                      <li v-for="c in item.clses">
-                        <a :href="item._meta.slug +'/'+ c" v-text="c"></a>
-                      </li>
-                    </ul> -->
-                    <registry-list :list='item.clses' :slug="item._meta.slug"></registry-list>
+                    <div v-if="item.clses">
+                      <registry-list :list='item.clses' :slug="item._meta.slug"></registry-list>
+                    </div>
                   </div>
-                  <div class="p-1 flex-fill" v-if="item.props">
+                  <div class="p-1 flex-fill" >
                     <div class="mainBackLightFade text-light badge w-100 text-left">Properties</div>
-                    <!-- <ul>
-                      <li v-for="p in item.props">
-                        <a :href="item._meta.slug +'/'+ p" v-text="p"></a>
-                      </li>
-                    </ul> -->
-                    <registry-list :list='item.props' :slug="item._meta.slug"></registry-list>
+                    <div v-if="item.props">
+                      <registry-list :list='item.props' :slug="item._meta.slug"></registry-list>
+                    </div>
                   </div>
                 </div>
               </li>
@@ -184,7 +156,7 @@
                 </ul>
               </nav>
               <div class="col-sm-12 right-align form-group">
-                <select class="perPage form-control form-control-sm w-25 m-auto" v-model="perPage" @change="calculatePages" id="perPage">
+                <select class="perPage form-control form-control-sm w-50 m-auto" v-model="perPage" @change="calculatePages" id="perPage">
                     <option value="" disabled selected>Shown Per Page</option>
                     <option value="20">20 per page</option>
                     <option value="50">50 per page</option>
@@ -233,22 +205,6 @@
       </div>
     </div>
 
-    <div class="modal fade" id="DetailsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <p class="modal-title caps" id="exampleModalLabel" v-text='selectedRegistryItem.url'></p>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body text-secondary">
-            <p v-text='selectedRegistryItem'></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
@@ -258,6 +214,33 @@
 <script src="./static/js/lodash.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
+
+Vue.component('registry-image', {
+  data: function(){
+    return{
+      img:''
+    }
+  },
+  props: ['username'],
+  methods:{
+
+
+  },
+  watch:{
+
+  },
+  mounted: function(){
+    let self = this;
+    axios.get('https://api.github.com/users/'+this.username).then(res=>{
+      if (res.data.avatar_url) {
+        self.img= res.data.avatar_url;
+      }else{
+        self.img= 'https://www.limestone.edu/sites/default/files/user.png';
+      }
+    })
+  },
+  template: `<img class="registryImg" :src="img" :alt='username'/>`
+});
 
 Vue.component('registry-list', {
   data: function(){
@@ -307,7 +290,7 @@ Vue.component('registry-list', {
               </ul>
               <template v-if="!showAll && list.length>5">
                 <div class="text-center d-block">
-                <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show More (<span v-text="list.length"></span>)</a>
+                <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show More (<span class="bold" v-text="list.length"></span>)</a>
                 </div>
               </template>
               <template v-if="showAll">
@@ -339,41 +322,6 @@ var app = new Vue({
           page: 1,
           pages: 1,
           perPage: 20,
-          selectedRegistryItem:{},
-          testRes:[
-            {
-              '_meta':{
-                'username':'marcodarko',
-                'url':'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld',
-                'slug':'bts',
-                'timestamp': Date.now().toString()
-              },
-              'classes':['BiologicalEntity','Gene','GeneticEntity'],
-              'properties':['hasPhenotype','expressedIn','hasGeneProduct'],
-              '~raw':'fhaskjhfjkahgkhdkhkjghkjhgkjdahkjhfgkjhgkjdhfk'
-            },
-            {
-              '_meta':{
-                'username':'marcodarko',
-                'url':'https://raw.githubusercontent.com/cvisb/sample_viewer_web/master/sample-viewer/src/assets/schema/dataset.json',
-                'slug':'cvisb',
-                'timestamp': Date.now().toString()
-              },
-              'classes':['BiologicalEntity','Gene','GeneticEntity'],
-              'properties':['hasPhenotype','expressedIn','hasGeneProduct'],
-              '~raw':'fhaskjhfjkahgkhdkhkjghkjhgkjdahkjhfgkjhgkjdhfk'
-            },
-            {
-              '_meta':{
-                'username':'marcodarko',
-                'url':'https://raw.githubusercontent.com/cvisb/sample_viewer_web/master/sample-viewer/src/assets/schema/dataset.json',
-                'slug':'cvisb',
-                'timestamp': Date.now().toString()
-              },
-              'classes':['BiologicalEntity','Gene','GeneticEntity'],
-              '~raw':'fhaskjhfjkahgkhdkhkjghkjhgkjdahkjhfgkjhgkjdhfk'
-            }
-          ]
 				}
 			},
       watch:{
@@ -470,10 +418,6 @@ var app = new Vue({
             axios.get('/api/query?size=100', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
-              // if (self.registryTotal === 0) {
-              //   console.log('reg is 0')
-              //   self.registry = self.testRes
-              // }
               self.mark(self.query);
               if (self.registryTotal) {
                 self.calculatePages();

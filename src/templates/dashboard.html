@@ -69,13 +69,12 @@
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                       <a class="dropdown-item" href="#">JSON-LD</a>
-                      <a class="dropdown-item" href="#">JSON</a>
                       <a class="dropdown-item" href="#">YAML</a>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <button class="btn btn-outline-secondary fill">
+                  <button @click.prevent="deleteSelected(item._meta.slug,item._id)" class="btn btn-outline-secondary fill">
                     Delete
                   </button>
                 </td>
@@ -98,9 +97,9 @@
 
 {% endblock %}
 {% block extra_scripts %}
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="/static/js/lodash.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 var app = new Vue({
       el: '#dashboard',
@@ -115,6 +114,44 @@ var app = new Vue({
 
       },
 			methods:{
+        deleteSelected(name,id){
+          var self = this;
+          Swal.fire({
+            title: '<h3>Are you sure you want to delete <span class="text-danger bold">'+name+'</span> ?</h3>',
+            text: "You won't be able to revert this!",
+            imageUrl: "/static/img/dde-logo-o.svg",
+            imageHeight: 100,
+            imageAlt: 'Warning',
+            showCancelButton: true,
+            confirmButtonColor: '#006476',
+            cancelButtonColor: '#5C3069',
+            confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+
+            if (result.value) {
+              axios.delete('/api/registry'+id).then(res=>{
+                console.log(res.data)
+                if (res.data.success) {
+                  Swal.fire(
+                    'Deleted!',
+                    'Your file has been deleted.',
+                    'success'
+                  );
+                  self.getAll();
+                }
+
+              }).catch(err=>{
+                throw err;
+                Swal.fire(
+                  'Oops!',
+                  'something went wrong',
+                  'error'
+                );
+              });
+
+            }
+          });
+        },
         getAll(){
           let self= this;
           if (this.user.login) {

@@ -138,7 +138,7 @@
             <h1 :id="item.group" class="text-muted" v-text="item.group "></h1>
             <ul>
               <li v-for="def in item.children">
-                <a :href="'./'+def" v-text="def"></a>
+                <a class="goLink" :href="'./'+def" v-text="def"></a>
               </li>
             </ul>
           </li>
@@ -239,7 +239,7 @@
             <ol>
               <li v-for="path in allPaths">
                 <span v-for="(item,index) in path">
-                  <a :class="[ index !== path.length-1 ? 'mainTextLight' : 'mainTextDark']" class="font-weight-bold small" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
+                  <a :class="[ index !== path.length-1 ? 'text-muted' : 'mainTextDark']" class="font-weight-bold small" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
                   <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right mainTextDark"></i>&nbsp;</span>
                 </span>
               </li>
@@ -365,6 +365,7 @@
 
     </div>
     <div id="bottom" v-if='schemaClass' class="jumbotron text-muted col-sm-9">
+      <h1>More About <a class="mainTextDark bold" :href="'./'+schemaClass" v-text="schemaClass"></a></h1>
       <div class="jumbotron mb-0" v-if="getRangePropertyInfoResults.length">
         <h3>
           Properties with <a class="mainTextDark bold" :href="'./'+schemaClass" v-text="schemaClass"></a> as Expected Type
@@ -520,7 +521,6 @@ var app = new Vue({
 			data: function(){
 				return {
           filter:'',
-          dataSetURL : 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/Dataset.jsonld',
           graph: [],
           context: {},
           query:'',
@@ -618,17 +618,25 @@ var app = new Vue({
             console.log('REQ BODY',body);
             axios.post('/api/registry',body).then(res=>{
               console.log('POSt resposnse ',res.data)
-              if (res.data.success) {
+              if (res.data.success === true) {
 
                 Swal.fire({
                   type: 'success',
                   toast: true,
-                  position: 'top center',
+                  position: 'center',
                   title: 'Registration Successful',
                   text: "Data can now be accessed on "+window.location.origin+"/"+self.slugInput
                 });
                 self.registered = true;
 
+              }else if (res.data.success === false){
+                Swal.fire({
+                  type: 'error',
+                  toast: true,
+                  position: 'top',
+                  title: 'Registration Failed',
+                  text: res.data.error
+                });
               }
 
             }).catch(err=>{
@@ -648,7 +656,6 @@ var app = new Vue({
           }
         },
         getAllAvailableProperties(){
-          console.log('getting all props')
           let results = [];
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdf:Property") {
@@ -1272,19 +1279,6 @@ var app = new Vue({
             return 'no description available'
           }
         },
-        reqFile: function(){
-
-            var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
-
-            // console.log('retreived data', retrievedObject);
-
-            this.graph = retrievedObject['@graph'];
-            this.context = retrievedObject['@context'];
-
-            this.determinePath()
-            this.getAvailableClasses()
-
-        },
         getClassProperties(){
           this.properties = [];
             for (var i = 0; i < this.graph.length; i++) {
@@ -1466,6 +1460,62 @@ var app = new Vue({
           }
           this.usedOnTheseTypes = res;
           this.rangeIncludes = range;
+        },
+        checkIfRegistered(namespace){
+          let url ='';
+          let self = this;
+          axios.get(`/api/query?q=_meta.slug:`+namespace).then(function (res) {
+            console.log('reg check ', res.data)
+            if (res.data.total) {
+              self.registered = true;
+              // window.location.href = window.location+"/"+self.namespace;
+              url = res.data.hits[0]._meta.url;
+              self.reqFile(url);
+            }
+          }).catch(err=>{
+            Swal.fire(
+              'Oops!',
+              'Something went wrong loading this dataset',
+              'error'
+            );
+          });
+        },
+        reqFile: function(url){
+          let self = this;
+          if (url && self.registered) {
+            console.log('LOADING FROM URL')
+            axios.get(url).then(res=>{
+              if (res.data) {
+                console.log('load success')
+                this.graph = res.data['@graph'];
+                this.context = res.data['@context'];
+                this.determinePath()
+                this.getAvailableClasses()
+              }
+            }).catch(err=>{
+              throw err;
+              Swal.fire(
+                'Oops!',
+                'Something went wrong loading this url',
+                'error'
+              );
+            });
+          }else if(!url){
+            console.log('LOADING FROM LOCALSTORAGE')
+            var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
+            this.graph = retrievedObject['@graph'];
+            this.context = retrievedObject['@context'];
+            this.determinePath()
+            this.getAvailableClasses()
+          }
+
+        },
+        checkUser(){
+          let self = this;
+          $.ajax({url: "/user", success: function(result){
+             self.userInfo = result;
+          },
+          cache: false});
         }
 			},
 			mounted:function(){
@@ -1473,20 +1523,15 @@ var app = new Vue({
         let self= this;
          if ( context ) {
            self.query = context.query;
-           self.reqFile()
-         }
-         if (context.hasOwnProperty('namespace')) {
-           //remove random numbers
-           self.namespace = context.namespace.replace(/[0-9]/g, '');;
+           if (context.hasOwnProperty('namespace')) {
+             //remove random numbers
+             self.namespace = context.namespace.replace(/[0-9]/g, '');;
+           }
+           self.datasetURL = localStorage.getItem('datasetDataURL');
+           self.checkIfRegistered(self.namespace);
          }
 
-         self.datasetURL = localStorage.getItem('datasetDataURL');
-
-         $.ajax({url: "/user", success: function(result){
-           console.log('got user info',result)
-            self.userInfo = result;
-         },
-         cache: false});
+         self.checkUser();
 
 			},
       created:function(){
