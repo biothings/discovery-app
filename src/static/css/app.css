@@ -583,82 +583,82 @@ g.nodes g.node:last-child text{
 
 
 .text-0{
-  color: #02c4e7;
+  color: #33ccff;
   font-weight: 900;
 }
 .text-1{
-  color: #0193ad;
+  color: #5cadcc;
   font-weight: 900;
 }
 .text-2{
-  color: #006476;
+  color: #709eb2;
   font-weight: 900;
 }
 .text-3{
-  color: #003f4a;
+  color: #858f99;
   font-weight: 900;
 }
 .text-4{
-  color: #001d22;
+  color: #998080;
   font-weight: 900;
 }
 .text-5{
-  color: #011013;
+  color: #ad7066;
   font-weight: 900;
 }
 .text-6{
-  color: #230528;
+  color: #c2614d;
   font-weight: 900;
 }
 .text-7{
-  color: #53185b;
+  color: #e86647;
   font-weight: 900;
 }
 .text-8{
-  color: #722e7c;
+  color: #c64040;
   font-weight: 900;
 }
 .text-9{
-  color: #9a4ba6;
+  color: #8b1653;
   font-weight: 900;
 }
 .text-10{
-  color: #c06acd;
+  color: #720760;
   font-weight: 900;
 }
 
 .bg-0{
-  background: #02c4e7;
+  background-color: #33ccff;
 }
 .bg-1{
-  background: #0193ad;
+  background-color: #5cadcc;
 }
 .bg-2{
-  background: #006476;
+  background-color: #709eb2;
 }
 .bg-3{
-  background: #003f4a;
+  background-color: #858f99;
 }
 .bg-4{
-  background: #001d22;
+  background-color: #998080;
 }
 .bg-5{
-  background: #011013;
+  background-color: #ad7066;
 }
 .bg-6{
-  background: #230528;
+  background-color: #c2614d;
 }
 .bg-7{
-  background: #53185b;
+  background-color: #e86647;
 }
 .bg-8{
-  background: #722e7c;
+  background-color: #c64040;
 }
 .bg-9{
-  background: #9a4ba6;
+  background-color: #8b1653;
 }
 .bg-10{
-  background: #c06acd;
+  background-color: #720760;
 }
 
 .table-striped-main tbody tr:nth-of-type(odd){
