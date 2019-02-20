@@ -441,14 +441,14 @@
                 <div class="col-sm-8">
                   <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="slugInput" v-model='slugInput'></textarea>
                   <template v-if="availableSlug && slugInput.length">
-                    <small class="text-success">AVAILABLE</small>
+                    <small class="text-success bold"><i class="fas fa-check"></i> AVAILABLE</small>
                   </template>
                   <template v-if="!availableSlug && slugInput.length">
-                    <small class="text-danger">NOT AVAILABLE</small>
+                    <small class="text-danger bold"><i class="fas fa-times"></i> NOT AVAILABLE</small>
                   </template>
                   <template v-if="invalidChars">
                     <br />
-                    <small class="text-warning">INVALID CHARACTERS</small>
+                    <small class="text-warning bold"><i class="fas fa-times"></i> INVALID CHARACTERS</small>
                   </template>
                   <p class="m-2" :class="[availableSlug ? 'mainTextDark' : 'text-danger']">
                     discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
@@ -458,12 +458,12 @@
               <div class="form-group row">
                 <label for="colFormLabelSm" class="col-sm-4 col-form-label col-form-label">Source URL</label>
                 <div class="col-sm-8">
-                  <input required="" type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="datasetURL">
+                  <input required="" type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="dataSetURL">
                 </div>
               </div>
-              <div class="p-2">
+              <div v-if="urlRegistered" class="p-2 alert alert-warning">
                 <small>
-                  If this url has been used previously it will overrride the existent registry entry.
+                  <i class="fas fa-exclamation-circle text-danger"></i> This URL has already been registered. Registering this slug will overrride the previsouly registered slug and data associated with it.
                 </small>
               </div>
               <div class="form-group row">
@@ -572,7 +572,8 @@ var app = new Vue({
           availableSlug: false,
           dataSetURL:'',
           invalidChars: false,
-          registered: false
+          registered: false,
+          urlRegistered: false
 				}
 			},
       watch:{
@@ -610,6 +611,18 @@ var app = new Vue({
               }
             });
           }
+        },
+        dataSetURL:function(newurl,oldurl){
+          var self = this;
+          if (newurl) {
+            axios.get(`/api/query?q=_meta.url:`+'"'+newurl+'"').then(function (response) {
+              if (response.data.total) {
+                self.urlRegistered = true;
+              }else{
+                self.urlRegistered = false;
+              }
+            });
+          }
         }
       },
 			methods:{
@@ -619,7 +632,7 @@ var app = new Vue({
 
           if (valid) {
             let body = {
-              'url' : self.datasetURL,
+              'url' : self.dataSetURL,
               'clses' : self.allAvailableClasses,
               'props' : self.allAvailableProperties,
               'slug' : self.slugInput
@@ -632,7 +645,7 @@ var app = new Vue({
                 Swal.fire({
                   type: 'success',
                   toast: true,
-                  position: 'center',
+                  position: 'bottom',
                   title: 'Registration Successful',
                   text: "Data can now be accessed on "+window.location.origin+"/"+self.slugInput
                 });
@@ -1540,7 +1553,7 @@ var app = new Vue({
              //remove random numbers
              self.namespace = context.namespace.replace(/[0-9]/g, '');;
            }
-           self.datasetURL = localStorage.getItem('datasetDataURL');
+           self.dataSetURL = localStorage.getItem('datasetDataURL');
            self.checkIfRegistered();
          }
 
