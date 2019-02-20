@@ -356,13 +356,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), e
   --hover: #1973bc;
 }
 
-.text3D {
-color: #fff !important;
-font-size: 2em;
-font-weight: bold;
-font-family: Helvetica;
-text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0,0,0,.1), 0 0 5px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.3), 0 3px 5px rgba(0,0,0,.2), 0 5px 10px rgba(0,0,0,.25), 0 10px 10px rgba(0,0,0,.2), 0 20px 20px rgba(0,0,0,.15);
-}
 
 .link {
   display: inline-block;
@@ -583,82 +576,82 @@ g.nodes g.node:last-child text{
 
 
 .text-0{
-  color: #33ccff;
+  color: #4ab19b;
   font-weight: 900;
 }
 .text-1{
-  color: #5cadcc;
+  color: #50a791;
   font-weight: 900;
 }
 .text-2{
-  color: #709eb2;
+  color: #5d927b;
   font-weight: 900;
 }
 .text-3{
-  color: #858f99;
+  color: #6a7e67;
   font-weight: 900;
 }
 .text-4{
-  color: #998080;
+  color: #71745c;
   font-weight: 900;
 }
 .text-5{
-  color: #ad7066;
+  color: #776951;
   font-weight: 900;
 }
 .text-6{
-  color: #c2614d;
+  color: #7d5f47;
   font-weight: 900;
 }
 .text-7{
-  color: #e86647;
+  color: #84553c;
   font-weight: 900;
 }
 .text-8{
-  color: #c64040;
+  color: #8a4b32;
   font-weight: 900;
 }
 .text-9{
-  color: #8b1653;
+  color: #914028;
   font-weight: 900;
 }
 .text-10{
-  color: #720760;
+  color: #97361d;
   font-weight: 900;
 }
 
 .bg-0{
-  background-color: #33ccff;
+  background-color: #4ab19b;
 }
 .bg-1{
-  background-color: #5cadcc;
+  background-color: #50a791;
 }
 .bg-2{
-  background-color: #709eb2;
+  background-color: #5d927b;
 }
 .bg-3{
-  background-color: #858f99;
+  background-color: #6a7e67;
 }
 .bg-4{
-  background-color: #998080;
+  background-color: #71745c;
 }
 .bg-5{
-  background-color: #ad7066;
+  background-color: #776951;
 }
 .bg-6{
-  background-color: #c2614d;
+  background-color: #7d5f47;
 }
 .bg-7{
-  background-color: #e86647;
+  background-color: #84553c;
 }
 .bg-8{
-  background-color: #c64040;
+  background-color: #8a4b32;
 }
 .bg-9{
-  background-color: #8b1653;
+  background-color: #914028;
 }
 .bg-10{
-  background-color: #720760;
+  background-color: #97361d;
 }
 
 .table-striped-main tbody tr:nth-of-type(odd){
@@ -691,7 +684,7 @@ ul.tree, ul.tree ul {
      line-height: 20px;
      color: #369;
      font-weight: bold;
-     border-left:1px solid rgb(100,100,100);
+     border-left:1px solid var(--sec);
 
    }
    ul.tree li:last-child {
@@ -703,13 +696,13 @@ ul.tree, ul.tree ul {
       height:1em;
       width:12px;
       color:white;
-      border-bottom:1px solid rgb(100,100,100);
+      border-bottom:1px solid var(--sec);
       content:"";
       display:inline-block;
       left:-7px;
    }
    ul.tree li:last-child:before {
-      border-left:1px solid rgb(100,100,100);
+      border-left:1px solid var(--sec);
    }
 
    .resultsTab{
@@ -742,6 +735,8 @@ ul.tree, ul.tree ul {
       font-weight: bold;
       background: transparent;
       color: red;
+      padding: 0pc !important;
+      background-color: transparent !important;
     }
 
     .smallButton{

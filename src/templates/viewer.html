@@ -102,7 +102,7 @@
     </div>
     <!-- IF NO QUERY -->
     <div v-if="!query" class="col-sm-9">
-      <div v-if="!registered" class="alert alert-light w-100 padding20 text-center">
+      <div v-if="!registered" class="alert alert-info w-100 padding20 text-center">
         <h3>Register this dataset?</h3>
         <button v-if="!slugRegistered" data-toggle="modal" data-target="#registration" class="btn themeButton text-light" > Register Now</button>
       </div>
@@ -434,6 +434,9 @@
                     Recommended slug found in graph context: Use <a class="badge badge-pill mainBackLight text-light pointer" @click.prevent='slugInput = namespace'><b v-text="namespace"></b></a>
                   </p>
                 </div>
+                <div class="col-sm-12">
+                  <h2>Slug</h2>
+                </div>
                 <label class="col-sm-4 col-form-label" for="exampleFormControlInput1">Namespace (slug)</label>
                 <div class="col-sm-8">
                   <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="slugInput" v-model='slugInput'></textarea>
@@ -453,10 +456,15 @@
                 </div>
               </div>
               <div class="form-group row">
-                <label for="colFormLabelSm" class="col-sm-4 col-form-label col-form-label">URL</label>
+                <label for="colFormLabelSm" class="col-sm-4 col-form-label col-form-label">Source URL</label>
                 <div class="col-sm-8">
                   <input required="" type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="datasetURL">
                 </div>
+              </div>
+              <div class="p-2">
+                <small>
+                  If this url has been used previously it will overrride the existent registry entry.
+                </small>
               </div>
               <div class="form-group row">
                 <label class="col-sm-4 col-form-label" for="exampleFormControlSelect1">Classes (<span class="text-success" v-text="allAvailableClasses.length"></span>)</label>
@@ -583,6 +591,7 @@ var app = new Vue({
         slugInput:function(newInput, oldInput){
           var self = this;
           self.slugInput = self.slugInput.toLowerCase();
+
 
           var re = /^[a-zA-Z0-9_.-]*$/;
           if (!re.test(newInput) ) {
