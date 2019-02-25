@@ -291,10 +291,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), e
     box-shadow: 0 0 0 0 var(--hover);
   }
 }
-.close:hover,
+/* .close:hover,
 .close:focus {
   box-shadow: inset -3.5em 0 0 0 var(--hover), inset 3.5em 0 0 0 var(--hover);
-}
+} */
 
 .raise:hover,
 .raise:focus {
@@ -331,10 +331,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), e
   --hover: var(--main);
 }
 
-.close {
+/* .close {
   --color: #ff7f82;
   --hover: var(--danger);
-}
+} */
 
 .raise {
   --color: #ffa260;
@@ -356,13 +356,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), e
   --hover: #1973bc;
 }
 
-.text3D {
-color: #fff !important;
-font-size: 2em;
-font-weight: bold;
-font-family: Helvetica;
-text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0,0,0,.1), 0 0 5px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.3), 0 3px 5px rgba(0,0,0,.2), 0 5px 10px rgba(0,0,0,.25), 0 10px 10px rgba(0,0,0,.2), 0 20px 20px rgba(0,0,0,.15);
-}
 
 .link {
   display: inline-block;
@@ -534,7 +527,7 @@ text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px
 }
 
 g.nodes g.node:last-child circle{
-  fill: #ec9ff0 !important;
+  fill: #fff6a7 !important;
 }
 
 g.nodes g.node:last-child text{
@@ -583,82 +576,82 @@ g.nodes g.node:last-child text{
 
 
 .text-0{
-  color: #02c4e7;
+  color: #4ab19b;
   font-weight: 900;
 }
 .text-1{
-  color: #0193ad;
+  color: #50a791;
   font-weight: 900;
 }
 .text-2{
-  color: #006476;
+  color: #5d927b;
   font-weight: 900;
 }
 .text-3{
-  color: #003f4a;
+  color: #6a7e67;
   font-weight: 900;
 }
 .text-4{
-  color: #001d22;
+  color: #71745c;
   font-weight: 900;
 }
 .text-5{
-  color: #011013;
+  color: #776951;
   font-weight: 900;
 }
 .text-6{
-  color: #230528;
+  color: #7d5f47;
   font-weight: 900;
 }
 .text-7{
-  color: #53185b;
+  color: #84553c;
   font-weight: 900;
 }
 .text-8{
-  color: #722e7c;
+  color: #8a4b32;
   font-weight: 900;
 }
 .text-9{
-  color: #9a4ba6;
+  color: #914028;
   font-weight: 900;
 }
 .text-10{
-  color: #c06acd;
+  color: #97361d;
   font-weight: 900;
 }
 
 .bg-0{
-  background: #02c4e7;
+  background-color: #4ab19b;
 }
 .bg-1{
-  background: #0193ad;
+  background-color: #50a791;
 }
 .bg-2{
-  background: #006476;
+  background-color: #5d927b;
 }
 .bg-3{
-  background: #003f4a;
+  background-color: #6a7e67;
 }
 .bg-4{
-  background: #001d22;
+  background-color: #71745c;
 }
 .bg-5{
-  background: #011013;
+  background-color: #776951;
 }
 .bg-6{
-  background: #230528;
+  background-color: #7d5f47;
 }
 .bg-7{
-  background: #53185b;
+  background-color: #84553c;
 }
 .bg-8{
-  background: #722e7c;
+  background-color: #8a4b32;
 }
 .bg-9{
-  background: #9a4ba6;
+  background-color: #914028;
 }
 .bg-10{
-  background: #c06acd;
+  background-color: #97361d;
 }
 
 .table-striped-main tbody tr:nth-of-type(odd){
@@ -691,7 +684,7 @@ ul.tree, ul.tree ul {
      line-height: 20px;
      color: #369;
      font-weight: bold;
-     border-left:1px solid rgb(100,100,100);
+     border-left:1px solid var(--sec);
 
    }
    ul.tree li:last-child {
@@ -703,11 +696,124 @@ ul.tree, ul.tree ul {
       height:1em;
       width:12px;
       color:white;
-      border-bottom:1px solid rgb(100,100,100);
+      border-bottom:1px solid var(--sec);
       content:"";
       display:inline-block;
       left:-7px;
    }
    ul.tree li:last-child:before {
-      border-left:1px solid rgb(100,100,100);
+      border-left:1px solid var(--sec);
    }
+
+   .resultsTab{
+    width: 20%;
+    text-align: center;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+   }
+
+   .page-item.active .page-link{
+     background-color: var(--main);
+     border-color: var(--main);
+   }
+
+   .mainBackDarkFade{
+      background: -moz-linear-gradient(left, var(--main) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
+      background: -webkit-linear-gradient(left, var(--main) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
+      background: linear-gradient(to right, var(--main) 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
+   }
+
+   .mainBackLightFade{
+     background: -moz-linear-gradient(left, var(--sec) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
+     background: -webkit-linear-gradient(left, var(--sec) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
+     background: linear-gradient(to right, var(--sec) 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
+   }
+
+   mark{
+      font-weight: bold;
+      background: transparent;
+      color: red;
+      padding: 0pc !important;
+      background-color: transparent !important;
+    }
+
+    .smallButton{
+      transform: scale(.7);
+      border-radius: 10px;
+    }
+
+    .smallButton:hover{
+      background: var(--sec);
+    }
+
+    .goLink:hover{
+      text-decoration: none !important;
+    }
+
+    .goLink:hover::after{
+      content: ' >';
+      color: var(--sec);
+    }
+
+    .registryImg{
+      border-radius: 100%;
+      object-fit: cover;
+      width:30px;
+      height: 30px;
+      border:2px grey solid;
+      -webkit-animation: scale-in-center 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    	animation: scale-in-center 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+      animation-delay: .5s;
+    }
+
+    .registryItem{
+      overflow-x: hidden;
+      overflow: scroll;
+    }
+
+    /* ----------------------------------------------
+     * Generated by Animista on 2019-2-19 12:25:54
+     * w: http://animista.net, t: @cssanimista
+     * ---------------------------------------------- */
+
+    /**
+     * ----------------------------------------
+     * animation scale-in-center
+     * ----------------------------------------
+     */
+    @-webkit-keyframes scale-in-center {
+      0% {
+        -webkit-transform: scale(0);
+                transform: scale(0);
+        opacity: 1;
+      }
+      100% {
+        -webkit-transform: scale(1);
+                transform: scale(1);
+        opacity: 1;
+      }
+    }
+    @keyframes scale-in-center {
+      0% {
+        -webkit-transform: scale(0);
+                transform: scale(0);
+        opacity: 1;
+      }
+      100% {
+        -webkit-transform: scale(1);
+                transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .preLink:hover::before{
+      content: 'Search: '
+    }
+
+    #animation_container {
+    margin:auto;
+    left:0;right:0;
+    top:0;bottom:0;
+    }
