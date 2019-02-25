@@ -102,7 +102,7 @@
     </div>
     <!-- IF NO QUERY -->
     <div v-if="!query" class="col-sm-9">
-      <div class="alert alert-light w-100 padding20 text-center">
+      <div v-if="!registered" class="alert alert-info w-100 padding20 text-center">
         <h3>Register this dataset?</h3>
         <button v-if="!slugRegistered" data-toggle="modal" data-target="#registration" class="btn themeButton text-light" > Register Now</button>
       </div>
@@ -138,7 +138,7 @@
             <h1 :id="item.group" class="text-muted" v-text="item.group "></h1>
             <ul>
               <li v-for="def in item.children">
-                <a :href="'./'+def" v-text="def"></a>
+                <a class="goLink" :href="'./'+def" v-text="def"></a>
               </li>
             </ul>
           </li>
@@ -173,37 +173,37 @@
         </ul>
         <ul class="tree">
           <li>
-            <a class="text-0" :href="'./'+rootNode" v-text="rootNode" ></a>
+            <a class="text-0 goLink" :href="'./'+rootNode" v-text="rootNode" ></a>
             <ul>
               <li v-for="item in getNeighbors(rootNode)">
-                <a class="text-1" :href="'./'+item" v-text="item"></a>
+                <a class="text-1 goLink" :href="'./'+item" v-text="item"></a>
                 <ul>
                   <li v-for="item2 in getNeighbors(item)">
-                    <a class="text-2" :href="'./'+item2" v-text="item2"></a>
+                    <a class="text-2 goLink" :href="'./'+item2" v-text="item2"></a>
                     <ul>
                       <li v-for="item3 in getNeighbors(item2)">
-                        <a class="text-3" :href="'./'+item3" v-text="item3"></a>
+                        <a class="text-3 goLink" :href="'./'+item3" v-text="item3"></a>
                         <ul>
                           <li v-for="item4 in getNeighbors(item3)">
-                            <a class="text-4" :href="'./'+item4" v-text="item4"></a>
+                            <a class="text-4 goLink" :href="'./'+item4" v-text="item4"></a>
                             <ul>
                               <li v-for="item5 in getNeighbors(item4)">
-                                <a class="text-5" :href="'./'+item5" v-text="item5"></a>
+                                <a class="text-5 goLink" :href="'./'+item5" v-text="item5"></a>
                                 <ul>
                                   <li v-for="item6 in getNeighbors(item5)">
-                                    <a class="text-6" :href="'./'+item6" v-text="item6"></a>
+                                    <a class="text-6 goLink" :href="'./'+item6" v-text="item6"></a>
                                     <ul>
                                       <li v-for="item7 in getNeighbors(item6)">
-                                        <a class="text-7" :href="'./'+item7" v-text="item7"></a>
+                                        <a class="text-7 goLink" :href="'./'+item7" v-text="item7"></a>
                                         <ul>
                                           <li v-for="item8 in getNeighbors(item7)">
-                                            <a class="text-8" :href="'./'+item8" v-text="item8"></a>
+                                            <a class="text-8 goLink" :href="'./'+item8" v-text="item8"></a>
                                             <ul>
                                               <li v-for="item9 in getNeighbors(item8)">
-                                                <a class="text-9" :href="'./'+item9" v-text="item9"></a>
+                                                <a class="text-9 goLink" :href="'./'+item9" v-text="item9"></a>
                                                 <ul>
                                                   <li v-for="item10 in getNeighbors(item9)">
-                                                    <a class="text-10" :href="'./'+item10" v-text="item10"></a>
+                                                    <a class="text-10 goLink" :href="'./'+item10" v-text="item10"></a>
                                                   </li>
                                                 </ul>
                                               </li>
@@ -239,7 +239,7 @@
             <ol>
               <li v-for="path in allPaths">
                 <span v-for="(item,index) in path">
-                  <a :class="[ index !== path.length-1 ? 'mainTextLight' : 'mainTextDark']" class="font-weight-bold small" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
+                  <a :class="[ index !== path.length-1 ? 'text-muted' : 'mainTextDark']" class="font-weight-bold small" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
                   <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right mainTextDark"></i>&nbsp;</span>
                 </span>
               </li>
@@ -365,6 +365,7 @@
 
     </div>
     <div id="bottom" v-if='schemaClass' class="jumbotron text-muted col-sm-9">
+      <h1>More About <a class="mainTextDark bold" :href="'./'+schemaClass" v-text="schemaClass"></a></h1>
       <div class="jumbotron mb-0" v-if="getRangePropertyInfoResults.length">
         <h3>
           Properties with <a class="mainTextDark bold" :href="'./'+schemaClass" v-text="schemaClass"></a> as Expected Type
@@ -433,18 +434,21 @@
                     Recommended slug found in graph context: Use <a class="badge badge-pill mainBackLight text-light pointer" @click.prevent='slugInput = namespace'><b v-text="namespace"></b></a>
                   </p>
                 </div>
+                <div class="col-sm-12">
+                  <h2>Slug</h2>
+                </div>
                 <label class="col-sm-4 col-form-label" for="exampleFormControlInput1">Namespace (slug)</label>
                 <div class="col-sm-8">
                   <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="slugInput" v-model='slugInput'></textarea>
                   <template v-if="availableSlug && slugInput.length">
-                    <small class="text-success">AVAILABLE</small>
+                    <small class="text-success bold"><i class="fas fa-check"></i> AVAILABLE</small>
                   </template>
                   <template v-if="!availableSlug && slugInput.length">
-                    <small class="text-danger">NOT AVAILABLE</small>
+                    <small class="text-danger bold"><i class="fas fa-times"></i> NOT AVAILABLE</small>
                   </template>
                   <template v-if="invalidChars">
                     <br />
-                    <small class="text-warning">INVALID CHARACTERS</small>
+                    <small class="text-warning bold"><i class="fas fa-times"></i> INVALID CHARACTERS</small>
                   </template>
                   <p class="m-2" :class="[availableSlug ? 'mainTextDark' : 'text-danger']">
                     discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
@@ -452,10 +456,15 @@
                 </div>
               </div>
               <div class="form-group row">
-                <label for="colFormLabelSm" class="col-sm-4 col-form-label col-form-label">URL</label>
+                <label for="colFormLabelSm" class="col-sm-4 col-form-label col-form-label">Source URL</label>
                 <div class="col-sm-8">
-                  <input required="" type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="datasetURL">
+                  <input required="" type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="dataSetURL">
                 </div>
+              </div>
+              <div v-if="urlRegistered" class="p-2 alert alert-warning">
+                <small>
+                  <i class="fas fa-exclamation-circle text-danger"></i> This URL has already been registered. Registering this slug will overrride the previsouly registered slug and data associated with it.
+                </small>
               </div>
               <div class="form-group row">
                 <label class="col-sm-4 col-form-label" for="exampleFormControlSelect1">Classes (<span class="text-success" v-text="allAvailableClasses.length"></span>)</label>
@@ -520,7 +529,6 @@ var app = new Vue({
 			data: function(){
 				return {
           filter:'',
-          dataSetURL : 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/Dataset.jsonld',
           graph: [],
           context: {},
           query:'',
@@ -564,7 +572,8 @@ var app = new Vue({
           availableSlug: false,
           dataSetURL:'',
           invalidChars: false,
-          registered: false
+          registered: false,
+          urlRegistered: false
 				}
 			},
       watch:{
@@ -584,6 +593,7 @@ var app = new Vue({
           var self = this;
           self.slugInput = self.slugInput.toLowerCase();
 
+
           var re = /^[a-zA-Z0-9_.-]*$/;
           if (!re.test(newInput) ) {
             self.invalidChars = true;
@@ -601,6 +611,18 @@ var app = new Vue({
               }
             });
           }
+        },
+        dataSetURL:function(newurl,oldurl){
+          var self = this;
+          if (newurl) {
+            axios.get(`/api/query?q=_meta.url:`+'"'+newurl+'"').then(function (response) {
+              if (response.data.total) {
+                self.urlRegistered = true;
+              }else{
+                self.urlRegistered = false;
+              }
+            });
+          }
         }
       },
 			methods:{
@@ -610,7 +632,7 @@ var app = new Vue({
 
           if (valid) {
             let body = {
-              'url' : self.datasetURL,
+              'url' : self.dataSetURL,
               'clses' : self.allAvailableClasses,
               'props' : self.allAvailableProperties,
               'slug' : self.slugInput
@@ -618,17 +640,25 @@ var app = new Vue({
             console.log('REQ BODY',body);
             axios.post('/api/registry',body).then(res=>{
               console.log('POSt resposnse ',res.data)
-              if (res.data.success) {
+              if (res.data.success === true) {
 
                 Swal.fire({
                   type: 'success',
                   toast: true,
-                  position: 'top center',
+                  position: 'bottom',
                   title: 'Registration Successful',
                   text: "Data can now be accessed on "+window.location.origin+"/"+self.slugInput
                 });
                 self.registered = true;
 
+              }else if (res.data.success === false){
+                Swal.fire({
+                  type: 'error',
+                  toast: true,
+                  position: 'top',
+                  title: 'Registration Failed',
+                  text: res.data.error
+                });
               }
 
             }).catch(err=>{
@@ -648,7 +678,6 @@ var app = new Vue({
           }
         },
         getAllAvailableProperties(){
-          console.log('getting all props')
           let results = [];
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdf:Property") {
@@ -1272,19 +1301,6 @@ var app = new Vue({
             return 'no description available'
           }
         },
-        reqFile: function(){
-
-            var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
-
-            // console.log('retreived data', retrievedObject);
-
-            this.graph = retrievedObject['@graph'];
-            this.context = retrievedObject['@context'];
-
-            this.determinePath()
-            this.getAvailableClasses()
-
-        },
         getClassProperties(){
           this.properties = [];
             for (var i = 0; i < this.graph.length; i++) {
@@ -1466,6 +1482,66 @@ var app = new Vue({
           }
           this.usedOnTheseTypes = res;
           this.rangeIncludes = range;
+        },
+        checkIfRegistered(){
+          let url ='';
+          let self = this;
+          let namespace = window.location.pathname.split('/');
+          namespace = namespace.slice(1,window.location.pathname.length-1)[0];
+          console.log('checking..',namespace)
+          axios.get(`/api/query?q=_meta.slug:`+namespace).then(function (res) {
+            console.log('reg check ', res.data)
+            if (res.data.total) {
+              self.registered = true;
+              url = res.data.hits[0]._meta.url;
+              self.reqFile(url);
+            }else{
+              self.reqFile();
+            }
+          }).catch(err=>{
+            Swal.fire(
+              'Oops!',
+              'Something went wrong loading this dataset',
+              'error'
+            );
+          });
+        },
+        reqFile: function(url){
+          let self = this;
+          if (url && self.registered) {
+            console.log('LOADING FROM URL')
+            axios.get(url).then(res=>{
+              if (res.data) {
+                console.log('load success')
+                this.graph = res.data['@graph'];
+                this.context = res.data['@context'];
+                this.determinePath()
+                this.getAvailableClasses()
+              }
+            }).catch(err=>{
+              throw err;
+              Swal.fire(
+                'Oops!',
+                'Something went wrong loading this url',
+                'error'
+              );
+            });
+          }else if(!url){
+            console.log('LOADING FROM LOCALSTORAGE')
+            var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
+            this.graph = retrievedObject['@graph'];
+            this.context = retrievedObject['@context'];
+            this.determinePath()
+            this.getAvailableClasses()
+          }
+
+        },
+        checkUser(){
+          let self = this;
+          $.ajax({url: "/user", success: function(result){
+             self.userInfo = result;
+          },
+          cache: false});
         }
 			},
 			mounted:function(){
@@ -1473,20 +1549,15 @@ var app = new Vue({
         let self= this;
          if ( context ) {
            self.query = context.query;
-           self.reqFile()
-         }
-         if (context.hasOwnProperty('namespace')) {
-           //remove random numbers
-           self.namespace = context.namespace.replace(/[0-9]/g, '');;
+           if (context.hasOwnProperty('namespace')) {
+             //remove random numbers
+             self.namespace = context.namespace.replace(/[0-9]/g, '');;
+           }
+           self.dataSetURL = localStorage.getItem('datasetDataURL');
+           self.checkIfRegistered();
          }
 
-         self.datasetURL = localStorage.getItem('datasetDataURL');
-
-         $.ajax({url: "/user", success: function(result){
-           console.log('got user info',result)
-            self.userInfo = result;
-         },
-         cache: false});
+         self.checkUser();
 
 			},
       created:function(){

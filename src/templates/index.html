@@ -2,46 +2,7 @@
 {% block content %}
 {% include "header.html" %}
 <style>
- .resultsTab{
-  width: 20%;
-  text-align: center;
-  border-top-right-radius: 10px;
-  border-top-left-radius: 10px;
- }
 
- .page-item.active .page-link{
-   background-color: var(--main);
-   border-color: var(--main);
- }
-
- .mainBackDarkFade{
-    background: -moz-linear-gradient(left, var(--main) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(left, var(--main) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to right, var(--main) 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
- }
-
- .mainBackLightFade{
-   background: -moz-linear-gradient(left, var(--sec) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
-   background: -webkit-linear-gradient(left, var(--sec) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
-   background: linear-gradient(to right, var(--sec) 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
- }
-
- mark{
-    font-weight: bold;
-    background: transparent;
-    color: red;
-  }
-
-  .smallButton{
-    transform: scale(.7);
-    border-radius: 10px;
-  }
-
-  .smallButton:hover{
-    background: var(--sec);
-  }
 
 </style>
 <main id="index" style="min-height:70vh;">
@@ -51,7 +12,12 @@
         <img class="margin20" src="./static/img/cd2h-logo.png" style="width:30vw; max-width: 300px;" alt="logo"/>
       </a>
       <h1 class="text-muted caps">CD2H Data Discovery Engine</h1>
-      <img src="./static/img/dde-logo-o.svg" width="200px" class="margin20 mb-9"/>
+      <!-- <img src="./static/img/dde-logo-o.svg" width="200px" class="margin20 mb-9"/> -->
+      <div id="animation_container" style="background-color:rgba(68, 68, 68, 00); width:640px; height:480px; zoom:.5;">
+    		<canvas id="canvas" width="640" height="480" style="position: absolute; display: block; background-color:rgba(68, 68, 68,0);"></canvas>
+    		<div id="dom_overlay_container" style="pointer-events:none; overflow:hidden; width:640px; height:480px; position: absolute; left: 0px; top: 0px; display: block;">
+    		</div>
+    	</div>
       <h4 class="text-muted caps">A Project of the CD2H Data Workgroup</h4>
     </div>
 
@@ -60,7 +26,7 @@
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <div class="link-wrapper">
             <a class="link hover-1" href="#registry">
-              <img class="mb-2" src="./static/img/R.svg" width="50%" alt="R"/>
+              <object class="mb-2" data="./static/img/R.svg" width="50%" alt="R"></object>
               <br />
               <h2 class="font-weight-bold text-light">REGISTRY</h2>
             </a>
@@ -70,7 +36,7 @@
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <div class="link-wrapper">
             <a class="link hover-1" href="./guide" >
-              <img class="mb-2" src="./static/img/G.svg" width="50%" alt="G"/>
+              <object class="mb-2" data="./static/img/G.svg" width="50%" alt="G"></object>
               <br />
               <h2 class="font-weight-bold text-light">GUIDE</h2>
             </a>
@@ -80,7 +46,7 @@
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <div class="link-wrapper">
             <a class="link hover-1" href="#" data-toggle="modal" data-target="#schemaOrgModal">
-              <img class="mb-2" src="./static/img/V.svg" width="50%" alt="V"/>
+              <object class="mb-2" data="./static/img/V.svg" width="50%" alt="V"></object>
               <br />
               <h2 class="font-weight-bold text-light">VIEW</h2>
             </a>
@@ -91,7 +57,7 @@
 
           <div class="link-wrapper">
             <a class="link hover-1" href="./schema-playground" >
-              <img class="mb-2" src="./static/img/B.svg" width="50%" alt="B"/>
+              <object class="mb-2" data="./static/img/B.svg" width="50%" alt="B"></object>
               <br />
               <h2 class="font-weight-bold text-light">BUILD</h2>
             </a>
@@ -103,14 +69,14 @@
 
     <div id="registry" class="jumbotron">
       <div class="row">
-        <div class="col-sm-12 col-md- col-lg-6" style="margin:auto;">
-          <h2 class="text-center">REGISTRY</h2>
+        <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
+          <h1 class="text-center text-muted mb-5">REGISTRY</h1>
           <div class="bg-light padding20">
-            <form>
+            <form @submit.prevent="search(query)">
               <div class="form-group form-row">
                 <input class="form-control col-6" id="search_query" type="text" v-model="query" name="query" placeholder="Search Registry" >
                 <button class="col btn ml-2 themeButton text-light pulse" type="button" @click.prevent="search(query)">Search</button>
-                <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';search(query)">Clear</button>
+                <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';search(query)">Reset</button>
               </div>
             </form>
             <div class="form-group form-inline m-0 ">
@@ -137,29 +103,29 @@
             <template v-if="registry.length" v-for="(item,index) in registry">
               <li class="list-group-item list-group-item-action flex-column align-items-start context registryItem">
                 <div class="">
-                  <h5 class="d-inline">
-                    <span v-if='query'>Found in</span> <a :href="item._meta.slug" class="mb-1 font-weight-bold" v-text='item._meta.slug'></a>
-                  </h5>
-                  <small class="float-right">More by <a class="text-primary pointer" @click.prevent='searchByUser(item._meta.username)' v-text='item._meta.username'></a></small>
+                  <h2 class="d-inline">
+                    <span v-if='query'>Found in</span> <a :href="item._meta.slug+'/'" class="mb-1 font-weight-bold goLink" v-text='"/"+item._meta.slug'></a>
+                  </h2>
+                  <small class="float-right">
+                    <a class="text-primary pointer preLink" @click.prevent='searchByUser(item._meta.username)' >
+                      <!-- <i class="fas fa-user-circle"> -->
+                      <registry-image :username="item._meta.username"></registry-image>
+                      </i> <span v-text='item._meta.username'></span>
+                    </a>
+                  </small>
                 </div>
                 <div class="d-flex justify-content-between">
-                  <div class="p-1 flex-fill" v-if="item.clses">
+                  <div class="p-1 flex-fill" >
                     <div class="mainBackDarkFade text-light badge w-100 text-left">Classes</div>
-                    <!-- <ul>
-                      <li v-for="c in item.clses">
-                        <a :href="item._meta.slug +'/'+ c" v-text="c"></a>
-                      </li>
-                    </ul> -->
-                    <registry-list :list='item.clses' :slug="item._meta.slug"></registry-list>
+                    <div v-if="item.clses">
+                      <registry-list :list='item.clses' :slug="item._meta.slug"></registry-list>
+                    </div>
                   </div>
-                  <div class="p-1 flex-fill" v-if="item.props">
+                  <div class="p-1 flex-fill" >
                     <div class="mainBackLightFade text-light badge w-100 text-left">Properties</div>
-                    <!-- <ul>
-                      <li v-for="p in item.props">
-                        <a :href="item._meta.slug +'/'+ p" v-text="p"></a>
-                      </li>
-                    </ul> -->
-                    <registry-list :list='item.props' :slug="item._meta.slug"></registry-list>
+                    <div v-if="item.props">
+                      <registry-list :list='item.props' :slug="item._meta.slug"></registry-list>
+                    </div>
                   </div>
                 </div>
               </li>
@@ -184,7 +150,7 @@
                 </ul>
               </nav>
               <div class="col-sm-12 right-align form-group">
-                <select class="perPage form-control form-control-sm w-25 m-auto" v-model="perPage" @change="calculatePages" id="perPage">
+                <select class="perPage form-control form-control-sm w-50 m-auto" v-model="perPage" @change="calculatePages" id="perPage">
                     <option value="" disabled selected>Shown Per Page</option>
                     <option value="20">20 per page</option>
                     <option value="50">50 per page</option>
@@ -233,22 +199,6 @@
       </div>
     </div>
 
-    <div class="modal fade" id="DetailsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <p class="modal-title caps" id="exampleModalLabel" v-text='selectedRegistryItem.url'></p>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body text-secondary">
-            <p v-text='selectedRegistryItem'></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
@@ -256,8 +206,39 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 <script src="./static/js/lodash.js"></script>
+<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+<script src="./static/js/logo.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
+
+Vue.component('registry-image', {
+  data: function(){
+    return{
+      img:''
+    }
+  },
+  props: ['username'],
+  methods:{
+
+
+  },
+  watch:{
+
+  },
+  mounted: function(){
+    let self = this;
+    axios.get('http://api.github.com/users/'+this.username).then(res=>{
+      if (res.data.avatar_url) {
+        self.img= res.data.avatar_url;
+      }else{
+        self.img= '/static/img/user-default.png';
+      }
+    }).catch(err=>{
+        self.img= '/static/img/user-default.png';
+    });
+  },
+  template: `<img class="registryImg" :src="img" :alt='username'/>`
+});
 
 Vue.component('registry-list', {
   data: function(){
@@ -307,7 +288,7 @@ Vue.component('registry-list', {
               </ul>
               <template v-if="!showAll && list.length>5">
                 <div class="text-center d-block">
-                <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show More (<span v-text="list.length"></span>)</a>
+                <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show More (<span class="bold" v-text="list.length"></span>)</a>
                 </div>
               </template>
               <template v-if="showAll">
@@ -339,41 +320,6 @@ var app = new Vue({
           page: 1,
           pages: 1,
           perPage: 20,
-          selectedRegistryItem:{},
-          testRes:[
-            {
-              '_meta':{
-                'username':'marcodarko',
-                'url':'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld',
-                'slug':'bts',
-                'timestamp': Date.now().toString()
-              },
-              'classes':['BiologicalEntity','Gene','GeneticEntity'],
-              'properties':['hasPhenotype','expressedIn','hasGeneProduct'],
-              '~raw':'fhaskjhfjkahgkhdkhkjghkjhgkjdahkjhfgkjhgkjdhfk'
-            },
-            {
-              '_meta':{
-                'username':'marcodarko',
-                'url':'https://raw.githubusercontent.com/cvisb/sample_viewer_web/master/sample-viewer/src/assets/schema/dataset.json',
-                'slug':'cvisb',
-                'timestamp': Date.now().toString()
-              },
-              'classes':['BiologicalEntity','Gene','GeneticEntity'],
-              'properties':['hasPhenotype','expressedIn','hasGeneProduct'],
-              '~raw':'fhaskjhfjkahgkhdkhkjghkjhgkjdahkjhfgkjhgkjdhfk'
-            },
-            {
-              '_meta':{
-                'username':'marcodarko',
-                'url':'https://raw.githubusercontent.com/cvisb/sample_viewer_web/master/sample-viewer/src/assets/schema/dataset.json',
-                'slug':'cvisb',
-                'timestamp': Date.now().toString()
-              },
-              'classes':['BiologicalEntity','Gene','GeneticEntity'],
-              '~raw':'fhaskjhfjkahgkhdkhkjghkjhgkjdahkjhfgkjhgkjdhfk'
-            }
-          ]
 				}
 			},
       watch:{
@@ -394,6 +340,15 @@ var app = new Vue({
             default:
             self.registry = _.sortBy(self.registry,'name');
           }
+        },
+        query: function(newQ, oldQ){
+          var self = this;
+          var context = document.querySelector(".context");
+          var instance = new Mark(context);
+          instance.unmark();
+          $( document ).ready(function() {
+            self.mark(newQ);
+          });
         }
       },
       methods:{
@@ -409,7 +364,9 @@ var app = new Vue({
           axios.get('/api/query?q=_meta.username:'+username+'&size=100').then(function (response) {
             self.registry = response.data.hits;
             self.registryTotal = response.data.total;
-            self.mark(username);
+            $( document ).ready(function() {
+              self.mark(username);
+            });
             if (self.registryTotal) {
               self.calculatePages();
             }
@@ -466,15 +423,15 @@ var app = new Vue({
             var context = document.querySelector(".context");
             var instance = new Mark(context);
             instance.unmark();
-
+            //clear registry to fix mixing results info
+            self.registry = [];
             axios.get('/api/query?size=100', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
-              // if (self.registryTotal === 0) {
-              //   console.log('reg is 0')
-              //   self.registry = self.testRes
-              // }
-              self.mark(self.query);
+              // mark results, doc must be loaded
+              $( document ).ready(function() {
+                self.mark(self.query);
+              });
               if (self.registryTotal) {
                 self.calculatePages();
               }
@@ -576,12 +533,193 @@ var app = new Vue({
       handleChange: function(e){
         let value = e.target.value;
         window.location.href = "./schema-org/"+value;
+      },
+      initAnimation(){
+        var canvas, stage, exportRoot, anim_container, dom_overlay_container, fnStartAnimation;
+        function init() {
+        	canvas = document.getElementById("canvas");
+        	anim_container = document.getElementById("animation_container");
+        	dom_overlay_container = document.getElementById("dom_overlay_container");
+        	var comp=AdobeAn.getComposition("46DA4F4F7E89411CA5216CDF046C8633");
+        	var lib=comp.getLibrary();
+        	var loader = new createjs.LoadQueue(false);
+        	loader.addEventListener("fileload", function(evt){handleFileLoad(evt,comp)});
+        	loader.addEventListener("complete", function(evt){handleComplete(evt,comp)});
+        	var lib=comp.getLibrary();
+        	loader.loadManifest(lib.properties.manifest);
+        }
+        function handleFileLoad(evt, comp) {
+        	var images=comp.getImages();
+        	if (evt && (evt.item.type == "image")) { images[evt.item.id] = evt.result; }
+        }
+        function handleComplete(evt,comp) {
+        	//This function is always called, irrespective of the content. You can use the variable "stage" after it is created in token create_stage.
+        	var lib=comp.getLibrary();
+        	var ss=comp.getSpriteSheet();
+        	var queue = evt.target;
+        	var ssMetadata = lib.ssMetadata;
+        	for(i=0; i<ssMetadata.length; i++) {
+        		ss[ssMetadata[i].name] = new createjs.SpriteSheet( {"images": [queue.getResult(ssMetadata[i].name)], "frames": ssMetadata[i].frames} )
+        	}
+        	exportRoot = new lib.logo();
+        	stage = new lib.Stage(canvas);
+        	//Registers the "tick" event listener.
+        	fnStartAnimation = function() {
+        		stage.addChild(exportRoot);
+        		createjs.Ticker.setFPS(lib.properties.fps);
+        		createjs.Ticker.addEventListener("tick", stage)
+        		stage.addEventListener("tick", handleTick)
+        		function getProjectionMatrix(container, totalDepth) {
+        			var focalLength = 528.25;
+        			var projectionCenter = { x : lib.properties.width/2, y : lib.properties.height/2 };
+        			var scale = (totalDepth + focalLength)/focalLength;
+        			var scaleMat = new createjs.Matrix2D;
+        			scaleMat.a = 1/scale;
+        			scaleMat.d = 1/scale;
+        			var projMat = new createjs.Matrix2D;
+        			projMat.tx = -projectionCenter.x;
+        			projMat.ty = -projectionCenter.y;
+        			projMat = projMat.prependMatrix(scaleMat);
+        			projMat.tx += projectionCenter.x;
+        			projMat.ty += projectionCenter.y;
+        			return projMat;
+        		}
+        		function handleTick(event) {
+        			var cameraInstance = exportRoot.___camera___instance;
+        			if(cameraInstance !== undefined && cameraInstance.pinToObject !== undefined)
+        			{
+        				cameraInstance.x = cameraInstance.pinToObject.x + cameraInstance.pinToObject.pinOffsetX;
+        				cameraInstance.y = cameraInstance.pinToObject.y + cameraInstance.pinToObject.pinOffsetY;
+        				if(cameraInstance.pinToObject.parent !== undefined && cameraInstance.pinToObject.parent.depth !== undefined)
+        				cameraInstance.depth = cameraInstance.pinToObject.parent.depth + cameraInstance.pinToObject.pinOffsetZ;
+        			}
+        			applyLayerZDepth(exportRoot);
+        		}
+        		function applyLayerZDepth(parent)
+        		{
+        			var cameraInstance = parent.___camera___instance;
+        			var focalLength = 528.25;
+        			var projectionCenter = { 'x' : 0, 'y' : 0};
+        			if(parent === exportRoot)
+        			{
+        				var stageCenter = { 'x' : lib.properties.width/2, 'y' : lib.properties.height/2 };
+        				projectionCenter.x = stageCenter.x;
+        				projectionCenter.y = stageCenter.y;
+        			}
+        			for(child in parent.children)
+        			{
+        				var layerObj = parent.children[child];
+        				if(layerObj == cameraInstance)
+        					continue;
+        				applyLayerZDepth(layerObj, cameraInstance);
+        				if(layerObj.layerDepth === undefined)
+        					continue;
+        				if(layerObj.currentFrame != layerObj.parent.currentFrame)
+        				{
+        					layerObj.gotoAndPlay(layerObj.parent.currentFrame);
+        				}
+        				var matToApply = new createjs.Matrix2D;
+        				var cameraMat = new createjs.Matrix2D;
+        				var totalDepth = layerObj.layerDepth ? layerObj.layerDepth : 0;
+        				var cameraDepth = 0;
+        				if(cameraInstance && !layerObj.isAttachedToCamera)
+        				{
+        					var mat = cameraInstance.getMatrix();
+        					mat.tx -= projectionCenter.x;
+        					mat.ty -= projectionCenter.y;
+        					cameraMat = mat.invert();
+        					cameraMat.prependTransform(projectionCenter.x, projectionCenter.y, 1, 1, 0, 0, 0, 0, 0);
+        					cameraMat.appendTransform(-projectionCenter.x, -projectionCenter.y, 1, 1, 0, 0, 0, 0, 0);
+        					if(cameraInstance.depth)
+        						cameraDepth = cameraInstance.depth;
+        				}
+        				if(layerObj.depth)
+        				{
+        					totalDepth = layerObj.depth;
+        				}
+        				//Offset by camera depth
+        				totalDepth -= cameraDepth;
+        				if(totalDepth < -focalLength)
+        				{
+        					matToApply.a = 0;
+        					matToApply.d = 0;
+        				}
+        				else
+        				{
+        					if(layerObj.layerDepth)
+        					{
+        						var sizeLockedMat = getProjectionMatrix(parent, layerObj.layerDepth);
+        						if(sizeLockedMat)
+        						{
+        							sizeLockedMat.invert();
+        							matToApply.prependMatrix(sizeLockedMat);
+        						}
+        					}
+        					matToApply.prependMatrix(cameraMat);
+        					var projMat = getProjectionMatrix(parent, totalDepth);
+        					if(projMat)
+        					{
+        						matToApply.prependMatrix(projMat);
+        					}
+        				}
+        				layerObj.transformMatrix = matToApply;
+        			}
+        		}
+        	}
+        	//Code to support hidpi screens and responsive scaling.
+        	function makeResponsive(isResp, respDim, isScale, scaleType) {
+        		var lastW, lastH, lastS=1;
+        		window.addEventListener('resize', resizeCanvas);
+        		resizeCanvas();
+        		function resizeCanvas() {
+        			var w = lib.properties.width, h = lib.properties.height;
+        			var iw = window.innerWidth, ih=window.innerHeight;
+        			var pRatio = window.devicePixelRatio || 1, xRatio=iw/w, yRatio=ih/h, sRatio=1;
+        			if(isResp) {
+        				if((respDim=='width'&&lastW==iw) || (respDim=='height'&&lastH==ih)) {
+        					sRatio = lastS;
+        				}
+        				else if(!isScale) {
+        					if(iw<w || ih<h)
+        						sRatio = Math.min(xRatio, yRatio);
+        				}
+        				else if(scaleType==1) {
+        					sRatio = Math.min(xRatio, yRatio);
+        				}
+        				else if(scaleType==2) {
+        					sRatio = Math.max(xRatio, yRatio);
+        				}
+        			}
+        			canvas.width = w*pRatio*sRatio;
+        			canvas.height = h*pRatio*sRatio;
+        			canvas.style.width = dom_overlay_container.style.width = anim_container.style.width =  w*sRatio+'px';
+        			canvas.style.height = anim_container.style.height = dom_overlay_container.style.height = h*sRatio+'px';
+        			stage.scaleX = pRatio*sRatio;
+        			stage.scaleY = pRatio*sRatio;
+        			lastW = iw; lastH = ih; lastS = sRatio;
+        			stage.tickOnUpdate = false;
+        			stage.update();
+        			stage.tickOnUpdate = true;
+        		}
+        	}
+        	makeResponsive(true,'both',false,1);
+        	AdobeAn.compositionLoaded(lib.properties.id);
+        	fnStartAnimation();
+        }
+        $( document ).ready(function() {
+            init();
+        });
+        document.getElementById("animation_container").addEventListener('click', function(){
+					init();
+				})
       }
     },
     mounted:function(){
       this.reqFile();
       this.search();
       this.checkLoggedUser();
+      this.initAnimation();
+
     },
     created: function(){
       this.getAvailableClasses();
