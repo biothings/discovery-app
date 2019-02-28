@@ -10,7 +10,8 @@
 .navbar {
   padding-top: 25px;
   padding-bottom: 25px;
-  background: #cfcfcf;
+  background: #7e7e7e;
+  color: white !important;
   transition: all 0.3s;
 }
 
@@ -18,7 +19,7 @@
   padding-top: 10px;
   padding-bottom: 10px;
   background: white;
-  color: grey;
+  color: red !important;
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -47,7 +48,7 @@ body{
 </style>
 <header id="header">
 <title>CD2H Data Discovery Engine</title>
-<nav class="navbar navbar-expand-md navbar-light fixed-top">
+<nav class="navbar navbar-expand-md navbar-dark fixed-top">
   <a class="navbar-brand" href="#">
     <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="">
   </a>
@@ -58,9 +59,9 @@ body{
 
   <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
     <ul class="navbar-nav" id="user_link">
-      <li class="nav-item"><a class="nav-link" href="/#registry">Registry</a></li>
-      <li class="nav-item"><a class="nav-link" href="/guide">Guide</a></li>
-      <li class="nav-item"><a class="nav-link" href="/schema-playground">Playground</a></li>
+      <li class="nav-item"><a class="nav-link" href="/guide">Discovery Guide</a></li>
+      <li class="nav-item"><a class="nav-link" href="/schema-playground">Schema Playground</a></li>
+      <li class="nav-item"><a class="nav-link" href="/schema-playground#registry">Registry</a></li>
     </ul>
   </div>
   </nav>
@@ -81,9 +82,21 @@ var app = new Vue({
       methods:{
         scrollFunction() {
           if ($(window).scrollTop() >= 20) {
-            $(".navbar").addClass("compressed ");
+            $(".navbar").addClass("compressed");
+            $(".nav-link").removeClass("text-light");
+            $(".nav-link").addClass("text-muted");
+            $("#logo").addClass("text-muted");
+            $("#logo").removeClass("text-light");
+            $("#navPhotoLink").addClass("text-light");
+            $("#navPhotoLink").removeClass("text-muted");
           } else {
-            $(".navbar").removeClass("compressed ");
+            $(".navbar").removeClass("compressed");
+            $(".nav-link").removeClass("text-muted");
+            $(".nav-link").addClass("text-light");
+            $("#logo").addClass("text-light");
+            $("#logo").removeClass("text-muted");
+            // $("#navPhotoLink").addClass("text-muted");
+            // $("#navPhotoLink").removeClass("text-light");
           }
 
         }

@@ -2,12 +2,65 @@
 {% block content %}
 {% include "header.html" %}
 <style>
+.bg-none{
+  background: transparent !important;
+}
+
+.buildBack{
+  background-image: url('/static/img/build.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  width: 90%;
+  height: 100%;
+  opacity: .3;
+  z-index: 1;
+  top: 0;
+  border-radius: 20px;
+}
+
+.discoverBack{
+  background-image: url('/static/img/discover.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  width: 90%;
+  height: 100%;
+  opacity: .3;
+  z-index: 1;
+  top: 0;
+  border-radius: 20px;
+}
+
+.pRelative{
+  position: relative;
+}
+
+.pAbsolute{
+  position: absolute;
+}
+
+.o-0{
+  opacity: 0;
+  transition: all 1s;
+  font-weight: lighter;
+}
+
+.link-wrapper:hover .o-0{
+  opacity: 1;
+}
+
+.lighter{
+  font-weight: lighter;
+}
 
 
 </style>
 <main id="index" style="min-height:70vh;">
   <div class="">
-    <div class="jumbotron bg-light text-center padding20 hero mb-0" style="margin-top: 40px;">
+    <div class="jumbotron bg-light text-center padding20 her mb-0 p-5" style="margin-top: 40px;">
       <a data-tippy="Learn More About CD2H" target="_blank" href="https://ctsa.ncats.nih.gov/cd2h/">
         <img class="margin20" src="./static/img/cd2h-logo.png" style="width:30vw; max-width: 300px;" alt="logo"/>
       </a>
@@ -18,10 +71,37 @@
     		<div id="dom_overlay_container" style="pointer-events:none; overflow:hidden; width:640px; height:480px; position: absolute; left: 0px; top: 0px; display: block;">
     		</div>
     	</div>
-      <h4 class="text-muted caps">A Project of the CD2H Data Workgroup</h4>
+      <h5 class="text-muted caps lighter">A Project of the CD2H Data Workgroup</h5>
     </div>
 
-    <div class="jumbotron animatedBack mb-0">
+    <div class="jumbotron animatedBack">
+      <div class="container row m-auto">
+        <div class="col-sm-12 col-md-6 jumbotron bg-none text-center pRelative">
+          <div class="link-wrapper">
+            <a class="link hover-1 mt-5" href="./guide" style="z-index:2;">
+              <h3 class="font-weight-bold text-light">DISCOVERY GUIDE</h3>
+            </a>
+            <p class="m-auto w-75 text-light o-0">
+              Follow best practices to make your data more findable
+            </p>
+          </div>
+          <div class="discoverBack"></div>
+        </div>
+        <div class="col-sm-12 col-md-6 jumbotron bg-none text-center pRelative">
+          <div class="link-wrapper">
+            <a class="link hover-1 mt-5" href="./schema-playground" style="z-index:2;">
+              <h3 class="font-weight-bold text-light">SCHEMA PLAYGROUND</h3>
+            </a>
+            <p class="m-auto w-75 text-light o-0">
+              Build and host your own schema for better interoperability
+            </p>
+          </div>
+          <div class="buildBack"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="jumbotron animatedBack mb-0">
       <div class="container d-flex flex-row justify-content-center flex-wrap">
         <div class="col-sm-3 text-center swing-in-left-fwd">
           <div class="link-wrapper">
@@ -65,9 +145,9 @@
           <p class="caps text-light">Customize and host your own metadata schema</p>
         </div>
       </div>
-    </div>
+    </div> -->
 
-    <div id="registry" class="jumbotron">
+    <!-- <div id="registry" class="jumbotron">
       <div class="row">
         <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
           <h1 class="text-center text-muted mb-5">REGISTRY</h1>
@@ -108,7 +188,6 @@
                   </h2>
                   <small class="float-right">
                     <a class="text-primary pointer preLink" @click.prevent='searchByUser(item._meta.username)' >
-                      <!-- <i class="fas fa-user-circle"> -->
                       <registry-image :username="item._meta.username"></registry-image>
                       </i> <span v-text='item._meta.username'></span>
                     </a>
@@ -161,8 +240,7 @@
           </div>
         </div>
       </div>
-
-    </div>
+    </div> -->
 
     <div class="modal fade" id="schemaOrgModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
