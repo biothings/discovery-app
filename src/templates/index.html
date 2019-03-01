@@ -34,6 +34,15 @@
   border-radius: 20px;
 }
 
+.groupBack{
+  background-image: url('/static/img/group.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+}
+
 .pRelative{
   position: relative;
 }
@@ -56,6 +65,11 @@
   font-weight: lighter;
 }
 
+.glowTour{
+  box-shadow: 0px 0px 20px violet;
+  border: 2px solid white;
+}
+
 
 </style>
 <main id="index" style="min-height:70vh;">
@@ -64,7 +78,7 @@
       <a data-tippy="Learn More About CD2H" target="_blank" href="https://ctsa.ncats.nih.gov/cd2h/">
         <img class="margin20" src="./static/img/cd2h-logo.png" style="width:30vw; max-width: 300px;" alt="logo"/>
       </a>
-      <h1 class="text-muted caps">CD2H Data Discovery Engine</h1>
+      <h1 id="home" class="text-muted caps">CD2H Data Discovery Engine</h1>
       <!-- <img src="./static/img/dde-logo-o.svg" width="200px" class="margin20 mb-9"/> -->
       <div id="animation_container" style="background-color:rgba(68, 68, 68, 00); width:640px; height:480px; zoom:.5;">
     		<canvas id="canvas" width="640" height="480" style="position: absolute; display: block; background-color:rgba(68, 68, 68,0);"></canvas>
@@ -76,7 +90,7 @@
 
     <div class="jumbotron animatedBack">
       <div class="container row m-auto">
-        <div class="col-sm-12 col-md-6 jumbotron bg-none text-center pRelative">
+        <div id="bestPractices" class="col-sm-12 col-md-6 jumbotron bg-none text-center pRelative">
           <div class="link-wrapper">
             <a class="link hover-1 mt-5" href="./guide" style="z-index:2;">
               <h3 class="font-weight-bold text-light">BEST PRACTICES</h3>
@@ -87,7 +101,7 @@
           </div>
           <div class="discoverBack"></div>
         </div>
-        <div class="col-sm-12 col-md-6 jumbotron bg-none text-center pRelative">
+        <div id="schemaPlayground" class="col-sm-12 col-md-6 jumbotron bg-none text-center pRelative">
           <div class="link-wrapper">
             <a class="link hover-1 mt-5" href="./schema-playground" style="z-index:2;">
               <h3 class="font-weight-bold text-light">SCHEMA PLAYGROUND</h3>
@@ -98,149 +112,55 @@
           </div>
           <div class="buildBack"></div>
         </div>
+        <div class="col-sm-12 p-2 text-center text-light">
+          <p class="lighter">
+            Need Help?
+          </p>
+          <button id="demo" class="btn btn-outline-light" @click="startTour()">Click Here</button>
+        </div>
       </div>
     </div>
 
-    <!-- <div class="jumbotron animatedBack mb-0">
-      <div class="container d-flex flex-row justify-content-center flex-wrap">
-        <div class="col-sm-3 text-center swing-in-left-fwd">
-          <div class="link-wrapper">
-            <a class="link hover-1" href="#registry">
-              <object class="mb-2" data="./static/img/R.svg" width="50%" alt="R"></object>
-              <br />
-              <h2 class="font-weight-bold text-light">REGISTRY</h2>
-            </a>
+    <div class="jumbotron bg-light text-muted text-center">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-12 col-md-6">
+            <img class="w-100" src="/static/img/group.png" alt="join us"/>
           </div>
-          <p class="caps text-light">View all registered datasets</p>
-        </div>
-        <div class="col-sm-3 text-center swing-in-left-fwd">
-          <div class="link-wrapper">
-            <a class="link hover-1" href="./guide" >
-              <object class="mb-2" data="./static/img/G.svg" width="50%" alt="G"></object>
-              <br />
-              <h2 class="font-weight-bold text-light">GUIDE</h2>
-            </a>
-          </div>
-          <p class="caps text-light">Make your dateset more discoverable</p>
-        </div>
-        <div class="col-sm-3 text-center swing-in-left-fwd">
-          <div class="link-wrapper">
-            <a class="link hover-1" href="#" data-toggle="modal" data-target="#schemaOrgModal">
-              <object class="mb-2" data="./static/img/V.svg" width="50%" alt="V"></object>
-              <br />
-              <h2 class="font-weight-bold text-light">VIEW</h2>
-            </a>
-          </div>
-          <p class="caps text-light">Browse the core schema.org schemas</p>
-        </div>
-        <div class="col-sm-3 text-center swing-in-left-fwd">
-
-          <div class="link-wrapper">
-            <a class="link hover-1" href="./schema-playground" >
-              <object class="mb-2" data="./static/img/B.svg" width="50%" alt="B"></object>
-              <br />
-              <h2 class="font-weight-bold text-light">BUILD</h2>
-            </a>
-          </div>
-          <p class="caps text-light">Customize and host your own metadata schema</p>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- <div id="registry" class="jumbotron">
-      <div class="row">
-        <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
-          <h1 class="text-center text-muted mb-5">REGISTRY</h1>
-          <div class="bg-light padding20">
-            <form @submit.prevent="search(query)">
-              <div class="form-group form-row">
-                <input class="form-control col-6" id="search_query" type="text" v-model="query" name="query" placeholder="Search Registry" >
-                <button class="col btn ml-2 themeButton text-light pulse" type="button" @click.prevent="search(query)">Search</button>
-                <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';search(query)">Reset</button>
-              </div>
-            </form>
-            <div class="form-group form-inline m-0 ">
-              <select class="browser-default form-control form-control-sm" @change='sortResults($event)'>
-                 <option value="" disabled selected>Sort By</option>
-                 <option value="Search Relevance">Relevance (default)</option>
-                 <option value="Alpabethically A-Z">Alpabethically A-Z</option>
-                 <option value="Alpabethically Z-A">Alpabethically Z-A</option>
-                 <option value="Recently Updated">Recently Updated</option>
-              </select>
-            </div>
-          </div>
-          <div id="searching" class="progress" style="display:none;">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-secondary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
-          </div>
-          <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
-
-          </div>
-          <ul class="list-group" style="border-top:solid 3px var(--gray)">
-            <li class="list-group-item d-flex justify-content-center align-items-center text-muted p-1" style="background:#d0d0d0;">
-              <small v-if="registry.length && query" v-text="'results for '+query">
-              </small>
-            </li>
-            <template v-if="registry.length" v-for="(item,index) in registry">
-              <li class="list-group-item list-group-item-action flex-column align-items-start context registryItem">
-                <div class="">
-                  <h2 class="d-inline">
-                    <span v-if='query'>Found in</span> <a :href="item._meta.slug+'/'" class="mb-1 font-weight-bold goLink" v-text='"/"+item._meta.slug'></a>
-                  </h2>
-                  <small class="float-right">
-                    <a class="text-primary pointer preLink" @click.prevent='searchByUser(item._meta.username)' >
-                      <registry-image :username="item._meta.username"></registry-image>
-                      </i> <span v-text='item._meta.username'></span>
-                    </a>
-                  </small>
-                </div>
-                <div class="d-flex justify-content-between">
-                  <div class="p-1 flex-fill" >
-                    <div class="mainBackDarkFade text-light badge w-100 text-left">Classes</div>
-                    <div v-if="item.clses">
-                      <registry-list :list='item.clses' :slug="item._meta.slug"></registry-list>
-                    </div>
-                  </div>
-                  <div class="p-1 flex-fill" >
-                    <div class="mainBackLightFade text-light badge w-100 text-left">Properties</div>
-                    <div v-if="item.props">
-                      <registry-list :list='item.props' :slug="item._meta.slug"></registry-list>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            </template>
-            <li v-if="!registry.length" class="text-center text-muted list-group-item">
-              No Results
-            </li>
-          </ul>
-          <div class="bg-light">
-            <div class="row">
-              <nav class="m-auto ">
-                <ul class="pagination m-2">
-                  <li class="page-item" :class="{ disabled: page <= 1 }">
-                    <a class="page-link" @click.prevent="prevPage()">&lt;</a>
-                  </li>
-                  <li class="page-item" :class="{ active: page == n, blue: page == n, 'white-text': page == n  }" v-for="n in pages">
-                    <a href="#" class="page-link" @click.prevent="page = n" v-text="n"></a>
-                  </li>
-                  <li class="page-item" :class="{ disabled: page >= pages }">
-                    <a class="page-link" @click.prevent="nextPage()">&gt;</a>
-                  </li>
-                </ul>
-              </nav>
-              <div class="col-sm-12 right-align form-group">
-                <select class="perPage form-control form-control-sm w-50 m-auto" v-model="perPage" @change="calculatePages" id="perPage">
-                    <option value="" disabled selected>Shown Per Page</option>
-                    <option value="20">20 per page</option>
-                    <option value="50">50 per page</option>
-                    <option value="100">100 per page</option>
-                </select>
-              </div>
-            </div>
+          <div class="col-sm-12 col-md-6 p-3">
+            <h1 class="mb-4">JOIN US</h1>
+            <a class="d-block" target="_blank" href=""></a>
+            <a class="d-block" target="_blank" href=""></a>
+            <dl>
+              <dt>
+                <img src="/static/img/gh.png" width="40px" alt="logo"/>
+                <br />
+                <a class="mainTextDark" target="_blank" href="https://github.com/data2health/rdp-portal"> Reusable Data best practice portal (rdp-portal)</a>
+              </dt>
+              <dd class="lighter">
+                Contribute to our reserach on GitHub
+              </dd>
+              <dt>
+                <img src="/static/img/slack.png" width="40px" alt="logo"/>
+                <br />
+                <a class="mainTextDark" target="_blank" href="https://cd2h.slack.com/messages/CEY05KLPM "> Slack Channel #Metadata</a>
+              </dt>
+              <dd class="lighter">
+                Join the conversation and our biweekly meetings
+              </dd>
+              <dt>
+                <img src="/static/img/gg.png" width="40px" alt="logo"/>
+                <br />
+                <a class="mainTextDark" target="_blank" href="mailto:cd2h-metadata@googlegroups.com "> Google Group</a>
+              </dt>
+              <dd class="lighter">
+                Join our group and learn more!
+              </dd>
+            </dl>
           </div>
         </div>
       </div>
-    </div> -->
+    </div>
 
     <div class="modal fade" id="schemaOrgModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -284,6 +204,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 <script src="./static/js/lodash.js"></script>
+<script src="./static/js/tour.js"></script>
 <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
 <script src="./static/js/logo.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
@@ -430,6 +351,56 @@ var app = new Vue({
         }
       },
       methods:{
+        startTour(){
+          console.log('tour happening')
+          let tour = new Shepherd.Tour({
+            defaultStepOptions: {
+              classes: 'shadow-md bg-purple-dark',
+              scrollTo: true,
+              highlightClass:'glowTour',
+              showCancelLink: true,
+            },
+            useModalOverlay: true
+          });
+
+          tour.addStep('step1', {
+            title: 'Data Reusability and Discovery',
+            text: 'If you have a dataset, and want to share it properly, so that others can find it, use it for their research and attribute your work properly.',
+            attachTo: '#bestPractices bottom',
+            advanceOn: 'click',
+            scrollTo: true,
+            buttons: [
+              {
+                text: 'Next',
+                action: tour.next,
+                classes:'themeButton text-light'
+              }
+            ]
+          });
+
+          tour.addStep('step1', {
+            title: 'Schema Interopeabilty',
+            text: 'If you are starting a new project, and want to plan ahead, so that the data coming out of your project will be FAIR (Findable, Accessible, Interopeable, Reusable) from the beginning.',
+            attachTo: '#schemaPlayground bottom',
+            advanceOn: 'click',
+            scrollTo: true,
+            buttons: [
+              {
+                text: 'Back',
+                action: tour.back,
+                classes:'themeButton text-light'
+              },
+              {
+                text: 'Next',
+                action: tour.next,
+                classes:'themeButton text-light'
+              }
+            ]
+          });
+
+          tour.start();
+
+        },
         searchByUser(username){
           var self = this;
 
@@ -790,14 +761,14 @@ var app = new Vue({
         document.getElementById("animation_container").addEventListener('click', function(){
 					init();
 				})
-      }
+      },
+
     },
     mounted:function(){
       this.reqFile();
       this.search();
       this.checkLoggedUser();
       this.initAnimation();
-
     },
     created: function(){
       this.getAvailableClasses();
