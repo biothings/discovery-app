@@ -40,8 +40,10 @@ class RegistryHandler(BaseHandler):
         meta = Metadata(username=self.current_user.get(
             'login'), url=url, slug=slug)
         schema = Schema(_meta=meta, props=props, clses=clses)
-        res = schema.save()
-        self.return_json({'success': res})
+        created = schema.save()
+        res = {'success': True,
+               'url': self.request.full_url() + schema.meta.id}
+        self.return_json(res, status_code=200+int(created))
 
     def get(self, api_id):
         ''' Retrive a document by es field _id '''
