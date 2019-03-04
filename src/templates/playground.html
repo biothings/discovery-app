@@ -7,23 +7,18 @@
 <div id="playground" class="container" style="min-height: 70vh;padding-top:60px;">
   <div class="jumbotron animatedBack text-center mt-5">
     <h1 class="text-light">SCHEMA PLAYGROUND</h1>
+    <small class="text-light">(Work in Progress)</small>
   </div>
   <div class="jumbotron text-muted text-center">
-    <h3>CUSTOMIZE AND HOST YOUR OWN METADATA SCHEMA</h3>
-    <p>Copy the <b>raw</b> link to your data and paste it here</p>
-    <img src="/static/img/raw.gif" alt="Copy Raw Link" width="300px"/>
+    <h1>IF YOU HAVE A SCHEMA</h1>
+    <p>Use this tool to load your schema to visualize it</p>
     <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
       <div class="form-group">
         <label for="urlform">Paste your URL here:</label>
         <input style="margin:auto;" data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="on" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
         <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
       </div>
-      <!-- <div v-if="suggestedURL" class="alert alert-warning">
-        <p>We noticed that was not a GitHub raw data link.<br /> We have converted it to: </p>
-        <p><a style="word-break: break-all;" target="_blank" class="small" :href="suggestedURL" v-text="suggestedURL"></a></p>
-        <button class="btn btn-warning text-light pointer" @click.prevent="input = suggestedURL">Use this link</button>
-      </div> -->
-      <small class="badge badge-pill badge-secondary pointer mr-1"
+      <!-- <small class="badge badge-pill badge-secondary pointer mr-1"
       @click="input = 'https://schema.org/Dataset.jsonld'">
         <i class="fas fa-question-circle" data-tippy="Schema.org Dataset"></i> Example URL
       </small>
@@ -38,13 +33,16 @@
       <small class="badge badge-pill badge-warning pointer mr-1"
       @click="input = 'https://github.com/data2health/schemas/blob/master/Dataset/Dataset.jsonld'">
         <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> Example URL
-      </small>
-      <small class="badge badge-pill badge-primary pointer mr-1"
+      </small> -->
+      <small class="badge badge-pill badge-secondary pointer mr-1"
       @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
         <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> Example URL Multiple
       </small>
     </form>
   </div>
+</div>
+<div class="container">
+  {% include "registry.html" %}
 </div>
 
 {% endblock %}
