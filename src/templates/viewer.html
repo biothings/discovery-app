@@ -39,7 +39,7 @@
       <template v-if="availableClasses.length>20">
         <ul class="list-group">
           <li class="list-group-item mainBackDark text-light text-center">
-            Schemas
+            Classes
           </li>
           <li class="list-group-item">
             <select @change='handleChange' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
@@ -103,7 +103,7 @@
     <!-- IF NO QUERY -->
     <div v-if="!query" class="col-sm-9">
       <div v-if="!registered" class="alert alert-info w-100 padding20 text-center">
-        <h3>Register this dataset?</h3>
+        <h3>Register this schema?</h3>
         <button v-if="!slugRegistered" data-toggle="modal" data-target="#registration" class="btn themeButton text-light" > Register Now</button>
       </div>
       <div class="padding20">
@@ -128,6 +128,7 @@
           </div>
         </form>
         <h1 class="text-muted">Alphabetical</h1>
+        <!-- <div id="canvas2"></div> -->
         <ul class="pagination" style="overflow-x: scroll;">
           <li class="page-link" v-for="(item,i) in availableClassesNames">
             <a :href="'#'+item.group" v-text="item.group"></a>
@@ -146,7 +147,6 @@
       </div>
       <div v-else>
         <h1 class="text-muted">Hierarchical</h1>
-        <div id="canvas2"></div>
         <ul class="pagination">
           <li class="d-inline bg-0" style="width:20px; height:20px" >
           </li>
