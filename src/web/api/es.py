@@ -17,7 +17,6 @@ connections.create_connection(hosts=['localhost'], timeout=20)
 class Metadata(InnerDoc):
     """
     The metadata of a schema in discovery-app.
-    Required fields include: a username and an URL (url).
     """
     slug = Keyword(required=True)
     username = Text(fields={'keyword': Keyword()}, required=True)
@@ -39,7 +38,6 @@ class Schema(Document):
     props = Text(multi=True)
     _meta = Object(Metadata, required=True)
 
-    #pylint:disable=too-few-public-methods
     class Index:
         ''' Associated ES index information '''
         name = 'discovery'
