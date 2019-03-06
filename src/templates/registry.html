@@ -265,6 +265,7 @@ var app = new Vue({
             return finalFilters;
         },
         search(query){
+          console.log('search happening')
           var self = this;
 
           query = query || "__all__";
@@ -291,6 +292,7 @@ var app = new Vue({
             axios.get('/api/query?size=100', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
+              console.log('reg length',self.registry.length)
               // mark results, doc must be loaded
               $( document ).ready(function() {
                 self.mark(self.query);
