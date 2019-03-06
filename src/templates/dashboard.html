@@ -19,81 +19,149 @@
   .dashboardUserBox img{
     border:2px solid var(--light)
   }
-</style>
-<div id="dashboard" class="container" style="min-height: 70vh;padding-top:80px;">
-  <h1 class="text-muted">My Dashboard</h1>
-  <div class="jumbotron">
-    <div class="row">
-      <div class="col-sm-2 text-center">
-        <div class="bg-secondary padding20 dashboardUserBox">
-          <img class="circle" :src="user.avatar_url" width="80%" alt="logo" style="max-width:200px;"/>
-          <p class="text-light mt-4"  v-text="user.name" v-text="user.name"></p>
-          <a data-tippy="Go to GitHub profile" class="badge badge-light" v-text="'@'+user.login" target="_blank" :href="'http://www.github.com/'+user.login">
-          </a>
-        </div>
-      </div>
-      <div class="col-sm-10">
-        <div>
-          <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Datasets
-        </div>
-        <table class="table">
-          <thead class="bg-secondary text-light">
-            <tr>
-              <th scope="col">Slug</th>
-              <th scope="col">Source URL</th>
-              <th scope="col">View</th>
-              <th scope="col">Download</th>
-              <th scope="col">Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template v-if="dashboard && dashboard.length">
-              <tr v-for="item in dashboard">
-                <td>
-                  <span class="status bg-success" ></span> <a target="_blank" :href="item.url" v-text="item._meta.slug"></a>
-                </td>
-                <td>
-                  <a target="_blank" :href="item._meta.url" :title="item._meta.url">
-                    Link <i class="fas fa-external-link-alt"></i>
-                  </a>
-                </td>
-                <td>
-                  <a role="button" :href="'/'+item._meta.slug+'/'" class="btn btn-outline-secondary up">
-                    Visualize
-                  </a>
-                </td>
-                <td>
-                  <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Download
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                      <a class="dropdown-item" href="#">JSON-LD</a>
-                      <a class="dropdown-item" href="#">YAML</a>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <button @click.prevent="deleteSelected(item._meta.slug,item._id)" class="btn btn-outline-secondary fill">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </template>
-            <template v-else>
-              <tr>
-                <td colspan="6" class="text-center text-muted">
-                  No Contributions Yet
-                </td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
 
+  .clip{
+    height: 50px;
+    width: 100%;
+    bottom: 0;
+    -webkit-clip-path: polygon(0 93%, 100% 0, 100% 100%, 0% 100%);
+    clip-path: polygon(0 93%, 100% 0, 100% 100%, 0% 100%);
+  }
+
+  .dashPic{
+    background-position: top center !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
+    background: var(--secondary);
+  }
+
+  .userInfo{
+    box-shadow: -5px 2px 10px grey;
+    border-bottom: 10px solid var(--main);
+  }
+</style>
+<section id="dashboard">
+  <div  class="container" style="min-height: 70vh;padding-top:80px;">
+    <h1 class="text-muted caps">My Dashboard</h1>
+    <div class="dashboard">
+      <div class="row">
+        <div class="col-sm-2 p-0 userInfo">
+          <div class="pRelative">
+            <img :src="user.avatar_url" width="100%" alt="logo" style="z-index:1"/>
+            <div class="clip bg-secondary pAbsolute" style="z-index:2"></div>
+          </div>
+          <div class="bg-secondary text-light p-3 text-center">
+            <template v-if="user && user.name">
+              <p class="text-light mt-4 lighter"  v-text="user.name" v-text="user.name"></p>
+            </template>
+            <a class="text-light link"  target="_blank" :href="'http://www.github.com/'+user.login">
+              <i class="fab fa-github"></i> <span v-text="user.login"></span>
+            </a>
+          </div>
+        </div>
+        <div class="col-sm-10">
+          <div class="mt-3 text-muted lighter">
+            <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Datasets
+          </div>
+          <table class="table">
+            <thead class="bg-light text-muted">
+              <tr>
+                <th scope="col" class="lighter">Slug</th>
+                <th scope="col" class="lighter">Source URL</th>
+                <th scope="col" class="lighter">View</th>
+                <!-- <th scope="col">Download</th> -->
+                <th scope="col" class="lighter">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-if="dashboard && dashboard.length">
+                <tr v-for="item in dashboard">
+                  <td>
+                    <a target="_blank" :href="'/'+item._meta.slug">
+                      <h4 v-text="item._meta.slug" class="d-inline"></h4>
+                    </a>
+                    <button style="zoom:.7" class="btn btn-secondary btn-sm" @click="selectedItem = item" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i> Edit</button>
+                  </td>
+                  <td>
+                    <a target="_blank" :href="item._meta.url" :title="item._meta.url">
+                      Link <i class="fas fa-external-link-alt"></i>
+                    </a>
+                  </td>
+                  <td>
+                    <a role="button" :href="'/'+item._meta.slug+'/'" class="btn btn-outline-secondary up">
+                      Visualize
+                    </a>
+                  </td>
+                  <!-- <td>
+                    <div class="dropdown">
+                      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Download
+                      </button>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#">JSON-LD</a>
+                        <a class="dropdown-item" href="#">YAML</a>
+                      </div>
+                    </div>
+                  </td> -->
+                  <td>
+                    <button @click.prevent="deleteSelected(item._meta.slug,item._id)" class="btn btn-outline-secondary fill">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              </template>
+              <template v-else>
+                <tr>
+                  <td colspan="6" class="text-center text-muted">
+                    No Contributions Yet
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header p-1" >
+            <!-- <h5 class="modal-title" id="exampleModalLabel">Edit</h5> -->
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" v-if="selectedItem">
+            <form>
+              <div class="form-group">
+                <small>
+                  Enter your new slug then hit Save.
+                </small>
+                <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="slugInput" v-model='slugInput'></textarea>
+                <template v-if="availableSlug && slugInput.length">
+                  <small class="text-success bold"><i class="fas fa-check"></i> AVAILABLE</small>
+                </template>
+                <template v-if="!availableSlug && slugInput.length">
+                  <small class="text-danger bold"><i class="fas fa-times"></i> NOT AVAILABLE</small>
+                </template>
+                <template v-if="invalidChars">
+                  <br />
+                  <small class="text-warning bold"><i class="fas fa-times"></i> INVALID CHARACTERS</small>
+                </template>
+                <hr />
+                <p class="m-2" :class="[availableSlug ? 'mainTextDark' : 'text-danger']">
+                  discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
+                </p>
+              <button v-if="availableSlug && slugInput.length" type="submit" class="btn themeButton text-light mt-3">Save</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 {% endblock %}
 {% block extra_scripts %}
@@ -107,11 +175,41 @@ var app = new Vue({
 				return {
           user:{},
           dashboard:[],
-          dashboardTotal:"0"
+          dashboardTotal:"0",
+          selectedItem:{},
+          slugInput:'',
+          availableSlug: false,
+          invalidChars : false
 				}
 			},
       watch:{
+        slugInput: function(newInput, oldInput){
+          console.log('checking..', newInput)
+          var self = this;
+          self.slugInput = self.slugInput.toLowerCase();
 
+
+          var re = /^[a-zA-Z0-9_.-]*$/;
+          if (!re.test(newInput) ) {
+            self.invalidChars = true;
+          }else{
+            self.invalidChars = false;
+          }
+
+          if (newInput && !self.invalidChars) {
+            axios.get(`/api/query?q=_meta.slug:`+self.slugInput).then(function (response) {
+              console.log('slug check',response.data,newInput)
+              if (response.data.total) {
+                self.availableSlug= false;
+              }else{
+                self.availableSlug= true;
+              }
+            });
+          }
+        },
+        selectedItem:function(n,o){
+          console.log('new',n);
+        }
       },
 			methods:{
         deleteSelected(name,id){

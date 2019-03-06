@@ -17,6 +17,10 @@
 
       <div class="jumbotron animatedBack text-center mt-5">
         <h1 class="text-light">DISCOVERY GUIDE</h1>
+        <p class="lighter text-light">
+          Need Help?
+        </p>
+        <button id="demo" class="btn btn-outline-light" @click="startTour()">Click Here</button>
       </div>
       <p class="text-muted">
         Make your data more findable using this guide.
@@ -30,7 +34,7 @@
             Here's a few suggestions where you may host your dataset:
           </p>
           <hr />
-          <ul class="list-group col-sm-6" style="margin:0 auto;">
+          <ul id="host" class="list-group col-sm-6" style="margin:0 auto;">
             <li class="list-group-item">
               <a href="https://dataverse.org/" target="_blank">
                 <img width="220px" src="https://dataverse.org/files/dataverseorg/files/dataverse_r_project.png" alt="Dataverse"/>
@@ -62,7 +66,11 @@
               </div>
               <small class="badge badge-pill badge-secondary pointer"
               @click="link = 'https://figshare.com/articles/Should_we_treat_patients_with_only_one_set_of_positive_blood_cultures_for_extensively_drug-resistant_i_Acinetobacter_baumannii_i_the_same_as_multiple_sets_/5187139'">
-                <i class="fas fa-question-circle"></i> Example URL
+                <i class="fas fa-question-circle"></i> FigShare Example
+              </small>
+              <small class="badge badge-pill badge-secondary pointer"
+              @click="link = 'https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/XD1A6B'">
+                <i class="fas fa-question-circle"></i> Dataverse Example
               </small>
             </form>
             <div>
@@ -343,129 +351,10 @@
               <div class="form-group bg-secondary">
                 <label for="progressCode">Dataset Metadata</label>
                 <pre class="margin20 text-left font-weight-bold" style="height:50vh" id="progressCode"></pre>
-                <!-- <textarea :disabled='!editCodeMode' class="form-control margin20" id="progressCode" rows="20"></textarea> -->
-                <!-- <button @click="editCodeMode = !editCodeMode" class="btn text-secondary btn-light" role="button">
-                  <span v-if='!editCodeMode'>Locked <i class="fas fa-lock"></i></span>
-                  <span v-else>Unlocked <i class="fas fa-lock-open"></i></span>
-                </button> -->
               </div>
-              <!-- <div>
-                <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light" @click.prevent='validate("metadataForm")' value="Submit">
-                <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
-              </div> -->
             </div>
           </div>
       </template>
-
-      <!-- <template>
-        <div class="jumbotron text-muted">
-          <h2>Metadata</h2>
-          <small>(*Required)</small>
-          <p class="col-sm-6" style="margin: 0 auto;">
-            Fill out or edit your metadata.
-          </p>
-          <p>
-            <a data-tippy="Load Cancer FigShare Example" href="#" class="badge badge-pill badge-secondary pointer mt-2 p-2" @click.prevent="loadExample('./static/misc/cancer.jsonld')"><i class="fas fa-question-circle"></i> Load Example</a>
-          </p>
-          <hr />
-          <form id="metadataForm" autocomplete="off" class="col-sm-6" style="margin: 0 auto;">
-            <div class="form-group row">
-              <label for="name" class="col-sm-2 col-form-label col-form-label-sm">
-                Name* <br />
-                <i class="fas fa-question-circle" data-tippy="A descriptive name of a dataset."></i>
-              </label>
-              <div class="col-sm-10">
-                <input autocomplete="off" v-model="metadata.name" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="name" placeholder="Enter text here" required="">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="description" class=" col-form-label col-form-label-sm">
-                Description* <br />
-                <i class="fas fa-question-circle" data-tippy="A short summary describing a dataset."></i>
-              </label>
-              <textarea required="" rows="7" v-model="metadata.description" class="form-control" id="description" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
-              <div class="col-sm-12 text-center">
-                <small><span v-text="metadata.description.length">0</span> Characters</small>
-              </div>
-            </div>
-            <div class="form-group row">
-              <label for="keywords" class="col-sm-2 col-form-label col-form-label-sm">
-                Keywords <br />
-                <i class="fas fa-question-circle" data-tippy="Keywords summarizing the dataset."></i>
-              </label>
-              <div class="col-sm-9">
-                <input ref="keywordInput" autocomplete="off" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="keywords" placeholder="Enter new keyword here">
-              </div>
-              <div class="col-sm-1">
-                <button @click.prevent="addKeyword" class="btn btn-secondary btn-sm"><i class="fas fa-plus-circle"></i></button>
-              </div>
-              <div id="keywords">
-                <template v-for="text in keywords">
-                  <span @click="removeKeyword(text)" data-tippy-placement="bottom" data-tippy="Remove" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
-                  </span>
-                </template>
-              </div>
-            </div>
-            <div class="form-group row">
-              <label for="version" class="col-sm-2 col-form-label col-form-label-sm">
-                Version* <br />
-                <i class="fas fa-question-circle" data-tippy="The version number for the dataset."></i>
-              </label>
-              <div class="col-sm-10">
-                <input autocomplete="off" v-model="metadata.version" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="version" placeholder="Enter text here" required="">
-              </div>
-            </div>
-            <div class="form-group row">
-              <label for="url" class="col-sm-2 col-form-label col-form-label-sm">
-                URL* <br />
-                <i class="fas fa-question-circle" data-tippy="Location of a page describing the dataset."></i>
-              </label>
-              <div class="col-sm-10">
-                <input autocomplete="off" v-model="metadata.url" data-parsley-trigger="change" type="url" class="form-control form-control-sm" id="url" placeholder="Enter URL here" required="">
-              </div>
-            </div>
-            <div class="form-group row">
-              <label for="SameAs" class="col-sm-2 col-form-label col-form-label-sm">
-                Same As* <br />
-                <i class="fas fa-question-circle" data-tippy="A link to a page that provides more information about the same dataset, usually in a different repository."></i>
-              </label>
-              <div class="col-sm-10">
-                <input autocomplete="off" v-model="metadata.sameAs" data-parsley-trigger="change" type="url" class="form-control form-control-sm" id="SameAs" placeholder="Enter URL here" required="">
-              </div>
-            </div>
-            <div class="form-group row">
-              <label for="variablesMeasured" class="col-sm-2 col-form-label col-form-label-sm">
-                Variables Measured <br />
-                <i class="fas fa-question-circle" data-tippy="The variable that this dataset measures. For example, temperature or pressure."></i>
-                <i class="fas fa-info-circle text-info" data-tippy="The variableMeasured property is proposed and pending standardization at schema.org."></i>
-              </label>
-              <div class="col-sm-10">
-                <input autocomplete="off" v-model="metadata.variablesMeasured" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="variablesMeasured" placeholder="Enter text here">
-              </div>
-            </div>
-            <div class="form-group row">
-              <label for="license" class="col-sm-2 col-form-label col-form-label-sm">
-                License* <i class="fas fa-question-circle pointer" @click.prevent="scrollTo('licenseForm')" data-tippy="Get help choosing the right license"></i>
-              </label>
-              <div class="col-sm-10">
-                <input required="" disabled v-model="licenseAbbreviation" v-model="metadata.license" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="license" placeholder="Use License Chooser Tool">
-              </div>
-            </div>
-
-            <template v-if="otherFields.length">
-              <div class="text-muted mb-3 alert alert-secondary">
-                <small>Other Fields Found:</small>
-                <span class="badge badge-secondary mr-1" v-for="field in otherFields" v-text="field"></span>
-              </div>
-            </template>
-
-            <div>
-              <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light" @click.prevent='validate("metadataForm")' value="Submit">
-              <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
-            </div>
-          </form>
-        </div>
-      </template> -->
 
       <template>
         <div id="result" class="jumbotron text-muted">
@@ -507,6 +396,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="./static/js/lodash.js"></script>
 <script src="./static/js/renderjson.js"></script>
+<script src="./static/js/tour.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
@@ -560,6 +450,81 @@ var app = new Vue({
         }
       },
       methods:{
+        startTour(){
+          console.log('tour happening')
+          let tour = new Shepherd.Tour({
+            defaultStepOptions: {
+              classes: 'shadow-md bg-purple-dark',
+              scrollTo: true,
+              highlightClass:'glowTour',
+              showCancelLink: true,
+            },
+            useModalOverlay: true
+          });
+
+          tour.addStep('step1', {
+            title: 'Host Your Metadata',
+            text: "Here is a list of sites where you can host your dataset and metadata",
+            attachTo: {element: '#host', on: 'bottom'},
+            advanceOn: 'click',
+            scrollTo: true,
+            buttons: [
+              {
+                text: 'Next',
+                action: tour.next,
+                classes:'themeButton text-light'
+              }
+            ]
+          });
+
+          tour.addStep('step2', {
+            title: 'Is your dataset already hosted?',
+            text: "Use this tool to load help us load your metadata information",
+            attachTo: '#linkForm bottom',
+            advanceOn: 'click',
+            scrollTo: true,
+            buttons: [
+              {
+                text: 'Next',
+                action: tour.next,
+                classes:'themeButton text-light'
+              }
+            ]
+          });
+
+          tour.addStep('step3', {
+            title: 'Choose a License',
+            text: "Answer a few questions to determine what your license type is.",
+            attachTo: '#licenseForm bottom',
+            advanceOn: 'click',
+            scrollTo: true,
+            buttons: [
+              {
+                text: 'Next',
+                action: tour.next,
+                classes:'themeButton text-light'
+              }
+            ]
+          });
+
+          tour.addStep('step3', {
+            title: 'Metadata',
+            text: "Don't have metadata? Use this form to start creating it OR use this form to update and fill out metadata fields loaded from your link.",
+            attachTo: '#metadataForm bottom',
+            advanceOn: 'click',
+            scrollTo: true,
+            buttons: [
+              {
+                text: 'Next',
+                action: tour.next,
+                classes:'themeButton text-light'
+              }
+            ]
+          });
+
+          tour.start();
+
+        },
         renderProgress(){
           // var str = JSON.stringify(this.metadata, null, 2);
           // var progressCode = str;
@@ -776,7 +741,6 @@ var app = new Vue({
         requestPageHTML(url){
           var self = this;
           self.loadingOn();
-          //https://multiverso.me/AllOrigins/
           //http://api.allorigins.ml/get?url=
           // Gets around the CORS blocking issue
           $.getJSON('http://api.allorigins.ml/get?url='+encodeURIComponent(url)+'&callback=?', function(data){        	// console.log(data)

@@ -101,7 +101,7 @@
 
     </div>
     <!-- IF NO QUERY -->
-    <div v-if="!query" class="col-sm-9">
+    <div v-if="!query" class="col-sm-9 mb-5">
       <div v-if="!registered" class="alert alert-info w-100 padding20 text-center">
         <h3>Register this schema?</h3>
         <button v-if="!slugRegistered" data-toggle="modal" data-target="#registration" class="btn themeButton text-light" > Register Now</button>
@@ -425,7 +425,15 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body text-muted text-center">
+        <div v-if="urlRegistered" class="modal-body p-5 alert alert-warning">
+          <p class="w-75 m-auto">
+            <i class="fas fa-exclamation-circle text-warning"></i> This URL has already been registered.
+          </p>
+          <p class="w-75 m-auto">
+            Please use your <a href="/dashboard">dashboard</a> to make changes.
+          </p>
+        </div>
+        <div v-else class="modal-body text-muted text-center">
           <template v-if="userInfo.login">
             <form id="registrationForm">
               <div class="form-group row">
@@ -461,11 +469,6 @@
                   <input required="" type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="dataSetURL">
                 </div>
               </div>
-              <div v-if="urlRegistered" class="p-2 alert alert-warning">
-                <small>
-                  <i class="fas fa-exclamation-circle text-danger"></i> This URL has already been registered. Registering this slug will overrride the previsouly registered slug and data associated with it.
-                </small>
-              </div>
               <div class="form-group row">
                 <label class="col-sm-4 col-form-label" for="exampleFormControlSelect1">Classes (<span class="text-success" v-text="allAvailableClasses.length"></span>)</label>
                 <div class="col-sm-8">
@@ -487,16 +490,15 @@
                 </div>
               </div>
               <div class="mb-4">
-                <button @click.prevent="handleSubmit()" class="btn themeButton pulse text-light" :disabled="!availableSlug && slugInput">Submit</button>
+                <button v-if="!registered" @click.prevent="handleSubmit()" class="btn themeButton pulse text-light" :disabled="!availableSlug && slugInput">Submit</button>
                 <button v-if="registered" type="button" class="btn btn-danger" data-dismiss="modal" aria-label="Close">
                   Close
                 </button>
               </div>
-              <div v-if="registered" class="mainBackDark text-light p-5">
-                <p >
-                  Your data has been added to the registry.
+              <div v-if="registered" class="bg-success text-light p-5">
+                <p>
+                  Your schema has been added to the registry.
                 </p>
-                <a class="btn themeButton text-light pointer" :href="'/#registry'" >Registry</a>
               </div>
             </form>
           </template>
@@ -647,7 +649,7 @@ var app = new Vue({
                   toast: true,
                   position: 'bottom',
                   title: 'Registration Successful',
-                  text: "Data can now be accessed on "+window.location.origin+"/"+self.slugInput
+                  html: "Data can now be accessed on <a href='/"+self.slugInput+"/'>"+window.location.origin+"/"+self.slugInput+"</a>"
                 });
                 self.registered = true;
 
