@@ -2,8 +2,8 @@
 
 import tornado
 
-from ..handlers import BaseHandler
-from .es import Metadata, Schema
+from web.handlers import BaseHandler
+from web.api.doc import Metadata, Schema
 
 # pylint: disable=abstract-method, arguments-differ
 class RegistryHandler(BaseHandler):
