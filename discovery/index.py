@@ -1,10 +1,11 @@
 ''' Tornado Web Server Starting Script - Application Entry Point '''
 
-import os.path
+import os
 
-import config
 from biothings.web.index_base import main
 from biothings.web.settings import BiothingESWebSettings
+
+from . import config
 
 WEB_SETTINGS = BiothingESWebSettings(config=config)
 
