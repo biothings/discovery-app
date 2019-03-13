@@ -2,12 +2,13 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # C extensions
 *.so
 
-src/config_key.py
-*.pyc
+# Credentials
+discovery/config_key.py
 
 # Distribution / packaging
 .Python
@@ -105,3 +106,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Dev fixture
+biothings
+elasticsearch_dsl
