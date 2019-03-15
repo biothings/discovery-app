@@ -1,36 +1,35 @@
 '''
 Automated testing for discovery-app
     > python tests.py
-or  > nosetests tests
 '''
 import difflib
 import os
 
-import nose
 import requests
+from nose.core import runmodule
 from nose.tools import eq_, ok_
 from tornado.web import Application, create_signed_value
 from torngithub import json_encode
 
 from biothings.tests.test_helper import (BiothingsTestCase,
                                          TornadoTestServerMixin)
-from biothings.utils.common import ask
 from biothings.web.settings import BiothingESWebSettings
-from config_key import COOKIE_SECRET
+from discovery import config
+from discovery.web.api.es.doc import Metadata, Schema
 from elasticsearch_dsl import Index
-from web.api.es.doc import Metadata, Schema
 
-WEB_SETTINGS = BiothingESWebSettings(config='config')
+WEB_SETTINGS = BiothingESWebSettings(config=config)
+COOKIE_SECRET = 'Discovery Tests'
+
 
 class DiscoveryAppAPITest(TornadoTestServerMixin, BiothingsTestCase):
     '''
         The tester will start its own tornado server
-        if a file named "FORCE_TEST" exists in the app folder
-        existing index could be replaced without warning
+        existing 'discovery' will be overwitten
     '''
     __test__ = True
 
-    host = os.getenv("DISCOVERY_host", "").rstrip('/')
+    host = os.getenv("DISCOVERY_HOST", "").rstrip('/')
     api = host + '/api'
 
     def get_app(self):
@@ -41,17 +40,14 @@ class DiscoveryAppAPITest(TornadoTestServerMixin, BiothingsTestCase):
     @classmethod
     def setUpClass(cls):
 
-        cls.index = Index(Schema.Index.name)
+        cls.index = Index('discovery')
 
+        # remove existing index
         if cls.index.exists():
-            if os.path.isfile('FORCE_TEST') \
-                    or ask('Current indexed documents will be permenantely lost.') == 'Y':
-                cls.index.delete()
-            else:
-                exit()
+            cls.index.delete()
 
         # create new index as defined in Schema class
-        Schema.init()
+        Schema.init(index='discovery')
 
         # test dataset
         cls.testset = []
@@ -72,25 +68,21 @@ class DiscoveryAppAPITest(TornadoTestServerMixin, BiothingsTestCase):
         schema.save()
         cls.testset.append(schema)
 
-    @classmethod
-    def tearDownClass(cls):
-        pass
-        cls.index.delete()
-        Schema.init()
-
     # Helper functions
 
-    def secure_post_status_match(self, url, body, status_code, headers):
+    def post_status_match(self, url, params, status_code, add_headers=None):
         ''' make an authenticated POST request and return json if the status codes match '''
         cookie_name, cookie_value = 'user', {'login': 'tester'}
         secure_cookie = create_signed_value(
             COOKIE_SECRET,
             cookie_name,
             json_encode(cookie_value))
-        authenticated_headers = {'Content-type': 'application/json',
-                                 'Cookie': '='.join((cookie_name, secure_cookie.decode()))}
-        authenticated_headers.update(headers)
-        return self.post_status_match(url, body, status_code, authenticated_headers)
+        authenticated_headers = {
+            'Cookie': '='.join((cookie_name, secure_cookie.decode())),
+            'Content-Type': 'application/json'}
+        if add_headers:
+            authenticated_headers.update(add_headers)
+        return super().post_status_match(url, params, status_code, authenticated_headers)
 
     # Tests
 
@@ -126,7 +118,7 @@ class DiscoveryAppAPITest(TornadoTestServerMixin, BiothingsTestCase):
     def test_05_handlers_registry_get(self):
         ''' asserts get request to registry retrives documents
         acknowledges timestamp will not be in datetime format in res'''
-        res = self.get_json_ok(self.host+'/registry/'+self.testset[0].meta.id)
+        res = self.get_json_ok(self.api+'/registry/'+self.testset[0].meta.id)
         eq_(res['_meta']['url'], self.testset[0].to_dict()['_meta']['url'])
 
     def test_06_handlers_registry_post(self):
@@ -140,20 +132,25 @@ class DiscoveryAppAPITest(TornadoTestServerMixin, BiothingsTestCase):
                  'slug': 'org',
                  'props': ['cvs'],
                  'clses': ['costco', 'MTS']}
-        ok_(self.post_json_ok(self.host+'/registry', data=doc_1)['success'])
-        ok_(self.post_json_ok(self.host+'/registry', data=doc_2)['success'])
+        # create documents
+        ok_(self.json_ok(self.post_status_match(self.api+'/registry', doc_1, 201))['success'])
+        ok_(self.json_ok(self.post_status_match(self.api+'/registry', doc_2, 201))['success'])
+        # verify created
+        self.query_has_hits('ebay')
         self.query_has_hits('MTS')
+        # modify a document
         doc_2['slug'] = 'us'
-        self.post_json_ok(self.host+'/registry', data=doc_2)
+        self.post_json_ok(self.api+'/registry', doc_2)
+        # verify modified
         self.query_has_hits('_meta.slug:us')
 
     def test_07_handlers_registry_delete(self):
         ''' asserts delete a document by its _id '''
         self.query_has_hits('es-dsl')
-        self.fetch(self.host+'/registry/' +
+        self.fetch(self.api+'/registry/' +
                    self.testset[0].meta.id, method='DELETE')
         self.query_missed('es-dsl')
 
 
 if __name__ == '__main__':
-    nose.run()
+    runmodule(argv=['', '--logging-level=INFO'])
