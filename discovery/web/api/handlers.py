@@ -2,10 +2,12 @@
 
 import tornado
 
-from web.handlers import BaseHandler
-from web.api.es.doc import Metadata, Schema
+from discovery.web.handlers import BaseHandler
+from discovery.web.api.es.doc import Metadata, Schema
 
 # pylint: disable=abstract-method, arguments-differ
+
+
 class RegistryHandler(BaseHandler):
     ''' POST ./api/registry
         GET ./api/registry/<api_id> '''
@@ -53,23 +55,18 @@ class RegistryHandler(BaseHandler):
     def put(self, api_id):
         ''' Update existing only '''
 
-
         sch = Schema.get(id=api_id)
         # check existance
-        
+
         # extract what to update
 
         # update and save
 
         # return response
 
-
-
-
-
         # Validate
         req = tornado.escape.json_decode(self.request.body)
-        url = req.get('url', '').lower() #TODO cannot edit url
+        url = req.get('url', '').lower()  # TODO cannot edit url
         slug = req.get('slug', '').lower()
         if not url or not slug:
             res = {'success': False,
@@ -77,13 +74,12 @@ class RegistryHandler(BaseHandler):
             self.return_json(res, status_code=400)
             return
 
-        
     def delete(self, api_id):
         ''' Delete a document by es _id '''
 
         if not self.current_user:
             res = {'success': False,
-                   'error': 'Login with your Github account first.'}            
+                   'error': 'Login with your Github account first.'}
             self.return_json(res, status_code=401)
 
         sch = Schema.get(id=api_id)
@@ -108,6 +104,7 @@ class ProxyHandler(BaseHandler):
         # input validation
         url = self.get_argument("url", "/")
         # fetch attempt
+
         async def f():
             http_client = tornado.httpclient.AsyncHTTPClient()
             try:
