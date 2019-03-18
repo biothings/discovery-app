@@ -2,7 +2,98 @@
 {% block content %}
 {% include "header.html" %}
 <style>
+.meterContainer{
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#45484d+0,000000+100;Black+3D+%231 */
+  background: rgb(69,72,77); /* Old browsers */
+  background: -moz-linear-gradient(top, rgba(69,72,77,1) 0%, rgba(0,0,0,1) 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+  border: 5px solid var(--sec);
+  box-shadow: -2px 2px 5px grey;
+  border-radius: 20px;
+  z-index: 2000;
+  position: fixed;
+  right: 20px;
+  top: 35%;
+  display: flex;
+  flex-direction: column;
+}
 
+.meterTextBox{
+  color: white;
+  flex: 1;
+  height: 40px;
+  text-align: center;
+  line-height:20px;
+  word-wrap: break-word;
+  padding: 10px;
+  font-weight: bold !important;
+  text-transform: uppercase;
+}
+
+.trophyBox{
+  flex: 1;
+}
+
+.meterBox{
+  flex: 1;
+  flex-basis: 120px;
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+  align-content: center;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+}
+
+
+
+.zoomHalf{
+  zoom:.5;
+}
+
+
+meter{
+  box-shadow:0px 0px 8px #5b5b5b;
+}
+
+.clipBox{
+  -webkit-clip-path: polygon(58% 0, 100% 0, 100% 100%, 0 100%, 0 49%);
+  clip-path: polygon(58% 0, 100% 0, 100% 100%, 0 100%, 0 49%);
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100px;
+  z-index: 2;
+  background: var(--sec);
+  text-align: center;
+  line-height: 100px;
+  color: white;
+  font-size: 2em;
+  text-transform: uppercase;
+  font-weight: lighter;
+}
+
+.stepBox{
+  position: relative;
+  width: 100%;
+  height: 100px;
+  background: var(--main);
+}
+
+.stepBox span{
+  color: white;
+  position: absolute;
+  padding: 2px 7px;
+  left:0;
+  top:0;
+  font-size: 2em;
+  font-weight: lighter;
+}
 
 </style>
 
@@ -12,24 +103,43 @@
     <img src="./static/img/ripple.svg"/>
   </div>
 
+  <div class="meterContainer">
+    <div class="meterTextBox">
+      <small>Discovery<br /> Meter</small>
+    </div>
+    <div class="meterBox">
+      <meter min="0" max="100" low="25" high="75" optimum="100" value="50">2 out of 10</meter>
+    </div>
+    <template v-if="achievements.length">
+      <div class="p-1 bg-muted trophyBox">
+        <small class="text-muted caps d-block text-center">Trophies</small>
+        <div class="m-1 d-inline zoomHalf" v-for="ach in achievements">
+          <i class="fas fa-trophy text-warning" :title='ach'></i>
+        </div>
+      </div>
+    </template>
+  </div>
+
   <div class="container">
     <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
 
       <div class="jumbotron animatedBack text-center mt-5">
         <h1 class="text-light">DISCOVERY GUIDE</h1>
-        <p class="lighter text-light">
-          Need Help?
-        </p>
-        <button id="demo" class="btn btn-outline-light" @click="startTour()">Click Here</button>
       </div>
       <p class="text-muted">
         Make your data more findable using this guide.
       </p>
 
       <template>
+        <div class="stepBox">
+          <span>1</span>
+          <div class="clipBox">
+            Host your Dataset Metadata
+          </div>
+        </div>
         <div class="jumbotron text-muted">
-          <div class="numberCircle mainBackLight">1</div>
-          <h3>Host your Dataset Metadata</h3>
+          <!-- <div class="numberCircle mainBackLight">1</div> -->
+          <!-- <h3>Host your Dataset Metadata</h3> -->
           <p class="col-sm-6" style="margin: 0 auto;">
             Here's a few suggestions where you may host your dataset:
           </p>
@@ -82,9 +192,15 @@
       </template>
 
       <template>
+        <div class="stepBox">
+          <span>2</span>
+          <div class="clipBox">
+            License Chooser*
+          </div>
+        </div>
         <div class="jumbotron text-muted">
-          <div class="numberCircle mainBackLight">2</div>
-          <h3>License Chooser*</h3>
+          <!-- <div class="numberCircle mainBackLight">2</div>
+          <h3>License Chooser*</h3> -->
           <small>(*Required)</small>
           <p class="col-sm-6" style="margin: 0 auto;">
             This tool helps you determine which Creative Commons License is right for you in a couple of easy steps.
@@ -227,11 +343,17 @@
       </template>
 
       <template>
+        <div class="stepBox">
+          <span>3</span>
+          <div class="clipBox">
+            Metadata
+          </div>
+        </div>
           <div class="flipcard">
             <div class="jumbotron text-muted face front">
               <button style="position:absolute; right: 10px; top:10px; transform: scale(.7);" class="btn btn-secondary" @click='flipView()'>Switch View</button>
-              <div class="numberCircle mainBackLight">3</div>
-              <h2>Metadata</h2>
+              <!-- <div class="numberCircle mainBackLight">3</div>
+              <h2>Metadata</h2> -->
               <small>(*Required)</small>
               <p class="col-sm-6" style="margin: 0 auto;">
                 Fill out or edit your metadata.
@@ -357,9 +479,15 @@
       </template>
 
       <template>
+        <div class="stepBox">
+          <span>4</span>
+          <div class="clipBox">
+            Code
+          </div>
+        </div>
         <div id="result" class="jumbotron text-muted">
-          <div class="numberCircle mainBackLight">4</div>
-          <h3>Code</h3>
+          <!-- <div class="numberCircle mainBackLight">4</div>
+          <h3>Code</h3> -->
           <p class="col-sm-6" style="margin: 0 auto;">
             Copy and paste this code in your site's HTML code.
           </p>
@@ -396,7 +524,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="./static/js/lodash.js"></script>
 <script src="./static/js/renderjson.js"></script>
-<script src="./static/js/tour.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
@@ -450,81 +577,6 @@ var app = new Vue({
         }
       },
       methods:{
-        startTour(){
-          console.log('tour happening')
-          let tour = new Shepherd.Tour({
-            defaultStepOptions: {
-              classes: 'shadow-md bg-purple-dark',
-              scrollTo: true,
-              highlightClass:'glowTour',
-              showCancelLink: true,
-            },
-            useModalOverlay: true
-          });
-
-          tour.addStep('step1', {
-            title: 'Host Your Metadata',
-            text: "Here is a list of sites where you can host your dataset and metadata",
-            attachTo: {element: '#host', on: 'bottom'},
-            advanceOn: 'click',
-            scrollTo: true,
-            buttons: [
-              {
-                text: 'Next',
-                action: tour.next,
-                classes:'themeButton text-light'
-              }
-            ]
-          });
-
-          tour.addStep('step2', {
-            title: 'Is your dataset already hosted?',
-            text: "Use this tool to load help us load your metadata information",
-            attachTo: '#linkForm bottom',
-            advanceOn: 'click',
-            scrollTo: true,
-            buttons: [
-              {
-                text: 'Next',
-                action: tour.next,
-                classes:'themeButton text-light'
-              }
-            ]
-          });
-
-          tour.addStep('step3', {
-            title: 'Choose a License',
-            text: "Answer a few questions to determine what your license type is.",
-            attachTo: '#licenseForm bottom',
-            advanceOn: 'click',
-            scrollTo: true,
-            buttons: [
-              {
-                text: 'Next',
-                action: tour.next,
-                classes:'themeButton text-light'
-              }
-            ]
-          });
-
-          tour.addStep('step3', {
-            title: 'Metadata',
-            text: "Don't have metadata? Use this form to start creating it OR use this form to update and fill out metadata fields loaded from your link.",
-            attachTo: '#metadataForm bottom',
-            advanceOn: 'click',
-            scrollTo: true,
-            buttons: [
-              {
-                text: 'Next',
-                action: tour.next,
-                classes:'themeButton text-light'
-              }
-            ]
-          });
-
-          tour.start();
-
-        },
         renderProgress(){
           // var str = JSON.stringify(this.metadata, null, 2);
           // var progressCode = str;
