@@ -62,12 +62,12 @@ class DiscoveryAppAPITest(AsyncHTTPTestCase):
         cls.testset.append(schema)
 
         # add another document
-        # url = ('https://raw.githubusercontent.com/data2health/'
-        #        'schemas/biothings/biothings/biothings_curie.jsonld')
-        # meta = Metadata(username='data2health', slug='d2h', url=url)
-        # schema = Schema(clses=['biothings'], _meta=meta)
-        # schema.save()
-        # cls.testset.append(schema)
+        url = ('https://raw.githubusercontent.com/data2health/'
+               'schemas/biothings/biothings/biothings_curie.jsonld')
+        meta = Metadata(username='data2health', slug='d2h', url=url)
+        schema = Schema(clses=['biothings'], _meta=meta)
+        schema.save()
+        cls.testset.append(schema)
 
     @classmethod
     def tearDownClass(cls):

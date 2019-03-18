@@ -189,7 +189,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=var(--main), e
     perspective: 800;
     -moz-perspective: 800;
     -webkit-perspective: 800;
-    margin: 1em auto;
+    /* margin: 1em auto; */
     transform-style: preserve-3d;
     -moz-transform-style: preserve-3d;
     -webkit-transform-style: preserve-3d;
