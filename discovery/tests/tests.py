@@ -3,13 +3,12 @@ Automated testing for discovery-app
     > python tests.py
 '''
 import difflib
-import os
 
 import requests
 from nose.core import runmodule
 from nose.tools import eq_, ok_
 from tornado.web import Application, create_signed_value
-from torngithub import json_encode
+from tornado.escape import json_encode, json_decode
 
 from biothings.tests.test_helper import (BiothingsTestCase,
                                          TornadoTestServerMixin)
@@ -29,7 +28,7 @@ class DiscoveryAppAPITest(TornadoTestServerMixin, BiothingsTestCase):
     '''
     __test__ = True
 
-    host = os.getenv("DISCOVERY_HOST", "").rstrip('/')
+    host = ''  # not data save, won't be tested on production server
     api = host + '/api'
 
     def get_app(self):
@@ -63,26 +62,34 @@ class DiscoveryAppAPITest(TornadoTestServerMixin, BiothingsTestCase):
         # add another document
         url = ('https://raw.githubusercontent.com/data2health/'
                'schemas/biothings/biothings/biothings_curie.jsonld')
-        meta = Metadata(username='data2health', slug='d2h', url=url)
+        meta = Metadata(username='namespacestd', slug='d2h', url=url)
         schema = Schema(clses=['biothings'], _meta=meta)
         schema.save()
         cls.testset.append(schema)
 
-    # Helper functions
-
-    def post_status_match(self, url, params, status_code, add_headers=None):
-        ''' make an authenticated POST request and return json if the status codes match '''
-        cookie_name, cookie_value = 'user', {'login': 'tester'}
+        # secured headers
+        cookie_name, cookie_value = 'user', {'login': 'namespacestd'}
         secure_cookie = create_signed_value(
             COOKIE_SECRET,
             cookie_name,
             json_encode(cookie_value))
-        authenticated_headers = {
+        cls.auth_h = {
             'Cookie': '='.join((cookie_name, secure_cookie.decode())),
             'Content-Type': 'application/json'}
-        if add_headers:
-            authenticated_headers.update(add_headers)
-        return super().post_status_match(url, params, status_code, authenticated_headers)
+
+    # Helper functions
+
+    # override
+    def post_status_match(self, url, params, status_code, add_headers=None):
+        ''' make an authenticated POST request and return json if the status codes match '''
+        headers = self.auth_h if not add_headers else {** self.auth_h, ** add_headers}
+        return super().post_status_match(url, params, status_code, headers)
+
+    def put_json_okay(self, url, data):
+        ''' make an authenticated PUT request and return json if the status code is 200 '''
+        res = self.fetch(url, method='PUT', body=json_encode(data), headers=self.auth_h)
+        assert res.code == 200
+        return json_decode(res.body)
 
     # Tests
 
@@ -143,13 +150,26 @@ class DiscoveryAppAPITest(TornadoTestServerMixin, BiothingsTestCase):
         self.post_json_ok(self.api+'/registry', doc_2)
         # verify modified
         self.query_has_hits('_meta.slug:us')
+        # slug should be directly searchable
+        self.query_has_hits('us')
 
     def test_07_handlers_registry_delete(self):
         ''' asserts delete a document by its _id '''
         self.query_has_hits('es-dsl')
         self.fetch(self.api+'/registry/' +
-                   self.testset[0].meta.id, method='DELETE')
+                   self.testset[0].meta.id, method='DELETE', headers=self.auth_h)
         self.query_missed('es-dsl')
+
+    def test_08_handlers_registry_put(self):
+        ''' asserts sucessful slug update '''
+        self.query_has_hits('d2h')
+        self.query_missed('d3h')
+        data = {'slug': 'd3h'}
+        res = self.put_json_okay(self.api+'/registry/' + self.testset[1].meta.id,
+                                 data=data)
+        assert 'success' in res
+        self.query_has_hits('d3h')
+        self.query_missed('d2h')
 
 
 if __name__ == '__main__':
