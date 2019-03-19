@@ -1501,11 +1501,8 @@ var app = new Vue({
               self.reqFile();
             }
           }).catch(err=>{
-            Swal.fire(
-              'Oops!',
-              'Something went wrong loading this dataset',
-              'error'
-            );
+            console.log(err);
+            throw err;
           });
         },
         reqFile: function(url){
