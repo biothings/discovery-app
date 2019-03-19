@@ -7,8 +7,8 @@ import difflib
 import requests
 from nose.core import runmodule
 from nose.tools import eq_, ok_
+from tornado.escape import json_decode, json_encode
 from tornado.web import Application, create_signed_value
-from tornado.escape import json_encode, json_decode
 
 from biothings.tests.test_helper import (BiothingsTestCase,
                                          TornadoTestServerMixin)
