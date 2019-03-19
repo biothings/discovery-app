@@ -1,4 +1,5 @@
-elasticsearch-dsl==6.1.1
+elasticsearch-dsl>=6.1
+elasticsearch==6.1.1
 PyLD>=0.7.1
 requests>=2.18.3
 tornado==5.1.1
