@@ -2,12 +2,12 @@
 
 import tornado
 
-from discovery.web.handlers import BaseHandler
-from discovery.web.api.es.doc import Metadata, Schema
+from biothings.web.api.es.handlers.query_handler import QueryHandler
+from web.api.es.doc import Metadata, Schema
+from web.handlers import BaseHandler
+
 
 # pylint: disable=abstract-method, arguments-differ
-
-
 class RegistryHandler(BaseHandler):
     ''' POST ./api/registry
         GET ./api/registry/<api_id> '''
@@ -142,3 +142,10 @@ class ProxyHandler(BaseHandler):
 
         self.write(response.body)
         self.finish()
+
+
+class DiscoveryQueryHandler(QueryHandler):
+    def _pre_finish_GET_hook(self, options, res):
+        ''' Override me. '''
+        # TODO add E-Tag support
+        return res

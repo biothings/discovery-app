@@ -4,9 +4,9 @@
 
 from biothings.web.api.es.handlers import QueryHandler
 from biothings.web.settings.default import *
-from discovery.web.api.es.query_builder import DiscoveryQueryBuilder
-from discovery.web.api.handlers import ProxyHandler, RegistryHandler
-from discovery.web.handlers import APP_LIST as WEB_ENDPOINTS
+from web.api.es.query_builder import DiscoveryQueryBuilder
+from web.api.handlers import ProxyHandler, RegistryHandler
+from web.handlers import APP_LIST as WEB_ENDPOINTS
 
 from config_key import COOKIE_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 
