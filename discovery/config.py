@@ -13,7 +13,7 @@ from config_key import COOKIE_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 # *****************************************************************************
 # Credentials
 # *****************************************************************************
-# Define in config_key.py:
+# Define in ./config_key.py:
 #   COOKIE_SECRET = '<Any Random String>'
 #   GITHUB_CLIENT_ID = '<your Github application Client ID>'
 #   GITHUB_CLIENT_SECRET = '<your Github application Client Secret>'
