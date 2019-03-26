@@ -1,7 +1,7 @@
 # Discovery
 A Web Schema Visualization App 
 
-# Run a local dev server
+## Run a local dev server
 1. Install Elasticsearch at localhost:9200 (follow [this instruction](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html))
 2. Clone this repo
     ```
