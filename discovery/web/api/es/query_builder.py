@@ -22,11 +22,13 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                         },
                         {
                             "query_string": {
+                                "default_field": "clses",
                                 "query": q
                             }
                         },
                         {
                             "query_string": {
+                                "default_field": "clses",
                                 "query": q + "*",
                                 "boost": 0.8
                             }
