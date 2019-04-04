@@ -50,8 +50,6 @@
   transform: rotate(-90deg);
 }
 
-
-
 .zoomHalf{
   zoom:.5;
 }
@@ -95,10 +93,6 @@ meter{
   font-weight: lighter;
 }
 
-.hi{
-
-}
-
 </style>
 
 <main id="guide" style="min-height:70vh;">
@@ -112,7 +106,7 @@ meter{
       <small>Discovery<br /> Meter</small>
     </div>
     <div class="meterBox">
-      <meter min="0" max="100" low="25" high="75" optimum="100" value="50">2 out of 10</meter>
+      <meter min="0" max="100" low="25" high="75" optimum="100" :value="fieldsFoundCount*10">2 out of 10</meter>
     </div>
     <template v-if="achievements.length">
       <div class="p-1 bg-muted trophyBox">
@@ -130,9 +124,6 @@ meter{
       <div class="jumbotron animatedBack text-center mt-5">
         <h1 class="text-light">DISCOVERY GUIDE</h1>
       </div>
-      <p class="text-muted">
-        Make your data more findable using this guide.
-      </p>
 
       <template>
         <div class="stepBox">
@@ -151,17 +142,17 @@ meter{
           <ul id="host" class="list-group col-sm-6" style="margin:0 auto;">
             <li class="list-group-item">
               <a href="https://dataverse.org/" target="_blank">
-                <img width="220px" src="https://dataverse.org/files/dataverseorg/files/dataverse_r_project.png" alt="Dataverse"/>
+                <!-- <img width="220px" src="https://dataverse.org/files/dataverseorg/files/dataverse_r_project.png" alt="Dataverse"/> -->
               </a>
             </li>
             <li class="list-group-item">
               <a href="https://zenodo.org/" target="_blank">
-                <img width="220px" src="https://about.zenodo.org/static/img/logos/zenodo-gradient-square.svg" alt="Zenodo"/>
+                <!-- <img width="220px" src="https://about.zenodo.org/static/img/logos/zenodo-gradient-square.svg" alt="Zenodo"/> -->
               </a>
             </li>
             <li class="list-group-item">
               <a href="https://figshare.com/" target="_blank">
-              <img width="220px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Figshare_logo.svg/1280px-Figshare_logo.svg.png" alt="FigShare"/></a>
+              <!-- <img width="220px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Figshare_logo.svg/1280px-Figshare_logo.svg.png" alt="FigShare"/></a> -->
             </li>
             <li class="list-group-item">
               <h3 class="text-muted"><i class="fas fa-home"></i> Your own website</h3>
@@ -356,8 +347,6 @@ meter{
           <div class="flipcard">
             <div class="jumbotron text-muted face front">
               <button style="position:absolute; right: 10px; top:10px; transform: scale(.7);" class="btn btn-secondary" @click='flipView()'>Switch View</button>
-              <!-- <div class="numberCircle mainBackLight">3</div>
-              <h2>Metadata</h2> -->
               <small>(*Required)</small>
               <p class="col-sm-6" style="margin: 0 auto;">
                 Fill out or edit your metadata.
@@ -367,7 +356,13 @@ meter{
               </p>
               <hr />
               <div class="row">
-                <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-6">
+              <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-6">
+                <template v-for="(field,index) in fieldsInfo">
+                  <metadata-field-text v-if="field.inputtype === 'text'" :key='index' :label="field.label" :inputtype="field.inputtype" :helpmsg="field.helpmsg" :errmsg="field.errmsg" :requiredby="field.requiredby" :trophy="field.trophy"></metadata-field-text>
+                  <metadata-field-textarea v-if="field.inputtype === 'textarea'" :key='index' :label="field.label" :inputtype="field.inputtype" :helpmsg="field.helpmsg" :errmsg="field.errmsg" :requiredby="field.requiredby" :trophy="field.trophy"></metadata-field-textarea>
+                  <metadata-field-keywords v-if="field.inputtype === 'keywords'" :key='index' :label="field.label" :inputtype="field.inputtype" :helpmsg="field.helpmsg" :errmsg="field.errmsg" :requiredby="field.requiredby" :trophy="field.trophy"></metadata-field-keywords>
+                </template>
+                <!-- <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-6">
                   <div class="form-group row">
                     <label for="name" class="col-sm-2 col-form-label col-form-label-sm">
                       Name* <br />
@@ -461,6 +456,10 @@ meter{
                   <div>
                     <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light pulse" @click.prevent='validate("metadataForm")' value="Submit">
                     <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
+                  </div> -->
+                  <div>
+                    <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light pulse" @click.prevent='validate("metadataForm")' value="Submit">
+                    <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
                   </div>
                 </form>
 
@@ -490,8 +489,6 @@ meter{
           </div>
         </div>
         <div id="result" class="jumbotron text-muted">
-          <!-- <div class="numberCircle mainBackLight">4</div>
-          <h3>Code</h3> -->
           <p class="col-sm-6" style="margin: 0 auto;">
             Copy and paste this code in your site's HTML code.
           </p>
@@ -531,6 +528,123 @@ meter{
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
+
+Vue.component('metadata-field-text', {
+  data: function(){
+    return{
+      answer:'',
+      err:false,
+    }
+  },
+  props: ['inputtype','label','trophy','requiredby','helpmsg','errmsg',],
+  methods:{
+  },
+  watch:{
+  },
+  created: function(){
+    console.log('TEXT',this.inputtype)
+  },
+  template:
+  `<div>
+    <small>text field</small>
+    <div class="form-group row">
+      <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
+        <span v-text="label"></span> <br />
+        <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
+      </label>
+      <div class="col-sm-10">
+        <input autocomplete="off" v-model="answer" data-parsley-trigger="change" :type="inputtype" class="form-control form-control-sm" :id="label" :placeholder="helpmsg" required="">
+      </div>
+      <small v-if="err" v-text="errmsg"></small>
+    </div>
+  </div>`
+});
+
+Vue.component('metadata-field-textarea', {
+  data: function(){
+    return{
+      answer:'',
+      err:false,
+    }
+  },
+  props: ['inputtype','label','trophy','requiredby','helpmsg','errmsg',],
+  methods:{
+  },
+  watch:{
+  },
+  mounted: function(){
+    console.log('TEXTAREA',this.inputtype)
+  },
+  template:
+  `<div>
+    <small>text field</small>
+    <div class="form-group">
+      <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
+        <span v-text="label"></span> <br />
+        <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
+      </label>
+      <textarea required="" rows="7" v-model="answer" class="form-control" :id="label" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
+      <div class="col-sm-12 text-center">
+        <small><span v-text="answer.length">0</span> Characters</small>
+      </div>
+      <small v-if="err" v-text="errmsg"></small>
+    </div>
+  </div>`
+});
+
+Vue.component('metadata-field-keywords', {
+  data: function(){
+    return{
+      answer:'',
+      keywords:[],
+      err:false,
+    }
+  },
+  props: ['inputtype','label','trophy','requiredby','helpmsg','errmsg',],
+  methods:{
+    addKeyword(){
+      let value = this.$refs.keywordInput.value;
+      this.keywords.push(value);
+      this.$refs.keywordInput.value = '';
+    },
+    removeKeyword(tagName){
+      for (var i = 0; i < this.keywords.length; i++) {
+        if (this.keywords[i] === tagName) {
+          this.keywords.splice(i,1);
+        }
+      }
+    },
+  },
+  watch:{
+  },
+  mounted: function(){
+    console.log('KEYWORDS',this.inputtype)
+  },
+  template:
+  `<div>
+    <div class="form-group row">
+      <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
+        <span v-text="label"></span> <br />
+        <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
+      </label>
+      <div class="col-sm-9">
+        <input ref="keywordInput" autocomplete="off" data-parsley-trigger="change" type="text" class="form-control form-control-sm" :id="label" placeholder="Enter new keyword here">
+      </div>
+      <div class="col-sm-1">
+        <button @click.prevent="addKeyword" class="btn btn-secondary btn-sm"><i class="fas fa-plus-circle"></i></button>
+      </div>
+      <div :id="label">
+        <template v-for="text in keywords">
+          <span title="Delete" @click.prevent="removeKeyword(text)" data-tippy-placement="bottom" data-tippy="Remove" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
+          </span>
+        </template>
+      </div>
+      <small v-if="err" v-text="errmsg"></small>
+    </div>
+  </div>`
+});
+
+
 var app = new Vue({
       el: '#guide',
 			data: function(){
@@ -560,12 +674,38 @@ var app = new Vue({
           fieldsFoundCount: 0,
           validForm:false,
           achievements:[],
-          editCodeMode: false
+          editCodeMode: false,
+          fieldsInfo:[
+            {
+              'label':'Name',
+              'inputtype':'text',
+              'helpmsg':'A descriptive name of a dataset',
+              'errmsg':'Field required. What is the name of your dataset?',
+              'trophy':'',
+              'requiredby':'Google',
+            },
+            {
+              'label':'TEST2',
+              'inputtype':'textarea',
+              'helpmsg':'some test text',
+              'errmsg':'',
+              'trophy':'',
+              'requiredby':'',
+            },
+            {
+              'label':'TEST3',
+              'inputtype':'keywords',
+              'helpmsg':'some test text',
+              'errmsg':'',
+              'trophy':'',
+              'requiredby':'',
+            }
+          ]
 				}
 			},
       watch:{
         metadata: {
-          handler:function(oldM, newM){
+          handler:function(newM,oldM){
             renderjson.set_show_to_level(7);
 						$('#sideCode').html( renderjson(newM) );
           },
@@ -575,7 +715,7 @@ var app = new Vue({
           let str = newKW.join(',');
           this.metadata.keywords = str;
         },
-        typeLicense: function(oldLic, newLic){
+        typeLicense: function(newLic,oldLic){
           this.metadata.license = this.licenseAbbreviation;
           // this.renderProgress();
         }
@@ -797,15 +937,12 @@ var app = new Vue({
         requestPageHTML(url){
           var self = this;
           self.loadingOn();
-          //http://api.allorigins.ml/get?url=
-          // Gets around the CORS blocking issue
-          $.getJSON('http://api.allorigins.ml/get?url='+encodeURIComponent(url)+'&callback=?', function(data){        	// console.log(data)
+          axios.get('/api/proxy?url='+url).then(res=>{
             self.loadingOff();
             let parser  = new DOMParser();
-            let htmlDoc = parser.parseFromString(data.contents, "text/html");
+            let htmlDoc = parser.parseFromString(res.data, "text/html");
             var txt = htmlDoc.querySelector('script[type="application/ld+json"]');
             if (!txt) {
-              // self.achievementPopup("Nothing To See Here...");
               swal({
                 type: 'error',
                 title: 'Oops...',
@@ -820,6 +957,9 @@ var app = new Vue({
               self.parseData();
               self.scrollTo('metadataForm');
             }
+          }).catch(err=>{
+            self.loadingOff();
+            throw err;
           });
         },
         loadExample(url){
@@ -899,16 +1039,16 @@ var app = new Vue({
     mounted:function(){
       var self = this;
       $(function () {
-        $('#metadataForm').parsley().on('field:validated', function() {
-          var err = $('.parsley-error').length;
-          if (err > 5) {
-            self.achievementPopup('Not So Fast!');
-          }
-        })
-        .on('form:submit', function() {
-          self.makeScript();
-          return false;
-        });
+        // $('#metadataForm').parsley().on('field:validated', function() {
+        //   var err = $('.parsley-error').length;
+        //   if (err > 5) {
+        //     self.achievementPopup('Not So Fast!');
+        //   }
+        // })
+        // .on('form:submit', function() {
+        //   self.makeScript();
+        //   return false;
+        // });
 
         $('#licenseForm').parsley().on('field:validated', function() {
         });
