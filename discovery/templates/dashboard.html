@@ -2,43 +2,7 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-  .status{
-    border-radius: 100%;
-    min-width: 10px;
-    min-height: 10px;
-    display: inline-block;
-  }
 
-  .circle{
-    border-radius: 100%;
-  }
-
-  .dashboardUserBox{
-    border-radius: 20px;
-  }
-  .dashboardUserBox img{
-    border:2px solid var(--light)
-  }
-
-  .clip{
-    height: 50px;
-    width: 100%;
-    bottom: 0;
-    -webkit-clip-path: polygon(0 93%, 100% 0, 100% 100%, 0% 100%);
-    clip-path: polygon(0 93%, 100% 0, 100% 100%, 0% 100%);
-  }
-
-  .dashPic{
-    background-position: top center !important;
-    background-repeat: no-repeat !important;
-    background-size: contain !important;
-    background: var(--secondary);
-  }
-
-  .userInfo{
-    box-shadow: -5px 2px 10px grey;
-    border-bottom: 10px solid var(--main);
-  }
 </style>
 <section id="dashboard">
   <div  class="container" style="min-height: 70vh;padding-top:80px;">
@@ -69,7 +33,6 @@
                 <th scope="col" class="lighter">Slug</th>
                 <th scope="col" class="lighter">Source URL</th>
                 <th scope="col" class="lighter">View</th>
-                <!-- <th scope="col">Download</th> -->
                 <th scope="col" class="lighter">Delete</th>
               </tr>
             </thead>
@@ -92,17 +55,6 @@
                       Visualize
                     </a>
                   </td>
-                  <!-- <td>
-                    <div class="dropdown">
-                      <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Download
-                      </button>
-                      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="#">JSON-LD</a>
-                        <a class="dropdown-item" href="#">YAML</a>
-                      </div>
-                    </div>
-                  </td> -->
                   <td>
                     <button @click.prevent="deleteSelected(item._meta.slug,item._id)" class="btn btn-outline-secondary fill">
                       Delete
@@ -134,7 +86,7 @@
             </button>
           </div>
           <div class="modal-body" v-if="selectedItem">
-            <form>
+            <form @submit.prevent="updateSlug()">
               <div class="form-group">
                 <small>
                   Enter your new slug then hit Save.
@@ -154,7 +106,7 @@
                 <p class="m-2" :class="[availableSlug ? 'mainTextDark' : 'text-danger']">
                   discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
                 </p>
-              <button v-if="availableSlug && slugInput.length" type="submit" class="btn themeButton text-light mt-3">Save</button>
+              <button v-if="availableSlug && slugInput.length" type="submit" @click.prevent="updateSlug()" class="btn themeButton text-light mt-3">Save</button>
             </form>
           </div>
         </div>
@@ -212,14 +164,51 @@ var app = new Vue({
         }
       },
 			methods:{
+        updateSlug(){
+          let self = this;
+          axios.put('/api/registry/'+self.selectedItem["_id"],{"slug":self.slugInput}).then(res=>{
+            console.log(res.data)
+            if (res.data.success) {
+              swal({
+                toast: true,
+                timer: 3000,
+                showConfirmButton: false,
+                title: "Success",
+                footer:'Slug Updated',
+                position: 'center-top',
+                type:'success'
+              });
+              self.getAll();
+            }else{
+              swal({
+                toast: true,
+                timer: 3000,
+                showConfirmButton: false,
+                title: "Oh no!",
+                footer:'Slug Update failed',
+                position: 'center-top',
+                type:'error'
+              });
+            }
+          }).catch(err=>{
+            swal({
+              toast: true,
+              timer: 3000,
+              showConfirmButton: false,
+              title: "Oh no!",
+              footer:'Slug Update Failed, let us know if this issue persists',
+              position: 'center-top',
+              type:'error'
+            });
+            throw err;
+          });
+        },
         deleteSelected(name,id){
           var self = this;
           Swal.fire({
             title: '<h3>Are you sure you want to delete <span class="text-danger bold">'+name+'</span> ?</h3>',
             text: "You won't be able to revert this!",
-            imageUrl: "/static/img/dde-logo-o.svg",
-            imageHeight: 100,
-            imageAlt: 'Warning',
+            type:'warning',
             showCancelButton: true,
             confirmButtonColor: '#006476',
             cancelButtonColor: '#5C3069',
@@ -236,12 +225,18 @@ var app = new Vue({
                     'success'
                   );
                   self.getAll();
+                }else{
+                  Swal.fire(
+                    'Oh no!',
+                    'Your file could not be deleted',
+                    'error'
+                  );
                 }
 
               }).catch(err=>{
                 throw err;
                 Swal.fire(
-                  'Oops!',
+                  'Oh no!',
                   'something went wrong',
                   'error'
                 );
@@ -252,6 +247,7 @@ var app = new Vue({
         },
         getAll(){
           let self= this;
+          self.dashboard = [];
           if (this.user.login) {
             axios.get('/api/query?q=_meta.username:'+self.user.login).then(res=>{
               self.dashboard = res.data.hits;
