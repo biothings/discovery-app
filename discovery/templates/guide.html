@@ -10,12 +10,11 @@
   background: linear-gradient(to bottom, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
   border: 5px solid var(--sec);
-  box-shadow: -2px 2px 5px grey;
   border-radius: 20px;
   z-index: 2000;
   position: fixed;
   right: 20px;
-  top: 35%;
+  top: 15%;
   display: flex;
   flex-direction: column;
 }
@@ -187,7 +186,7 @@ meter{
       </template>
 
       <template>
-        <div class="stepBox">
+        <div class="stepBox" id="licenseChooser">
           <span>2</span>
           <div class="clipBox">
             License Chooser*
@@ -347,21 +346,42 @@ meter{
           <div class="flipcard">
             <div class="jumbotron text-muted face front">
               <button style="position:absolute; right: 10px; top:10px; transform: scale(.7);" class="btn btn-secondary" @click='flipView()'>Switch View</button>
-              <small>(*Required)</small>
               <p class="col-sm-6" style="margin: 0 auto;">
-                Fill out or edit your metadata.
+                Need Help?
               </p>
               <p>
                 <a data-tippy="Load Cancer FigShare Example" href="#" class="badge badge-pill badge-secondary pointer mt-2 p-2" @click.prevent="loadExample('./static/misc/example.jsonld')"><i class="fas fa-question-circle"></i> Load Example</a>
               </p>
               <hr />
+              <div class="d-flex align-content-center justify-content-center mb-5">
+                <div class="p-2 m-2 mainBackLight text-light" style="flex:1;">
+                  <i class="fab fa-google fa-3x mainTextDark"></i>
+                  <h4>Google</h4>
+                  <h2><span>0</span>/<span>3</span></h2>
+                </div>
+                <div class="p-2 m-2 mainBackLight text-light" style="flex:1;">
+                  <img src="/static/img/dde-logo-o.svg" style="width:48px;" alt="logo"/>
+                  <h4>Data Discovery Engine</h4>
+                  <h2><span>0</span>/<span>3</span></h2>
+                </div>
+              </div>
+              <small>(*Required)</small>
+              <p class="col-sm-6" style="margin: 0 auto;">
+                Fill out or edit your metadata.
+              </p>
               <div class="row">
-              <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-6">
+              <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-12">
                 <template v-for="(field,index) in fieldsInfo">
-                  <metadata-field-text v-if="field.inputtype === 'text'" :key='index' :label="field.label" :inputtype="field.inputtype" :helpmsg="field.helpmsg" :errmsg="field.errmsg" :requiredby="field.requiredby" :trophy="field.trophy"></metadata-field-text>
-                  <metadata-field-textarea v-if="field.inputtype === 'textarea'" :key='index' :label="field.label" :inputtype="field.inputtype" :helpmsg="field.helpmsg" :errmsg="field.errmsg" :requiredby="field.requiredby" :trophy="field.trophy"></metadata-field-textarea>
-                  <metadata-field-keywords v-if="field.inputtype === 'keywords'" :key='index' :label="field.label" :inputtype="field.inputtype" :helpmsg="field.helpmsg" :errmsg="field.errmsg" :requiredby="field.requiredby" :trophy="field.trophy"></metadata-field-keywords>
+                  <metadata-field :key='index' :label="field.label" :inputtype="field.inputtype" :helpmsg="field.helpmsg" :requiredtext="field.requiredtext" :requiredby="field.requiredby" :trophy="field.trophy" :fieldname="field.fieldname"></metadata-field>
                 </template>
+                <div class="form-group row">
+                  <label for="license" class="col-sm-2 col-form-label col-form-label-sm">
+                    License* <i class="fas fa-question-circle pointer" @click.prevent="scrollTo('licenseChooser')" data-tippy="Get help choosing the right license"></i>
+                  </label>
+                  <div class="col-sm-10">
+                    <input required="" disabled v-model="licenseAbbreviation" v-model="metadata.license" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="license" placeholder="Use License Chooser Tool">
+                  </div>
+                </div>
                 <!-- <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-6">
                   <div class="form-group row">
                     <label for="name" class="col-sm-2 col-form-label col-form-label-sm">
@@ -463,9 +483,9 @@ meter{
                   </div>
                 </form>
 
-                <div class="col-sm-12 col-md-6">
+                <!-- <div class="col-sm-12 col-md-6">
                   <pre :disabled='!editCodeMode' class="form-control margin20 text-left bg-secondary text-light padding20 context" id="sideCode"></pre>
-                </div>
+                </div> -->
               </div>
 
 
@@ -522,6 +542,7 @@ meter{
 <script type="text/javascript">
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+<script src="https://unpkg.com/vuex"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="./static/js/lodash.js"></script>
 <script src="./static/js/renderjson.js"></script>
@@ -529,78 +550,69 @@ meter{
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
 
-Vue.component('metadata-field-text', {
-  data: function(){
-    return{
-      answer:'',
-      err:false,
+const store = new Vuex.Store({
+  state: {
+    // can access directly but not mutate using this.$store.state.count
+    metadata:{
+      "name":'test',
+      "description":'',
+      "keywords": '',
+      "version":'',
+      "url":'',
+      "sameAs":'',
+      "variablesMeasured":'',
+      "license": '',
+      "dateModified":''
+    },
+    count:0
+  },
+  mutations: {
+    // must call as store.commit({'type':'increment','amount': 10})
+    increment (state, payload) {
+      state.count += payload.amount
+    },
+    changeMetadata(state,payload){
+
+      Object.keys(payload).forEach(function(key,index) {
+        console.log('changing '+key+" to "+payload[key])
+          switch (key) {
+            case 'keywords'||'Keywords':
+              if (_.isArray(payload[key])) {
+                state.metadata.keywords = payload[key];
+              }else if (_.isString(payload[key])) {
+                state.metadata.keywords = payload[key].split(",");
+              }
+              break;
+            default:
+              state.metadata[key.toLowerCase()] = payload[key];
+              break;
+          }
+      });
     }
   },
-  props: ['inputtype','label','trophy','requiredby','helpmsg','errmsg',],
-  methods:{
-  },
-  watch:{
-  },
-  created: function(){
-    console.log('TEXT',this.inputtype)
-  },
-  template:
-  `<div>
-    <small>text field</small>
-    <div class="form-group row">
-      <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
-        <span v-text="label"></span> <br />
-        <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
-      </label>
-      <div class="col-sm-10">
-        <input autocomplete="off" v-model="answer" data-parsley-trigger="change" :type="inputtype" class="form-control form-control-sm" :id="label" :placeholder="helpmsg" required="">
-      </div>
-      <small v-if="err" v-text="errmsg"></small>
-    </div>
-  </div>`
-});
-
-Vue.component('metadata-field-textarea', {
-  data: function(){
-    return{
-      answer:'',
-      err:false,
+  getters:{
+    //exposed as store.getters.getCount
+    getCount: state => {
+      return state.count
     }
   },
-  props: ['inputtype','label','trophy','requiredby','helpmsg','errmsg',],
-  methods:{
-  },
-  watch:{
-  },
-  mounted: function(){
-    console.log('TEXTAREA',this.inputtype)
-  },
-  template:
-  `<div>
-    <small>text field</small>
-    <div class="form-group">
-      <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
-        <span v-text="label"></span> <br />
-        <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
-      </label>
-      <textarea required="" rows="7" v-model="answer" class="form-control" :id="label" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
-      <div class="col-sm-12 text-center">
-        <small><span v-text="answer.length">0</span> Characters</small>
-      </div>
-      <small v-if="err" v-text="errmsg"></small>
-    </div>
-  </div>`
+  actions:{
+
+  }
 });
 
-Vue.component('metadata-field-keywords', {
+// store.commit('increment')
+// console.log(store.state.count) // -> 1
+
+Vue.component('metadata-field', {
   data: function(){
     return{
       answer:'',
       keywords:[],
-      err:false,
+      err:true,
     }
   },
-  props: ['inputtype','label','trophy','requiredby','helpmsg','errmsg',],
+  props: ['inputtype','label','trophy','requiredby','helpmsg','requiredtext','required','fieldname'],
   methods:{
     addKeyword(){
       let value = this.$refs.keywordInput.value;
@@ -616,37 +628,107 @@ Vue.component('metadata-field-keywords', {
     },
   },
   watch:{
+    answer:function(newAnswer,oldAnswer){
+      var self = this;
+      if (newAnswer) {
+        //removes error msg
+        self.err = false;
+        //prepares payload and emits event
+        var keyName = self.fieldname;
+        var payload = {};
+        payload[keyName] = newAnswer;
+        store.commit('changeMetadata',payload)
+      }else{
+        //no data shows error msg
+        self.err = true;
+      }
+    },
+    keywords: function(newKW, oldKW){
+      var self = this;
+      if (newKW.length) {
+        self.err = false;
+      }else{
+        self.err = true;
+      }
+    }
   },
   mounted: function(){
-    console.log('KEYWORDS',this.inputtype)
+    console.log('TYPE',this.inputtype)
+    console.log('STORE ',this.$store.state.metadata.name);
+  },
+  computed: {
+    count () {
+      return this.$store.state.count
+    },
+    getCount () {
+    return this.$store.getters.getCount
+  }
   },
   template:
   `<div>
-    <div class="form-group row">
-      <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
-        <span v-text="label"></span> <br />
-        <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
-      </label>
-      <div class="col-sm-9">
-        <input ref="keywordInput" autocomplete="off" data-parsley-trigger="change" type="text" class="form-control form-control-sm" :id="label" placeholder="Enter new keyword here">
+    <template v-if="inputtype ==='keywords'">
+      <div class="form-group row">
+        <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
+          <span v-text="label"></span>
+          <br />
+          <i v-if="requiredby==='Google'" :data-tippy="'Required by '+requiredby" class="fab fa-google mainTextDark"></i>
+          <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
+        </label>
+        <div class="col-sm-9">
+          <input ref="keywordInput" autocomplete="off" data-parsley-trigger="change" type="text" class="form-control form-control-sm" :id="label" placeholder="Enter new keyword here">
+        </div>
+        <div class="col-sm-1">
+          <button @click.prevent="addKeyword" class="btn btn-secondary btn-sm"><i class="fas fa-plus-circle"></i></button>
+        </div>
+        <div :id="label" class="col-sm-8 m-auto">
+          <template v-for="text in keywords">
+            <span title="Delete" @click.prevent="removeKeyword(text)" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
+            </span>
+          </template>
+        </div>
+        <small class="text-danger m-auto" v-if="err" v-text="requiredtext"></small>
       </div>
-      <div class="col-sm-1">
-        <button @click.prevent="addKeyword" class="btn btn-secondary btn-sm"><i class="fas fa-plus-circle"></i></button>
+    </template>
+
+    <template v-if="inputtype ==='textarea'">
+      <div class="form-group">
+        <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
+          <span v-text="label"></span>
+          <br />
+          <i v-if="requiredby==='Google'" :data-tippy="'Required by '+requiredby" class="fab fa-google mainTextDark"></i>
+          <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
+        </label>
+        <textarea :required="required" rows="7" v-model="answer" class="form-control" :id="label" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
+        <div class="col-sm-12 text-center">
+          <small><span v-text="answer.length">0</span> Characters</small>
+        </div>
+        <small class="text-danger m-auto" v-if="err" v-text="requiredtext"></small>
       </div>
-      <div :id="label">
-        <template v-for="text in keywords">
-          <span title="Delete" @click.prevent="removeKeyword(text)" data-tippy-placement="bottom" data-tippy="Remove" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
-          </span>
-        </template>
+    </template>
+
+    <template v-if="inputtype ==='text'||inputtype ==='url'">
+      <div class="form-group row">
+        <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
+          <span v-text="label"></span>
+          <br />
+          <i v-if="requiredby==='Google'" :data-tippy="'Required by '+requiredby" class="fab fa-google mainTextDark"></i>
+          <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
+        </label>
+        <div class="col-sm-10">
+          <input autocomplete="off" v-model="answer" data-parsley-trigger="change" :type="inputtype" class="form-control form-control-sm" :id="label" :placeholder="helpmsg" :required="required">
+        </div>
+        <small class="text-danger m-auto" v-if="err" v-text="requiredtext"></small>
       </div>
-      <small v-if="err" v-text="errmsg"></small>
-    </div>
+    </template>
+
   </div>`
 });
 
-
 var app = new Vue({
       el: '#guide',
+      // provide the store using the "store" option.
+      // this will inject the store instance to all child components.
+      store,
 			data: function(){
 				return {
           loading: false,
@@ -678,28 +760,74 @@ var app = new Vue({
           fieldsInfo:[
             {
               'label':'Name',
+              'fieldname':'name',
               'inputtype':'text',
+              'required':true,
               'helpmsg':'A descriptive name of a dataset',
-              'errmsg':'Field required. What is the name of your dataset?',
+              'requiredtext':'Required* What is the name of your dataset?',
               'trophy':'',
               'requiredby':'Google',
             },
             {
-              'label':'TEST2',
+              'label':'Description',
+              'fieldname':'description',
               'inputtype':'textarea',
-              'helpmsg':'some test text',
-              'errmsg':'',
+              'required':true,
+              'helpmsg':'A short summary describing a dataset.',
+              'requiredtext':'Required* Write a short summary about your dataset',
               'trophy':'',
-              'requiredby':'',
+              'requiredby':'Google',
             },
             {
-              'label':'TEST3',
+              'label':'Keywords',
+              'fieldname':'keywords',
               'inputtype':'keywords',
-              'helpmsg':'some test text',
-              'errmsg':'',
+              'required':'',
+              'helpmsg':'Keywords summarizing the dataset',
+              'requiredtext':'Required* Enter a list of keywords that descrive your dataset',
               'trophy':'',
-              'requiredby':'',
-            }
+              'requiredby':'Google',
+            },
+            {
+              'label':'Version',
+              'fieldname':'version',
+              'inputtype':'text',
+              'required':true,
+              'helpmsg':'The version number of the dataset',
+              'requiredtext':'Required* Enter the version number of your dataset',
+              'trophy':'',
+              'requiredby':'Google',
+            },
+            {
+              'label':'URL',
+              'fieldname':'url',
+              'inputtype':'url',
+              'required':true,
+              'helpmsg':'Location of a page describing the dataset',
+              'requiredtext':'Required* Enter the url of a page that decribes the dataset',
+              'trophy':'',
+              'requiredby':'Google',
+            },
+            {
+              'label':'Same As',
+              'fieldname':'sameAs',
+              'inputtype':'text',
+              'required':true,
+              'helpmsg':'A link to a page that provides more information about the same dataset, usually in a different repository.',
+              'requiredtext':'Required* Enter the url of a page that provides more information about the same dataset',
+              'trophy':'',
+              'requiredby':'Google',
+            },
+            {
+              'label':'Date Modified',
+              'fieldname':'dateModified',
+              'inputtype':'text',
+              'required':true,
+              'helpmsg':'The last date this dataset metadata was modified.',
+              'requiredtext':'Required* This field will be automatically filled in.',
+              'trophy':'',
+              'requiredby':'Google',
+            },
           ]
 				}
 			},
@@ -990,15 +1118,15 @@ var app = new Vue({
           self.fieldsFoundCount = 0;
           Object.keys(data).forEach(function(key,index) {
               switch (key) {
-                case 'name':
+                case 'name'||'Name':
                   self.metadata['name'] = data[key];
                   self.fieldsFoundCount++;
                   break;
-                case 'description':
+                case 'description'||"Description":
                   self.metadata['description'] = data[key];
                   self.fieldsFoundCount++;
                   break;
-                case 'keywords':
+                case 'keywords'||'Keywords':
                   if (_.isArray(data[key])) {
                     self.keywords = data[key];
                   }else if (_.isString(data[key])) {
@@ -1006,11 +1134,11 @@ var app = new Vue({
                   }
                   self.fieldsFoundCount++;
                   break;
-                case 'sameAs':
+                case 'sameAs'||"Same As":
                   self.metadata['sameAs'] = data[key];
                   self.fieldsFoundCount++;
                   break;
-                case 'version':
+                case 'version'||"Version":
                   self.metadata['version'] = data[key];
                   self.fieldsFoundCount++;
                   break;
@@ -1039,16 +1167,16 @@ var app = new Vue({
     mounted:function(){
       var self = this;
       $(function () {
-        // $('#metadataForm').parsley().on('field:validated', function() {
-        //   var err = $('.parsley-error').length;
-        //   if (err > 5) {
-        //     self.achievementPopup('Not So Fast!');
-        //   }
-        // })
-        // .on('form:submit', function() {
-        //   self.makeScript();
-        //   return false;
-        // });
+        $('#metadataForm').parsley().on('field:validated', function() {
+          var err = $('.parsley-error').length;
+          if (err > 5) {
+            self.achievementPopup('Not So Fast!');
+          }
+        })
+        .on('form:submit', function() {
+          self.makeScript();
+          return false;
+        });
 
         $('#licenseForm').parsley().on('field:validated', function() {
         });
