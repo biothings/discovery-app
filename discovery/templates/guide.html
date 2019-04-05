@@ -92,6 +92,9 @@ meter{
   font-weight: lighter;
 }
 
+.kwbadge:hover{
+  background: var(--danger)
+}
 </style>
 
 <main id="guide" style="min-height:70vh;">
@@ -169,11 +172,11 @@ meter{
                 <button :disabled="!link.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
               </div>
               <small class="badge badge-pill badge-secondary pointer"
-              @click="link = 'https://figshare.com/articles/Should_we_treat_patients_with_only_one_set_of_positive_blood_cultures_for_extensively_drug-resistant_i_Acinetobacter_baumannii_i_the_same_as_multiple_sets_/5187139'">
+              @click.prevent="link = 'https://figshare.com/articles/Should_we_treat_patients_with_only_one_set_of_positive_blood_cultures_for_extensively_drug-resistant_i_Acinetobacter_baumannii_i_the_same_as_multiple_sets_/5187139'">
                 <i class="fas fa-question-circle"></i> FigShare Example
               </small>
               <small class="badge badge-pill badge-secondary pointer"
-              @click="link = 'https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/XD1A6B'">
+              @click.prevent="link = 'https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/XD1A6B'">
                 <i class="fas fa-question-circle"></i> Dataverse Example
               </small>
             </form>
@@ -372,7 +375,7 @@ meter{
               <div class="row">
               <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-12">
                 <template v-for="(field,index) in fieldsInfo">
-                  <metadata-field :key='index' :label="field.label" :inputtype="field.inputtype" :helpmsg="field.helpmsg" :requiredtext="field.requiredtext" :requiredby="field.requiredby" :trophy="field.trophy" :fieldname="field.fieldname"></metadata-field>
+                  <metadata-field :key='index' :label="field.label" :inputvalidationtype="field.inputvalidationtype" :helpmsg="field.helpmsg" :requiredtext="field.requiredtext" :requiredby="field.requiredby" :trophy="field.trophy" :fieldname="field.fieldname"></metadata-field>
                 </template>
                 <div class="form-group row">
                   <label for="license" class="col-sm-2 col-form-label col-form-label-sm">
@@ -382,107 +385,17 @@ meter{
                     <input required="" disabled v-model="licenseAbbreviation" v-model="metadata.license" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="license" placeholder="Use License Chooser Tool">
                   </div>
                 </div>
-                <!-- <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-6">
-                  <div class="form-group row">
-                    <label for="name" class="col-sm-2 col-form-label col-form-label-sm">
-                      Name* <br />
-                      <i class="fas fa-question-circle" data-tippy="A descriptive name of a dataset."></i>
-                    </label>
-                    <div class="col-sm-10">
-                      <input autocomplete="off" v-model="metadata.name" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="name" placeholder="Enter text here" required="">
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="description" class=" col-form-label col-form-label-sm">
-                      Description* <br />
-                      <i class="fas fa-question-circle" data-tippy="A short summary describing a dataset."></i>
-                    </label>
-                    <textarea required="" rows="7" v-model="metadata.description" class="form-control" id="description" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
-                    <div class="col-sm-12 text-center">
-                      <small><span v-text="metadata.description.length">0</span> Characters</small>
-                    </div>
-                  </div>
-                  <div class="form-group row">
-                    <label for="keywords" class="col-sm-2 col-form-label col-form-label-sm">
-                      Keywords <br />
-                      <i class="fas fa-question-circle" data-tippy="Keywords summarizing the dataset."></i>
-                    </label>
-                    <div class="col-sm-9">
-                      <input ref="keywordInput" autocomplete="off" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="keywords" placeholder="Enter new keyword here">
-                    </div>
-                    <div class="col-sm-1">
-                      <button @click.prevent="addKeyword" class="btn btn-secondary btn-sm"><i class="fas fa-plus-circle"></i></button>
-                    </div>
-                    <div id="keywords">
-                      <template v-for="text in keywords">
-                        <span title="Delete" @click="removeKeyword(text)" data-tippy-placement="bottom" data-tippy="Remove" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
-                        </span>
-                      </template>
-                    </div>
-                  </div>
-                  <div class="form-group row">
-                    <label for="version" class="col-sm-2 col-form-label col-form-label-sm">
-                      Version* <br />
-                      <i class="fas fa-question-circle" data-tippy="The version number for the dataset."></i>
-                    </label>
-                    <div class="col-sm-10">
-                      <input autocomplete="off" v-model="metadata.version" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="version" placeholder="Enter text here" required="">
-                    </div>
-                  </div>
-                  <div class="form-group row">
-                    <label for="url" class="col-sm-2 col-form-label col-form-label-sm">
-                      URL* <br />
-                      <i class="fas fa-question-circle" data-tippy="Location of a page describing the dataset."></i>
-                    </label>
-                    <div class="col-sm-10">
-                      <input autocomplete="off" v-model="metadata.url" data-parsley-trigger="change" type="url" class="form-control form-control-sm" id="url" placeholder="Enter URL here" required="">
-                    </div>
-                  </div>
-                  <div class="form-group row">
-                    <label for="SameAs" class="col-sm-2 col-form-label col-form-label-sm">
-                      Same As* <br />
-                      <i class="fas fa-question-circle" data-tippy="A link to a page that provides more information about the same dataset, usually in a different repository."></i>
-                    </label>
-                    <div class="col-sm-10">
-                      <input autocomplete="off" v-model="metadata.sameAs" data-parsley-trigger="change" type="url" class="form-control form-control-sm" id="SameAs" placeholder="Enter URL here" required="">
-                    </div>
-                  </div>
-                  <div class="form-group row">
-                    <label for="variablesMeasured" class="col-sm-2 col-form-label col-form-label-sm">
-                      Variables Measured <br />
-                      <i class="fas fa-question-circle" data-tippy="The variable that this dataset measures. For example, temperature or pressure."></i>
-                      <i class="fas fa-info-circle text-info" data-tippy="The variableMeasured property is proposed and pending standardization at schema.org."></i>
-                    </label>
-                    <div class="col-sm-10">
-                      <input autocomplete="off" v-model="metadata.variablesMeasured" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="variablesMeasured" placeholder="Enter text here">
-                    </div>
-                  </div>
-                  <div class="form-group row">
-                    <label for="license" class="col-sm-2 col-form-label col-form-label-sm">
-                      License* <i class="fas fa-question-circle pointer" @click.prevent="scrollTo('licenseForm')" data-tippy="Get help choosing the right license"></i>
-                    </label>
-                    <div class="col-sm-10">
-                      <input required="" disabled v-model="licenseAbbreviation" v-model="metadata.license" data-parsley-trigger="change" type="text" class="form-control form-control-sm" id="license" placeholder="Use License Chooser Tool">
-                    </div>
-                  </div>
-
-                  <template v-if="otherFields.length">
+                  <template >
                     <div class="text-muted mb-3 alert alert-secondary">
                       <small>Other Fields Found:</small>
                       <span class="badge badge-secondary mr-1" v-for="field in otherFields" v-text="field"></span>
                     </div>
                   </template>
-
-                  <div>
-                    <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light pulse" @click.prevent='validate("metadataForm")' value="Submit">
-                    <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
-                  </div> -->
                   <div>
                     <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light pulse" @click.prevent='validate("metadataForm")' value="Submit">
                     <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
                   </div>
                 </form>
-
                 <!-- <div class="col-sm-12 col-md-6">
                   <pre :disabled='!editCodeMode' class="form-control margin20 text-left bg-secondary text-light padding20 context" id="sideCode"></pre>
                 </div> -->
@@ -552,6 +465,7 @@ meter{
 
 const store = new Vuex.Store({
   state: {
+    strict: true,
     // can access directly but not mutate using this.$store.state.count
     metadata:{
       "name":'test',
@@ -564,19 +478,15 @@ const store = new Vuex.Store({
       "license": '',
       "dateModified":''
     },
-    count:0
+    otherFields:[],
   },
   mutations: {
-    // must call as store.commit({'type':'increment','amount': 10})
-    increment (state, payload) {
-      state.count += payload.amount
-    },
     changeMetadata(state,payload){
-
+      console.log('changing metadata event')
       Object.keys(payload).forEach(function(key,index) {
         console.log('changing '+key+" to "+payload[key])
           switch (key) {
-            case 'keywords'||'Keywords':
+            case 'keywords':
               if (_.isArray(payload[key])) {
                 state.metadata.keywords = payload[key];
               }else if (_.isString(payload[key])) {
@@ -584,16 +494,26 @@ const store = new Vuex.Store({
               }
               break;
             default:
-              state.metadata[key.toLowerCase()] = payload[key];
+              if (key in state.metadata) {
+                state.metadata[key] = payload[key];
+              }else{
+                if ( key !== "@context" || "@type" || "@id") {
+                  state.otherFields.push(key);
+                }
+              }
               break;
           }
       });
+      // console.log('Other Fields',state.otherFields)
     }
   },
   getters:{
     //exposed as store.getters.getCount
-    getCount: state => {
-      return state.count
+    getStoreMetadata:state=>{
+      return state.metadata
+    },
+    getOtherFields:state=>{
+      return state.otherFields
     }
   },
   actions:{
@@ -607,16 +527,27 @@ const store = new Vuex.Store({
 Vue.component('metadata-field', {
   data: function(){
     return{
-      answer:'',
-      keywords:[],
+      // answer:'',
+      // keywords:[],
       err:true,
     }
   },
-  props: ['inputtype','label','trophy','requiredby','helpmsg','requiredtext','required','fieldname'],
+  props: ['inputvalidationtype','label','trophy','requiredby','helpmsg','requiredtext','required','fieldname'],
   methods:{
     addKeyword(){
       let value = this.$refs.keywordInput.value;
-      this.keywords.push(value);
+      if (value && !this.keywords.includes(value)) {
+        this.keywords.push(value);
+      }else{
+        swal({
+          type: 'error',
+          toast: true,
+          title: 'Duplicate or No Value Entered',
+          showConfirmButton: false,
+          position: 'top',
+          timer: 4500
+        });
+      }
       this.$refs.keywordInput.value = '';
     },
     removeKeyword(tagName){
@@ -633,15 +564,15 @@ Vue.component('metadata-field', {
       if (newAnswer) {
         //removes error msg
         self.err = false;
-        //prepares payload and emits event
-        var keyName = self.fieldname;
-        var payload = {};
-        payload[keyName] = newAnswer;
-        store.commit('changeMetadata',payload)
       }else{
         //no data shows error msg
         self.err = true;
       }
+      //prepares payload and emits event
+      var keyName = self.fieldname;
+      var payload = {};
+      payload[keyName] = newAnswer;
+      store.commit('changeMetadata',payload)
     },
     keywords: function(newKW, oldKW){
       var self = this;
@@ -650,23 +581,45 @@ Vue.component('metadata-field', {
       }else{
         self.err = true;
       }
+      //prepares payload and emits event
+      var keyName = self.fieldname;
+      var payload = {};
+      payload[keyName] = self.keywords;
+      store.commit('changeMetadata',payload)
     }
   },
   mounted: function(){
-    console.log('TYPE',this.inputtype)
-    console.log('STORE ',this.$store.state.metadata.name);
+    // console.log('TYPE',this.inputvalidationtype)
+    console.log('STORE ',this.$store.state);
   },
   computed: {
-    count () {
-      return this.$store.state.count
+    answer:{
+      get () {
+        return store.state.metadata[this.fieldname]
+      },
+      set (value){
+        var keyName = this.fieldname;
+        var payload = {};
+        payload[keyName] = value;
+        store.commit('changeMetadata',payload)
+      }
     },
-    getCount () {
-    return this.$store.getters.getCount
-  }
+    keywords:{
+      get () {
+        return store.state.metadata[this.fieldname]
+      },
+      set (value){
+        console.log('VAL',value)
+        // var keyName = this.fieldname;
+        // var payload = {};
+        // payload[keyName] = value;
+        // store.commit('changeMetadata',payload)
+      }
+    }
   },
   template:
   `<div>
-    <template v-if="inputtype ==='keywords'">
+    <template v-if="inputvalidationtype ==='keywords'">
       <div class="form-group row">
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
           <span v-text="label"></span>
@@ -682,7 +635,7 @@ Vue.component('metadata-field', {
         </div>
         <div :id="label" class="col-sm-8 m-auto">
           <template v-for="text in keywords">
-            <span title="Delete" @click.prevent="removeKeyword(text)" class="badge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
+            <span title="Delete" @click.prevent="removeKeyword(text)" class="badge kwbadge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
             </span>
           </template>
         </div>
@@ -690,7 +643,7 @@ Vue.component('metadata-field', {
       </div>
     </template>
 
-    <template v-if="inputtype ==='textarea'">
+    <template v-if="inputvalidationtype ==='textarea'">
       <div class="form-group">
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
           <span v-text="label"></span>
@@ -706,7 +659,7 @@ Vue.component('metadata-field', {
       </div>
     </template>
 
-    <template v-if="inputtype ==='text'||inputtype ==='url'">
+    <template v-if="inputvalidationtype ==='text'||inputvalidationtype ==='url'">
       <div class="form-group row">
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
           <span v-text="label"></span>
@@ -715,7 +668,7 @@ Vue.component('metadata-field', {
           <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
         </label>
         <div class="col-sm-10">
-          <input autocomplete="off" v-model="answer" data-parsley-trigger="change" :type="inputtype" class="form-control form-control-sm" :id="label" :placeholder="helpmsg" :required="required">
+          <input autocomplete="off" v-model="answer" data-parsley-trigger="change" :type="inputvalidationtype" class="form-control form-control-sm" :id="label" :placeholder="helpmsg" :required="required">
         </div>
         <small class="text-danger m-auto" v-if="err" v-text="requiredtext"></small>
       </div>
@@ -761,7 +714,7 @@ var app = new Vue({
             {
               'label':'Name',
               'fieldname':'name',
-              'inputtype':'text',
+              'inputvalidationtype':'text',
               'required':true,
               'helpmsg':'A descriptive name of a dataset',
               'requiredtext':'Required* What is the name of your dataset?',
@@ -771,7 +724,7 @@ var app = new Vue({
             {
               'label':'Description',
               'fieldname':'description',
-              'inputtype':'textarea',
+              'inputvalidationtype':'textarea',
               'required':true,
               'helpmsg':'A short summary describing a dataset.',
               'requiredtext':'Required* Write a short summary about your dataset',
@@ -781,7 +734,7 @@ var app = new Vue({
             {
               'label':'Keywords',
               'fieldname':'keywords',
-              'inputtype':'keywords',
+              'inputvalidationtype':'keywords',
               'required':'',
               'helpmsg':'Keywords summarizing the dataset',
               'requiredtext':'Required* Enter a list of keywords that descrive your dataset',
@@ -791,7 +744,7 @@ var app = new Vue({
             {
               'label':'Version',
               'fieldname':'version',
-              'inputtype':'text',
+              'inputvalidationtype':'text',
               'required':true,
               'helpmsg':'The version number of the dataset',
               'requiredtext':'Required* Enter the version number of your dataset',
@@ -801,7 +754,7 @@ var app = new Vue({
             {
               'label':'URL',
               'fieldname':'url',
-              'inputtype':'url',
+              'inputvalidationtype':'url',
               'required':true,
               'helpmsg':'Location of a page describing the dataset',
               'requiredtext':'Required* Enter the url of a page that decribes the dataset',
@@ -811,7 +764,7 @@ var app = new Vue({
             {
               'label':'Same As',
               'fieldname':'sameAs',
-              'inputtype':'text',
+              'inputvalidationtype':'text',
               'required':true,
               'helpmsg':'A link to a page that provides more information about the same dataset, usually in a different repository.',
               'requiredtext':'Required* Enter the url of a page that provides more information about the same dataset',
@@ -821,7 +774,7 @@ var app = new Vue({
             {
               'label':'Date Modified',
               'fieldname':'dateModified',
-              'inputtype':'text',
+              'inputvalidationtype':'text',
               'required':true,
               'helpmsg':'The last date this dataset metadata was modified.',
               'requiredtext':'Required* This field will be automatically filled in.',
@@ -831,6 +784,8 @@ var app = new Vue({
           ]
 				}
 			},
+      computed:{
+      },
       watch:{
         metadata: {
           handler:function(newM,oldM){
@@ -1116,52 +1071,63 @@ var app = new Vue({
           let self = this;
           let data = this.data;
           self.fieldsFoundCount = 0;
+
           Object.keys(data).forEach(function(key,index) {
-              switch (key) {
-                case 'name'||'Name':
-                  self.metadata['name'] = data[key];
-                  self.fieldsFoundCount++;
-                  break;
-                case 'description'||"Description":
-                  self.metadata['description'] = data[key];
-                  self.fieldsFoundCount++;
-                  break;
-                case 'keywords'||'Keywords':
-                  if (_.isArray(data[key])) {
-                    self.keywords = data[key];
-                  }else if (_.isString(data[key])) {
-                    self.keywords = data[key].split(",");
-                  }
-                  self.fieldsFoundCount++;
-                  break;
-                case 'sameAs'||"Same As":
-                  self.metadata['sameAs'] = data[key];
-                  self.fieldsFoundCount++;
-                  break;
-                case 'version'||"Version":
-                  self.metadata['version'] = data[key];
-                  self.fieldsFoundCount++;
-                  break;
-                case 'url':
-                  self.metadata['url'] = data[key];
-                  self.fieldsFoundCount++;
-                  break;
-                case 'license':
-                  self.licenseAbbreviation = data[key];
-                  self.fieldsFoundCount++;
-                  break;
-                case 'variablesMeasured':
-                  self.metadata['variablesMeasured'] = data[key];
-                  self.fieldsFoundCount++;
-                  break;
-                default:
-                  self.metadata[key] = data[key];
-                  if ( !_.includes(["@context", "@type", "@id"], key)) {
-                    self.otherFields.push(key);
-                  }
-                  break;
-              }
+            //prepares payload and emits event
+            var payload = {};
+            payload[key] = data[key];
+            store.commit('changeMetadata',payload)
           });
+
+          self.otherFields = store.getters.getOtherFields
+          self.metadata = store.getters.getStoreMetadata
+
+          // Object.keys(data).forEach(function(key,index) {
+          //     switch (key) {
+          //       case 'name'||'Name':
+          //         self.metadata['name'] = data[key];
+          //         self.fieldsFoundCount++;
+          //         break;
+          //       case 'description'||"Description":
+          //         self.metadata['description'] = data[key];
+          //         self.fieldsFoundCount++;
+          //         break;
+          //       case 'keywords'||'Keywords':
+          //         if (_.isArray(data[key])) {
+          //           self.keywords = data[key];
+          //         }else if (_.isString(data[key])) {
+          //           self.keywords = data[key].split(",");
+          //         }
+          //         self.fieldsFoundCount++;
+          //         break;
+          //       case 'sameAs'||"Same As":
+          //         self.metadata['sameAs'] = data[key];
+          //         self.fieldsFoundCount++;
+          //         break;
+          //       case 'version'||"Version":
+          //         self.metadata['version'] = data[key];
+          //         self.fieldsFoundCount++;
+          //         break;
+          //       case 'url':
+          //         self.metadata['url'] = data[key];
+          //         self.fieldsFoundCount++;
+          //         break;
+          //       case 'license':
+          //         self.licenseAbbreviation = data[key];
+          //         self.fieldsFoundCount++;
+          //         break;
+          //       case 'variablesMeasured':
+          //         self.metadata['variablesMeasured'] = data[key];
+          //         self.fieldsFoundCount++;
+          //         break;
+          //       default:
+          //         self.metadata[key] = data[key];
+          //         if ( !_.includes(["@context", "@type", "@id"], key)) {
+          //           self.otherFields.push(key);
+          //         }
+          //         break;
+          //     }
+          // });
         }
     },
     mounted:function(){
