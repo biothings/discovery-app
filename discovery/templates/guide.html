@@ -95,6 +95,38 @@ meter{
 .kwbadge:hover{
   background: var(--danger)
 }
+.kwbadge:hover span:last-child{
+  opacity: 1 !important;
+  transition: .5s;
+}
+
+.particles-container {
+  position: absolute;
+	user-select: none;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.particle {
+	position: absolute;
+	animation: explode .5s reverse linear;
+	transform: translatex(-50%) translatey(-50%);
+  font-size: 1em;
+}
+
+@keyframes explode {
+  100% {
+    top: 50%;
+    left: 50%;
+    transform: scale(5);
+  }
+}
+
+.highlight{
+  background: white;
+  border-radius: 10px;
+}
+
 </style>
 
 <main id="guide" style="min-height:70vh;">
@@ -108,7 +140,7 @@ meter{
       <small>Discovery<br /> Meter</small>
     </div>
     <div class="meterBox">
-      <meter min="0" max="100" low="25" high="75" optimum="100" :value="fieldsFoundCount*10">2 out of 10</meter>
+      <meter min="0" :max="totalQuestions" :low="totalQuestions/3" :high="totalQuestions*.75" :optimum="totalQuestions" :value="meterTotal">2 out of 10</meter>
     </div>
     <template v-if="achievements.length">
       <div class="p-1 bg-muted trophyBox">
@@ -144,17 +176,17 @@ meter{
           <ul id="host" class="list-group col-sm-6" style="margin:0 auto;">
             <li class="list-group-item">
               <a href="https://dataverse.org/" target="_blank">
-                <!-- <img width="220px" src="https://dataverse.org/files/dataverseorg/files/dataverse_r_project.png" alt="Dataverse"/> -->
+                <img width="220px" src="https://dataverse.org/files/dataverseorg/files/dataverse_r_project.png" alt="Dataverse"/>
               </a>
             </li>
             <li class="list-group-item">
               <a href="https://zenodo.org/" target="_blank">
-                <!-- <img width="220px" src="https://about.zenodo.org/static/img/logos/zenodo-gradient-square.svg" alt="Zenodo"/> -->
+                <img width="220px" src="https://about.zenodo.org/static/img/logos/zenodo-gradient-square.svg" alt="Zenodo"/>
               </a>
             </li>
             <li class="list-group-item">
               <a href="https://figshare.com/" target="_blank">
-              <!-- <img width="220px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Figshare_logo.svg/1280px-Figshare_logo.svg.png" alt="FigShare"/></a> -->
+              <img width="220px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Figshare_logo.svg/1280px-Figshare_logo.svg.png" alt="FigShare"/></a>
             </li>
             <li class="list-group-item">
               <h3 class="text-muted"><i class="fas fa-home"></i> Your own website</h3>
@@ -180,9 +212,6 @@ meter{
                 <i class="fas fa-question-circle"></i> Dataverse Example
               </small>
             </form>
-            <div>
-              <span v-if="fieldsFoundCount && link" class="text-success h5 font-weigth-light" v-text="fieldsFoundCount+' fields found and filled out'"></span>
-            </div>
           </div>
         </div>
 
@@ -324,15 +353,12 @@ meter{
 
 
           <template v-if="licenseInfo">
+            <h4>License Selected:</h4>
             <div class="alert alert-success fade-in" role="alert" style="margin: 0 auto;">
-              <h4>License Selected:</h4>
-              <h2 class="font-weight-bold" v-text="typeLicense"></h2>
-              <span class="badge badge-success" v-text="licenseAbbreviation"></span>
-              <div class="alert alert-info mt-2" role="alert">
-                Form has been updated!
-              </div>
+              <h2 class="font-weight-bold" v-text="licenseAbbreviation"></h2>
+              <span class="badge badge-success" v-text="typeLicense"></span>
               <hr />
-              <a target="_blank" :href="licenseLink">More Info</a>
+              <a target="_blank" :href="licenseLink">Learn more about this license</a>
             </div>
           </template>
 
@@ -356,17 +382,20 @@ meter{
                 <a data-tippy="Load Cancer FigShare Example" href="#" class="badge badge-pill badge-secondary pointer mt-2 p-2" @click.prevent="loadExample('./static/misc/example.jsonld')"><i class="fas fa-question-circle"></i> Load Example</a>
               </p>
               <hr />
-              <div class="d-flex align-content-center justify-content-center mb-5">
-                <div class="p-2 m-2 mainBackLight text-light" style="flex:1;">
-                  <i class="fab fa-google fa-3x mainTextDark"></i>
-                  <h4>Google</h4>
-                  <h2><span>0</span>/<span>3</span></h2>
+              <div class="d-flex mb-5 justify-content-center flex-wrap">
+              <template v-for="item in categories">
+                  <div class="p-2 m-2 bg-secondary text-light pointer" @click.prevent="highlightField(item.name)" style="border-radius:10px;">
+                    <div class="d-inline m-1">
+                      <i v-if="item.name==='Minimum'" :data-tippy="'Minimum requirement'" class="fas fa-seedling text-success"></i>
+                      <i v-if="item.name==='Google'" :data-tippy="'Recommended by '+item.name" class="fab fa-google text-light"></i>
+                      <img v-if="item.name==='DDE'" :data-tippy="'Recommended by Data Discovery Engine'" src="/static/img/dde-logo-o.svg" style="width:20px;" alt="logo"/>
+                      <i v-if="item.name==='Gold'" :data-tippy="'Complete to achieve Gold Standard'" class="fas fa-star text-warning"></i>
+                    </div>
+                    <h4 class="d-inline" v-text="item.name"></h4>
+                    <h4 class="d-inline "><span class="font-weight-bold">0</span>/<span class="font-weight-bold" v-text="item.value"></span></h4>
+                  </div>
                 </div>
-                <div class="p-2 m-2 mainBackLight text-light" style="flex:1;">
-                  <img src="/static/img/dde-logo-o.svg" style="width:48px;" alt="logo"/>
-                  <h4>Data Discovery Engine</h4>
-                  <h2><span>0</span>/<span>3</span></h2>
-                </div>
+              </template>
               </div>
               <small>(*Required)</small>
               <p class="col-sm-6" style="margin: 0 auto;">
@@ -386,12 +415,12 @@ meter{
                   </div>
                 </div>
                   <template >
-                    <div class="text-muted mb-3 alert alert-secondary">
+                    <div class="text-muted mb-3 alert alert-secondary col-sm-7 m-auto">
                       <small>Other Fields Found:</small>
                       <span class="badge badge-secondary mr-1" v-for="field in otherFields" v-text="field"></span>
                     </div>
                   </template>
-                  <div>
+                  <div class="mt-3">
                     <input data-tippy="Validate and Submit" type="button" class="btn themeButton text-light pulse" @click.prevent='validate("metadataForm")' value="Submit">
                     <input data-tippy="Clear All Fields" type="button" class="btn btn-danger text-light" @click.prevent='clearForm()' value="Clear">
                   </div>
@@ -465,12 +494,11 @@ meter{
 
 const store = new Vuex.Store({
   state: {
-    strict: true,
     // can access directly but not mutate using this.$store.state.count
-    metadata:{
-      "name":'test',
+    'metadata':{
+      "name":'',
       "description":'',
-      "keywords": '',
+      "keywords": [],
       "version":'',
       "url":'',
       "sameAs":'',
@@ -478,13 +506,15 @@ const store = new Vuex.Store({
       "license": '',
       "dateModified":''
     },
-    otherFields:[],
+    'otherFields':[],
+
   },
+  strict: true,
   mutations: {
     changeMetadata(state,payload){
-      console.log('changing metadata event')
+      // console.log('changing metadata event')
+      // console.log(payload)
       Object.keys(payload).forEach(function(key,index) {
-        console.log('changing '+key+" to "+payload[key])
           switch (key) {
             case 'keywords':
               if (_.isArray(payload[key])) {
@@ -504,8 +534,40 @@ const store = new Vuex.Store({
               break;
           }
       });
-      // console.log('Other Fields',state.otherFields)
-    }
+    },
+    clearMetadata(state){
+      Object.keys(state.metadata).forEach(function(key,index) {
+        if (_.isArray(state.metadata[key])) {
+          state.metadata[key]=[];
+        }else{
+          state.metadata[key]='';
+        }
+      });
+      state.otherFields = []
+    },
+    addKeyword(state,payload){
+      let value = payload.kw;
+      if (value && !state.metadata.keywords.includes(value)) {
+        state.metadata.keywords.push(value);
+      }else{
+        swal({
+          type: 'error',
+          toast: true,
+          title: 'Duplicate or No Value Entered',
+          showConfirmButton: false,
+          position: 'top',
+          timer: 4500
+        });
+      }
+    },
+    removeKeyword(state,payload){
+      let value = payload.kw;
+      for (var i = 0; i < state.metadata.keywords.length; i++) {
+        if (state.metadata.keywords[i] === value) {
+          state.metadata.keywords.splice(i,1);
+        }
+      }
+    },
   },
   getters:{
     //exposed as store.getters.getCount
@@ -517,7 +579,9 @@ const store = new Vuex.Store({
     }
   },
   actions:{
-
+    clearMetadata ({ commit }) {
+        commit('clearMetadata')
+      }
   }
 });
 
@@ -527,35 +591,48 @@ const store = new Vuex.Store({
 Vue.component('metadata-field', {
   data: function(){
     return{
-      // answer:'',
-      // keywords:[],
       err:true,
     }
   },
   props: ['inputvalidationtype','label','trophy','requiredby','helpmsg','requiredtext','required','fieldname'],
   methods:{
-    addKeyword(){
-      let value = this.$refs.keywordInput.value;
-      if (value && !this.keywords.includes(value)) {
-        this.keywords.push(value);
-      }else{
-        swal({
-          type: 'error',
-          toast: true,
-          title: 'Duplicate or No Value Entered',
-          showConfirmButton: false,
-          position: 'top',
-          timer: 4500
-        });
-      }
-      this.$refs.keywordInput.value = '';
+    addClass(list){
+      var str = list.join(' ');
+      return str;
     },
-    removeKeyword(tagName){
-      for (var i = 0; i < this.keywords.length; i++) {
-        if (this.keywords[i] === tagName) {
-          this.keywords.splice(i,1);
+    addCategory(data){
+      if (_.isString(data)) {
+        var payload = {};
+        payload[data] = 1;
+        store.commit('addCategory',payload)
+      }else if(_.isArray(data)){
+        for (var i = 0; i < data.length; i++) {
+          var payload = {};
+          payload[data[i]] = 1;
+          store.commit('addCategory',payload)
         }
       }
+    },
+    parseRequired(data){
+      let self = this;
+      if (_.isString(data)) {
+        return [data];
+      }else if(_.isArray(data)){
+        return data;
+      }
+    },
+    addKeyword(){
+      let self = this;
+      let value = self.$refs.keywordInput.value;
+      var payload = {};
+      payload["kw"] = value;
+      store.commit('addKeyword',payload)
+      self.$refs.keywordInput.value = '';
+    },
+    removeKeyword(tagName){
+      var payload = {};
+      payload["kw"] = tagName;
+      store.commit('removeKeyword',payload)
     },
   },
   watch:{
@@ -574,7 +651,7 @@ Vue.component('metadata-field', {
       payload[keyName] = newAnswer;
       store.commit('changeMetadata',payload)
     },
-    keywords: function(newKW, oldKW){
+    ks: function(newKW, oldKW){
       var self = this;
       if (newKW.length) {
         self.err = false;
@@ -584,7 +661,8 @@ Vue.component('metadata-field', {
       //prepares payload and emits event
       var keyName = self.fieldname;
       var payload = {};
-      payload[keyName] = self.keywords;
+      payload[keyName] = self.ks;
+      console.log('commiting ',payload)
       store.commit('changeMetadata',payload)
     }
   },
@@ -604,27 +682,31 @@ Vue.component('metadata-field', {
         store.commit('changeMetadata',payload)
       }
     },
-    keywords:{
+    ks:{
       get () {
         return store.state.metadata[this.fieldname]
       },
       set (value){
-        console.log('VAL',value)
-        // var keyName = this.fieldname;
-        // var payload = {};
-        // payload[keyName] = value;
-        // store.commit('changeMetadata',payload)
+        var keyName = this.fieldname;
+        var payload = {};
+        payload[keyName] = this.ks;
+        store.commit('changeMetadata',payload)
       }
     }
   },
   template:
   `<div>
     <template v-if="inputvalidationtype ==='keywords'">
-      <div class="form-group row">
+      <div class="form-group p-2 row" :class='addClass(requiredby)'>
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
           <span v-text="label"></span>
           <br />
-          <i v-if="requiredby==='Google'" :data-tippy="'Required by '+requiredby" class="fab fa-google mainTextDark"></i>
+          <template v-for="item in parseRequired(requiredby)">
+            <i v-if="item==='Minimum'" :data-tippy="'Minimum requirement'" class="fas fa-seedling text-success"></i>
+            <i v-if="item==='Google'" :data-tippy="'Recommended by '+item" class="fab fa-google mainTextDark"></i>
+            <img v-if="item==='DDE'" :data-tippy="'Recommended by '+item" src="/static/img/dde-logo-o.svg" style="width:17px;" alt="logo"/>
+            <i v-if="item==='Gold'" :data-tippy="'Complete to achieve Gold Standard'" class="fas fa-star text-warning"></i>
+          </template>
           <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
         </label>
         <div class="col-sm-9">
@@ -634,8 +716,10 @@ Vue.component('metadata-field', {
           <button @click.prevent="addKeyword" class="btn btn-secondary btn-sm"><i class="fas fa-plus-circle"></i></button>
         </div>
         <div :id="label" class="col-sm-8 m-auto">
-          <template v-for="text in keywords">
-            <span title="Delete" @click.prevent="removeKeyword(text)" class="badge kwbadge badge-success mr-1 pointer slit-in-vertical" v-html="text" data-tippy="Remove">
+          <template v-for="text in ks">
+            <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical" data-tippy="Remove">
+            <span v-html="text"></span>
+            <span style="opacity:0;" class="d-inline" @click.prevent="removeKeyword(text)"> <i class="fas fa-times"></i></span>
             </span>
           </template>
         </div>
@@ -644,14 +728,19 @@ Vue.component('metadata-field', {
     </template>
 
     <template v-if="inputvalidationtype ==='textarea'">
-      <div class="form-group">
+      <div class="form-group p-2 row" :class='addClass(requiredby)'>
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
           <span v-text="label"></span>
           <br />
-          <i v-if="requiredby==='Google'" :data-tippy="'Required by '+requiredby" class="fab fa-google mainTextDark"></i>
+          <template v-for="item in parseRequired(requiredby)">
+            <i v-if="item==='Minimum'" :data-tippy="'Minimum requirement'" class="fas fa-seedling text-success"></i>
+            <i v-if="item==='Google'" :data-tippy="'Recommended by '+item" class="fab fa-google mainTextDark"></i>
+            <img v-if="item==='DDE'" :data-tippy="'Recommended by '+item" src="/static/img/dde-logo-o.svg" style="width:17px;" alt="logo"/>
+            <i v-if="item==='Gold'" :data-tippy="'Complete to achieve Gold Standard'" class="fas fa-star text-warning"></i>
+          </template>
           <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
         </label>
-        <textarea :required="required" rows="7" v-model="answer" class="form-control" :id="label" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
+        <textarea :required="required" rows="7" v-model="answer" class="form-control col-sm-10" :id="label" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
         <div class="col-sm-12 text-center">
           <small><span v-text="answer.length">0</span> Characters</small>
         </div>
@@ -660,15 +749,20 @@ Vue.component('metadata-field', {
     </template>
 
     <template v-if="inputvalidationtype ==='text'||inputvalidationtype ==='url'">
-      <div class="form-group row">
+      <div class="form-group p-2 row" :class='addClass(requiredby)'>
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
           <span v-text="label"></span>
           <br />
-          <i v-if="requiredby==='Google'" :data-tippy="'Required by '+requiredby" class="fab fa-google mainTextDark"></i>
+          <template v-for="item in parseRequired(requiredby)">
+            <i v-if="item==='Minimum'" :data-tippy="'Minimum requirement'" class="fas fa-seedling text-success"></i>
+            <i v-if="item==='Google'" :data-tippy="'Recommended by '+item" class="fab fa-google mainTextDark"></i>
+            <img v-if="item==='DDE'" :data-tippy="'Recommended by '+item" src="/static/img/dde-logo-o.svg" style="width:17px;" alt="logo"/>
+            <i v-if="item==='Gold'" :data-tippy="'Complete to achieve Gold Standard'" class="fas fa-star text-warning"></i>
+          </template>
           <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
         </label>
         <div class="col-sm-10">
-          <input autocomplete="off" v-model="answer" data-parsley-trigger="change" :type="inputvalidationtype" class="form-control form-control-sm" :id="label" :placeholder="helpmsg" :required="required">
+          <input :required="required" autocomplete="off" v-model="answer" data-parsley-trigger="change" :type="inputvalidationtype" class="form-control form-control-sm" :id="label" :placeholder="helpmsg" >
         </div>
         <small class="text-danger m-auto" v-if="err" v-text="requiredtext"></small>
       </div>
@@ -681,7 +775,7 @@ var app = new Vue({
       el: '#guide',
       // provide the store using the "store" option.
       // this will inject the store instance to all child components.
-      store,
+      store:store,
 			data: function(){
 				return {
           loading: false,
@@ -692,34 +786,39 @@ var app = new Vue({
           licenseAbbreviation:'',
           licenseLink:'',
           licenseHelp: false,
-          metadata:{
-            "name":'',
-            "description":'',
-            "keywords": '',
-            "version":'',
-            "url":'',
-            "sameAs":'',
-            "variablesMeasured":'',
-            "license": ''
-          },
-          otherFields:[],
-          keywords:[],
           result:'',
           datasetInput:false,
-          fieldsFoundCount: 0,
           validForm:false,
           achievements:[],
           editCodeMode: false,
+          otherFields:[],
+          totalQuestions:0,
+          'categoryTotals':{
+            'Google':0,
+            'DDE':0,
+            'Minimum':0,
+            'Gold':0,
+            "Other":0
+          },
+          categories:[],
           fieldsInfo:[
             {
+              //The label to appear above the input field
               'label':'Name',
+              //actual field name in camelCase format
               'fieldname':'name',
+              //html input type
               'inputvalidationtype':'text',
+              //is it a required field
               'required':true,
+              //when hovering above the ?
               'helpmsg':'A descriptive name of a dataset',
+              //initial red text or when empty
               'requiredtext':'Required* What is the name of your dataset?',
+              //achieevment for completing this question
               'trophy':'',
-              'requiredby':'Google',
+              //required by what serach engines
+              'requiredby':['Minimum','Google','DDE','Gold'],
             },
             {
               'label':'Description',
@@ -729,7 +828,7 @@ var app = new Vue({
               'helpmsg':'A short summary describing a dataset.',
               'requiredtext':'Required* Write a short summary about your dataset',
               'trophy':'',
-              'requiredby':'Google',
+              'requiredby':['Minimum','Google','DDE','Gold'],
             },
             {
               'label':'Keywords',
@@ -739,7 +838,7 @@ var app = new Vue({
               'helpmsg':'Keywords summarizing the dataset',
               'requiredtext':'Required* Enter a list of keywords that descrive your dataset',
               'trophy':'',
-              'requiredby':'Google',
+              'requiredby':['Google','DDE','Gold'],
             },
             {
               'label':'Version',
@@ -749,7 +848,7 @@ var app = new Vue({
               'helpmsg':'The version number of the dataset',
               'requiredtext':'Required* Enter the version number of your dataset',
               'trophy':'',
-              'requiredby':'Google',
+              'requiredby':['Google','DDE','Gold'],
             },
             {
               'label':'URL',
@@ -759,7 +858,7 @@ var app = new Vue({
               'helpmsg':'Location of a page describing the dataset',
               'requiredtext':'Required* Enter the url of a page that decribes the dataset',
               'trophy':'',
-              'requiredby':'Google',
+              'requiredby':['Google','DDE','Gold'],
             },
             {
               'label':'Same As',
@@ -769,7 +868,7 @@ var app = new Vue({
               'helpmsg':'A link to a page that provides more information about the same dataset, usually in a different repository.',
               'requiredtext':'Required* Enter the url of a page that provides more information about the same dataset',
               'trophy':'',
-              'requiredby':'Google',
+              'requiredby':['Google','Gold'],
             },
             {
               'label':'Date Modified',
@@ -779,12 +878,26 @@ var app = new Vue({
               'helpmsg':'The last date this dataset metadata was modified.',
               'requiredtext':'Required* This field will be automatically filled in.',
               'trophy':'',
-              'requiredby':'Google',
+              'requiredby':['Google','DDE','Gold'],
             },
           ]
 				}
 			},
       computed:{
+        meterTotal:function(){
+          let meter=0
+          let meterObj= store.getters.getStoreMetadata
+          Object.keys(meterObj).forEach(function(key,index) {
+            if (key === 'keywords') {
+              if (meterObj[key].length > 0) {
+                meter++;
+              }
+            }else if (meterObj[key] !== '' ){
+              meter++;
+            }
+          });
+          return meter
+        }
       },
       watch:{
         metadata: {
@@ -800,16 +913,56 @@ var app = new Vue({
         },
         typeLicense: function(newLic,oldLic){
           this.metadata.license = this.licenseAbbreviation;
-          // this.renderProgress();
         }
       },
       methods:{
+        highlightField(className){
+          let elements = document.getElementsByClassName(className);
+
+          //highlight
+          for (var i = 0; i < elements.length; i++) {
+            if (!elements[i].classList.contains('highlight')) {
+              elements[i].classList.add('highlight')
+            }else{
+              elements[i].classList.remove('highlight')
+            }
+          }
+
+        },
+        parseQuestions(data){
+          let self = this;
+          let total = 0;
+          for (var i = 0; i < data.length; i++) {
+            if (_.isArray(data[i]['requiredby'])) {
+              for (var x = 0; x < data[i]['requiredby'].length; x++) {
+                self.categoryTotals[data[i]['requiredby'][x]]++;
+              }
+              total++;
+            }else if (_.isString(data[i]['requiredby'])) {
+              self.categoryTotals[data[i]['requiredby']]++;
+              total++;
+            }
+
+          }
+
+          let categories = [];
+          Object.keys(self.categoryTotals).forEach(function(key,index) {
+            let obj ={};
+            obj.name = key;
+            obj.value = self.categoryTotals[key];
+            categories.push(obj);
+          });
+          self.totalQuestions = total;
+          self.categories = categories;
+        },
         renderProgress(){
           // var str = JSON.stringify(this.metadata, null, 2);
           // var progressCode = str;
           // document.getElementById("progressCode").textContent=progressCode;
+          let metadata = store.getters.getStoreMetadata
+          var newData = _.extend({}, this.data, metadata);
           renderjson.set_show_to_level(7);
-          $('#progressCode').html( renderjson(this.metadata) );
+          $('#progressCode').html( renderjson(newData) );
         },
         flipView(){
 
@@ -844,23 +997,11 @@ var app = new Vue({
 
         },
         clearForm(){
-          this.metadata = {
-            "name":'',
-            "description":'',
-            "keywords": '',
-            "version":'',
-            "url":'',
-            "sameAs":'',
-            "variablesMeasured":'',
-            "thumbnailUrl":'',
-            "license": ''
-          };
+          store.dispatch('clearMetadata');
+          this.otherFields = [];
           this.typeLicense='';
           this.licenseAbbreviation='';
           this.licenseLink='';
-          this.keywords=[];
-          this.otherFields=[];
-          this.fieldsFoundCount= 0;
           this.achievements = [];
           this.renderProgress();
         },
@@ -891,7 +1032,8 @@ var app = new Vue({
           this.renderProgress();
         },
         mergeOldAndNewData(){
-          var newData = _.extend({}, this.data, this.metadata);
+          let metadata = store.getters.getStoreMetadata
+          var newData = _.extend({}, this.data, metadata);
           this.data = newData;
         },
         makeScript(){
@@ -929,6 +1071,17 @@ var app = new Vue({
           let question1 = this.$refs.license1.value;
           let question2 = this.$refs.license2.value;
 
+          function notifySuccess(){
+            swal({
+              type: 'success',
+              toast: true,
+              title: 'License Added to Form',
+              showConfirmButton: false,
+              position: 'top',
+              timer: 4500
+            });
+          }
+
           if (specialCase) {
             switch (specialCase) {
               case 'No':
@@ -936,12 +1089,14 @@ var app = new Vue({
                 this.typeLicense = 'No Rights Reserved';
                 this.licenseLink = 'https://creativecommons.org/share-your-work/public-domain/cc0/';
                 this.licenseAbbreviation = 'CC0';
+                notifySuccess();
                 break;
               case "Yes":
                 this.licenseInfo = true;
                 this.typeLicense = 'Attribution 4.0 International';
                 this.licenseLink = 'http://creativecommons.org/licenses/by/4.0/';
                 this.licenseAbbreviation = 'CC BY 4.0';
+                notifySuccess();
                 break;
               default:
                 this.licenseInfo = false;
@@ -965,6 +1120,7 @@ var app = new Vue({
                 this.typeLicense = 'Attribution-NoDerivatives 4.0 International';
                 this.licenseLink = 'http://creativecommons.org/licenses/by-nd/4.0/';
                 this.licenseAbbreviation = 'CC BY-ND 4.0';
+                notifySuccess();
                 $('#thirdQuestionBlock').hide();
                 break;
               case "Yes, as long as others share alike|Yes":
@@ -972,6 +1128,7 @@ var app = new Vue({
                 this.typeLicense = 'Attribution-ShareAlike 4.0 International';
                 this.licenseLink = 'http://creativecommons.org/licenses/by-sa/4.0/';
                 this.licenseAbbreviation = 'CC BY-SA 4.0';
+                notifySuccess();
                 $('#thirdQuestionBlock').hide();
                 break;
               case "Yes|No":
@@ -979,6 +1136,7 @@ var app = new Vue({
                 this.typeLicense = 'Attribution-NonCommercial 4.0 International';
                 this.licenseLink = 'http://creativecommons.org/licenses/by-nc/4.0/';
                 this.licenseAbbreviation = 'CC BY-NC 4.0';
+                notifySuccess();
                 $('#thirdQuestionBlock').hide();
                 break;
               case "No|No":
@@ -986,6 +1144,7 @@ var app = new Vue({
                 this.typeLicense = 'Attribution-NonCommercial-NoDerivatives 4.0 International';
                 this.licenseAbbreviation = 'CC BY-NC-ND 4.0';
                 this.licenseLink = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
+                notifySuccess();
                 $('#thirdQuestionBlock').hide();
                 break;
               case "Yes, as long as others share alike|No":
@@ -993,6 +1152,7 @@ var app = new Vue({
                 this.typeLicense = 'Attribution-NonCommercial-ShareAlike 4.0 International';
                 this.licenseAbbreviation = 'CC BY-NC-SA 4.0';
                 this.licenseLink = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
+                notifySuccess();
                 $('#thirdQuestionBlock').hide();
                 break;
               default:
@@ -1004,10 +1164,6 @@ var app = new Vue({
                 break;
             }
           }
-
-
-
-
         },
         getFormValues () {
           this.requestPageHTML(this.link);
@@ -1070,7 +1226,6 @@ var app = new Vue({
         parseData(){
           let self = this;
           let data = this.data;
-          self.fieldsFoundCount = 0;
 
           Object.keys(data).forEach(function(key,index) {
             //prepares payload and emits event
@@ -1081,57 +1236,11 @@ var app = new Vue({
 
           self.otherFields = store.getters.getOtherFields
           self.metadata = store.getters.getStoreMetadata
-
-          // Object.keys(data).forEach(function(key,index) {
-          //     switch (key) {
-          //       case 'name'||'Name':
-          //         self.metadata['name'] = data[key];
-          //         self.fieldsFoundCount++;
-          //         break;
-          //       case 'description'||"Description":
-          //         self.metadata['description'] = data[key];
-          //         self.fieldsFoundCount++;
-          //         break;
-          //       case 'keywords'||'Keywords':
-          //         if (_.isArray(data[key])) {
-          //           self.keywords = data[key];
-          //         }else if (_.isString(data[key])) {
-          //           self.keywords = data[key].split(",");
-          //         }
-          //         self.fieldsFoundCount++;
-          //         break;
-          //       case 'sameAs'||"Same As":
-          //         self.metadata['sameAs'] = data[key];
-          //         self.fieldsFoundCount++;
-          //         break;
-          //       case 'version'||"Version":
-          //         self.metadata['version'] = data[key];
-          //         self.fieldsFoundCount++;
-          //         break;
-          //       case 'url':
-          //         self.metadata['url'] = data[key];
-          //         self.fieldsFoundCount++;
-          //         break;
-          //       case 'license':
-          //         self.licenseAbbreviation = data[key];
-          //         self.fieldsFoundCount++;
-          //         break;
-          //       case 'variablesMeasured':
-          //         self.metadata['variablesMeasured'] = data[key];
-          //         self.fieldsFoundCount++;
-          //         break;
-          //       default:
-          //         self.metadata[key] = data[key];
-          //         if ( !_.includes(["@context", "@type", "@id"], key)) {
-          //           self.otherFields.push(key);
-          //         }
-          //         break;
-          //     }
-          // });
         }
     },
     mounted:function(){
       var self = this;
+      self.parseQuestions(self.fieldsInfo);
       $(function () {
         $('#metadataForm').parsley().on('field:validated', function() {
           var err = $('.parsley-error').length;
@@ -1157,6 +1266,77 @@ var app = new Vue({
     created: function(){
     }
   })
+
+    //
+    // const options = {
+    // 	radius: 150, // explosion size
+    // 	variation: 10, // randomized variation on each point's angle
+    // 	points: 5, // number of points in explosion
+    // 	character: '⭐' // the character in each particle
+    // }
+    // const inputs = document.querySelectorAll('input, select');
+    // const main = document.querySelector('main');
+    // let clicked = false;
+    //
+    //
+    // // ===============
+    // // Event Listeners
+    // document.addEventListener('mousedown', () => clicked = true);
+    // document.addEventListener('mouseup', () => clicked = false);
+    // main.addEventListener('click', e => explode(e, options));
+    //
+    // // ==============
+    // // Functions
+    //
+    // function explode(e, options) {
+    //   console.log('explode')
+    // 	const container = document.createElement('div');
+    // 	container.classList.add('particles-container');
+    // 	container.style.left = e.clientX + "px";
+    // 	container.style.top = e.clientY + "px";
+    // 	document.body.appendChild(container);
+    //
+    //   for (let i = 0; i < options.points; i++) {
+    // 		const referenceAngle = (360 / options.points) * (i + 1);
+    // 		const maxAngle = referenceAngle + parseFloat(options.variation);
+    // 		const minAngle = referenceAngle - parseFloat(options.variation);
+    //
+    // 		const angle = randomAngleBetween(minAngle, maxAngle);
+    //
+    // 		const x = Math.cos(angle) * options.radius;
+    // 		const y = Math.sin(angle) * options.radius;
+    // 		const popup = document.createElement('div');
+    // 		popup.textContent = '⭐';
+    // 		popup.classList.add('particle');
+    // 		popup.style.top = y + "px";
+    // 		popup.style.left = x + "px";
+    // 		container.appendChild(popup);
+    //
+    // 		if (i == 0) {
+    // 			popup.addEventListener('animationend', () => {
+    // 				document.body.removeChild(container);
+    // 			});
+    // 		}
+    // 	}
+    // }
+    //
+    // function randomAngleBetween(minAngle, maxAngle) {
+    // 	return (Math.random() * (maxAngle - minAngle) + minAngle) / 180 * Math.PI - Math.PI/2;
+    // }
+    //
+    // function handleInput() {
+    //   const option = this.dataset.option;
+    // 	options[option] = this.value;
+    // 	if (option == 'duration') {
+    //     document.documentElement.style.setProperty('--duration', `${this.value}s`);
+    //   }
+    //   const valueDisplay = document.querySelector(`.${option}-value`);
+    //   if (valueDisplay) {
+    //     valueDisplay.textContent = this.value;
+    //   }
+    // }
+
+
 </script>
 {% include "footer.html" %}
 {% endblock %}
