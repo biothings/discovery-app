@@ -165,8 +165,6 @@ class VisualizerHandler(BaseHandler):
         self.write(test_output)
 
 
-
-
 APP_LIST = [
     (r"/?", MainHandler),
     (r"/schema-playground/?", PGHandler),
@@ -177,8 +175,5 @@ APP_LIST = [
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),
     (r"/logout/?", LogoutHandler),
     (r"/schema-org/(.+)/?", SchemaOrgHandler),
-
     (r"/(.+)/(.*)/?", VisualizerHandler),
-
-    # (r"/?", RegistryHandler),
 ]

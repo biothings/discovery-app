@@ -49,7 +49,12 @@ class RegistryHandler(BaseHandler):
 
     def get(self, api_id):
         ''' Retrive a document by es field _id '''
-        sch = Schema.get(id=api_id)
+        sch = Schema.get(id=api_id, ignore=404)
+        if not sch:
+            res = {'success': False,
+                   'error': 'Document does not exisit.'}
+            self.return_json(res, status_code=404)
+            return
         self.return_json(sch.to_dict())
 
     def put(self, api_id):
@@ -65,26 +70,29 @@ class RegistryHandler(BaseHandler):
             return
 
         # Validate document existance by id
-        sch = Schema.get(id=api_id)
+        sch = Schema.get(id=api_id, ignore=404)
         if not sch:
             res = {'success': False,
                    'error': 'Document does not exisit.'}
             self.return_json(res, status_code=404)
+            return
 
         # Validate edit permission
         if sch['_meta'].username != self.current_user['login']:
             res = {'success': False,
                    'error': 'Document does not belong to the logged-in user.'}
             self.return_json(res, status_code=403)
+            return
 
         # Parse request body
         req = tornado.escape.json_decode(self.request.body)
         url = req.get('url', '').lower()
-        if url:
+        if url and url != sch['_meta'].username:
             res = {'success': False,
                    'error': 'URL change requires recreating the document.'}
             self.return_json(res, status_code=403)
             return
+
         slug = req.get('slug', '').lower()
         if not slug:
             res = {'success': False,
@@ -127,21 +135,18 @@ class ProxyHandler(BaseHandler):
     ''' retrive a document from a remote server to bypass same origin policy '''
     async def get(self):
 
-        # TODO user validation
-
-        # TODO input validation
-        url = self.get_argument("url", "/")
-
-        # TODO header forward
-
-        # fetch attempt
-        http_client = tornado.httpclient.AsyncHTTPClient()
-        response = await http_client.fetch(url)
-
-        # TODO response validation
-
-        self.write(response.body)
-        self.finish()
+        try:
+            url = self.get_argument("url")
+            http_client = tornado.httpclient.AsyncHTTPClient()
+            response = await http_client.fetch(url)
+        except tornado.web.MissingArgumentError as err:
+            self.set_status(err.status_code)
+            self.write(str(err))
+        except tornado.httpclient.HTTPClientError as err:
+            self.set_status(err.code)
+            self.write(str(err))
+        else:
+            self.write(response.body)
 
 
 class DiscoveryQueryHandler(QueryHandler):
