@@ -14,6 +14,7 @@ from elasticsearch_dsl.connections import connections
 # Default elasticsearch connection
 connections.create_connection(hosts=['localhost'], timeout=20)
 
+
 class Metadata(InnerDoc):
     """
     The metadata of a schema in discovery-app.
@@ -26,7 +27,8 @@ class Metadata(InnerDoc):
     def stamp(self):
         ''' Record the time and date,
         automatically invoked when a Schema is saved '''
-        self.timestamp = datetime.now().isoformat()
+        self.timestamp = datetime.now()
+
 
 class Schema(Document):
     """
