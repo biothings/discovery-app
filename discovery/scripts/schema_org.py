@@ -2,12 +2,20 @@
 
 ''' Schema.org Datasource Indexer '''
 
+import functools
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
-from discovery.web.api.es.doc import Metadata, Schema
+from discovery.web.api.es.doc import Metadata, Schema  # Index is defined here
+
+print()
+print("-"*70)
+print(" "*25, "Schema.org Indexer")
+print("-"*70)
+print()
 
 res = requests.get("https://schema.org/version/3.4/schema.jsonld").json()
 print('Downloaded', len(res['@graph']), 'objects.\n')
@@ -28,7 +36,7 @@ for obj in res['@graph']:
                 else:
                     raise TypeError
             else:
-                print('Class', obj['@id'], 'is a base class.')
+                print('[INFO] Class', obj['@id'], 'is a base class.')
         elif obj['@type'] == 'rdf:Property':
             DOMAIN = "http://schema.org/domainIncludes"
             if DOMAIN in obj:
@@ -47,15 +55,20 @@ for obj in res['@graph']:
                     else:
                         properties[cls_] = [obj['@id']]
             else:
-                print('Property', obj['@id'], 'is not attached to any class.')
+                print('[WARNING] Property', obj['@id'], 'is not attached to any class.')
         else:
             pass
     else:
-        print('Skipping typeless object', obj['@id'])
+        print('[WARNING] Skipping typeless object', obj['@id'])
 
 print()
 print('Loaded', len(subclasses), 'class nodes.')
-print('Loaded', len(properties), 'property nodes.\n')
+print('Loaded', len(properties), 'property nodes.')
+print()
+print('Legend')
+print(' . : Created')
+print(' ^ : Updated')
+print()
 
 schemas = []
 for obj in res['@graph']:
@@ -74,6 +87,7 @@ for obj in res['@graph']:
                         queue.append(subcls)
         clses = [url[18:] for url in clses if url.startswith('http://schema.org/') or url]
         props = [url[18:] for url in props if url.startswith('http://schema.org/') or url]
+        ###### DEBUG #####
         # print()
         # print(obj['@id'])
         # print(clses)
@@ -81,25 +95,43 @@ for obj in res['@graph']:
         # print()
         meta = Metadata(username='schema_org_auto_indexer',
                         url=obj['@id'] + '.jsonld', slug=obj['rdfs:label'])
-        print(obj['@id'] + '.jsonld')
         schema = Schema(clses=clses, props=props, _meta=meta)
         schemas.append(schema)
 
-perf_sample_size = 10
+
+def es_save(sch):
+    ''' save a schema to es index '''
+    new_created = sch.save(refresh=False)
+    if new_created:
+        print('.', end='')
+    else:
+        print('^', end='')
+    sys.stdout.flush()
+    return new_created
+
+
+sample_size = 50  # for performance benchmark
 
 start = time.perf_counter()
-for schema in schemas[: perf_sample_size]:
-    schema.save(refresh=False)
-    print('.', end='')
-    sys.stdout.flush()
+with ThreadPoolExecutor() as executor:
+    res_sample = executor.map(es_save, schemas[:sample_size])
 end = time.perf_counter()
 print()
 
 print()
-print('Estimated', int(len(schemas)/perf_sample_size*(end - start)/60), 'minute(s) left.')
+print('Estimated total time:', round(len(schemas)/sample_size*(end - start)/60), 'minute(s).')
+print('Estimated time left:',
+      round((len(schemas) - sample_size) / sample_size * (end - start) / 60), 'minute(s).')
 print()
 
-for schema in schemas[10:]:
-    schema.save(refresh=False)
-    print('.', end='')
-    sys.stdout.flush()
+with ThreadPoolExecutor() as executor:
+    res_main = executor.map(es_save, schemas[sample_size:])
+    res = list(res_sample) + list(res_main)
+end = time.perf_counter()
+print()
+
+print()
+print('Actual time spent:', round((end - start)/60), 'minute(s).')
+print('Created', functools.reduce(lambda a, b: a+b, res), 'document(s).')
+print('Updated', len(res) - functools.reduce(lambda a, b: a+b, res), 'document(s).')
+print()
