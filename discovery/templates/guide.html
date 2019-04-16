@@ -2,401 +2,6 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-.meterContainer{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#45484d+0,000000+100;Black+3D+%231 */
-  background: rgb(69,72,77); /* Old browsers */
-  background: -moz-linear-gradient(top, rgba(69,72,77,1) 0%, rgba(0,0,0,1) 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
-  border: 5px solid var(--sec);
-  border-radius: 20px;
-  z-index: 2000;
-  position: fixed;
-  right: 20px;
-  top: 15%;
-  display: flex;
-  flex-direction: column;
-}
-
-.meterTextBox{
-  color: white;
-  flex: 1;
-  height: 40px;
-  text-align: center;
-  line-height:20px;
-  word-wrap: break-word;
-  padding: 10px;
-  font-weight: bold !important;
-  text-transform: uppercase;
-}
-
-.trophyBox{
-  flex: 1;
-}
-
-.meterBox{
-  flex: 1;
-  flex-basis: 120px;
-  height: 120px;
-  line-height: 120px;
-  text-align: center;
-  align-content: center;
-  -webkit-transform: rotate(-90deg);
-  -moz-transform: rotate(-90deg);
-  -o-transform: rotate(-90deg);
-  -ms-transform: rotate(-90deg);
-  transform: rotate(-90deg);
-}
-
-.zoomHalf{
-  zoom:.5;
-}
-
-
-meter{
-  box-shadow:0px 0px 8px #5b5b5b;
-}
-
-.clipBox{
-  -webkit-clip-path: polygon(58% 0, 100% 0, 100% 100%, 0 100%, 0 49%);
-  clip-path: polygon(58% 0, 100% 0, 100% 100%, 0 100%, 0 49%);
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 100px;
-  z-index: 2;
-  background: var(--sec);
-  text-align: center;
-  line-height: 100px;
-  color: white;
-  font-size: 2em;
-  text-transform: uppercase;
-  font-weight: lighter;
-}
-
-.stepBox{
-  position: relative;
-  width: 100%;
-  height: 100px;
-  background: var(--main);
-}
-
-.stepBox span{
-  color: white;
-  position: absolute;
-  padding: 2px 7px;
-  left:0;
-  top:0;
-  font-size: 2em;
-  font-weight: lighter;
-}
-
-.kwbadge:hover{
-  background: var(--danger)
-}
-.kwbadge:hover span:last-child{
-  opacity: 1 !important;
-  transition: .5s;
-}
-
-.particles-container {
-  position: absolute;
-	user-select: none;
-  pointer-events: none;
-  z-index: 200;
-}
-
-.particle {
-	position: absolute;
-	animation: explode .5s reverse linear;
-	transform: translatex(-50%) translatey(-50%);
-  font-size: 1em;
-}
-
-@keyframes explode {
-  100% {
-    top: 50%;
-    left: 50%;
-    transform: scale(5);
-  }
-}
-
-.highlight{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#666666+0,000000+51,777777+100&0.47+0,0+52,0.47+100 */
-background: -moz-linear-gradient(left, rgba(102,102,102,0.47) 0%, rgba(0,0,0,0.01) 51%, rgba(2,2,2,0) 52%, rgba(119,119,119,0.47) 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(left, rgba(102,102,102,0.47) 0%,rgba(0,0,0,0.01) 51%,rgba(2,2,2,0) 52%,rgba(119,119,119,0.47) 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to right, rgba(102,102,102,0.47) 0%,rgba(0,0,0,0.01) 51%,rgba(2,2,2,0) 52%,rgba(119,119,119,0.47) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#78666666', endColorstr='#78777777',GradientType=1 ); /* IE6-9 */
-  border-radius: 10px;
-}
-
-.category{
-  border-radius: 10px;
-}
-
-.category:hover{
-  background: #768088 !important;
-  transition: .5s;
-}
-
-.pill{
-  border:2px solid #b9b9b9;
-  display: flex;
-  border-radius:20px;
-  background: transparent;
-  margin:5px;
-  transition: border .5s;
-}
-
-.pillLeft{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#ffffff+0,f1f1f1+50,e1e1e1+51,f6f6f6+100;White+Gloss+%231 */
-  background: rgb(255,255,255); /* Old browsers */
-  background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(241,241,241,1) 50%, rgba(225,225,225,1) 51%, rgba(246,246,246,1) 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(241,241,241,1) 50%,rgba(225,225,225,1) 51%,rgba(246,246,246,1) 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom, rgba(255,255,255,1) 0%,rgba(241,241,241,1) 50%,rgba(225,225,225,1) 51%,rgba(246,246,246,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f6f6f6',GradientType=0 ); /* IE6-9 */
-  flex: 1;
-  padding: 5px 20px;
-  border-top-left-radius:20px;
-  border-bottom-left-radius:20px;
-  display: flex !important;
-  flex-direction: column;
-  justify-content: space-around;
-  pointer-events: none;
-  outline: none;
-}
-
-.pill:hover{
-  border:2px solid #808080;
-  box-shadow: 0px 2px 4px #808080;
-}
-
-.pillRight{
-  flex: 1;
-    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#45484d+0,000000+43,000000+65,5b5f66+100 */
-  background: rgb(69,72,77); /* Old browsers */
-  background: -moz-linear-gradient(top, rgba(69,72,77,1) 0%, rgba(0,0,0,1) 43%, rgba(0,0,0,1) 65%, rgba(91,95,102,1) 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 43%,rgba(0,0,0,1) 65%,rgba(91,95,102,1) 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom, rgba(69,72,77,1) 0%,rgba(0,0,0,1) 43%,rgba(0,0,0,1) 65%,rgba(91,95,102,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45484d', endColorstr='#5b5f66',GradientType=0 ); /* IE6-9 */
-  display: flex;
-  flex-direction: column;
-  pointer-events: none;
-  outline: none;
-  border-top-right-radius:20px;
-  border-bottom-right-radius:20px;
-}
-
-.pillTop{
-  min-width: 55px;
-  color: grey;
-  flex: 1;
-  padding: 5px;
-  border-top-right-radius:20px;
-  display: flex !important;
-  flex-direction: column;
-  justify-content: space-around;
-  pointer-events: none;
-  outline: none;
-}
-
-.pillBottom{
-  min-width: 55px;
-  font-weight: bold;
-  color:white;
-  flex: 1;
-  padding: 5px;
-  border-bottom-right-radius:20px;
-  display: flex !important;
-  flex-direction: column;
-  justify-content: space-around;
-  pointer-events: none;
-  outline: none;
-}
-
-.bg-complete{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#8ec454+3,0d0d0d+32,010101+50,0a0a0a+53,303030+76,383838+87,1b1b1b+100 */
-background: rgb(142,196,84); /* Old browsers */
-background: -moz-linear-gradient(top, rgba(142,196,84,1) 3%, rgba(13,13,13,1) 32%, rgba(1,1,1,1) 50%, rgba(10,10,10,1) 53%, rgba(48,48,48,1) 76%, rgba(56,56,56,1) 87%, rgba(27,27,27,1) 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(top, rgba(142,196,84,1) 3%,rgba(13,13,13,1) 32%,rgba(1,1,1,1) 50%,rgba(10,10,10,1) 53%,rgba(48,48,48,1) 76%,rgba(56,56,56,1) 87%,rgba(27,27,27,1) 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to bottom, rgba(142,196,84,1) 3%,rgba(13,13,13,1) 32%,rgba(1,1,1,1) 50%,rgba(10,10,10,1) 53%,rgba(48,48,48,1) 76%,rgba(56,56,56,1) 87%,rgba(27,27,27,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#8ec454', endColorstr='#1b1b1b',GradientType=0 ); /* IE6-9 */
-}
-
-/* ----------------------------------------------
- * Generated by Animista on 2019-4-12 11:55:11
- * w: http://animista.net, t: @cssanimista
- * ---------------------------------------------- */
-
-/**
- * ----------------------------------------
- * animation jello-horizontal
- * ----------------------------------------
- */
-@-webkit-keyframes jello-horizontal {
-  0% {
-    -webkit-transform: scale3d(1, 1, 1);
-            transform: scale3d(1, 1, 1);
-  }
-  30% {
-    -webkit-transform: scale3d(1.25, 0.75, 1);
-            transform: scale3d(1.25, 0.75, 1);
-  }
-  40% {
-    -webkit-transform: scale3d(0.75, 1.25, 1);
-            transform: scale3d(0.75, 1.25, 1);
-  }
-  50% {
-    -webkit-transform: scale3d(1.15, 0.85, 1);
-            transform: scale3d(1.15, 0.85, 1);
-  }
-  65% {
-    -webkit-transform: scale3d(0.95, 1.05, 1);
-            transform: scale3d(0.95, 1.05, 1);
-  }
-  75% {
-    -webkit-transform: scale3d(1.05, 0.95, 1);
-            transform: scale3d(1.05, 0.95, 1);
-  }
-  100% {
-    -webkit-transform: scale3d(1, 1, 1);
-            transform: scale3d(1, 1, 1);
-  }
-}
-@keyframes jello-horizontal {
-  0% {
-    -webkit-transform: scale3d(1, 1, 1);
-            transform: scale3d(1, 1, 1);
-  }
-  30% {
-    -webkit-transform: scale3d(1.25, 0.75, 1);
-            transform: scale3d(1.25, 0.75, 1);
-  }
-  40% {
-    -webkit-transform: scale3d(0.75, 1.25, 1);
-            transform: scale3d(0.75, 1.25, 1);
-  }
-  50% {
-    -webkit-transform: scale3d(1.15, 0.85, 1);
-            transform: scale3d(1.15, 0.85, 1);
-  }
-  65% {
-    -webkit-transform: scale3d(0.95, 1.05, 1);
-            transform: scale3d(0.95, 1.05, 1);
-  }
-  75% {
-    -webkit-transform: scale3d(1.05, 0.95, 1);
-            transform: scale3d(1.05, 0.95, 1);
-  }
-  100% {
-    -webkit-transform: scale3d(1, 1, 1);
-            transform: scale3d(1, 1, 1);
-  }
-}
-
-.jello {
-	-webkit-animation: jello-horizontal 0.9s both;
-	        animation: jello-horizontal 0.9s both;
-}
-
-
-.meterContainerSmall{
-  position: fixed;
-  width: 100vw;
-  margin: 0;
-  bottom:1%;
-  z-index: 200;
-}
-
-.meterSmall{
-  margin: auto;
-  display: flex;
-}
-
-.meterSmall meter{
-  flex: 1;
-}
-
-.googleText{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#ff2600+23,ffe100+23,ffd400+49,009dff+50,009dff+50,0099ff+75,03bc00+75 */
-  background: rgb(255,38,0); /* Old browsers */
-  background: -moz-linear-gradient(top, rgba(255,38,0,1) 23%, rgba(255,225,0,1) 23%, rgba(255,212,0,1) 49%, rgba(0,157,255,1) 50%, rgba(0,157,255,1) 50%, rgba(0,153,255,1) 75%, rgba(3,188,0,1) 75%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top, rgba(255,38,0,1) 23%,rgba(255,225,0,1) 23%,rgba(255,212,0,1) 49%,rgba(0,157,255,1) 50%,rgba(0,157,255,1) 50%,rgba(0,153,255,1) 75%,rgba(3,188,0,1) 75%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom, rgba(255,38,0,1) 23%,rgba(255,225,0,1) 23%,rgba(255,212,0,1) 49%,rgba(0,157,255,1) 50%,rgba(0,157,255,1) 50%,rgba(0,153,255,1) 75%,rgba(3,188,0,1) 75%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff2600', endColorstr='#03bc00',GradientType=0 ); /* IE6-9 */
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.gold{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#fccd4d+0,f9edcf+21,fccd4d+41,f8b500+51,d18b0a+76,f9be27+100 */
-background: rgb(252,205,77); /* Old browsers */
-background: -moz-linear-gradient(top, rgba(252,205,77,1) 0%, rgba(249,237,207,1) 21%, rgba(252,205,77,1) 41%, rgba(248,181,0,1) 51%, rgba(209,139,10,1) 76%, rgba(249,190,39,1) 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(top, rgba(252,205,77,1) 0%,rgba(249,237,207,1) 21%,rgba(252,205,77,1) 41%,rgba(248,181,0,1) 51%,rgba(209,139,10,1) 76%,rgba(249,190,39,1) 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to bottom, rgba(252,205,77,1) 0%,rgba(249,237,207,1) 21%,rgba(252,205,77,1) 41%,rgba(248,181,0,1) 51%,rgba(209,139,10,1) 76%,rgba(249,190,39,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fccd4d', endColorstr='#f9be27',GradientType=0 ); /* IE6-9 */
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.min{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#c9de96+0,7ad356+100 */
-background: rgb(201,222,150); /* Old browsers */
-background: -moz-linear-gradient(top, rgba(201,222,150,1) 0%, rgba(122,211,86,1) 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(top, rgba(201,222,150,1) 0%,rgba(122,211,86,1) 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to bottom, rgba(201,222,150,1) 0%,rgba(122,211,86,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c9de96', endColorstr='#7ad356',GradientType=0 ); /* IE6-9 */
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-}
-
-.glow {
-  -webkit-animation: glow 0.75s ease-in-out infinite alternate;
-  -moz-animation: glow 0.75s ease-in-out infinite alternate;
-  animation: glow 0.75s ease-in-out infinite alternate;
-}
-
-@-webkit-keyframes glow {
-    0% {
-		border-color: #393;
-		box-shadow: 0 0 5px rgba(0,255,0,.2), inset 0 0 5px rgba(0,255,0,.1), 0 0px 0 #000;
-    }
-    100% {
-		border-color: #6f6;
-		box-shadow: 0 0 20px rgba(0,255,0,.6), inset 0 0 10px rgba(0,255,0,.4), 0 0px 0 #000;
-    }
-}
-
-@keyframes glow {
-    0% {
-		border-color: #393;
-		box-shadow: 0 0 5px rgba(0,255,0,.2), inset 0 0 5px rgba(0,255,0,.1), 0 0px 0 #000;
-    }
-    100% {
-		border-color: #6f6;
-		box-shadow: 0 0 20px rgba(0,255,0,.6), inset 0 0 10px rgba(0,255,0,.4), 0 0px 0 #000;
-    }
-}
-
-
-
-
- input:focus {
-	-webkit-animation: glow 800ms ease-out infinite alternate;
-	        animation: glow 800ms ease-out infinite alternate;
-	border-color: #393;
-	box-shadow: 0 0 5px rgba(0,255,0,.2), inset 0 0 5px rgba(0,255,0,.1), 0 2px 0 #000;
-	outline: none;
-}
-
-textarea:focus {
- -webkit-animation: glow 800ms ease-out infinite alternate;
-         animation: glow 800ms ease-out infinite alternate;
- border-color: #393;
- box-shadow: 0 0 5px rgba(0,255,0,.2), inset 0 0 5px rgba(0,255,0,.1), 0 2px 0 #000;
- outline: none;
-}
 
 </style>
 
@@ -406,13 +11,22 @@ textarea:focus {
     <img src="./static/img/ripple.svg"/>
   </div>
 
-  <div class="meterContainer d-none d-sm-none d-md-block" :class="{ 'jello' : meterTotal >= totalQuestions}">
+  <div class="meterContainer d-none d-sm-none d-md-block" :class="{ 'jello bg-complete' : meterTotal >= totalQuestions}">
     <div class="meterTextBox">
       <small>Discovery<br /> Meter</small>
     </div>
     <div class="meterBox">
       <meter min="0" :max="totalQuestions" :low="totalQuestions/3" :high="totalQuestions*.75" :optimum="totalQuestions" :value="meterTotal">2 out of 10</meter>
     </div>
+    <small class="text-danger bold d-block text-center" v-if='meterTotal > 0 && meterTotal < totalQuestions/3'>
+      LOW
+    </small>
+    <small class="text-warning bold d-block text-center" v-if='meterTotal > totalQuestions/3 && meterTotal < totalQuestions*.75'>
+      MEDIUM
+    </small>
+    <small class="text-success bold d-block text-center" v-if='meterTotal >= totalQuestions*.75'>
+      HIGH
+    </small>
     <template v-if="achievements.length">
       <div class="p-1 bg-muted trophyBox">
         <small class="text-muted caps d-block text-center">Trophies</small>
@@ -686,7 +300,7 @@ textarea:focus {
               <div class="row">
               <form id="metadataForm" autocomplete="off" class="col-sm-12 col-md-12">
                 <template v-for="(field,index) in fieldsInfo">
-                  <metadata-field :key='index' :label="field.label" :inputvalidationtype="field.inputvalidationtype" :helpmsg="field.helpmsg" :requiredtext="field.requiredtext" :requiredby="field.requiredby" :trophy="field.trophy" :fieldname="field.fieldname"></metadata-field>
+                  <metadata-field :key='index' :label="field.label" :inputvalidationtype="field.inputvalidationtype" :required="field.required" :helpmsg="field.helpmsg" :emptymessage="field.emptymessage" :requiredby="field.requiredby" :trophy="field.trophy" :fieldname="field.fieldname"></metadata-field>
                 </template>
                 <!-- <div class="form-group row">
                   <label for="license" class="col-sm-2 col-form-label col-form-label-sm">
@@ -958,7 +572,7 @@ Vue.component('metadata-field', {
       err:true,
     }
   },
-  props: ['inputvalidationtype','label','trophy','requiredby','helpmsg','requiredtext','required','fieldname'],
+  props: ['inputvalidationtype','label','trophy','requiredby','helpmsg','emptymessage','required','fieldname'],
   methods:{
     addClass(list){
       var str = list.join(' ');
@@ -1074,7 +688,7 @@ Vue.component('metadata-field', {
     <template v-if="inputvalidationtype ==='keywords'">
       <div class="form-group p-2 row" :class='addClass(requiredby)'>
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
-          <span v-text="label" :class="{'text-success':!err}"></span>
+          <span v-text="label" :class="{'text-success':!err}"></span><span v-if="required">*</span>
           <br />
           <template v-for="item in parseRequired(requiredby)">
             <i v-if="item==='Minimum'" :data-tippy="'Minimum requirement'" class="fas fa-seedling text-success"></i>
@@ -1098,14 +712,14 @@ Vue.component('metadata-field', {
             </span>
           </template>
         </div>
-        <small class="text-primary m-auto" v-if="err" v-text="requiredtext"></small>
+        <small class="col-sm-12 text-primary m-auto" v-if="err" v-text="emptymessage"></small>
       </div>
     </template>
 
     <template v-if="inputvalidationtype ==='textarea'">
       <div class="form-group p-2 row" :class='addClass(requiredby)'>
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
-          <span v-text="label" :class="{'text-success':!err}"></span>
+          <span v-text="label" :class="{'text-success':!err}"></span><span v-if="required">*</span>
           <br />
           <template v-for="item in parseRequired(requiredby)">
             <i v-if="item==='Minimum'" :data-tippy="'Minimum requirement'" class="fas fa-seedling text-success"></i>
@@ -1115,18 +729,18 @@ Vue.component('metadata-field', {
           </template>
           <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
         </label>
-        <textarea :required="required?'':'false'" rows="7" v-model="answer" class="form-control col-sm-10" :id="label" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
+        <textarea :data-parsley-required="required" rows="7" v-model="answer" class="form-control col-sm-10" :id="label" name="message" data-parsley-trigger="keyup" data-parsley-minlength="20" data-parsley-minlength-message="Your description needs to be at least 20 characters long.." data-parsley-validation-threshold="10"></textarea>
         <div class="col-sm-12 text-center">
           <small><span v-text="answer.length">0</span> Characters</small>
         </div>
-        <small class="text-primary m-auto" v-if="err" v-text="requiredtext"></small>
+        <small class="text-primary m-auto" v-if="err" v-text="emptymessage"></small>
       </div>
     </template>
 
     <template v-if="inputvalidationtype ==='text'||inputvalidationtype ==='url'">
       <div class="form-group p-2 row" :class='addClass(requiredby)'>
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
-          <span v-text="label" :class="{'text-success':!err}"></span>
+          <span v-text="label" :class="{'text-success':!err}"></span><span v-if="required">*</span>
           <br />
           <template v-for="item in parseRequired(requiredby)">
             <i v-if="item==='Minimum'" :data-tippy="'Minimum requirement'" class="fas fa-seedling text-success"></i>
@@ -1137,9 +751,9 @@ Vue.component('metadata-field', {
           <i class="fas fa-question-circle" :data-tippy="helpmsg"></i>
         </label>
         <div class="col-sm-10">
-          <input :required="required?'':'false'" autocomplete="off" v-model="answer" data-parsley-trigger="change" :type="inputvalidationtype" class="form-control form-control-sm" :id="label" :placeholder="helpmsg" >
+          <input :data-parsley-required="required" autocomplete="off" v-model="answer" data-parsley-trigger="change" :type="inputvalidationtype" class="form-control form-control-sm" :id="label" :placeholder="helpmsg" >
         </div>
-        <small class="text-primary m-auto" v-if="err" v-text="requiredtext"></small>
+        <small class="text-primary m-auto" v-if="err" v-text="emptymessage"></small>
       </div>
     </template>
 
@@ -1188,7 +802,7 @@ var app = new Vue({
               //when hovering above the ?
               'helpmsg':'A descriptive name of a dataset',
               //initial red text or when empty
-              'requiredtext':'Required* What is the name of your dataset?',
+              'emptymessage':'Required* What is the name of your dataset?',
               //achieevment for completing this question
               'trophy':'',
               //required by what serach engines
@@ -1200,7 +814,7 @@ var app = new Vue({
               'inputvalidationtype':'textarea',
               'required':true,
               'helpmsg':'A short summary describing a dataset.',
-              'requiredtext':'Required* Write a short summary about your dataset',
+              'emptymessage':'Required* Write a short summary about your dataset',
               'trophy':'',
               'requiredby':['Minimum','Google','DDE','Gold'],
             },
@@ -1210,7 +824,7 @@ var app = new Vue({
               'inputvalidationtype':'keywords',
               'required':'',
               'helpmsg':'Keywords summarizing the dataset',
-              'requiredtext':'Required* Enter a list of keywords that descrive your dataset',
+              'emptymessage':'Enter a list of keywords that descrive your dataset',
               'trophy':'',
               'requiredby':['Google','DDE','Gold'],
             },
@@ -1218,9 +832,9 @@ var app = new Vue({
               'label':'Version',
               'fieldname':'version',
               'inputvalidationtype':'text',
-              'required':true,
+              'required':false,
               'helpmsg':'The version number of the dataset',
-              'requiredtext':'Required* Enter the version number of your dataset',
+              'emptymessage':'Enter the version number of your dataset',
               'trophy':'',
               'requiredby':['Google','DDE','Gold'],
             },
@@ -1228,9 +842,9 @@ var app = new Vue({
               'label':'URL',
               'fieldname':'url',
               'inputvalidationtype':'url',
-              'required':true,
+              'required':false,
               'helpmsg':'Location of a page describing the dataset',
-              'requiredtext':'Required* Enter the url of a page that decribes the dataset',
+              'emptymessage':'Enter the url of a page that decribes the dataset',
               'trophy':'',
               'requiredby':['Google','DDE','Gold'],
             },
@@ -1238,9 +852,9 @@ var app = new Vue({
               'label':'Same As',
               'fieldname':'sameAs',
               'inputvalidationtype':'text',
-              'required':true,
+              'required':false,
               'helpmsg':'A link to a page that provides more information about the same dataset, usually in a different repository.',
-              'requiredtext':'Required* Enter the url of a page that provides more information about the same dataset',
+              'emptymessage':'Enter the url of a page that provides more information about the same dataset',
               'trophy':'',
               'requiredby':['Google','Gold'],
             },
@@ -1248,9 +862,9 @@ var app = new Vue({
               'label':'Date Modified',
               'fieldname':'dateModified',
               'inputvalidationtype':'text',
-              'required':true,
+              'required':false,
               'helpmsg':'The last date this dataset metadata was modified.',
-              'requiredtext':'Required* This field will be automatically filled in.',
+              'emptymessage':'This field will be automatically filled in.',
               'trophy':'',
               'requiredby':['Google','DDE','Gold'],
             },
@@ -1405,7 +1019,7 @@ var app = new Vue({
             }
           }else{
             swal({
-              type: 'error',
+              type: 'warning',
               title: 'You need to choose a license to proceed',
               position: 'center',
               timer: 4500
@@ -1617,7 +1231,7 @@ var app = new Vue({
               'inputvalidationtype':'text',
               'required':true,
               'helpmsg':'enter text here',
-              'requiredtext':'',
+              'emptymessage':'',
               'trophy':'',
               'requiredby':['Other'],
             })
