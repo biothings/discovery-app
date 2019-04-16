@@ -80,7 +80,7 @@ class Schema(Document):
         return ''
 
     #pylint: disable=arguments-differ
-    def save(self, ref_raw=False, **kwargs):
+    def save(self, ref_raw=False, refresh=True, **kwargs):
         '''
         Save the Schema document into elasticsearch.
         If the document doesn’t exist it is created, it is overwritten otherwise.
@@ -92,4 +92,4 @@ class Schema(Document):
         if ref_raw or '~raw' not in self:
             self['~raw'] = self.encode_raw()
         self._meta.stamp()
-        return super().save(refresh=True, **kwargs)
+        return super().save(refresh=refresh, **kwargs)
