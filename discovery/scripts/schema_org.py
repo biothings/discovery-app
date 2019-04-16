@@ -36,7 +36,7 @@ for obj in res['@graph']:
                 else:
                     raise TypeError
             else:
-                print('[INFO] Class', obj['@id'], 'is a base class.')
+                print('[INFO] Found base class', obj['@id'])
         elif obj['@type'] == 'rdf:Property':
             DOMAIN = "http://schema.org/domainIncludes"
             if DOMAIN in obj:
@@ -55,7 +55,7 @@ for obj in res['@graph']:
                     else:
                         properties[cls_] = [obj['@id']]
             else:
-                print('[WARNING] Property', obj['@id'], 'is not attached to any class.')
+                print('[WARNING] Skipping domainless property', obj['@id'])
         else:
             pass
     else:
@@ -65,7 +65,7 @@ print()
 print('Loaded', len(subclasses), 'class nodes.')
 print('Loaded', len(properties), 'property nodes.')
 print()
-print('Legend')
+print('Indexing Legend')
 print(' . : Created')
 print(' ^ : Updated')
 print()
