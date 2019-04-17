@@ -2,7 +2,7 @@
     Proxy Handler Tester
 '''
 
-from nose.core import runmodule
+from discovery.tests import run
 
 from biothings.tests import BiothingsTestCase, TornadoTestServerMixin
 
@@ -30,8 +30,4 @@ class DiscoveryProxyTest(TornadoTestServerMixin, BiothingsTestCase):
 
 
 if __name__ == '__main__':
-    print()
-    print('Proxy Handler Local Test')
-    print('-' * 70)
-    print()
-    runmodule(argv=['', '--logging-level=INFO', '-v'])
+    run('Proxy Handler Local Test')
