@@ -4,14 +4,14 @@
 <style>
 
 </style>
-
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 <main id="guide" style="min-height:70vh;">
 
   <div v-if=loading class="loader">
     <img src="./static/img/ripple.svg"/>
   </div>
 
-  <div class="meterContainer d-none d-sm-none d-md-block" :class="{ 'jello bg-complete' : meterTotal >= totalQuestions}">
+  <div data-aos="fade-up" data-aos-anchor="#metadataForm" data-aos-delay="200" class="meterContainer d-none d-sm-none d-md-block" :class="{ 'bg-complete' : meterTotal >= totalQuestions}">
     <div class="meterTextBox">
       <small>Discovery<br /> Meter</small>
     </div>
@@ -381,12 +381,15 @@
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://unpkg.com/vuex"></script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="./static/js/lodash.js"></script>
 <script src="./static/js/renderjson.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
+
+AOS.init();
 
 const store = new Vuex.Store({
   state: {
@@ -657,7 +660,7 @@ Vue.component('metadata-field', {
     // console.log('TYPE',this.inputvalidationtype)
   },
   updated:function(){
-    console.log('STORE ',this.$store.state);
+    // console.log('STORE ',this.$store.state);
   },
   computed: {
     answer:{
@@ -737,7 +740,7 @@ Vue.component('metadata-field', {
       </div>
     </template>
 
-    <template v-if="inputvalidationtype ==='text'||inputvalidationtype ==='url'">
+    <template v-if="inputvalidationtype ==='text'||inputvalidationtype ==='url'||inputvalidationtype ==='date'">
       <div class="form-group p-2 row" :class='addClass(requiredby)'>
         <label :for="label" class="col-sm-2 col-form-label col-form-label-sm">
           <span v-text="label" :class="{'text-success':!err}"></span><span v-if="required">*</span>
@@ -861,7 +864,7 @@ var app = new Vue({
             {
               'label':'Date Modified',
               'fieldname':'dateModified',
-              'inputvalidationtype':'text',
+              'inputvalidationtype':'date',
               'required':false,
               'helpmsg':'The last date this dataset metadata was modified.',
               'emptymessage':'This field will be automatically filled in.',
@@ -1224,7 +1227,7 @@ var app = new Vue({
           let self = this;
           if (key[0] !== '@') {
             var finalResult = _.startCase(key);
-            console.log(key,finalResult);
+            // console.log(key,finalResult);
             self.fieldsInfo.push({
               'label':finalResult,
               'fieldname':key,
