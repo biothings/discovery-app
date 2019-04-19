@@ -36,6 +36,7 @@ class Schema(Document):
     The es backend is a collection of objects of this type.
     """
     locals()['~raw'] = Binary()
+    label = Text()
     clses = Text(multi=True)
     props = Text(multi=True)
     _meta = Object(Metadata, required=True)
