@@ -19,7 +19,7 @@ class Metadata(InnerDoc):
     """
     The metadata of a schema in discovery-app.
     """
-    slug = Keyword(required=True)
+    slug = Keyword()
     username = Text(fields={'keyword': Keyword()}, required=True)
     timestamp = Date(required=True)
     url = Text(required=True)
