@@ -2,22 +2,50 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-
+  .no-br{
+    border-radius: 0px !important;
+  }
 </style>
 <div id="playground" class="container" style="min-height: 70vh;padding-top:60px;">
+
   <div class="jumbotron animatedBack text-center mt-5">
     <h1 class="text-light">SCHEMA PLAYGROUND</h1>
     <small class="text-light">(Work in Progress)</small>
   </div>
-  <div class="jumbotron text-muted text-center">
+  <div v-if="!choice" class="row mb-4">
+    <div class="col-sm-12 text-center p-5 bg-secondary text-center">
+      <h1>DO YOU HAVE A SCHEMA?</h1>
+    </div>
+    <div class="col-sm-12">
+      <div class="row">
+        <buttom @click.prevent="choice='have'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-primary text-light">
+          <h1>Yes</h1>
+          <h4>Visualize your schema and register it</h4>
+        </buttom>
+        <buttom @click.prevent="choice='dont'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-danger text-light">
+          <h1>No</h1>
+          <h4>Search other schemas and start your own</h4>
+        </buttom>
+      </div>
+    </div>
+  </div>
+  <div v-if="choice" class="">
+    <buttom @click.prevent="choice=''" class="btn w-100 text-center p-4 btn-danger text-light">
+      Back
+    </buttom>
+  </div>
+  <div v-if="choice === 'have'" class="jumbotron text-muted text-center">
     <h1>IF YOU HAVE A SCHEMA</h1>
-    <p>Use this tool to load your schema to visualize it</p>
+    <p>Use this tool to load your schema and visualize it</p>
     <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
       <div class="form-group">
         <label for="urlform">Paste your URL here:</label>
         <input style="margin:auto;" data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="on" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
         <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
       </div>
+      <p>
+        <small>Need Help? Try these examples</small>
+      </p>
       <small class="badge badge-pill badge-secondary pointer mr-1"
       @click="input = 'https://raw.githubusercontent.com/cvisb/sample_viewer_web/master/sample-viewer/src/assets/schema/dataset.json'">
         <i class="fas fa-question-circle" data-tippy="CVISB Dataset"></i> CVISB Example
@@ -32,10 +60,27 @@
       </small>
     </form>
   </div>
+
+  <div v-if="choice === 'dont'" class="container">
+    <div class="jumbotron">
+      <form @submit.prevent="searchSchemas">
+        <div class="form-group">
+          <input type="text" v-model="userInput" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+        </div>
+        <button @click.prevent="searchSchemas" type="button" class="btn btn-primary">Search</button>
+      </form>
+    </div>
+    {% include "registry.html" %}
+  </div>
+
+  <!-- <div v-if="choice === 'dont'" class="container">
+    {% include "registry.html" %}
+  </div> -->
+
 </div>
-<div class="container">
-  {% include "registry.html" %}
-</div>
+
+
+
 
 
 {% endblock %}
@@ -51,7 +96,9 @@ var app = new Vue({
 				return {
           input: '',
           suggestedURL:'',
-          slug:''
+          slug:'',
+          choice:'',
+          userInput:''
 				}
 			},
       watch:{
@@ -83,6 +130,19 @@ var app = new Vue({
         }
       },
 			methods:{
+        searchSchemas(){
+          var self = this;
+          var params={
+            'params':{
+              'q': self.userInput
+            }
+          }
+          axios.get('/api/query',params).then(res=>{
+            console.log('RES: ',res.data);
+          }).catch(err=>{
+            throw err;
+          });
+        },
         getFormValues () {
           this.input = this.$refs.my_input.value;
           this.$refs.my_input.value = '';
