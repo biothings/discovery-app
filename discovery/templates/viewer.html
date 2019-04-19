@@ -1490,9 +1490,9 @@ var app = new Vue({
           let self = this;
           let namespace = window.location.pathname.split('/');
           namespace = namespace.slice(1,window.location.pathname.length-1)[0];
-          console.log('checking..',namespace)
+          // console.log('checking..',namespace)
           axios.get(`/api/query?q=_meta.slug:`+namespace).then(function (res) {
-            console.log('reg check ', res.data)
+            // console.log('reg check ', res.data)
             if (res.data.total) {
               self.registered = true;
               url = res.data.hits[0]._meta.url;
@@ -1508,7 +1508,7 @@ var app = new Vue({
         reqFile: function(url){
           let self = this;
           if (url && self.registered) {
-            console.log('LOADING FROM URL')
+            // console.log('LOADING FROM URL')
             axios.get(url).then(res=>{
               if (res.data) {
                 console.log('load success')
@@ -1526,7 +1526,7 @@ var app = new Vue({
               );
             });
           }else if(!url){
-            console.log('LOADING FROM LOCALSTORAGE')
+            // console.log('LOADING FROM LOCALSTORAGE')
             var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
             this.graph = retrievedObject['@graph'];
             this.context = retrievedObject['@context'];
