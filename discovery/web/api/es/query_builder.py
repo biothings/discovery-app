@@ -1,5 +1,7 @@
 ''' Discovery App Customization for Biothings ESQuery Builder '''
 
+from tornado.escape import url_escape
+
 from biothings.web.api.es.query_builder import ESQueryBuilder
 
 
@@ -29,7 +31,7 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                         {
                             "query_string": {
                                 "default_field": "clses",
-                                "query": q + "*",
+                                "query": url_escape(q) + "*",
                                 "boost": 0.8
                             }
                         },
