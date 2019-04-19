@@ -1,32 +1,24 @@
+# pylint: disable=abstract-method, arguments-differ, missing-docstring
+
+''' Discovery Web Tornado Request Handler'''
+
 import json
 import logging
 import os
-import sys
 
-import tornado.gen
-import tornado.httpclient
-import tornado.httpserver
-import tornado.ioloop
-import tornado.web
-import torngithub
 from jinja2 import Environment, FileSystemLoader
 from tornado.httputil import url_concat
-from torngithub import json_decode, json_encode
+from torngithub import GithubMixin, json_decode, json_encode
 
 from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
-
-log = logging.getLogger("discovery")
 
 GITHUB_CALLBACK_PATH = "/oauth"
 GITHUB_SCOPE = ""
 
-src_path = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
-if src_path not in sys.path:
-    sys.path.append(src_path)
-
-TEMPLATE_PATH = os.path.join(src_path, 'templates/')
-templateLoader = FileSystemLoader(searchpath=TEMPLATE_PATH)
-templateEnv = Environment(loader=templateLoader, cache_size=0)
+SRC_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates/')
+TEMPLATE_LOADER = FileSystemLoader(searchpath=TEMPLATE_PATH)
+TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER, cache_size=0)
 
 
 class BaseHandler(BioThingsBaseHandler):
@@ -43,13 +35,13 @@ class MainHandler(BaseHandler):
         if url:
             print(url)
             template_file = "viewer.html"
-            schema_template = templateEnv.get_template(template_file)
+            schema_template = TEMPLATE_ENV.get_template(template_file)
             schema_output = schema_template.render(
                 Context=json.dumps({"Query": '', "Content": True, 'URL': url}))
             self.write(schema_output)
         else:
             index_file = "index.html"
-            index_template = templateEnv.get_template(index_file)
+            index_template = TEMPLATE_ENV.get_template(index_file)
             index_output = index_template.render()
             self.write(index_output)
 
@@ -57,7 +49,7 @@ class MainHandler(BaseHandler):
 class SchemaOrgHandler(BaseHandler):
     def get(self, yourQuery=None):
         template_file = "schema.html"
-        schema_template = templateEnv.get_template(template_file)
+        schema_template = TEMPLATE_ENV.get_template(template_file)
         if yourQuery:
             schema_output = schema_template.render(
                 Context=json.dumps({"Query": yourQuery, "Content": True}))
@@ -73,7 +65,7 @@ class LoginHandler(BaseHandler):
     def get(self):
         xsrf = self.xsrf_token
         login_file = "login.html"
-        login_template = templateEnv.get_template(login_file)
+        login_template = TEMPLATE_ENV.get_template(login_file)
         path = GITHUB_CALLBACK_PATH
         _next = self.get_argument("next", "/")
         if _next != "/":
@@ -88,9 +80,8 @@ class LogoutHandler(BaseHandler):
         self.redirect(self.get_argument("next", "/"))
 
 
-class GithubLoginHandler(BaseHandler, torngithub.GithubMixin):
-    @tornado.gen.coroutine
-    def get(self):
+class GithubLoginHandler(BaseHandler, GithubMixin):
+    async def get(self):
         # we can append next to the redirect uri, so the user gets the
         # correct URL on login
         redirect_uri = url_concat(self.request.protocol +
@@ -100,7 +91,7 @@ class GithubLoginHandler(BaseHandler, torngithub.GithubMixin):
 
         # if we have a code, we have been authorized so we can log in
         if self.get_argument("code", False):
-            user = yield self.get_authenticated_user(
+            user = await self.get_authenticated_user(
                 redirect_uri=redirect_uri,
                 client_id=self.web_settings.GITHUB_CLIENT_ID,
                 client_secret=self.web_settings.GITHUB_CLIENT_SECRET,
@@ -108,7 +99,7 @@ class GithubLoginHandler(BaseHandler, torngithub.GithubMixin):
                 callback=None
             )
             if user:
-                log.info('logged in user from github: ' + str(user))
+                logging.info('logged in user from github: %s', user)
                 self.set_secure_cookie("user", json_encode(user))
             else:
                 self.clear_cookie("user")
@@ -116,7 +107,7 @@ class GithubLoginHandler(BaseHandler, torngithub.GithubMixin):
             return
 
         # otherwise we need to request an authorization code
-        yield self.authorize_redirect(
+        await self.authorize_redirect(
             redirect_uri=redirect_uri,
             client_id=self.web_settings.GITHUB_CLIENT_ID,
             extra_params={"scope": GITHUB_SCOPE, "foo": 1}
@@ -135,7 +126,7 @@ class UserInfoHandler(BaseHandler):
 class GuideHandler(BaseHandler):
     def get(self):
         doc_file = "guide.html"
-        guide_template = templateEnv.get_template(doc_file)
+        guide_template = TEMPLATE_ENV.get_template(doc_file)
         guide_output = guide_template.render()
         self.write(guide_output)
 
@@ -143,7 +134,7 @@ class GuideHandler(BaseHandler):
 class DashboardHandler(BaseHandler):
     def get(self):
         doc_file = "dashboard.html"
-        dashboard_template = templateEnv.get_template(doc_file)
+        dashboard_template = TEMPLATE_ENV.get_template(doc_file)
         dashboard_output = dashboard_template.render()
         self.write(dashboard_output)
 
@@ -151,7 +142,7 @@ class DashboardHandler(BaseHandler):
 class PGHandler(BaseHandler):
     def get(self):
         doc_file = "playground.html"
-        playground_template = templateEnv.get_template(doc_file)
+        playground_template = TEMPLATE_ENV.get_template(doc_file)
         playground_output = playground_template.render()
         self.write(playground_output)
 
@@ -159,7 +150,7 @@ class PGHandler(BaseHandler):
 class VisualizerHandler(BaseHandler):
     def get(self, namespace=None, className=None):
         test_file = "viewer.html"
-        test_template = templateEnv.get_template(test_file)
+        test_template = TEMPLATE_ENV.get_template(test_file)
         test_output = test_template.render(Context=json.dumps(
             {"namespace": namespace, "query": className}))
         self.write(test_output)
