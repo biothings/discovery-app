@@ -21,7 +21,7 @@ print()
 res = requests.get("https://schema.org/version/3.4/schema.jsonld").json()
 print('Downloaded', len(res['@graph']), 'objects.\n')
 
-subclasses = {}
+superclses = {}
 properties = {}
 
 for obj in res['@graph']:
@@ -30,10 +30,10 @@ for obj in res['@graph']:
             if 'rdfs:subClassOf' in obj:
                 # single parent
                 if isinstance(obj['rdfs:subClassOf'], dict):
-                    subclasses[obj['@id']] = [obj['rdfs:subClassOf']['@id']]
+                    superclses[obj['@id']] = [obj['rdfs:subClassOf']['@id']]
                 # multiple parents
                 elif isinstance(obj['rdfs:subClassOf'], list):
-                    subclasses[obj['@id']] = [item['@id'] for item in obj['rdfs:subClassOf']]
+                    superclses[obj['@id']] = [item['@id'] for item in obj['rdfs:subClassOf']]
                 else:
                     raise TypeError
             else:
@@ -63,7 +63,7 @@ for obj in res['@graph']:
         print('[WARNING] Skipping typeless object', obj['@id'])
 
 print()
-print('Loaded', len(subclasses), 'class nodes.')
+print('Loaded', len(superclses), 'class nodes.')
 print('Loaded', len(properties), 'property nodes.')
 print()
 print('Indexing Legend')
@@ -76,17 +76,16 @@ schemas = []
 for obj in res['@graph']:
     if '@type' in obj and obj['@type'] == 'rdfs:Class':
         clses = {obj['@id']}
-        props = set()
+        props = properties[obj['@id']] if obj['@id'] in properties else []
         queue = [obj['@id']]
         while queue:
             cls_ = queue.pop(0)
-            if cls_ in properties:
-                props.update(properties[cls_])
-            if cls_ in subclasses:
-                clses.update(subclasses[cls_])
-                for subcls in subclasses[cls_]:
-                    if subcls not in queue:
-                        queue.append(subcls)
+            if cls_ in superclses:
+                clses.update(superclses[cls_])
+                for supercls in superclses[cls_]:
+                    if supercls not in queue:
+                        queue.append(supercls)
+        clses.remove(obj['@id'])
         clses = [url[18:] for url in clses if url.startswith('http://schema.org/') or url]
         props = [url[18:] for url in props if url.startswith('http://schema.org/') or url]
         ###### DEBUG #####
@@ -95,9 +94,9 @@ for obj in res['@graph']:
         # print(clses)
         # print(props)
         # print()
-        meta = Metadata(username='schema_org_auto_indexer',
-                        url=obj['@id'] + '.jsonld', slug=obj['rdfs:label'])
-        schema = Schema(clses=clses, props=props, _meta=meta)
+        ##################
+        meta = Metadata(username='schema_org_auto_indexer', url=obj['@id'] + '.jsonld')
+        schema = Schema(label=obj['rdfs:label'], clses=clses, props=props, _meta=meta)
         schemas.append(schema)
 
 sample_size = 50  # for performance benchmark
@@ -116,7 +115,7 @@ def es_save(sch):
         else:
             print('^', end='')
         count += 1
-        if count > 99:
+        if count > 99:  # 100 per line
             print()
             count = 0
         sys.stdout.flush()
