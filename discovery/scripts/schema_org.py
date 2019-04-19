@@ -1,9 +1,10 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,global-statement
 
 ''' Schema.org Datasource Indexer '''
 
 import functools
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -12,9 +13,9 @@ import requests
 from discovery.web.api.es.doc import Metadata, Schema  # Index is defined here
 
 print()
-print("-"*70)
-print(" "*25, "Schema.org Indexer")
-print("-"*70)
+print("-"*100)
+print(" "*35, "Schema.org Indexer")
+print("-"*100)
 print()
 
 res = requests.get("https://schema.org/version/3.4/schema.jsonld").json()
@@ -66,6 +67,7 @@ print('Loaded', len(subclasses), 'class nodes.')
 print('Loaded', len(properties), 'property nodes.')
 print()
 print('Indexing Legend')
+print('100 documents per line')
 print(' . : Created')
 print(' ^ : Updated')
 print()
@@ -98,19 +100,28 @@ for obj in res['@graph']:
         schema = Schema(clses=clses, props=props, _meta=meta)
         schemas.append(schema)
 
+sample_size = 50  # for performance benchmark
+
+count = -sample_size  # number of dots printed this line
+lock = threading.Lock()
+
 
 def es_save(sch):
     ''' save a schema to es index '''
     new_created = sch.save(refresh=False)
-    if new_created:
-        print('.', end='')
-    else:
-        print('^', end='')
-    sys.stdout.flush()
+    global count, lock
+    with lock:
+        if new_created:
+            print('.', end='')
+        else:
+            print('^', end='')
+        count += 1
+        if count > 99:
+            print()
+            count = 0
+        sys.stdout.flush()
     return new_created
 
-
-sample_size = 50  # for performance benchmark
 
 start = time.perf_counter()
 with ThreadPoolExecutor() as executor:
@@ -119,9 +130,8 @@ end = time.perf_counter()
 print()
 
 print()
-print('Estimated total time:', round(len(schemas)/sample_size*(end - start)/60), 'minute(s).')
 print('Estimated time left:',
-      round((len(schemas) - sample_size) / sample_size * (end - start) / 60), 'minute(s).')
+      round((len(schemas) - sample_size) / sample_size * (end - start)), 'seconds.')
 print()
 
 with ThreadPoolExecutor() as executor:
@@ -131,7 +141,7 @@ end = time.perf_counter()
 print()
 
 print()
-print('Actual time spent:', round((end - start)/60), 'minute(s).')
+print('Total time spent:', round((end - start)), 'seconds.')
 print('Created', functools.reduce(lambda a, b: a+b, res), 'document(s).')
 print('Updated', len(res) - functools.reduce(lambda a, b: a+b, res), 'document(s).')
 print()
