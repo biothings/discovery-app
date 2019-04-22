@@ -3,34 +3,7 @@
 {% include "header.html" %}
 <style>
 
-.basic-breadcrumbs li {
-  margin: 0 8px 0 0;
-}
 
-.basic-breadcrumbs li a, .basic-breadcrumbs li a:link, .basic-breadcrumbs li a:visited {
-  padding: 5px 8px;
-  color: #666;
-  position: relative;
-}
-
-.basic-breadcrumbs li a:before {
-  content: "";
-  position: absolute;
-  border: 5px solid transparent;
-  border-right: none;
-  border-left: 5px solid #5a9ee8;
-  top: 50%;
-  right: -5px;
-  transform: translate(0, -50%);
-}
-
-.basic-breadcrumbs li:last-of-type a {
-  color: #5a9ee8;
-}
-
-.basic-breadcrumbs li:last-of-type a:before {
-  display: none;
-}
 
 </style>
 <div id="viewer" class="container" style="min-height: 70vh;padding-top:40px;">
@@ -112,19 +85,34 @@
         </button>
       </div>
       <div v-if="viewAlphabetical">
-        <form class="col-sm-6 pl-0">
-          <div class="input-group mb-2">
+        <form class="col-sm-12 pl-0">
+          <div class="input-group mb-2 col-sm-12 col-md-6">
             <div class="input-group-prepend">
               <div class="input-group-text">Quick Search</div>
             </div>
             <input type="text" v-model='searchQuery' class="form-control" id="inlineFormInputGroup" placeholder="Enter text here">
           </div>
-          <div>
-            <ul>
-              <li v-for='item in searchResults'>
-                <a :href='"./"+item["rdfs:label"]' v-text='item["rdfs:label"]'></a>
-              </li>
-            </ul>
+          <div class="row w-100">
+            <div class="col-sm-12 col-md-6 p-4">
+              <ul >
+                <li v-if="searchResults.length" class="mainTextDark bold" style="list-style:none;">
+                  Classes
+                </li>
+                <li v-for='item in searchResults' >
+                  <a :href='"./"+item["rdfs:label"]' v-text='item["rdfs:label"]'></a>
+                </li>
+              </ul>
+            </div>
+            <div class="col-sm-12 col-md-6 p-4">
+              <ul >
+                <li v-if="searchResultsProps.length" class="mainTextLight bold" style="list-style:none;">
+                  Properties
+                </li>
+                <li v-for='item in searchResultsProps'>
+                  <a :href='"./"+item["rdfs:label"]' v-text='item["rdfs:label"]'></a>
+                </li>
+              </ul>
+            </div>
           </div>
         </form>
         <h1 class="text-muted">Alphabetical</h1>
@@ -575,7 +563,9 @@ var app = new Vue({
           dataSetURL:'',
           invalidChars: false,
           registered: false,
-          urlRegistered: false
+          urlRegistered: false,
+          searchResultsProps:[],
+          fullPropList:[]
 				}
 			},
       watch:{
@@ -586,9 +576,18 @@ var app = new Vue({
                   return o;
                 }
             });
-              this.searchResults = result;
+            let resultProps = _.filter(this.fullPropList, function(o) {
+                if (o['rdfs:label'].toLowerCase().includes(newQ.toLowerCase())) {
+                  return o;
+                }
+            });
+
+            this.searchResults = result;
+            this.searchResultsProps = resultProps;
+
           }else{
             this.searchResults = [];
+            this.searchResultsProps = [];
           }
         },
         slugInput:function(newInput, oldInput){
@@ -1381,13 +1380,19 @@ var app = new Vue({
         },
         getAvailableClasses(){
           let results = [];
+          let props=[];
           let resultsForRegistration = [];
           for (var i = 0; i < this.graph.length; i++) {
             if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class") {
               results.push(this.graph[i]);
               resultsForRegistration.push(this.graph[i]['rdfs:label']);
             }
+            else if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdf:Property") {
+              props.push(this.graph[i]);
+            }
           }
+          this.fullPropList = props.sort();
+          console.log(this.fullPropList)
           this.availableClasses = results.sort();
           this.allAvailableClasses = resultsForRegistration.sort();
           this.getAvailableClassesNames();
@@ -1490,15 +1495,17 @@ var app = new Vue({
           let self = this;
           let namespace = window.location.pathname.split('/');
           namespace = namespace.slice(1,window.location.pathname.length-1)[0];
-          // console.log('checking..',namespace)
+          console.log('checking..',namespace)
           axios.get(`/api/query?q=_meta.slug:`+namespace).then(function (res) {
-            // console.log('reg check ', res.data)
+            console.log('reg check ', res.data)
             if (res.data.total) {
               self.registered = true;
               url = res.data.hits[0]._meta.url;
               self.reqFile(url);
+              console.log('registered')
             }else{
               self.reqFile();
+              console.log('not registered')
             }
           }).catch(err=>{
             console.log(err);
@@ -1508,7 +1515,7 @@ var app = new Vue({
         reqFile: function(url){
           let self = this;
           if (url && self.registered) {
-            // console.log('LOADING FROM URL')
+            console.log('LOADING FROM URL')
             axios.get(url).then(res=>{
               if (res.data) {
                 console.log('load success')
@@ -1526,7 +1533,7 @@ var app = new Vue({
               );
             });
           }else if(!url){
-            // console.log('LOADING FROM LOCALSTORAGE')
+            console.log('LOADING FROM LOCALSTORAGE')
             var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
             this.graph = retrievedObject['@graph'];
             this.context = retrievedObject['@context'];
