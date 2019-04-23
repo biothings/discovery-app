@@ -65,6 +65,9 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
         ''' HTTP DELETE /registry/__id__ '''
         res = self.query(q='d2h')
         _id = res['hits'][0]['_id']
+        self.request('registry/'+_id, method='DELETE', expect_status=401)
+        self.request('registry/'+_id, method='DELETE', headers=self.evil_user, expect_status=403)
+        self.request('registry/'+'i', method='DELETE', headers=self.auth_user, expect_status=404)
         self.request('registry/'+_id, method='DELETE', headers=self.auth_user)
         self.query(q='d2h', expect_hits=False)
 
