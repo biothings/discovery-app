@@ -1,16 +1,16 @@
-<div id="registry" class="jumbotron">
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div id="registry" class="jumbotron" style="min-height:80vh;">
   <div class="row">
     <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
-      <h1 class="text-center text-muted mb-5">BUILD YOUR OWN SCHEMA</h1>
-      <p class="text-muted text-center">
-        Explore existing schemas and build your own
-      </p>
+      <h1 class="text-center text-muted mb-5 mt-5">REGISTRY</h1>
       <div class="bg-light padding20">
         <form @submit.prevent="search(query)">
           <div class="form-group form-row">
             <input class="form-control col-6" id="search_query" type="text" v-model="query" name="query" placeholder="Search Registry" >
             <button class="col btn ml-2 themeButton text-light pulse" type="button" @click.prevent="search(query)">Search</button>
-            <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';search(query)">Reset</button>
+            <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';registry=[]">Reset</button>
           </div>
         </form>
         <div class="form-group form-inline m-0 ">
@@ -71,13 +71,13 @@
         <div class="row">
           <nav class="m-auto ">
             <ul class="pagination m-2">
-              <li class="page-item" :class="{ disabled: page <= 1 }">
+              <li class="page-item" :class="{ 'disabled': page <= 1 }">
                 <a class="page-link" @click.prevent="prevPage()">&lt;</a>
               </li>
-              <li class="page-item" :class="{ active: page == n, blue: page == n, 'white-text': page == n  }" v-for="n in pages">
+              <li class="page-item" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
                 <a href="#" class="page-link" @click.prevent="page = n" v-text="n"></a>
               </li>
-              <li class="page-item" :class="{ disabled: page >= pages }">
+              <li class="page-item" :class="{ 'disabled': page >= pages }">
                 <a class="page-link" @click.prevent="nextPage()">&gt;</a>
               </li>
             </ul>
@@ -95,6 +95,8 @@
     </div>
   </div>
 </div>
+{% endblock %}
+{% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
@@ -119,15 +121,16 @@ Vue.component('registry-image', {
   },
   mounted: function(){
     let self = this;
-    axios.get('http://api.github.com/users/'+this.username).then(res=>{
-      if (res.data.avatar_url) {
-        self.img= res.data.avatar_url;
-      }else{
-        self.img= '/static/img/user-default.png';
-      }
-    }).catch(err=>{
-        self.img= '/static/img/user-default.png';
-    });
+    self.img= '/static/img/user-default.png';
+    // axios.get('http://api.github.com/users/'+this.username).then(res=>{
+    //   if (res.data.avatar_url) {
+    //     self.img= res.data.avatar_url;
+    //   }else{
+    //     self.img= '/static/img/user-default.png';
+    //   }
+    // }).catch(err=>{
+    //     self.img= '/static/img/user-default.png';
+    // });
   },
   template: `<img class="registryImg" :src="img" :alt='username'/>`
 });
@@ -196,10 +199,6 @@ var app = new Vue({
 			data: function(){
 				return {
           alphabet : ['ALL','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
-          filter:'',
-          availableClasses:[],
-          graph:[],
-          filterResults :[],
           input:'',
           linkPrefix:'./',
           data: null,
@@ -292,7 +291,7 @@ var app = new Vue({
             axios.get('/api/query?size=100', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
-              console.log('reg length',self.registry.length)
+              console.log('res',response.data.hits)
               // mark results, doc must be loaded
               $( document ).ready(function() {
                 self.mark(self.query);
@@ -304,15 +303,18 @@ var app = new Vue({
             });
         },
         calculatePages: function () {
-          this.pages = Math.ceil(this.registry && this.registry.length / this.perPage);
+          var self= this;
+          self.pages = Math.ceil(self.registry && self.registry.length / self.perPage);
         },
         prevPage: function () {
-          if (this.page > 1)
-              this.page -= 1
+          var self= this;
+          if (self.page > 1)
+              self.page -= 1
         },
         nextPage: function () {
-          if (this.page < this.pages)
-              this.page += 1
+          var self= this;
+          if (self.page < self.pages)
+              self.page += 1
         },
         sortResults(e){
           this.sort = e.target.value;
@@ -357,57 +359,15 @@ var app = new Vue({
         },
         makeURLandRedirect(obj){
           let arr = obj['@id'].split(':');
-
           localStorage.setItem('datasetData', JSON.stringify(this.data));
-
           window.location.href = "./"+arr[0]+"/"+arr[1];
 
-        },
-        handleFilter(e){
-          let target = e.target.value;
-          this.filter = e.target.value;
-          let fullList = this.availableClasses;
-          let results = [];
-          switch (target) {
-            case 'ALL':
-              this.filterResults = fullList;
-              break;
-            default:
-              results = fullList;
-              results = fullList.filter(word => word[0] === target);
-              this.filterResults = _.sortBy(results, [user => user['rdfs:label']], ['asc']);
-          }
-        },
-        reqFile: function(){
-          axios.get('./static/misc/schema.jsonld').then(res=>{
-            this.graph = res.data['@graph']
-            this.getAvailableClasses()
-          }).catch(err=>{
-            throw err;
-          })
-      },
-      getAvailableClasses(){
-        let results = [];
-        for (var i = 0; i < this.graph.length; i++) {
-          if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class") {
-            results.push(this.graph[i]["rdfs:label"]);
-          }
         }
-        this.availableClasses = results.sort();
-      },
-      handleChange: function(e){
-        let value = e.target.value;
-        window.location.href = "./schema-org/"+value;
-      },
+
     },
     mounted:function(){
       var self = this;
-      self.reqFile();
-      self.search();
       self.checkLoggedUser();
-    },
-    created: function(){
-
     }
   })
 
@@ -442,3 +402,6 @@ var app = new Vue({
       }
     });
 </script>
+
+{% include "footer.html" %}
+{% endblock %}
