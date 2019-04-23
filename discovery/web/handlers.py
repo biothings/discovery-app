@@ -130,6 +130,12 @@ class GuideHandler(BaseHandler):
         guide_output = guide_template.render()
         self.write(guide_output)
 
+class RegistryHandler(BaseHandler):
+    def get(self):
+        doc_file = "registry.html"
+        registry_template = TEMPLATE_ENV.get_template(doc_file)
+        registry_output = registry_template.render()
+        self.write(registry_output)
 
 class DashboardHandler(BaseHandler):
     def get(self):
@@ -146,6 +152,13 @@ class PGHandler(BaseHandler):
         playground_output = playground_template.render()
         self.write(playground_output)
 
+class EditorHandler(BaseHandler):
+    def get(self):
+        doc_file = "editor.html"
+        editor_template = TEMPLATE_ENV.get_template(doc_file)
+        editor_output = editor_template.render()
+        self.write(editor_output)
+
 
 class VisualizerHandler(BaseHandler):
     def get(self, namespace=None, className=None):
@@ -161,6 +174,8 @@ APP_LIST = [
     (r"/schema-playground/?", PGHandler),
     (r"/dashboard/?", DashboardHandler),
     (r"/guide/?", GuideHandler),
+    (r"/registry/?", RegistryHandler),
+    (r"/editor/?", EditorHandler),
     (r"/user/?", UserInfoHandler),
     (r"/login/?", LoginHandler),
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),

@@ -1,0 +1,169 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<style>
+#user_link{
+  display: none !important;
+}
+.navbar{
+  position: absolute !important;
+  top:0 !important;
+}
+#editor_holder{
+  border: 2px grey solid;
+}
+button[title='Edit JSON']{
+  background: var(--sec) !important;
+  color: white !important;
+}
+button[title='Object Properties']{
+  background: var(--main) !important;
+  color: white !important;
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
+  <div>
+    <div class="jumbotron animatedBack text-center mt-5">
+      <h1 class="text-light">Schema Editor</h1>
+    </div>
+    <div v-if=loading class="loader">
+      <h1 class="mainTextLight"><i class="fas fa-cog"></i> Loading...</h1>
+    </div>
+    <div class="w-100 text-right jumbotron">
+      <span>
+        Status:
+        <i class="fas fa-check text-success" v-if="statusOK"></i>
+        <i class="fas fa-close text-danger" v-else></i>
+      </span>
+      <button class="btn themeButton text-light" @click.prevent="test">Validate</button>
+      <button class="btn themeButton text-light" @click.prevent="generateResult">Generate Code</button>
+    </div>
+    <div v-if="errors.length">
+      <ul>
+        <template v-for="error in errors">
+          <li class="text-danger">
+            <span v-text="error.property"></span> <i class="fas fa-arrow-circle-right"> </i><span v-text="error.path"></span>
+            <small v-text="error.message"></small>
+          </li>
+        </template>
+      </ul>
+    </div>
+    <div v-show="valid" class="swing-in-left-fwd">
+      <pre >
+        <code class="p-5" id="resultCode" @click="selectText('resultCode')">
+        </code>
+      </pre>
+    </div>
+    <div id='editor_holder' class="mb-5 p-2">
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+{% block extra_scripts %}
+<script src="./static/js/jsoneditor.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
+<script>
+
+var app = new Vue({
+      el: '#editor',
+			data: function(){
+				return {
+          editor:null,
+          statusOK: true,
+          loading: false,
+          errors:[],
+          valid: false,
+          code: null,
+				}
+			},
+      watch:{
+        input: function(value, oldValue){
+
+        }
+      },
+			methods:{
+        selectText(containerid) {
+          window.getSelection().selectAllChildren( document.getElementById( containerid ) );
+        },
+        loadingOn(){
+          var self = this;
+          self.loading = true;
+        },
+        loadingOff(){
+          var self = this;
+          self.loading = false;
+        },
+        generateResult(){
+          var self = this;
+          var errors = this.editor.validate();
+          if (!errors.length) {
+            self.valid= true;
+            self.code = JSON.stringify(self.editor.getValue(), null, 2);
+            document.getElementById("resultCode").textContent= self.code;
+          }else{
+            self.valid = false;
+          }
+        },
+        test:function(){
+          var errors = this.editor.validate();
+          if(errors.length) {
+            // errors is an array of objects, each with a `path`, `property`, and `message` parameter
+            // `property` is the schema keyword that triggered the validation error (e.g. "minLength")
+            // `path` is a dot separated path into the JSON object (e.g. "root.path.to.field")
+            console.log(errors);
+            Swal.fire({
+              type: 'error',
+              position: 'center',
+              title: 'Found Some Errors',
+            });
+          }
+          else {
+            Swal.fire({
+              type: 'success',
+              position: 'center',
+              title: 'No Errors',
+            });
+          }
+
+        }
+			},
+			mounted:function(){
+        var self = this;
+
+        self.loadingOn();
+        var element = document.getElementById('editor_holder');
+        var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
+        self.editor = new JSONEditor(element,{
+          theme: 'bootstrap3',
+          iconlib: "fontawesome4",
+          schema: {
+              type:'object',
+              properties:{
+                '@context':{
+                  type:'object',
+                },
+              }
+
+          }
+        });
+        self.editor.on('ready',function() {
+          // Now the api methods will be available
+          self.loadingOff();
+        });
+
+        if (retrievedObject) {
+          self.editor.setValue(retrievedObject);
+        }
+
+			}
+		});
+
+</script>
+{% include "footer.html" %}
+{% endblock %}

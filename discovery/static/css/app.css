@@ -72,6 +72,10 @@ h1, h2, h3, h4, h4{
   padding-right: 3px;
 }
 
+.no-br{
+  border-radius: 0px !important;
+}
+
 .margin20{
   margin:20px !important;
 }
@@ -1301,4 +1305,77 @@ ul.tree, ul.tree ul {
      border-color: #393;
      box-shadow: 0 0 5px rgba(0,255,0,.2), inset 0 0 5px rgba(0,255,0,.1), 0 2px 0 #000;
      outline: none;
+    }
+
+
+    #navbar #logo {
+      font-size: 1em;
+      font-weight: bold;
+      transition: 0.4s;
+    }
+
+    .navbar {
+      padding-top: 25px;
+      padding-bottom: 25px;
+      background: #7e7e7e;
+      color: white !important;
+      transition: all 0.3s;
+    }
+
+    .navbar.compressed {
+      padding-top: 10px;
+      padding-bottom: 10px;
+      background: white;
+      color: red !important;
+      box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    body{
+      padding-top: 40px;
+    }
+
+    #navPhotoLink{
+      background: var(--sec);
+      color: var(--light);
+      border-radius: 50px;
+      text-align: center;
+      padding-left: 15px;
+    }
+
+    .navbar-brand{
+      font-size: 1em;
+      margin-right: .2em;
+    }
+
+    .navbar-toggler{
+      zoom:.6;
+    }
+
+    .basic-breadcrumbs li {
+      margin: 0 8px 0 0;
+    }
+
+    .basic-breadcrumbs li a, .basic-breadcrumbs li a:link, .basic-breadcrumbs li a:visited {
+      padding: 5px 8px;
+      color: #666;
+      position: relative;
+    }
+
+    .basic-breadcrumbs li a:before {
+      content: "";
+      position: absolute;
+      border: 5px solid transparent;
+      border-right: none;
+      border-left: 5px solid #5a9ee8;
+      top: 50%;
+      right: -5px;
+      transform: translate(0, -50%);
+    }
+
+    .basic-breadcrumbs li:last-of-type a {
+      color: #5a9ee8;
+    }
+
+    .basic-breadcrumbs li:last-of-type a:before {
+      display: none;
     }
