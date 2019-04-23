@@ -114,18 +114,21 @@ class RegistryHandler(BaseHandler):
             res = {'success': False,
                    'error': 'Login with your Github account first.'}
             self.return_json(res, status_code=401)
+            return
 
-        sch = Schema.get(id=api_id)
+        sch = Schema.get(id=api_id, ignore=404)
 
         if not sch:
             res = {'success': False,
                    'error': 'Document does not exisit.'}
             self.return_json(res, status_code=404)
+            return
 
         if sch['_meta'].username != self.current_user['login']:
             res = {'success': False,
                    'error': 'Document does not belong to the logged-in user.'}
             self.return_json(res, status_code=403)
+            return
 
         sch.delete(refresh=True)
         self.return_json({'success': True})
