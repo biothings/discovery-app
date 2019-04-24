@@ -2,27 +2,21 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-#user_link{
-  display: none !important;
+.clsContainer{
+  border-radius: 20px;
+  box-shadow: 2px 2px 5px #bbbbbb;
 }
-.navbar{
-  position: absolute !important;
-  top:0 !important;
+.clsNameContainer{
+  display: flex;
+  word-break: break-all;
+  justify-content: center;
+  flex-direction: row;
+  text-align: center;
 }
-#editor_holder{
-  border: 2px grey solid;
-}
-button[title='Edit JSON']{
-  background: var(--sec) !important;
-  color: white !important;
-}
-button[title='Object Properties']{
-  background: var(--main) !important;
-  color: white !important;
+.clsNameContainer div{
+  flex: 1;
 }
 </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
   <div>
     <div class="jumbotron animatedBack text-center mt-5">
@@ -31,63 +25,300 @@ button[title='Object Properties']{
     <div v-if=loading class="loader">
       <h1 class="mainTextLight"><i class="fas fa-cog"></i> Loading...</h1>
     </div>
-    <div class="w-100 text-right jumbotron">
-      <span>
-        Status:
-        <i class="fas fa-check text-success" v-if="statusOK"></i>
-        <i class="fas fa-close text-danger" v-else></i>
-      </span>
-      <button class="btn themeButton text-light" @click.prevent="test">Validate</button>
-      <button class="btn themeButton text-light" @click.prevent="generateResult">Generate Code</button>
+    <div class="jumbotron">
+      <h2>Step 1: Define your schema</h2>
+      <button class="btn btn-danger text-light" @click.prevent="addClass">Add Class</button>
+      <button class="btn btn-primary text-light" @click.prevent="addClass">Add Property</button>
     </div>
-    <div v-if="errors.length">
-      <ul>
-        <template v-for="error in errors">
-          <li class="text-danger">
-            <span v-text="error.property"></span> <i class="fas fa-arrow-circle-right"> </i><span v-text="error.path"></span>
-            <small v-text="error.message"></small>
-          </li>
-        </template>
-      </ul>
-    </div>
-    <div v-show="valid" class="swing-in-left-fwd">
+    <div v-show="valid" class="swing-in-left-fwd ">
       <pre >
-        <code class="p-5" id="resultCode" @click="selectText('resultCode')">
+        <code class="p-5 border-success" id="resultCode" @click="selectText('resultCode')">
         </code>
       </pre>
     </div>
-    <div id='editor_holder' class="mb-5 p-2">
-
+    <div class="jumbotron">
+      <h2>Step 2: Choose parent clses' properties to keep</h2>
+      <template v-for="(item,index) in clses">
+        <class-box key="index" :clss="item"></class-box>
+      </template>
+    </div>
+    <div class="jumbotron">
+      <h2>Step 3: Generate Code</h2>
+      <button class="btn themeButton pulse text-light" @click.prevent="generateResult">Generate Code</button>
     </div>
 
   </div>
 </section>
 {% endblock %}
 {% block extra_scripts %}
-<script src="./static/js/jsoneditor.js"></script>
+<script src="https://unpkg.com/vuex"></script>
+<script src="./static/js/lodash.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 
+const store = new Vuex.Store({
+  state: {
+    // can access directly but not mutate using this.$store.state.count
+    'schema':{},
+    'clssList':[]
+  },
+  strict: true,
+  mutations: {
+    saveSchema(state,payload){
+      state.schema = payload['schema'];
+      //find all classes
+      for (var i = 0; i < state.schema['@graph'].length; i++) {
+        if(state.schema['@graph'][i].hasOwnProperty('@type') && state.schema['@graph'][i]['@type'] === "rdfs:Class"){
+          state.clssList.push(state.schema['@graph'][i])
+        }
+      }
+    },
+  },
+  getters:{
+    // exposed as store.getters.nameOfGetter
+    getClassList:state=>{
+      return state.clssList
+    },
+    getSchema:state=>{
+      return state.schema
+    }
+  },
+  actions:{
+
+  }
+});
+
+Vue.component('comment-box', {
+  data: function(){
+    return{
+      full:false,
+      text:''
+    }
+  },
+  props: ['content'],
+  methods:{
+    switch:function(){
+      this.full = !this.full
+    }
+  },
+  watch:{
+    full:function(val,old){
+      if (val) {
+        this.text = this.content
+      }else{
+        this.text = this.content.substring(1, 20);
+      }
+    }
+  },
+  mounted: function(){
+
+  },
+  computed: {
+  },
+  template:
+  `<small class="pointer" @click.prevent="switch">
+    <span v-text="content"></span>
+    <i v-if="!full" class="far fa-plus-square"></i>
+  </small>`
+});
+
+Vue.component('class-box', {
+  data: function(){
+    return{
+
+    }
+  },
+  props: ['clss'],
+  methods:{
+    getType: function(data){
+      let types=[];
+      if (data.hasOwnProperty("schema:rangeIncludes")) {
+        if (_.isString(data["schema:rangeIncludes"])) {
+          let type = data['schema:rangeIncludes'].split(':');
+          type = type[type.length-1];
+          types.push(type);
+        }
+        else if (_.isArray(data["schema:rangeIncludes"])) {
+          for (var i = 0; i < data['schema:rangeIncludes'].length; i++) {
+            let type = data['schema:rangeIncludes'][i]['@id'].split(':');
+            type = type[type.length-1];
+            types.push(type);
+          }
+        }else if(_.isObject(data["schema:rangeIncludes"])){
+          let type = data['schema:rangeIncludes']['@id'].split(':');
+          type = type[type.length-1];
+          types.push(type);
+        }
+      }
+      return types;
+    },
+  },
+  watch:{
+
+  },
+  mounted: function(){
+
+  },
+  computed: {
+    className:function(){
+      return this.clss['rdfs:label'];
+    },
+    properties:function(){
+      let schema = store.getters.getSchema;
+      let props =[];
+      for (var i = 0; i < schema['@graph'].length; i++) {
+        if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdf:Property"){
+          let propObj = schema['@graph'][i];
+          if ( _.isString(propObj['schema:domainIncludes']) ) {
+              let idValue = propObj["schema:domainIncludes"].split(':');
+              idValue = idValue[idValue.length-1];
+              if (idValue === this.className) {
+                props.push(propObj);
+              }
+          }
+          else if ( _.isArray(propObj['schema:domainIncludes']) ) {
+            for (var i = 0; i < data['schema:domainIncludes'].length; i++) {
+              let idValue = data["schema:domainIncludes"][i]['@id'].split(':');
+              idValue = idValue[idValue.length-1];
+              if (idValue === this.className) {
+                props.push(propObj);
+              }
+            }
+          }else if( _.isPlainObject(propObj['schema:domainIncludes']) ){
+            let idValue = propObj["schema:domainIncludes"]['@id'].split(':');
+            idValue = idValue[idValue.length-1];
+            if (idValue === this.className ) {
+              props.push(propObj);
+            }
+          }
+
+        }
+      }
+      return props;
+    }
+  },
+  template:
+  `<div class="clsContainer p-3 bg-light mb-3">
+    <div class="row">
+      <div class="clsNameContainer col-sm-12 col-md-3">
+        <div>
+          <h5 class="mainTextDark" v-text="clss['rdfs:label']"></h5>
+          <small class="mainTextLight">Subclass of <span v-text="clss['rdfs:subClassOf']['@id']"></span></small>
+        </div>
+      </div>
+      <div class="propContainer col-sm-12 col-md-9 text-muted">
+        <p>
+          PROPERTIES
+        </p>
+        <table class="w-100">
+          <thead class="bg-secondary text-light">
+            <th class="text-center">
+              <small>Remove</small>
+            </th>
+            <th>
+              <small>Name</small>
+            </th>
+            <th>
+              <small>Description</small>
+            </th>
+            <th>
+              <small>Expected Type</small>
+            </th>
+          </thead>
+          <tbody>
+            <template v-for="(item,index) in properties">
+              <tr>
+                <td class="text-center">
+                  <i :title="'Remove '+item['rdfs:label']" class="fas fa-minus-circle text-danger pointer" @click.prevent="testArr.splice(index,1)"></i>
+                </td>
+                <td>
+                  <span v-text='item["rdfs:label"]'></span>
+                </td>
+                <td class="p-2">
+                  <comment-box :content='item["rdfs:comment"]'></comment-box>
+                </td>
+                <td>
+                  <template v-for="(type,i) in getType(item)">
+                    <small v-html='type'></small>
+                  </template>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>`
+});
+
 var app = new Vue({
       el: '#editor',
+      store: store,
 			data: function(){
 				return {
-          editor:null,
-          statusOK: true,
           loading: false,
-          errors:[],
           valid: false,
           code: null,
+          url:'',
+          startData:null,
+          classSkeleton:{
+            "@id": "",
+            "@type": "rdfs:Class",
+            "rdfs:comment": null,
+            "rdfs:label": "",
+            "rdfs:subClassOf": {
+                "@id": "schema:"
+            }
+          },
+          userAnswers:[],
+
 				}
 			},
+      computed:{
+        clses:function(){
+          return store.getters.getClassList
+        }
+      },
       watch:{
-        input: function(value, oldValue){
+        startData:function(newData, oldData){
+          let self = this;
+          console.log(newData)
+          let arr = [];
+          newData['@graph'].filter(item=>{
+            if (item.hasOwnProperty('@type') && item['@type']==='rdfs:Class' ) {
+              arr.push(item)
+            }
+          })
+          self.clses= arr;
+        },
+        userAnswers: function(value, oldValue){
+          var self = this;
+          self.classSkeleton['@id']=value[1]+":"+value[0];
+          self.classSkeleton['rdfs:label']=value[0];
+          self.classSkeleton['rdfs:comment']=value[2];
+          self.classSkeleton['rdfs:subClassOf']={"@id": "schema:Thing"};
 
+          // console.log(self.startData)
+          self.startData['@graph'].unshift(self.classSkeleton)
+          console.log(self.startData)
         }
       },
 			methods:{
+        findAndRemove(label){
+
+        },
+        handleSubmit(){
+          var self = this;
+          if (self.url) {
+            axios.get(self.url).then(res=>{
+              console.log(res.data)
+            }).catch(err=>{
+              throw err;
+            });
+          }
+        },
         selectText(containerid) {
           window.getSelection().selectAllChildren( document.getElementById( containerid ) );
         },
@@ -101,66 +332,52 @@ var app = new Vue({
         },
         generateResult(){
           var self = this;
-          var errors = this.editor.validate();
-          if (!errors.length) {
-            self.valid= true;
-            self.code = JSON.stringify(self.editor.getValue(), null, 2);
-            document.getElementById("resultCode").textContent= self.code;
-          }else{
-            self.valid = false;
-          }
+          // if (!self.errors.length) {
+          //   self.valid= true;
+          //   self.code = JSON.stringify(self.editor.getValue(), null, 2);
+          //   document.getElementById("resultCode").textContent= self.code;
+          // }else{
+          //   self.valid = false;
+          // }
         },
-        test:function(){
-          var errors = this.editor.validate();
-          if(errors.length) {
-            // errors is an array of objects, each with a `path`, `property`, and `message` parameter
-            // `property` is the schema keyword that triggered the validation error (e.g. "minLength")
-            // `path` is a dot separated path into the JSON object (e.g. "root.path.to.field")
-            console.log(errors);
-            Swal.fire({
-              type: 'error',
-              position: 'center',
-              title: 'Found Some Errors',
-            });
+        addClass:function(){
+          Swal.mixin({
+          input: 'text',
+          confirmButtonText: 'Next &rarr;',
+          showCancelButton: true,
+          progressSteps: ['1', '2','3']
+        }).queue([
+          {
+            title: "Choose a name for your schema",
+            html: '<b class="text-danger">Hi </b>works'
+          },
+          {
+            title: "Choose a namespace for your schema",
+            html: `<p>
+                    The namespace chosen will resolve to your schema when expanded, for example:
+                    <br />
+                    <small>  http://discovery.biothings.io/<b class="text-danger">your-namespace</b>/SchemaName</small>
+                   </p>`
+          },
+          {
+            title: "Write a comment about this class",
+            html: 'write a short summary about this class'
+          },
+        ]).then((result) => {
+          if (result.value) {
+            this.userAnswers= result.value;
           }
-          else {
-            Swal.fire({
-              type: 'success',
-              position: 'center',
-              title: 'No Errors',
-            });
-          }
-
+        })
         }
 			},
 			mounted:function(){
         var self = this;
-
-        self.loadingOn();
-        var element = document.getElementById('editor_holder');
-        var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
-        self.editor = new JSONEditor(element,{
-          theme: 'bootstrap3',
-          iconlib: "fontawesome4",
-          schema: {
-              type:'object',
-              properties:{
-                '@context':{
-                  type:'object',
-                },
-              }
-
-          }
-        });
-        self.editor.on('ready',function() {
-          // Now the api methods will be available
-          self.loadingOff();
-        });
-
-        if (retrievedObject) {
-          self.editor.setValue(retrievedObject);
+        var schema = localStorage.getItem('datasetData');
+        if (schema) {
+          var payload = {};
+          payload["schema"] = JSON.parse(schema);
+          store.commit('saveSchema',payload);
         }
-
 			}
 		});
 
