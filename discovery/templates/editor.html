@@ -16,28 +16,39 @@
 .clsNameContainer div{
   flex: 1;
 }
+.bg-fade{
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#6c757d+1,6c757d+54,6c757d+100&0+0,0.65+31,0.65+55,0.65+77,0+100 */
+  background: -moz-linear-gradient(left, rgba(108,117,125,0) 0%, rgba(108,117,125,0.02) 1%, rgba(108,117,125,0.65) 31%, rgba(108,117,125,0.65) 54%, rgba(108,117,125,0.65) 55%, rgba(108,117,125,0.65) 77%, rgba(108,117,125,0) 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(left, rgba(108,117,125,0) 0%,rgba(108,117,125,0.02) 1%,rgba(108,117,125,0.65) 31%,rgba(108,117,125,0.65) 54%,rgba(108,117,125,0.65) 55%,rgba(108,117,125,0.65) 77%,rgba(108,117,125,0) 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to right, rgba(108,117,125,0) 0%,rgba(108,117,125,0.02) 1%,rgba(108,117,125,0.65) 31%,rgba(108,117,125,0.65) 54%,rgba(108,117,125,0.65) 55%,rgba(108,117,125,0.65) 77%,rgba(108,117,125,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#006c757d', endColorstr='#006c757d',GradientType=1 ); /* IE6-9 */
+}
 </style>
 <section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
   <div>
     <div class="jumbotron animatedBack text-center mt-5">
       <h1 class="text-light">Schema Editor</h1>
     </div>
-    <div v-if=loading class="loader">
+    <!-- <div v-if=loading class="loader">
       <h1 class="mainTextLight"><i class="fas fa-cog"></i> Loading...</h1>
-    </div>
-    <div class="jumbotron">
-      <h2>Step 1: Define your schema</h2>
-      <button class="btn btn-danger text-light" @click.prevent="addClass">Add Class</button>
-      <button class="btn btn-primary text-light" @click.prevent="addClass">Add Property</button>
-    </div>
-    <div v-show="valid" class="swing-in-left-fwd ">
+    </div> -->
+    <!-- <div v-show="valid" class="swing-in-left-fwd ">
       <pre >
         <code class="p-5 border-success" id="resultCode" @click="selectText('resultCode')">
         </code>
       </pre>
+    </div> -->
+    <div class="jumbotron">
+      <h2>Step 1: Define a class and properties for your schema</h2>
+      <div class="p-2 mb-3">
+        <button class="btn btn-danger text-light" @click.prevent="addClass">Add Class</button>
+      </div>
+      <template v-for="(item,index) in myClasses">
+        <class-box key="index" :clss="item" :myclass="true"></class-box>
+      </template>
     </div>
     <div class="jumbotron">
-      <h2>Step 2: Choose parent clses' properties to keep</h2>
+      <h2>Step 2: Choose which parent class properties you want to resuse</h2>
       <template v-for="(item,index) in clses">
         <class-box key="index" :clss="item"></class-box>
       </template>
@@ -62,19 +73,47 @@ const store = new Vuex.Store({
   state: {
     // can access directly but not mutate using this.$store.state.count
     'schema':{},
-    'clssList':[]
+    'userClasses':[]
   },
   strict: true,
   mutations: {
     saveSchema(state,payload){
+      console.log('saving..')
       state.schema = payload['schema'];
-      //find all classes
-      for (var i = 0; i < state.schema['@graph'].length; i++) {
-        if(state.schema['@graph'][i].hasOwnProperty('@type') && state.schema['@graph'][i]['@type'] === "rdfs:Class"){
-          state.clssList.push(state.schema['@graph'][i])
-        }
+    },
+    saveClass(state,payload){
+      clss = payload['clss'];
+      if (state.schema['@graph']) {
+        state.schema['@graph'].unshift(clss);
+        state.userClasses.unshift(clss);
       }
     },
+    removeClass(state,payload){
+      clss = payload['clss'];
+      if (state.schema['@graph']) {
+        state.schema['@graph']= _.difference(state.schema['@graph'], [clss]);;
+        state.userClasses= _.difference(state.userClasses, [clss]);;
+      }
+    },
+    saveProperty(state,payload){
+      prop = payload['prop'];
+      if (state.schema['@graph']) {
+        state.schema['@graph'].push(prop);
+      }
+    },
+    removeProperty(state,payload){
+      prop = payload['prop'];
+      if (state.schema['@graph']) {
+        for (var i = 0; i < state.schema['@graph'].length; i++) {
+          if(state.schema['@graph'][i].hasOwnProperty('@type') && state.schema['@graph'][i]['@type'] === "rdf:Property"){
+            let propObj = state.schema['@graph'][i];
+            if (state.schema['@graph'][i]['rdfs:label']===prop['rdfs:label']) {
+              state.schema['@graph'].splice(i, 1)
+            }
+          }
+        }
+      }
+    }
   },
   getters:{
     // exposed as store.getters.nameOfGetter
@@ -83,6 +122,9 @@ const store = new Vuex.Store({
     },
     getSchema:state=>{
       return state.schema
+    },
+    getUserClasses:state=>{
+      return state.userClasses
     }
   },
   actions:{
@@ -90,48 +132,104 @@ const store = new Vuex.Store({
   }
 });
 
-Vue.component('comment-box', {
+Vue.component('description', {
+  props: ['content'],
   data: function(){
     return{
-      full:false,
+      full:true ,
       text:''
     }
   },
-  props: ['content'],
-  methods:{
-    switch:function(){
-      this.full = !this.full
-    }
-  },
   watch:{
-    full:function(val,old){
-      if (val) {
+    full:function(n,o){
+      if (n) {
         this.text = this.content
       }else{
-        this.text = this.content.substring(1, 20);
+        if (this.content) {
+          this.text = this.content.substring(0, 40);
+        }
       }
     }
   },
-  mounted: function(){
-
+  mounted:function(){
+    this.full = false;
   },
-  computed: {
-  },
-  template:
-  `<small class="pointer" @click.prevent="switch">
-    <span v-text="content"></span>
-    <i v-if="!full" class="far fa-plus-square"></i>
-  </small>`
+  template: `<small class="pointer d-block" v-on:click="clicked">
+              <span v-text="text"></span>
+              <i v-if="!full && text.length>39" class="far fa-plus-square mainTextDark pointer"></i>
+              <i v-if="full && text.length>39" class="far fa-minus-square mainTextLight pointer"></i>
+            </small>`,
+  methods: {
+    clicked: function() {
+      this.full=!this.full
+    }
+  }
 });
+
 
 Vue.component('class-box', {
   data: function(){
     return{
-
+      showAll:true,
+      myList:[]
     }
   },
-  props: ['clss'],
+  props: ['clss','myclass'],
   methods:{
+      deleteClass(){
+        var payload={};
+        payload['clss'] = clss;
+        store.commit('removeClass',payload)
+      },
+      addPropsToClass:function(){
+        Swal.mixin({
+        input: 'text',
+        confirmButtonText: 'Next &rarr;',
+        showCancelButton: true,
+        progressSteps: ['1', '2','3',]
+      }).queue([
+        {
+          title: "Choose a name for your property",
+          html: 'input name must be camel cased <b class="text-danger">eg. myProperty </b>'
+        },
+        {
+          title: "What is its expected type?",
+          html: 'input name(s) must be Pascal cased <b class="text-danger">eg. MyClass </b>'
+        },
+        {
+          title: "Describe this property",
+          html: 'write a short summary about this class'
+        },
+      ]).then((result) => {
+        if (result.value) {
+          this.handleUserPropInput(result.value);
+        }
+      })
+    },
+    handleUserPropInput: function(value, oldValue){
+        var self = this;
+        var skeleton={
+          "@id": "schema:"+value[0],
+          "@type": "rdf:Property",
+          "rdfs:comment": value[2],
+          "rdfs:label": value[0],
+          "schema:domainIncludes": {
+              "@id": self.clss['@id']
+          },
+          "schema:rangeIncludes": {
+              "@id": "schema:"+value[1]
+          }
+        };
+        // push to store
+        var payload = {};
+        payload["prop"] = skeleton;
+        store.commit('saveProperty',payload);
+    },
+    removeProp(prop){
+      var payload={};
+      payload['prop'] = prop;
+      store.commit('removeProperty',payload)
+    },
     getType: function(data){
       let types=[];
       if (data.hasOwnProperty("schema:rangeIncludes")) {
@@ -154,12 +252,39 @@ Vue.component('class-box', {
       }
       return types;
     },
+    getSubclass: function(data){
+      let subclasses=[];
+      if (data.hasOwnProperty("rdfs:subClassOf")) {
+        if (_.isString(data["rdfs:subClassOf"])) {
+          let cl = data['rdfs:subClassOf']
+          subclasses.push(cl);
+        }
+        else if (_.isArray(data["rdfs:subClassOf"])) {
+          for (var i = 0; i < data['rdfs:subClassOf'].length; i++) {
+            let cl = data['rdfs:subClassOf'][i]['@id']
+            subclasses.push(type);
+          }
+        }else if(_.isObject(data["rdfs:subClassOf"])){
+          let cl = data['rdfs:subClassOf']['@id']
+          subclasses.push(cl);
+        }
+      }else{
+        subclasses.push('This class has no subclass');
+      }
+      return subclasses;
+    },
   },
   watch:{
-
+    showAll: function(newVal, oldVal){
+      if (newVal) {
+        this.myList = this.properties;
+      }else{
+        this.myList = this.properties.slice(0,5);
+      }
+    }
   },
   mounted: function(){
-
+    this.showAll= false
   },
   computed: {
     className:function(){
@@ -168,28 +293,23 @@ Vue.component('class-box', {
     properties:function(){
       let schema = store.getters.getSchema;
       let props =[];
+      var self= this;
       for (var i = 0; i < schema['@graph'].length; i++) {
         if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdf:Property"){
           let propObj = schema['@graph'][i];
           if ( _.isString(propObj['schema:domainIncludes']) ) {
-              let idValue = propObj["schema:domainIncludes"].split(':');
-              idValue = idValue[idValue.length-1];
-              if (idValue === this.className) {
-                props.push(propObj);
-              }
+            if (propObj["schema:domainIncludes"].includes(self.className)) {
+              props.push(propObj);
+            }
           }
           else if ( _.isArray(propObj['schema:domainIncludes']) ) {
-            for (var i = 0; i < data['schema:domainIncludes'].length; i++) {
-              let idValue = data["schema:domainIncludes"][i]['@id'].split(':');
-              idValue = idValue[idValue.length-1];
-              if (idValue === this.className) {
+            for (var j = 0; j < propObj['schema:domainIncludes'].length; j++) {
+              if (propObj["schema:domainIncludes"][j]['@id'].includes(self.className)) {
                 props.push(propObj);
               }
             }
           }else if( _.isPlainObject(propObj['schema:domainIncludes']) ){
-            let idValue = propObj["schema:domainIncludes"]['@id'].split(':');
-            idValue = idValue[idValue.length-1];
-            if (idValue === this.className ) {
+            if (propObj["schema:domainIncludes"]['@id'].includes(self.className)) {
               props.push(propObj);
             }
           }
@@ -200,20 +320,26 @@ Vue.component('class-box', {
     }
   },
   template:
-  `<div class="clsContainer p-3 bg-light mb-3">
+  `<div class="clsContainer p-3 bg-light mb-3" style="position:relative;">
+    <i v-if="myclass" @click.prevent="deleteClass" title="DELETE" class="fas fa-times-circle text-danger pointer" style="position:absolute; right:10px; top:10px;"></i>
     <div class="row">
       <div class="clsNameContainer col-sm-12 col-md-3">
-        <div>
-          <h5 class="mainTextDark" v-text="clss['rdfs:label']"></h5>
-          <small class="mainTextLight">Subclass of <span v-text="clss['rdfs:subClassOf']['@id']"></span></small>
+        <div class='text-center'>
+          <h5 class="mainTextDark" v-text="clss['rdfs:label']" :title="clss['rdfs:comment']"></h5>
+          <small class="text-muted">
+            <span v-if="clss['rdfs:subClassOf']">Subclass of:</span>
+            <template v-for="item in getSubclass(clss)">
+              <small class="bold mainTextDark" v-text='item'></small>
+            </template>
+          </small>
         </div>
       </div>
       <div class="propContainer col-sm-12 col-md-9 text-muted">
-        <p>
+        <small>
           PROPERTIES
-        </p>
-        <table class="w-100">
-          <thead class="bg-secondary text-light">
+        </small>
+        <table class="w-100 table table-sm table-responsive-sm" v-if="properties.length">
+          <thead class="mainBackLight text-light">
             <th class="text-center">
               <small>Remove</small>
             </th>
@@ -221,33 +347,53 @@ Vue.component('class-box', {
               <small>Name</small>
             </th>
             <th>
-              <small>Description</small>
+              <small>Comment</small>
             </th>
             <th>
               <small>Expected Type</small>
             </th>
           </thead>
           <tbody>
-            <template v-for="(item,index) in properties">
+            <template v-for="(item,index) in myList">
               <tr>
                 <td class="text-center">
-                  <i :title="'Remove '+item['rdfs:label']" class="fas fa-minus-circle text-danger pointer" @click.prevent="testArr.splice(index,1)"></i>
+                  <i :title="'Remove '+item['rdfs:label']" class="fas fa-minus-circle text-danger pointer" @click.prevent="removeProp(item)"></i>
                 </td>
                 <td>
                   <span v-text='item["rdfs:label"]'></span>
                 </td>
                 <td class="p-2">
-                  <comment-box :content='item["rdfs:comment"]'></comment-box>
+                  <description :content='item["rdfs:comment"]'></description>
                 </td>
                 <td>
                   <template v-for="(type,i) in getType(item)">
-                    <small v-html='type'></small>
+                    <small class="mr-2" v-html='type'></small>
                   </template>
+                </td>
+              </tr>
+            </template>
+            <template v-if="!showAll && properties.length>5">
+              <tr class="text-center">
+                <td colspan='4' class='text-center'>
+                  <a role="button" class="btn smallButton mainBackLight text-light" @click.prevent="showAll= !showAll">Show More (<span class="bold" v-text="properties.length"></span>)</a>
+                </td>
+              </tr>
+            </template>
+            <template v-if="showAll">
+              <tr class="text-center">
+                <td colspan='4' class='text-center'>
+                  <a role="button" class="btn smallButton mainBackLight text-light" @click.prevent="showAll= !showAll">Show Less</a>
                 </td>
               </tr>
             </template>
           </tbody>
         </table>
+        <div v-else class="bg-fade text-light text-center">
+          <small>This class has no properties of its own</small>
+        </div>
+        <div class="text-center" v-if='myclass'>
+            <a role='button' class="btn smallButton mainBackDark text-light" @click.prevent="addPropsToClass">Add Property <i class="fas fa-plus"></i></a>
+        </div>
       </div>
     </div>
   </div>`
@@ -262,53 +408,48 @@ var app = new Vue({
           valid: false,
           code: null,
           url:'',
-          startData:null,
-          classSkeleton:{
-            "@id": "",
-            "@type": "rdfs:Class",
-            "rdfs:comment": null,
-            "rdfs:label": "",
-            "rdfs:subClassOf": {
-                "@id": "schema:"
-            }
-          },
-          userAnswers:[],
-
+          handleUserClassInput:[],
+          editFrom:''
 				}
 			},
       computed:{
         clses:function(){
-          return store.getters.getClassList
+          var schema= store.getters.getSchema;
+          let clssList=[];
+          if (schema && schema['@graph']) {
+            for (var i = 0; i < schema['@graph'].length; i++) {
+              if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdfs:Class"){
+                clssList.push(schema['@graph'][i])
+              }
+            }
+          }
+          return _.difference(clssList, this.myClasses)
+        },
+        myClasses:{
+          get(){
+            return store.getters.getUserClasses
+          }
         }
       },
       watch:{
-        startData:function(newData, oldData){
-          let self = this;
-          console.log(newData)
-          let arr = [];
-          newData['@graph'].filter(item=>{
-            if (item.hasOwnProperty('@type') && item['@type']==='rdfs:Class' ) {
-              arr.push(item)
-            }
-          })
-          self.clses= arr;
-        },
-        userAnswers: function(value, oldValue){
+        handleUserClassInput: function(value, oldValue){
           var self = this;
-          self.classSkeleton['@id']=value[1]+":"+value[0];
-          self.classSkeleton['rdfs:label']=value[0];
-          self.classSkeleton['rdfs:comment']=value[2];
-          self.classSkeleton['rdfs:subClassOf']={"@id": "schema:Thing"};
-
-          // console.log(self.startData)
-          self.startData['@graph'].unshift(self.classSkeleton)
-          console.log(self.startData)
+          var skeleton={
+            "@id": value[2]+":"+value[0],
+            "@type": "rdfs:Class",
+            "rdfs:comment": value[3],
+            "rdfs:label": value[0],
+            "rdfs:subClassOf": {
+                "@id": value[1]
+            }
+          };
+          // push to store
+          var payload = {};
+          payload["clss"] = skeleton;
+          store.commit('saveClass',payload);
         }
       },
 			methods:{
-        findAndRemove(label){
-
-        },
         handleSubmit(){
           var self = this;
           if (self.url) {
@@ -345,11 +486,15 @@ var app = new Vue({
           input: 'text',
           confirmButtonText: 'Next &rarr;',
           showCancelButton: true,
-          progressSteps: ['1', '2','3']
+          progressSteps: ['1', '2','3','4']
         }).queue([
           {
-            title: "Choose a name for your schema",
-            html: '<b class="text-danger">Hi </b>works'
+            title: "Choose a name for your class",
+            html: 'input name must be Pascal cased <b class="text-danger">eg. MyClass </b>'
+          },
+          {
+            title: "What is this class' subclass?",
+            html: 'input name must be Pascal cased <b class="text-danger">eg. Thing </b>'
           },
           {
             title: "Choose a namespace for your schema",
@@ -365,7 +510,7 @@ var app = new Vue({
           },
         ]).then((result) => {
           if (result.value) {
-            this.userAnswers= result.value;
+            this.handleUserClassInput= result.value;
           }
         })
         }
@@ -378,6 +523,9 @@ var app = new Vue({
           payload["schema"] = JSON.parse(schema);
           store.commit('saveSchema',payload);
         }
+        localStorage.setItem('editFrom','CreativeWork');
+        this.editFrom = localStorage.getItem('editFrom');
+
 			}
 		});
 
