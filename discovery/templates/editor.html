@@ -27,13 +27,6 @@
   flex: 1;
 }
 
-.bg-fade{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#6c757d+1,6c757d+54,6c757d+100&0+0,0.65+31,0.65+55,0.65+77,0+100 */
-  background: -moz-linear-gradient(left, rgba(108,117,125,0) 0%, rgba(108,117,125,0.02) 1%, rgba(108,117,125,0.65) 31%, rgba(108,117,125,0.65) 54%, rgba(108,117,125,0.65) 55%, rgba(108,117,125,0.65) 77%, rgba(108,117,125,0) 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(left, rgba(108,117,125,0) 0%,rgba(108,117,125,0.02) 1%,rgba(108,117,125,0.65) 31%,rgba(108,117,125,0.65) 54%,rgba(108,117,125,0.65) 55%,rgba(108,117,125,0.65) 77%,rgba(108,117,125,0) 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to right, rgba(108,117,125,0) 0%,rgba(108,117,125,0.02) 1%,rgba(108,117,125,0.65) 31%,rgba(108,117,125,0.65) 54%,rgba(108,117,125,0.65) 55%,rgba(108,117,125,0.65) 77%,rgba(108,117,125,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#006c757d', endColorstr='#006c757d',GradientType=1 ); /* IE6-9 */
-}
 #schemaName1{
   background: none !important;
   box-shadow: none !important;
@@ -44,10 +37,6 @@
 
 #schemaName1:focus{
   background: white !important;
-  box-shadow: none !important;
-  text-align: center !important;
-  font-size: 2em !important;
-  color: #006476;
 }
 </style>
 <section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
@@ -55,12 +44,11 @@
     <div class="jumbotron animatedBack text-center mt-5">
       <h1 class="text-light">Schema Editor</h1>
     </div>
-    <!-- <div v-if=loading class="loader">
+    <div v-if=loading class="loader">
       <h1 class="mainTextLight"><i class="fas fa-cog"></i> Loading...</h1>
-    </div> -->
-
+    </div>
     <div class="jumbotron">
-      <h2 class="text-muted text-center">Step 1: Define a class and properties for your schema</h2>
+      <h2 class="text-muted text-center">1. Define new classes and properties for your schema</h2>
       <div class="form-group text-center p-5">
         <input autocomplete="true" type="text" v-model='schemaName' class="form-control w-50 m-auto" id="schemaName1" aria-describedby="nameHelp" placeholder="Enter schema name">
         <small id="nameHelp" class="form-text text-muted">Choose a meaninful name for your schema. eg. Dataset, Contact, etc.</small>
@@ -76,15 +64,16 @@
     </div>
     <div class="jumbotron d-flex flex-wrap align-items-start">
       <div style="flex:1; min-width:100%;">
-        <h2 class="text-muted text-center">Step 2: Choose which parent class properties you want to resuse</h2>
+        <h2 class="text-muted text-center">2. Choose which parent class properties you want to resuse</h2>
       </div>
       <template v-for="(item,index) in clses">
         <class-box key="index" :clss="item"></class-box>
       </template>
     </div>
     <div class="jumbotron text-center">
-      <h2 class="text-muted text-center">Step 3: Generate Code</h2>
-      <button class="btn themeButton pulse text-light" @click.prevent="generateResult">Generate Code</button>
+      <h2 class="text-muted text-center">3. Generate Code</h2>
+      <small class="text-muted d-block">Click here to see latest changes</small>
+      <button class="btn themeButton pulse text-light" @click.prevent="generateResult">Get Your Code</button>
       <div v-show="valid" class="swing-in-left-fwd ">
         <pre >
           <code class="p-5 border-success" id="resultCode" @click="selectText('resultCode')">
@@ -342,7 +331,7 @@ Vue.component('class-box', {
         else if (_.isArray(data["rdfs:subClassOf"])) {
           for (var i = 0; i < data['rdfs:subClassOf'].length; i++) {
             let cl = data['rdfs:subClassOf'][i]['@id']
-            subclasses.push(type);
+            subclasses.push(cl);
           }
         }else if(_.isObject(data["rdfs:subClassOf"])){
           let cl = data['rdfs:subClassOf']['@id']
@@ -411,7 +400,7 @@ Vue.component('class-box', {
           <small class="text-muted">
             <span v-if="clss['rdfs:subClassOf']">Subclass of:</span>
             <template v-for="item in getSubclass(clss)">
-              <small class="bold mainTextDark" v-text='item'></small>
+              <small class="bold mainTextDark mr-2" v-text='item'></small>
             </template>
           </small>
           <div class="text-center" v-if='myclass'>
