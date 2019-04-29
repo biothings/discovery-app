@@ -8,6 +8,7 @@
   box-shadow: 2px 2px 5px #bbbbbb;
   transition: .5s all;
   background: #eceaea !important;
+  position: relative;
 }
 
 .clsContainer:hover{
@@ -38,6 +39,16 @@
 #schemaName1:focus{
   background: white !important;
 }
+
+.keepButton{
+  background: #6c757d;
+  transition: .5s all;
+}
+
+.keepButton:hover{
+  background: #28a745;
+}
+
 </style>
 <section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
   <div>
@@ -48,11 +59,14 @@
       <h1 class="mainTextLight"><i class="fas fa-cog"></i> Loading...</h1>
     </div>
     <div class="jumbotron">
-      <h2 class="text-muted text-center">1. Define new classes and properties for your schema</h2>
-      <div class="form-group text-center p-5">
-        <input autocomplete="true" type="text" v-model='schemaName' class="form-control w-50 m-auto" id="schemaName1" aria-describedby="nameHelp" placeholder="Enter schema name">
-        <small id="nameHelp" class="form-text text-muted">Choose a meaninful name for your schema. eg. Dataset, Contact, etc.</small>
+      <h2 class="text-muted text-center">1. Choose a namespace</h2>
+      <div class="form-group text-center">
+        <input autocomplete="true" type="text" v-model='inputNamespace' class="form-control w-50 m-auto" id="schemaName1" aria-describedby="nameHelp" placeholder="Enter namespace here">
+        <small id="nameHelp" class="form-text" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" v-text='namespaceCheck'></small>
       </div>
+    </div>
+    <div class="jumbotron">
+      <h2 class="text-muted text-center">2. Define a new class and properties for your schema</h2>
       <div class="p-2 mb-3 text-center">
         <button class="btn btn-success text-light" @click.prevent="addClass">Add Class <i class="fas fa-plus"></i></button>
       </div>
@@ -64,14 +78,14 @@
     </div>
     <div class="jumbotron d-flex flex-wrap align-items-start">
       <div style="flex:1; min-width:100%;">
-        <h2 class="text-muted text-center">2. Choose which parent class properties you want to resuse</h2>
+        <h2 class="text-muted text-center">3. Choose which parent class properties you want to resuse</h2>
       </div>
       <template v-for="(item,index) in clses">
         <class-box key="index" :clss="item"></class-box>
       </template>
     </div>
     <div class="jumbotron text-center">
-      <h2 class="text-muted text-center">3. Generate Code</h2>
+      <h2 class="text-muted text-center">4. Generate Code</h2>
       <small class="text-muted d-block">Click here to see latest changes</small>
       <button class="btn themeButton pulse text-light" @click.prevent="generateResult">Get Your Code</button>
       <div v-show="valid" class="swing-in-left-fwd ">
@@ -96,15 +110,27 @@
 
 const store = new Vuex.Store({
   state: {
+    'finalschema':{
+      '@context':{
+      },
+      '@graph':[]
+    },
     // can access directly but not mutate using this.$store.state.count
-    'schema':{},
-    'userClasses':[]
+    'schema':{
+      'type':Object
+    },
+    'userClasses':[],
+    'namespace':''
   },
   strict: true,
   mutations: {
     saveSchema(state,payload){
       console.log('saving..')
       state.schema = payload['schema'];
+      state.finalschema['@context']=payload['schema']['@context'];
+    },
+    saveNamespace(state,payload){
+      state.namespace = payload['namespace'];
     },
     saveClass(state,payload){
       clss = payload['clss'];
@@ -126,6 +152,14 @@ const store = new Vuex.Store({
         state.schema['@graph'].push(prop);
       }
     },
+    keepProperty(state,payload){
+      prop = payload['prop'];
+      clss = payload['clss'];
+      console.log('keeping',prop,clss)
+      // if (state.schema['@graph']) {
+      //   state.schema['@graph'].push(prop);
+      // }
+    },
     removeProperty(state,payload){
       prop = payload['prop'];
       if (state.schema['@graph']) {
@@ -145,12 +179,46 @@ const store = new Vuex.Store({
     getClassList:state=>{
       return state.clssList
     },
+    getNamespace:state=>{
+      return state.namespace
+    },
     getSchema:state=>{
       return state.schema
+    },
+    getFinalSchema:state=>{
+      return state.finalschema
     },
     getUserClasses:state=>{
       return state.userClasses
     },
+    getPropsFor: (state) => (name) => {
+
+      let schema = state.schema
+      let props = []
+      for (var i = 0; i < schema['@graph'].length; i++) {
+        if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdf:Property"){
+          let propObj = schema['@graph'][i];
+          if ( _.isString(propObj['schema:domainIncludes']) ) {
+            if (propObj["schema:domainIncludes"].includes(name)) {
+              props.push(propObj);
+            }
+          }
+          else if ( _.isArray(propObj['schema:domainIncludes']) ) {
+            for (var j = 0; j < propObj['schema:domainIncludes'].length; j++) {
+              if (propObj["schema:domainIncludes"][j]['@id'].includes(name)) {
+                props.push(propObj);
+              }
+            }
+          }else if( _.isPlainObject(propObj['schema:domainIncludes']) ){
+            if (propObj["schema:domainIncludes"]['@id'].includes(name)) {
+              props.push(propObj);
+            }
+          }
+
+        }
+      }
+      return props
+  }
   },
   actions:{
 
@@ -197,7 +265,7 @@ Vue.component('class-box', {
     return{
       showAll:true,
       myList:[],
-      isHidden:true
+      isHidden:true,
     }
   },
   props: ['clss','myclass'],
@@ -277,8 +345,9 @@ Vue.component('class-box', {
     },
     handleUserPropInput: function(value, oldValue){
         var self = this;
+        let prefix= store.getters.getNamespace
         var skeleton={
-          "@id": "schema:"+value[0],
+          "@id": prefix+':'+value[0],
           "@type": "rdf:Property",
           "rdfs:comment": value[2],
           "rdfs:label": value[0],
@@ -298,6 +367,53 @@ Vue.component('class-box', {
       var payload={};
       payload['prop'] = prop;
       store.commit('removeProperty',payload)
+    },
+    keepProp(prop){
+      let list = store.getters.getUserClasses
+      if (list.length<1) {
+        Swal(
+            'You must create a class first',
+            'All parent properties are inherited by default,but after creating a class choose which ones you will actually use in your schema',
+            'error'
+          );
+      }
+      if (list && list.length === 1) {
+
+        var payload={};
+        payload['prop'] = prop;
+        payload['clss']=list[0];
+        store.commit('keepProperty',payload)
+
+      }else if(list && list.length > 1){
+
+        let listOptions={};
+        for (var i = 0; i < list.length; i++) {
+          listOptions[list[i]['@id']]= list[i]
+        }
+
+        Swal.mixin({
+          input: 'text',
+          confirmButtonText: 'OK',
+          showCancelButton: true,
+          progressSteps: ['1']
+        }).queue([
+          {
+            title: "What class will use this property?",
+            input: 'select',
+            inputOptions: listOptions,
+            html: 'Select class'
+          },
+        ]).then((result) => {
+          if (result.value) {
+
+            var payload={};
+            payload['prop'] = prop;
+            payload['clss']=result.value;
+            store.commit('keepProperty',payload)
+
+          }
+        })
+      }
     },
     getType: function(data){
       let types=[];
@@ -343,15 +459,15 @@ Vue.component('class-box', {
       return subclasses;
     },
   },
-  watch:{
-    showAll: function(newVal, oldVal){
-      if (newVal) {
-        this.myList = this.properties;
-      }else{
-        this.myList = this.properties.slice(0,5);
-      }
-    }
-  },
+  // watch:{
+  //   showAll: function(newVal, oldVal){
+  //     if (newVal) {
+  //       this.myList = this.properties;
+  //     }else{
+  //       this.myList = this.properties.slice(0,5);
+  //     }
+  //   }
+  // },
   mounted: function(){
     this.showAll= false
   },
@@ -360,37 +476,11 @@ Vue.component('class-box', {
       return this.clss['rdfs:label'];
     },
     properties:function(){
-      let schema = store.getters.getSchema;
-      let props =[];
-      var self= this;
-      for (var i = 0; i < schema['@graph'].length; i++) {
-        if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdf:Property"){
-          let propObj = schema['@graph'][i];
-          if ( _.isString(propObj['schema:domainIncludes']) ) {
-            if (propObj["schema:domainIncludes"].includes(self.className)) {
-              props.push(propObj);
-            }
-          }
-          else if ( _.isArray(propObj['schema:domainIncludes']) ) {
-            for (var j = 0; j < propObj['schema:domainIncludes'].length; j++) {
-              if (propObj["schema:domainIncludes"][j]['@id'].includes(self.className)) {
-                props.push(propObj);
-              }
-            }
-          }else if( _.isPlainObject(propObj['schema:domainIncludes']) ){
-            if (propObj["schema:domainIncludes"]['@id'].includes(self.className)) {
-              props.push(propObj);
-            }
-          }
-
-        }
-      }
-      return props;
+      return store.getters.getPropsFor(this.clss['rdfs:label']);
     }
   },
   template:
-  `<div class="clsContainer p-3 bg-light m-3" style="position:relative;" style="flex:1">
-    <i v-if="myclass" @click.prevent="deleteClass" title="DELETE" class="fas fa-times text-danger pointer" style="position:absolute; right:10px; top:10px;"></i>
+  `<div class="clsContainer p-3 bg-light m-3" style="flex:1">
     <div class="row">
       <div class="clsNameContainer col-sm-12">
         <div class='text-center'>
@@ -405,6 +495,9 @@ Vue.component('class-box', {
           </small>
           <div class="text-center" v-if='myclass'>
               <a role='button' class="btn smallButton bg-success text-light" @click.prevent="addPropsToClass">Add Property <i class="fas fa-plus"></i></a>
+              <!--<a role="button" class="btn smallButton bg-danger text-light" @click.prevent="deleteClass" title="DELETE">
+                Delete <i class="fas fa-times" ></i>
+              </a>-->
           </div>
         </div>
       </div>
@@ -415,7 +508,8 @@ Vue.component('class-box', {
         <table class="w-100 table table-sm table-responsive-sm" v-if="properties.length">
           <thead class="mainBackLight text-light">
             <th class="text-center">
-              <small>Remove</small>
+              <small v-if="!myclass">Reuse</small>
+              <small v-if="myclass">Remove</small>
             </th>
             <th>
               <small>Name</small>
@@ -428,25 +522,28 @@ Vue.component('class-box', {
             </th>
           </thead>
           <tbody>
-            <template v-for="(item,index) in myList">
-              <tr>
-                <td class="text-center">
-                  <i :title="'Remove '+item['rdfs:label']" class="fas fa-minus-circle text-danger pointer" @click.prevent="removeProp(item)"></i>
+            <template v-for="(item,index) in properties">
+              <tr :key='index'>
+                <td v-if="!myclass" class="text-center">
+                  <button :title="'Keep '+item['rdfs:label']" @click.prevent="keepProp(item)" class="btn smallButton keepButton text-light"><i class="fas fa-check" ></i></button>
                 </td>
-                <td>
-                  <span v-text='getName(item)'></span>
+                <td v-if="myclass" class="text-center">
+                  <button :title="'Remove '+item['rdfs:label']" @click.prevent="removeProp(item)" class="btn smallButton bg-danger text-light"><i class="fas fa-minus" ></i></button>
+                </td>
+                <td  >
+                  <small class="bold" v-text='getName(item)'></small>
                 </td>
                 <td class="p-2">
                   <description :content='item["rdfs:comment"]'></description>
                 </td>
-                <td>
+                <td >
                   <template v-for="(type,i) in getType(item)">
-                    <small class="mr-2" v-html='type'></small>
+                    <small class="d-block" v-html='type'></small>
                   </template>
                 </td>
               </tr>
             </template>
-            <template v-if="!showAll && properties.length>5">
+          <!--   <template v-if="!showAll && properties.length>5">
               <tr class="text-center">
                 <td colspan='4' class='text-center'>
                   <a role="button" class="btn smallButton mainBackLight text-light" @click.prevent="showAll= !showAll">Show More (<span class="bold" v-text="properties.length-5"></span>)</a>
@@ -459,7 +556,7 @@ Vue.component('class-box', {
                   <a role="button" class="btn smallButton mainBackLight text-light" @click.prevent="showAll= !showAll">Show Less</a>
                 </td>
               </tr>
-            </template>
+            </template> -->
           </tbody>
         </table>
         <div v-else class="bg-secondary text-light text-center">
@@ -481,7 +578,9 @@ var app = new Vue({
           url:'',
           handleUserClassInput:[],
           editFrom:'',
-          schemaName:''
+          inputNamespace:'',
+          namespaceCheck:'Start typing to check availability',
+          availableNamespace:false
 				}
 			},
       computed:{
@@ -504,22 +603,53 @@ var app = new Vue({
         }
       },
       watch:{
+        inputNamespace:function(value,oldvalue){
+          let self=this;
+          if (value.length) {
+            axios.get(`/api/query?q=_meta.slug:`+value).then(function (response) {
+              if (response.data.total) {
+                self.namespaceCheck ='Not Available';
+                self.availableNamespace=false;
+              }else if(!response.data.total){
+                self.namespaceCheck ='Available';
+                self.availableNamespace=true;
+                var payload={};
+                payload['namespace'] = value;
+                store.commit('saveNamespace',payload)
+              }
+            }).catch(error => {
+              throw error;
+            });
+          }else{
+            self.namespaceCheck ='Start typing to check availability';
+            self.availableNamespace=false;
+          }
+        },
         handleUserClassInput: function(value, oldValue){
           var self = this;
-          console.log('VALUE', value)
-          var skeleton={
-            "@id": value[2]+":"+value[0],
-            "@type": "rdfs:Class",
-            "rdfs:comment": value[3],
-            "rdfs:label": value[0],
-            "rdfs:subClassOf": {
-                "@id": value[1]
+          let prefix= store.getters.getNamespace
+            var skeleton={
+              "@id": prefix+":"+value[0],
+              "@type": "rdfs:Class",
+              "rdfs:comment": value[2],
+              "rdfs:label": value[0],
+              "rdfs:subClassOf": {
+                  "@id": value[1]
+              },
+              "validation":{
+               "$schema": "",
+               "title": value[0],
+               "description": value[2],
+               "type": "object",
+               "properties": {},
+               "required": ["id"]
             }
-          };
-          // push to store
-          var payload = {};
-          payload["clss"] = skeleton;
-          store.commit('saveClass',payload);
+            };
+            // push to store
+            var payload = {};
+            payload["clss"] = skeleton;
+            store.commit('saveClass',payload);
+
         }
       },
 			methods:{
@@ -546,7 +676,7 @@ var app = new Vue({
         },
         generateResult(){
           var self = this;
-          let schema = store.getters.getSchema;
+          let schema = store.getters.getFinalSchema;
           if (schema) {
             self.valid= true;
             self.code = JSON.stringify(schema, null, 2);
@@ -557,82 +687,69 @@ var app = new Vue({
         },
         addClass:function(){
           var self = this;
-          var schema= store.getters.getSchema;
-          let list={};
-          if (schema && schema['@graph']) {
-            for (var i = 0; i < schema['@graph'].length; i++) {
-              if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdfs:Class"){
-                list[schema['@graph'][i]['@id']]= schema['@graph'][i]['@id']
+          let prefix= store.getters.getNamespace
+          if (prefix) {
+            var schema= store.getters.getSchema;
+            let list={};
+            if (schema && schema['@graph']) {
+              for (var i = 0; i < schema['@graph'].length; i++) {
+                if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdfs:Class"){
+                  list[schema['@graph'][i]['@id']]= schema['@graph'][i]['@id']
+                }
               }
             }
+
+            Swal.mixin({
+            input: 'text',
+            confirmButtonText: 'Next &rarr;',
+            showCancelButton: true,
+            progressSteps: ['1', '2','3']
+          }).queue([
+            {
+              title: "Choose a name for your class",
+              html: 'input name must be Pascal cased <b class="text-danger">eg. MyClass </b>',
+              inputValidator: (value) => {
+                return new Promise((resolve) => {
+                  if (value.match(/^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/)) {
+                    resolve()
+                  } else {
+                    resolve('class names must be PascalCased')
+                  }
+                })
+              }
+            },
+            {
+              title: "What is this class' subclass?",
+              input: 'select',
+              inputOptions: list,
+              html: 'input name must be Pascal cased <b class="text-danger">eg. Thing </b>'
+            },
+            {
+              title: "Write a comment about this class",
+              html: 'write a short summary about this class',
+              inputValidator: (value) => {
+                return new Promise((resolve) => {
+                  if (!value.length<10) {
+                    resolve()
+                  } else {
+                    resolve('Comment is too short. 10 characters minimum.')
+                  }
+                })
+              }
+            },
+          ]).then((result) => {
+            if (result.value) {
+              this.handleUserClassInput= result.value;
+            }
+          });
+          }else{
+            Swal(
+                'You must set a namespace first',
+                'Do not change or delete the namespace once created',
+                'error'
+              );
           }
 
-          Swal.mixin({
-          input: 'text',
-          confirmButtonText: 'Next &rarr;',
-          showCancelButton: true,
-          progressSteps: ['1', '2','3','4']
-        }).queue([
-          {
-            title: "Choose a name for your class",
-            html: 'input name must be Pascal cased <b class="text-danger">eg. MyClass </b>',
-            inputValidator: (value) => {
-              return new Promise((resolve) => {
-                if (value.match(/^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/)) {
-                  resolve()
-                } else {
-                  resolve('class names must be PascalCased')
-                }
-              })
-            }
-          },
-          {
-            title: "What is this class' subclass?",
-            input: 'select',
-            inputOptions: list,
-            html: 'input name must be Pascal cased <b class="text-danger">eg. Thing </b>'
-          },
-          {
-            title: "Choose a namespace for your schema",
-            html: `<p>
-                    The namespace chosen will resolve to your schema when expanded, for example:
-                    <br />
-                    <small>  http://discovery.biothings.io/<b class="text-danger">your-namespace</b>/SchemaName</small>
-                   </p>`,
-            showLoaderOnConfirm: true,
-            preConfirm: (value) => {
-              return axios.get(`/api/query?q=_meta.slug:`+value).then(function (response) {
-                console.log('slug check',response,value)
-                if (response.data.total) {
-                  throw new Error('namespace not available')
-                }else if(!response.data.total){
-                  return value
-                }
-              }).catch(error => {
-                Swal.showValidationMessage(
-                  `Request failed: ${error}`
-                )
-              });
-             },
-          },
-          {
-            title: "Write a comment about this class",
-            html: 'write a short summary about this class',
-            inputValidator: (value) => {
-              return new Promise((resolve) => {
-                if (!value.length<10) {
-                  resolve()
-                } else {
-                  resolve('Comment is too short. 10 characters minimum.')
-                }
-              })
-            }
-          },
-        ]).then((result) => {
-          if (result.value) {
-            this.handleUserClassInput= result.value;
-          }
-        })
         }
 			},
 			mounted:function(){
