@@ -29,10 +29,10 @@
 }
 
 #schemaName1{
-  background: none !important;
-  box-shadow: none !important;
+  /* background: none !important; */
+  /* box-shadow: none !important; */
   text-align: center !important;
-  font-size: 2em !important;
+  /* font-size: 2em !important; */
   color: #006476;
 }
 
@@ -59,10 +59,25 @@
       <h1 class="mainTextLight"><i class="fas fa-cog"></i> Loading...</h1>
     </div>
     <div class="jumbotron">
-      <h2 class="text-muted text-center">1. Choose a namespace</h2>
-      <div class="form-group text-center">
-        <input autocomplete="true" type="text" v-model='inputNamespace' class="form-control w-50 m-auto" id="schemaName1" aria-describedby="nameHelp" placeholder="Enter namespace here">
-        <small id="nameHelp" class="form-text" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" v-text='namespaceCheck'></small>
+      <h2 class="text-muted text-center">1. Define a new context key-value pair</h2>
+      <form v-if="!myContextFields.length" @submit.prevent="addToContext" class="form-group text-center form-row">
+        <div class="col-sm-12 col-md-6">
+          <input autocomplete="true" type="text" v-model='inputNamespace' class="form-control m-auto" id="schemaName1" aria-describedby="nameHelp" placeholder="Enter namespace here">
+          <small id="nameHelp" class="form-text" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" v-text='namespaceCheck'></small>
+        </div>
+        <div class="col-sm-12 col-md-6">
+          <input autocomplete="true" type="url" v-model='inputUrl' class="form-control m-auto" id="schemaName1" aria-describedby="urlHelp" placeholder="Enter URL here">
+          <small id="urlHelp" class="form-text" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" v-text='namespaceCheck'></small>
+        </div>
+        <div class="col-sm-12 text-center">
+          <button :disabled="!myContextFields" type="submit" class="btn btn-success" @click.prevent="addToContext">Add <i class="fas fa-plus"></i></button>
+        </div>
+      </form>
+      <div v-if="myContextFields.length" class="col-sm-12 text-center text-success mt-2">
+        <span class="d-block">@Context:</span>
+          <template v-for="item in myContextFields">
+            <span class="d-block" v-text="item"></span>
+          </template>
       </div>
     </div>
     <div class="jumbotron">
@@ -120,7 +135,7 @@ const store = new Vuex.Store({
       'type':Object
     },
     'userClasses':[],
-    'namespace':''
+    'userContextFields':[],
   },
   strict: true,
   mutations: {
@@ -128,46 +143,63 @@ const store = new Vuex.Store({
       console.log('saving..')
       state.schema = payload['schema'];
       state.finalschema['@context']=payload['schema']['@context'];
+      //move all classes to user schema
+      for (var i = 0; i < state.schema['@graph'].length; i++) {
+        if (state.schema['@graph'][i].hasOwnProperty('@type') && state.schema['@graph'][i]['@type'] === "rdfs:Class") {
+          state.finalschema['@graph'].push(state.schema['@graph'][i]);
+        }
+      }
     },
     saveNamespace(state,payload){
       state.namespace = payload['namespace'];
     },
+    saveContextField(state,payload){
+      let newField ={};
+      newField[payload['namespace']]= payload['url'];
+      state.userContextFields.unshift(newField);
+      state.finalschema['@context'] = {...state.finalschema['@context'],...newField};
+      console.log('saved..',state.finalschema['@context'])
+    },
     saveClass(state,payload){
       clss = payload['clss'];
       if (state.schema['@graph']) {
-        state.schema['@graph'].unshift(clss);
+        state.finalschema['@graph'].unshift(clss);
         state.userClasses.unshift(clss);
       }
     },
     removeClass(state,payload){
       clss = payload['clss'];
-      if (state.schema['@graph']) {
-        state.schema['@graph']= _.difference(state.schema['@graph'], [clss]);;
+      if (state.finalschema['@graph']) {
+        state.finalschema['@graph']= _.difference(state.finalschema['@graph'], [clss]);;
         state.userClasses= _.difference(state.userClasses, [clss]);;
       }
     },
     saveProperty(state,payload){
       prop = payload['prop'];
-      if (state.schema['@graph']) {
-        state.schema['@graph'].push(prop);
+      if (state.finalschema['@graph']) {
+        state.finalschema['@graph'].push(prop);
       }
     },
     keepProperty(state,payload){
       prop = payload['prop'];
       clss = payload['clss'];
       console.log('keeping',prop,clss)
-      // if (state.schema['@graph']) {
-      //   state.schema['@graph'].push(prop);
-      // }
+
+      if (clss.hasOwnProperty('validation')) {
+        let target= clss['validation']['properties']
+        let value = {'description':prop['rdfs:comment'],'type':prop['schema:rangeIncludes']}
+        let fieldname = prop['rdfs:label']
+        Vue.set( target, fieldname, value)
+      }
     },
     removeProperty(state,payload){
       prop = payload['prop'];
-      if (state.schema['@graph']) {
-        for (var i = 0; i < state.schema['@graph'].length; i++) {
-          if(state.schema['@graph'][i].hasOwnProperty('@type') && state.schema['@graph'][i]['@type'] === "rdf:Property"){
-            let propObj = state.schema['@graph'][i];
-            if (state.schema['@graph'][i]['rdfs:label']===prop['rdfs:label']) {
-              state.schema['@graph'].splice(i, 1)
+      if (state.finalschema['@graph']) {
+        for (var i = 0; i < state.finalschema['@graph'].length; i++) {
+          if(state.finalschema['@graph'][i].hasOwnProperty('@type') && state.finalschema['@graph'][i]['@type'] === "rdf:Property"){
+            let propObj = state.finalschema['@graph'][i];
+            if (state.finalschema['@graph'][i]['rdfs:label']===prop['rdfs:label']) {
+              state.finalschema['@graph'].splice(i, 1)
             }
           }
         }
@@ -179,9 +211,6 @@ const store = new Vuex.Store({
     getClassList:state=>{
       return state.clssList
     },
-    getNamespace:state=>{
-      return state.namespace
-    },
     getSchema:state=>{
       return state.schema
     },
@@ -191,9 +220,16 @@ const store = new Vuex.Store({
     getUserClasses:state=>{
       return state.userClasses
     },
-    getPropsFor: (state) => (name) => {
-
-      let schema = state.schema
+    getUserContextFields:state=>{
+      return state.userContextFields
+    },
+    getPropsFor: (state) => (name,myclass) => {
+      let schema={};
+      if (myclass===true) {
+        schema = state.finalschema
+      }else{
+        schema = state.schema
+      }
       let props = []
       for (var i = 0; i < schema['@graph'].length; i++) {
         if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdf:Property"){
@@ -218,6 +254,22 @@ const store = new Vuex.Store({
         }
       }
       return props
+  },
+  getSelectedPropsFor: (state) => (name,myclass) => {
+
+    let schema={};
+    if (myclass===true) {
+      schema = state.finalschema
+      for (var i = 0; i < schema['@graph'].length; i++) {
+        if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdfs:Class"){
+          let propObj = schema['@graph'][i];
+          if (propObj['@id'].includes(name)) {
+            console.log('returning',schema['@graph'][i]['validation']['properties'])
+            return schema['@graph'][i]['validation']['properties']
+          }
+        }
+      }
+    }
   }
   },
   actions:{
@@ -345,7 +397,11 @@ Vue.component('class-box', {
     },
     handleUserPropInput: function(value, oldValue){
         var self = this;
-        let prefix= store.getters.getNamespace
+        let context= store.getters.getUserContextFields;
+        let prefix = '';
+        for (key in context[0]) {
+          prefix = key;
+        }
         var skeleton={
           "@id": prefix+':'+value[0],
           "@type": "rdf:Property",
@@ -398,7 +454,7 @@ Vue.component('class-box', {
           progressSteps: ['1']
         }).queue([
           {
-            title: "What class will use this property?",
+            title: "Which class will use this property?",
             input: 'select',
             inputOptions: listOptions,
             html: 'Select class'
@@ -470,13 +526,27 @@ Vue.component('class-box', {
   // },
   mounted: function(){
     this.showAll= false
+    if (this.myclass) {
+      this.isHidden = false;
+    }
   },
   computed: {
     className:function(){
       return this.clss['rdfs:label'];
     },
     properties:function(){
-      return store.getters.getPropsFor(this.clss['rdfs:label']);
+      if (this.myclass) {
+        return store.getters.getPropsFor(this.clss['rdfs:label'],true);
+      }else{
+        return store.getters.getPropsFor(this.clss['rdfs:label'],false);
+      }
+    },
+    selectedProperties:{
+      get(){
+        if (this.myclass) {
+          return store.getters.getSelectedPropsFor(this.clss['rdfs:label'],true);
+        }
+      }
     }
   },
   template:
@@ -503,12 +573,12 @@ Vue.component('class-box', {
       </div>
       <div v-show='!isHidden' class="propContainer  text-muted col-sm-12">
         <small>
-          PROPERTIES
+          Properties of <span v-text="clss['rdfs:label']"></span>
         </small>
         <table class="w-100 table table-sm table-responsive-sm" v-if="properties.length">
           <thead class="mainBackLight text-light">
             <th class="text-center">
-              <small v-if="!myclass">Reuse</small>
+              <small v-if="!myclass">Keep</small>
               <small v-if="myclass">Remove</small>
             </th>
             <th>
@@ -562,6 +632,22 @@ Vue.component('class-box', {
         <div v-else class="bg-secondary text-light text-center">
           <small>This class has no properties of its own</small>
         </div>
+        <div v-if="myclass">
+          <table class="w-100 table table-sm table-muted table-responsive-sm">
+            <thead>
+              <th>
+                Selected Inherited Properties
+              </th>
+            </thead>
+            <tbody>
+              <template v-for="(item,index) in selectedProperties">
+                <tr>
+                  <span class="badge mainBackLight text-light" v-text="index"></span>: <description :content='item.description'></description>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>`
@@ -579,6 +665,7 @@ var app = new Vue({
           handleUserClassInput:[],
           editFrom:'',
           inputNamespace:'',
+          inputUrl:'',
           namespaceCheck:'Start typing to check availability',
           availableNamespace:false
 				}
@@ -600,6 +687,11 @@ var app = new Vue({
           get(){
             return store.getters.getUserClasses
           }
+        },
+        myContextFields:{
+          get(){
+            return store.getters.getUserContextFields
+          }
         }
       },
       watch:{
@@ -613,9 +705,6 @@ var app = new Vue({
               }else if(!response.data.total){
                 self.namespaceCheck ='Available';
                 self.availableNamespace=true;
-                var payload={};
-                payload['namespace'] = value;
-                store.commit('saveNamespace',payload)
               }
             }).catch(error => {
               throw error;
@@ -627,7 +716,11 @@ var app = new Vue({
         },
         handleUserClassInput: function(value, oldValue){
           var self = this;
-          let prefix= store.getters.getNamespace
+          let context= store.getters.getUserContextFields;
+          let prefix = '';
+          for (key in context[0]) {
+            prefix = key;
+          }
             var skeleton={
               "@id": prefix+":"+value[0],
               "@type": "rdfs:Class",
@@ -641,7 +734,8 @@ var app = new Vue({
                "title": value[0],
                "description": value[2],
                "type": "object",
-               "properties": {},
+               "properties": {
+               },
                "required": ["id"]
             }
             };
@@ -653,6 +747,25 @@ var app = new Vue({
         }
       },
 			methods:{
+        addToContext(){
+          var self = this;
+          if (self.inputUrl && self.inputNamespace) {
+            var payload={};
+            payload['namespace'] = self.inputNamespace;
+            payload['url'] = self.inputUrl;
+            store.commit('saveContextField',payload)
+            self.inputNamespace='';
+            self.inputUrl='';
+            Swal.fire({
+              type: 'success',
+              toast: true,
+              position: 'top',
+              timer:2500,
+              showConfirmButton:false,
+              title: 'Context Saved',
+            });
+          }
+        },
         handleSubmit(){
           var self = this;
           if (self.url) {
@@ -687,9 +800,9 @@ var app = new Vue({
         },
         addClass:function(){
           var self = this;
-          let prefix= store.getters.getNamespace
-          if (prefix) {
-            var schema= store.getters.getSchema;
+          let userContext= store.getters.getUserContextFields
+          if (userContext.length) {
+            var schema= store.getters.getFinalSchema;
             let list={};
             if (schema && schema['@graph']) {
               for (var i = 0; i < schema['@graph'].length; i++) {
