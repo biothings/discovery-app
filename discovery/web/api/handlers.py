@@ -1,122 +1,151 @@
 ''' Handlers for Non-Query API Requests '''
 
+from json import JSONDecodeError
+
 import tornado
 
 from biothings.web.api.es.handlers.query_handler import QueryHandler
-from web.api.es.doc import Metadata, Schema
-from web.handlers import BaseHandler
+from biothings_schema import Schema as SchemaParser
+from discovery.web.api.es.doc import Class, Schema
+from discovery.web.handlers import BaseHandler
+from elasticsearch_dsl import Search
+
+
+def github_authenticated(handler_method):
+    ''' Authentication and Authorization Decorator '''
+
+    def _(self, namespace=None):
+        if not self.current_user:
+            res = {'success': False,
+                   'error': 'Login with your Github account first.'}
+            self.return_json(res, status_code=401)
+            return
+        if namespace:
+            sch = Schema.get(id=namespace, ignore=404)
+            if sch and sch['_meta'].username != self.current_user['login']:
+                res = {'success': False,
+                       'error': 'Document does not belong to the logged-in user.'}
+                self.return_json(res, status_code=403)
+                return
+        if namespace:
+            handler_method(self, namespace)
+        else:
+            handler_method(self)
+
+    return _
 
 
 # pylint: disable=abstract-method, arguments-differ
 class RegistryHandler(BaseHandler):
-    ''' POST ./api/registry
-        GET ./api/registry/<api_id> '''
+    ''' Create - POST ./api/registry
+        Modify - PUT ./api/registry/<schema_namespace>
+        Fetch  - GET ./api/registry/<schema_namespace>
+        Remvoe - DELETE ./api/registry/<schema_namespace> '''
 
+    @github_authenticated
     def post(self):
-        ''' Save or Update a document '''
+        ''' Define a schema with its URL
+            Parse the classes defined in the schema
+            Save the schema and its classes in separate indexes '''
 
-        # Authenticate
-        if not self.current_user:
-            res = {'success': False,
-                   'error': 'Login with your Github account first.'}
-            self.return_json(res, status_code=401)
-            return
-
-        # Validate
-        req = tornado.escape.json_decode(self.request.body)
-        url = req.get('url', '').lower()
-        slug = req.get('slug', '').lower()
-        if not url or not slug:
-            res = {'success': False,
-                   'error': 'Parameters "url" and/or "slug" not found.'}
+        # Request Body Validation
+        try:
+            req = tornado.escape.json_decode(self.request.body)
+            namespace = req.get('name').lower()
+            url = req.get('url').lower()
+            assert len(req) == 2, 'Found Unknown fields.'
+        except Exception as exc:  # pylint: disable=broad-except
+            res = {'success': False, 'error': str(exc)}
             self.return_json(res, status_code=400)
             return
 
-        # Index
-        props = req.get('props', [])
-        clses = req.get('clses', [])
-        props = [props] if isinstance(props, str) else [
-            prop for prop in props]
-        clses = [clses] if isinstance(clses, str) else [
-            clss for clss in clses]
-        meta = Metadata(username=self.current_user.get(
-            'login'), url=url, slug=slug)
-        schema = Schema(_meta=meta, props=props, clses=clses)
-        created = schema.save()
+        # Authorization
+        existing_schema = Schema.get(id=namespace, ignore=404)
+        if existing_schema and existing_schema['_meta'].username != self.current_user['login']:
+            res = {'success': False,
+                   'error': "The requested namespace is registered by another user."}
+            self.return_json(res, status_code=403)
+            return
+
+        # Document Construction
+        schema = Schema(namespace, url, self.current_user.get('login'))
+        try:
+            classes = []
+            schema_parser = SchemaParser(url)
+            for class_ in schema_parser.fetch_all_classes():
+                es_class = Class()
+                es_class.name = class_
+                try:
+                    es_class.clses = [branch[-1]
+                                      for branch in schema_parser.find_parent_classes(class_)]
+                except KeyError:
+                    es_class.clses = []
+                try:
+                    es_class.props = schema_parser.find_class_specific_properties(class_)
+                except KeyError:
+                    es_class.props = []
+                es_class.schema = namespace
+                classes.append(es_class)
+        except Exception as exc:  # pylint: disable=broad-except
+            res = {'success': False, 'error': str(exc)}
+            self.return_json(res, status_code=400)
+            return
+
+        # Cleanup
+        if existing_schema:
+            existing_classes = Search(
+                index='discover_class').query(
+                    "match", schema=namespace)
+            existing_classes.delete()
+
+        # Saving
+        for cls_ in classes:
+            cls_.save(refresh=False)
+        save_status = schema.save()
+
         res = {'success': True,
-               'url': self.request.full_url() + '/' + schema.meta.id}
-        self.return_json(res, status_code=200+int(created))
+               'url': self.request.full_url() + '/' + schema.meta.id,
+               'schema': 'created' if save_status else 'updated',
+               'classes': len(classes)}
 
-    def get(self, api_id):
-        ''' Retrive a document by es field _id '''
-        sch = Schema.get(id=api_id, ignore=404)
-        if not sch:
-            res = {'success': False,
-                   'error': 'Document does not exisit.'}
-            self.return_json(res, status_code=404)
-            return
-        self.return_json(sch.to_dict())
+        self.return_json(res, status_code=200+int(save_status))
 
-    def put(self, api_id):
-        ''' Update existing document's slug only
-            Use POST to create a document
-            to gurantee _id corresponds to its meta url '''
+    @github_authenticated
+    def put(self, namespace):
+        ''' Update a schema without triggering class population '''
 
-        # Authenticate
-        if not self.current_user:
-            res = {'success': False,
-                   'error': 'Login with your Github account first.'}
-            self.return_json(res, status_code=401)
-            return
-
-        # Validate document existance by id
-        sch = Schema.get(id=api_id, ignore=404)
-        if not sch:
-            res = {'success': False,
-                   'error': 'Document does not exisit.'}
-            self.return_json(res, status_code=404)
-            return
-
-        # Validate edit permission
-        if sch['_meta'].username != self.current_user['login']:
-            res = {'success': False,
-                   'error': 'Document does not belong to the logged-in user.'}
-            self.return_json(res, status_code=403)
-            return
-
-        # Parse request body
-        req = tornado.escape.json_decode(self.request.body)
-        url = req.get('url', '').lower()
-        if url and url != sch['_meta'].username:
-            res = {'success': False,
-                   'error': 'URL change requires recreating the document.'}
-            self.return_json(res, status_code=403)
-            return
-
-        slug = req.get('slug', '').lower()
-        if not slug:
-            res = {'success': False,
-                   'error': 'Parameters "slug" not found.'}
+        try:
+            req = tornado.escape.json_decode(self.request.body)
+            ns = req.get('name').lower()  # TODO validation
+            url = req.get('url').lower()
+            assert len(req) == 2, 'Found Unknown fields.'
+        except Exception as exc:  # pylint: disable=broad-except
+            res = {'success': False, 'error': str(exc)}
             self.return_json(res, status_code=400)
             return
 
-        # update and save
-        sch['_meta'].slug = slug
-        result = sch.save()
-        assert not result
-        res = {'success': True}
-        self.return_json(res, status_code=200)
+        sch = Schema(namespace, url, self.current_user['login'])
+        save_status = sch.save()
+        self.set_status(200 + save_status)
+        return
 
-    def delete(self, api_id):
+    def get(self, namespace):
+        ''' Retrive a schema by namespace '''
+        sch = Schema.get(id=namespace, ignore=404)
+        if not sch:
+            res = {'success': False,
+                   'error': 'Document does not exisit.'}
+            self.return_json(res, status_code=404)
+            return
+        sch_dict = sch.to_dict()
+        sch_dict['name'] = sch.meta.id
+        self.return_json(sch_dict)
+
+    @github_authenticated
+    def delete(self, namespace):
         ''' Delete a document by es _id '''
 
-        if not self.current_user:
-            res = {'success': False,
-                   'error': 'Login with your Github account first.'}
-            self.return_json(res, status_code=401)
-            return
-
-        sch = Schema.get(id=api_id, ignore=404)
+        sch = Schema.get(id=namespace, ignore=404)
 
         if not sch:
             res = {'success': False,
@@ -124,14 +153,12 @@ class RegistryHandler(BaseHandler):
             self.return_json(res, status_code=404)
             return
 
-        if sch['_meta'].username != self.current_user['login']:
-            res = {'success': False,
-                   'error': 'Document does not belong to the logged-in user.'}
-            self.return_json(res, status_code=403)
-            return
-
-        sch.delete(refresh=True)
-        self.return_json({'success': True})
+        sch.delete()
+        existing_classes = Search(
+            index='discover_class').query(
+                "match", schema=namespace)
+        existing_classes.delete()
+        return
 
 
 class ProxyHandler(BaseHandler):

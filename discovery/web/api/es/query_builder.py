@@ -6,7 +6,7 @@ from biothings.web.api.es.query_builder import ESQueryBuilder
 
 
 class DiscoveryQueryBuilder(ESQueryBuilder):
-    ''' Allow direct search with slug or partial match '''
+    ''' Allow direct search with class name or partial match '''
 
     def _extra_query_types(self, q):
 
@@ -16,7 +16,7 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                     "queries": [
                         {
                             "term": {
-                                "_meta.slug": {
+                                "name": {
                                     "value": q,
                                     "boost": 1.2
                                 }
@@ -24,13 +24,12 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                         },
                         {
                             "query_string": {
-                                "default_field": "clses",
                                 "query": q
                             }
                         },
                         {
                             "query_string": {
-                                "default_field": "clses",
+                                "default_field": "name",
                                 "query": url_escape(q) + "*",
                                 "boost": 0.8
                             }
