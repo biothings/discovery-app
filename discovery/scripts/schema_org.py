@@ -10,15 +10,17 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
-from discovery.web.api.es.doc import Metadata, Schema  # Index is defined here
+from discovery.web.api.es.doc import Class, Schema
 
 print()
 print("-"*100)
-print(" "*35, "Schema.org Indexer")
+print(" "*35, "Schema.org Auto Indexer")
 print("-"*100)
 print()
 
-res = requests.get("https://schema.org/version/3.4/schema.jsonld").json()
+SCHEMA_ORG_URL = "https://schema.org/version/3.5/schema.jsonld"
+
+res = requests.get(SCHEMA_ORG_URL).json()
 print('Downloaded', len(res['@graph']), 'objects.\n')
 
 superclses = {}
@@ -75,17 +77,9 @@ print()
 schemas = []
 for obj in res['@graph']:
     if '@type' in obj and obj['@type'] == 'rdfs:Class':
-        clses = {obj['@id']}
+        clses = superclses[obj['@id']] if obj['@id'] in superclses else []
         props = properties[obj['@id']] if obj['@id'] in properties else []
-        queue = [obj['@id']]
-        while queue:
-            cls_ = queue.pop(0)
-            if cls_ in superclses:
-                clses.update(superclses[cls_])
-                for supercls in superclses[cls_]:
-                    if supercls not in queue:
-                        queue.append(supercls)
-        clses.remove(obj['@id'])
+        # convert url to name
         clses = [url[18:] for url in clses if url.startswith('http://schema.org/') or url]
         props = [url[18:] for url in props if url.startswith('http://schema.org/') or url]
         ###### DEBUG #####
@@ -95,9 +89,14 @@ for obj in res['@graph']:
         # print(props)
         # print()
         ##################
-        meta = Metadata(username='schema_org_auto_indexer', url=obj['@id'] + '.jsonld')
-        schema = Schema(label=obj['rdfs:label'], clses=clses, props=props, _meta=meta)
-        schemas.append(schema)
+        schemas.append(
+            Class(name=obj['rdfs:label'], clses=clses, props=props, schema='schema'))
+
+
+# Index schema
+Schema('schema', SCHEMA_ORG_URL, 'Schema.org Auto Indexer').save()
+
+# Index classes
 
 sample_size = 50  # for performance benchmark
 
