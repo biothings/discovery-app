@@ -29,11 +29,7 @@
 }
 
 #schemaName1{
-  /* background: none !important; */
-  /* box-shadow: none !important; */
   text-align: center !important;
-  /* font-size: 2em !important; */
-  color: #006476;
 }
 
 #schemaName1:focus{
@@ -49,6 +45,127 @@
   background: #28a745;
 }
 
+.border-done{
+  border-left: 7px solid var(--success);
+}
+
+.p-r{
+  position: relative;
+  border-left: 5px solid var(--sec);
+}
+
+.p-a{
+  position: absolute;
+}
+
+.sectionHeader{
+  top: 45%;
+  left:-13px;
+}
+
+input[type="checkbox"].ios8-switch {
+    position: absolute;
+    margin: 8px 0 0 16px;
+}
+input[type="checkbox"].ios8-switch + label {
+    position: relative;
+    padding: 5px 0 0 50px;
+    line-height: 2.0em;
+}
+input[type="checkbox"].ios8-switch + label:before {
+    content: "";
+    position: absolute;
+    display: block;
+    left: 0;
+    top: 0;
+    width: 40px; /* x*5 */
+    height: 24px; /* x*3 */
+    border-radius: 16px; /* x*2 */
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+}
+input[type="checkbox"].ios8-switch + label:after {
+    content: "";
+    position: absolute;
+    display: block;
+    left: 0px;
+    top: 0px;
+    width: 24px; /* x*3 */
+    height: 24px; /* x*3 */
+    border-radius: 16px; /* x*2 */
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+}
+input[type="checkbox"].ios8-switch + label:hover:after {
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+input[type="checkbox"].ios8-switch:checked + label:after {
+    margin-left: 16px;
+}
+input[type="checkbox"].ios8-switch:checked + label:before {
+    background: #55D069;
+}
+
+/* SMALL */
+
+input[type="checkbox"].ios8-switch-sm {
+    margin: 5px 0 0 10px;
+}
+input[type="checkbox"].ios8-switch-sm + label {
+    position: relative;
+    padding: 0 0 0 32px;
+    line-height: 1.3em;
+}
+input[type="checkbox"].ios8-switch-sm + label:before {
+    width: 25px; /* x*5 */
+    height: 15px; /* x*3 */
+    border-radius: 10px; /* x*2 */
+}
+input[type="checkbox"].ios8-switch-sm + label:after {
+    width: 15px; /* x*3 */
+    height: 15px; /* x*3 */
+    border-radius: 10px; /* x*2 */
+}
+input[type="checkbox"].ios8-switch-sm + label:hover:after {
+    box-shadow: 0 0 3px rgba(0,0,0,0.3);
+}
+input[type="checkbox"].ios8-switch-sm:checked + label:after {
+    margin-left: 10px; /* x*2 */
+}
+
+/* LARGE */
+
+input[type="checkbox"].ios8-switch-lg {
+    margin: 10px 0 0 20px;
+}
+input[type="checkbox"].ios8-switch-lg + label {
+    position: relative;
+    padding: 7px 0 0 60px;
+    line-height: 2.3em;
+}
+input[type="checkbox"].ios8-switch-lg + label:before {
+    width: 50px; /* x*5 */
+    height: 30px; /* x*3 */
+    border-radius: 20px; /* x*2 */
+}
+input[type="checkbox"].ios8-switch-lg + label:after {
+    width: 30px; /* x*3 */
+    height: 30px; /* x*3 */
+    border-radius: 20px; /* x*2 */
+}
+input[type="checkbox"].ios8-switch-lg + label:hover:after {
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+input[type="checkbox"].ios8-switch-lg:checked + label:after {
+    margin-left: 20px; /* x*2 */
+}
+
+
+
 </style>
 <section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
   <div>
@@ -58,30 +175,34 @@
     <div v-if=loading class="loader">
       <h1 class="mainTextLight"><i class="fas fa-cog"></i> Loading...</h1>
     </div>
-    <div class="jumbotron">
-      <h2 class="text-muted text-center">1. Define a new context key-value pair</h2>
-      <form v-if="!myContextFields.length" @submit.prevent="addToContext" class="form-group text-center form-row">
-        <div class="col-sm-12 col-md-6">
-          <input autocomplete="true" type="text" v-model='inputNamespace' class="form-control m-auto" id="schemaName1" aria-describedby="nameHelp" placeholder="Enter namespace here">
-          <small id="nameHelp" class="form-text" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" v-text='namespaceCheck'></small>
+    <div class="jumbotron p-r" :class="[ myContextFields.length ? 'border-done' : '']">
+      <div class="numberCircle mainBackLight text-light sectionHeader p-a">1</div>
+      <h2 class="text-muted text-center">Define a context <b class="mainTextDark">namespace:url</b> key-value pair</h2>
+      <form v-if="!myContextFields.length" @submit.prevent="addToContext" class="form-group text-center form-row w-50 m-auto">
+        <div class="col-sm-12 col-md-5">
+          <input autocomplete="true" type="text" v-model='inputNamespace' class="form-control m-auto" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" id="schemaName1" aria-describedby="nameHelp" placeholder="Enter namespace here">
         </div>
-        <div class="col-sm-12 col-md-6">
-          <input autocomplete="true" type="url" v-model='inputUrl' class="form-control m-auto" id="schemaName1" aria-describedby="urlHelp" placeholder="Enter URL here">
-          <small id="urlHelp" class="form-text" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" v-text='namespaceCheck'></small>
+        <div class="col-sm-12 col-md-2">
+          <h1>:</h1>
+        </div>
+        <div class="col-sm-12 col-md-5">
+          <input autocomplete="true" type="url" v-model='inputUrl' class="form-control m-auto" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-muted']" id="schemaName1" aria-describedby="urlHelp" placeholder="Enter URL here">
         </div>
         <div class="col-sm-12 text-center">
+          <small id="nameHelp" class="form-text m-3 bold" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" v-text='namespaceCheck'></small>
           <button :disabled="!myContextFields" type="submit" class="btn btn-success" @click.prevent="addToContext">Add <i class="fas fa-plus"></i></button>
         </div>
       </form>
-      <div v-if="myContextFields.length" class="col-sm-12 text-center text-success mt-2">
+      <div v-if="myContextFields.length" class="col-sm-6 m-auto text-center text-success mt-2 alert alert-light">
         <span class="d-block">@Context:</span>
           <template v-for="item in myContextFields">
             <span class="d-block" v-text="item"></span>
           </template>
       </div>
     </div>
-    <div class="jumbotron">
-      <h2 class="text-muted text-center">2. Define a new class and properties for your schema</h2>
+    <div class="jumbotron p-r" >
+      <div class="numberCircle mainBackLight text-light sectionHeader p-a">2</div>
+      <h2 class="text-muted text-center">Define a new class and properties for your schema</h2>
       <div class="p-2 mb-3 text-center">
         <button class="btn btn-success text-light" @click.prevent="addClass">Add Class <i class="fas fa-plus"></i></button>
       </div>
@@ -91,16 +212,18 @@
         </template>
       </div>
     </div>
-    <div class="jumbotron d-flex flex-wrap align-items-start">
+    <div class="jumbotron d-flex flex-wrap align-items-start p-r">
+      <div class="numberCircle mainBackLight text-light sectionHeader p-a">3</div>
       <div style="flex:1; min-width:100%;">
-        <h2 class="text-muted text-center">3. Choose which parent class properties you want to resuse</h2>
+        <h2 class="text-muted text-center">Choose which parent class properties you want to resuse</h2>
       </div>
       <template v-for="(item,index) in clses">
         <class-box key="index" :clss="item"></class-box>
       </template>
     </div>
-    <div class="jumbotron text-center">
-      <h2 class="text-muted text-center">4. Generate Code</h2>
+    <div class="jumbotron text-center p-r">
+      <div class="numberCircle mainBackLight text-light sectionHeader p-a">4</div>
+      <h2 class="text-muted text-center">Generate Code</h2>
       <small class="text-muted d-block">Click here to see latest changes</small>
       <button class="btn themeButton pulse text-light" @click.prevent="generateResult">Get Your Code</button>
       <div v-show="valid" class="swing-in-left-fwd ">
@@ -118,6 +241,7 @@
 {% block extra_scripts %}
 <script src="https://unpkg.com/vuex"></script>
 <script src="./static/js/lodash.js"></script>
+<script src="./static/js/notify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
@@ -158,38 +282,69 @@ const store = new Vuex.Store({
       newField[payload['namespace']]= payload['url'];
       state.userContextFields.unshift(newField);
       state.finalschema['@context'] = {...state.finalschema['@context'],...newField};
+      $.notify(payload['namespace']+" added",{ globalPosition: 'right',className:'success', showDuration: 200, });
       console.log('saved..',state.finalschema['@context'])
     },
     saveClass(state,payload){
-      clss = payload['clss'];
+      let clss = payload['clss'];
       if (state.schema['@graph']) {
         state.finalschema['@graph'].unshift(clss);
         state.userClasses.unshift(clss);
       }
     },
     removeClass(state,payload){
-      clss = payload['clss'];
+      let clss = payload['clss'];
       if (state.finalschema['@graph']) {
         state.finalschema['@graph']= _.difference(state.finalschema['@graph'], [clss]);;
         state.userClasses= _.difference(state.userClasses, [clss]);;
       }
     },
     saveProperty(state,payload){
-      prop = payload['prop'];
+      let prop = payload['prop'];
       if (state.finalschema['@graph']) {
         state.finalschema['@graph'].push(prop);
       }
     },
     keepProperty(state,payload){
-      prop = payload['prop'];
-      clss = payload['clss'];
-      console.log('keeping',prop,clss)
+      let prop = payload['prop'];
+      let clss = payload['clss'];
 
       if (clss.hasOwnProperty('validation')) {
         let target= clss['validation']['properties']
-        let value = {'description':prop['rdfs:comment'],'type':prop['schema:rangeIncludes']}
-        let fieldname = prop['rdfs:label']
-        Vue.set( target, fieldname, value)
+        if (clss['validation']['properties'].hasOwnProperty(prop['rdfs:label'])) {
+          Vue.delete(target, prop['rdfs:label']);
+          $.notify(prop['rdfs:label']+" removed",{ globalPosition: 'right',className:'info', showDuration: 200, });
+        }else{
+          //TO DO: infer type based on propname but use string as default for now
+          let value = {'description':prop['rdfs:comment'],'type':'string'}
+          let fieldname = prop['rdfs:label']
+          Vue.set( target, fieldname, value)
+          $.notify(prop['rdfs:label']+" added",{ globalPosition: 'right',className:'success', showDuration: 200, });
+
+        }
+
+      }
+    },
+    handleRequiredProp(state,payload){
+      let prop = payload['propname'];
+      let clss = payload['clss'];
+      console.log('received',prop,clss)
+
+      if (clss && clss.hasOwnProperty('validation')) {
+        console.log('checking',clss['validation']['required'])
+        if (clss['validation']['required'].includes(prop)) {
+          for (var i = 0; i < clss['validation']['required'].length; i++) {
+            if (clss['validation']['required'][i] === prop) {
+              console.log('found',clss['validation']['required'])
+              clss['validation']['required'].splice(i,1);
+              $.notify(prop+" not required",{ globalPosition: 'right',className:'info', showDuration: 200, });
+            }
+          }
+        }else{
+          console.log('not found',clss['validation']['required'])
+          clss['validation']['required'].unshift(prop)
+          $.notify(prop+" required",{ globalPosition: 'right',className:'success', showDuration: 200, });
+        }
       }
     },
     removeProperty(state,payload){
@@ -200,6 +355,7 @@ const store = new Vuex.Store({
             let propObj = state.finalschema['@graph'][i];
             if (state.finalschema['@graph'][i]['rdfs:label']===prop['rdfs:label']) {
               state.finalschema['@graph'].splice(i, 1)
+              $.notify(prop['rdfs:label']+" removed",{ globalPosition: 'right',className:'info', showDuration: 200, });
             }
           }
         }
@@ -264,7 +420,6 @@ const store = new Vuex.Store({
         if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdfs:Class"){
           let propObj = schema['@graph'][i];
           if (propObj['@id'].includes(name)) {
-            console.log('returning',schema['@graph'][i]['validation']['properties'])
             return schema['@graph'][i]['validation']['properties']
           }
         }
@@ -274,6 +429,75 @@ const store = new Vuex.Store({
   },
   actions:{
 
+  }
+});
+
+Vue.component('keep-button', {
+  props: ['item'],
+  data: function(){
+    return{
+      clicked:false
+    }
+  },
+  watch:{
+  },
+  mounted:function(){
+  },
+  template: `<button :title="'Keep '+item['rdfs:label']" @click.prevent="keepProp(item)" class="btn smallButton keepButton text-light" :class="[ clicked ? 'bg-success' : '']" >
+              <i v-if="!clicked" class="fas fa-check" ></i>
+              <i v-if="clicked" class="fas fa-star" ></i>
+             </button>`,
+  methods: {
+    keepProp(prop){
+      let self= this;
+      let list = store.getters.getUserClasses
+      if (list.length<1) {
+        Swal(
+            'You must create a class first',
+            'All parent properties are inherited by default,but after creating a class choose which ones you will actually use in your schema',
+            'error'
+          );
+      }
+      if (list && list.length === 1) {
+
+        var payload={};
+        payload['prop'] = prop;
+        payload['clss']=list[0];
+        store.commit('keepProperty',payload)
+        self.clicked= !self.clicked;
+
+      }else if(list && list.length > 1){
+
+        let listOptions={};
+        for (var i = 0; i < list.length; i++) {
+          listOptions[list[i]['@id']]= list[i]
+        }
+
+        Swal.mixin({
+          input: 'text',
+          confirmButtonText: 'OK',
+          showCancelButton: true,
+          progressSteps: ['1']
+        }).queue([
+          {
+            title: "Which class will use this property?",
+            input: 'select',
+            inputOptions: listOptions,
+            html: 'Select class'
+          },
+        ]).then((result) => {
+          if (result.value) {
+
+            var payload={};
+            payload['prop'] = prop;
+            payload['clss']=result.value;
+            store.commit('keepProperty',payload)
+            self.clicked= !self.clicked;
+
+          }
+        })
+      }
+    },
   }
 });
 
@@ -299,7 +523,7 @@ Vue.component('description', {
   mounted:function(){
     this.full = false;
   },
-  template: `<small class="pointer d-block" v-on:click="clicked">
+  template: `<small class="pointer d-inline" v-on:click="clicked">
               <span v-text="text"></span>
               <i v-if="!full && text.length>39" class="far fa-plus-square mainTextDark pointer"></i>
               <i v-if="full && text.length>39" class="far fa-minus-square mainTextLight pointer"></i>
@@ -326,6 +550,13 @@ Vue.component('class-box', {
         var payload={};
         payload['clss'] = clss;
         store.commit('removeClass',payload)
+      },
+      handleRequired(propname,clss){
+        console.log(propname,clss)
+        let payload={};
+        payload['clss']=clss;
+        payload['propname']=propname;
+        store.commit('handleRequiredProp',payload)
       },
       toggleHide(){
         this.isHidden = ! this.isHidden
@@ -423,53 +654,6 @@ Vue.component('class-box', {
       var payload={};
       payload['prop'] = prop;
       store.commit('removeProperty',payload)
-    },
-    keepProp(prop){
-      let list = store.getters.getUserClasses
-      if (list.length<1) {
-        Swal(
-            'You must create a class first',
-            'All parent properties are inherited by default,but after creating a class choose which ones you will actually use in your schema',
-            'error'
-          );
-      }
-      if (list && list.length === 1) {
-
-        var payload={};
-        payload['prop'] = prop;
-        payload['clss']=list[0];
-        store.commit('keepProperty',payload)
-
-      }else if(list && list.length > 1){
-
-        let listOptions={};
-        for (var i = 0; i < list.length; i++) {
-          listOptions[list[i]['@id']]= list[i]
-        }
-
-        Swal.mixin({
-          input: 'text',
-          confirmButtonText: 'OK',
-          showCancelButton: true,
-          progressSteps: ['1']
-        }).queue([
-          {
-            title: "Which class will use this property?",
-            input: 'select',
-            inputOptions: listOptions,
-            html: 'Select class'
-          },
-        ]).then((result) => {
-          if (result.value) {
-
-            var payload={};
-            payload['prop'] = prop;
-            payload['clss']=result.value;
-            store.commit('keepProperty',payload)
-
-          }
-        })
-      }
     },
     getType: function(data){
       let types=[];
@@ -575,11 +759,14 @@ Vue.component('class-box', {
         <small>
           Properties of <span v-text="clss['rdfs:label']"></span>
         </small>
-        <table class="w-100 table table-sm table-responsive-sm" v-if="properties.length">
+        <table class="w-100 table table-sm table-responsive-sm table-striped" v-if="properties.length">
           <thead class="mainBackLight text-light">
             <th class="text-center">
               <small v-if="!myclass">Keep</small>
               <small v-if="myclass">Remove</small>
+            </th>
+            <th v-if="myclass">
+              <small>Required</small>
             </th>
             <th>
               <small>Name</small>
@@ -595,10 +782,15 @@ Vue.component('class-box', {
             <template v-for="(item,index) in properties">
               <tr :key='index'>
                 <td v-if="!myclass" class="text-center">
-                  <button :title="'Keep '+item['rdfs:label']" @click.prevent="keepProp(item)" class="btn smallButton keepButton text-light"><i class="fas fa-check" ></i></button>
+                  <keep-button :item='item'></keep-button>
                 </td>
                 <td v-if="myclass" class="text-center">
                   <button :title="'Remove '+item['rdfs:label']" @click.prevent="removeProp(item)" class="btn smallButton bg-danger text-light"><i class="fas fa-minus" ></i></button>
+                </td>
+                <td v-if="myclass">
+                  <div class="d-inline mr-3">
+                    <input @click="handleRequired(item['rdfs:label'],clss)" class="ios8-switch" type="checkbox" value="" :id="item['rdfs:label']">
+                  </div>
                 </td>
                 <td  >
                   <small class="bold" v-text='getName(item)'></small>
@@ -629,19 +821,25 @@ Vue.component('class-box', {
             </template> -->
           </tbody>
         </table>
-        <div v-else class="bg-secondary text-light text-center">
+        <div v-else class="alert alert-secondary text-center">
           <small>This class has no properties of its own</small>
         </div>
         <div v-if="myclass">
-          <table class="w-100 table table-sm table-muted table-responsive-sm">
+          <table class="col-sm-12 col-md-6 m-auto table table-sm table-muted table-responsive-sm">
             <thead>
               <th>
-                Selected Inherited Properties
+                <small>Selected Inherited Properties</small>
               </th>
             </thead>
             <tbody>
               <template v-for="(item,index) in selectedProperties">
-                <tr>
+                <tr class='text-left'>
+                  <div class="d-inline mr-3">
+                    <input @click="handleRequired(index,clss)" class="ios8-switch" type="checkbox" :id="index">
+                    <label class="form-check-label" :for="index">
+                      Required
+                    </label>
+                  </div>
                   <span class="badge mainBackLight text-light" v-text="index"></span>: <description :content='item.description'></description>
                 </tr>
               </template>
@@ -665,7 +863,7 @@ var app = new Vue({
           handleUserClassInput:[],
           editFrom:'',
           inputNamespace:'',
-          inputUrl:'',
+          inputUrl:'http://discovery.biothings.io/',
           namespaceCheck:'Start typing to check availability',
           availableNamespace:false
 				}
@@ -764,6 +962,12 @@ var app = new Vue({
               showConfirmButton:false,
               title: 'Context Saved',
             });
+          }else{
+            Swal(
+                'No Input',
+                'You Must enter a namespace and url first',
+                'error'
+              );
           }
         },
         handleSubmit(){
