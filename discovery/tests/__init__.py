@@ -18,8 +18,8 @@ def setup():
 
     SCHEMAS.clear()
 
-    index_primary = Index('discovery_schema')
-    index_secondary = Index('discovery_class')
+    index_primary = Index('discover_schema')
+    index_secondary = Index('discover_class')
 
     # remove existing index
     if index_primary.exists():
@@ -61,20 +61,23 @@ def setup():
 
         CLASSES.append(es_class)
 
+        Index('discover_schema').refresh()
+        Index('discover_class').refresh()
+
 
 def teardown():
     ''' package level teardown '''
 
-    index_primary = Index('discovery_schema')
-    index_secondary = Index('discovery_class')
+    index_primary = Index('discover_schema')
+    index_secondary = Index('discover_class')
 
-    # index_primary.delete() TODO
-    # index_secondary.delete() TODO
+    index_primary.delete()
+    index_secondary.delete()
 
 
 def run(testname):
     ''' run tests with fixtures '''
     setup()
     print('\n' + testname + '\n' + '-'*70 + '\n')
-    runmodule(argv=['', '--logging-level=INFO', '-v'])
+    runmodule(argv=['', '--logging-level=INFO', '-v'], exit=False)
     teardown()
