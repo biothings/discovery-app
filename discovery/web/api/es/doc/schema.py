@@ -63,7 +63,7 @@ class Schema(Document):
         Returns if the URL is reachable and raw successfully encoded.
         '''
         try:
-            res = requests.get(self._meta.url)
+            res = requests.get(self._meta.url, timeout=5)
             res.raise_for_status()
         except requests.exceptions.RequestException:
             return False
