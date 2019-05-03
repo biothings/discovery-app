@@ -122,7 +122,7 @@ def es_save(sch):
 
 
 start = time.perf_counter()
-with ThreadPoolExecutor() as executor:
+with ThreadPoolExecutor(max_workers=4) as executor:
     res_sample = executor.map(es_save, schemas[:sample_size])
 end = time.perf_counter()
 print()
@@ -132,7 +132,7 @@ print('Estimated time left:',
       round((len(schemas) - sample_size) / sample_size * (end - start)), 'seconds.')
 print()
 
-with ThreadPoolExecutor() as executor:
+with ThreadPoolExecutor(max_workers=4) as executor:
     res_main = executor.map(es_save, schemas[sample_size:])
     res = list(res_sample) + list(res_main)
 end = time.perf_counter()
