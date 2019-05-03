@@ -1,38 +1,119 @@
 ''' Handlers for Non-Query API Requests '''
 
-from json import JSONDecodeError
+from functools import partial
 
 import tornado
+from tornado.escape import json_decode
+from tornado.ioloop import IOLoop
 
 from biothings.web.api.es.handlers.query_handler import QueryHandler
 from biothings_schema import Schema as SchemaParser
 from discovery.web.api.es.doc import Class, Schema
 from discovery.web.handlers import BaseHandler
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Index, Search
 
 
-def github_authenticated(handler_method):
+def github_authenticated(func):
     ''' Authentication and Authorization Decorator '''
 
-    def _(self, namespace=None):
+    def _(self, *args, **kwargs):
+
         if not self.current_user:
-            res = {'success': False,
-                   'error': 'Login with your Github account first.'}
+
+            res = {
+                'success': False,
+                'error': 'Login with your Github account first.'
+            }
             self.return_json(res, status_code=401)
             return
-        if namespace:
-            sch = Schema.get(id=namespace, ignore=404)
-            if sch and sch['_meta'].username != self.current_user['login']:
-                res = {'success': False,
-                       'error': 'Document does not belong to the logged-in user.'}
-                self.return_json(res, status_code=403)
-                return
-        if namespace:
-            handler_method(self, namespace)
-        else:
-            handler_method(self)
+
+        func(self, *args, **kwargs)
 
     return _
+
+
+def body_validated(func):
+    ''' Validate the request body contends name and url fields and those only  '''
+
+    def _(self, *args, **kwargs):
+
+        # Process Request Body
+        try:
+            req = json_decode(self.request.body)
+            name = req.get('name').lower()
+            url = req.get('url').lower()
+            assert len(req) == 2
+
+        except Exception as exc:  # pylint: disable=broad-except
+            response = {
+                'success': False,
+                'error': str(exc)
+            }
+            self.return_json(response, status_code=400)
+            return
+
+        func(self, *args, **kwargs)
+
+    return _
+
+
+def permisson_verifeid(func):
+    ''' Validate the user who generates the request is the creator of content '''
+
+    def _(self, namespace, *args, **kwargs):
+
+        schema = Schema.get(id=namespace, ignore=404)
+
+        if not schema:
+            response = {
+                'success': False,
+                'error': "The requested namespace is not registered."
+            }
+            self.return_json(response, status_code=404)
+            return
+
+        if schema['_meta'].username != self.current_user['login']:
+            res = {
+                'success': False,
+                'error': 'Document does not belong to the logged-in user.'
+            }
+            self.return_json(res, status_code=403)
+            return
+
+        func(self, namespace, *args, **kwargs)
+
+    return _
+
+
+def populate_class_index(schema):
+    ''' Save classes defined in schema document to class index '''
+
+    name = schema.meta.id
+    url = schema['_meta'].url
+
+    existing_classes = Search(index='discover_class').query("match", schema=name)
+    existing_classes.delete()
+
+    try:
+        schema_parser = SchemaParser(url)
+        for class_ in schema_parser.fetch_all_classes():
+            es_class = Class()
+            es_class.name = class_
+            try:
+                es_class.clses = [branch[-1]
+                                  for branch in schema_parser.find_parent_classes(class_)]
+            except KeyError:
+                es_class.clses = []
+            try:
+                es_class.props = schema_parser.find_class_specific_properties(class_)
+            except KeyError:
+                es_class.props = []
+            es_class.schema = name
+            es_class.save()
+    except:  # pylint: disable=bare-except
+        pass
+
+    Index('discover_class').refresh()
 
 
 # pylint: disable=abstract-method, arguments-differ
@@ -43,122 +124,98 @@ class RegistryHandler(BaseHandler):
         Remvoe - DELETE ./api/registry/<schema_namespace> '''
 
     @github_authenticated
+    @body_validated
     def post(self):
         ''' Define a schema with its URL
             Parse the classes defined in the schema
             Save the schema and its classes in separate indexes '''
 
-        # Request Body Validation
-        try:
-            req = tornado.escape.json_decode(self.request.body)
-            namespace = req.get('name').lower()
-            url = req.get('url').lower()
-            assert len(req) == 2, 'Found Unknown fields.'
-        except Exception as exc:  # pylint: disable=broad-except
-            res = {'success': False, 'error': str(exc)}
-            self.return_json(res, status_code=400)
+        req = json_decode(self.request.body)
+        name = req.get('name').lower()
+        url = req.get('url').lower()
+
+        if Schema.get(id=name, ignore=404):
+            response = {
+                'success': False,
+                'error': "The requested namespace is already registered."
+            }
+            self.return_json(response, status_code=409)
             return
 
-        # Authorization
-        existing_schema = Schema.get(id=namespace, ignore=404)
-        if existing_schema and existing_schema['_meta'].username != self.current_user['login']:
-            res = {'success': False,
-                   'error': "The requested namespace is registered by another user."}
-            self.return_json(res, status_code=403)
-            return
+        schema = Schema(name, url, self.current_user.get('login'))
+        schema.save()
 
-        # Document Construction
-        schema = Schema(namespace, url, self.current_user.get('login'))
-        try:
-            classes = []
-            schema_parser = SchemaParser(url)
-            for class_ in schema_parser.fetch_all_classes():
-                es_class = Class()
-                es_class.name = class_
-                try:
-                    es_class.clses = [branch[-1]
-                                      for branch in schema_parser.find_parent_classes(class_)]
-                except KeyError:
-                    es_class.clses = []
-                try:
-                    es_class.props = schema_parser.find_class_specific_properties(class_)
-                except KeyError:
-                    es_class.props = []
-                es_class.schema = namespace
-                classes.append(es_class)
-        except Exception as exc:  # pylint: disable=broad-except
-            res = {'success': False, 'error': str(exc)}
-            self.return_json(res, status_code=400)
-            return
+        response = {
+            'success': True,
+            'url': self.request.full_url() + '/' + schema.meta.id,
+        }
 
-        # Cleanup
-        if existing_schema:
-            existing_classes = Search(
-                index='discover_class').query(
-                    "match", schema=namespace)
-            existing_classes.delete()
+        store_classes = partial(populate_class_index, schema)
+        IOLoop.current().run_in_executor(None, store_classes)
 
-        # Saving
-        for cls_ in classes:
-            cls_.save(refresh=False)
-        save_status = schema.save()
-
-        res = {'success': True,
-               'url': self.request.full_url() + '/' + schema.meta.id,
-               'schema': 'created' if save_status else 'updated',
-               'classes': len(classes)}
-
-        self.return_json(res, status_code=200+int(save_status))
+        self.return_json(response, status_code=201)
+        return
 
     @github_authenticated
+    @permisson_verifeid
+    @body_validated
     def put(self, namespace):
-        ''' Update a schema without triggering class population '''
+        ''' Update a schema's URL field
+            Apply changes to the class index '''
 
-        try:
-            req = tornado.escape.json_decode(self.request.body)
-            ns = req.get('name').lower()  # TODO validation
-            url = req.get('url').lower()
-            assert len(req) == 2, 'Found Unknown fields.'
-        except Exception as exc:  # pylint: disable=broad-except
-            res = {'success': False, 'error': str(exc)}
-            self.return_json(res, status_code=400)
+        req = json_decode(self.request.body)
+        name = req.get('name').lower()
+        url = req.get('url').lower()
+
+        if namespace != name:
+            response = {
+                'success': False,
+                'error': "Cannot modify schema name."
+            }
+            self.return_json(response, status_code=403)
             return
 
-        sch = Schema(namespace, url, self.current_user['login'])
-        save_status = sch.save()
-        self.set_status(200 + save_status)
+        schema = Schema.get(id=namespace)
+        schema['_meta'].url = url
+
+        store_classes = partial(populate_class_index, schema)
+        IOLoop.current().run_in_executor(None, store_classes)
+
+        if schema.save():
+            self.set_status(201)
+        else:
+            self.set_status(200)
         return
 
     def get(self, namespace):
-        ''' Retrive a schema by namespace '''
-        sch = Schema.get(id=namespace, ignore=404)
-        if not sch:
-            res = {'success': False,
-                   'error': 'Document does not exisit.'}
+        ''' Retrive a schema by namespace value '''
+
+        schema = Schema.get(id=namespace, ignore=404)
+
+        if not schema:
+            res = {
+                'success': False,
+                'error': 'Document does not exisit.'
+            }
             self.return_json(res, status_code=404)
             return
-        sch_dict = sch.to_dict()
-        sch_dict['name'] = sch.meta.id
-        self.return_json(sch_dict)
+
+        result = schema.to_dict()
+        result['name'] = schema.meta.id
+
+        self.return_json(result)
 
     @github_authenticated
+    @permisson_verifeid
     def delete(self, namespace):
-        ''' Delete a document by es _id '''
+        ''' Delete a document by its namespace value '''
 
-        sch = Schema.get(id=namespace, ignore=404)
-
-        if not sch:
-            res = {'success': False,
-                   'error': 'Document does not exisit.'}
-            self.return_json(res, status_code=404)
-            return
-
+        sch = Schema.get(id=namespace)
         sch.delete()
-        existing_classes = Search(
-            index='discover_class').query(
-                "match", schema=namespace)
-        existing_classes.delete()
-        return
+
+        Search(index='discover_class').query(
+            "match", schema=namespace).delete()
+        Index('discover_class').refresh()
 
 
 class ProxyHandler(BaseHandler):

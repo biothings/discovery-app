@@ -1,6 +1,7 @@
 '''
     Registry Handler Tester
 '''
+import time
 
 from tornado.escape import json_encode
 from tornado.web import create_signed_value
@@ -44,15 +45,9 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
         doc = {'url': 'https://schema.org/version/3.5/schema.jsonld',
                'name': 'schema'}
         self.request('registry', method='POST', json=doc, headers=self.auth_user, expect_status=201)
+        time.sleep(10)
         self.query(q='ebay', expect_hits=False)
         self.query(q='CreativeWork')
-
-    def test_03(self):
-        ''' HTTP POST /registry _ document modification '''
-        doc = {'url': 'https://schema.org/version/3.4/schema.jsonld',
-               'namespace': 'schema'}
-        self.request('registry', method='POST', json=doc, headers=self.auth_user, expect_status=200)
-        # TODO Add assertion basing on diff v3.4 and v3.5
 
     def test_04(self):
         ''' HTTP DELETE /registry/__id__ '''
@@ -65,25 +60,25 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
 
     def test_05(self):
         ''' HTTP PUT /registry/__id__ Update '''
-        res = self.request('registry/schema').json()
-        assert res['_meta'].startswith('http:')
+        res = self.request('registry/example').json()
+        assert res['_meta']['url'].startswith('http:')
         data = {'url': 'https://www.example.com',
                 'name': 'example'}
         self.request('registry/example', method='PUT', json=data, headers=self.auth_user)
-        res = self.request('registry/schema').json()
-        assert res['_meta'].startswith('https:')
+        res = self.request('registry/example').json()
+        assert res['_meta']['url'].startswith('https:')
 
     def test_06(self):
         ''' HTTP PUT /registry/__id__ Validation '''
         # Bad Request (No valid updatable field provided)
         self.request('registry/' + SCHEMAS[0].meta.id, method='PUT', json={'pwd': 'None'},
                      headers=self.auth_user, expect_status=400)
-        # Forbidden (url is not an updatable field) TODO
-        # self.request('registry/' + SCHEMAS[0].meta.id, method='PUT', json={'url': 'valid_url'},
-        #              headers=self.auth_user, expect_status=403)
-        # Not Found (Document id does not exist) TODO
-        # self.request('registry/666', method='PUT', json={'slug': 'new'},
-        #              headers=self.auth_user, expect_status=404)
+        # Forbidden(name is not an updatable field)
+        self.request('registry/' + SCHEMAS[0].meta.id, method='PUT', json={'name': 'a', 'url': 'b'},
+                     headers=self.auth_user, expect_status=403)
+        # Not Found(Document id does not exist)
+        self.request('registry/666', method='PUT', json={'slug': 'new'},
+                     headers=self.auth_user, expect_status=404)
 
     def test_07(self):
         ''' HTTP PUT /registry/__id__ Authentication '''
