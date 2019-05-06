@@ -1,6 +1,11 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
+.br-0{
+  border-radius: 0px !important;
+}
+</style>
 <div id="registry" class="jumbotron" style="min-height:80vh;">
   <div class="row">
     <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
@@ -13,7 +18,7 @@
             <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';registry=[]">Reset</button>
           </div>
         </form>
-        <div class="form-group form-inline m-0 ">
+        <!-- <div class="form-group form-inline m-0 ">
           <select class="browser-default form-control form-control-sm" @change='sortResults($event)'>
              <option value="" disabled selected>Sort By</option>
              <option value="Search Relevance">Relevance (default)</option>
@@ -21,7 +26,7 @@
              <option value="Alpabethically Z-A">Alpabethically Z-A</option>
              <option value="Recently Updated">Recently Updated</option>
           </select>
-        </div>
+        </div> -->
       </div>
       <div id="searching" class="progress" style="display:none;">
         <div class="progress-bar progress-bar-striped progress-bar-animated bg-secondary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
@@ -29,20 +34,20 @@
       <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
 
       </div>
-      <ul class="list-group" style="border-top:solid 3px var(--gray)">
+      <ul class="list-group context" style="border-top:solid 3px var(--gray)">
         <li class="list-group-item d-flex justify-content-center align-items-center text-muted p-1" style="background:#d0d0d0;">
           <small v-if="registry.length && query" v-text="'results for '+query">
           </small>
         </li>
         <template v-if="registry.length" v-for="(item,index) in registry">
-          <li class="list-group-item list-group-item-action flex-column align-items-start context registryItem">
+          <registry-item :item='item'></registry-item>
+          <!-- <li class="list-group-item list-group-item-action flex-column align-items-start context registryItem">
             <div class="">
               <h2 class="d-inline">
                 <span v-if='query'>Found in</span> <a :href="item._meta.slug+'/'" class="mb-1 font-weight-bold goLink" v-text='"/"+item._meta.slug'></a>
               </h2>
               <small class="float-right">
                 <a class="text-primary pointer preLink" @click.prevent='searchByUser(item._meta.username)' >
-                  <registry-image :username="item._meta.username"></registry-image>
                   </i> <span v-text='item._meta.username'></span>
                 </a>
               </small>
@@ -61,10 +66,16 @@
                 </div>
               </div>
             </div>
-          </li>
+          </li> -->
         </template>
         <li v-if="!registry.length" class="text-center text-muted list-group-item">
-          No Results
+          <div class="jumbotron">
+            <h4>Search for existing schemas</h4>
+            <h5>For example:</h5>
+            <a href="#" class="badge mainBackLight text-light mr-1" @click.prevent='search("Thing")'>Thing</a>
+            <a href="#" class="badge mainBackLight text-light mr-1" @click.prevent='search("CreativeWork")'>CreativeWork</a>
+            <a href="#" class="badge mainBackLight text-light mr-1" @click.prevent='search("Dataset")'>Dataset</a>
+          </div>
         </li>
       </ul>
       <div class="bg-light">
@@ -105,34 +116,49 @@
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
 
-Vue.component('registry-image', {
+Vue.component('registry-item', {
   data: function(){
     return{
-      img:''
+      options:false
     }
   },
-  props: ['username'],
+  props: ['item'],
   methods:{
 
 
   },
   watch:{
-
   },
   mounted: function(){
-    let self = this;
-    self.img= '/static/img/user-default.png';
-    // axios.get('http://api.github.com/users/'+this.username).then(res=>{
-    //   if (res.data.avatar_url) {
-    //     self.img= res.data.avatar_url;
-    //   }else{
-    //     self.img= '/static/img/user-default.png';
-    //   }
-    // }).catch(err=>{
-    //     self.img= '/static/img/user-default.png';
-    // });
+
   },
-  template: `<img class="registryImg" :src="img" :alt='username'/>`
+  template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="options=!options">
+    <div class="d-flex">
+      <div class="flex-grow-1 p-2">
+        <div class="d-flex justify-content-between w-100">
+          <h5 class="mb-1" >
+            <small v-text="item.schema"></small>:<span v-text="item.name"></span>
+          </h5>
+        </div>
+        <p class="mb-1">
+          <small>Subclass of:</small>
+          <template v-for='clss in item.clses'>
+            <span class="mb-1" v-text="clss"></span>
+          </template>
+        </p>
+        <small>
+          <template v-for='(prop,index) in item.props'>
+            <span class="d-inline" v-text='prop'></span>
+            <span v-if="index !== item.props.length-1">, </span>
+          </template>
+        </small>
+      </div>
+      <div v-if='options' class="d-flex flex-column align-content-center w-25 bg-secondary">
+        <button type="button" class="btn themeButton text-light w-100 h-50 text-center align-self-center br-0">View</button>
+        <button type="button" class="btn themeButton text-light w-100 h-50 text-center align-self-center br-0">Extend</button>
+      </div>
+    </div>
+  </li>`
 });
 
 Vue.component('registry-list', {
@@ -214,6 +240,24 @@ var app = new Vue({
 				}
 			},
       methods:{
+        getSchema(name){
+          let self = this;
+          console.log('get Schema')
+          $('#searching').show();
+          axios.get('/api/registry/'+name).then(function (response) {
+            console.log('SCHEMA SEARCH: ',response.data)
+            if (response.data && response.data._meta.url) {
+              axios.get('/api/proxy?url='+response.data._meta.url).then(res=>{
+                let obj = JSON.stringify(res.data)
+                console.log('setting new url')
+                localStorage.setItem('datasetData',obj);
+              });
+
+            }
+
+            $('#searching').hide();
+          });
+        },
         searchByUser(username){
           var self = this;
 

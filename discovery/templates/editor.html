@@ -896,7 +896,7 @@ var app = new Vue({
         inputNamespace:function(value,oldvalue){
           let self=this;
           if (value.length) {
-            axios.get(`/api/query?q=_meta.slug:`+value).then(function (response) {
+            axios.get(`/api/query?q=name:`+value).then(function (response) {
               if (response.data.total) {
                 self.namespaceCheck ='Not Available';
                 self.availableNamespace=false;
@@ -928,7 +928,7 @@ var app = new Vue({
                   "@id": value[1]
               },
               "validation":{
-               "$schema": "",
+               "$schema": "http://json-schema.org/draft-04/schema#",
                "title": value[0],
                "description": value[2],
                "type": "object",
