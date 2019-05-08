@@ -11,7 +11,7 @@ class Class(Document):
     A discovery-app class object.
     """
     name = Text(required=True)
-    url = Text()
+    url = Text()  # optinal field populated by schema.org indexer
     clses = Text(multi=True)  # immediate parent class(es) only
     props = Text(multi=True)  # properties that belong directly to this class
     schema = Text(required=True)  # the namespace (schema _id, not url) it is defined in
