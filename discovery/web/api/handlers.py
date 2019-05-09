@@ -20,11 +20,7 @@ def github_authenticated(func):
 
         if not self.current_user:
 
-            res = {
-                'success': False,
-                'error': 'Login with your Github account first.'
-            }
-            self.return_json(res, status_code=401)
+            self.set_status(401)
             return
 
         func(self, *args, **kwargs)
@@ -40,16 +36,12 @@ def body_validated(func):
         # Process Request Body
         try:
             req = json_decode(self.request.body)
-            name = req.get('name').lower()
-            url = req.get('url').lower()
+            req.get('name').lower()
+            req.get('url').lower()
             assert len(req) == 2
 
         except Exception as exc:  # pylint: disable=broad-except
-            response = {
-                'success': False,
-                'error': str(exc)
-            }
-            self.return_json(response, status_code=400)
+            self.set_status(400, str(exc))
             return
 
         func(self, *args, **kwargs)
@@ -65,19 +57,11 @@ def permisson_verifeid(func):
         schema = Schema.get(id=namespace, ignore=404)
 
         if not schema:
-            response = {
-                'success': False,
-                'error': "The requested namespace is not registered."
-            }
-            self.return_json(response, status_code=404)
+            self.set_status(404)
             return
 
         if schema['_meta'].username != self.current_user['login']:
-            res = {
-                'success': False,
-                'error': 'Document does not belong to the logged-in user.'
-            }
-            self.return_json(res, status_code=403)
+            self.set_status(403)
             return
 
         func(self, namespace, *args, **kwargs)
@@ -128,7 +112,7 @@ class RegistryHandler(BaseHandler):
     ''' Create - POST ./api/registry
         Modify - PUT ./api/registry/<schema_namespace>
         Fetch  - GET ./api/registry/<schema_namespace>
-        Remvoe - DELETE ./api/registry/<schema_namespace> '''
+        Remove - DELETE ./api/registry/<schema_namespace> '''
 
     @github_authenticated
     @body_validated
@@ -142,18 +126,13 @@ class RegistryHandler(BaseHandler):
         url = req.get('url').lower()
 
         if Schema.get(id=name, ignore=404):
-            response = {
-                'success': False,
-                'error': "The requested namespace is already registered."
-            }
-            self.return_json(response, status_code=409)
+            self.set_status(403)
             return
 
         schema = Schema(name, url, self.current_user.get('login'))
         schema.save()
 
         response = {
-            'success': True,
             'url': self.request.full_url() + '/' + schema.meta.id,
         }
 
@@ -200,27 +179,22 @@ class RegistryHandler(BaseHandler):
         schema = Schema.get(id=namespace, ignore=404)
 
         if not schema:
-            res = {
-                'success': False,
-                'error': 'Document does not exisit.'
-            }
-            self.return_json(res, status_code=404)
+            self.set_status(404)
             return
 
-        result = schema.to_dict()
+        result = {}
         result['name'] = schema.meta.id
+        result['url'] = schema['_meta'].url
 
         self.return_json(result)
 
     def head(self, namespace):
         ''' check if a namespace is registered '''
 
-        schema = Schema.get(id=namespace, ignore=404)
-
-        if not schema:
-            self.set_status(404)
-        else:
+        if Schema.get(id=namespace, ignore=404):
             self.set_status(200)
+        else:
+            self.set_status(404)
 
     @github_authenticated
     @permisson_verifeid
