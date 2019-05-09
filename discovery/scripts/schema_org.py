@@ -91,6 +91,7 @@ for obj in res['@graph']:
         ##################
         cls_ = Class(name=obj['rdfs:label'], clses=clses, props=props, schema='schema')
         cls_.url = obj['@id'] + '.jsonld'
+        cls_.comment = obj['rdfs:comment']
         schemas.append(cls_)
 
 

@@ -15,6 +15,7 @@ class Class(Document):
     clses = Text(multi=True)  # immediate parent class(es) only
     props = Text(multi=True)  # properties that belong directly to this class
     schema = Text(required=True)  # the namespace (schema _id, not url) it is defined in
+    comment = Text()  # correspond to rdfs:comment field if it exists
 
     # _id : in the format of <schema>:<name>, for example, schema:Thing
     #       accessible through constructor argument 'id' or cls.meta.id
