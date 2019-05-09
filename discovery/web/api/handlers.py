@@ -104,10 +104,17 @@ def populate_class_index(schema):
                                   for branch in schema_parser.find_parent_classes(class_)]
             except KeyError:
                 es_class.clses = []
+
             try:
                 es_class.props = schema_parser.find_class_specific_properties(class_)
             except KeyError:
                 es_class.props = []
+
+            try:
+                es_class.comment = schema_parser.schema_nx.node[class_]['description']
+            except KeyError:
+                pass
+
             es_class.schema = name
             es_class.save()
     except:  # pylint: disable=bare-except
