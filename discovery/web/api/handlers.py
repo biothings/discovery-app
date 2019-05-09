@@ -168,15 +168,16 @@ class RegistryHandler(BaseHandler):
         url = req.get('url').lower()
 
         if namespace != name:
-            response = {
-                'success': False,
-                'error': "Cannot modify schema name."
-            }
-            self.return_json(response, status_code=403)
-            return
+            sch = Schema.get(id=namespace)
+            sch.delete()
 
-        schema = Schema.get(id=namespace)
-        schema['_meta'].url = url
+            Search(index='discover_class').query(
+                "match", schema=namespace).delete()
+
+            schema = Schema(name, url, self.current_user['login'])
+        else:
+            schema = Schema.get(id=namespace)
+            schema['_meta'].url = url
 
         store_classes = partial(populate_class_index, schema)
         IOLoop.current().run_in_executor(None, store_classes)
@@ -185,7 +186,6 @@ class RegistryHandler(BaseHandler):
             self.set_status(201)
         else:
             self.set_status(200)
-        return
 
     def get(self, namespace):
         ''' Retrive a schema by namespace value '''
