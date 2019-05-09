@@ -205,6 +205,16 @@ class RegistryHandler(BaseHandler):
 
         self.return_json(result)
 
+    def head(self, namespace):
+        ''' check if a namespace is registered '''
+
+        schema = Schema.get(id=namespace, ignore=404)
+
+        if not schema:
+            self.set_status(404)
+        else:
+            self.set_status(200)
+
     @github_authenticated
     @permisson_verifeid
     def delete(self, namespace):
