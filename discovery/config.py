@@ -36,8 +36,8 @@ API_ENDPOINTS = [
 APP_LIST = API_ENDPOINTS + WEB_ENDPOINTS
 
 # *****************************************************************************
-# Biothings Query Settings
+# Biothings SDK Settings
 # *****************************************************************************
-# Subclass of biothings.web.api.es.query_builder.ESQueryBuilder
+ACCESS_CONTROL_ALLOW_METHODS = 'HEAD,GET,POST,DELETE,PUT,OPTIONS'
 ES_QUERY_BUILDER = DiscoveryQueryBuilder
 DISABLE_CACHING = True
