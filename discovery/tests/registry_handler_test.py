@@ -34,18 +34,23 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
         cls.auth_user = cookie_header('namespacestd')
         cls.evil_user = cookie_header('villain')
 
+    def test_00(self):
+        ''' HTTP HEAD /registry/__id__ '''
+        self.request('registry/'+SCHEMAS[0].meta.id, method='HEAD')
+        self.request('registry/does_not_exist', method='HEAD', expect_status=404)
+
     def test_01(self):
         ''' HTTP GET /registry/__id__ '''
         res = self.request('registry/'+SCHEMAS[0].meta.id).json()
-        equal('Retrived URL', res['_meta']['url'],
+        equal('Retrived URL', res['url'],
               'Source URL', SCHEMAS[0].to_dict()['_meta']['url'])
 
     def test_02(self):
-        ''' HTTP POST /registry _ document creation '''
+        ''' HTTP POST '''
         doc = {'url': 'https://schema.org/version/3.5/schema.jsonld',
                'name': 'schema'}
         self.request('registry', method='POST', json=doc, headers=self.auth_user, expect_status=201)
-        time.sleep(10)
+        time.sleep(10)  # allow time for the backend to index the schema classes
         self.query(q='ebay', expect_hits=False)
         self.query(q='CreativeWork')
 
@@ -60,34 +65,37 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
 
     def test_05(self):
         ''' HTTP PUT /registry/__id__ Update '''
+        # url change
         res = self.request('registry/example').json()
-        assert res['_meta']['url'].startswith('http:')
+        assert res['url'].startswith('http:')
         data = {'url': 'https://www.example.com',
                 'name': 'example'}
         self.request('registry/example', method='PUT', json=data, headers=self.auth_user)
         res = self.request('registry/example').json()
-        assert res['_meta']['url'].startswith('https:')
+        assert res['url'].startswith('https:')
+        # name change
+        self.request('registry/' + SCHEMAS[0].meta.id, method='PUT',
+                     json={'name': 'examples', 'url': 'null'},
+                     headers=self.auth_user, expect_status=201)
 
     def test_06(self):
         ''' HTTP PUT /registry/__id__ Validation '''
-        # Bad Request (No valid updatable field provided)
-        self.request('registry/' + SCHEMAS[0].meta.id, method='PUT', json={'pwd': 'None'},
+        # Bad Request (Wrong fields)
+        self.request('registry/examples', method='PUT', json={'pwd': 'None'},
                      headers=self.auth_user, expect_status=400)
-        # Forbidden(name is not an updatable field)
-        self.request('registry/' + SCHEMAS[0].meta.id, method='PUT', json={'name': 'a', 'url': 'b'},
-                     headers=self.auth_user, expect_status=403)
-        # Not Found(Document id does not exist)
+        # Not Found (id does not exist)
         self.request('registry/666', method='PUT', json={'slug': 'new'},
                      headers=self.auth_user, expect_status=404)
 
     def test_07(self):
         ''' HTTP PUT /registry/__id__ Authentication '''
         # Unauthorized (Secured cookie is not provided)
-        self.request('registry/' + SCHEMAS[0].meta.id, method='PUT', json={'slug': 'new'},
+        self.request('registry/examples', method='PUT', json={'slug': 'new'},
                      expect_status=401)
         # Forbidden (Document not owned by current user)
-        self.request('registry/' + SCHEMAS[0].meta.id, method='PUT', json={'slug': 'new'},
-                     headers=self.evil_user, expect_status=403)
+        self.request('registry/examples', method='PUT', json={'slug': 'new'},
+                     headers=self.evil_user,
+                     expect_status=403)
 
 
 if __name__ == '__main__':
