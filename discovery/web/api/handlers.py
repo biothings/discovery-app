@@ -7,9 +7,9 @@ from tornado.escape import json_decode
 from tornado.ioloop import IOLoop
 
 from biothings.web.api.es.handlers.query_handler import QueryHandler
+from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 from biothings_schema import Schema as SchemaParser
 from discovery.web.api.es.doc import Class, Schema
-from discovery.web.handlers import BaseHandler
 from elasticsearch_dsl import Index, Search
 
 
@@ -33,7 +33,6 @@ def body_validated(func):
 
     def _(self, *args, **kwargs):
 
-        # Process Request Body
         try:
             req = json_decode(self.request.body)
             req.get('name').lower()
@@ -60,7 +59,7 @@ def permisson_verifeid(func):
             self.set_status(404)
             return
 
-        if schema['_meta'].username != self.current_user['login']:
+        if schema['_meta'].username != self.current_user:
             self.set_status(403)
             return
 
@@ -108,11 +107,34 @@ def populate_class_index(schema):
 
 
 # pylint: disable=abstract-method, arguments-differ
-class RegistryHandler(BaseHandler):
-    ''' Create - POST ./api/registry
+class APIBaseHandler(BioThingsBaseHandler):
+    ''' API Endpoint Base Handler '''
+
+    def get_current_user(self):
+
+        user_json = self.get_secure_cookie("user")
+
+        if user_json:
+            return json_decode(user_json).get('login')
+
+        return None
+
+
+# pylint: disable=abstract-method, arguments-differ
+class RegistryHandler(APIBaseHandler):
+    ''' Check  - HEAD ./api/registry/<schema_namespace>
+        Create - POST ./api/registry
         Modify - PUT ./api/registry/<schema_namespace>
         Fetch  - GET ./api/registry/<schema_namespace>
         Remove - DELETE ./api/registry/<schema_namespace> '''
+
+    def head(self, namespace):
+        ''' check if a namespace is registered '''
+
+        if Schema.get(id=namespace, ignore=404):
+            self.set_status(200)
+        else:
+            self.set_status(404)
 
     @github_authenticated
     @body_validated
@@ -129,7 +151,7 @@ class RegistryHandler(BaseHandler):
             self.set_status(403)
             return
 
-        schema = Schema(name, url, self.current_user.get('login'))
+        schema = Schema(name, url, self.current_user)
         schema.save()
 
         response = {
@@ -139,7 +161,8 @@ class RegistryHandler(BaseHandler):
         store_classes = partial(populate_class_index, schema)
         IOLoop.current().run_in_executor(None, store_classes)
 
-        self.return_json(response, status_code=201)
+        self.set_status(201)
+        self.write(response)
         return
 
     @github_authenticated
@@ -160,7 +183,7 @@ class RegistryHandler(BaseHandler):
             Search(index='discover_class').query(
                 "match", schema=namespace).delete()
 
-            schema = Schema(name, url, self.current_user['login'])
+            schema = Schema(name, url, self.current_user)
         else:
             schema = Schema.get(id=namespace)
             schema['_meta'].url = url
@@ -186,15 +209,7 @@ class RegistryHandler(BaseHandler):
         result['name'] = schema.meta.id
         result['url'] = schema['_meta'].url
 
-        self.return_json(result)
-
-    def head(self, namespace):
-        ''' check if a namespace is registered '''
-
-        if Schema.get(id=namespace, ignore=404):
-            self.set_status(200)
-        else:
-            self.set_status(404)
+        self.write(result)
 
     @github_authenticated
     @permisson_verifeid
@@ -209,8 +224,9 @@ class RegistryHandler(BaseHandler):
         Index('discover_class').refresh()
 
 
-class ProxyHandler(BaseHandler):
+class ProxyHandler(APIBaseHandler):
     ''' retrive a document from a remote server to bypass same origin policy '''
+
     async def get(self):
 
         try:
@@ -228,7 +244,9 @@ class ProxyHandler(BaseHandler):
 
 
 class DiscoveryQueryHandler(QueryHandler):
+
     def _pre_finish_GET_hook(self, options, res):
         ''' Override me. '''
+
         # TODO add E-Tag support
         return res
