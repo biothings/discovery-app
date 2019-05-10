@@ -119,6 +119,10 @@ class APIBaseHandler(BioThingsBaseHandler):
 
         return None
 
+    def set_default_headers(self):
+
+        self.set_header("Access-Control-Allow-Origin", "*")
+
 
 # pylint: disable=abstract-method, arguments-differ
 class RegistryHandler(APIBaseHandler):
