@@ -79,32 +79,6 @@
         </li>
         <template v-if="registry.length" v-for="(item,index) in registryResults">
           <registry-item :item='item' :key="index"></registry-item>
-          <!-- <li class="list-group-item list-group-item-action flex-column align-items-start context registryItem">
-            <div class="">
-              <h2 class="d-inline">
-                <span v-if='query'>Found in</span> <a :href="item._meta.slug+'/'" class="mb-1 font-weight-bold goLink" v-text='"/"+item._meta.slug'></a>
-              </h2>
-              <small class="float-right">
-                <a class="text-primary pointer preLink" @click.prevent='searchByUser(item._meta.username)' >
-                  </i> <span v-text='item._meta.username'></span>
-                </a>
-              </small>
-            </div>
-            <div class="d-flex justify-content-between">
-              <div class="p-1 flex-fill" >
-                <div class="mainBackDarkFade text-light badge w-100 text-left">Classes</div>
-                <div v-if="item.clses">
-                  <registry-list :list='item.clses' :slug="item._meta.slug"></registry-list>
-                </div>
-              </div>
-              <div class="p-1 flex-fill" >
-                <div class="mainBackLightFade text-light badge w-100 text-left">Properties</div>
-                <div v-if="item.props">
-                  <registry-list :list='item.props' :slug="item._meta.slug"></registry-list>
-                </div>
-              </div>
-            </div>
-          </li> -->
         </template>
         <li v-if="!registry.length" class="text-center text-muted list-group-item">
           <div class="jumbotron">
@@ -166,7 +140,7 @@ Vue.component('registry-item', {
       if (item && item.url) {
         let dataUrl = item.url;
         $('#searching').show();
-        axios.get('/api/proxy?url='+dataUrl+'.jsonld').then(function (res) {
+        axios.get('/api/proxy?url='+dataUrl).then(function (res) {
           console.log('SCHEMA SEARCH: ',res.data)
           if (res.data) {
             let obj = JSON.stringify(res.data)
@@ -182,14 +156,16 @@ Vue.component('registry-item', {
   watch:{
   },
   mounted: function(){
-
+    tippy('#'+this.item.name, {
+      content: this.item['comment'] || 'No Description Available'
+    })
   },
   template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="options=!options">
     <div class="d-flex">
       <div class="flex-grow-1 p-2">
         <div class="d-flex justify-content-between w-100">
-          <h5 class="mb-1" >
-            <small v-text="item.schema"></small>:<span v-text="item.name"></span>
+          <h5 class="mb-1">
+            <small v-text="item.schema"></small>:<span v-text="item.name"></span> <i :id="item.name" class="fas fa-info-circle mainTextDark"></i>
           </h5>
         </div>
         <p class="mb-1">
@@ -343,7 +319,6 @@ var app = new Vue({
             return finalFilters;
         },
         search(query){
-          console.log('search happening')
           var self = this;
 
           query = query || "__all__";
@@ -370,7 +345,6 @@ var app = new Vue({
             axios.get('/api/query?size=1000', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
-              console.log('res',response.data.hits)
               // mark results, doc must be loaded
               $( document ).ready(function() {
                 self.mark(self.query);
@@ -384,7 +358,6 @@ var app = new Vue({
         calculatePages: function () {
           var self= this;
           self.pages = Math.ceil(self.registry && self.registry.length / self.perPage);
-          console.log('calculatePages', self.pages)
         },
         prevPage: function () {
           var self= this;

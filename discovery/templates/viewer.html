@@ -426,8 +426,8 @@
             <form id="registrationForm">
               <div class="form-group row">
                 <div class="col-sm-12">
-                  <p v-if="!slugInput">
-                    Recommended slug found in graph context: Use <a class="badge badge-pill mainBackLight text-light pointer" @click.prevent='slugInput = namespace'><b v-text="namespace"></b></a>
+                  <p v-if="!namespaceInput">
+                    Recommended slug found in graph context: Use <a class="badge badge-pill mainBackLight text-light pointer" @click.prevent='namespaceInput = namespace'><b v-text="namespace"></b></a>
                   </p>
                 </div>
                 <div class="col-sm-12">
@@ -435,11 +435,11 @@
                 </div>
                 <label class="col-sm-4 col-form-label" for="exampleFormControlInput1">Namespace (slug)</label>
                 <div class="col-sm-8">
-                  <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="slugInput" v-model='slugInput'></textarea>
-                  <template v-if="availableSlug && slugInput.length">
+                  <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="namespaceInput" v-model='namespaceInput'></textarea>
+                  <template v-if="availableSlug && namespaceInput.length">
                     <small class="text-success bold"><i class="fas fa-check"></i> AVAILABLE</small>
                   </template>
-                  <template v-if="!availableSlug && slugInput.length">
+                  <template v-if="!availableSlug && namespaceInput.length">
                     <small class="text-danger bold"><i class="fas fa-times"></i> NOT AVAILABLE</small>
                   </template>
                   <template v-if="invalidChars">
@@ -447,7 +447,7 @@
                     <small class="text-warning bold"><i class="fas fa-times"></i> INVALID CHARACTERS</small>
                   </template>
                   <p class="m-2" :class="[availableSlug ? 'mainTextDark' : 'text-danger']">
-                    discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
+                    discovery.biothings.io/<span class="bold" v-text='namespaceInput'></span>
                   </p>
                 </div>
               </div>
@@ -478,7 +478,7 @@
                 </div>
               </div>
               <div class="mb-4">
-                <button v-if="!registered" @click.prevent="handleSubmit()" class="btn themeButton pulse text-light" :disabled="!availableSlug && slugInput">Submit</button>
+                <button v-if="!registered" @click.prevent="handleSubmit()" class="btn themeButton pulse text-light" :disabled="!availableSlug && namespaceInput">Submit</button>
                 <button v-if="registered" type="button" class="btn btn-danger" data-dismiss="modal" aria-label="Close">
                   Close
                 </button>
@@ -558,7 +558,7 @@ var app = new Vue({
           userInfo:{},
           allAvailableProperties:[],
           allAvailableClasses:[],
-          slugInput:'',
+          namespaceInput:'',
           availableSlug: false,
           dataSetURL:'',
           invalidChars: false,
@@ -590,9 +590,9 @@ var app = new Vue({
             this.searchResultsProps = [];
           }
         },
-        slugInput:function(newInput, oldInput){
+        namespaceInput:function(newInput, oldInput){
           var self = this;
-          self.slugInput = self.slugInput.toLowerCase();
+          self.namespaceInput = self.namespaceInput.toLowerCase();
 
 
           var re = /^[a-zA-Z0-9_.-]*$/;
@@ -603,13 +603,15 @@ var app = new Vue({
           }
 
           if (newInput && !self.invalidChars) {
-            axios.get(`/api/query?q=_meta.slug:`+self.slugInput).then(function (response) {
-              console.log('slug check',response.data,newInput)
-              if (response.data.total) {
+            axios.get(`/api/registry/`+self.namespaceInput).then(function (response) {
+              console.log('namespace check',response,newInput)
+              if (response.data.status==='200') {
                 self.availableSlug= false;
               }else{
                 self.availableSlug= true;
               }
+            }).catch(err=>{
+              throw err;
             });
           }
         },
@@ -634,13 +636,11 @@ var app = new Vue({
           if (valid) {
             let body = {
               'url' : self.dataSetURL,
-              'clses' : self.allAvailableClasses,
-              'props' : self.allAvailableProperties,
-              'slug' : self.slugInput
+              'name' : self.namespaceInput
             }
             console.log('REQ BODY',body);
             axios.post('/api/registry',body).then(res=>{
-              console.log('POSt resposnse ',res.data)
+              console.log('POST response ',res.data)
               if (res.data.success === true) {
 
                 Swal.fire({
@@ -648,7 +648,7 @@ var app = new Vue({
                   toast: true,
                   position: 'bottom',
                   title: 'Registration Successful',
-                  html: "Data can now be accessed on <a href='/"+self.slugInput+"/'>"+window.location.origin+"/"+self.slugInput+"</a>"
+                  html: "Data can now be accessed on <a href='/"+self.namespaceInput+"/'>"+window.location.origin+"/"+self.namespaceInput+"</a>"
                 });
                 self.registered = true;
 
@@ -855,79 +855,6 @@ var app = new Vue({
           }
           return myList;
         },
-        // async checkLinks(myList){
-        //
-        //   var self = this;
-        //
-        //   console.log('My List Input: ',myList)
-        //
-        //   for (var x = 0; x < myList.length; x++) {
-        //
-        //     let query = self.removePrefix(myList[x]['@id']);
-        //
-        //     for (var i = 0; i < self.graph.length; i++) {
-        //       //CHECK IF A CLASS EXISTS
-        //       if (self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class"
-        //        && self.graph[i]["rdfs:label"].toLowerCase() === query
-        //        || self.graph[i].hasOwnProperty('@type') && self.graph[i]['@type'] === "rdfs:Class"
-        //        && self.graph[i]["rdfs:label"].toLowerCase() === query.toLowerCase())
-        //         {
-        //           myList[x]['link'] = './'+query;
-        //         }
-        //         else if (self.graph[i].hasOwnProperty("rdfs:label") && self.graph[i]["rdfs:label"] === query)
-        //         // CHECK IF A PROPERTY EXISTS
-        //           {
-        //             // myList[x]['link'] = './'+query;
-        //
-        //             // jsonld.expand({'@context':self.context, ...myList[x]}, function(err, expanded) {
-        //             //    let linkFinal = expanded[0]['@id'];
-        //             //    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
-        //             // });
-        //
-        //             const compacted = await jsonld.compact(myList[x], self.context);
-        //             const expanded = await jsonld.expand(compacted);
-        //             let linkFinal = expanded[0]['@id'];
-        //             myList[x] = Object.assign({'link':linkFinal}, myList[x]);
-        //
-        //           }
-        //         else{
-        //           // ELSE EXPAND AND LINK OUT
-        //
-        //           const compacted = await jsonld.compact(myList[x], self.context);
-        //           const expanded = await jsonld.expand(compacted);
-        //           let linkFinal = expanded[0]['@id'];
-        //           myList[x] = Object.assign({'link':linkFinal}, myList[x]);
-        //
-        //           // jsonld.expand({'@context':self.context, ...myList[x]}, function(err, expanded) {
-        //           //    console.log('expanded',expanded)
-        //           //    let linkFinal = expanded[0]['@id'];
-        //           //    myList[x] = Object.assign({'link':linkFinal}, myList[x]);
-        //           // });
-        //
-        //         }
-        //     }
-        //   }
-        //   console.log('FINAL LIST', myList)
-        //   return myList;
-        // },
-        // async compactSchema(propertyObj){
-        //
-        //   const compacted = jsonld.compact(propertyObj, this.context);
-        //   const expanded = await compacted.then(compactedRes=>{
-        //     this.extendSchema(compactedRes);
-        //   });
-        // },
-        // async extendSchema(data){
-        //
-        //   const expanded = jsonld.expand(data);
-        //   const link = await expanded.then(expandedRes=>{
-        //     // console.log(expandedRes)
-        //     let linkFinal = expandedRes[0]['@id'];
-        //     console.log('returning ',linkFinal);
-        //     return linkFinal;
-        //   });
-        //   return link;
-        // },
         toggleGraph(){
           this.showGraph = !this.showGraph;
           if (this.showGraph) {
@@ -1496,8 +1423,8 @@ var app = new Vue({
           let namespace = window.location.pathname.split('/');
           namespace = namespace.slice(1,window.location.pathname.length-1)[0];
           console.log('checking..',namespace)
-          axios.get(`/api/query?q=_meta.slug:`+namespace).then(function (res) {
-            console.log('reg check ', res.data)
+          axios.head(`/api/registry/`+namespace).then(function (res) {
+            console.log('reg check ', res)
             if (res.data.total) {
               self.registered = true;
               url = res.data.hits[0]._meta.url;
