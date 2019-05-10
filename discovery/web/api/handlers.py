@@ -119,16 +119,6 @@ class APIBaseHandler(BioThingsBaseHandler):
 
         return None
 
-    def set_default_headers(self):
-
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Methods", 'HEAD,GET,POST,DELETE,PUT,OPTIONS')
-        self.set_header(
-            "Access-Control-Allow-Headers",
-            'Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, If-Modified-Since, X-File-Name, Cache-Control')
-        self.set_header("Access-Control-Allow-Credentials", "false")
-        self.set_header("Access-Control-Max-Age", "60")
-
 
 # pylint: disable=abstract-method, arguments-differ
 class RegistryHandler(APIBaseHandler):
