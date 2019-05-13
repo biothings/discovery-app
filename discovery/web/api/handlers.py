@@ -75,14 +75,14 @@ def populate_class_index(schema):
     name = schema.meta.id
     url = schema['_meta'].url
 
-    logging.info('Enter %s schema processing thread.', name)
+    logging.info("Enter '%s' schema processing thread.", name)
 
     existing_classes = Search(index='discover_class').query("match", schema=name)
     existing_classes.delete()
 
     try:
         schema_parser = SchemaParser(url)
-        logging.info('Retrieved schema document from URL.')
+        logging.info('Retrieved document from %s.', url)
 
         for class_ in schema_parser.fetch_all_classes():
             es_class = Class()
@@ -105,7 +105,7 @@ def populate_class_index(schema):
 
             es_class.schema = name
             es_class.save()
-            logging.info('Saved: ' + class_)
+            logging.info('Saved: %s', class_)
 
     except Exception as exc:  # pylint: disable=broad-except
         logging.warning(exc)
