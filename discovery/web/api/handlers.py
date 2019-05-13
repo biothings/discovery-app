@@ -2,6 +2,7 @@
 
 from functools import partial
 
+import logging
 import tornado
 from tornado.escape import json_decode
 from tornado.ioloop import IOLoop
@@ -74,11 +75,15 @@ def populate_class_index(schema):
     name = schema.meta.id
     url = schema['_meta'].url
 
+    logging.info('Enter %s schema processing thread.', name)
+
     existing_classes = Search(index='discover_class').query("match", schema=name)
     existing_classes.delete()
 
     try:
         schema_parser = SchemaParser(url)
+        logging.info('Retrieved schema document from URL.')
+
         for class_ in schema_parser.fetch_all_classes():
             es_class = Class()
             es_class.name = class_
@@ -100,10 +105,14 @@ def populate_class_index(schema):
 
             es_class.schema = name
             es_class.save()
-    except:  # pylint: disable=bare-except
-        pass
+            logging.info('Saved: ' + class_)
+
+    except Exception as exc:  # pylint: disable=broad-except
+        logging.warning(exc)
 
     Index('discover_class').refresh()
+
+    logging.info('Exit discover_class processing thread.')
 
 
 # pylint: disable=abstract-method, arguments-differ
