@@ -604,13 +604,12 @@ var app = new Vue({
 
           if (newInput && !self.invalidChars) {
             axios.get(`/api/registry/`+self.namespaceInput).then(function (response) {
-              console.log('namespace check',response,newInput)
-              if (response.data.status==='200') {
+              console.log('namespace check',newInput,response)
+              if (response.data.url) {
                 self.availableSlug= false;
-              }else{
-                self.availableSlug= true;
               }
             }).catch(err=>{
+              self.availableSlug= true;
               throw err;
             });
           }
@@ -641,18 +640,18 @@ var app = new Vue({
             console.log('REQ BODY',body);
             axios.post('/api/registry',body).then(res=>{
               console.log('POST response ',res.data)
-              if (res.data.success === true) {
+              if (res.data.url) {
 
                 Swal.fire({
                   type: 'success',
                   toast: true,
                   position: 'bottom',
                   title: 'Registration Successful',
-                  html: "Data can now be accessed on <a href='/"+self.namespaceInput+"/'>"+window.location.origin+"/"+self.namespaceInput+"</a>"
+                  html: "Data can now be accessed on <a href='/"+self.namespaceInput+"/'>"+window.location.origin+"/"+self.namespaceInput+"/"+"</a>"
                 });
                 self.registered = true;
 
-              }else if (res.data.success === false){
+              }else if (res.data.url){
                 Swal.fire({
                   type: 'error',
                   toast: true,
@@ -1444,14 +1443,12 @@ var app = new Vue({
           let self = this;
           if (url && self.registered) {
             console.log('LOADING FROM URL')
-            axios.get(url).then(res=>{
-              if (res.data) {
-                console.log('load success')
-                this.graph = res.data['@graph'];
-                this.context = res.data['@context'];
-                this.determinePath()
-                this.getAvailableClasses()
-              }
+            axios.get('/api/proxy?url='+url).then(res=>{
+              console.log('load success')
+              this.graph = res.data['@graph'];
+              this.context = res.data['@context'];
+              this.determinePath()
+              this.getAvailableClasses()
             }).catch(err=>{
               throw err;
               Swal.fire(
