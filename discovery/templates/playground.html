@@ -42,6 +42,10 @@
       @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
         <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> BioThings Schema Example
       </small>
+      <small class="badge badge-pill badge-secondary pointer mr-1"
+      @click="input = 'https://schema.org/Dataset.jsonld'">
+        <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> Dataset Example
+      </small>
     </form>
   </div>
   <div v-if="choice === 'dont'" class="jumbotron text-muted text-center">
