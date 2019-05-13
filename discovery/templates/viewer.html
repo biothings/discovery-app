@@ -1319,7 +1319,7 @@ var app = new Vue({
             }
           }
           this.fullPropList = props.sort();
-          console.log(this.fullPropList)
+          // console.log(this.fullPropList)
           this.availableClasses = results.sort();
           this.allAvailableClasses = resultsForRegistration.sort();
           this.getAvailableClassesNames();
@@ -1423,11 +1423,11 @@ var app = new Vue({
           let namespace = window.location.pathname.split('/');
           namespace = namespace.slice(1,window.location.pathname.length-1)[0];
           console.log('checking..',namespace)
-          axios.head(`/api/registry/`+namespace).then(function (res) {
+          axios.get(`/api/registry/`+namespace).then(function (res) {
             console.log('reg check ', res)
-            if (res.data.total) {
+            if (res.data) {
               self.registered = true;
-              url = res.data.hits[0]._meta.url;
+              url = res.data.url;
               self.reqFile(url);
               console.log('registered')
             }else{
@@ -1435,7 +1435,8 @@ var app = new Vue({
               console.log('not registered')
             }
           }).catch(err=>{
-            console.log(err);
+            console.log('no res err')
+            self.reqFile();
             throw err;
           });
         },

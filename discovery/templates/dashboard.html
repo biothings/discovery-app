@@ -249,7 +249,7 @@ var app = new Vue({
           let self= this;
           self.dashboard = [];
           if (this.user.login) {
-            axios.get('/api/query?q=_meta.username:'+self.user.login).then(res=>{
+            axios.get('/api/registry/'+self.user.login).then(res=>{
               self.dashboard = res.data.hits;
               self.dashboardTotal = res.data.total;
             }).catch(err=>{
