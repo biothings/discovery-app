@@ -1,5 +1,6 @@
 ''' Discovery App Test Package '''
 
+import inspect
 import sys
 
 from nose.core import runmodule
@@ -77,6 +78,10 @@ def teardown():
 
 def run(testname):
     ''' run tests with fixtures '''
+
+    if inspect.isclass(testname):
+        testname = testname.__name__
+
     setup()
     print('\n' + testname + '\n' + '-'*70 + '\n')
     runmodule(argv=['', '--logging-level=INFO', '-v'], exit=False)
