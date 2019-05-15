@@ -1,13 +1,12 @@
 ''' Handlers for Non-Query API Requests '''
 
+import logging
 from functools import partial
 
-import logging
 import tornado
 from tornado.escape import json_decode
 from tornado.ioloop import IOLoop
 
-from biothings.web.api.es.handlers.query_handler import QueryHandler
 from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 from biothings_schema import Schema as SchemaParser
 from discovery.web.api.es.doc import Class, Schema
@@ -129,7 +128,6 @@ class APIBaseHandler(BioThingsBaseHandler):
         return None
 
 
-# pylint: disable=abstract-method, arguments-differ
 class RegistryHandler(APIBaseHandler):
     ''' Check  - HEAD ./api/registry/<schema_namespace>
         Create - POST ./api/registry
@@ -138,7 +136,7 @@ class RegistryHandler(APIBaseHandler):
         Remove - DELETE ./api/registry/<schema_namespace> '''
 
     def head(self, namespace):
-        ''' check if a namespace is registered '''
+        ''' Check if the namespace is already registered '''
 
         if Schema.get(id=namespace, ignore=404):
             self.set_status(200)
@@ -233,8 +231,32 @@ class RegistryHandler(APIBaseHandler):
         Index('discover_class').refresh()
 
 
+class UserQueryHandler(APIBaseHandler):
+    '''
+    Access schema entries with username
+    '''
+
+    def get(self, username):
+        '''
+        Return a list of schemas that belong to the specified user
+        '''
+
+        search = Search(index='discover_schema').query("match", ** {"_meta.username": username})
+        response = search.execute()
+
+        self.write({
+            "total": response.hits.total,
+            "hits": [{
+                "name": schema.meta.id,
+                "url": schema['_meta'].url
+            } for schema in response]
+        })
+
+
 class ProxyHandler(APIBaseHandler):
-    ''' retrive a document from a remote server to bypass same origin policy '''
+    '''
+    Retrive a document from a remote server to bypass same origin policy
+    '''
 
     async def get(self):
 
@@ -250,12 +272,3 @@ class ProxyHandler(APIBaseHandler):
             self.write(str(err))
         else:
             self.write(response.body)
-
-
-class DiscoveryQueryHandler(QueryHandler):
-
-    def _pre_finish_GET_hook(self, options, res):
-        ''' Override me. '''
-
-        # TODO add E-Tag support
-        return res
