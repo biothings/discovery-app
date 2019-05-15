@@ -96,7 +96,7 @@ for obj in res['@graph']:
 
 
 # Index schema
-Schema('schema', SCHEMA_ORG_URL, 'Schema.org Auto Indexer').save()
+Schema('schema', SCHEMA_ORG_URL, 'schema_org_auto_indexer').save()
 
 # Index classes
 
