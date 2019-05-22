@@ -126,6 +126,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 <script src="/static/js/lodash.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 
 Vue.component('registry-item', {
@@ -137,19 +138,25 @@ Vue.component('registry-item', {
   props: ['item'],
   methods:{
     saveDataAndRedirect(item,redirectUrl){
+      console.log(item)
       if (item && item.url) {
         let dataUrl = item.url;
         $('#searching').show();
         axios.get('/api/proxy?url='+dataUrl).then(function (res) {
-          console.log('SCHEMA SEARCH: ',res.data)
           if (res.data) {
             let obj = JSON.stringify(res.data)
-            console.log('setting new url')
             localStorage.setItem('datasetData',obj);
+            localStorage.setItem('editFrom',item.name);
             window.location.href = redirectUrl;
           }
           $('#searching').hide();
         });
+      }else{
+        Swal.fire(
+          'Oops!',
+          'No schema found for this class',
+          'error'
+        );
       }
     },
   },
@@ -170,7 +177,7 @@ Vue.component('registry-item', {
         </div>
         <p class="mb-1">
           <small>Subclass of:</small>
-          <template v-for='clss in item.clses'>
+          <template v-for='clss in item.clses ||"This class has no subclass"'>
             <span class="mb-1" v-text="clss"></span>
           </template>
         </p>
@@ -182,8 +189,8 @@ Vue.component('registry-item', {
         </small>
       </div>
       <div v-if='options' class="d-flex flex-column align-content-center w-25 flip-in-ver-left">
-        <button @click.prevent="saveDataAndRedirect(item,'/'+item.schema+'/')" type="button" class="btn themeButton text-light w-100 h-50 text-center align-self-center br-0">Visualize</button>
-        <button @click.prevent="saveDataAndRedirect(item,'editor')" type="button" class="btn themeButton text-light w-100 h-50 text-center align-self-center br-0">Extend</button>
+        <button @click.prevent="saveDataAndRedirect(item,'/'+item.schema+'/'+item.name)" type="button" class="btn themeButton text-light w-100 h-50 text-center align-self-center br-0"><i class="fas fa-list-alt"></i> Visualize</button>
+        <button @click.prevent="saveDataAndRedirect(item,'editor')" type="button" class="btn themeButton text-light w-100 h-50 text-center align-self-center br-0"><i class="fas fa-project-diagram"></i> Extend</button>
       </div>
     </div>
   </li>`

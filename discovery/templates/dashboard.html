@@ -9,7 +9,7 @@
     <h1 class="text-muted caps">My Dashboard</h1>
     <div class="dashboard">
       <div class="row">
-        <div class="col-sm-2 p-0 userInfo">
+        <div class="col-sm-2 p-0 userInfo bg-secondary">
           <div class="pRelative">
             <img :src="user.avatar_url" width="100%" alt="logo" style="z-index:1"/>
             <div class="clip bg-secondary pAbsolute" style="z-index:2"></div>
@@ -30,7 +30,7 @@
           <table class="table">
             <thead class="bg-light text-muted">
               <tr>
-                <th scope="col" class="lighter">Slug</th>
+                <th scope="col" class="lighter">name</th>
                 <th scope="col" class="lighter">Source URL</th>
                 <th scope="col" class="lighter">View</th>
                 <th scope="col" class="lighter">Delete</th>
@@ -40,23 +40,23 @@
               <template v-if="dashboard && dashboard.length">
                 <tr v-for="item in dashboard">
                   <td>
-                    <a target="_blank" :href="'/'+item._meta.slug">
-                      <h4 v-text="item._meta.slug" class="d-inline"></h4>
+                    <a target="_blank" :href="'/'+item.name+'/'">
+                      <h4 v-text="item.name" class="d-inline"></h4>
                     </a>
                     <button style="zoom:.7" class="btn btn-secondary btn-sm" @click="selectedItem = item" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i> Edit</button>
                   </td>
                   <td>
-                    <a target="_blank" :href="item._meta.url" :title="item._meta.url">
+                    <a target="_blank" :href="item.url" :title="item.url">
                       Link <i class="fas fa-external-link-alt"></i>
                     </a>
                   </td>
                   <td>
-                    <a role="button" :href="'/'+item._meta.slug+'/'" class="btn btn-outline-secondary up">
+                    <a role="button" :href="'/'+item.name+'/'" class="btn btn-outline-secondary up">
                       Visualize
                     </a>
                   </td>
                   <td>
-                    <button @click.prevent="deleteSelected(item._meta.slug,item._id)" class="btn btn-outline-secondary fill">
+                    <button @click.prevent="deleteSelected(item.name,item._id)" class="btn btn-outline-secondary fill">
                       Delete
                     </button>
                   </td>
@@ -249,7 +249,8 @@ var app = new Vue({
           let self= this;
           self.dashboard = [];
           if (this.user.login) {
-            axios.get('/api/registry/'+self.user.login).then(res=>{
+            axios.get('/api/user/'+self.user.login).then(res=>{
+              console.log(res.data)
               self.dashboard = res.data.hits;
               self.dashboardTotal = res.data.total;
             }).catch(err=>{
