@@ -202,6 +202,41 @@
     border-radius: 20px;
   }
 
+  .pillType{
+    border-radius: 10px;
+    display: block;
+    padding: 0px;
+    margin-right: 5px;
+    white-space:nowrap;
+  }
+
+  .pillType span:first-child{
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#596a72+0,596a72+0,a9b3bc+54,596a72+100 */
+    background: rgb(89,106,114); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(89,106,114,1) 0%, rgba(89,106,114,1) 0%, rgba(169,179,188,1) 54%, rgba(89,106,114,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  rgba(89,106,114,1) 0%,rgba(89,106,114,1) 0%,rgba(169,179,188,1) 54%,rgba(89,106,114,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  rgba(89,106,114,1) 0%,rgba(89,106,114,1) 0%,rgba(169,179,188,1) 54%,rgba(89,106,114,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#596a72', endColorstr='#596a72',GradientType=0 ); /* IE6-9 */
+    color: white;
+    text-shadow: 0px 1px 2px black;
+    padding: 2px 4px;
+    border: 2px solid darkgrey;
+    font-size: .6em;
+  }
+  .pillType span:last-child{
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    color: var(--sec);
+    background: #d7d7d7;
+    padding: 2px 4px;
+    margin-left: -5px;
+    border: 2px solid darkgrey;
+    font-weight: bold;
+    font-size: .6em;
+  }
+
 </style>
 
 <section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
@@ -214,25 +249,38 @@
       <h1 class="mainTextLight"><i class="fas fa-cog"></i> Loading...</h1>
     </div>
     <div class="text-center p-3 mb-2 text-success jumbotron message " v-if="editFrom">
-      <h5>You have chosen to start a new branch from <b class="mainTextLight" v-text='editFrom'></b>'s schema</h5>
+      <h5>You have chosen to start a new schema based on <b class="mainTextDark" v-text='editFrom'></b>'s schema</h5>
+    </div>
+    <div class="text-center p-3 mb-2 text-success jumbotron d-flex justify-content-center flex-wrap">
+      <div class="alert-info p-5">
+        <h4 class="m-1"><i class="far fa-calendar"></i> Dataset</h4>
+        <small>(Schema.org)</small>
+        <br />
+        <a role="button" class="btn themeButton text-light pulse m-1" @click="testPreset('./static/misc/cvisb-dataset.jsonld')">Use This Schema</a>
+      </div>
     </div>
     <div class="jumbotron p-r" :class="[ myContextFields.length ? 'border-done' : '']">
       <div class="numberCircle mainBackLight text-light sectionHeader p-a">1</div>
-      <h2 class="text-muted text-center">Define a context <b class="mainTextDark">namespace:url</b> key-value pair</h2>
+      <h2 class="text-muted text-center">Choose a namespace</h2>
+
+      <p class="text-center text-muted">(lowercase a-z, web url safe characters only)<p>
       <form v-if="!myContextFields.length" @submit.prevent="addToContext" class="form-group text-center form-row w-50 m-auto">
-        <div class="col-sm-12 col-md-5">
-          <input id="contNamespace"  autocomplete="true" type="text" v-model='inputNamespace' class="form-control m-auto" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" id="schemaName1" aria-describedby="nameHelp" placeholder="Enter namespace here">
+        <div class="col-sm-12 col-md-12">
+          <input id="contNamespace"  autocomplete="true" type="text" v-model='inputNamespace' class="form-control m-auto text-center" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" id="schemaName1" aria-describedby="nameHelp" placeholder="Enter namespace here">
         </div>
-        <div class="col-sm-12 col-md-2">
+        <!-- <div class="col-sm-12 col-md-2">
           <h1>:</h1>
         </div>
         <div class="col-sm-12 col-md-5">
           <input id="contUrl" autocomplete="true" type="url" v-model='inputUrl' class="form-control m-auto" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-muted']" id="schemaName1" aria-describedby="urlHelp" placeholder="Enter URL here">
           <small class="pointer mainTextLight badge badge-light mr-1" @click="inputUrl='https://discovery.biothings.io/'">use discovery</small>
           <small class="pointer mainTextDark badge badge-light mr-1" @click="inputUrl='https://data.cvisb.org/schema/'">use cvisb</small>
-        </div>
+        </div> -->
         <div class="col-sm-12 text-center alert-light message p-3 mt-3">
           <p id="nameHelp" class="form-text m-3  bold" :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']" v-text='namespaceCheck'><p>
+          <p class="text-center text-muted">
+            <span>https://discovery.biothings.io/</span><span v-text='inputNamespace' :class="[ namespaceCheck === 'Available' ? 'text-success' : 'text-danger']"></span>
+          </p>
           <button :disabled="namespaceCheck !== 'Available'" :disabled="!myContextFields" type="submit" class="btn" :class="[ namespaceCheck === 'Available' ? 'btn-success' : 'btn-danger']" @click.prevent="addToContext">Add <i class="fas fa-plus"></i></button>
         </div>
       </form>
@@ -243,9 +291,12 @@
           </template>
       </div>
     </div>
-    <div class="jumbotron p-r" >
-      <div class="numberCircle mainBackLight text-light sectionHeader p-a">2</div>
-      <h2 class="text-muted text-center">Define a new class and properties for your schema</h2>
+    <div class="jumbotron p-r text-center text-muted" >
+      <div class="numberCircle mainBackLight text-light sectionHeader p-a ">2</div>
+      <h2 class="text-muted text-center">Add a new class</h2>
+      <small>
+        Add only new properties not existent in the parent classes
+      </small>
       <div class="p-2 mb-3 text-center">
         <button class="btn btn-success text-light" @click.prevent="addClass">Add Class <i class="fas fa-plus"></i></button>
       </div>
@@ -258,7 +309,7 @@
     <div class="jumbotron d-flex flex-wrap align-items-start p-r">
       <div class="numberCircle mainBackLight text-light sectionHeader p-a">3</div>
       <div style="flex:1; min-width:100%;" class="text-center text-muted">
-        <h2 class="text-muted text-center">Choose which parent class properties you want to resuse</h2>
+        <h2 class="text-muted text-center">Choose parent properties to re-use</h2>
         <small>
           All parent properties are inherited but choose only the ones you wish to include and use in your schema.
         </small>
@@ -269,8 +320,8 @@
     </div>
     <div class="jumbotron text-center p-r">
       <div class="numberCircle mainBackLight text-light sectionHeader p-a">4</div>
-      <h2 class="text-muted text-center">See Your Schema</h2>
-      <small class="text-muted d-block">Click here to see latest changes</small>
+      <h2 class="text-muted text-center">Your Schema</h2>
+      <small class="text-muted d-block">Click here to see latest changes to your schema</small>
       <button class="btn themeButton pulse text-light mt-2" @click.prevent="generateResult">Update</button>
       <div v-show="valid" class="swing-in-left-fwd ">
         <pre >
@@ -279,7 +330,16 @@
         </pre>
       </div>
     </div>
-
+    <div class="jumbotron p-r text-center text-muted" :class="[ myContextFields.length ? 'border-done' : '']">
+      <div class="numberCircle mainBackLight text-light sectionHeader p-a">5</div>
+      <h2 class="text-muted text-center">Hosting & Registration</h2>
+      <p class="w-50 m-auto">
+        Your base schema is done! Feel free to modify it further to fit your specific needs. Make sure to host your schema using your preferred web service.
+      </p>
+      <p class="w-50 m-auto">
+        Once hosted come back and try our viewer to visualize your schema and register to share it with the community!
+      </p>
+    </div>
   </div>
 
 </section>
@@ -312,6 +372,12 @@ const store = new Vuex.Store({
       // console.log('saving..')
       state.schema = payload['schema'];
       state.finalschema['@context']=payload['schema']['@context'];
+    },
+    savePreset(state,payload){
+      // console.log('saving..')
+      // state.finalschema=payload['schema'];
+      Vue.set( state, 'finalschema', payload['schema'])
+      console.log('saved preset',state.finalschema)
     },
     saveNamespace(state,payload){
       state.namespace = payload['namespace'];
@@ -747,19 +813,19 @@ Vue.component('class-box', {
       if (data.hasOwnProperty("schema:rangeIncludes")) {
         if (_.isString(data["schema:rangeIncludes"])) {
           let type = data['schema:rangeIncludes'].split(':');
-          type = type[type.length-1];
-          types.push(type);
+          let res={'schema':type[0],'name':type[1]};
+          types.push(res);
         }
         else if (_.isArray(data["schema:rangeIncludes"])) {
           for (var i = 0; i < data['schema:rangeIncludes'].length; i++) {
             let type = data['schema:rangeIncludes'][i]['@id'].split(':');
-            type = type[type.length-1];
-            types.push(type);
+            let res={'schema':type[0],'name':type[1]};
+            types.push(res);
           }
         }else if(_.isObject(data["schema:rangeIncludes"])){
           let type = data['schema:rangeIncludes']['@id'].split(':');
-          type = type[type.length-1];
-          types.push(type);
+          let res={'schema':type[0],'name':type[1]};
+          types.push(res);
         }
       }
       return types;
@@ -870,6 +936,19 @@ Vue.component('class-box', {
           </div>
           <div>
             <table class="w-100 table table-sm table-responsive-sm table-hover" v-if="searchRes.length">
+              <template v-if="myclass">
+                <col width="">
+                <col width="">
+                <col width="">
+                <col width="40%">
+                <col width="">
+              </template>
+              <template v-if="!myclass">
+                <col width="">
+                <col width="">
+                <col width="40%">
+                <col width="">
+              </template>
               <thead class="bg-success text-light">
                 <th class="text-center">
                   <small v-if="!myclass">Keep</small>
@@ -910,8 +989,12 @@ Vue.component('class-box', {
                     </td>
                     <td >
                       <template v-for="(type,i) in getType(item)">
-                        <small class="d-inline" v-html='type'></small>
-                        <span v-if="i !== getType(item).length-1">, </span>
+                        <div class="pillType">
+                          <span v-text="type.schema"></span>
+                          <span v-text="type.name"></span>
+                        </div>
+                        <!--<small class="d-inline" v-html='type'></small>
+                        <span v-if="i !== getType(item).length-1">, </span> -->
                       </template>
                     </td>
                   </tr>
@@ -924,6 +1007,19 @@ Vue.component('class-box', {
           Properties of <span class="mainTextLight" v-text="clss['rdfs:label']"></span>
         </small>
         <table class="w-100 table table-sm table-responsive-sm table-hover" v-if="properties.length">
+          <template v-if="myclass">
+            <col width="">
+            <col width="">
+            <col width="">
+            <col width="40%">
+            <col width="">
+          </template>
+          <template v-if="!myclass">
+            <col width="">
+            <col width="">
+            <col width="40%">
+            <col width="">
+          </template>
           <thead class="mainBackLight text-light">
             <th class="text-center">
               <small v-if="!myclass">Keep</small>
@@ -964,8 +1060,10 @@ Vue.component('class-box', {
                 </td>
                 <td >
                   <template v-for="(type,i) in getType(item)">
-                    <small class="d-inline" v-html='type'></small>
-                    <span v-if="i !== getType(item).length-1">, </span>
+                    <div class="pillType">
+                      <span v-text="type.schema"></span>
+                      <span v-text="type.name"></span>
+                    </div>
                   </template>
                 </td>
               </tr>
@@ -991,6 +1089,9 @@ Vue.component('class-box', {
         </div>
         <div v-if="myclass">
           <table class="col-sm-12 col-md-6 m-auto table table-sm table-muted table-responsive-sm table-hover">
+            <col width="">
+            <col width="">
+            <col width="40%">
             <thead class='mainTextDark'>
               <th>
                 <small>Required</small>
@@ -1036,7 +1137,7 @@ var app = new Vue({
           handleUserClassInput:[],
           editFrom:'',
           inputNamespace:'',
-          inputUrl:'',
+          inputUrl:'https://discovery.biothings.io/',
           namespaceCheck:'Start typing to check availability',
           availableNamespace:false
 				}
@@ -1130,7 +1231,7 @@ var app = new Vue({
             payload['url'] = self.inputUrl;
             store.commit('saveContextField',payload)
             self.inputNamespace='';
-            self.inputUrl='';
+            // self.inputUrl='';
             Swal.fire({
               type: 'success',
               toast: true,
@@ -1172,15 +1273,15 @@ var app = new Vue({
           Swal.mixin({
             confirmButtonText: 'Next &rarr;',
             showCancelButton: true,
-            progressSteps: ['i', '1','2','3','4']
+            progressSteps: ['i', '1','2','3','4','5']
           }).queue([
             {
               title: "Schema Editor",
               html: "<p>With this tool you will be able to extend an existing schema to define your new schema.</p><p>It's as easy as picking the things you want to re-use and enter only any new information.</p>",
             },
             {
-              title: "Step 1: Define Context",
-              html: "<p>Here you will define a new context field consisting of a <b class='text-info'>namespace</b> and a <b class='text-info'>url</b>.</p><p>The namespace will be use for both extending the prefixes in the class and property definitions for your url but also as a namespace for your landing page should you register it here. So we will check that your namespace is available.</p><p>The url shou'd be the base url where the schema is hosted.</p>"
+              title: "Step 1: Namespace",
+              html: "<p>The namespace will be used for both extending the prefixes in the classes and properties definitions but also as a namespace for your landing page should you register it here. We will check that your namespace is available, it's simple just enter a name that represents your schema or organization.</p>"
             },
             {
               title: "Step 2: Add A New Class",
@@ -1193,6 +1294,10 @@ var app = new Vue({
             {
               title: "Step 4: Schema",
               html: "<p>Finally here you can see how your schema is coming along.</p><p>When you are satisfied with the result simply copy and paste that into your project repo and use our viewer to visualize and register your schema.</p>"
+            },
+            {
+              title: "Step 4: Hosting",
+              html: "<p>You now have a schema based on your starting point. Feel free to add more custom validation fields and modify to your own needs.</p><p>Host your schema on your preferred service and come back to try out our viewer and register so others can see your schema.</p>"
             },
           ]);
         },
@@ -1269,6 +1374,16 @@ var app = new Vue({
               );
           }
 
+        },
+        testPreset(url){
+          axios.get(url).then(res=>{
+            let schema = JSON.stringify(res.data)
+            var payload = {};
+            payload["schema"] = JSON.parse(schema);
+            store.commit('savePreset',payload);
+          }).catch(err=>{
+            throw err;
+          })
         }
 			},
 			mounted:function(){

@@ -146,7 +146,8 @@ Vue.component('registry-item', {
           if (res.data) {
             let obj = JSON.stringify(res.data)
             localStorage.setItem('datasetData',obj);
-            localStorage.setItem('editFrom',item.name);
+            console.log(item)
+            localStorage.setItem('editFrom',item.schema+':'+item.name);
             window.location.href = redirectUrl;
           }
           $('#searching').hide();
