@@ -23,7 +23,7 @@ pre code {
   padding: 20px;
   overflow: scroll;
   text-align: left;
-  max-height: 40vh;
+  max-height: 80vh;
   box-shadow: inset 0 0 10px grey;
 }
 
