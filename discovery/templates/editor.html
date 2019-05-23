@@ -3,7 +3,7 @@
 {% include "header.html" %}
 <style>
   .clsContainer{
-    min-width: 45%;
+    min-width: 100%;
     border-radius: 20px;
     box-shadow: 2px 2px 5px #bbbbbb;
     transition: .5s all;
@@ -791,21 +791,22 @@ Vue.component('class-box', {
       this.isHidden = false;
     }
     tippy('#'+this.clss['rdfs:label'], {
-      content: this.clss['rdfs:comment'] || 'No Description Available'
+      content: "<div class='alert alert-info m-0'>"+this.clss['rdfs:comment']+"</div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
+      placement: 'bottom'
     })
   },
   watch:{
     searchInput:function(val,oldval){
       let self= this;
       if (val) {
-         self.searchRes = _.filter(self.properties, function(item) {
-           if (_.isPlainObject(item['rdfs:label'])) {
-             return item['rdfs:label']['@value'].toLowerCase().includes(val);
-           }else if(_.isString(item['rdfs:label'])){
-             return item['rdfs:label'].toLowerCase().includes(val);
-           }
-
-         });
+      let myObjects = store.getters.getPropsFor(self.clss['rdfs:label'],self.myclass);
+       self.searchRes = _.filter(myObjects, function(item) {
+         if (_.isPlainObject(item['rdfs:label'])) {
+           return item['rdfs:label']['@value'].toLowerCase().includes(val);
+         }else if(_.isString(item['rdfs:label'])){
+           return item['rdfs:label'].toLowerCase().includes(val);
+         }
+       });
       }else{
         self.searchRes=[]
       }
@@ -818,20 +819,12 @@ Vue.component('class-box', {
     },
     properties:function(){
       let self = this;
-
-      if (self.myclass) {
-        let myObjects = store.getters.getPropsFor(self.clss['rdfs:label'],true);
-        self.propCount= myObjects.length;
-        return _.sortBy(myObjects, 'rdfs:label')
+      let myObjects =  store.getters.getPropsFor(self.clss['rdfs:label'],self.myclass);
+      self.propCount= myObjects.length;
+      if (!self.showAll) {
+        return _.sortBy(myObjects, 'rdfs:label').slice(0, 10);
       }else{
-        let myObjects =  store.getters.getPropsFor(self.clss['rdfs:label'],false);
-        self.propCount= myObjects.length;
-        if (!self.showAll) {
-          return _.sortBy(myObjects, 'rdfs:label').slice(0, 10);
-        }else{
-          return _.sortBy(myObjects, 'rdfs:label');
-        }
-
+        return _.sortBy(myObjects, 'rdfs:label');
       }
     },
     selectedProperties:{
@@ -843,11 +836,14 @@ Vue.component('class-box', {
     }
   },
   template:
-  `<div class="clsContainer p-3 bg-light m-3" style="flex:1">
+  `<div class="clsContainer p-3 bg-light m-1" style="flex:1">
     <div class="row">
       <div class="clsNameContainer col-sm-12">
         <div class='text-center'>
-          <h2 :id="clss['rdfs:label']" @click.prevent='toggleHide' class="mainTextDark d-inline pointer bold unselectable" v-text="clss['rdfs:label']" style="outline:none;"></h2>
+          <h2 @click.prevent='toggleHide' class="mainTextDark d-inline pointer bold unselectable"  style="outline:none;">
+           <span v-text="clss['rdfs:label']"></span>
+          </h2>
+          <i class="fas fa-info-circle text-info unselectable" :id="clss['rdfs:label']" style="outline:none;"></i>
           <span class="badge text-light" :class="[ propCount>0 ? 'mainBackLight' : 'bg-secondary']" v-text="propCount"></span>
           <br />
           <small class="text-muted">
@@ -873,7 +869,7 @@ Vue.component('class-box', {
             <input type="text" class="form-control" v-model="searchInput" class="form-control" placeholder="search">
           </div>
           <div>
-            <table class="w-100 table table-sm table-responsive-sm table-striped" v-if="searchRes.length">
+            <table class="w-100 table table-sm table-responsive-sm table-hover" v-if="searchRes.length">
               <thead class="bg-success text-light">
                 <th class="text-center">
                   <small v-if="!myclass">Keep</small>
@@ -914,7 +910,8 @@ Vue.component('class-box', {
                     </td>
                     <td >
                       <template v-for="(type,i) in getType(item)">
-                        <small class="d-block" v-html='type'></small>
+                        <small class="d-inline" v-html='type'></small>
+                        <span v-if="i !== getType(item).length-1">, </span>
                       </template>
                     </td>
                   </tr>
@@ -926,7 +923,7 @@ Vue.component('class-box', {
         <small class="bold">
           Properties of <span class="mainTextLight" v-text="clss['rdfs:label']"></span>
         </small>
-        <table class="w-100 table table-sm table-responsive-sm table-striped" v-if="properties.length">
+        <table class="w-100 table table-sm table-responsive-sm table-hover" v-if="properties.length">
           <thead class="mainBackLight text-light">
             <th class="text-center">
               <small v-if="!myclass">Keep</small>
@@ -967,7 +964,8 @@ Vue.component('class-box', {
                 </td>
                 <td >
                   <template v-for="(type,i) in getType(item)">
-                    <small class="d-block" v-html='type'></small>
+                    <small class="d-inline" v-html='type'></small>
+                    <span v-if="i !== getType(item).length-1">, </span>
                   </template>
                 </td>
               </tr>
@@ -992,7 +990,7 @@ Vue.component('class-box', {
           <small>This class has no properties of its own</small>
         </div>
         <div v-if="myclass">
-          <table class="col-sm-12 col-md-6 m-auto table table-sm table-muted table-responsive-sm">
+          <table class="col-sm-12 col-md-6 m-auto table table-sm table-muted table-responsive-sm table-hover">
             <thead class='mainTextDark'>
               <th>
                 <small>Required</small>

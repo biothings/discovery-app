@@ -164,7 +164,7 @@ Vue.component('registry-item', {
   },
   mounted: function(){
     tippy('#'+this.item.name, {
-      content: this.item['comment'] || 'No Description Available'
+      content: "<div class='alert alert-info m-0'>"+this.item['comment']+"</div>" || "<div class='alert alert-warning m-0'>No Description Available</div>"
     })
   },
   template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="options=!options">
