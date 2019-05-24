@@ -251,14 +251,14 @@
     <div class="text-center p-3 mb-2 text-success jumbotron message " v-if="editFrom">
       <h5>You have chosen to start a new schema based on <b class="mainTextDark" v-text='editFrom'></b>'s schema</h5>
     </div>
-    <div class="text-center p-3 mb-2 text-success jumbotron d-flex justify-content-center flex-wrap">
+    <!-- <div class="text-center p-3 mb-2 text-success jumbotron d-flex justify-content-center flex-wrap">
       <div class="alert-info p-5">
         <h4 class="m-1"><i class="far fa-calendar"></i> Dataset</h4>
         <small>(Schema.org)</small>
         <br />
         <a role="button" class="btn themeButton text-light pulse m-1" @click="testPreset('./static/misc/cvisb-dataset.jsonld')">Use This Schema</a>
       </div>
-    </div>
+    </div> -->
     <div class="jumbotron p-r" :class="[ myContextFields.length ? 'border-done' : '']">
       <div class="numberCircle mainBackLight text-light sectionHeader p-a">1</div>
       <h2 class="text-muted text-center">Choose a namespace</h2>
@@ -419,25 +419,28 @@ const store = new Vuex.Store({
       let prop = payload['prop'];
       let clss = payload['clss'];
 
-      if (clss.hasOwnProperty('validation')) {
-        let target= clss['validation']['properties']
-        if (clss['validation']['properties'].hasOwnProperty(prop['rdfs:label'])) {
+      if (clss.hasOwnProperty('$validation')) {
+        let target= clss['$validation']['properties']
+        let arr= prop['@id'].split(':');
+        let checkThisPropName = arr[arr.length-1];
+        console.log('checkThisPropName',checkThisPropName)
+        if (clss['$validation']['properties'].hasOwnProperty(checkThisPropName)) {
           Vue.delete(target, prop['rdfs:label']);
-          $.notify(prop['rdfs:label']+" removed",{ globalPosition: 'right',className:'info', showDuration: 200, });
+          $.notify(checkThisPropName+" removed",{ globalPosition: 'right',className:'info', showDuration: 200, });
         }else{
-          let validationInfo = {};
-          validationInfo['description'] =prop['rdfs:comment'];
-          switch (prop['rdfs:label']) {
+          let $validationInfo = {};
+          $validationInfo['description'] =prop['rdfs:comment'];
+          switch (checkThisPropName) {
             case 'keywords':
-              validationInfo['type'] = 'array';
-              validationInfo['items'] = {'type':'string'};
+              $validationInfo['type'] = 'array';
+              $validationInfo['items'] = {'type':'string'};
               break;
             case 'url':
-              validationInfo['type'] = 'string';
-              validationInfo['format'] = 'uri';
+              $validationInfo['type'] = 'string';
+              $validationInfo['format'] = 'uri';
               break;
             case 'dateModified'|| 'datePublished':
-              validationInfo['oneOf'] = [
+              $validationInfo['oneOf'] = [
                             {
                                 "type": "string",
                                 "format": "date-time"
@@ -449,7 +452,7 @@ const store = new Vuex.Store({
                         ];
               break;
               case 'temporalCoverage':
-                validationInfo['oneOf'] = [
+                $validationInfo['oneOf'] = [
                               {
                                   "type": "string",
                                   "format": "date-time"
@@ -464,12 +467,12 @@ const store = new Vuex.Store({
                           ];
                 break;
             default:
-              validationInfo['type'] = 'string';
+              $validationInfo['type'] = 'string';
           }
 
           let fieldname = prop['rdfs:label']
-          Vue.set( target, fieldname, validationInfo)
-          $.notify(prop['rdfs:label']+" added",{ globalPosition: 'right',className:'success', showDuration: 200, });
+          Vue.set( target, fieldname, $validationInfo)
+          $.notify(checkThisPropName+" added",{ globalPosition: 'right',className:'success', showDuration: 200, });
 
         }
 
@@ -480,19 +483,19 @@ const store = new Vuex.Store({
       let clss = payload['clss'];
       // console.log('received',prop,clss)
 
-      if (clss && clss.hasOwnProperty('validation')) {
-        // console.log('checking',clss['validation']['required'])
-        if (clss['validation']['required'].includes(prop)) {
-          for (var i = 0; i < clss['validation']['required'].length; i++) {
-            if (clss['validation']['required'][i] === prop) {
-              // console.log('found',clss['validation']['required'])
-              clss['validation']['required'].splice(i,1);
+      if (clss && clss.hasOwnProperty('$validation')) {
+        // console.log('checking',clss['$validation']['required'])
+        if (clss['$validation']['required'].includes(prop)) {
+          for (var i = 0; i < clss['$validation']['required'].length; i++) {
+            if (clss['$validation']['required'][i] === prop) {
+              // console.log('found',clss['$validation']['required'])
+              clss['$validation']['required'].splice(i,1);
               $.notify(prop+" not required",{ globalPosition: 'right',className:'info', showDuration: 200, });
             }
           }
         }else{
-          // console.log('not found',clss['validation']['required'])
-          clss['validation']['required'].unshift(prop)
+          // console.log('not found',clss['$validation']['required'])
+          clss['$validation']['required'].unshift(prop)
           $.notify(prop+" required",{ globalPosition: 'right',className:'success', showDuration: 200, });
         }
       }
@@ -552,7 +555,7 @@ const store = new Vuex.Store({
       }
       let props = []
       for (var i = 0; i < schema['@graph'].length; i++) {
-        if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdf:Property"){
+        if(schema['@graph'][i].hasOwnProperty('schema:domainIncludes') ){
           let propObj = schema['@graph'][i];
           if ( _.isString(propObj['schema:domainIncludes']) ) {
             if (propObj["schema:domainIncludes"].includes(name)) {
@@ -584,7 +587,7 @@ const store = new Vuex.Store({
         if(schema['@graph'][i].hasOwnProperty('@type') && schema['@graph'][i]['@type'] === "rdfs:Class"){
           let propObj = schema['@graph'][i];
           if (propObj['@id'].includes(name)) {
-            return schema['@graph'][i]['validation']['properties']
+            return schema['@graph'][i]['$validation']['properties']
           }
         }
       }
@@ -632,7 +635,7 @@ Vue.component('keep-button', {
 
         let listOptions={};
         for (var i = 0; i < list.length; i++) {
-          listOptions[list[i]['@id']]= list[i]
+          listOptions[list[i]['@id']]= list[i]['@id']
         }
 
         Swal.mixin({
@@ -648,11 +651,18 @@ Vue.component('keep-button', {
             html: 'Select class'
           },
         ]).then((result) => {
+          let c ={};
+          console.log(result.value[0],list)
           if (result.value) {
-
+            for (var i = 0; i < list.length; i++) {
+              if (list[i]['@id'] === result.value[0] ) {
+                c = list[i]
+              }
+            }
             var payload={};
             payload['prop'] = prop;
-            payload['clss']=result.value;
+            payload['clss']=c;
+            console.log('KEEP',payload)
             store.commit('keepProperty',payload)
             self.clicked= !self.clicked;
 
@@ -726,11 +736,11 @@ Vue.component('class-box', {
         this.isHidden = ! this.isHidden
       },
       getName(classInfo){
-        if (classInfo && classInfo.hasOwnProperty('rdfs:label')) {
-          if (_.isPlainObject(classInfo['rdfs:label'])){
-            return classInfo['rdfs:label']['@value']
-          }else if (_.isString(classInfo['rdfs:label'])){
-            return classInfo['rdfs:label']
+        if (classInfo && classInfo.hasOwnProperty('@id')) {
+          if (_.isPlainObject(classInfo['@id'])){
+            return classInfo['@id']['@value']
+          }else if (_.isString(classInfo['@id'])){
+            return classInfo['@id']
           }
         }
       },
@@ -907,7 +917,7 @@ Vue.component('class-box', {
       <div class="clsNameContainer col-sm-12">
         <div class='text-center'>
           <h2 @click.prevent='toggleHide' class="mainTextDark d-inline pointer bold unselectable"  style="outline:none;">
-           <span v-text="clss['rdfs:label']"></span>
+           <span v-text="getName(clss)"></span>
           </h2>
           <i class="fas fa-info-circle text-info unselectable" :id="clss['rdfs:label']" style="outline:none;"></i>
           <span class="badge text-light" :class="[ propCount>0 ? 'mainBackLight' : 'bg-secondary']" v-text="propCount"></span>
@@ -1071,7 +1081,7 @@ Vue.component('class-box', {
           <template v-if="!showAll && propCount !== properties.length">
               <tr class="text-center">
                 <td colspan='4' class='text-center'>
-                  <a role="button" class="btn smallButton mainBackLight text-light" @click.prevent="showAll= !showAll">Show All</a>
+                  <a role="button" class="btn smallButton mainBackLight text-light" @click.prevent="showAll= !showAll">Show All (<span v-text='propCount-properties.length'></span> more)</a>
                 </td>
               </tr>
             </template>
@@ -1205,7 +1215,7 @@ var app = new Vue({
               "rdfs:subClassOf": {
                   "@id": value[1]
               },
-              "validation":{
+              "$validation":{
                "$schema": "http://json-schema.org/draft-07/schema#",
                "title": value[0],
                "description": value[2],
