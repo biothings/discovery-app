@@ -771,7 +771,7 @@ Vue.component('class-box', {
               if (value.match(/^[a-z]+(?:[A-Z][a-z]+)*$/)) {
                 resolve()
               } else {
-                resolve('class names must be PascalCased')
+                resolve('property names must be camelCased')
               }
             })
           }
