@@ -237,6 +237,16 @@
     font-size: .6em;
   }
 
+  .msgOpen{
+    /* /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#eafcff+0,d9f8fc+50,cdeff2+51,e5fcf9+100 */
+    background: rgb(234,252,255); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(234,252,255,1) 0%, rgba(217,248,252,1) 50%, rgba(205,239,242,1) 51%, rgba(229,252,249,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  rgba(234,252,255,1) 0%,rgba(217,248,252,1) 50%,rgba(205,239,242,1) 51%,rgba(229,252,249,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  rgba(234,252,255,1) 0%,rgba(217,248,252,1) 50%,rgba(205,239,242,1) 51%,rgba(229,252,249,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eafcff', endColorstr='#e5fcf9',GradientType=0 ); /* IE6-9 */
+
+  }
+
 </style>
 
 <section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
@@ -767,8 +777,8 @@ Vue.component('class-box', {
           }
         },
         {
-          title: "What is this property's expected type?",
-          html: 'input name(s) must be Pascal cased <b class="text-danger">eg. schema:MyClass </b>'
+          title: "What is this property's expected type(s)?",
+          html: 'input name(s) must be Pascal cased <b class="text-danger">eg. schema:MyClass </b>. Multiple types separated by commas.'
         },
         {
           title: "Describe this property",
@@ -804,10 +814,22 @@ Vue.component('class-box', {
           "schema:domainIncludes": {
               "@id": self.clss['@id']
           },
-          "schema:rangeIncludes": {
-              "@id": value[1]
-          }
         };
+        //check multiple types
+        var arr = value[1].split(",");
+        if (arr.length>1) {
+          let types=[]
+          for (var i = 0; i < arr.length; i++) {
+            types.push({'@id':arr[i]})
+          }
+          skeleton['schema:rangeIncludes'] = types;
+        }else{
+          let type = {
+            "@id": value[1]
+          };
+          skeleton['schema:rangeIncludes'] = type;
+        }
+
         // push to store
         var payload = {};
         payload["prop"] = skeleton;
@@ -912,8 +934,8 @@ Vue.component('class-box', {
     }
   },
   template:
-  `<div class="clsContainer p-3 bg-light m-1" style="flex:1">
-    <div class="row">
+  `<div class="clsContainer p-3 bg-light m-1" style="flex:1" :class="[ !isHidden ? '' : 'msgOpen']">
+    <div class="row" >
       <div class="clsNameContainer col-sm-12">
         <div class='text-center'>
           <h2 @click.prevent='toggleHide' class="mainTextDark d-inline pointer bold unselectable"  style="outline:none;">
