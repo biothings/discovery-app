@@ -1,0 +1,346 @@
+{
+  "@context": {
+    "schema": "http://schema.org/",
+    "bibo": "http://purl.org/ontology/bibo/",
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dct": "http://purl.org/dc/terms/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "dctype": "http://purl.org/dc/dcmitype/",
+    "eli": "http://data.europa.eu/eli/ontology#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfa": "http://www.w3.org/ns/rdfa#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "snomed": "http://purl.bioontology.org/ontology/SNOMEDCT/",
+    "void": "http://rdfs.org/ns/void#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "xsd1": "hhttp://www.w3.org/2001/XMLSchema#",
+    "cvisb": "https://discovery.biothings.io/"
+  },
+  "@graph": [{
+      "@id": "cvisb:DerivedSample",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing a derived sample from a primary source in the Center for Viral Systems Biology",
+      "rdfs:label": "DerivedSample",
+      "rdfs:subClassOf": {
+        "@id": "cvisb:Sample"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "DerivedSample",
+        "description": "A schema describing a derived sample from a primary source in the Center for Viral Systems Biology",
+        "type": "object",
+        "properties": {},
+        "required": [
+          "sourceSampleType",
+          "sourceSampleId"
+        ]
+      }
+    },
+    {
+      "@id": "cvisb:SampleLocation",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing a the location of a sample in the Center for Viral Systems Biology",
+      "rdfs:label": "SampleLocation",
+      "rdfs:subClassOf": {
+        "@id": "schema:Place"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "SampleLocation",
+        "description": "A schema describing a the location of a sample in the Center for Viral Systems Biology",
+        "type": "object",
+        "properties": {},
+        "required": [
+          "numAliquots",
+          "lab"
+        ]
+      }
+    },
+    {
+      "@id": "cvisb:Sample",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing a sample the Center for Viral Systems Biology. Primary samples = blood draw, tissue sample, urine, or feces.  Derived are some sort of isolation/preparation of whole blood/tissue, e.g. plasma, sera, DNA, RNA, etc.",
+      "rdfs:label": "Sample",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Sample",
+        "description": "A schema describing a sample the Center for Viral Systems Biology. Primary samples = blood draw, tissue sample, urine, or feces.  Derived are some sort of isolation/preparation of whole blood/tissue, e.g. plasma, sera, DNA, RNA, etc.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the item.",
+            "type": "string"
+          },
+          "description": {
+            "description": "A description of the item.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sampleType",
+          "patientId",
+          "sampleId"
+        ]
+      }
+    },
+    {
+      "@id": "cvisb:sampleId",
+      "@type": "rdf:Property",
+      "rdfs:comment": "unique ID for the derived sample; ideally, the combination of sampleType and isolationDate",
+      "rdfs:label": "sampleId",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:patientId",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Unique patient id; G-number, S-number, or C-number",
+      "rdfs:label": "patientId",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": [{
+          "@id": "schema:Text"
+        },
+        {
+          "@id": "schema:Patient"
+        }
+      ]
+    },
+    {
+      "@id": "cvisb:visitCode",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Visit code for the patient (day post hospitalization of blood draw for patients, visit number after initial for follow-up/contact)",
+      "rdfs:label": "visitCode",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:isolationDate",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Date of sample creation/collection (NOT date of blood draw/tissue collection, unless the sample is that primary sample) (YYYY-MM-DD)",
+      "rdfs:label": "isolationDate",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Date"
+      }
+    },
+    {
+      "@id": "cvisb:sampleType",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sample type. Primary types: \\\"blood_purple-EDTA\\\", \\\"blood_blue-citrate\\\", \\\"blood_mixed\\\", \\\"blood_unknown\\\", \\\"urine\\\", \\\"feces\\\", \\\"organs\\\", \\\"tissue\\\"; Derived types: \\\"plasma\\\", \\\"serum\\\", \\\"buffy coat\\\", \\\"PBMC\\\", \\\"frozenPBMC-DNA\\\", \\\"frozenPBMC-RNA\\\", \\\"viralRNA\\\", \\\"totalRNA\\\", \\\"DNA\\\"",
+      "rdfs:label": "sampleType",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:derivedIndex",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Integer expressing how far derived the sample is from the primary sample.  Primary sample (e.g. blood draw) has a derivedIndex=0; PBMC=1, ...",
+      "rdfs:label": "derivedIndex",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Integer"
+      }
+    },
+    {
+      "@id": "cvisb:species",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Source of sample (human or rat)",
+      "rdfs:label": "species",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:protocolVersion",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Protocol version to isolate sample; either file name and/or version",
+      "rdfs:label": "protocolVersion",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:protocolUrl",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Link to protocol used to isolate sample",
+      "rdfs:label": "protocolUrl",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:freezingBuffer",
+      "@type": "rdf:Property",
+      "rdfs:comment": "What buffer was used to freeze the sample in; relevant for PBMC samples",
+      "rdfs:label": "freezingBuffer",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:avlInactivated",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Whether a plasma or serum sample is AVL-inactivated",
+      "rdfs:label": "avlInactivated",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Boolean"
+      }
+    },
+    {
+      "@id": "cvisb:dilutionFactor",
+      "@type": "rdf:Property",
+      "rdfs:comment": "How much a plamsa sample has been diluted from its original isolation",
+      "rdfs:label": "dilutionFactor",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:location",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Current location(s) for the sample, including Lab, number of aliquots, and when the info was last updated",
+      "rdfs:label": "location",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Sample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:SampleLocation"
+      }
+    },
+    {
+      "@id": "cvisb:lab",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Current location of sample",
+      "rdfs:label": "lab",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SampleLocation"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:numAliquots",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Number of aliquots for a particular sampleID at a particular lab location. If sample has been used up, numAliquots = 0",
+      "rdfs:label": "numAliquots",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SampleLocation"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Integer"
+      }
+    },
+    {
+      "@id": "cvisb:updated",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Date of last update (YYYY-MM-DD)",
+      "rdfs:label": "updated",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SampleLocation"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Date"
+      }
+    },
+    {
+      "@id": "cvisb:updatedBy",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Person who updated the sample location",
+      "rdfs:label": "updatedBy",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SampleLocation"
+      },
+      "schema:rangeIncludes": [{
+          "@id": "schema:Person"
+        },
+        {
+          "@id": "schema:Text"
+        }
+      ]
+    },
+    {
+      "@id": "cvisb:sourceSampleId",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sample ID for the primary source of the derived sample",
+      "rdfs:label": "sourceSampleId",
+      "schema:domainIncludes": {
+        "@id": "cvisb:DerivedSample"
+      },
+      "schema:rangeIncludes": [{
+          "@id": "schema:Text"
+        },
+        {
+          "@id": "schema:Sample"
+        }
+      ]
+    },
+    {
+      "@id": "cvisb:sourceSampleType",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sample ID for the primary source of the derived sample",
+      "rdfs:label": "sourceSampleType",
+      "schema:domainIncludes": {
+        "@id": "cvisb:DerivedSample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:primarySampleDate",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Date of *primary* sample creation/collection (e.g. blood draw, tissue sample, urine/feces collection) (YYYY-MM-DD)",
+      "rdfs:label": "primarySampleDate",
+      "schema:domainIncludes": {
+        "@id": "cvisb:DerivedSample"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Date"
+      }
+    }
+  ]
+}
