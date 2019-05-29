@@ -1,0 +1,564 @@
+{
+  "@context": {
+    "schema": "http://schema.org/",
+    "bibo": "http://purl.org/ontology/bibo/",
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dct": "http://purl.org/dc/terms/",
+    "dcterms": "http://purl.org/dc/terms/",
+    "dctype": "http://purl.org/dc/dcmitype/",
+    "eli": "http://data.europa.eu/eli/ontology#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfa": "http://www.w3.org/ns/rdfa#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "snomed": "http://purl.bioontology.org/ontology/SNOMEDCT/",
+    "void": "http://rdfs.org/ns/void#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "xsd1": "hhttp://www.w3.org/2001/XMLSchema#",
+    "cvisb": "https://discovery.biothings.io/"
+  },
+  "@graph": [{
+      "@id": "cvisb:SystemsSerology",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing a Systems Serology Experiment in the Center for Viral Systems Biology",
+      "rdfs:label": "SystemsSerology",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "SystemsSerology",
+        "description": "A schema describing a Systems Serology Experiment in the Center for Viral Systems Biology",
+        "type": "object",
+        "properties": {},
+        "required": [
+          "assayType"
+        ]
+      }
+    },
+    {
+      "@id": "cvisb:RtPcrResult",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing a RT-PCR result for a Patient in the Center for Viral Systems Biology experiments",
+      "rdfs:label": "RtPcrResult",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "RtPcrResult",
+        "description": "A schema describing a RT-PCR result for a Patient in the Center for Viral Systems Biology experiments",
+        "type": "object",
+        "properties": {},
+        "required": [
+          "result",
+          "virus"
+        ]
+      }
+    },
+    {
+      "@id": "cvisb:Rdt",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing a rapid diagnostic test result for a Patient in the Center for Viral Systems Biology experiments",
+      "rdfs:label": "Rdt",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Rdt",
+        "description": "A schema describing a rapid diagnostic test result for a Patient in the Center for Viral Systems Biology experiments",
+        "type": "object",
+        "properties": {},
+        "required": [
+          "virus",
+          "result"
+        ]
+      }
+    },
+    {
+      "@id": "cvisb:RepertoireSequencing",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing a repertoire sequencing Experiment in the Center for Viral Systems Biology",
+      "rdfs:label": "RepertoireSequencing",
+      "rdfs:subClassOf": {
+        "@id": "cvisb:SequencingExperiment"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "RepertoireSequencing",
+        "description": "A schema describing a repertoire sequencing Experiment in the Center for Viral Systems Biology",
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "@id": "cvisb:AndersenSequencing",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing a HLA, viral, or metagenome sequencing Experiment in the Center for Viral Systems Biology",
+      "rdfs:label": "AndersenSequencing",
+      "rdfs:subClassOf": {
+        "@id": "cvisb:SequencingExperiment"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "AndersenSequencing",
+        "description": "A schema describing a HLA, viral, or metagenome sequencing Experiment in the Center for Viral Systems Biology",
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "@id": "cvisb:SequencingExperiment",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing a Sequencing Experiment in the Center for Viral Systems Biology",
+      "rdfs:label": "SequencingExperiment",
+      "rdfs:subClassOf": {
+        "@id": "cvisb:Experiment"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "SequencingExperiment",
+        "description": "A schema describing a Sequencing Experiment in the Center for Viral Systems Biology",
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "@id": "cvisb:Experiment",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing an Experiment in the Center for Viral Systems Biology",
+      "rdfs:label": "Experiment",
+      "rdfs:subClassOf": {
+        "@id": "schema:Dataset"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Experiment",
+        "description": "A schema describing an Experiment in the Center for Viral Systems Biology",
+        "type": "object",
+        "properties": {
+          "measurementTechnique": {
+            "description": "A technique or technology used in a <a class=\"localLink\" href=\"http://schema.org/Dataset\">Dataset</a> (or <a class=\"localLink\" href=\"http://schema.org/DataDownload\">DataDownload</a>, <a class=\"localLink\" href=\"http://schema.org/DataCatalog\">DataCatalog</a>),\ncorresponding to the method used for measuring the corresponding variable(s) (described using <a class=\"localLink\" href=\"http://schema.org/variableMeasured\">variableMeasured</a>). This is oriented towards scientific and scholarly dataset publication but may have broader applicability; it is not intended as a full representation of measurement, but rather as a high level summary for dataset discovery.<br/><br/>\n\nFor example, if <a class=\"localLink\" href=\"http://schema.org/variableMeasured\">variableMeasured</a> is: molecule concentration, <a class=\"localLink\" href=\"http://schema.org/measurementTechnique\">measurementTechnique</a> could be: \"mass spectrometry\" or \"nmr spectroscopy\" or \"colorimetry\" or \"immunofluorescence\".<br/><br/>\n\nIf the <a class=\"localLink\" href=\"http://schema.org/variableMeasured\">variableMeasured</a> is \"depression rating\", the <a class=\"localLink\" href=\"http://schema.org/measurementTechnique\">measurementTechnique</a> could be \"Zung Scale\" or \"HAM-D\" or \"Beck Depression Inventory\".<br/><br/>\n\nIf there are several <a class=\"localLink\" href=\"http://schema.org/variableMeasured\">variableMeasured</a> properties recorded for some given data object, use a <a class=\"localLink\" href=\"http://schema.org/PropertyValue\">PropertyValue</a> for each <a class=\"localLink\" href=\"http://schema.org/variableMeasured\">variableMeasured</a> and attach the corresponding <a class=\"localLink\" href=\"http://schema.org/measurementTechnique\">measurementTechnique</a>.",
+            "type": "string"
+          },
+          "description": {
+            "description": "A description of the item.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the item.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sampleIds",
+          "experimentDate",
+          "experimentId"
+        ]
+      }
+    },
+    {
+      "@id": "cvisb:experimentId",
+      "@type": "rdf:Property",
+      "rdfs:comment": "unique experiment ID created by the lab doing the experiment. One experiment can contain multiple batches.",
+      "rdfs:label": "experimentId",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Experiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:analysisVersion",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Analysis pipeline version",
+      "rdfs:label": "analysisVersion",
+      "schema:domainIncludes": {
+        "@id": "cvisb:AndersenSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:URL"
+      }
+    },
+    {
+      "@id": "cvisb:metagenomeDatabase",
+      "@type": "rdf:Property",
+      "rdfs:comment": "metagenome database",
+      "rdfs:label": "metagenomeDatabase",
+      "schema:domainIncludes": {
+        "@id": "cvisb:AndersenSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:URL"
+      }
+    },
+    {
+      "@id": "cvisb:metagenomeDbVersion",
+      "@type": "rdf:Property",
+      "rdfs:comment": "metagenome database version",
+      "rdfs:label": "metagenomeDbVersion",
+      "schema:domainIncludes": {
+        "@id": "cvisb:AndersenSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:URL"
+      }
+    },
+    {
+      "@id": "cvisb:assemblyReference",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Reference for assembly",
+      "rdfs:label": "assemblyReference",
+      "schema:domainIncludes": {
+        "@id": "cvisb:AndersenSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:URL"
+      }
+    },
+    {
+      "@id": "cvisb:alignmentReference",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Reference for alignment",
+      "rdfs:label": "alignmentReference",
+      "schema:domainIncludes": {
+        "@id": "cvisb:AndersenSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:URL"
+      }
+    },
+    {
+      "@id": "cvisb:libraryKit",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Library kit",
+      "rdfs:label": "libraryKit",
+      "schema:domainIncludes": {
+        "@id": "cvisb:AndersenSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:libraryVersion",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Library version",
+      "rdfs:label": "libraryVersion",
+      "schema:domainIncludes": {
+        "@id": "cvisb:AndersenSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:variantCallingType",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Variant calling Type(Consensus/Reference)",
+      "rdfs:label": "variantCallingType",
+      "schema:domainIncludes": {
+        "@id": "cvisb:AndersenSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:replicate",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Replicate number",
+      "rdfs:label": "replicate",
+      "schema:domainIncludes": {
+        "@id": "cvisb:AndersenSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Integer"
+      }
+    },
+    {
+      "@id": "cvisb:batchId",
+      "@type": "rdf:Property",
+      "rdfs:comment": "unique batch ID created by the lab doing the experiment",
+      "rdfs:label": "batchId",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Experiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:experimentDate",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Date or Date range of the Experiment",
+      "rdfs:label": "experimentDate",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Experiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:DateTime"
+      }
+    },
+    {
+      "@id": "cvisb:analysisCode",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Computer programming source code. Example: Full (compile ready) solutions, code snippet samples, scripts, templates.",
+      "rdfs:label": "analysisCode",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Experiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:SoftwareSourceCode"
+      }
+    },
+    {
+      "@id": "cvisb:sampleIds",
+      "@type": "rdf:Property",
+      "rdfs:comment": "List of Samples used in the experiment",
+      "rdfs:label": "sampleIds",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Experiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:patientIds",
+      "@type": "rdf:Property",
+      "rdfs:comment": "List of patient IDs used within the experiment",
+      "rdfs:label": "patientIds",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Experiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:virus",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Virus tested in ELISA (Ebola or Lassa)",
+      "rdfs:label": "virus",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Rdt"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:result",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Result of RDT, either positive/negative",
+      "rdfs:label": "result",
+      "schema:domainIncludes": {
+        "@id": "cvisb:Rdt"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:primerSet",
+      "@type": "rdf:Property",
+      "rdfs:comment": "primer set",
+      "rdfs:label": "primerSet",
+      "schema:domainIncludes": {
+        "@id": "cvisb:RepertoireSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:analysisVersion",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Analysis pipeline version",
+      "rdfs:label": "analysisVersion",
+      "schema:domainIncludes": {
+        "@id": "cvisb:RepertoireSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:abstarVersion",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Abstar version",
+      "rdfs:label": "abstarVersion",
+      "schema:domainIncludes": {
+        "@id": "cvisb:RepertoireSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:germlineDatabase",
+      "@type": "rdf:Property",
+      "rdfs:comment": "germline database name or URL",
+      "rdfs:label": "germlineDatabase",
+      "schema:domainIncludes": {
+        "@id": "cvisb:RepertoireSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:germlineDdVersion",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Germline database version",
+      "rdfs:label": "germlineDdVersion",
+      "schema:domainIncludes": {
+        "@id": "cvisb:RepertoireSequencing"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:virus",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Virus tested in RT-PCR (Ebola or Lassa)",
+      "rdfs:label": "virus",
+      "schema:domainIncludes": {
+        "@id": "cvisb:RtPcrResult"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:result",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Result of RT-PCR, either positive/negative or Ct value",
+      "rdfs:label": "result",
+      "schema:domainIncludes": {
+        "@id": "cvisb:RtPcrResult"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:text"
+      }
+    },
+    {
+      "@id": "cvisb:sequencingTechnology",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sequencing Technology (e.g. Illumina)",
+      "rdfs:label": "sequencingTechnology",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SequencingExperiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:sequencingPlataform",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sequencing Platform (e.g. MiSeq)",
+      "rdfs:label": "sequencingPlataform",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SequencingExperiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:instrumentId",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sequencing instrument ID",
+      "rdfs:label": "instrumentId",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SequencingExperiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:sequencingCenter",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sequencing Center (e.g. TSRI, Broad)",
+      "rdfs:label": "sequencingCenter",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SequencingExperiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:readLength",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Read length",
+      "rdfs:label": "readLength",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SequencingExperiment"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Interger"
+      }
+    },
+    {
+      "@id": "cvisb:assayType",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Type of Systems Serology assay.  Options: ADNP, ADCD, ADCP, NKD-CD107a, NKD-IFNg, NKD-MIP-1b",
+      "rdfs:label": "assayType",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SystemsSerology"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:assayReadout",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Type of assay readout, such as phagocytic score, C3 deposition MFI",
+      "rdfs:label": "assayReadout",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SystemsSerology"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:sampleDilution",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Dilution of sample",
+      "rdfs:label": "sampleDilution",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SystemsSerology"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "cvisb:assayResult",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Assay result",
+      "rdfs:label": "assayResult",
+      "schema:domainIncludes": {
+        "@id": "cvisb:SystemsSerology"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    }
+  ]
+}

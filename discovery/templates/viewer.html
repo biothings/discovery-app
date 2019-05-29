@@ -3,8 +3,6 @@
 {% include "header.html" %}
 <style>
 
-
-
 </style>
 <div id="viewer" class="container" style="min-height: 70vh;padding-top:40px;">
   <div class="row" style="margin-top:40px;">
@@ -219,6 +217,9 @@
     <div v-else class="col-sm-9">
       <!-- <h1>Schema Visualizer</h1> -->
       <div id="canvas" class="d-none d-sm-none d-md-block"></div>
+      <div class="p-1" v-if="query">
+        <a role="button" class="btn themeButton text-light" :href="RemoveLastDirectoryPartOf(window.location.href)" >Go Back</a>
+      </div>
       <div class="jumbotron" v-if='schemaClass'>
         <div >
           <button v-if="!showGraph" @click="toggleGraph" class="d-none d-sm-none d-md-block btn themeButton text-light float-right pulse" ><i class="fas fa-draw-polygon"></i> Graph</button>
@@ -628,6 +629,12 @@ var app = new Vue({
         }
       },
 			methods:{
+        RemoveLastDirectoryPartOf(the_url)
+        {
+          var the_arr = the_url.split('/');
+          the_arr.pop();
+          return( the_arr.join('/')+'/' );
+        },
         handleSubmit(){
           let self = this;
           let valid = $('#registrationForm').parsley().validate();
@@ -861,9 +868,13 @@ var app = new Vue({
           }
         },
         removePrefix(text){
-          let arr = text.split(':');
-          text = arr[arr.length-1];
-          return text;
+          if (text.includes('http')) {
+            return text.split("/").pop()
+          }else{
+            let arr = text.split(':');
+            text = arr[arr.length-1];
+            return text;
+          }
         },
         allIndices(arr, val){
             var indices = [],
