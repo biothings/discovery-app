@@ -19,6 +19,10 @@ def setup():
 
     SCHEMAS.clear()
 
+    print("Existing discovery-app es indexes will be deleted.")
+    print("Terminate the program to avoid losing data.")
+    input("Press Enter to continue...")
+
     index_primary = Index('discover_schema')
     index_secondary = Index('discover_class')
 
