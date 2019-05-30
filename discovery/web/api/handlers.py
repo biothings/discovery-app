@@ -106,8 +106,8 @@ def populate_class_index(schema):
             es_class.save()
             logging.info('Saved: %s', class_)
 
-    except Exception as exc:  # pylint: disable=broad-except
-        logging.warning(exc)
+    except:  # pylint: disable=bare-except
+        logging.exception("SchemaParser Error")
 
     Index('discover_class').refresh()
 
