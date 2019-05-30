@@ -58,8 +58,8 @@ class Schema(Document):
 
     def refresh_raw(self):
         '''
-        Encode and compress an original schema file to bytes,
-        automatically invoked during saving if ~raw is not set.
+        Encode and compress an original schema file to bytes.
+        This method is automatically invoked during saving process.
         Returns if the URL is reachable and raw successfully encoded.
         '''
         try:
@@ -67,11 +67,11 @@ class Schema(Document):
             res.raise_for_status()
         except requests.exceptions.RequestException:
             return False
-
-        _raw = res.text.encode()
-        _raw = gzip.compress(_raw)
-        self['~raw'] = _raw
-        return True
+        else:
+            _raw = res.text.encode()
+            _raw = gzip.compress(_raw)
+            self['~raw'] = _raw
+            return True
 
     def retrieve_raw(self):
         ''' Decode the compressed schema definition document saved in _raw field. '''
@@ -85,7 +85,7 @@ class Schema(Document):
         Save the schema document into elasticsearch.
         If the document doesn’t exist it is created, it is overwritten otherwise.
         Returns True if this operations resulted in new document being created.
-        The document is saved with an update to its timestamp to the current time.
+        The document is saved with an update to its timestamp and an encoded copy.
         '''
         self.refresh_raw()
         self.refresh_timestamp()
