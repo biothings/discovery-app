@@ -79,39 +79,30 @@ def populate_class_index(schema):
     existing_classes = Search(index='discover_class').query("match", schema=name)
     existing_classes.delete()
 
-    try:
-        schema_parser = SchemaParser(url)
-        logging.info('Retrieved document from %s.', url)
+    schema_parser = SchemaParser(url)
 
-        for class_ in schema_parser.fetch_all_classes():
-            es_class = Class()
-            es_class.name = class_
-            try:
-                es_class.clses = [branch[-1]
-                                  for branch in schema_parser.find_parent_classes(class_)]
-            except KeyError:
-                es_class.clses = []
+    logging.info('Retrieved document from %s.', url)
 
-            try:
-                es_class.props = schema_parser.find_class_specific_properties(class_)
-            except KeyError:
-                es_class.props = []
+    for class_ in schema_parser.fetch_all_classes():
 
-            try:
-                es_class.comment = schema_parser.schema_nx.node[class_]['description']
-            except KeyError:
-                pass
+        es_class = Class()
+        es_class.name = class_
 
-            es_class.schema = name
-            es_class.save()
-            logging.info('Saved: %s', class_)
+        try:
+            es_class.clses = [branch[-1] for branch in schema_parser.find_parent_classes(class_)]
+            es_class.props = schema_parser.find_class_specific_properties(class_)
+            es_class.comment = schema_parser.schema_nx.node[class_]['description']
+        except BaseException:
+            logging.exception("Error parsing %s.", class_)
 
-    except:  # pylint: disable=bare-except
-        logging.exception("SchemaParser Error")
+        es_class.schema = name
+        es_class.save()
+
+        logging.info('Saved: %s', class_)
 
     Index('discover_class').refresh()
 
-    logging.info('Exit discover_class processing thread.')
+    logging.info('Exit discover_class processing.')
 
 
 # pylint: disable=abstract-method, arguments-differ
