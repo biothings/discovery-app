@@ -2,250 +2,7 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-  .clsContainer{
-    min-width: 100%;
-    border-radius: 20px;
-    box-shadow: 2px 2px 5px #bbbbbb;
-    transition: .5s all;
-    background: rgb(255,255,255); /* Old browsers */
-    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(241,241,241,1) 50%, rgba(225,225,225,1) 51%, rgba(246,246,246,1) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(241,241,241,1) 50%,rgba(225,225,225,1) 51%,rgba(246,246,246,1) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(241,241,241,1) 50%,rgba(225,225,225,1) 51%,rgba(246,246,246,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f6f6f6',GradientType=0 ); /* IE6-9 */
-    position: relative;
-    overflow-x: scroll;
-    border: 2px solid #bdbdbd;
-  }
 
-  .clsContainer:hover{
-    /* background: white !important; */
-    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#ffffff+0,f3f3f3+50,ededed+51,ffffff+100;White+Gloss+%232 */
-    background: rgb(255,255,255); /* Old browsers */
-    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(243,243,243,1) 50%, rgba(237,237,237,1) 51%, rgba(255,255,255,1) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(243,243,243,1) 50%,rgba(237,237,237,1) 51%,rgba(255,255,255,1) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(243,243,243,1) 50%,rgba(237,237,237,1) 51%,rgba(255,255,255,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
-
-    box-shadow: 2px 2px 1px #bbbbbb;
-    cursor: default;
-  }
-
-  .clsNameContainer{
-    display: flex;
-    word-break: break-all;
-    justify-content: center;
-    flex-direction: row;
-    text-align: center;
-  }
-  .clsNameContainer div{
-    flex: 1;
-  }
-
-  #schemaName1{
-    text-align: center !important;
-  }
-
-  #schemaName1:focus{
-    background: white !important;
-  }
-
-  .keepButton{
-    background: #6c757d;
-    transition: .5s all;
-  }
-
-  .keepButton:hover{
-    background: #28a745;
-  }
-
-  .border-done{
-    border-left: 7px solid var(--success);
-  }
-
-  .p-r{
-    position: relative;
-    border-left: 5px solid var(--sec);
-  }
-
-  .p-a{
-    position: absolute;
-  }
-
-  .sectionHeader{
-    top: 45%;
-    left:-13px;
-  }
-
-  input[type="checkbox"].ios8-switch {
-      position: absolute;
-      margin: 8px 0 0 16px;
-  }
-  input[type="checkbox"].ios8-switch + label {
-      position: relative;
-      padding: 5px 0 0 50px;
-      line-height: 2.0em;
-  }
-  input[type="checkbox"].ios8-switch + label:before {
-      content: "";
-      position: absolute;
-      display: block;
-      left: 0;
-      top: 0;
-      width: 40px; /* x*5 */
-      height: 24px; /* x*3 */
-      border-radius: 16px; /* x*2 */
-      background: #fff;
-      border: 1px solid #d9d9d9;
-      -webkit-transition: all 0.3s;
-      transition: all 0.3s;
-  }
-  input[type="checkbox"].ios8-switch + label:after {
-      content: "";
-      position: absolute;
-      display: block;
-      left: 0px;
-      top: 0px;
-      width: 24px; /* x*3 */
-      height: 24px; /* x*3 */
-      border-radius: 16px; /* x*2 */
-      background: #fff;
-      border: 1px solid #d9d9d9;
-      -webkit-transition: all 0.3s;
-      transition: all 0.3s;
-  }
-  input[type="checkbox"].ios8-switch + label:hover:after {
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-  }
-  input[type="checkbox"].ios8-switch:checked + label:after {
-      margin-left: 16px;
-  }
-  input[type="checkbox"].ios8-switch:checked + label:before {
-      background: #55D069;
-  }
-
-  /* SMALL */
-
-  input[type="checkbox"].ios8-switch-sm {
-      margin: 5px 0 0 10px;
-  }
-  input[type="checkbox"].ios8-switch-sm + label {
-      position: relative;
-      padding: 0 0 0 32px;
-      line-height: 1.3em;
-  }
-  input[type="checkbox"].ios8-switch-sm + label:before {
-      width: 25px; /* x*5 */
-      height: 15px; /* x*3 */
-      border-radius: 10px; /* x*2 */
-  }
-  input[type="checkbox"].ios8-switch-sm + label:after {
-      width: 15px; /* x*3 */
-      height: 15px; /* x*3 */
-      border-radius: 10px; /* x*2 */
-  }
-  input[type="checkbox"].ios8-switch-sm + label:hover:after {
-      box-shadow: 0 0 3px rgba(0,0,0,0.3);
-  }
-  input[type="checkbox"].ios8-switch-sm:checked + label:after {
-      margin-left: 10px; /* x*2 */
-  }
-
-  /* LARGE */
-
-  input[type="checkbox"].ios8-switch-lg {
-      margin: 10px 0 0 20px;
-  }
-  input[type="checkbox"].ios8-switch-lg + label {
-      position: relative;
-      padding: 7px 0 0 60px;
-      line-height: 2.3em;
-  }
-  input[type="checkbox"].ios8-switch-lg + label:before {
-      width: 50px; /* x*5 */
-      height: 30px; /* x*3 */
-      border-radius: 20px; /* x*2 */
-  }
-  input[type="checkbox"].ios8-switch-lg + label:after {
-      width: 30px; /* x*3 */
-      height: 30px; /* x*3 */
-      border-radius: 20px; /* x*2 */
-  }
-  input[type="checkbox"].ios8-switch-lg + label:hover:after {
-      box-shadow: 0 0 8px rgba(0,0,0,0.3);
-  }
-  input[type="checkbox"].ios8-switch-lg:checked + label:after {
-      margin-left: 20px; /* x*2 */
-  }
-
-  .unselectable {
-     -moz-user-select: none;
-     -khtml-user-select: none;
-     -webkit-user-select: none;
-
-     /*
-       Introduced in IE 10.
-       See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
-     */
-     -ms-user-select: none;
-     user-select: none;
-  }
-
-  .message{
-    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#ffffff+0,f1f1f1+50,e1e1e1+51,f6f6f6+100;White+Gloss+%231 */
-    background: rgb(255,255,255); /* Old browsers */
-    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(241,241,241,1) 50%, rgba(225,225,225,1) 51%, rgba(246,246,246,1) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(241,241,241,1) 50%,rgba(225,225,225,1) 51%,rgba(246,246,246,1) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(241,241,241,1) 50%,rgba(225,225,225,1) 51%,rgba(246,246,246,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f6f6f6',GradientType=0 ); /* IE6-9 */
-
-    border: 2px solid #bdbdbd;
-    border-radius: 20px;
-  }
-
-  .pillType{
-    border-radius: 10px;
-    display: block;
-    padding: 0px;
-    margin-right: 5px;
-    white-space:nowrap;
-  }
-
-  .pillType span:first-child{
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#596a72+0,596a72+0,a9b3bc+54,596a72+100 */
-    background: rgb(89,106,114); /* Old browsers */
-    background: -moz-linear-gradient(top,  rgba(89,106,114,1) 0%, rgba(89,106,114,1) 0%, rgba(169,179,188,1) 54%, rgba(89,106,114,1) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top,  rgba(89,106,114,1) 0%,rgba(89,106,114,1) 0%,rgba(169,179,188,1) 54%,rgba(89,106,114,1) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom,  rgba(89,106,114,1) 0%,rgba(89,106,114,1) 0%,rgba(169,179,188,1) 54%,rgba(89,106,114,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#596a72', endColorstr='#596a72',GradientType=0 ); /* IE6-9 */
-    color: white;
-    text-shadow: 0px 1px 2px black;
-    padding: 2px 4px;
-    border: 2px solid darkgrey;
-    font-size: .6em;
-  }
-  .pillType span:last-child{
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-    color: var(--sec);
-    background: #d7d7d7;
-    padding: 2px 4px;
-    margin-left: -5px;
-    border: 2px solid darkgrey;
-    font-weight: bold;
-    font-size: .6em;
-  }
-
-  .msgOpen{
-    /* /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#eafcff+0,d9f8fc+50,cdeff2+51,e5fcf9+100 */
-    background: rgb(234,252,255); /* Old browsers */
-    background: -moz-linear-gradient(top,  rgba(234,252,255,1) 0%, rgba(217,248,252,1) 50%, rgba(205,239,242,1) 51%, rgba(229,252,249,1) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top,  rgba(234,252,255,1) 0%,rgba(217,248,252,1) 50%,rgba(205,239,242,1) 51%,rgba(229,252,249,1) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom,  rgba(234,252,255,1) 0%,rgba(217,248,252,1) 50%,rgba(205,239,242,1) 51%,rgba(229,252,249,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eafcff', endColorstr='#e5fcf9',GradientType=0 ); /* IE6-9 */
-
-  }
 
 </style>
 
@@ -259,16 +16,8 @@
       <h1 class="mainTextLight"><i class="fas fa-cog"></i> Loading...</h1>
     </div>
     <div class="text-center p-3 mb-2 text-success jumbotron message " v-if="editFrom">
-      <h5>You have chosen to start a new schema based on <b class="mainTextDark" v-text='editFrom'></b>'s schema</h5>
+      <h5>You have chosen to start a new schema based on this schema: <b class="mainTextDark" v-text='editFrom'></b></h5>
     </div>
-    <!-- <div class="text-center p-3 mb-2 text-success jumbotron d-flex justify-content-center flex-wrap">
-      <div class="alert-info p-5">
-        <h4 class="m-1"><i class="far fa-calendar"></i> Dataset</h4>
-        <small>(Schema.org)</small>
-        <br />
-        <a role="button" class="btn themeButton text-light pulse m-1" @click="testPreset('./static/misc/cvisb-dataset.jsonld')">Use This Schema</a>
-      </div>
-    </div> -->
     <div class="jumbotron p-r" :class="[ myContextFields.length ? 'border-done' : '']">
       <div class="numberCircle mainBackLight text-light sectionHeader p-a">1</div>
       <h2 class="text-muted text-center">Choose a namespace</h2>
@@ -885,9 +634,9 @@ Vue.component('class-box', {
     },
   },
   mounted: function(){
-    if (this.myclass) {
-      this.isHidden = false;
-    }
+    // if (this.myclass) {
+    //   this.isHidden = false;
+    // }
     tippy('#'+this.clss['rdfs:label'], {
       content: "<div class='alert alert-info m-0'>"+this.clss['rdfs:comment']+"</div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
       placement: 'bottom'
@@ -1010,7 +759,7 @@ Vue.component('class-box', {
                     </td>
                     <td v-if="myclass">
                       <div class="d-inline mr-3">
-                        <input @click="handleRequired(item['rdfs:label'],clss)" class="ios8-switch" type="checkbox" value="" :id="item['rdfs:label']">
+                        <input @click="handleRequired(item['rdfs:label'],clss)" class="" type="checkbox" value="" :id="item['rdfs:label']">
                       </div>
                     </td>
                     <td  >
@@ -1038,7 +787,7 @@ Vue.component('class-box', {
         <small class="bold">
           Properties of <span class="mainTextLight" v-text="clss['rdfs:label']"></span>
         </small>
-        <table class="w-100 table table-sm table-responsive-sm table-hover" v-if="properties.length">
+        <table class="w-100 table table-sm table-responsive-sm table-hover">
           <template v-if="myclass">
             <col width="">
             <col width="">
@@ -1081,7 +830,7 @@ Vue.component('class-box', {
                 </td>
                 <td v-if="myclass">
                   <div class="d-inline mr-3">
-                    <input @click="handleRequired(item['rdfs:label'],clss)" class="ios8-switch" type="checkbox" value="" :id="item['rdfs:label']">
+                    <input @click="handleRequired(item['rdfs:label'],clss)" class="" type="checkbox" value="" :id="item['rdfs:label']">
                   </div>
                 </td>
                 <td  >
@@ -1116,15 +865,19 @@ Vue.component('class-box', {
             </template>
           </tbody>
         </table>
-        <div v-else class="alert alert-secondary text-center">
-          <small>This class has no properties of its own</small>
+        <div v-if="!properties.length" class='alert alert-secondary text-center text-muted w-100'>
+          <small v-if='!myclass'>This class has no properties of its own</small>
+          <small v-if='myclass'>New properties not found in parents will be listed here</small>
         </div>
         <div v-if="myclass">
-          <table class="col-sm-12 col-md-6 m-auto table table-sm table-muted table-responsive-sm table-hover">
+          <small class="bold">
+            Selected Inherited Properties
+          </small>
+          <table class="col-sm-12 col-md-12 m-auto table table-sm table-muted table-responsive-sm table-hover">
             <col width="">
             <col width="">
             <col width="40%">
-            <thead class='mainTextDark'>
+            <thead class='mainBackDark text-light'>
               <th>
                 <small>Required</small>
               </th>
@@ -1138,11 +891,11 @@ Vue.component('class-box', {
             <tbody>
               <template v-for="(item,index) in selectedProperties">
                 <tr class='text-left'>
-                <td>
-                  <input @click="handleRequired(index,clss)" class="ios8-switch" type="checkbox" :id="index">
+                <td class='text-center'>
+                  <input @click="handleRequired(index,clss)" class="" type="checkbox" :id="index">
                 </td>
-                <td>
-                  <span class="badge mainBackDark text-light" v-text="index"></span>
+                <td class='text-center'>
+                  <span class="mainTextDark" v-text="index"></span>
                 </td>
                 <td>
                   <description :content='item.description'></description>
@@ -1151,6 +904,9 @@ Vue.component('class-box', {
               </template>
             </tbody>
           </table>
+          <div v-if="selectedProperties && !selectedProperties.length" class='alert alert-secondary text-center text-muted w-100'>
+            <small>Selected inherited properties in step 3 will be listed here</small>
+          </div>
         </div>
       </div>
     </div>

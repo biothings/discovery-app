@@ -6,81 +6,16 @@
 </style>
 <div id="viewer" class="container" style="min-height: 70vh;padding-top:40px;">
   <div class="row" style="margin-top:40px;">
-    <div class="col-lg-2">
-      <template v-if="availableClasses.length>20">
-        <ul class="list-group">
-          <li class="list-group-item mainBackDark text-light text-center">
-            Classes
-          </li>
-          <li class="list-group-item">
-            <select @change='handleChange' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
-              <option selected>Filter by...</option>
-              <option v-for="letter in filterLetters" :value="letter" v-text="letter"></option>
-            </select>
-          </li>
-          <li class="list-group-item text-light mainBackDark twoEM text-center" v-if='filter' v-text='filter'>
-
-          </li>
-          <li class="list-group-item" v-if='filter'>
-            <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
-              <option selected v-text='"Choose..."'></option>
-              <option v-for="(item,i) in filterResults" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
-            </select>
-          </li>
-        </ul>
-      </template>
-      <!-- If class list is less than 20 -->
-      <template v-else>
-        <ul class="list-group">
-          <li class="list-group-item mainBackLight text-light text-center">
-            Schemas
-          </li>
-          <li class="list-group-item">
-            <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
-              <option selected v-text='"Choose..."'></option>
-              <option v-for="(item,i) in availableClasses" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
-            </select>
-          </li>
-        </ul>
-      </template>
-
-      <!-- sideNav -->
-      <template v-if="parentDisplayResults.length">
-        <ul class="list-group d-none d-sm-none d-md-block navigation">
-          <li class="list-group-item mainBackLight text-light text-center font-weight-bold">
-            Page Navigation
-          </li>
-          <li class="list-group-item noPadding" v-for="item in parentDisplayResults.slice().reverse()">
-            <small>
-              <a class="nav-link" :href="'#'+removePrefix(item)" >
-                <i class="fas fa-arrow-alt-circle-right mainTextLight"></i> <span v-text="removePrefix(item)"></span>
-              </a>
-            </small>
-          </li>
-          <li class="list-group-item noPadding">
-            <small>
-              <a class="nav-link" href="#bottom" >
-                <i class="fas fa-arrow-alt-circle-right mainTextDark"></i> More
-              </a>
-            </small>
-          </li>
-        </ul>
-      </template>
-
-    </div>
-    <div class="col-sm-1">
-
-    </div>
     <!-- IF NO QUERY -->
-    <div v-if="!query" class="col-sm-9 mb-5">
-      <div v-if="!registered" class="alert alert-info w-100 padding20 text-center">
+    <div v-if="!query" class="col-sm-12 mb-5">
+      <div v-if="!registered" class="jumbotron message w-100 padding20 text-center text-muted">
         <h3>Register this schema?</h3>
         <button v-if="!slugRegistered" data-toggle="modal" data-target="#registration" class="btn themeButton text-light" > Register Now</button>
       </div>
       <div class="padding20">
-        <button @click="switchView()" class="btn btn-secondary up text-light float-right mb-4">
+        <a @click="switchView()" class="bold mainTextDark pointer float-right mb-4">
           Toggle View <i class="fas fa-retweet"></i>
-        </button>
+        </a>
       </div>
       <div v-if="viewAlphabetical">
         <form class="col-sm-12 pl-0">
@@ -214,15 +149,32 @@
         </ul>
       </div>
     </div>
-    <div v-else class="col-sm-9">
-      <!-- <h1>Schema Visualizer</h1> -->
+    <div v-else class="col-sm-12">
       <div id="canvas" class="d-none d-sm-none d-md-block"></div>
       <div class="p-1" v-if="query">
-        <a role="button" class="btn themeButton text-light" :href="RemoveLastDirectoryPartOf(window.location.href)" >Go Back</a>
+        <ul class="nav nav-justified">
+          <li class="nav-item">
+            <a class="nav-link mainTextDark" :href="RemoveLastDirectoryPartOf(window.location.href)"><i class="fas fa-chevron-left"></i> Back</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle mainTextDark" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Jump To</a>
+            <div class="dropdown-menu">
+              <a class="nav-link mainTextDark" v-for="item in parentDisplayResults.slice().reverse()" :href="'#'+removePrefix(item)">
+                <span v-text="removePrefix(item)"></span>
+              </a>
+              <a class="nav-link pointer mainTextDark" href="#bottom" >
+                 More...
+              </a>
+            </div>
+          </li>
+          <li class="nav-item ">
+            <a class="nav-link mainTextDark pointer" data-toggle="modal" data-target="#changeClass"><i class="fas fa-window-restore"></i> Change Schema Viewed</a>
+          </li>
+        </ul>
       </div>
-      <div class="jumbotron" v-if='schemaClass'>
+      <div class="jumbotron message" v-if='schemaClass'>
         <div >
-          <button v-if="!showGraph" @click="toggleGraph" class="d-none d-sm-none d-md-block btn themeButton text-light float-right pulse" ><i class="fas fa-draw-polygon"></i> Graph</button>
+          <a v-if="!showGraph" @click="toggleGraph" class="d-none d-sm-none d-md-block mainTextDark bold float-right pointer" ><i class="fas fa-draw-polygon"></i> View Graph</a>
           <h1 class="mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
           <template v-if='allPaths.length'>
             <ol>
@@ -246,31 +198,25 @@
           </template>
         </div>
       </div>
-
+      <!-- MAIN CLASS PROPERTIES -->
       <h1 class="mainTextDark bold" v-if='property' v-text='property'></h1>
-      <h3 class="mainTextDark" v-if='schemaClass'>
-        Properties of <a class="mainTextDark bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
-      </h3>
-      <table class="table  table-striped-main" v-if="properties.length" style="margin-bottom: 40px">
-      <thead class="mainBackDark text-light">
-        <tr>
-          <th >
-          </th>
-        </tr>
-      </thead>
+      <div class="resultsTabFull mt-3 p-3 mainBackDark text-light">
+        <span v-if='schemaClass'>Properties of</span> <h3 v-text='schemaClass' class='d-inline'></h3>
+      </div>
+      <table class="table  table-striped-main" v-if="properties.length" style="margin-bottom: 40px;border-left:5px solid var(--main);">
       <tbody>
         <tr v-for="(item,i) in properties">
           <td >
             <a class="font-weight-bold" :href='"./"+getTitle(item)'>
-              <h5 v-html=getTitle(item)></h5>
+              <span v-html=getTitle(item)></span>
             </a>
             <small v-html=getDescription(item) class=""></small>
             <hr />
-            <small class="badge badge-light text-muted">Expected Type: </small>
+            <small class="mainTextDark bold">Expected Type: </small>
             <template v-for="(type,i) in getType(item)">
               <a :href="generateLink(type)">
                 <small >
-                  <i class="fas fa-circle mainTextDark"></i> <span v-html='type'></span>
+                  <span v-html='type'></span>
                 </small>
                 <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
               </a>
@@ -281,7 +227,7 @@
       </tbody>
     </table>
     <template v-if="!properties.length && !userURL">
-      <div class="text-center mainBackDark text-light padding20" style="margin-bottom: 40px">
+      <div class="text-center alert alert-secondary text-muted padding20" style="margin-bottom: 40px">
         <i class="fas fa-exclamation-circle"></i>
         This class has no properties of it's own
       </div>
@@ -309,30 +255,25 @@
       </div>
     </div>
 
+    <!-- PARENT CLASS PROPERTIES -->
     <span v-if="parentClassesAndProps.length" v-for="(parent,i) in parentClassesAndProps">
-      <h3 :id='parent["className"]' class="mainTextLight">
-        Properties of <a class="mainTextLight bold" :href="'./'+parent['className']" v-html='parent["className"]'></a>
-      </h3>
-      <table v-if="parent['props'].length" class="table  table-striped-sec" style="margin-bottom: 40px">
-      <thead class="mainBackLight text-light">
-        <tr>
-          <th>
-          </th>
-        </tr>
-      </thead>
+      <div :id='parent["className"]' class="resultsTabFull mt-3 p-3 mainBackLight text-light">
+        Properties of <h3 v-text='parent["className"]' class='d-inline'></h3> <small><a class='text-light' :href='"#"+parent["className"]'><i class="fas fa-link"></i></a></small>
+      </div>
+      <table v-if="parent['props'].length" class="table  table-striped-sec" style="margin-bottom: 40px; border-left:5px solid var(--sec);">
       <tbody>
         <tr v-for="item in parent['props']">
           <td >
             <a class="font-weight-bold" :href='"./"+getTitle(item)'>
-              <h5 v-html=getTitle(item)></h5>
+              <span v-html=getTitle(item)></span>
             </a>
             <small v-html=getDescription(item) class=""></small>
             <hr />
-            <small class="badge badge-light text-muted">Expected Type: </small>
+            <small class="mainTextLight bold">Expected Type: </small>
             <template v-for="(type,i) in getType(item)">
               <a :href="generateLink(type)" >
                 <small>
-                  <i class="fas fa-circle mainTextLight"></i> <span v-html='type'></span>
+                  <span v-html='type'></span>
                 </small>
                 <i v-if="generateLink(type)[0] !== '.'" class="fas small fa-external-link-alt"></i>
               </a>
@@ -344,7 +285,7 @@
     </span>
   </table>
   <template v-else>
-    <div class="text-center mainBackLight text-light padding20" style="margin-bottom: 40px">
+    <div class="text-center alert alert-secondary text-muted  padding20" style="margin-bottom: 40px">
       <i class="fas fa-exclamation-circle"></i>
       This class has no properties of it's own
     </div>
@@ -432,9 +373,9 @@
                   </p>
                 </div>
                 <div class="col-sm-12">
-                  <h2>Slug</h2>
+                  <h4>Choose a namespace</h4>
                 </div>
-                <label class="col-sm-4 col-form-label" for="exampleFormControlInput1">Namespace (slug)</label>
+                <label class="col-sm-4 col-form-label" for="exampleFormControlInput1">Namespace</label>
                 <div class="col-sm-8">
                   <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="namespaceInput" v-model='namespaceInput'></textarea>
                   <template v-if="availableSlug && namespaceInput.length">
@@ -501,6 +442,61 @@
     </div>
   </div>
 
+  <!-- Button trigger modal -->
+
+
+<!-- Modal -->
+<div class="modal fade" id="changeClass" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-muted" id="exampleModalLabel">Change Class Viewed</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <template v-if="availableClasses.length>20">
+          <ul class="list-group">
+            <li class="list-group-item mainBackDark text-light text-center">
+              Schemas Available
+            </li>
+            <li class="list-group-item">
+              <select @change='handleChange' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+                <option selected>Filter by...</option>
+                <option v-for="letter in filterLetters" :value="letter" v-text="letter"></option>
+              </select>
+            </li>
+            <li class="list-group-item text-light mainBackDark twoEM text-center" v-if='filter' v-text='filter'>
+
+            </li>
+            <li class="list-group-item" v-if='filter'>
+              <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+                <option selected v-text='"Choose..."'></option>
+                <option v-for="(item,i) in filterResults" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
+              </select>
+            </li>
+          </ul>
+        </template>
+        <!-- If class list is less than 20 -->
+        <template v-else>
+          <ul class="list-group">
+            <li class="list-group-item mainBackLight text-light text-center">
+              Schemas
+            </li>
+            <li class="list-group-item">
+              <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+                <option selected v-text='"Choose..."'></option>
+                <option v-for="(item,i) in availableClasses" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
+              </select>
+            </li>
+          </ul>
+        </template>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 </div>
@@ -508,7 +504,7 @@
 {% endblock %}
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jsonld/1.0.0/jsonld.min.js"></script> -->
+<!-- <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script> -->
 <script src="/static/js/lodash.js"></script>
 <script src="https://d3js.org/d3.v3.js"></script>
 <script src="/static/js/networkx.js"></script>
@@ -605,7 +601,7 @@ var app = new Vue({
 
           if (newInput && !self.invalidChars) {
             axios.get(`/api/registry/`+self.namespaceInput).then(function (response) {
-              console.log('namespace check',newInput,response)
+              // console.log('namespace check',newInput,response)
               if (response.data.url) {
                 self.availableSlug= false;
               }
@@ -644,7 +640,7 @@ var app = new Vue({
               'url' : self.dataSetURL,
               'name' : self.namespaceInput
             }
-            console.log('REQ BODY',body);
+            // console.log('REQ BODY',body);
             axios.post('/api/registry',body).then(res=>{
               console.log('POST response ',res.data)
               if (res.data.url) {
@@ -1432,20 +1428,20 @@ var app = new Vue({
           let self = this;
           let namespace = window.location.pathname.split('/');
           namespace = namespace.slice(1,window.location.pathname.length-1)[0];
-          console.log('checking..',namespace)
+          // console.log('checking..',namespace)
           axios.get(`/api/registry/`+namespace).then(function (res) {
-            console.log('reg check ', res)
+            // console.log('reg check ', res)
             if (res.data) {
               self.registered = true;
               url = res.data.url;
               self.reqFile(url);
-              console.log('registered')
+              // console.log('registered')
             }else{
               self.reqFile();
-              console.log('not registered')
+              // console.log('not registered')
             }
           }).catch(err=>{
-            console.log('no res err')
+            // console.log('no res err')
             self.reqFile();
             throw err;
           });
@@ -1455,7 +1451,7 @@ var app = new Vue({
           if (url && self.registered) {
             console.log('LOADING FROM URL')
             axios.get('/api/proxy?url='+url).then(res=>{
-              console.log('load success')
+              // console.log('load success')
               this.graph = res.data['@graph'];
               this.context = res.data['@context'];
               this.determinePath()
