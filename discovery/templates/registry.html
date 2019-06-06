@@ -172,7 +172,7 @@ Vue.component('registry-item', {
     <div class="d-flex">
       <div class="flex-grow-1 p-2">
         <div class="d-flex justify-content-between w-100">
-          <h5 class="mb-1">
+          <h5 class="mb-1 mainTextDark">
             <small v-text="item.schema"></small>:<span v-text="item.name"></span> <i :id="item.name" class="fas fa-info-circle mainTextDark"></i>
           </h5>
         </div>
@@ -183,6 +183,7 @@ Vue.component('registry-item', {
           </template>
         </p>
         <small>
+          <span v-if='item.props.length' class='mainTextLight bold'>Properties: </span>
           <template v-for='(prop,index) in item.props'>
             <span class="d-inline" v-text='prop'></span>
             <span v-if="index !== item.props.length-1">, </span>

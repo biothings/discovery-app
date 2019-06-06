@@ -15,11 +15,11 @@
     <div class="col-sm-12">
       <div class="row">
         <buttom @click.prevent="choice='have'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted">
-          <h1 class="text-primary">Yes</h1>
+          <h1 class="mainTextDark">Yes</h1>
           <h4>Visualize your schema and register it</h4>
         </buttom>
         <buttom @click.prevent="choice='dont'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted">
-          <h1 class="text-danger">No</h1>
+          <h1 class="mainTextLight">No</h1>
           <h4>Search existing schemas to start your own</h4>
         </buttom>
       </div>
@@ -38,6 +38,7 @@
         <input style="margin:auto;" data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
         <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
       </div>
+      <small class="text-muted">Examples:</small>
       <small class="badge badge-pill badge-secondary pointer mr-1"
       @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
         <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> BioThings Schema Example
@@ -50,35 +51,22 @@
   </div>
   <div v-if="choice === 'dont'" class="jumbotron text-muted text-center">
     <h1>COMMON STARTING POINTS</h1>
-    <div class="d-flex justify-content-center flex-wrap">
-      <div class="bg-light m-1 text-center p-5">
-        <h4 class="m-1"><i class="far fa-calendar"></i> Dataset</h4>
-        <small>(Schema.org)</small>
-        <br />
-        <a role="button" class="btn themeButton text-light pulse m-1 disabled" href="#">Go</a>
-      </div>
-      <div class="bg-light m-1 text-center p-5">
-        <h4 class="m-1"><i class="fas fa-flask"></i> Experiment</h4>
-        <small>(Schema.org)</small>
-        <br />
-        <a role="button" class="btn themeButton text-light pulse m-1 disabled" href="#">Go</a>
-      </div>
-      <div class="bg-light m-1 text-center p-5">
-        <h4 class="m-1"><i class="fas fa-id-card"></i> Patient</h4>
-        <small>(Schema.org)</small>
-        <br />
-        <a role="button" class="btn themeButton text-light pulse m-1 disabled" href="#">Go</a>
-      </div>
+    <div class="row">
+      <template v-for='item in presets'>
+        <preset-box :preset='item'></preset-box>
+      </template>
     </div>
     <hr />
-    <p>
-      Don't see the right starting point?
-    </p>
-    <h1 cla>SEARCH FOR EXISTING SCHEMAS</h1>
-    <p>
-      The registry includes schemas from the community and <a target="_blank" href="https://schema.org/">Schema.org</a> core schemas.
-    </p>
-    <a role="button" class="btn themeButton text-light pulse" href="/registry">Go To Registry</a>
+    <div class="p-5">
+      <h4>
+        Don't see the right starting point?
+      </h4>
+      <h1 cla>SEARCH FOR EXISTING SCHEMAS</h1>
+      <p>
+        The registry includes schemas from the community and <a target="_blank" href="https://schema.org/">Schema.org</a> core schemas.
+      </p>
+      <a role="button" class="btn themeButton text-light pulse" href="/registry">Go To Registry</a>
+    </div>
   </div>
 </div>
 {% endblock %}
@@ -89,6 +77,41 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 
+Vue.component('preset-box', {
+  props: ['preset'],
+  data: function(){
+    return{
+
+    }
+  },
+  mounted:function(){
+    
+  },
+  template: `<div class="bg-light text-center p-5 col-sm-6 col-md-3">
+              <h4 class="m-1">
+              <i v-if="preset.name === 'Cvisb:Dataset'" class="far fa-calendar"></i>
+              <i v-if="preset.name === 'Cvisb:Experiment'" class="fas fa-flask"></i>
+              <i v-if="preset.name === 'Cvisb:Sample'" class="fas fa-vial"></i>
+              <i v-if="preset.name === 'Cvisb:Patient'" class="fas fa-id-card"></i>
+              <span v-text='preset.name'></span></h4>
+              <small><span v-text='preset.description'></span></small>
+              <br />
+              <a role="button" @click='handleClick(preset.name,preset.url)' class="btn themeButton text-light pulse m-1" href="#">Go</a>
+            </div>`,
+  methods: {
+    handleClick(name,url){
+        axios.get('/api/proxy?url='+url).then(res=> {
+          if (res.data) {
+            let obj = JSON.stringify(res.data)
+            localStorage.setItem('datasetData',obj);
+            localStorage.setItem('editFrom',name);
+            window.location.href = '/editor';
+          }
+        });
+    }
+  }
+});
+
 var app = new Vue({
       el: '#playground',
 			data: function(){
@@ -97,6 +120,28 @@ var app = new Vue({
           suggestedURL:'',
           slug:'',
           choice:'',
+          presets:[
+            {
+              'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_dataset.json',
+              'name':'Cvisb:Dataset',
+              'description':'A schema describing Dataset in the Center for Viral Systems Biology'
+            },
+            {
+              'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_experiment.json',
+              'name':'Cvisb:Experiment',
+              'description':'A schema describing a Systems Serology Experiment in the Center for Viral Systems Biology '
+            },
+            {
+              'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_patient.json',
+              'name':'Cvisb:Patient',
+              'description':'A schema describing a Patient/Person in the Center for Viral Systems Biology experiments '
+            },
+            {
+              'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_sample.json',
+              'name':'Cvisb:Sample',
+              'description':'A schema describing a derived sample from a primary source in the Center for Viral Systems Biology '
+            }
+          ]
 				}
 			},
       watch:{

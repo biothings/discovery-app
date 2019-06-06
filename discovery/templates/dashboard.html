@@ -8,7 +8,7 @@
   <div  class="container" style="min-height: 70vh;padding-top:80px;">
     <h1 class="text-muted caps">My Dashboard</h1>
     <div class="dashboard">
-      <div class="row">
+      <div class="row mb-5">
         <div class="col-sm-2 p-0 userInfo bg-secondary">
           <div class="pRelative">
             <img :src="user.avatar_url" width="100%" alt="logo" style="z-index:1"/>
@@ -25,12 +25,12 @@
         </div>
         <div class="col-sm-10">
           <div class="mt-3 text-muted lighter">
-            <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Datasets
+            <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Schemas
           </div>
           <table class="table">
             <thead class="bg-light text-muted">
               <tr>
-                <th scope="col" class="lighter">name</th>
+                <th scope="col" class="lighter">Namespace Registered</th>
                 <th scope="col" class="lighter">Source URL</th>
                 <th scope="col" class="lighter">View</th>
                 <th scope="col" class="lighter">Delete</th>
@@ -40,14 +40,14 @@
               <template v-if="dashboard && dashboard.length">
                 <tr v-for="item in dashboard">
                   <td>
-                    <a target="_blank" :href="'/'+item.name+'/'">
+                    <a target="_blank" :href="'/'+item.name+'/'" class=" d-block">
                       <h4 v-text="item.name" class="d-inline"></h4>
                     </a>
-                    <button style="zoom:.7" class="btn btn-secondary btn-sm" @click="selectedItem = item" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i> Edit</button>
+                    <button style="zoom:.7" class="btn btn-secondary btn-sm d-block" @click="selectedItem = item" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i> Edit</button>
                   </td>
                   <td>
                     <a target="_blank" :href="item.url" :title="item.url">
-                      Link <i class="fas fa-external-link-alt"></i>
+                      Source link <i class="fas fa-external-link-alt"></i>
                     </a>
                   </td>
                   <td>
@@ -56,7 +56,7 @@
                     </a>
                   </td>
                   <td>
-                    <button @click.prevent="deleteSelected(item.name,item._id)" class="btn btn-outline-secondary fill">
+                    <button @click.prevent="deleteSelected(item.name)" class="btn btn-outline-secondary fill">
                       Delete
                     </button>
                   </td>
@@ -136,11 +136,8 @@ var app = new Vue({
 			},
       watch:{
         slugInput: function(newInput, oldInput){
-          console.log('checking..', newInput)
           var self = this;
           self.slugInput = self.slugInput.toLowerCase();
-
-
           var re = /^[a-zA-Z0-9_.-]*$/;
           if (!re.test(newInput) ) {
             self.invalidChars = true;
@@ -149,18 +146,18 @@ var app = new Vue({
           }
 
           if (newInput && !self.invalidChars) {
-            axios.get(`/api/query?q=_meta.slug:`+self.slugInput).then(function (response) {
-              console.log('slug check',response.data,newInput)
-              if (response.data.total) {
+            axios.get(`/api/registry/`+self.slugInput).then(function (response) {
+              if (response.data.url) {
                 self.availableSlug= false;
-              }else{
-                self.availableSlug= true;
               }
+            }).catch(error => {
+              self.availableSlug= true;
+              throw error;
             });
           }
         },
         selectedItem:function(n,o){
-          console.log('new',n);
+          // console.log('new',n);
         }
       },
 			methods:{
@@ -203,10 +200,10 @@ var app = new Vue({
             throw err;
           });
         },
-        deleteSelected(name,id){
+        deleteSelected(name){
           var self = this;
           Swal.fire({
-            title: '<h3>Are you sure you want to delete <span class="text-danger bold">'+name+'</span> ?</h3>',
+            title: '<h3>Are you sure you want to delete schema:  <span class="text-danger bold">'+name+'</span> ?</h3>',
             text: "You won't be able to revert this!",
             type:'warning',
             showCancelButton: true,
@@ -216,22 +213,50 @@ var app = new Vue({
           }).then((result) => {
 
             if (result.value) {
-              axios.delete('/api/registry'+id).then(res=>{
-                console.log(res.data)
-                if (res.data.success) {
-                  Swal.fire(
-                    'Deleted!',
-                    'Your file has been deleted.',
-                    'success'
-                  );
-                  self.getAll();
-                }else{
-                  Swal.fire(
-                    'Oh no!',
-                    'Your file could not be deleted',
-                    'error'
-                  );
+              axios.delete('/api/registry/'+name).then(res=>{
+                if (res.status) {
+                  switch (res.status) {
+                    case 200:
+                      Swal.fire(
+                        'Success',
+                        'Schema deleted',
+                        'success'
+                      );
+                      self.getAll();
+                      break;
+                      case 401:
+                        Swal.fire(
+                          'Oh, no!',
+                          'You must sign-in to delete this schema',
+                          'error'
+                        );
+                        self.getAll();
+                        break;
+                        case 403:
+                          Swal.fire(
+                            'Oh, no!',
+                            'You do not have permission to delete this schema',
+                            'error'
+                          );
+                          self.getAll();
+                          break;
+                          case 404:
+                            Swal.fire(
+                              'Oh, no!',
+                              'This schema does not seem to exist',
+                              'error'
+                            );
+                            self.getAll();
+                            break;
+                    default:
+                      Swal.fire(
+                        'Oh no!',
+                        'something went wrong',
+                        'error'
+                      );
+                  }
                 }
+
 
               }).catch(err=>{
                 throw err;
