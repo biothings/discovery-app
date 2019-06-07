@@ -143,10 +143,12 @@ Vue.component('registry-item', {
         let dataUrl = item.url;
         $('#searching').show();
         axios.get('/api/proxy?url='+dataUrl).then(function (res) {
+          // console.log('proxy res')
+          // console.log(res.data)
           if (res.data) {
             let obj = JSON.stringify(res.data)
             localStorage.setItem('datasetData',obj);
-            console.log(item)
+            // console.log(item)
             localStorage.setItem('editFrom',item.schema+':'+item.name);
             window.location.href = redirectUrl;
           }

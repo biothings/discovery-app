@@ -48,7 +48,7 @@
             </div>
           </div>
         </form>
-        <h1 class="text-muted">Alphabetical</h1>
+        <h1 class="logoText">Alphabetical</h1>
         <!-- <div id="canvas2"></div> -->
         <ul class="pagination" style="overflow-x: scroll;">
           <li class="page-link" v-for="(item,i) in availableClassesNames">
@@ -67,7 +67,7 @@
         </ul>
       </div>
       <div v-else>
-        <h1 class="text-muted">Hierarchical</h1>
+        <h1 class="logoText">Hierarchical</h1>
         <ul class="pagination">
           <li class="d-inline bg-0" style="width:20px; height:20px" >
           </li>
@@ -168,7 +168,7 @@
             </div>
           </li>
           <li class="nav-item ">
-            <a class="nav-link mainTextDark pointer" data-toggle="modal" data-target="#changeClass"><i class="fas fa-window-restore"></i> Change Schema Viewed</a>
+            <a class="nav-link mainTextDark pointer" data-toggle="modal" data-target="#changeClass"><i class="fas fa-window-restore"></i> Change Class Viewed</a>
           </li>
         </ul>
       </div>
@@ -396,7 +396,7 @@
               <div class="form-group row">
                 <label for="colFormLabelSm" class="col-sm-4 col-form-label col-form-label">Source URL</label>
                 <div class="col-sm-8">
-                  <input required="" type="url" class="form-control form-control" id="colFormLabelSm" placeholder="enter url here" v-model="dataSetURL">
+                  <input required="" disabled type="url" class="form-control form-control disabled" id="colFormLabelSm" placeholder="enter url here" v-model="dataSetURL">
                 </div>
               </div>
               <div class="form-group row">
@@ -450,7 +450,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-muted" id="exampleModalLabel">Change Class Viewed</h5>
+        <h5 class="modal-title text-muted" id="exampleModalLabel">Classes available in this schema</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -459,7 +459,7 @@
         <template v-if="availableClasses.length>20">
           <ul class="list-group">
             <li class="list-group-item mainBackDark text-light text-center">
-              Schemas Available
+              Filter by
             </li>
             <li class="list-group-item">
               <select @change='handleChange' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
@@ -688,9 +688,6 @@ var app = new Vue({
             }
           }
           this.allAvailableProperties = results.sort();
-        },
-        generateRegistrationData(){
-
         },
         getMoreSpecifTypes(){
           var self = this;
@@ -1430,15 +1427,15 @@ var app = new Vue({
           namespace = namespace.slice(1,window.location.pathname.length-1)[0];
           // console.log('checking..',namespace)
           axios.get(`/api/registry/`+namespace).then(function (res) {
-            // console.log('reg check ', res)
+            console.log('reg check ', res)
             if (res.data) {
               self.registered = true;
               url = res.data.url;
               self.reqFile(url);
-              // console.log('registered')
+              console.log('registered')
             }else{
               self.reqFile();
-              // console.log('not registered')
+              console.log('not registered')
             }
           }).catch(err=>{
             // console.log('no res err')
@@ -1451,7 +1448,8 @@ var app = new Vue({
           if (url && self.registered) {
             console.log('LOADING FROM URL')
             axios.get('/api/proxy?url='+url).then(res=>{
-              // console.log('load success')
+              console.log('load success')
+              console.log(res.data)
               this.graph = res.data['@graph'];
               this.context = res.data['@context'];
               this.determinePath()

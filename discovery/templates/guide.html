@@ -53,41 +53,41 @@
       <template>
         <div class="stepBox">
           <span>1</span>
-          <div class="clipBox">
+          <div class="clipBox bold bold">
             Host your Dataset Metadata
           </div>
         </div>
         <div class="jumbotron text-muted">
           <!-- <div class="numberCircle mainBackLight">1</div> -->
           <!-- <h3>Host your Dataset Metadata</h3> -->
-          <p class="col-sm-6" style="margin: 0 auto;">
-            Here's a few suggestions where you may host your dataset:
-          </p>
+          <h3 class="col-sm-6" style="margin: 0 auto;">
+            Some hosting options
+          </h3>
           <hr />
-          <ul id="host" class="list-group col-sm-6" style="margin:0 auto;">
-            <li class="list-group-item">
+          <div id="host" class="row" style="margin:0 auto;">
+            <div class="col-sm-6 col-md-3 p-3">
               <a href="https://dataverse.org/" target="_blank">
                 <img width="220px" src="https://dataverse.org/files/dataverseorg/files/dataverse_r_project.png" alt="Dataverse"/>
               </a>
-            </li>
-            <li class="list-group-item">
+            </div>
+            <div class="col-sm-6 col-md-3 p-3">
               <a href="https://zenodo.org/" target="_blank">
                 <img width="220px" src="https://about.zenodo.org/static/img/logos/zenodo-gradient-square.svg" alt="Zenodo"/>
               </a>
-            </li>
-            <li class="list-group-item">
+            </div>
+            <div class="col-sm-6 col-md-3 p-3">
               <a href="https://figshare.com/" target="_blank">
               <img width="220px" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Figshare_logo.svg/1280px-Figshare_logo.svg.png" alt="FigShare"/></a>
-            </li>
-            <li class="list-group-item">
+            </div>
+            <div class="col-sm-6 col-md-3 p-3">
               <h3 class="text-muted"><i class="fas fa-home"></i> Your own website</h3>
-            </li>
-          </ul>
+            </div>
+          </div>
           <hr />
           <div class="text-muted">
-            <p class="col-sm-6" style="margin: 0 auto;">
-              Paste the URL to your hosted dataset metadata
-            </p>
+            <h3 class="col-sm-6" style="margin: 0 auto;">
+              Already hosted?
+            </h3>
             <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
               <div class="form-group">
                 <label for="urlform">Paste your URL here:</label>
@@ -111,7 +111,7 @@
       <template>
         <div class="stepBox" id="licenseChooser">
           <span>2</span>
-          <div class="clipBox">
+          <div class="clipBox bold">
             License Chooser*
           </div>
         </div>
@@ -274,7 +274,7 @@
       <template>
         <div class="stepBox">
           <span>3</span>
-          <div class="clipBox">
+          <div class="clipBox bold">
             Metadata
           </div>
         </div>
@@ -282,10 +282,10 @@
             <div class="jumbotron text-muted face front">
               <button style="position:absolute; right: 10px; top:10px; transform: scale(.7);" class="btn btn-secondary" @click='flipView()'>Switch View</button>
               <p class="col-sm-6" style="margin: 0 auto;">
-                Need Help?
+                Example:
               </p>
               <p>
-                <a data-tippy="Click to fill form" href="#" class="badge badge-pill badge-secondary pointer mt-2 p-2" @click.prevent="loadExample('./static/misc/example.jsonld')"><i class="fas fa-question-circle"></i> Load Example</a>
+                <a data-tippy="Click to fill form" href="#" class="badge badge-pill badge-secondary pointer mt-2 p-2" @click.prevent="loadExample('./static/misc/example.jsonld')"><i class="fas fa-question-circle"></i> Metadata Example</a>
               </p>
               <hr />
               <div class="d-flex mb-5 justify-content-center flex-wrap">
@@ -342,7 +342,7 @@
       <template>
         <div class="stepBox">
           <span>4</span>
-          <div class="clipBox">
+          <div class="clipBox bold">
             Code
           </div>
         </div>
@@ -1281,6 +1281,10 @@ var app = new Vue({
           return false;
         });
       });
+
+      tippy.setDefaults({
+        theme:'light'
+      })
     },
     created: function(){
     }
