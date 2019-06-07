@@ -15,11 +15,11 @@
     <div class="col-sm-12">
       <div class="row">
         <buttom @click.prevent="choice='have'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted">
-          <h1 class="mainTextDark">Yes</h1>
+          <h1 class="mainTextDark bold">Yes</h1>
           <h4>Visualize your schema and register it</h4>
         </buttom>
         <buttom @click.prevent="choice='dont'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted">
-          <h1 class="mainTextLight">No</h1>
+          <h1 class="mainTextLight bold">No</h1>
           <h4>Search existing schemas to start your own</h4>
         </buttom>
       </div>
@@ -85,7 +85,7 @@ Vue.component('preset-box', {
     }
   },
   mounted:function(){
-    
+
   },
   template: `<div class="bg-light text-center p-5 col-sm-6 col-md-3">
               <h4 class="m-1">
