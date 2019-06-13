@@ -11,7 +11,7 @@ class Prop(InnerDoc):
     A Child Property of a Class
     """
     name = Text(required=True)
-    value_type = Text()
+    value_type = Text(multi=True)
     description = Text()
 
 
