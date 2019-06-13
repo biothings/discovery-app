@@ -79,7 +79,10 @@ def populate_class_index(schema):
     existing_classes = Search(index='discover_class').query("match", schema=name)
     existing_classes.delete()
 
-    schema_parser = SchemaParser(url)
+    if name == 'schema':
+        schema_parser = SchemaParser()
+    else:
+        schema_parser = SchemaParser(url)
 
     logging.info('Retrieved document from %s.', url)
 
@@ -89,18 +92,18 @@ def populate_class_index(schema):
         es_class.name = class_.name
 
         es_class.clses = [
-            ', '.join([schema_class.name for schema_class in schema_line])
+            ', '.join([str(schema_class) for schema_class in schema_line])
             for schema_line in class_.parent_classes]
 
         for prop in class_.list_properties(group_by_class=False):
             try:
                 info = prop.describe()
             except BaseException:
-                logging.error("Cannot access class '%s' property '%s'.", class_, prop)
+                logging.exception("Cannot access class '%s' property '%s'.", class_, prop)
             else:
                 es_class.props.append(Prop(
-                    name=info['id'],
-                    value_type=info['range'].name,
+                    name=str(prop),
+                    value_type=[str(_type) for _type in info['range']],
                     description=str(info['description'])
                 ))
 
