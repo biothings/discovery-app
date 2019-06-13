@@ -9,7 +9,7 @@ from tornado.ioloop import IOLoop
 
 from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 from biothings_schema import Schema as SchemaParser
-from discovery.web.api.es.doc import Class, Schema
+from discovery.web.api.es.doc import Prop, Class, Schema
 from elasticsearch_dsl import Index, Search
 
 
@@ -83,26 +83,35 @@ def populate_class_index(schema):
 
     logging.info('Retrieved document from %s.', url)
 
-    for class_ in schema_parser.fetch_all_classes():
+    for class_ in schema_parser.list_all_classes():
 
         es_class = Class()
-        es_class.name = class_
+        es_class.name = class_.name
 
-        try:
-            es_class.clses = [branch[-1] for branch in schema_parser.find_parent_classes(class_)]
-            es_class.props = schema_parser.find_class_specific_properties(class_)
-            es_class.comment = schema_parser.schema_nx.node[class_]['description']
-        except BaseException:
-            logging.exception("Error parsing %s.", class_)
+        es_class.clses = [
+            ', '.join([schema_class.name for schema_class in schema_line])
+            for schema_line in class_.parent_classes]
+
+        for prop in class_.list_properties(group_by_class=False):
+            try:
+                info = prop.describe()
+            except BaseException:
+                logging.error("Cannot access class '%s' property '%s'.", class_, prop)
+            else:
+                es_class.props.append(Prop(
+                    name=info['id'],
+                    value_type=info['range'].name,
+                    description=str(info['description'])
+                ))
 
         es_class.schema = name
         es_class.save()
 
-        logging.info('Saved: %s', class_)
+        logging.info('Sent %s to elasticsearch index.', class_)
 
     Index('discover_class').refresh()
 
-    logging.info('Exit discover_class processing.')
+    logging.info('Finished discover_class index processing.')
 
 
 # pylint: disable=abstract-method, arguments-differ
