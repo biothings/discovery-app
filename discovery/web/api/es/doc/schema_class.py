@@ -3,7 +3,16 @@
     Definition https://schema.org/docs/full.html
 '''
 
-from elasticsearch_dsl import Document, Text
+from elasticsearch_dsl import Document, Text, InnerDoc, Nested
+
+
+class Prop(InnerDoc):
+    """
+    A Child Property of a Class
+    """
+    name = Text(required=True)
+    value_type = Text()
+    description = Text()
 
 
 class Class(Document):
@@ -13,7 +22,7 @@ class Class(Document):
     name = Text(required=True)
     url = Text()  # optinal field populated by schema.org indexer
     clses = Text(multi=True)  # immediate parent class(es) only
-    props = Text(multi=True)  # properties that belong directly to this class
+    props = Nested(Prop)  # properties that belong directly to this class
     schema = Text(required=True)  # the namespace (schema _id, not url) it is defined in
     comment = Text()  # correspond to rdfs:comment field if it exists
 
