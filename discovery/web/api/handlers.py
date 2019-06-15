@@ -74,7 +74,8 @@ def populate_class_index(schema):
     name = schema.meta.id
     url = schema['_meta'].url
 
-    logging.info("Enter '%s' schema processing thread.", name)
+    logger = logging.getLogger(__name__)
+    logger.info("Processing schema '%s'.", name)
 
     existing_classes = Search(index='discover_class').query("match", schema=name)
     existing_classes.delete()
@@ -84,9 +85,11 @@ def populate_class_index(schema):
     else:
         schema_parser = SchemaParser(url)
 
-    logging.info('Retrieved document from %s.', url)
+    logger.info('Parsed %s.', url)
 
     for class_ in schema_parser.list_all_classes():
+
+        logger.debug("Indexing class '%s.'", class_)
 
         es_class = Class()
         es_class.name = class_.name
@@ -99,22 +102,22 @@ def populate_class_index(schema):
             try:
                 info = prop.describe()
             except BaseException:
-                logging.exception("Cannot access class '%s' property '%s'.", class_, prop)
+                logger.exception("Cannot access class '%s' property '%s'.", class_, prop)
             else:
                 es_class.props.append(Prop(
                     name=str(prop),
                     value_type=[str(_type) for _type in info['range']],
-                    description=str(info['description'])
+                    description=str(info.get('description', ''))
                 ))
 
         es_class.schema = name
         es_class.save()
 
-        logging.info('Sent %s to elasticsearch index.', class_)
+        logger.info("Indexed class '%s'.", class_)
 
     Index('discover_class').refresh()
 
-    logging.info('Finished discover_class index processing.')
+    logger.info("Processed schema '%s'.", name)
 
 
 # pylint: disable=abstract-method, arguments-differ
