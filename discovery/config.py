@@ -31,8 +31,9 @@ API_ENDPOINTS = [
     (r"/api/proxy/?", ProxyHandler),
     (r"/api/query/?", QueryHandler),
     (r"/api/user/(.+)/?", UserQueryHandler),
-    (r"/api/registry/?", RegistryHandler),
+    (r"/api/registry/(.+)/(.+)/?", RegistryHandler),
     (r"/api/registry/(.+)/?", RegistryHandler),
+    (r"/api/registry/?", RegistryHandler),
 ]
 APP_LIST = API_ENDPOINTS + WEB_ENDPOINTS
 

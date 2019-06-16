@@ -209,7 +209,7 @@ class RegistryHandler(APIBaseHandler):
         else:
             self.set_status(200)
 
-    def get(self, namespace):
+    def get(self, namespace, classname=None):
         ''' Retrive a schema by namespace value '''
 
         schema = Schema.get(id=namespace, ignore=404)
@@ -218,11 +218,22 @@ class RegistryHandler(APIBaseHandler):
             self.set_status(404)
             return
 
-        result = {}
-        result['name'] = schema.meta.id
-        result['url'] = schema['_meta'].url
+        if not classname:
+            result = {}
+            result['name'] = schema.meta.id
+            result['url'] = schema['_meta'].url
 
-        self.write(result)
+            self.write(result)
+            return
+
+        klass = Class.get(id=f"{namespace}:{classname}", ignore=404)
+
+        if not klass:
+            self.set_status(404)
+            return
+
+        self.write(klass.to_dict())
+        return
 
     @github_authenticated
     @permisson_verifeid
