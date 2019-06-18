@@ -3,31 +3,43 @@
     Require Elasticsearch setup at localhost:9200
 '''
 
-import gzip
+from discovery.web.api.es.doc import Class, Schema
 
-from biothings.tests.helper import equal
-from discovery.tests import SCHEMAS, CLASSES, run
-from discovery.web.api.es.doc import Schema, Class
+from discovery.tests import run
+
+
+def setup():
+    ''' Module Level Setup '''
+
+    url = ('https://raw.githubusercontent.com/data2health/'
+           'schemas/biothings/biothings/biothings_curie_kevin.jsonld')
+
+    schema = Schema('bts', url, 'tester')
+    schema.save()
+
+    Class.import_from(schema)
 
 
 def test_01():
-    ''' ES Schema Retrival '''
-    sch = Schema.get(id=SCHEMAS[0].meta.id)
-    equal("Retrived", sch.to_dict(), "Original", SCHEMAS[0].to_dict())
+    ''' [ES Schema Class] Retrival by "_id" '''
+
+    Schema.get(id='bts')
 
 
 def test_02():
-    ''' ES Schema RAW Saving '''
-    sch = Schema.get(id=SCHEMAS[1].meta.id)
-    remote = sch.retrieve_raw()
-    equal("Remote", remote, "Local", gzip.decompress(sch['~raw']).decode())
+    ''' [ES Schema Class] Saving RAW format '''
+
+    schema = Schema.get(id='bts')
+    remote_file = schema.retrieve_raw()
+    assert "http://schema.biothings.io/" in remote_file
 
 
 def test_03():
-    ''' ES Class Retrival '''
-    sch = Class.get(id=CLASSES[0].meta.id)
-    equal("Retrived", sch.to_dict(), "Original", CLASSES[0].to_dict())
+    ''' [ES Class Class] Retrival by "_id" '''
+
+    Class.get(id="bts:BiologicalEntity")
 
 
 if __name__ == '__main__':
+
     run('ES Local Test')
