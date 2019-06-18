@@ -3,14 +3,13 @@
 import logging
 from functools import partial
 
-import tornado
 from tornado.escape import json_decode
 from tornado.ioloop import IOLoop
 
-from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
-from biothings_schema import Schema as SchemaParser
 from discovery.web.api.es.doc import Prop, Class, Schema
 from elasticsearch_dsl import Index, Search
+
+from .base import APIBaseHandler
 
 
 def github_authenticated(func):
@@ -68,70 +67,7 @@ def permisson_verifeid(func):
     return _
 
 
-def populate_class_index(schema):
-    ''' Save classes defined in schema document to class index '''
-
-    name = schema.meta.id
-    url = schema['_meta'].url
-
-    logger = logging.getLogger(__name__)
-    logger.info("Processing schema '%s'.", name)
-
-    existing_classes = Search(index='discover_class').query("match", schema=name)
-    existing_classes.delete()
-
-    if name == 'schema':
-        schema_parser = SchemaParser()
-    else:
-        schema_parser = SchemaParser(url)
-
-    logger.info('Parsed %s.', url)
-
-    for class_ in schema_parser.list_all_classes():
-
-        logger.debug("Indexing class '%s.'", class_)
-
-        es_class = Class()
-        es_class.name = class_.name
-
-        es_class.clses = [
-            ', '.join([str(schema_class) for schema_class in schema_line])
-            for schema_line in class_.parent_classes]
-
-        for prop in class_.list_properties(group_by_class=False):
-            try:
-                info = prop.describe()
-            except BaseException:
-                logger.exception("Cannot access class '%s' property '%s'.", class_, prop)
-            else:
-                es_class.props.append(Prop(
-                    name=str(prop),
-                    value_type=[str(_type) for _type in info['range']],
-                    description=str(info.get('description', ''))
-                ))
-
-        es_class.schema = name
-        es_class.save()
-
-        logger.info("Indexed class '%s'.", class_)
-
-    Index('discover_class').refresh()
-
-    logger.info("Processed schema '%s'.", name)
-
-
 # pylint: disable=abstract-method, arguments-differ
-class APIBaseHandler(BioThingsBaseHandler):
-    ''' API Endpoint Base Handler '''
-
-    def get_current_user(self):
-
-        user_json = self.get_secure_cookie("user")
-
-        if user_json:
-            return json_decode(user_json).get('login')
-
-        return None
 
 
 class RegistryHandler(APIBaseHandler):
@@ -171,7 +107,7 @@ class RegistryHandler(APIBaseHandler):
             'url': self.request.full_url() + '/' + schema.meta.id,
         }
 
-        store_classes = partial(populate_class_index, schema)
+        store_classes = partial(Class.import_from, schema)
         IOLoop.current().run_in_executor(None, store_classes)
 
         self.set_status(201)
@@ -201,7 +137,7 @@ class RegistryHandler(APIBaseHandler):
             schema = Schema.get(id=namespace)
             schema['_meta'].url = url
 
-        store_classes = partial(populate_class_index, schema)
+        store_classes = partial(Class.import_from, schema)
         IOLoop.current().run_in_executor(None, store_classes)
 
         if schema.save():
@@ -246,46 +182,3 @@ class RegistryHandler(APIBaseHandler):
         Search(index='discover_class').query(
             "match", schema=namespace).delete()
         Index('discover_class').refresh()
-
-
-class UserQueryHandler(APIBaseHandler):
-    '''
-    Access schema entries with username
-    '''
-
-    def get(self, username):
-        '''
-        Return a list of schemas that belong to the specified user
-        '''
-
-        search = Search(index='discover_schema').query("match", ** {"_meta.username": username})
-        response = search.execute()
-
-        self.write({
-            "total": response.hits.total,
-            "hits": [{
-                "name": schema.meta.id,
-                "url": schema['_meta'].url
-            } for schema in response]
-        })
-
-
-class ProxyHandler(APIBaseHandler):
-    '''
-    Retrive a document from a remote server to bypass same origin policy
-    '''
-
-    async def get(self):
-
-        try:
-            url = self.get_argument("url")
-            http_client = tornado.httpclient.AsyncHTTPClient()
-            response = await http_client.fetch(url)
-        except tornado.web.MissingArgumentError as err:
-            self.set_status(err.status_code)
-            self.write(str(err))
-        except tornado.httpclient.HTTPClientError as err:
-            self.set_status(err.code)
-            self.write(str(err))
-        else:
-            self.write(response.body)

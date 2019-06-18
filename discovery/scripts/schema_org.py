@@ -4,8 +4,7 @@
 
 import logging
 
-from discovery.web.api.es.doc import Schema
-from discovery.web.api.handlers import populate_class_index
+from discovery.web.api.es.doc import Schema, Class
 
 SCHEMA_ORG_URL = "http://schema.org/version/latest/schema.jsonld"
 
@@ -21,9 +20,9 @@ def main():
 
     schema = Schema('schema', SCHEMA_ORG_URL, 'schema_org_auto_indexer')
     ans = schema.save()
-    logger.debug("Indexed schema 'schema' (new document created:%s).", ans)
+    logger.debug("Indexed schema 'schema' (new:%s).", ans)
 
-    populate_class_index(schema)
+    Class.import_from(schema)
 
     logger.info("Finished indexing schema.org definitions.")
 
