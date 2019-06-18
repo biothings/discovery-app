@@ -20,7 +20,7 @@ def main():
 
     schema = Schema('schema', SCHEMA_ORG_URL, 'schema_org_auto_indexer')
     ans = schema.save()
-    logger.debug("Indexed schema 'schema' (new:%s).", ans)
+    logger.debug("Indexed 'schema' (new:%s).", ans)
 
     Class.import_from(schema)
 
@@ -30,6 +30,9 @@ def main():
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.WARNING,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%H:%M:%S'
+    )
+    logging.captureWarnings(True)
     logging.getLogger("discovery").setLevel(logging.INFO)
     main()
