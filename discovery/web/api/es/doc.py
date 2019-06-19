@@ -152,7 +152,10 @@ class Class(Document):
         existing_classes.delete()
         logger.info("Deleted existing classes.")
 
-        cls._parser.load_schema(url)
+        if namespace == 'schema':
+            cls._parser.load_default_schema()
+        else:
+            cls._parser.load_schema(url)
         logger.info('Loaded %s.', url)
 
         for class_ in cls._parser.list_all_classes():
@@ -168,7 +171,7 @@ class Class(Document):
 
             es_class = Class()
             es_class.schema = namespace
-            es_class.name = class_.name[(len(namespace) + 1):]  # Remove prefix
+            es_class.name = class_.label
             es_class.clses = [
                 ', '.join(map(str, schemas))
                 for schemas in class_.parent_classes
