@@ -12,24 +12,21 @@ class SchemaHandler(APIBaseHandler):
     TODO
     '''
 
+    _parser = SchemaParser()
+
     def get(self):
 
         try:
             url = self.get_argument("url")
-        except tornado.web.MissingArgumentError as err:
-            self.set_status(err.status_code)
-            self.write(str(err))
 
-        try:
-
-            schema_parser = SchemaParser(url)
+            self._parser.load_schema(url)
 
             logger = logging.getLogger(__name__)
             logger.info('Loaded %s.', url)
 
             classes = []
 
-            for class_ in schema_parser.list_all_classes():
+            for class_ in self._parser.list_all_classes():
 
                 klass = {
                     "name": class_.name,
@@ -48,6 +45,11 @@ class SchemaHandler(APIBaseHandler):
                 }
 
                 classes.append(klass)
+
+        except tornado.web.MissingArgumentError as err:
+
+            self.set_status(err.status_code)
+            self.write(str(err))
 
         except BaseException as exc:
 
