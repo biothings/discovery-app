@@ -121,6 +121,7 @@ class Class(Document):
     schema = Text(required=True)  # the namespace (schema _id, not url) it is defined in
     name = Text(required=True)
     clses = Text(multi=True)  # immediate parent class(es) only
+    description = Text()
     props = Nested(Prop)  # properties that belong directly to this class
 
     _parser = SchemaParser()
@@ -172,21 +173,19 @@ class Class(Document):
             es_class = Class()
             es_class.schema = namespace
             es_class.name = class_.label
+            es_class.description = class_.description
             es_class.clses = [
                 ', '.join(map(str, schemas))
                 for schemas in class_.parent_classes
             ]
 
-            try:
-                for prop in class_.list_properties(group_by_class=False):
-                    info = prop.describe()
-                    es_class.props.append(Prop(
-                        name=str(prop),
-                        value_types=[str(_type) for _type in info['range']],
-                        description=info.get('description', '')
-                    ))
-            except BaseException:
-                logger.exception("Parser error in listing properties.")
+            for prop in class_.list_properties(group_by_class=False):
+                info = prop.describe()
+                es_class.props.append(Prop(
+                    name=str(prop),
+                    value_types=[str(_type) for _type in info['range']],
+                    description=info.get('description', '')
+                ))
 
             es_class.save()
             logger.info("Indexed class '%s'.", class_)
