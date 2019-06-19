@@ -31,8 +31,7 @@ if __name__ == "__main__":
     logging.basicConfig(
         level=logging.WARNING,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%H:%M:%S'
-    )
+        datefmt='%H:%M:%S')
     logging.captureWarnings(True)
     logging.getLogger("discovery").setLevel(logging.INFO)
     main()
