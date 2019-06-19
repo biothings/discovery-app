@@ -30,6 +30,7 @@ class SchemaHandler(APIBaseHandler):
 
                 klass = {
                     "name": class_.name,
+                    "description": class_.description or '',
                     "clses": [
                         ', '.join([str(schema_class) for schema_class in schema_line])
                         for schema_line in class_.parent_classes
