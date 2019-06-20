@@ -143,8 +143,8 @@ class RegistryHandler(APIBaseHandler):
         self.set_status(201)
         self.finish({
             'success': True,
+            'total': len(classes),
             'url': self.request.full_url() + '/' + schema.meta.id,
-            'classes': len(classes),
         })
 
     @github_authenticated
