@@ -1,25 +1,29 @@
 ''' Handlers for Non-Query API Requests '''
 
+import json
 import logging
-from functools import partial
 
 from tornado.escape import json_decode
-from tornado.ioloop import IOLoop
 
-from discovery.web.api.es.doc import Prop, Class, Schema
+from discovery.web.api.es.doc import Class, Schema
 from elasticsearch_dsl import Index, Search
 
 from .base import APIBaseHandler
 
 
 def github_authenticated(func):
-    ''' Authentication and Authorization Decorator '''
+    '''
+        RegistryHandler Decorator
+    '''
 
     def _(self, *args, **kwargs):
 
         if not self.current_user:
 
-            self.set_status(401)
+            self.send_error(
+                message='login with github first',
+                status_code=401
+            )
             return
 
         func(self, *args, **kwargs)
@@ -28,46 +32,67 @@ def github_authenticated(func):
 
 
 def body_validated(func):
-    ''' Validate the request body contends name and url fields and those only  '''
+    '''
+        RegistryHandler Decorator
+
+        - Validate the request body:
+            {
+                name: <requested namespace string>
+                url: <url to hosted schema document>
+            }
+
+        - Normalize case-sensitivity
+
+    '''
 
     def _(self, *args, **kwargs):
 
         try:
+
             req = json_decode(self.request.body)
-            req.get('name').lower()
-            req.get('url').lower()
-            assert len(req) == 2
+            assert isinstance(req.get('name'), str), "missing 'name' field"
+            assert isinstance(req.get('url'), str), "missing 'url' field"
+            assert len(req) == 2, "found extra fields besides 'name' and 'url'"
 
-        except Exception as exc:  # pylint: disable=broad-except
-            self.set_status(400, str(exc))
-            return
+        except json.decoder.JSONDecodeError:
 
-        func(self, *args, **kwargs)
+            self.send_error(400, reason='cannot decode json string')
+
+        except AssertionError as exc:
+
+            self.send_error(400, reason=str(exc))
+
+        else:
+
+            func(self, *args, **kwargs)
 
     return _
 
 
 def permisson_verifeid(func):
-    ''' Validate the user who generates the request is the creator of content '''
+    '''
+        RegistryHandler Decorator
+
+        - Validate user permission to edit a schema
+        - Only the owner has the permission
+
+    '''
 
     def _(self, namespace, *args, **kwargs):
 
         schema = Schema.get(id=namespace, ignore=404)
 
         if not schema:
-            self.set_status(404)
+            self.send_error(404)
             return
 
         if schema['_meta'].username != self.current_user:
-            self.set_status(403)
+            self.send_error(403)
             return
 
         func(self, namespace, *args, **kwargs)
 
     return _
-
-
-# pylint: disable=abstract-method, arguments-differ
 
 
 class RegistryHandler(APIBaseHandler):
@@ -97,22 +122,30 @@ class RegistryHandler(APIBaseHandler):
         url = req.get('url').lower()
 
         if Schema.get(id=name, ignore=404):
-            self.set_status(403)
+            self.send_error(403, reason=f"'{name}'' is already registered.")
             return
+
+        classes = self.import_from_url(url)
+
+        if not classes:
+            return
+
+        for klass in classes:
+            klass.save()
+
+        logger = logging.getLogger(__name__)
 
         schema = Schema(name, url, self.current_user)
         schema.save()
 
-        response = {
-            'url': self.request.full_url() + '/' + schema.meta.id,
-        }
-
-        store_classes = partial(Class.import_from, schema)
-        IOLoop.current().run_in_executor(None, store_classes)
+        logger.info("Saved '%s'.", name)
 
         self.set_status(201)
-        self.write(response)
-        return
+        self.finish({
+            'success': True,
+            'url': self.request.full_url() + '/' + schema.meta.id,
+            'classes': len(classes),
+        })
 
     @github_authenticated
     @permisson_verifeid
@@ -137,8 +170,14 @@ class RegistryHandler(APIBaseHandler):
             schema = Schema.get(id=namespace)
             schema['_meta'].url = url
 
-        store_classes = partial(Class.import_from, schema)
-        IOLoop.current().run_in_executor(None, store_classes)
+        Class.delete_by_schema(namespace)
+        classes = self.import_from_url(url)
+
+        if not classes:
+            return
+
+        for klass in classes:
+            klass.save()
 
         if schema.save():
             self.set_status(201)
@@ -151,7 +190,7 @@ class RegistryHandler(APIBaseHandler):
         schema = Schema.get(id=namespace, ignore=404)
 
         if not schema:
-            self.set_status(404)
+            self.send_error(404)
             return
 
         if not classname:
@@ -165,7 +204,7 @@ class RegistryHandler(APIBaseHandler):
         klass = Class.get(id=f"{namespace}:{classname}", ignore=404)
 
         if not klass:
-            self.set_status(404)
+            self.send_error(404)
             return
 
         self.write(klass.to_dict())
@@ -179,6 +218,6 @@ class RegistryHandler(APIBaseHandler):
         sch = Schema.get(id=namespace)
         sch.delete()
 
-        Search(index='discover_class').query(
-            "match", schema=namespace).delete()
+        Class.delete_by_schema(namespace)
+
         Index('discover_class').refresh()
