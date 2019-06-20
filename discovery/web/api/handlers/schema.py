@@ -1,74 +1,62 @@
+import json
 import logging
 
 import tornado
 
-from biothings_schema import Schema as SchemaParser
+from discovery.web.api.es.doc import Class
 
 from .base import APIBaseHandler
 
 
 class SchemaHandler(APIBaseHandler):
     '''
-    TODO
+    Live Schema Document Parsing
+
+        - with biothings_schema package
+
     '''
 
-    _parser = SchemaParser()
-
-    def get(self):
+    async def get(self):
 
         try:
+
             url = self.get_argument("url")
 
-            self._parser.load_schema(url)
+            http_client = tornado.httpclient.AsyncHTTPClient()
+            response = await http_client.fetch(url)
+            doc = json.loads(response.body)
+            parser = self.get_parser(doc)
 
             logger = logging.getLogger(__name__)
             logger.info('Loaded %s.', url)
 
-            classes = []
+            classes = Class.import_from_parser(parser)
 
-            for class_ in self._parser.list_all_classes():
+        except tornado.web.MissingArgumentError:
 
-                klass = {
-                    "name": class_.name,
-                    "description": class_.description or '',
-                    "clses": [
-                        ', '.join([str(schema_class) for schema_class in schema_line])
-                        for schema_line in class_.parent_classes
-                    ],
-                    "props": [
-                        {
-                            "name": str(prop),
-                            "value_types": [str(_type) for _type in prop.describe()['range']],
-                            "description": str(prop.describe().get('description', ''))
-                        }
-                        for prop in class_.list_properties(group_by_class=False)
-                    ]
-                }
+            self.send_error(reason='missing url argument', status_code=400)
 
-                classes.append(klass)
+        except tornado.httpclient.HTTPError as exc:
 
-        except tornado.web.MissingArgumentError as err:
+            self.send_error(reason=str(exc), status_code=400)
 
-            self.set_status(err.status_code)
-            self.write(str(err))
+        except json.decoder.JSONDecodeError:
 
-        except BaseException as exc:
+            self.send_error(reason='not a valid json', status_code=400)
+
+        except BaseException:
 
             logging.exception("parser_exception")
-
-            self.set_status(500)
-            self.write(
-                {
-                    "success": False,
-                    "error": str(exc),
-                }
-            )
+            self.send_error(reason='parser_exception')
 
         else:
 
             self.write(
                 {
                     "total": len(classes),
-                    "hits": classes,
+                    "hits": [
+                        klass.to_dict()
+                        for klass in classes
+                    ],
                 }
             )
