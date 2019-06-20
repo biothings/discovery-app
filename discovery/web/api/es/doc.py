@@ -145,7 +145,7 @@ class Class(Document):
                     existing_classes.count(), namespace)
 
     @classmethod
-    def import_from_parser(cls, loaded_parser):
+    def import_from_parser(cls, loaded_parser, reference=False):
         '''
         Import classes from a schema to a list of Class objects.
         The schema is represented by a schema parser instance.
@@ -155,30 +155,38 @@ class Class(Document):
 
         assert isinstance(loaded_parser, SchemaParser)
 
-        parser_classes = loaded_parser.list_all_classes()
+        def get_es_classes(parser_classes):
 
-        LOGGER.info("Found %s classes.", len(parser_classes))
+            es_classes = []
 
-        es_classes = []
+            for class_ in parser_classes:
 
-        for class_ in parser_classes:
+                LOGGER.info("Parsing '%s'.", class_)
 
-            LOGGER.info("Parsing '%s'.", class_)
+                es_class = Class(class_.prefix, class_.label)
+                es_class.description = class_.description
 
-            es_class = Class(class_.prefix, class_.label)
-            es_class.description = class_.description
+                for parent_line in class_.parent_classes:
+                    es_class.clses.append(', '.join(map(str, parent_line)))
 
-            for parent_line in class_.parent_classes:
-                es_class.clses.append(', '.join(map(str, parent_line)))
+                for prop in class_.list_properties(group_by_class=False):
+                    info = prop.describe()
+                    es_class.props.append(Prop(
+                        name=str(prop),
+                        value_types=[str(_type) for _type in info['range']],
+                        description=info.get('description', '')
+                    ))
 
-            for prop in class_.list_properties(group_by_class=False):
-                info = prop.describe()
-                es_class.props.append(Prop(
-                    name=str(prop),
-                    value_types=[str(_type) for _type in info['range']],
-                    description=info.get('description', '')
-                ))
+                es_classes.append(es_class)
 
-            es_classes.append(es_class)
+            return es_classes
 
-        return es_classes
+        defined = loaded_parser.list_all_defined_classes()
+        if reference:
+            referenced = loaded_parser.list_all_referenced_classes()
+            LOGGER.info("Defined %s classes.", len(defined))
+            LOGGER.info("Referenced %s classes.", len(referenced))
+            return (get_es_classes(defined), get_es_classes(referenced))
+        else:
+            LOGGER.info("Found %s classes.", len(defined))
+            return get_es_classes(defined)

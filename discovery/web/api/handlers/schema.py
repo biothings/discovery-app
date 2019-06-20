@@ -30,7 +30,7 @@ class SchemaHandler(APIBaseHandler):
             logger = logging.getLogger(__name__)
             logger.info('Loaded %s.', url)
 
-            classes = Class.import_from_parser(parser)
+            clses, refs = Class.import_from_parser(parser, True)
 
         except tornado.web.MissingArgumentError:
 
@@ -53,10 +53,14 @@ class SchemaHandler(APIBaseHandler):
 
             self.write(
                 {
-                    "total": len(classes),
+                    "total": len(clses) + len(refs),
                     "hits": [
                         klass.to_dict()
-                        for klass in classes
+                        for klass in clses
+                    ],
+                    "refs": [
+                        klass.to_dict()
+                        for klass in refs
                     ],
                 }
             )
