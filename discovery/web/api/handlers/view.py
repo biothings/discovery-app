@@ -8,7 +8,7 @@ from discovery.web.api.es.doc import Class
 from .base import APIBaseHandler
 
 
-class SchemaHandler(APIBaseHandler):
+class SchemaViewHandler(APIBaseHandler):
     '''
     Live Schema Document Parsing
 
@@ -51,17 +51,20 @@ class SchemaHandler(APIBaseHandler):
 
         else:
 
-            self.write(
-                {
-                    "total": len(clses) + len(refs),
-                    "context": parser.context,
-                    "hits": [
-                        klass.to_dict()
-                        for klass in clses
-                    ],
-                    "refs": [
-                        klass.to_dict()
-                        for klass in refs
-                    ],
-                }
-            )
+            response = {
+                "total": len(clses) + len(refs),
+                "context": parser.context,
+                "hits": [
+                    klass.to_dict()
+                    for klass in clses
+                ],
+                "refs": [
+                    klass.to_dict()
+                    for klass in refs
+                ],
+            }
+
+            if parser.validation:
+                response['validation'] = parser.validation
+
+            self.finish(response)

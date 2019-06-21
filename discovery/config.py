@@ -5,7 +5,7 @@
 from biothings.web.api.es.handlers import QueryHandler
 from biothings.web.settings.default import *
 from discovery.web.api.es.query_builder import DiscoveryQueryBuilder
-from discovery.web.api.handlers import ProxyHandler, RegistryHandler, UserQueryHandler, SchemaHandler
+from discovery.web.api.handlers import ProxyHandler, RegistryHandler, SchemaViewHandler
 from discovery.web.handlers import APP_LIST as WEB_ENDPOINTS
 
 from config_key import COOKIE_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
@@ -30,11 +30,10 @@ ES_DOC_TYPE = 'doc'
 API_ENDPOINTS = [
     (r"/api/proxy/?", ProxyHandler),
     (r"/api/query/?", QueryHandler),
-    (r"/api/user/(.+)/?", UserQueryHandler),
     (r"/api/registry/(.+)/(.+)/?", RegistryHandler),
     (r"/api/registry/(.+)/?", RegistryHandler),
     (r"/api/registry/?", RegistryHandler),
-    (r"/api/schema/?", SchemaHandler),
+    (r"/api/view/?", SchemaViewHandler),
 ]
 APP_LIST = API_ENDPOINTS + WEB_ENDPOINTS
 
