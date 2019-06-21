@@ -8,7 +8,7 @@ from tornado.escape import json_decode
 
 from biothings.web.api.helper import BaseHandler
 from biothings_schema import Schema as SchemaParser
-from discovery.web.api.es.doc import Class
+from discovery.web.api.es.doc import Class, Schema
 
 
 # pylint: disable=abstract-method, arguments-differ
@@ -21,7 +21,7 @@ class APIBaseHandler(BaseHandler):
 
         parser = copy.deepcopy(cls._PARSER)
         parser.load_schema(doc)
-
+        parser.context.update(Schema.gather_context())
         return parser
 
     def get_current_user(self):
@@ -90,4 +90,6 @@ class APIBaseHandler(BaseHandler):
 
         else:
 
-            return classes
+            context = parser.schema.get("@context", None)
+
+            return classes, context
