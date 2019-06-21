@@ -125,10 +125,18 @@ class RegistryHandler(APIBaseHandler):
             self.send_error(403, reason=f"'{name}'' is already registered.")
             return
 
-        classes = self.import_from_url(url)
+        result = self.import_from_url(url)
 
-        if not classes:
+        if not result:
             return
+
+        classes = result[0]
+        contexts = result[1]
+
+        if contexts and isinstance(contexts, dict):
+            context = contexts.get(name, None)
+        else:
+            context = None
 
         for klass in classes:
             klass.save()
@@ -136,6 +144,7 @@ class RegistryHandler(APIBaseHandler):
         logger = logging.getLogger(__name__)
 
         schema = Schema(name, url, self.current_user)
+        schema.context = context
         schema.save()
 
         logger.info("Saved '%s'.", name)
@@ -184,8 +193,33 @@ class RegistryHandler(APIBaseHandler):
         else:
             self.set_status(200)
 
-    def get(self, namespace, classname=None):
+    def get(self, namespace=None, classname=None):
         ''' Retrive a schema by namespace value '''
+
+        if not namespace:
+
+            user = self.get_query_argument('user', None)
+            search = Schema.search()
+
+            if user:
+                search = search.query("match", ** {"_meta.username": user})
+            else:
+                search = search.query("match_all")
+
+            response = search.execute()
+
+            self.write({
+                "total": response.hits.total,
+                "context": {
+                    schema.meta.id: schema.context
+                    for schema in response
+                },
+                "hits": [{
+                    "name": schema.meta.id,
+                    "url": schema['_meta'].url,
+                } for schema in response]
+            })
+            return
 
         schema = Schema.get(id=namespace, ignore=404)
 

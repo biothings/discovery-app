@@ -54,6 +54,7 @@ class SchemaHandler(APIBaseHandler):
             self.write(
                 {
                     "total": len(clses) + len(refs),
+                    "context": parser.context,
                     "hits": [
                         klass.to_dict()
                         for klass in clses

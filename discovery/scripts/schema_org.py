@@ -18,11 +18,12 @@ def main():
     logger.info("Start indexing schema.org definitions.")
 
     Class.delete_by_schema('schema')
-    classes = Class.import_from_parser(SchemaParser())
+    classes, _ = Class.import_from_parser(SchemaParser())
     for klass in classes:
         klass.save()
 
     schema = Schema('schema', SCHEMA_ORG_URL, 'schema_org_auto_indexer')
+    schema.context = "http://schema.org/"
     ans = schema.save()
     logger.info("Indexed 'schema' (new:%s).", ans)
 

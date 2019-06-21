@@ -64,10 +64,19 @@ class Schema(Document):
 
         super().__init__(**kwargs)
 
-        self.meta.id = name
-        self._meta = Metadata()
-        self._meta.url = url
-        self._meta.username = user
+        if name and url and user:
+            self.meta.id = name
+            self._meta = Metadata()
+            self._meta.url = url
+            self._meta.username = user
+
+    @classmethod
+    def gather_context(cls):
+
+        return {
+            schema.meta.id: schema.context
+            for schema in cls.search()
+        }
 
     def encode_raw(self, text):
         '''
