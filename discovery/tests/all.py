@@ -1,4 +1,6 @@
-''' Discovery Tester Entry Point '''
+'''
+    Discovery Tester Entry Point
+'''
 
 from nose.core import run
 
