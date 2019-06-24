@@ -22,21 +22,35 @@ class SchemaViewHandler(APIBaseHandler):
         doc = json.loads(response.body)
         parser = self.get_parser(doc)
 
-        hits = list(filter(None, [
-            klass.list_properties(group_by_class=False)
-            for klass in parser.list_all_defined_classes()
-        ]))
+        hits = parser.list_all_defined_classes()
+        refs = parser.list_all_referenced_classes()
 
-        refs = list(filter(None, [
-            klass.list_properties(group_by_class=False)
-            for klass in parser.list_all_referenced_classes()
-        ]))
+        def construct_class(parser_classes):
+
+            classes = []
+
+            for klass in parser_classes:
+
+                class_ = {
+                    "namespace": klass.prefix,
+                    "classname": klass.label,
+                    "parents": [', '.join(map(str, parent_line))
+                                for parent_line in klass.parent_classes],
+                    "description": klass.description,
+                    "properties": klass.list_properties(group_by_class=False)
+                }
+
+                class_ = {key: value for key, value in class_.items() if value}
+
+                classes.append(class_)
+
+            return classes
 
         response = {
             "total": len(hits) + len(refs),
             "context": parser.context,
-            "hits": hits,
-            "refs": refs,
+            "hits": construct_class(hits),
+            "refs": construct_class(refs),
         }
 
         if parser.validation:
