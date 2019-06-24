@@ -7,10 +7,13 @@ from biothings_schema import Schema as SchemaParser
 from discovery.web.api.es.doc import Class
 
 
-def index_schema_org():
+def index_schema_org(lazy=False):
     '''
         Setup Script
     '''
+    if lazy:
+        if Class.search().query("match", namespace='schema').count() > 770:
+            return
 
     Class.delete_by_schema('schema')
     classes = Class.import_from_parser(SchemaParser())
