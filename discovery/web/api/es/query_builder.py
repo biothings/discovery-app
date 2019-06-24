@@ -16,9 +16,17 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                     "queries": [
                         {
                             "term": {
-                                "name": {
+                                "_id": {
                                     "value": q,
-                                    "boost": 1.2
+                                    "boost": 2
+                                }
+                            }
+                        },
+                        {
+                            "term": {
+                                "namespace": {
+                                    "value": q,
+                                    "boost": 1.5
                                 }
                             }
                         },
@@ -29,7 +37,7 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                         },
                         {
                             "query_string": {
-                                "default_field": "name",
+                                "default_field": "classname",
                                 "query": url_escape(q) + "*",
                                 "boost": 0.8
                             }
