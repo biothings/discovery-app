@@ -3,29 +3,23 @@
 '''
 
 import logging
-
 from biothings_schema import Schema as SchemaParser
-from discovery.web.api.es.doc import Class, Schema
-
-SCHEMA_ORG_URL = "http://schema.org/version/latest/schema.jsonld"
+from discovery.web.api.es.doc import Class
 
 
-def main():
+def index_schema_org():
     '''
         Setup Script
     '''
-    logger = logging.getLogger('discovery.scripts.schema_org')
-    logger.info("Start indexing schema.org definitions.")
 
     Class.delete_by_schema('schema')
-    classes, _ = Class.import_from_parser(SchemaParser())
+    classes = Class.import_from_parser(SchemaParser())
+
     for klass in classes:
         klass.save()
 
-    schema = Schema('schema', SCHEMA_ORG_URL, 'schema_org_auto_indexer')
-    schema.context = "http://schema.org/"
-    ans = schema.save()
-    logger.info("Indexed 'schema' (new:%s).", ans)
+    logger = logging.getLogger('discovery.scripts.indexing')
+    logger.info("Indexed 'schema'.")
 
 
 if __name__ == "__main__":
@@ -34,4 +28,4 @@ if __name__ == "__main__":
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%H:%M:%S')
     logging.captureWarnings(True)
-    main()
+    index_schema_org()

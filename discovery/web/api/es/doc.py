@@ -28,9 +28,9 @@ class Metadata(InnerDoc):
         - Timestamp corresponds to ~raw processing time.
 
     '''
-    username = Text(fields={'keyword': Keyword()}, required=True)
-    timestamp = Date()
     url = Text(required=True)
+    username = Text(required=True)
+    timestamp = Date()
 
     def stamp(self):
         '''
@@ -44,7 +44,7 @@ class Schema(Document):
         A Top-Level Schema
         https://schema.org/docs/schemas.html
     '''
-    _meta = Object(Metadata)
+    _meta = Object(Metadata, required=True)
     context = Text()
     locals()['~raw'] = Binary()
 
@@ -60,18 +60,8 @@ class Schema(Document):
             "number_of_replicas": 0
         }
 
-    def __init__(self, name=None, url=None, user=None, **kwargs):
-
-        super().__init__(**kwargs)
-
-        if name and url and user:
-            self.meta.id = name
-            self._meta = Metadata()
-            self._meta.url = url
-            self._meta.username = user
-
     @classmethod
-    def gather_context(cls):
+    def gather_contexts(cls):
 
         return {
             schema.meta.id: schema.context
@@ -85,7 +75,7 @@ class Schema(Document):
         Return the encoded binary.
         '''
         assert isinstance(text, str)
-        _raw = gzip.compress(text)
+        _raw = gzip.compress(text.encode())
         self['~raw'] = _raw
         self._meta.stamp()
         return _raw
@@ -105,7 +95,7 @@ class Prop(InnerDoc):
     A Class Property
     '''
     name = Text(required=True)
-    value_types = Text(multi=True)
+    range = Text(multi=True)
     description = Text()
 
 
@@ -118,11 +108,11 @@ class Class(Document):
     # _id : in the format of <schema>:<name>, for example, schema:Thing
     #       accessible through constructor argument 'id' or cls.meta.id
 
-    schema = Text()  # the namespace (schema _id, not url) it is defined in
-    name = Text(required=True)
-    clses = Text(multi=True)  # immediate parent class(es) only
+    namespace = Text(required=True)  # the namespace (schema _id, not url) it is defined in
+    classname = Text(required=True)
+    parents = Text(multi=True)  # immediate parent class(es) only
     description = Text()
-    props = Nested(Prop)  # properties that belong directly to this class
+    properties = Nested(Prop)  # properties that belong directly to this class
 
     class Index:
         '''
@@ -133,15 +123,6 @@ class Class(Document):
             "number_of_replicas": 0
         }
 
-    def __init__(self, schema=None, name=None, **kwargs):
-
-        super().__init__(**kwargs)
-
-        if schema and name:
-            self.meta.id = f"{schema}:{name}"
-            self.schema = schema
-            self.name = name
-
     @classmethod
     def delete_by_schema(cls, namespace):
         '''
@@ -150,7 +131,7 @@ class Class(Document):
         existing_classes = cls.search().query("match", schema=namespace)
         existing_classes.delete()
 
-        LOGGER.info("Deleted %s '%s' classes in es.",
+        LOGGER.info("Deleted %s existing '%s' classes in es.",
                     existing_classes.count(), namespace)
 
     @classmethod
@@ -172,30 +153,36 @@ class Class(Document):
 
                 LOGGER.info("Parsing '%s'.", class_)
 
-                es_class = Class(class_.prefix, class_.label)
+                es_class = cls()
+                es_class.namespace = class_.prefix
+                es_class.classname = class_.label
                 es_class.description = class_.description
 
                 for parent_line in class_.parent_classes:
-                    es_class.clses.append(', '.join(map(str, parent_line)))
+                    es_class.parents.append(', '.join(map(str, parent_line)))
 
                 for prop in class_.list_properties(group_by_class=False):
-                    info = prop.describe()
-                    es_class.props.append(Prop(
-                        name=str(prop),
-                        value_types=[str(_type) for _type in info['range']],
-                        description=info.get('description', '')
+                    es_class.properties.append(Prop(
+                        name=prop['uri'],
+                        range=prop['range'],
+                        description=prop['description']
                     ))
 
                 es_classes.append(es_class)
 
             return es_classes
 
-        defined = loaded_parser.list_all_defined_classes()
         if reference:
-            referenced = loaded_parser.list_all_referenced_classes()
-            LOGGER.info("Defined %s classes.", len(defined))
-            LOGGER.info("Referenced %s classes.", len(referenced))
-            return (get_es_classes(defined), get_es_classes(referenced))
+            classes = loaded_parser.list_all_referenced_classes()
         else:
-            LOGGER.info("Found %s classes.", len(defined))
-            return get_es_classes(defined)
+            classes = loaded_parser.list_all_defined_classes()
+
+        LOGGER.info("Found %s classes. (ref=%d)", len(classes), reference)
+
+        return get_es_classes(classes)
+
+    def save(self, **kwargs):
+
+        self.meta.id = f"{self.namespace}:{self.classname}"
+
+        super().save(**kwargs)

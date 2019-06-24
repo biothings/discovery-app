@@ -1,9 +1,7 @@
 import json
-import logging
 
 import tornado
 
-from discovery.web.api.es.doc import Class
 
 from .base import APIBaseHandler
 
@@ -18,53 +16,30 @@ class SchemaViewHandler(APIBaseHandler):
 
     async def get(self):
 
-        try:
+        url = self.get_argument("url")
+        http_client = tornado.httpclient.AsyncHTTPClient()
+        response = await http_client.fetch(url)
+        doc = json.loads(response.body)
+        parser = self.get_parser(doc)
 
-            url = self.get_argument("url")
+        hits = list(filter(None, [
+            klass.list_properties(group_by_class=False)
+            for klass in parser.list_all_defined_classes()
+        ]))
 
-            http_client = tornado.httpclient.AsyncHTTPClient()
-            response = await http_client.fetch(url)
-            doc = json.loads(response.body)
-            parser = self.get_parser(doc)
+        refs = list(filter(None, [
+            klass.list_properties(group_by_class=False)
+            for klass in parser.list_all_referenced_classes()
+        ]))
 
-            logger = logging.getLogger(__name__)
-            logger.info('Loaded %s.', url)
+        response = {
+            "total": len(hits) + len(refs),
+            "context": parser.context,
+            "hits": hits,
+            "refs": refs,
+        }
 
-            clses, refs = Class.import_from_parser(parser, True)
+        if parser.validation:
+            response['validation'] = parser.validation
 
-        except tornado.web.MissingArgumentError:
-
-            self.send_error(reason='missing url argument', status_code=400)
-
-        except tornado.httpclient.HTTPError as exc:
-
-            self.send_error(reason=str(exc), status_code=400)
-
-        except json.decoder.JSONDecodeError:
-
-            self.send_error(reason='not a valid json', status_code=400)
-
-        except BaseException:
-
-            logging.exception("parser_exception")
-            self.send_error(reason='parser_exception')
-
-        else:
-
-            response = {
-                "total": len(clses) + len(refs),
-                "context": parser.context,
-                "hits": [
-                    klass.to_dict()
-                    for klass in clses
-                ],
-                "refs": [
-                    klass.to_dict()
-                    for klass in refs
-                ],
-            }
-
-            if parser.validation:
-                response['validation'] = parser.validation
-
-            self.finish(response)
+        self.finish(response)
