@@ -3,6 +3,7 @@
 import json
 import logging
 
+import requests
 from tornado.escape import json_decode
 
 from discovery.web.api.es.doc import Class, Schema
@@ -27,44 +28,6 @@ def github_authenticated(func):
             return
 
         func(self, *args, **kwargs)
-
-    return _
-
-
-def body_validated(func):
-    '''
-        RegistryHandler Decorator
-
-        - Validate the request body:
-            {
-                name: <requested namespace string>
-                url: <url to hosted schema document>
-            }
-
-        - Normalize case-sensitivity
-
-    '''
-
-    def _(self, *args, **kwargs):
-
-        try:
-
-            req = json_decode(self.request.body)
-            assert isinstance(req.get('name'), str), "missing 'name' field"
-            assert isinstance(req.get('url'), str), "missing 'url' field"
-            assert len(req) == 2, "found extra fields besides 'name' and 'url'"
-
-        except json.decoder.JSONDecodeError:
-
-            self.send_error(400, reason='cannot decode json string')
-
-        except AssertionError as exc:
-
-            self.send_error(400, reason=str(exc))
-
-        else:
-
-            func(self, *args, **kwargs)
 
     return _
 
@@ -96,14 +59,24 @@ def permisson_verifeid(func):
 
 
 class RegistryHandler(APIBaseHandler):
-    ''' Check  - HEAD ./api/registry/<schema_namespace>
+    '''
+        Registered Schema Repository
+
+        Check  - HEAD ./api/registry/<schema>
         Create - POST ./api/registry
-        Modify - PUT ./api/registry/<schema_namespace>
-        Fetch  - GET ./api/registry/<schema_namespace>
-        Remove - DELETE ./api/registry/<schema_namespace> '''
+        Fetch  - GET ./api/registry
+        Fetch  - GET ./api/registry?user=<username>
+        Fetch  - GET ./api/registry/<schema>/<class>
+        Remove - DELETE ./api/registry/<schema>
+
+        * namespace/schema name/prefix are used interchangeably.
+
+    '''
 
     def head(self, namespace):
-        ''' Check if the namespace is already registered '''
+        '''
+            Check the existance of a schema by its namespace.
+        '''
 
         if Schema.get(id=namespace, ignore=404):
             self.set_status(200)
@@ -111,90 +84,60 @@ class RegistryHandler(APIBaseHandler):
             self.set_status(404)
 
     @github_authenticated
-    @body_validated
     def post(self):
-        ''' Define a schema with its URL
-            Parse the classes defined in the schema
-            Save the schema and its classes in separate indexes '''
+        '''
+            Create a new schema entry in the registry.
+        '''
 
-        req = json_decode(self.request.body)
-        name = req.get('name').lower()
-        url = req.get('url').lower()
+        args = json_decode(self.request.body)
+        name = args.get('namespace').lower()
+        url = args.get('url').lower()
+
+        assert name != 'schema', "cannot rewrite core schema."
 
         if Schema.get(id=name, ignore=404):
-            self.send_error(403, reason=f"'{name}'' is already registered.")
+
+            self.send_error(
+                reason=f"'{name}'' is already registered.",
+                status_code=403
+            )
             return
 
-        result = self.import_from_url(url)
+        schema_doc = requests.get(url, timeout=5)
+        schema_parser = self.get_parser(schema_doc.json())
+        schema_classes = Class.import_from_parser(schema_parser)
 
-        if not result:
-            return
-
-        classes = result[0]
-        contexts = result[1]
-
-        if contexts and isinstance(contexts, dict):
-            context = contexts.get(name, None)
-        else:
-            context = None
-
-        for klass in classes:
+        for klass in schema_classes:
             klass.save()
 
-        logger = logging.getLogger(__name__)
-
-        schema = Schema(name, url, self.current_user)
-        schema.context = context
+        schema = Schema(**{
+            "meta": {"id": name},
+            "context": schema_parser.context.get(name, None),
+        })
+        schema._meta.url = url
+        schema._meta.username=self.current_user
+        schema.encode_raw(schema_doc.text)
         schema.save()
 
+        logger = logging.getLogger(__name__)
         logger.info("Saved '%s'.", name)
 
         self.set_status(201)
         self.finish({
             'success': True,
-            'total': len(classes),
+            'total': len(schema_classes),
             'url': self.request.full_url() + '/' + schema.meta.id,
         })
 
-    @github_authenticated
-    @permisson_verifeid
-    @body_validated
-    def put(self, namespace):
-        ''' Update a schema's URL field
-            Apply changes to the class index '''
-
-        req = json_decode(self.request.body)
-        name = req.get('name').lower()
-        url = req.get('url').lower()
-
-        if namespace != name:
-            sch = Schema.get(id=namespace)
-            sch.delete()
-
-            Search(index='discover_class').query(
-                "match", schema=namespace).delete()
-
-            schema = Schema(name, url, self.current_user)
-        else:
-            schema = Schema.get(id=namespace)
-            schema['_meta'].url = url
-
-        Class.delete_by_schema(namespace)
-        classes = self.import_from_url(url)
-
-        if not classes:
-            return
-
-        for klass in classes:
-            klass.save()
-
-        if schema.save():
-            self.set_status(201)
-        else:
-            self.set_status(200)
-
     def get(self, namespace=None, classname=None):
-        ''' Retrive a schema by namespace value '''
+        '''
+            Access the registry.
+
+            - List all schemas.
+            - List schemas by a user.
+            - List a schema by its namespace.
+            - List a class by its name and namespace.
+        '''
 
         if not namespace:
 
@@ -247,7 +190,9 @@ class RegistryHandler(APIBaseHandler):
     @github_authenticated
     @permisson_verifeid
     def delete(self, namespace):
-        ''' Delete a document by its namespace value '''
+        '''
+        Delete a schema and its classes by its namespace.
+        '''
 
         sch = Schema.get(id=namespace)
         sch.delete()

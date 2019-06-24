@@ -3,12 +3,12 @@ import copy
 import json
 import logging
 
-import requests
+import tornado
 from tornado.escape import json_decode
 
 from biothings.web.api.helper import BaseHandler
 from biothings_schema import Schema as SchemaParser
-from discovery.web.api.es.doc import Class, Schema
+from discovery.web.api.es.doc import Schema
 
 
 # pylint: disable=abstract-method, arguments-differ
@@ -21,7 +21,7 @@ class APIBaseHandler(BaseHandler):
 
         parser = copy.deepcopy(cls._PARSER)
         parser.load_schema(doc)
-        parser.context.update(Schema.gather_context())
+        parser.context.update(Schema.gather_contexts())
         return parser
 
     def get_current_user(self):
@@ -35,15 +35,22 @@ class APIBaseHandler(BaseHandler):
 
     def write_error(self, status_code, **kwargs):
 
+        if 'exc_info' in kwargs:
+
+            exception = kwargs.pop('exc_info')[1]
+
+            self._reason = str(exception)
+            if exception in [tornado.web.MissingArgumentError,
+                             tornado.httpclient.HTTPError,
+                             json.decoder.JSONDecodeError]:
+                self.set_status(422)
+                status_code = 422
+
         template = {
             "code": status_code,
             "success": False,
             "reason": self._reason,
         }
-        if 'reason' in kwargs:
-            del kwargs['reason']
-        if 'exc_info' in kwargs:
-            del kwargs['exc_info']
 
         for key in ['code', 'success']:
             if key in kwargs:
@@ -58,38 +65,3 @@ class APIBaseHandler(BaseHandler):
 
         template.update(kwargs)
         self.finish(template)
-
-    def import_from_url(self, url):
-
-        try:
-
-            response = requests.get(url, timeout=5)
-            parser = self.get_parser(response.json())
-
-            logger = logging.getLogger(__name__)
-            logger.info('Loaded %s.', url)
-
-            classes = Class.import_from_parser(parser)
-            logger.info('Parsed %s classes.', len(classes))
-
-        except requests.RequestException as exc:
-
-            self.send_error(reason=str(exc), status_code=400)
-            return
-
-        except json.decoder.JSONDecodeError:
-
-            self.send_error(reason='not a valid json', status_code=400)
-            return
-
-        except BaseException:
-
-            logging.exception("parser_exception")
-            self.send_error(reason='parser_exception')
-            return
-
-        else:
-
-            context = parser.schema.get("@context", None)
-
-            return classes, context
