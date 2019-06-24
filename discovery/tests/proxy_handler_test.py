@@ -13,8 +13,6 @@ class DiscoveryProxyTest(TornadoTestServerMixin, BiothingsTestCase):
     '''
     api = '/api'
 
-    __test__ = True
-
     def test_01(self):
         ''' [PROXY] Basic Functionality '''
 

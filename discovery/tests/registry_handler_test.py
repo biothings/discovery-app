@@ -1,14 +1,17 @@
 '''
     Registry Handler Tester
 '''
-import time
 
 from tornado.escape import json_encode
 from tornado.web import create_signed_value
 
 from biothings.tests import BiothingsTestCase, TornadoTestServerMixin
-from biothings.tests.helper import equal
-from discovery.tests import SCHEMAS, run
+from discovery.scripts.index_schema import index_schema
+from discovery.tests import run
+from discovery.web.api.es.doc import Class
+
+BTS_URL = ('https://raw.githubusercontent.com/data2health/schemas'
+           '/biothings/biothings/biothings_curie.jsonld')
 
 
 class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
@@ -34,69 +37,60 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
         cls.auth_user = cookie_header('namespacestd')
         cls.evil_user = cookie_header('villain')
 
+        index_schema('bts', BTS_URL, 'namespacestd')
+
     def test_00(self):
-        ''' HTTP HEAD /registry/__id__ '''
-        self.request('registry/'+SCHEMAS[0].meta.id, method='HEAD')
+        '''
+        [REGISTRY HEAD] /registry/<namespace>
+        '''
+        self.request('registry/bts', method='HEAD')
         self.request('registry/does_not_exist', method='HEAD', expect_status=404)
 
-    def test_01(self):
-        ''' HTTP GET /registry/__id__ '''
-        res = self.request('registry/'+SCHEMAS[0].meta.id).json()
-        equal('Retrived URL', res['url'],
-              'Source URL', SCHEMAS[0].to_dict()['_meta']['url'])
+    def test_10(self):
+        '''
+        [REGISTRY GET] /registry
+        '''
+        res = self.request('registry?user=namespacestd').json()
+        assert res['hits'][0]['namespace'] == 'bts'
 
-    def test_02(self):
-        ''' HTTP POST '''
-        doc = {'url': 'https://schema.org/version/3.5/schema.jsonld',
-               'name': 'schema'}
-        self.request('registry', method='POST', json=doc, headers=self.auth_user, expect_status=201)
-        time.sleep(10)  # allow time for the backend to index the schema classes
-        self.query(q='ebay', expect_hits=False)
-        self.query(q='CreativeWork')
+    def test_11(self):
+        '''
+        [REGISTRY GET] /registry/<namespace>
+        '''
+        res = self.request('registry/bts').json()
+        assert res['name'] == 'bts'
+        assert res['url'] == BTS_URL
 
-    def test_04(self):
-        ''' HTTP DELETE /registry/__id__ '''
+    def test_12(self):
+        '''
+        [REGISTRY GET] /registry/<namespace>/<classname>
+        '''
+        res = self.request('registry/bts/BiologicalEntity').json()
+        assert res['classname'] == 'BiologicalEntity'
+        assert res['namespace'] == 'bts'
+
+    def test_20(self):
+        '''
+        [REGISTRY DEL] /registry/<namespace>
+        '''
         _id = 'bts'
-        self.request('registry/'+_id, method='DELETE', expect_status=401)
-        self.request('registry/'+_id, method='DELETE', headers=self.evil_user, expect_status=403)
-        self.request('registry/'+'i', method='DELETE', headers=self.auth_user, expect_status=404)
-        self.request('registry/'+_id, method='DELETE', headers=self.auth_user)
-        self.query(q='bts', expect_hits=False)
+        self.request('registry/' + _id, method='DELETE', expect_status=401)
+        self.request('registry/' + _id, method='DELETE', headers=self.evil_user, expect_status=403)
+        self.request('registry/' + 'i', method='DELETE', headers=self.auth_user, expect_status=404)
+        self.request('registry/' + _id, method='DELETE', headers=self.auth_user)
+        self.query(q='BiologicalEntity', expect_hits=False)
 
-    def test_05(self):
-        ''' HTTP PUT /registry/__id__ Update '''
-        # url change
-        res = self.request('registry/example').json()
-        assert res['url'].startswith('http:')
-        data = {'url': 'https://www.example.com',
-                'name': 'example'}
-        self.request('registry/example', method='PUT', json=data, headers=self.auth_user)
-        res = self.request('registry/example').json()
-        assert res['url'].startswith('https:')
-        # name change
-        self.request('registry/' + SCHEMAS[0].meta.id, method='PUT',
-                     json={'name': 'examples', 'url': 'null'},
-                     headers=self.auth_user, expect_status=201)
-
-    def test_06(self):
-        ''' HTTP PUT /registry/__id__ Validation '''
-        # Bad Request (Wrong fields)
-        self.request('registry/examples', method='PUT', json={'pwd': 'None'},
-                     headers=self.auth_user, expect_status=400)
-        # Not Found (id does not exist)
-        self.request('registry/666', method='PUT', json={'slug': 'new'},
-                     headers=self.auth_user, expect_status=404)
-
-    def test_07(self):
-        ''' HTTP PUT /registry/__id__ Authentication '''
-        # Unauthorized (Secured cookie is not provided)
-        self.request('registry/examples', method='PUT', json={'slug': 'new'},
-                     expect_status=401)
-        # Forbidden (Document not owned by current user)
-        self.request('registry/examples', method='PUT', json={'slug': 'new'},
-                     headers=self.evil_user,
-                     expect_status=403)
+    def test_30(self):
+        '''
+        [REGISTRY POST] /registry/<namespace>
+        '''
+        doc = {'url': BTS_URL, 'namespace': 'bts'}
+        Class.delete_by_schema('bts')
+        self.query(q='BiologicalEntity', expect_hits=False)
+        self.request('registry', method='POST', json=doc, headers=self.auth_user, expect_status=201)
+        self.query(q='BiologicalEntity')
 
 
 if __name__ == '__main__':
+
     run('Registry Handler Test')
