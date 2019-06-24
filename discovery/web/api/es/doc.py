@@ -128,7 +128,7 @@ class Class(Document):
         '''
         Delete all classes of the specified schema namespace.
         '''
-        existing_classes = cls.search().query("match", schema=namespace)
+        existing_classes = cls.search().query("match", namespace=namespace)
         existing_classes.delete()
 
         LOGGER.info("Deleted %s existing '%s' classes in es.",
