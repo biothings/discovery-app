@@ -90,12 +90,12 @@ class RegistryHandler(APIBaseHandler):
         '''
 
         args = json_decode(self.request.body)
-        name = args.get('namespace').lower()
+        namespace = args.get('namespace').lower()
         url = args.get('url').lower()
 
-        assert name != 'schema', "cannot rewrite core schema."
+        assert namespace != 'schema', "cannot rewrite core schema."
 
-        if Schema.get(id=name, ignore=404):
+        if Schema.get(id=namespace, ignore=404):
 
             self.send_error(
                 reason=f"'{name}'' is already registered.",
@@ -111,8 +111,8 @@ class RegistryHandler(APIBaseHandler):
             klass.save()
 
         schema = Schema(**{
-            "meta": {"id": name},
-            "context": schema_parser.context.get(name, None),
+            "meta": {"id": namespace},
+            "context": schema_parser.context.get(namespace, None),
         })
         schema._meta.url = url
         schema._meta.username=self.current_user
@@ -120,7 +120,7 @@ class RegistryHandler(APIBaseHandler):
         schema.save()
 
         logger = logging.getLogger(__name__)
-        logger.info("Saved '%s'.", name)
+        logger.info("Saved '%s'.", namespace)
 
         self.set_status(201)
         self.finish({
@@ -158,7 +158,7 @@ class RegistryHandler(APIBaseHandler):
                     for schema in response
                 },
                 "hits": [{
-                    "name": schema.meta.id,
+                    "namespace": schema.meta.id,
                     "url": schema['_meta'].url,
                 } for schema in response]
             })
