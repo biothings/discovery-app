@@ -90,15 +90,15 @@ class RegistryHandler(APIBaseHandler):
         '''
 
         args = json_decode(self.request.body)
-        namespace = args.get('namespace').lower()
-        url = args.get('url').lower()
+        namespace = args['namespace'].lower()
+        url = args['url'].lower()
 
         assert namespace != 'schema', "cannot rewrite core schema."
 
         if Schema.get(id=namespace, ignore=404):
 
             self.send_error(
-                reason=f"'{name}'' is already registered.",
+                reason=f"'{namespace}'' is already registered.",
                 status_code=403
             )
             return
@@ -115,7 +115,7 @@ class RegistryHandler(APIBaseHandler):
             "context": schema_parser.context.get(namespace, None),
         })
         schema._meta.url = url
-        schema._meta.username=self.current_user
+        schema._meta.username = self.current_user
         schema.encode_raw(schema_doc.text)
         schema.save()
 
