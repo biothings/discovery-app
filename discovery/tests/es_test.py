@@ -3,41 +3,41 @@
     Require Elasticsearch setup at localhost:9200
 '''
 
-from discovery.web.api.es.doc import Class, Schema
-
+from discovery.scripts.index_schema import index_schema
 from discovery.tests import run
+from discovery.web.api.es.doc import Class, Schema
 
 
 def setup():
     ''' Module Level Setup '''
 
-    url = ('https://raw.githubusercontent.com/data2health/'
-           'schemas/biothings/biothings/biothings_curie_kevin.jsonld')
+    url = ('https://raw.githubusercontent.com/data2health'
+           '/schemas/master/cvisb/cvisb_dataset.json')
 
-    schema = Schema('bts', url, 'tester')
-    schema.save()
-
-    Class.import_from(schema)
+    index_schema('cvisb', url, 'namespacestd0')
 
 
 def test_01():
-    ''' [ES Schema Class] Retrival by "_id" '''
-
-    Schema.get(id='bts')
+    '''
+    [ES Schema Class] Retrival by "_id"
+    '''
+    Schema.get(id='cvisb')
 
 
 def test_02():
-    ''' [ES Schema Class] Saving RAW format '''
-
-    schema = Schema.get(id='bts')
-    remote_file = schema.retrieve_raw()
-    assert "http://schema.biothings.io/" in remote_file
+    '''
+    [ES Schema Class] Saving RAW format
+    '''
+    schema = Schema.get(id='cvisb')
+    text = schema.decode_raw()
+    assert "Dataset in the Center for Viral Systems Biology" in text
 
 
 def test_03():
-    ''' [ES Class Class] Retrival by "_id" '''
-
-    Class.get(id="bts:BiologicalEntity")
+    '''
+    [ES Class Class] Retrival by "_id"
+    '''
+    Class.get(id="cvisb:CvisbDataset")
 
 
 if __name__ == '__main__':
