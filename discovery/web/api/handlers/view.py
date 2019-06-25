@@ -52,7 +52,12 @@ class SchemaViewHandler(APIBaseHandler):
                     "description": _property['description'],
                 } for _property in _properties]
 
+                for property_ in properties:
+                    if '://' in property_['name']:
+                        del property_['name']
+
                 class_ = {
+                    "name": klass.name,
                     "namespace": klass.prefix,
                     "classname": klass.label,
                     "parents": [', '.join(map(str, parent_line))
@@ -60,6 +65,9 @@ class SchemaViewHandler(APIBaseHandler):
                     "description": klass.description,
                     "properties": properties,
                 }
+
+                if '://' in class_['name']:
+                    del class_['name']
 
                 class_ = {key: value for key, value in class_.items() if value}
 
