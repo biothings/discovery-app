@@ -6,3 +6,4 @@ jsonschema>=2.6.0
 torngithub==0.2.0
 Jinja2>=2.9.6
 pycurl>=7.19
+requests
