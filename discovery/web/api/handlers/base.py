@@ -2,6 +2,7 @@
 import copy
 import json
 import logging
+import pprint
 
 import tornado
 from tornado.escape import json_decode
@@ -10,6 +11,7 @@ from biothings.web.api.helper import BaseHandler
 from biothings_schema import Schema as SchemaParser
 from discovery.web.api.es.doc import Schema
 
+L = logging.getLogger(__name__)
 
 # pylint: disable=abstract-method, arguments-differ
 class APIBaseHandler(BaseHandler):
@@ -21,7 +23,9 @@ class APIBaseHandler(BaseHandler):
 
         parser = copy.deepcopy(cls._PARSER)
         parser.load_schema(doc)
-        parser.context.update(Schema.gather_contexts())
+        contexts = Schema.gather_contexts()
+        L.debug("Provide the parser with contexts:\n%s", pprint.pformat(contexts))
+        parser.context.update(contexts)
         return parser
 
     def get_current_user(self):

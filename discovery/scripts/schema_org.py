@@ -12,7 +12,7 @@ def index_schema_org(lazy=False):
         Setup Script
     '''
     if lazy:
-        if Class.search().query("match", namespace='schema').count() > 770:
+        if Class.search().query("match", prefix='schema').count() > 770:
             return
 
     Class.delete_by_schema('schema')
@@ -21,7 +21,7 @@ def index_schema_org(lazy=False):
     for klass in classes:
         klass.save()
 
-    logger = logging.getLogger('discovery.scripts.indexing')
+    logger = logging.getLogger('discovery.scripts.schema_org')
     logger.info("Indexed 'schema'.")
 
 

@@ -34,14 +34,14 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
                 json_encode(cookie_value))
             return {'Cookie': '='.join((cookie_name, secure_cookie.decode()))}
 
-        cls.auth_user = cookie_header('namespacestd')
+        cls.auth_user = cookie_header('tester')
         cls.evil_user = cookie_header('villain')
 
-        index_schema('bts', BTS_URL, 'namespacestd')
+        index_schema('bts', BTS_URL, 'tester')
 
     def test_00(self):
         '''
-        [REGISTRY HEAD] /registry/<namespace>
+        [REGISTRY HEAD] /registry/<prefix>
         '''
         self.request('registry/bts', method='HEAD')
         self.request('registry/does_not_exist', method='HEAD', expect_status=404)
@@ -50,12 +50,12 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
         '''
         [REGISTRY GET] /registry
         '''
-        res = self.request('registry?user=namespacestd').json()
-        assert res['hits'][0]['namespace'] == 'bts'
+        res = self.request('registry?user=tester').json()
+        assert res['hits'][0]['prefix'] == 'bts'
 
     def test_11(self):
         '''
-        [REGISTRY GET] /registry/<namespace>
+        [REGISTRY GET] /registry/<prefix>
         '''
         res = self.request('registry/bts').json()
         assert res['name'] == 'bts'
@@ -63,15 +63,15 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
 
     def test_12(self):
         '''
-        [REGISTRY GET] /registry/<namespace>/<classname>
+        [REGISTRY GET] /registry/<prefix>/<label>
         '''
         res = self.request('registry/bts/BiologicalEntity').json()
-        assert res['classname'] == 'BiologicalEntity'
-        assert res['namespace'] == 'bts'
+        assert res['label'] == 'BiologicalEntity'
+        assert res['prefix'] == 'bts'
 
     def test_20(self):
         '''
-        [REGISTRY DEL] /registry/<namespace>
+        [REGISTRY DEL] /registry/<prefix>
         '''
         _id = 'bts'
         self.request('registry/' + _id, method='DELETE', expect_status=401)
@@ -82,9 +82,9 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
 
     def test_30(self):
         '''
-        [REGISTRY POST] /registry/<namespace>
+        [REGISTRY POST] /registry/<prefix>
         '''
-        doc = {'url': BTS_URL, 'namespace': 'bts'}
+        doc = {'url': BTS_URL, 'prefix': 'bts'}
         Class.delete_by_schema('bts')
         self.query(q='BiologicalEntity', expect_hits=False)
         self.request('registry', method='POST', json=doc, headers=self.auth_user, expect_status=201)

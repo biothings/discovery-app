@@ -48,7 +48,7 @@ class Schema(Document):
     context = Text()
     locals()['~raw'] = Binary()
 
-    # _id : schema namespace, for example: bts, schema (for schema.org)
+    # _id : schema prefix, for example: bts, schema (for schema.org)
     #       accessible through constructor argument 'id' or schema.meta.id
 
     class Index:
@@ -63,10 +63,12 @@ class Schema(Document):
     @classmethod
     def gather_contexts(cls):
 
-        return {
+        contexts = {
             schema.meta.id: schema.context
             for schema in cls.search()
         }
+
+        return {k: v for k, v in contexts.items() if v}
 
     def encode_raw(self, text):
         '''
@@ -94,8 +96,8 @@ class Prop(InnerDoc):
     '''
     A Class Property
     '''
-    name = Text(required=True)
-    types = Text(multi=True)
+    curie = Text(required=True)
+    range = Text(multi=True)
     description = Text()
 
 
@@ -108,9 +110,9 @@ class Class(Document):
     # _id : in the format of <schema>:<name>, for example, schema:Thing
     #       accessible through constructor argument 'id' or cls.meta.id
 
-    namespace = Text(required=True)  # the namespace (schema _id, not url) it is defined in
-    classname = Text(required=True)
-    parents = Text(multi=True)  # immediate parent class(es) only
+    prefix = Text(required=True)  # the prefix (schema _id, not url) it is defined in
+    label = Text(required=True)
+    parent_classes = Text(multi=True)  # immediate parent class(es) only
     description = Text()
     properties = Nested(Prop)  # properties that belong directly to this class
 
@@ -124,15 +126,15 @@ class Class(Document):
         }
 
     @classmethod
-    def delete_by_schema(cls, namespace):
+    def delete_by_schema(cls, prefix):
         '''
-        Delete all classes of the specified schema namespace.
+        Delete all classes of the specified schema prefix.
         '''
-        existing_classes = cls.search().query("match", namespace=namespace)
+        existing_classes = cls.search().query("match", prefix=prefix)
         existing_classes.delete()
 
-        LOGGER.info("Deleted %s existing '%s' classes in es.",
-                    existing_classes.count(), namespace)
+        LOGGER.info("Deleted %s existing '%s' classes.",
+                    existing_classes.count(), prefix)
 
     @classmethod
     def import_from_parser(cls, loaded_parser, reference=False):
@@ -156,17 +158,17 @@ class Class(Document):
                 LOGGER.info("Parsing '%s'.", class_)
 
                 es_class = cls()
-                es_class.namespace = class_.prefix
-                es_class.classname = class_.label
+                es_class.prefix = class_.prefix
+                es_class.label = class_.label
                 es_class.description = class_.description
 
                 for parent_line in class_.parent_classes:
-                    es_class.parents.append(', '.join(map(str, parent_line)))
+                    es_class.parent_classes.append(', '.join(map(str, parent_line)))
 
                 for prop in class_.list_properties(group_by_class=False):
                     es_class.properties.append(Prop(
-                        name=prop['curie'],
-                        types=prop['range'],
+                        curie=prop['curie'],
+                        range=prop['range'],
                         description=prop['description']
                     ))
 
@@ -185,6 +187,6 @@ class Class(Document):
 
     def save(self, **kwargs):
 
-        self.meta.id = f"{self.namespace}:{self.classname}"
+        self.meta.id = f"{self.prefix}:{self.label}"
 
         super().save(**kwargs)
