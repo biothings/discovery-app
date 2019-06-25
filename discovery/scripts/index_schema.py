@@ -9,7 +9,7 @@ from biothings_schema import Schema as SchemaParser
 from discovery.web.api.es.doc import Class, Schema
 
 
-def index_schema(namespace, url, user):
+def index_schema(prefix, url, user):
     '''
         Indexing Script
     '''
@@ -18,14 +18,14 @@ def index_schema(namespace, url, user):
     schema_parser = SchemaParser(req.json())
 
     schema = Schema()
-    schema.meta.id = namespace
+    schema.meta.id = prefix
     schema._meta.url = url
     schema._meta.username = user
-    schema.context = schema_parser.context.get(namespace, None)
+    schema.context = schema_parser.context.get(prefix, None)
     schema.encode_raw(req.text)
     schema.save()
 
-    Class.delete_by_schema(namespace)
+    Class.delete_by_schema(prefix)
     classes = Class.import_from_parser(schema_parser)
 
     logger = logging.getLogger('discovery.scripts.index_schema')
@@ -34,21 +34,21 @@ def index_schema(namespace, url, user):
     for klass in classes:
         klass.save()
 
-    logger.info("Indexed %s.", namespace)
+    logger.info("Indexed %s.", prefix)
 
 
 def main():
     '''
         Interactive Prompt
     '''
-    namespace = input("Enter the namespace of your schema:")
-    if namespace == 'bts':
+    prefix = input("Enter the prefix of your schema:")
+    if prefix == 'bts':
         url = ('https://raw.githubusercontent.com/data2health/schemas'
                '/biothings/biothings/biothings_curie.jsonld')
     else:
         url = input("Enter the url where the schema json is hosted:")
     user = input("Enter your github username:")
-    index_schema(namespace, url, user)
+    index_schema(prefix, url, user)
 
 
 if __name__ == "__main__":

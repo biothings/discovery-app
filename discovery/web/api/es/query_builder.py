@@ -24,7 +24,7 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                         },
                         {
                             "term": {
-                                "namespace": {
+                                "prefix": {
                                     "value": q,
                                     "boost": 1.5
                                 }
@@ -37,7 +37,7 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                         },
                         {
                             "query_string": {
-                                "default_field": "classname",
+                                "default_field": "label",
                                 "query": url_escape(q) + "*",
                                 "boost": 0.8
                             }

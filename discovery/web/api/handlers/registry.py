@@ -41,9 +41,9 @@ def permisson_verifeid(func):
 
     '''
 
-    def _(self, namespace, *args, **kwargs):
+    def _(self, prefix, *args, **kwargs):
 
-        schema = Schema.get(id=namespace, ignore=404)
+        schema = Schema.get(id=prefix, ignore=404)
 
         if not schema:
             self.send_error(404)
@@ -53,7 +53,7 @@ def permisson_verifeid(func):
             self.send_error(403)
             return
 
-        func(self, namespace, *args, **kwargs)
+        func(self, prefix, *args, **kwargs)
 
     return _
 
@@ -69,16 +69,14 @@ class RegistryHandler(APIBaseHandler):
         Fetch  - GET ./api/registry/<schema>/<class>
         Remove - DELETE ./api/registry/<schema>
 
-        * namespace/schema name/prefix are used interchangeably.
-
     '''
 
-    def head(self, namespace):
+    def head(self, prefix):
         '''
-            Check the existance of a schema by its namespace.
+            Check the existance of a schema by its prefix.
         '''
 
-        if Schema.get(id=namespace, ignore=404):
+        if Schema.get(id=prefix, ignore=404):
             self.set_status(200)
         else:
             self.set_status(404)
@@ -90,15 +88,15 @@ class RegistryHandler(APIBaseHandler):
         '''
 
         args = json_decode(self.request.body)
-        namespace = args['namespace'].lower()
+        prefix = args['prefix'].lower()
         url = args['url'].lower()
 
-        assert namespace != 'schema', "cannot rewrite core schema."
+        assert prefix != 'schema', "cannot rewrite core schema."
 
-        if Schema.get(id=namespace, ignore=404):
+        if Schema.get(id=prefix, ignore=404):
 
             self.send_error(
-                reason=f"'{namespace}'' is already registered.",
+                reason=f"'{prefix}'' is already registered.",
                 status_code=403
             )
             return
@@ -111,8 +109,8 @@ class RegistryHandler(APIBaseHandler):
             klass.save()
 
         schema = Schema(**{
-            "meta": {"id": namespace},
-            "context": schema_parser.context.get(namespace, None),
+            "meta": {"id": prefix},
+            "context": schema_parser.context.get(prefix, None),
         })
         schema._meta.url = url
         schema._meta.username = self.current_user
@@ -120,7 +118,7 @@ class RegistryHandler(APIBaseHandler):
         schema.save()
 
         logger = logging.getLogger(__name__)
-        logger.info("Saved '%s'.", namespace)
+        logger.info("Saved '%s'.", prefix)
 
         self.set_status(201)
         self.finish({
@@ -129,17 +127,17 @@ class RegistryHandler(APIBaseHandler):
             'url': self.request.full_url() + '/' + schema.meta.id,
         })
 
-    def get(self, namespace=None, classname=None):
+    def get(self, prefix=None, label=None):
         '''
             Access the registry.
 
             - List all schemas.
             - List schemas by a user.
-            - List a schema by its namespace.
-            - List a class by its name and namespace.
+            - List a schema by its prefix.
+            - List a class by its name and prefix.
         '''
 
-        if not namespace:
+        if not prefix:
 
             user = self.get_query_argument('user', None)
             search = Schema.search()
@@ -158,19 +156,19 @@ class RegistryHandler(APIBaseHandler):
                     for schema in response
                 },
                 "hits": [{
-                    "namespace": schema.meta.id,
+                    "prefix": schema.meta.id,
                     "url": schema['_meta'].url,
                 } for schema in response]
             })
             return
 
-        schema = Schema.get(id=namespace, ignore=404)
+        schema = Schema.get(id=prefix, ignore=404)
 
         if not schema:
             self.send_error(404)
             return
 
-        if not classname:
+        if not label:
             result = {}
             result['name'] = schema.meta.id
             result['url'] = schema['_meta'].url
@@ -178,7 +176,7 @@ class RegistryHandler(APIBaseHandler):
             self.write(result)
             return
 
-        klass = Class.get(id=f"{namespace}:{classname}", ignore=404)
+        klass = Class.get(id=f"{prefix}:{label}", ignore=404)
 
         if not klass:
             self.send_error(404)
@@ -189,14 +187,14 @@ class RegistryHandler(APIBaseHandler):
 
     @github_authenticated
     @permisson_verifeid
-    def delete(self, namespace):
+    def delete(self, prefix):
         '''
-        Delete a schema and its classes by its namespace.
+        Delete a schema and its classes by its prefix.
         '''
 
-        sch = Schema.get(id=namespace)
+        sch = Schema.get(id=prefix)
         sch.delete()
 
-        Class.delete_by_schema(namespace)
+        Class.delete_by_schema(prefix)
 
         Index('discover_class').refresh()
