@@ -71,6 +71,9 @@ class SchemaViewHandler(APIBaseHandler):
 
                 class_ = {key: value for key, value in class_.items() if value}
 
+                if klass.validation:
+                    class_['validation'] = klass.validation
+
                 classes.append(class_)
 
             return classes
