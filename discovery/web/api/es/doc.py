@@ -95,7 +95,7 @@ class Prop(InnerDoc):
     A Class Property
     '''
     name = Text(required=True)
-    range = Text(multi=True)
+    types = Text(multi=True)
     description = Text()
 
 
@@ -151,6 +151,8 @@ class Class(Document):
 
             for class_ in parser_classes:
 
+                class_.output_type = "curie"
+
                 LOGGER.info("Parsing '%s'.", class_)
 
                 es_class = cls()
@@ -163,8 +165,8 @@ class Class(Document):
 
                 for prop in class_.list_properties(group_by_class=False):
                     es_class.properties.append(Prop(
-                        name=prop['uri'],
-                        range=prop['range'],
+                        name=prop['curie'],
+                        types=prop['range'],
                         description=prop['description']
                     ))
 
