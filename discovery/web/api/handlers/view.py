@@ -36,7 +36,7 @@ class SchemaViewHandler(APIBaseHandler):
 
         logger.info("Found %s classes.", len(hits) + len(refs))
 
-        def construct_class(parser_classes):
+        def construct_class(parser_classes, **kwargs):
 
             classes = []
 
@@ -69,6 +69,7 @@ class SchemaViewHandler(APIBaseHandler):
                 if klass.validation:
                     class_['validation'] = klass.validation
 
+                class_.update(kwargs)
                 classes.append(class_)
 
             return classes
@@ -76,8 +77,7 @@ class SchemaViewHandler(APIBaseHandler):
         response = {
             "total": len(hits) + len(refs),
             "context": parser.context,
-            "hits": construct_class(hits),
-            "refs": construct_class(refs),
+            "hits": construct_class(hits, ref=False) + construct_class(refs, ref=True)
         }
 
         self.finish(response)
