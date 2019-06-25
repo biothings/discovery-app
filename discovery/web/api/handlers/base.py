@@ -13,6 +13,7 @@ from discovery.web.api.es.doc import Schema
 
 L = logging.getLogger(__name__)
 
+
 # pylint: disable=abstract-method, arguments-differ
 class APIBaseHandler(BaseHandler):
 
@@ -22,10 +23,11 @@ class APIBaseHandler(BaseHandler):
     def get_parser(cls, doc):
 
         parser = copy.deepcopy(cls._PARSER)
-        parser.load_schema(doc)
         contexts = Schema.gather_contexts()
-        L.debug("Provide the parser with contexts:\n%s", pprint.pformat(contexts))
-        parser.context.update(contexts)
+        L.debug("Server-side contexts:\n%s",
+                pprint.pformat(contexts))
+        parser.context.update({k: v for k, v in contexts.items() if v})
+        parser.load_schema(doc)
         return parser
 
     def get_current_user(self):
@@ -45,13 +47,12 @@ class APIBaseHandler(BaseHandler):
             kwargs['exception'] = exception.__class__.__name__
 
             if type(exception) in [tornado.web.MissingArgumentError,
-                             tornado.httpclient.HTTPError,
-                             json.decoder.JSONDecodeError]:
+                                   tornado.httpclient.HTTPError,
+                                   json.decoder.JSONDecodeError]:
                 self.set_status(422)
                 status_code = 422
             else:
                 self._reason = str(exception)
-
 
         template = {
             "code": status_code,
