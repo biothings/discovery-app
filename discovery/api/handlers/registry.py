@@ -6,7 +6,7 @@ import logging
 import requests
 from tornado.escape import json_decode
 
-from discovery.web.api.es.doc import Class, Schema
+from discovery.api.es.doc import Class, Schema
 from elasticsearch_dsl import Index, Search
 
 from .base import APIBaseHandler
