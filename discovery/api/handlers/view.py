@@ -60,7 +60,7 @@ class SchemaViewHandler(APIBaseHandler):
                 klass.output_type = "curie"
 
                 properties = klass.list_properties(
-                    class_specific=False,
+                    class_specific=True,
                     group_by_class=False)
 
                 for property_ in properties:
