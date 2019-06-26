@@ -2,7 +2,7 @@
     Empty Index Creator
 '''
 
-from discovery.web.api.es.doc import Class, Schema
+from discovery.api.es.doc import Class, Schema
 from elasticsearch_dsl import Index
 
 

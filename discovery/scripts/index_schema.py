@@ -6,7 +6,7 @@ import logging
 import requests
 
 from biothings_schema import Schema as SchemaParser
-from discovery.web.api.es.doc import Class, Schema
+from discovery.api.es.doc import Class, Schema
 
 
 def index_schema(prefix, url, user):

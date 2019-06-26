@@ -8,7 +8,7 @@ from biothings.web.settings import BiothingESWebSettings
 
 WEB_SETTINGS = BiothingESWebSettings(config='config')
 SRC_PATH = os.path.dirname(os.path.abspath(__file__))
-STATIC_PATH = os.path.join(SRC_PATH, 'static')
+STATIC_PATH = os.path.join(SRC_PATH, 'web', 'static')
 
 if __name__ == '__main__':
     logging.captureWarnings(True)

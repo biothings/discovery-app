@@ -5,7 +5,7 @@
 
 from discovery.scripts.index_schema import index_schema
 from discovery.tests import run
-from discovery.web.api.es.doc import Class, Schema
+from discovery.api.es.doc import Class, Schema
 
 
 def setup():

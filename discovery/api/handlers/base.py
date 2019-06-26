@@ -9,7 +9,7 @@ from tornado.escape import json_decode
 
 from biothings.web.api.helper import BaseHandler
 from biothings_schema import Schema as SchemaParser
-from discovery.web.api.es.doc import Schema
+from discovery.api.es.doc import Schema
 
 L = logging.getLogger(__name__)
 

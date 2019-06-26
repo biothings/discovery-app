@@ -15,8 +15,7 @@ from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 GITHUB_CALLBACK_PATH = "/oauth"
 GITHUB_SCOPE = ""
 
-SRC_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEMPLATE_PATH = os.path.join(SRC_PATH, 'templates/')
+TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 TEMPLATE_LOADER = FileSystemLoader(searchpath=TEMPLATE_PATH)
 TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER, cache_size=0)
 
