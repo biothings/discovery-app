@@ -16,11 +16,11 @@
       <div class="row">
         <buttom @click.prevent="choice='have'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted">
           <h1 class="mainTextDark bold">Yes</h1>
-          <h4>Visualize your schema and register it</h4>
+          <p>Visualize your schema and register it</p>
         </buttom>
         <buttom @click.prevent="choice='dont'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted">
           <h1 class="mainTextLight bold">No</h1>
-          <h4>Search existing schemas to start your own</h4>
+          <p>Search existing schemas to start your own</p>
         </buttom>
       </div>
     </div>
@@ -31,21 +31,28 @@
     </buttom>
   </div>
   <div v-if="choice === 'have'" class="jumbotron text-muted text-center">
-    <h1>VISUALIZE AND REGISTER YOUR SCHEMA</h1>
+    <h1>VISUALIZE &amp; REGISTER YOUR SCHEMA</h1>
     <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
       <div class="form-group">
         <label for="urlform">Paste your URL here:</label>
         <input style="margin:auto;" data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
         <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
       </div>
+      <div v-if=loading class="loader">
+        <img src="./static/img/ripple.svg"/>
+      </div>
       <small class="text-muted">Examples:</small>
       <small class="badge badge-pill badge-secondary pointer mr-1"
       @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
-        <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> BioThings Schema Example
+        <i class="fas fa-question-circle" data-tippy="BioThings Schema"></i> BioThings Schema
+      </small>
+      <small class="badge badge-pill badge-secondary pointer mr-1"
+      @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
+        <i class="fas fa-question-circle" data-tippy="CTSA Schema"></i> CTSA Dataset Schema
       </small>
       <small class="badge badge-pill badge-secondary pointer mr-1"
       @click="input = 'https://schema.org/Dataset.jsonld'">
-        <i class="fas fa-question-circle" data-tippy="BioThings Dataset"></i> Dataset Example
+        <i class="fas fa-question-circle" data-tippy="Dataset Schema"></i> Schema.org Dataset Schema
       </small>
     </form>
   </div>
@@ -120,6 +127,7 @@ var app = new Vue({
           suggestedURL:'',
           slug:'',
           choice:'',
+          loading:false,
           presets:[
             {
               'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_dataset.json',
@@ -178,35 +186,47 @@ var app = new Vue({
           this.$refs.my_input.value = '';
           this.sendRequest()
         },
-        parseData(graph){
-          for (var i = 0; i < graph.length; i++) {
-            if (graph[i].hasOwnProperty('@type') && graph[i]['@type'] === "rdfs:Class"){
-              this.makeURLandRedirect(graph[i]);
+        assignTempName(hits){
+          let self = this;
+          if (hits.length) {
+            if (hits[0].hasOwnProperty('namespace')) {
+              self.slug = hits[0]['namespace'];
+            }else if (hits[0].hasOwnProperty('name')) {
+              self.slug = hits[0]['name'].split(':')[0];
             }
+            else{
+              self.slug = 'temp'
+            }
+            self.makeURLandRedirect();
+          }else{
+            Swal(
+              'Error parsing schema',
+              "No classes found",
+              'error'
+            );
           }
         },
         sendRequest(){
           let self = this;
-          axios.get(self.input).then(res=>{
-
+          self.loading = true;
+          axios.get("/api/view?url="+self.input).then(res=>{
+            console.log(res.data)
             self.data = res.data;
-            localStorage.setItem('datasetDataURL',self.input);
-            let graph = res.data['@graph'];
-            self.parseData(graph);
-
+            self.loading = false;
+            localStorage.setItem('user-schema-classes',JSON.stringify(self.data));
+            localStorage.setItem('user-schema-url',self.input);
+            self.assignTempName(res.data.hits);
           }).catch(err=>{
-            Swal(
-                'Something went wrong.',
-                'Make sure your GitHub link links directly to your data page or raw data',
-                'error'
-              );
+            self.loading = false;
+            // Swal(
+            //   'Something went wrong.',
+            //   'Make sure your GitHub link links directly to your data page or raw data',
+            //   'error'
+            // );
             throw err;
           })
         },
-        makeURLandRedirect(obj){
-          let arr = obj['@id'].split(':');
-          this.slug = arr[0];
-          localStorage.setItem('datasetData', JSON.stringify(this.data));
+        makeURLandRedirect(){
           let number = Math.floor(Math.random()*90000) + 10000;
           window.location.href = "./"+this.slug+number+"/";
         },

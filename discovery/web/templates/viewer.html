@@ -32,7 +32,7 @@
                   Classes
                 </li>
                 <li v-for='item in searchResults' >
-                  <a :href='"./"+item["rdfs:label"]' v-text='item["rdfs:label"]'></a>
+                  <a :href='"./"+item["rdfs:label"]' v-text='item["name"]'></a>
                 </li>
               </ul>
             </div>
@@ -42,7 +42,7 @@
                   Properties
                 </li>
                 <li v-for='item in searchResultsProps'>
-                  <a :href='"./"+item["rdfs:label"]' v-text='item["rdfs:label"]'></a>
+                  <a :href='"./"+item["rdfs:label"]' v-text='item["name"]'></a>
                 </li>
               </ul>
             </div>
@@ -172,15 +172,16 @@
           </li>
         </ul>
       </div>
+      <!-- MAIN CLASS BOX -->
       <div class="jumbotron message" v-if='schemaClass'>
         <div >
           <a v-if="!showGraph" @click="toggleGraph" class="d-none d-sm-none d-md-block mainTextDark bold float-right pointer" ><i class="fas fa-draw-polygon"></i> View Graph</a>
           <h1 class="mainTextDark bold" v-if='schemaClass' :id='schemaClass' v-text='schemaClass'></h1>
-          <template v-if='allPaths.length'>
+          <template v-if='schemaClass'>
             <ol>
-              <li v-for="path in allPaths">
+              <li v-for="path in getPaths(classInfo)">
                 <span v-for="(item,index) in path">
-                  <a :class="[ index !== path.length-1 ? 'text-muted' : 'mainTextDark']" class="font-weight-bold small" :href="'./'+removePrefix(item)" v-text="removePrefix(item)"></a>
+                  <a :class="[ index !== path.length-1 ? 'text-muted' : 'mainTextDark']" class="font-weight-bold small" :href="'./'+item" v-text="item"></a>
                   <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right mainTextDark"></i>&nbsp;</span>
                 </span>
               </li>
@@ -194,7 +195,7 @@
             <a class="mainTextDark font-weight-bold" :href="'./'+schemaClass" v-text='schemaClass'></a>
           </template>
           <template v-if="schemaClass">
-            <p v-html="classInfo['rdfs:comment'] || 'No Description Provided'" class="padding20 description mainTextDark"></p>
+            <p v-html="classInfo['description'] || 'No Description Provided'" class="padding20 description mainTextDark"></p>
           </template>
         </div>
       </div>
@@ -203,17 +204,17 @@
       <div class="resultsTabFull mt-3 p-3 mainBackDark text-light">
         <span v-if='schemaClass'>Properties of</span> <h3 v-text='schemaClass' class='d-inline'></h3>
       </div>
-      <table class="table  table-striped-main" v-if="properties.length" style="margin-bottom: 40px;border-left:5px solid var(--main);">
+      <table class="table  table-striped-main" style="margin-bottom: 40px;border-left:5px solid var(--main);">
       <tbody>
-        <tr v-for="(item,i) in properties">
+        <tr v-for="(item,i) in getPropertiesFor(classInfo)">
           <td >
-            <a class="font-weight-bold" :href='"./"+getTitle(item)'>
-              <span v-html=getTitle(item)></span>
+            <a class="font-weight-bold" :href='"./"+item.name'>
+              <span v-html='item.name'></span>
             </a>
-            <small v-html=getDescription(item) class=""></small>
+            <small v-html='item.description || "No description provided"'></small>
             <hr />
             <small class="mainTextDark bold">Expected Type: </small>
-            <template v-for="(type,i) in getType(item)">
+            <template v-for="(type,i) in item.value_types">
               <a :href="generateLink(type)">
                 <small >
                   <span v-html='type'></span>
@@ -226,12 +227,12 @@
         </tr>
       </tbody>
     </table>
-    <template v-if="!properties.length && !userURL">
+    <!-- <template v-if="!classInfo.props">
       <div class="text-center alert alert-secondary text-muted padding20" style="margin-bottom: 40px">
         <i class="fas fa-exclamation-circle"></i>
         This class has no properties of it's own
       </div>
-    </template>
+    </template> -->
     <div class="row" v-if='propertyInfo["@id"]'>
       <div class="col-sm-6">
         <ul class="list-group" style="max-width: 50vw;">
@@ -256,11 +257,16 @@
     </div>
 
     <!-- PARENT CLASS PROPERTIES -->
-    <span v-if="parentClassesAndProps.length" v-for="(parent,i) in parentClassesAndProps">
-      <div :id='parent["className"]' class="resultsTabFull mt-3 p-3 mainBackLight text-light">
-        Properties of <h3 v-text='parent["className"]' class='d-inline'></h3> <small><a class='text-light' :href='"#"+parent["className"]'><i class="fas fa-link"></i></a></small>
+    <template v-if='userSchemaParents.length' v-for="item in userSchemaParents">
+      <div class="resultsTabFull mt-3 p-3 mainBackLight text-light">
+        <span v-text='item'></span>
       </div>
-      <table v-if="parent['props'].length" class="table  table-striped-sec" style="margin-bottom: 40px; border-left:5px solid var(--sec);">
+    </template>
+  <!-- <span v-if="parentClassesAndProps.length" v-for="(parent,i) in parentClassesAndProps">
+    <div :id='parent["className"]' class="resultsTabFull mt-3 p-3 mainBackLight text-light">
+      Properties of <h3 v-text='parent["className"]' class='d-inline'></h3> <small><a class='text-light' :href='"#"+parent["className"]'><i class="fas fa-link"></i></a></small>
+    </div>
+    <table v-if="parent['props'].length" class="table  table-striped-sec" style="margin-bottom: 40px; border-left:5px solid var(--sec);">
       <tbody>
         <tr v-for="item in parent['props']">
           <td >
@@ -282,14 +288,16 @@
           </td>
         </tr>
       </tbody>
-    </span>
-  </table>
+    </table>
+  </span>
+
   <template v-else>
     <div class="text-center alert alert-secondary text-muted  padding20" style="margin-bottom: 40px">
       <i class="fas fa-exclamation-circle"></i>
       This class has no properties of it's own
     </div>
-  </template>
+  </template> -->
+
   </div>
     <div class="col-sm-3">
 
@@ -445,59 +453,57 @@
   <!-- Button trigger modal -->
 
 
-<!-- Modal -->
-<div class="modal fade" id="changeClass" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title text-muted" id="exampleModalLabel">Classes available in this schema</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <template v-if="availableClasses.length>20">
-          <ul class="list-group">
-            <li class="list-group-item mainBackDark text-light text-center">
-              Filter by
-            </li>
-            <li class="list-group-item">
-              <select @change='handleChange' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
-                <option selected>Filter by...</option>
-                <option v-for="letter in filterLetters" :value="letter" v-text="letter"></option>
-              </select>
-            </li>
-            <li class="list-group-item text-light mainBackDark twoEM text-center" v-if='filter' v-text='filter'>
+  <!-- Modal -->
+  <div class="modal fade" id="changeClass" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-muted" id="exampleModalLabel">Classes available in this schema</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <template v-if="availableClasses.length>20">
+            <ul class="list-group">
+              <li class="list-group-item mainBackDark text-light text-center">
+                Filter by
+              </li>
+              <li class="list-group-item">
+                <select @change='handleChange' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+                  <option selected>Filter by...</option>
+                  <option v-for="letter in filterLetters" :value="letter" v-text="letter"></option>
+                </select>
+              </li>
+              <li class="list-group-item text-light mainBackDark twoEM text-center" v-if='filter' v-text='filter'>
 
-            </li>
-            <li class="list-group-item" v-if='filter'>
-              <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
-                <option selected v-text='"Choose..."'></option>
-                <option v-for="(item,i) in filterResults" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
-              </select>
-            </li>
-          </ul>
-        </template>
-        <!-- If class list is less than 20 -->
-        <template v-else>
-          <ul class="list-group">
-            <li class="list-group-item mainBackLight text-light text-center">
-              Schemas
-            </li>
-            <li class="list-group-item">
-              <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
-                <option selected v-text='"Choose..."'></option>
-                <option v-for="(item,i) in availableClasses" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
-              </select>
-            </li>
-          </ul>
-        </template>
+              </li>
+              <li class="list-group-item" v-if='filter'>
+                <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+                  <option selected v-text='"Choose..."'></option>
+                  <option v-for="(item,i) in filterResults" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
+                </select>
+              </li>
+            </ul>
+          </template>
+          <!-- If class list is less than 20 -->
+          <template v-else>
+            <ul class="list-group">
+              <li class="list-group-item mainBackLight text-light text-center">
+                Schemas
+              </li>
+              <li class="list-group-item">
+                <select @change='handleFilter' class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+                  <option selected v-text='"Choose..."'></option>
+                  <option v-for="(item,i) in availableClasses" :value="item['rdfs:label']" v-text="item['rdfs:label']"></option>
+                </select>
+              </li>
+            </ul>
+          </template>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
-
 
 </div>
 
@@ -562,19 +568,28 @@ var app = new Vue({
           registered: false,
           urlRegistered: false,
           searchResultsProps:[],
-          fullPropList:[]
+          fullPropList:[],
+          //  NEW VIEWER DATA
+          userSchema: [],
+          userSchemaURL: '',
+          userSchemaAllProps:[],
+          parentList:[],
+          userSchemaParents:[]
 				}
 			},
+      computed:{
+
+      },
       watch:{
         searchQuery:function(newQ,oldQ) {
           if (newQ.length) {
-            let result = _.filter(this.availableClasses, function(o) {
-                if (o['rdfs:label'].toLowerCase().includes(newQ.toLowerCase())) {
+            let result = _.filter(this.userSchema, function(o) {
+                if (o['name'].toLowerCase().includes(newQ.toLowerCase())) {
                   return o;
                 }
             });
-            let resultProps = _.filter(this.fullPropList, function(o) {
-                if (o['rdfs:label'].toLowerCase().includes(newQ.toLowerCase())) {
+            let resultProps = _.filter(this.userSchemaAllProps, function(o) {
+                if (o['name'].toLowerCase().includes(newQ.toLowerCase())) {
                   return o;
                 }
             });
@@ -625,8 +640,7 @@ var app = new Vue({
         }
       },
 			methods:{
-        RemoveLastDirectoryPartOf(the_url)
-        {
+        RemoveLastDirectoryPartOf(the_url){
           var the_arr = the_url.split('/');
           the_arr.pop();
           return( the_arr.join('/')+'/' );
@@ -711,34 +725,27 @@ var app = new Vue({
           self.moreSpecifTypes = res;
         },
         makeHierarchyTree(){
-          // Check for query or it will run multiple times
-          if (!this.query) {
-            this.nxG = new jsnx.DiGraph();
-            let grabFrom = this.availableClasses;
-
-            if (grabFrom.length > 1) {
-              for (var i = 0; i < grabFrom.length; i++) {
-                if (grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(grabFrom[i]["rdfs:subClassOf"]) ) {
-                  this.addNode(this.removePrefix( grabFrom[i]["@id"]));
-                  this.addNode(this.removePrefix( grabFrom[i]["rdfs:subClassOf"]["@id"]));
-                  this.addEdge( this.removePrefix( grabFrom[i]["rdfs:subClassOf"]["@id"]),this.removePrefix( grabFrom[i]["@id"]));
-                }
-                else if(grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isArray(grabFrom[i]["rdfs:subClassOf"]) ){
-                  this.addNode(this.removePrefix( grabFrom[i]["@id"]));
-                  for (var x = 0; x < grabFrom[i]["rdfs:subClassOf"].length; x++) {
-                    this.addNode(this.removePrefix( grabFrom[i]["rdfs:subClassOf"][x]["@id"]));
-                    this.addEdge(this.removePrefix( grabFrom[i]["rdfs:subClassOf"][x]["@id"]),this.removePrefix( grabFrom[i]["@id"]));
+          var self = this;
+          if (!self.query) {
+            self.nxG = new jsnx.DiGraph();
+            if (self.userSchema.length > 1) {
+              for (var i = 0; i < self.userSchema.length; i++) {
+                if(self.userSchema[i].hasOwnProperty("clses") ){
+                  self.addNode(self.userSchema[i]["name"]);
+                  let parents = self.userSchema[i]["clses"][0];
+                  if (parents) {
+                    parents = parents.split(", ");
+                    //only add an edge to immediate parent class
+                    self.addNode(parents[parents.length-1]);
+                    self.addEdge(parents[parents.length-1],self.userSchema[i]["name"]);
                   }
                 }
               }
             }
-
             let topoRes = jsnx.topologicalSort(this.nxG);
             let rootNode = topoRes[0];
             this.rootNode= rootNode;
-            // this.drawGraph(this.nxG, '#canvas2');
           }
-
         },
         getNeighbors(node){
           if (node) {
@@ -785,25 +792,16 @@ var app = new Vue({
         generateLink(query){
           var self = this;
           var link = ''
-          for (var i = 0; i < self.graph.length; i++) {
-            //IF OBJECT
-            if (_.isPlainObject(self.graph[i]["rdfs:label"])) {
-              if (self.graph[i]["rdfs:label"]['@value'] === query)
+          for (var i = 0; i < self.userSchema.length; i++) {
+            // console.log(query,self.userSchema[i]["name"])
+
+            if(_.isString(self.userSchema[i]["name"])){
+              if (self.userSchema[i]["name"] === query)
                 {
                   return link = './'+query;
                 }
                 else{
-                  var linkExpanded = self.context[self.namespace]+query;
-                  link = linkExpanded;
-                }
-            }
-            //IF NOT OBJECT
-            else if(_.isString(self.graph[i]["rdfs:label"])){
-              if (self.graph[i]["rdfs:label"] === query)
-                {
-                  return link = './'+query;
-                }
-                else{
+                  // To Do: Get context and link out
                   var linkExpanded = self.context[self.namespace]+query;
                   link = linkExpanded;
                 }
@@ -941,35 +939,22 @@ var app = new Vue({
 
             let res = this.paths(g,path[0],path[path.length-1])
             this.allPaths = res;
-            this.getUniqueContent(res);
+            // this.getUniqueContent(res);
             this.getParentData();
           }
         },
         getUniqueContent(paths){
-
           var finalArr = [];
-
-          Array.prototype.unique = function() {
-              var a = this.concat();
-              for(var i=0; i<a.length; ++i) {
-                  for(var j=i+1; j<a.length; ++j) {
-                      if(a[i] === a[j])
-                          a.splice(j--, 1);
-                  }
-              }
-
-              return a;
-          };
-
+          let mergedpaths =[]
           for (var i = 0; i < paths.length; i++) {
-            if (paths[i+1]) {
-              finalArr =paths[i].concat(paths[i+1]).unique();
-            }else{
-              finalArr = paths[0];
-            }
+            mergedpaths = mergedpaths.concat(paths[i])
           }
-          this.parentDisplayResults = finalArr;
 
+          function onlyUnique(value, index, self) {
+            return self.indexOf(value) === index;
+          }
+          finalArr =  mergedpaths.filter( onlyUnique );
+          return finalArr;
         },
         returnFullClassInfo(name){
           this.getAvailableClasses();
@@ -979,7 +964,7 @@ var app = new Vue({
               }
             }
           },
-          makeGraph(){
+        makeGraph(){
           this.nxG = new jsnx.Graph();
           this.getAvailableClasses();
           let grabFrom = this.availableClasses;
@@ -1006,33 +991,26 @@ var app = new Vue({
           this.getMoreSpecifTypes();
         },
         makeQueryGraph(){
+          let self = this;
           let smallG = new jsnx.Graph();
           let arr = [];
-          let grabFrom = arr;
-          for (var i = 0; i < this.parentDisplayResults.length; i++) {
-            arr.push( this.returnClass(this.parentDisplayResults[i]) )
-          }
 
-          if (grabFrom.length) {
-            for (var i = 0; i < grabFrom.length; i++) {
-              if (grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(grabFrom[i]["rdfs:subClassOf"]) ) {
-                smallG.addNode(grabFrom[i]["@id"],{'label':grabFrom[i]["@id"]});
-                smallG.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"]["@id"]);
-              }
-              else if(grabFrom[i].hasOwnProperty("rdfs:subClassOf") && _.isArray(grabFrom[i]["rdfs:subClassOf"]) ){
-                for (var x = 0; x < grabFrom[i]["rdfs:subClassOf"].length; x++) {
-                  smallG.addNode(grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
-                  smallG.addEdge(grabFrom[i]["@id"],grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
-                  //go one level deeper if exists
-                  let sc = this.returnClass(grabFrom[i]["rdfs:subClassOf"][x]["@id"]);
-                  if (sc.hasOwnProperty("rdfs:subClassOf") && _.isPlainObject(sc["rdfs:subClassOf"])) {
-                    smallG.addEdge(sc["@id"],sc["rdfs:subClassOf"]["@id"]);
-                  }
-                }
+          for (var i = 0; i < self.classInfo["clses"].length; i++) {
+            arr = arr.concat(self.classInfo["clses"][i].split(', '))
+          }
+          arr = arr.concat([self.schemaClass]);
+
+          console.log('arr',arr)
+
+          if (arr.length) {
+            for (var i = 0; i < arr.length; i++) {
+              if (arr[i-1]) {
+                smallG.addNode(arr[i]);
+                smallG.addEdge(arr[i],arr[i-1]);
               }
             }
           }else{
-            smallG.addNode(this.classInfo["@id"],{'label':this.classInfo["@id"]});
+            smallG.addNode(this.classInfo["name"],{'label':this.classInfo["name"]});
           }
           this.drawGraph(smallG, '#canvas');
         },
@@ -1175,16 +1153,14 @@ var app = new Vue({
           }
         },
         determinePath(){
-          if(this.userURL){
-            this.findDisplaySchema()
-          }
+          console.log('determining path...')
           if (this.getClass()) {
-            // console.log('PATH: CLASS')
+            console.log('PATH: CLASS')
             this.property='';
             this.getClassProperties();
             this.makeGraph();
-          }else if (!this.getClass()){
-            // console.log('PATH: PROPERTY')
+          }else{
+            console.log('PATH: PROPERTY')
             this.getPropertyInfo()
           }
         },
@@ -1292,17 +1268,16 @@ var app = new Vue({
         },
         getClass(){
           let results = [];
-          // console.log("QUERY ",  this.query)
-          for (var i = 0; i < this.graph.length; i++) {
-            if (this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query ||
-          this.graph[i].hasOwnProperty('@type') && this.graph[i]['@type'] === "rdfs:Class" && this.graph[i]["rdfs:label"].toLowerCase() === this.query.toLowerCase()) {
-              this.schemaClass = this.graph[i]["rdfs:label"];
-              this.classInfo= this.graph[i];
-
-              this.getSubclass(this.graph[i]);
+          let self = this;
+          console.log('Looking for class: ',self.query, self.userSchema)
+          for (var i = 0; i < self.userSchema.length; i++) {
+            if (self.userSchema[i]["name"] === self.query ) {
+              self.schemaClass = self.userSchema[i]["name"];
+              self.classInfo = self.userSchema[i];
+              console.log('FOUND CLASS', self.classInfo['name'])
             }
           }
-          if (this.schemaClass) {
+          if (self.schemaClass) {
             return true;
           }else{
             return false;
@@ -1325,38 +1300,35 @@ var app = new Vue({
           // console.log(this.fullPropList)
           this.availableClasses = results.sort();
           this.allAvailableClasses = resultsForRegistration.sort();
-          this.getAvailableClassesNames();
+          this.orderAlphabetically();
           this.getAllAvailableProperties();
           this.getFilters();
         },
-        getAvailableClassesNames(){
+        orderAlphabetically(){
           var self = this;
           let res =[];
-          for (var i = 0; i < self.availableClasses.length; i++) {
-            res.push(self.availableClasses[i]['rdfs:label']);
+          for (var i = 0; i < self.userSchema.length; i++) {
+            res.push(self.userSchema[i]['name']);
           }
-          // res = res.sort();
 
           let data = res.reduce((r, e) => {
-            let group = e[0];
+            let group = e.split(":")[1][0];
             if(!r[group]) r[group] = {group, children: [e]}
             else r[group].children.push(e);
             return r;
-          }, {})
+          }, {});
 
           res = Object.values(data)
-
           self.availableClassesNames= _.orderBy(res, ['group'], ['asc']);
           self.makeHierarchyTree();
-
+          self.getAllProps();
+          self.getFilters();
         },
         getFilters(){
           let letters = [];
           let self = this;
-          for (var i = 0; i < self.availableClasses.length; i++) {
-
-            let q = self.availableClasses[i]["rdfs:label"][0];
-
+          for (var i = 0; i < self.userSchema.length; i++) {
+            let q = self.userSchema[i]["name"].split(':')[1][0];
             if ( !letters.includes(q) ) {
               letters.push( q );
             }
@@ -1366,7 +1338,7 @@ var app = new Vue({
         handleChange: function(e){
           let target = e.target.value;
           this.filter = e.target.value;
-          let fullList = this.availableClasses;
+          let fullList = this.userSchema;
           let results = [];
           switch (target) {
             case 'ALL':
@@ -1374,8 +1346,8 @@ var app = new Vue({
               break;
             default:
               results = fullList;
-              results = fullList.filter(word => word["rdfs:label"][0] === target);
-              this.filterResults =  _.sortBy(results, [user => user['rdfs:label']], ['asc']);
+              results = fullList.filter(word => word["name"].split(":")[1][0] === target);
+              this.filterResults =  _.sortBy(results, [user => user['name'].split(":")[1]], ['asc']);
           }
         },
         getSubclass(data){
@@ -1421,24 +1393,28 @@ var app = new Vue({
           this.rangeIncludes = range;
         },
         checkIfRegistered(){
-          let url ='';
           let self = this;
-          let namespace = window.location.pathname.split('/');
-          namespace = namespace.slice(1,window.location.pathname.length-1)[0];
-          // console.log('checking..',namespace)
-          axios.get(`/api/registry/`+namespace).then(function (res) {
+          // let namespace = window.location.pathname.split('/');
+          // namespace = namespace.slice(1,window.location.pathname.length-1)[0];
+          console.log('checking..',self.namespace)
+          axios.get(`/api/registry/`+self.namespace).then(function (res) {
             console.log('reg check ', res)
             if (res.data) {
-              self.registered = true;
-              url = res.data.url;
-              self.reqFile(url);
-              console.log('registered')
-            }else{
-              self.reqFile();
-              console.log('not registered')
+              let url = res.data.url;
+              if (url) {
+                self.registered = true;
+                self.reqFile(url);
+                console.log('registered')
+              }else{
+                Swal.fire(
+                  'This namespace is registered but..',
+                  'No URL was found',
+                  'error'
+                );
+              }
             }
           }).catch(err=>{
-            // console.log('no res err')
+            console.log('not registered')
             self.reqFile();
             throw err;
           });
@@ -1447,13 +1423,13 @@ var app = new Vue({
           let self = this;
           if (url && self.registered) {
             console.log('LOADING FROM URL')
-            axios.get('/api/proxy?url='+url).then(res=>{
-              console.log('load success')
-              console.log(res.data)
-              this.graph = res.data['@graph'];
-              this.context = res.data['@context'];
-              this.determinePath()
-              this.getAvailableClasses()
+            axios.get('/api/schema?url='+url).then(res=>{
+              // console.log('load success')
+              // console.log(res.data)
+              // this.graph = res.data['@graph'];
+              // this.context = res.data['@context'];
+              // this.determinePath()
+              // this.getAvailableClasses()
             }).catch(err=>{
               throw err;
               Swal.fire(
@@ -1464,11 +1440,13 @@ var app = new Vue({
             });
           }else if(!url){
             console.log('LOADING FROM LOCALSTORAGE')
-            var retrievedObject = JSON.parse(localStorage.getItem('datasetData'));
-            this.graph = retrievedObject['@graph'];
-            this.context = retrievedObject['@context'];
+            this.userSchema = JSON.parse(localStorage.getItem('user-schema-classes'));
+            this.userSchemaURL = localStorage.getItem('user-schema-url');
+            console.log('userSchema',this.userSchema)
+            // this.graph = retrievedObject['@graph'];
+            // this.context = retrievedObject['@context'];
             this.determinePath()
-            this.getAvailableClasses()
+            this.orderAlphabetically()
           }
 
         },
@@ -1478,6 +1456,59 @@ var app = new Vue({
              self.userInfo = result;
           },
           cache: false});
+        },
+        getAllProps(){
+          let res = [];
+          let self = this;
+          for (var i = 0; i < self.userSchema.length; i++) {
+            if (self.userSchema[i].hasOwnProperty('props') && self.userSchema[i]['props'].length>0) {
+              res = res.concat(self.userSchema[i]['props']);
+            }
+          }
+          self.userSchemaAllProps = res;
+          // console.log('ALL Props', self.userSchemaAllProps)
+        },
+        getPaths(classInfo){
+          console.log('getting all possible paths...')
+          var self = this;
+          let res = [];
+          for (var i = 0; i < classInfo["clses"].length; i++) {
+            if (classInfo["clses"][i]) {
+              let parents =classInfo["clses"][i].split(', ');
+              // parents.push(classInfo.name)
+              res.push(parents)
+            }
+          }
+          console.log('ALL PATHS',res)
+          self.parentList = self.getUniqueContent(res).reverse();
+          console.log('Unique Parents',self.parentList)
+          // self.getParentsInfo(self.parentList)
+          return res;
+        },
+        getPropertiesFor(classInfo){
+          var self = this;
+          console.log('getting props for ', classInfo.name);
+          if (classInfo.hasOwnProperty('props') && classInfo['props'].length>0) {
+            return classInfo['props'];
+            console.log('returning ', classInfo['props']);
+          }else{
+            return ['This class has no properties of its own']
+          }
+        },
+        getParentsInfo(list){
+          console.log('Getting Parent Class Data...')
+          var self= this;
+          let res = [];
+          for (var i = 0; i < list.length; i++) {
+            for (var x = 0; x < self.userSchema.length; x++) {
+              console.log(self.userSchema[x].name,list[i])
+              if (self.userSchema[x].name === list[i]) {
+                res.push(self.userSchema[x])
+              }
+            }
+          }
+          self.userSchemaParents = res;
+          console.log('Full Parent Info', self.userSchemaParents)
         }
 			},
 			mounted:function(){
@@ -1486,8 +1517,10 @@ var app = new Vue({
          if ( context ) {
            self.query = context.query;
            if (context.hasOwnProperty('namespace')) {
-             //remove random numbers
-             self.namespace = context.namespace.replace(/[0-9]/g, '');;
+             // self.namespace = context.namespace.replace(/[0-9]/g, '');;
+             self.namespace = context.namespace;
+             console.log('namespace', self.namespace)
+             console.log('query', self.query)
            }
            self.dataSetURL = localStorage.getItem('datasetDataURL');
            self.checkIfRegistered();
@@ -1495,14 +1528,7 @@ var app = new Vue({
 
          self.checkUser();
 
-			},
-      created:function(){
-          let context = {{Context}}
-          if (context.hasOwnProperty('URL')) {
-            this.userURL = context.URL;
-          }
-
-      }
+			}
 		});
 
 

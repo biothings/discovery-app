@@ -161,7 +161,7 @@ class EditorHandler(BaseHandler):
 
 class VisualizerHandler(BaseHandler):
     def get(self, namespace=None, className=None):
-        test_file = "viewer.html"
+        test_file = "schema-viewer.html"
         test_template = TEMPLATE_ENV.get_template(test_file)
         test_output = test_template.render(Context=json.dumps(
             {"namespace": namespace, "query": className}))
