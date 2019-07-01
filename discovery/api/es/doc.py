@@ -101,6 +101,7 @@ class Prop(InnerDoc):
     A Class Property
     '''
     curie = Text(required=True)
+    label = Text()
     range = Text(multi=True)
     description = Text()
 
@@ -173,6 +174,7 @@ class Class(Document):
                     es_class.properties.append(Prop(
                         curie=prop['curie'],
                         range=prop['range'],
+                        label=prop['label'],
                         description=prop['description']
                     ))
 
