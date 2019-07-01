@@ -76,7 +76,7 @@ class RegistryHandler(APIBaseHandler):
             Check the existance of a schema by its prefix.
         '''
 
-        if Schema.get(id=prefix, ignore=404):
+        if prefix == 'schema' or Schema.get(id=prefix, ignore=404):
             self.set_status(200)
         else:
             self.set_status(404)
@@ -162,16 +162,22 @@ class RegistryHandler(APIBaseHandler):
             })
             return
 
-        schema = Schema.get(id=prefix, ignore=404)
+        result = {}
 
-        if not schema:
-            self.send_error(404)
-            return
+        if prefix != 'schema':
+
+            schema = Schema.get(id=prefix, ignore=404)
+
+            if not schema:
+                self.send_error(404)
+                return
+
+            result['url'] = schema['_meta'].url
 
         if not label:
-            result = {}
-            result['name'] = schema.meta.id
-            result['url'] = schema['_meta'].url
+
+            result['name'] = prefix
+            result['context'] = Schema.gather_contexts()
             result['hits'] = [klass.to_dict()
                               for klass in Class.search().query("match", prefix=prefix)]
 

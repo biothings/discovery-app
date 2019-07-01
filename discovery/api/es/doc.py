@@ -68,6 +68,10 @@ class Schema(Document):
             for schema in cls.search()
         }
 
+        contexts.update({
+            "schema": "http://schema.org/",
+        })
+
         return {k: v for k, v in contexts.items() if v}
 
     def encode_raw(self, text):
