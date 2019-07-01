@@ -172,6 +172,8 @@ class RegistryHandler(APIBaseHandler):
             result = {}
             result['name'] = schema.meta.id
             result['url'] = schema['_meta'].url
+            result['hits'] = [klass.to_dict()
+                              for klass in Class.search().query("match", prefix=prefix)]
 
             self.write(result)
             return
