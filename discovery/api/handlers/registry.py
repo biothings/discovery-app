@@ -147,18 +147,16 @@ class RegistryHandler(APIBaseHandler):
             else:
                 search = search.query("match_all")
 
-            response = search.execute()
-
             self.write({
-                "total": response.hits.total,
+                "total": search.execute().hits.total,
                 "context": {
                     schema.meta.id: schema.context
-                    for schema in response
+                    for schema in search.scan()
                 },
                 "hits": [{
                     "prefix": schema.meta.id,
                     "url": schema['_meta'].url,
-                } for schema in response]
+                } for schema in search.scan()]
             })
             return
 
@@ -176,10 +174,13 @@ class RegistryHandler(APIBaseHandler):
 
         if not label:
 
+            search = Class.search().query("match", prefix=prefix)
+
             result['name'] = prefix
+            result['total'] = search.execute().hits.total
             result['context'] = Schema.gather_contexts()
             result['hits'] = [klass.to_dict()
-                              for klass in Class.search().query("match", prefix=prefix)]
+                              for klass in search.scan()]
 
             self.write(result)
             return
