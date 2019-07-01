@@ -88,7 +88,7 @@ class RegistryHandler(APIBaseHandler):
         '''
 
         args = json_decode(self.request.body)
-        prefix = args['prefix'].lower()
+        prefix = args['namespace'].lower()
         url = args['url'].lower()
 
         assert prefix != 'schema', "cannot rewrite core schema."

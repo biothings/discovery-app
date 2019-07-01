@@ -84,7 +84,7 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
         '''
         [REGISTRY POST] /registry/<prefix>
         '''
-        doc = {'url': BTS_URL, 'prefix': 'bts'}
+        doc = {'url': BTS_URL, 'namespace': 'bts'}
         Class.delete_by_schema('bts')
         self.query(q='BiologicalEntity', expect_hits=False)
         self.request('registry', method='POST', json=doc, headers=self.auth_user, expect_status=201)
