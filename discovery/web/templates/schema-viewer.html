@@ -2,34 +2,75 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-  .overflow-x-scroll{
-    overflow-x: scroll;
-  }
-  .hierarchicalSwatch{
-    width:20px;
-    height:20px;
-  }
-  #viewer{
-    min-height: 90vh;
-  }
+
+
 </style>
 <div id="viewer" class="container pt-5">
+  <!-- Registration -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-center">
+          <template v-if="userInfo">
+            <h1 class="logoText">Registration</h1>
+            <div class="form-group">
+              <small class="text-muted">Choose a namespace</small>
+              <input class="form-control w-50 m-auto" type="text" v-model='nameInput'/>
+            </div>
+            <template v-if="available && nameInput.length">
+              <small class="text-success bold"><i class="fas fa-check"></i> AVAILABLE</small>
+            </template>
+            <template v-if="!available && nameInput.length">
+              <small class="text-danger bold"><i class="fas fa-times"></i> NOT AVAILABLE</small>
+            </template>
+            <template v-if="invalidChars">
+              <br />
+              <small class="text-warning bold"><i class="fas fa-times"></i> INVALID CHARACTERS</small>
+            </template>
+            <p class="m-2" :class="[available ? 'mainTextDark' : 'text-danger']">
+              discovery.biothings.io/<span class="bold" v-text='nameInput'></span>
+            </p>
+            <template v-if='available && !invalidChars'>
+              <button class="btn btn-success" @click='handleRegistration()' v-text="'Register '+nameInput"></button>
+            </template>
+          </template>
+          <template v-else>
+            <div class="alert alert-warning">
+              <h4>You must be logged in to register this schema</h4>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Loader -->
   <div v-if=loading class="loader">
-    <img src="./static/img/ripple.svg"/>
+    <img src="/static/img/ripple.svg"/>
   </div>
   <!-- HOMEPAGE MODE -->
   <div class="jumbotron" v-if="!query">
-    <div class="text-center p-2">
-      <h1 class="d-inline logoText" v-if='namespaceRegistered' v-text='namespace'></h1>
+    <div class="engineBox w-50 m-auto p-2" v-if='!namespaceRegistered'>
+      <div class="bg-light p-3 text-center clickBAck">
+        <h3 class="mainTextDark">Register Your Schema</h3>
+        <button role="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">Click Here</button>
+      </div>
+    </div>
+    <div class="text-center p-5">
+      <h1 style="font-size:3em" class="logoText" v-if='namespaceRegistered' v-text='namespace'></h1>
     </div>
     <div class="row">
-      <form class="col-sm-12 pl-0">
-        <a class="bold mainTextDark pointer m-2" style="float:right" @click='flipView()'>Toggle View <i class="fas fa-retweet"></i></a>
-        <div class="input-group mb-2 col-sm-12 col-md-6">
+      <form class="col-sm-12">
+        <a class="bold mainTextDark pointer m-2 toggleLink" style="float:right" @click='flipView()'>Toggle View <i class="fas fa-retweet"></i></a>
+        <div class="input-group mb-2 col-sm-12 col-md-4">
           <div class="input-group-prepend">
-            <div class="input-group-text">Quick Search</div>
+            <div class="input-group-text bg-info text-light"><i class="fas fa-search"></i></div>
           </div>
-          <input type="text" v-model='searchQuery' class="form-control" id="inlineFormInputGroup" placeholder="Enter text here">
+          <input type="text" v-model='searchQuery' class="form-control" id="inlineFormInputGroup" placeholder="Search...">
         </div>
         <div class="row w-100">
           <div class="col-sm-12 col-md-6 p-4">
@@ -153,7 +194,7 @@
         <li class="nav-item">
           <a class="nav-link mainTextDark" :href="RemoveLastDirectoryPartOf(window.location.href)"><i class="fas fa-chevron-left"></i> Back</a>
         </li>
-        <li class="nav-item dropdown">
+        <li v-if='!validationView' class="nav-item dropdown">
           <a class="nav-link dropdown-toggle mainTextDark" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Jump To</a>
           <div class="dropdown-menu">
             <template v-if='topClass'>
@@ -166,8 +207,18 @@
             </a>
           </div>
         </li>
+        <li v-if='validationView' class="nav-item dropdown">
+
+        </li>
         <li class="nav-item ">
-          <buttom @click='changeView' class="btn btn-info text-light" v-text='validationView?"Original View":"Complete View"'></buttom>
+          <a @click='changeView' class="btn text-light" :class="[validationView?'btn-info':'mainBackDark']">
+            <span v-if="!validationView">
+              <i class="fas fa-star"></i> Show Used Properties Only
+            </span>
+            <span v-if="validationView">
+             <i class="fas fa-stream"></i> Show All Inherited Properties
+            </span>
+          </a>
         </li>
       </ul>
     </div>
@@ -198,259 +249,439 @@
 <script>
 
 
-const store = new Vuex.Store({
-  state: {
-    'validationView':true,
-    'userSchema':Object,
-    'userSchemaProps':Array,
-    'queryClass':Object
-  },
-  strict: true,
-  mutations: {
-    toggleView (state) {
-      state.validationView = !state.validationView
+  const store = new Vuex.Store({
+    state: {
+      'validationView':true,
+      'userSchema':Object,
+      'userSchemaProps':Array,
+      'queryClass':Object
     },
-    saveSchema(state,payload){
-      console.log('saving schema 🦄 ...')
-      state.userSchema = payload['schema'];
+    strict: true,
+    mutations: {
+      toggleView (state) {
+        state.validationView = !state.validationView
+      },
+      saveSchema(state,payload){
+        state.userSchema = payload['schema'];
+        console.log('saved schema 🦄 ...',state.userSchema)
+      },
+      saveProps(state,payload){
+        state.userSchemaProps = payload['props'];
+        console.log('saving props 🛍 ...',state.userSchemaProps)
+      },
+      saveQueryClass(state,payload){
+        state.queryClass = payload['topclass'];
+        console.log('saved Query Class 🌎...',state.queryClass)
+      },
     },
-    saveProps(state,payload){
-      console.log('saving props 🛍 ...')
-      state.userSchema = payload['props'];
-    },
-    saveQueryClass(state,payload){
-      console.log('saving Query Class ...')
-      state.queryClass = payload['topclass'];
-    },
-  },
-  getters:{
-    // exposed as store.getters.nameOfGetter
-    getViewMode: state => {
-      return state.validationView
-    },
-    getDomainOfProp: (state) => (propname) => {
+    getters:{
+      // exposed as store.getters.nameOfGetter
+      getViewMode: state => {
+        return state.validationView
+      },
+      getDomainOfProp: (state) => (propname) => {
 
-    },
-  }
-});
+      },
+      handleLink: (state) => (name) =>{
+        let prefix='';
+        let cName ='';
+        let link =''
+        if (name.includes(':')) {
+          prefix = name.split(':')[0];
+          cName = name.split(':')[1];
+        }else{
+          cName = name;
+        }
+        // console.log('handling Link...',prefix,cName)
+        for (var x = 0; x < state.userSchema.hits.length; x++) {
+         if (state.userSchema.hits[x].label.includes(cName)) {
+           if (prefix && prefix === 'schema') {
+             link = '/schema/'+cName
+           }else{
+             link = "./"+cName
+           }
+           return link;
+         }else{
+           link = state.userSchema.context[prefix]+cName
+         }
+        }
+        return link
 
-Vue.component('validation-box', {
-  data: function(){
-    return{
-      userSchema:[],
-      textColor:'',
-      backColor:'',
-      properties:[],
-      required:[]
-    }
-  },
-  props: ['validation'],
-  methods:{
-    parseValidation(val){
-      if (val.hasOwnProperty('required')) {
-        self.required = val.required;
+      },
+      removeDomainsNotIncluded: (state) => (domains) =>{
+        let res = []
+        if (domains) {
+          for (var i = 0; i < domains.length; i++) {
+            for (var x = 0; x < state.userSchema.hits.length; x++) {
+              if (domains[i].includes(state.userSchema.hits[x].label)) {
+                if (!res.includes(domains[i])) {
+                  res.push(domains[i])
+                }
+              }
+            }
+          }
+        }
+        return res
       }
-      if (val.hasOwnProperty('properties')) {
-        self.required = val.properties;
+    }
+  });
+
+  Vue.component('property-box', {
+    data: function(){
+      return{
+
       }
     },
-  },
-  watch:{
-  },
-  mounted: function(){
-    var self = this;
-    if (self.validation) {
-      self.parseValidation(self.validation);
-    }
-    if (self.parent) {
-      self.textColor = 'mainTextLight'
-      self.backColor = 'mainBackLight'
-    }else{
-      self.textColor = 'mainTextDark'
-      self.backColor = 'mainBackDark'
-    }
-  },
-  computed: {
-    validationView () {
+    props: ['name','fullinfo','required'],
+    methods:{
+      findDomainOf(propname){
+        var self = this;
+        for (var i = 0; i < self.allProps.length; i++) {
+          if (self.allProps[i].label === propname) {
+            if (self.allProps[i].domain) {
+              // return self.allProps[i].domain
+              return store.getters.removeDomainsNotIncluded(self.allProps[i].domain);
+            }else{
+              return ['No Match Found']
+            }
+          }
+        }
+      },
+      getName(string){
+        let res ='';
+        if (string.includes('http')) {
+          let arr =  string.split('/');
+          res = arr[arr.length-1];
+        }else if (string.includes(':')) {
+          let arr =  string.split(':');
+          res = arr[arr.length-1];
+        }else{
+          res = string
+        }
+        return res
+      },
+      isRequired(propname){
+        if (this.required) {
+          for (var i = 0; i < this.required.length; i++) {
+            if (this.required[i]===propname) {
+              return true;
+            }
+          }
+          return false;
+        }else{
+          return false;
+        }
+      },
+      getLink(clssName){
+        let link = [store.getters.handleLink(clssName)];
+        return link;
+      }
+    },
+    watch:{
+    },
+    mounted: function(){
+      var self = this;
+      tippy('#'+self.name, {
+        content: "<div class='mainBackDark text-light'><h3>"+self.name+"</h3><pre class='alert alert-info m-0 text-left wraptext'>"+JSON.stringify(self.fullinfo,null,2)+"</pre></div>",
+        placement: 'left',
+        trigger:'click'
+      })
+    },
+    computed: {
+      validationView () {
         return this.$store.state.validationView
+      },
+      allProps(){
+        return this.$store.state.userSchemaProps
       }
-  },
-  template:
-  `<div class="alert alert-info">
-    <h1>VALIDATION</h1>
-    <span v-if='properties' class="badge badge-primary">Props</span>
-    <span v-if='required' class="badge badge-warning">Required</span>
-
-  </div>`
-});
-
-Vue.component('clss-box', {
-  data: function(){
-    return{
-      userSchema:[],
-      textColor:'',
-      backColor:'',
-      expand:false,
-      properties:[],
-    }
-  },
-  props: ['clss','userSchema','parent','validationView'],
-  methods:{
-    getPaths(classInfo){
-      // console.log('getting all possible paths...')
-      var self = this;
-      let res = [];
-      for (var i = 0; i < classInfo["parent_classes"].length; i++) {
-        if (classInfo["parent_classes"][i]) {
-          let parents =classInfo["parent_classes"][i].split(', ');
-          parents.push(classInfo.label)
-          res.push(parents)
-        }
-      }
-      return res;
     },
-    getPropertiesFor(classInfo){
+    template:
+    `<div>
+      <small v-if='name' :id='name' class='text-primary pointer float-right ml-2 unselectable'><i class="fas fa-code"></i></small>
+      <template v-if='name'>
+        <small class='badge badge-required float-right unselectable' v-if="isRequired(name)">Required</small>
+        <a class='bold d-inline' v-text='name' :href='"/"+name'></a>
+        <small class="text-muted">from </small>
+        <template v-for='item in findDomainOf(name)'>
+          <template v-for="link in getLink(item)">
+            <a class='d-inline' :href='link' :target="link[0] !== '.'?'_blank':'_self'">
+              <small >
+                <span v-html='item'></span>
+              </small>
+              <i v-if="link[0] !== '.'" class="fas small fa-external-link-alt"></i>
+            </a>
+          </template>
+        </template>
+      </template>
+      <small class="text-muted" v-if="fullinfo.description">
+        <p v-text="fullinfo.description || 'No Description Provided'"></p>
+      </small>
+      <template v-if="fullinfo.type">
+        <div class="pillType d-inline">
+          <span v-text="'type'"></span>
+          <span v-text="fullinfo.type"></span>
+        </div>
+      </template>
+      <template v-if="fullinfo.format">
+        <div class="pillType d-inline">
+          <span class="mainBackDark" v-text="'format'"></span>
+          <span v-text="fullinfo.format"></span>
+        </div>
+      </template>
+      <template v-if="fullinfo['$ref']">
+        <div class="pillType d-inline">
+          <span class="mainBackLight" v-text="'$ref'"></span>
+          <span v-text="fullinfo['$ref']"></span>
+        </div>
+      </template>
+      <template v-if="fullinfo.enum">
+        <div class="dropdown dropright">
+          <button class="btn smallButton btn-info text-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Enum
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <div v-for="item in fullinfo.enum" class="dropdown-item" v-text='item'></div>
+          </div>
+        </div>
+      </template>
+      <template v-if="fullinfo['const']">
+        <div class="pillType d-inline">
+          <span style='background:#17a2b8' v-text="'const'"></span>
+          <span v-text="fullinfo['const']"></span>
+        </div>
+      </template>
+      <template v-if="fullinfo.items">
+        <div class="dropdown">
+          <button class="btn smallButton btn-info text-light btn-sm dropdown-toggle m-1" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Items
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <div v-for="(item,index) in fullinfo.items" class="dropdown-item">
+              <div class="pillType d-inline">
+                <span class="mainBackLight" v-text="index"></span>
+                <span v-text="item"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+      <template v-if="fullinfo.oneOf">
+        <hr />
+        <h6 class="text-muted">Value can be either...</h6>
+        <div class="row">
+          <template v-for='(item,index) in fullinfo.oneOf'>
+            <property-box class='p-1 col-md-5 col-sm-12 text-center' :fullinfo="item"></property-box>
+            <div class="col-md-2 col-sm-12 text-center mainTextLight" v-if="index !== fullinfo.oneOf.length-1"><h4>OR</h4></div>
+          </template>
+        </div>
+      </template>
+      <template v-if='fullinfo.properties'>
+        <hr />
+        <h6 class="text-muted">Properties used:</h6>
+        <property-box v-for="(prop,index) in fullinfo.properties" style='background:#dcf2f7' class="alert propbox" :name='index' :fullinfo="prop" :required='fullinfo.required'></property-box>
+      </template>
+    </div>`
+  });
+
+  Vue.component('validation-box', {
+    data: function(){
+      return{
+        userSchema:[],
+        textColor:'',
+        backColor:'',
+      }
+    },
+    props: ['validation'],
+    methods:{
+
+    },
+    watch:{
+    },
+    mounted: function(){
       var self = this;
-      console.log('getting props for ', classInfo.name);
-      if (classInfo.hasOwnProperty('properties') && classInfo['properties'].length>0) {
-        return classInfo['properties'];
-        console.log('returning ', classInfo['properties']);
+      if (self.parent) {
+        self.textColor = 'mainTextLight'
+        self.backColor = 'mainBackLight'
       }else{
-        return ['This class has no properties of its own']
+        self.textColor = 'mainTextDark'
+        self.backColor = 'mainBackDark'
       }
     },
-    getType: function(data){
-      let types=[];
-      if (data.hasOwnProperty("schema:rangeIncludes")) {
-        if (_.isString(data["schema:rangeIncludes"])) {
-          let type = data['schema:rangeIncludes'].split(':');
-          type = type[type.length-1];
-          types.push(type);
+    computed: {
+      validationView () {
+          return this.$store.state.validationView
+        },
+      topclass(){
+        return this.$store.state.queryClass
+      }
+    },
+    template:
+    `<div class="alert alert-dark">
+      <h5 class="mainTextDark" v-if='validation.properties' v-text="'Properties used by '+topclass.label"> </h5>
+      <ul v-for="(prop,index) in validation.properties">
+        <property-box class="alert propbox" :name='index' :fullinfo="prop" :required='validation.required'></property-box>
+      </ul>
+    </div>`
+  });
+
+  Vue.component('clss-box', {
+    data: function(){
+      return{
+        userSchema:[],
+        textColor:'',
+        backColor:'',
+        expand:false,
+        properties:[],
+      }
+    },
+    props: ['clss','userSchema','parent','validationView'],
+    methods:{
+      getPaths(classInfo){
+        // console.log('getting all possible paths...')
+        var self = this;
+        let res = [];
+        for (var i = 0; i < classInfo["parent_classes"].length; i++) {
+          if (classInfo["parent_classes"][i]) {
+            let parents =classInfo["parent_classes"][i].split(', ');
+            parents.push(classInfo.label)
+            res.push(parents)
+          }
         }
-        else if (_.isArray(data["schema:rangeIncludes"])) {
-          for (var i = 0; i < data['schema:rangeIncludes'].length; i++) {
-            let type = data['schema:rangeIncludes'][i]['@id'].split(':');
+        return res;
+      },
+      getPropertiesFor(classInfo){
+        var self = this;
+        console.log('getting props for ', classInfo.name);
+        if (classInfo.hasOwnProperty('properties') && classInfo['properties'].length>0) {
+          return classInfo['properties'];
+          console.log('returning ', classInfo['properties']);
+        }else{
+          return ['This class has no properties of its own']
+        }
+      },
+      getType: function(data){
+        let types=[];
+        if (data.hasOwnProperty("schema:rangeIncludes")) {
+          if (_.isString(data["schema:rangeIncludes"])) {
+            let type = data['schema:rangeIncludes'].split(':');
             type = type[type.length-1];
             types.push(type);
           }
-        }else if(_.isObject(data["schema:rangeIncludes"])){
-          let type = data['schema:rangeIncludes']['@id'].split(':');
-          type = type[type.length-1];
-          types.push(type);
+          else if (_.isArray(data["schema:rangeIncludes"])) {
+            for (var i = 0; i < data['schema:rangeIncludes'].length; i++) {
+              let type = data['schema:rangeIncludes'][i]['@id'].split(':');
+              type = type[type.length-1];
+              types.push(type);
+            }
+          }else if(_.isObject(data["schema:rangeIncludes"])){
+            let type = data['schema:rangeIncludes']['@id'].split(':');
+            type = type[type.length-1];
+            types.push(type);
+          }
         }
-      }
-      return types;
+        return types;
+      },
+      getName(string){
+        let res ='';
+        if (string.includes('http')) {
+          let arr =  string.split('/');
+          res = arr[arr.length-1];
+        }else if (string.includes(':')) {
+          let arr =  string.split(':');
+          res = arr[arr.length-1];
+        }else{
+          res = string
+        }
+        return res
+      },
     },
-    getName(string){
-      let res ='';
-      if (string.includes('http')) {
-        let arr =  string.split('/');
-        res = arr[arr.length-1];
-      }else if (string.includes(':')) {
-        let arr =  string.split(':');
-        res = arr[arr.length-1];
+    watch:{
+
+    },
+    mounted: function(){
+      var self = this;
+
+      if (self.validationView && !self.parent) {
+        self.expand = true;
+      }
+      if (self.parent) {
+        self.textColor = 'mainTextLight'
+        self.backColor = 'mainBackLight'
       }else{
-        res = string
+        self.textColor = 'mainTextDark'
+        self.backColor = 'mainBackDark'
       }
-      return res
     },
-  },
-  watch:{
-    validationView(n,o){
-      console.log('VALIDATION View',n)
-    }
-  },
-  mounted: function(){
-    var self = this;
-
-    if (self.clss.properties) {
-      $.notify(self.clss.label+" has Props",{ globalPosition: 'right',className:'info', showDuration: 40, });
-    }else{
-      $.notify(self.clss.label+" has NO Props",{ globalPosition: 'right',className:'error', showDuration: 40, });
-    }
-
-    if (self.validationView && !self.parent) {
-      self.expand = true;
-    }
-    if (self.parent) {
-      self.textColor = 'mainTextLight'
-      self.backColor = 'mainBackLight'
-    }else{
-      self.textColor = 'mainTextDark'
-      self.backColor = 'mainBackDark'
-    }
-  },
-  computed: {
-    validationView () {
-      return this.$store.state.validationView
-    }
-  },
-  template:
-  `<div class="jumbotron message">
-    <div>
-      <h1 class="bold" :class='textColor' v-if='clss.label' :id='clss.label' v-text='clss.label'></h1>
-      <small class="text-danger float-right" v-if='validationView && clss.validation'><i class="fas fa-certificate"></i> Validation Provided</small>
-      <template v-if='clss.label && clss.parent_classes'>
-        <ul style="list-style:none;">
-          <li v-for="path in getPaths(clss)">
-            <span v-for="(item,index) in path">
-              <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold small" :href="'./'+getName(item)" v-text="getName(item)"></a>
-              <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right" :class='textColor'></i>&nbsp;</span>
-            </span>
-          </li>
-        </ul>
-      </template>
-      <p v-html="clss['description'] || 'No Description Provided'" class="padding20 description" :class='textColor'></p>
+    computed: {
+      validationView () {
+        return this.$store.state.validationView
+      }
+    },
+    template:
+    `<div class="jumbotron message">
       <div>
-        <div class="resultsTabFull mt-3 p-3 text-light" :class='backColor'>
-          <h5 class='d-inline'><span v-text='clss.label+" has "'></span>
-            <span class='badge badge-light' :class='textColor'>
-              <span v-if='clss && clss.properties' v-text='clss.properties.length+" properties"'>
-
+        <h1 class="bold" :class='textColor' v-if='clss.label' :id='clss.label' v-text='clss.label'></h1>
+        <template v-if='clss.label && clss.parent_classes'>
+          <ul style="list-style:none;">
+            <li v-for="path in getPaths(clss)">
+              <span v-for="(item,index) in path">
+                <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold small" :href="'./'+getName(item)" v-text="getName(item)"></a>
+                <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right" :class='textColor'></i>&nbsp;</span>
               </span>
-              <span v-else>
+            </li>
+          </ul>
+        </template>
+        <p v-html="clss['description'] || 'No Description Provided'" class="padding20 description" :class='textColor'></p>
+        <div v-if='clss.properties && !validationView'>
+          <div class="resultsTabFull mt-3 p-3 text-light" :class='backColor'>
+            <h5 class='d-inline'><span v-text='clss.label+" has "'></span>
+              <span class='badge badge-light' :class='textColor'>
+                <span v-if='clss && clss.properties' v-text='clss.properties.length+" properties"'>
 
+                </span>
+                <span v-else>
+
+                </span>
               </span>
-            </span>
-          </h5>
-          <button v-if='clss && clss.properties.length' @click='expand=!expand' style='border:2px solid white;' class='btn text-light ml-5' :class='backColor' v-text="expand?'Hide All':'Show All'"></button>
-        </div>
-        <table v-show='expand' class="table mb-2" :class='parent?"table-striped-sec":"table-striped-main"'>
-          <tbody>
-            <tr v-if='clss && clss.properties' v-for="(item,i) in clss.properties">
-              <td >
-                <a class="font-weight-bold" :href='"./"+item.label'>
-                  <span v-html='item.label'></span>
-                </a>
-                <p>
-                  <small class='text-muted' v-html='item.description || "No description provided"'></small>
-                </p>
-              </td>
-              <td>
-                <small class="mainTextDark bold">Expected Type: </small>
-                <template v-for="(type,i) in item.range">
-                  <a :href="'/'+getName(type)">
-                    <small >
-                      <span v-html='type'></span>
-                    </small>
+            </h5>
+            <button v-if='clss && clss.properties.length' @click='expand=!expand' style='border:2px solid white;' class='btn text-light ml-5' :class='backColor' v-text="expand?'Hide All':'Show All'"></button>
+          </div>
+          <table v-show='expand' class="table mb-2" :class='parent?"table-striped-sec":"table-striped-main"'>
+            <tbody>
+              <tr v-if='clss && clss.properties' v-for="(item,i) in clss.properties">
+                <td >
+                  <a class="font-weight-bold" :href='"./"+item.label'>
+                    <span v-html='item.label'></span>
                   </a>
-                  <span v-if="i !== item.range.length-1">, </span>
-                </template>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div v-if='validationView && clss.validation'>
-        <validation-box :validation='clss.validation'></validation-box>
-      </div>
-  </div>`
-});
+                  <p>
+                    <small class='text-muted' v-html='item.description || "No description provided"'></small>
+                  </p>
+                </td>
+                <td>
+                  <small class="mainTextDark bold">Expected Type: </small>
+                  <template v-for="(type,i) in item.range">
+                    <a :href="'/'+getName(type)">
+                      <small >
+                        <span v-html='type'></span>
+                      </small>
+                    </a>
+                    <span v-if="i !== item.range.length-1">, </span>
+                  </template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-if='validationView && clss.validation'>
+          <validation-box :validation='clss.validation'></validation-box>
+        </div>
+    </div>`
+  });
 
 
 
 
-var app = new Vue({
+  var app = new Vue({
       el: '#viewer',
       store: store,
 			data: function(){
@@ -463,6 +694,7 @@ var app = new Vue({
           userSchemaAllProps:[],
           userSchemaAllClasses:[],
           parentList:[],
+          userInfo:{},
           userSchemaParents:[],
           query:'',
           namespace:'',
@@ -475,11 +707,13 @@ var app = new Vue({
           searchResults:[],
           searchResultsProps:[],
           filterLetters:[],
-          // topClass:{},
           topProp:{},
           filter:'',
           loading:false,
           topClassParents:[],
+          available:false,
+          nameInput:'',
+          invalidChars:false
 				}
 			},
       computed:{
@@ -548,6 +782,25 @@ var app = new Vue({
             }
           },
           deep:true
+        },
+        nameInput:function(namespace,oldnamespace){
+          var self = this;
+          var re = /^[a-zA-Z0-9_.-]*$/;
+          if (!re.test(namespace) ) {
+            self.invalidChars = true;
+          }else{
+            self.invalidChars = false;
+          }
+
+          if (namespace && !self.invalidChars) {
+            axios.head(`/api/registry/`+namespace).then(function (res) {
+              console.log('Registration Check ', res)
+              self.available= false;
+            }).catch(err=>{
+              self.available= true;
+              throw err;
+            });
+          }
         }
       },
 			methods:{
@@ -565,10 +818,10 @@ var app = new Vue({
             console.log('Registration Check ', res)
             if (res.data) {
               let url = res.data.url;
-              if (url) {
+              if (url || res.data) {
                 self.namespaceRegistered = true;
-                self.loadSchema(url);
-                console.log('REGISTERED')
+                self.loadSchema(namespace,url);
+                console.log('%c REGISTERED...'+namespace,'color: green')
                 if (self.developerMode ) {
                   $.notify(namespace+" is registered",{ globalPosition: 'right',className:'info', showDuration: 40, });
                 }
@@ -588,23 +841,40 @@ var app = new Vue({
             throw err;
           });
         },
-        loadSchema(url){
+        loadSchema(namespace,url){
           let self = this;
-          if (url && self.namespaceRegistered) {
+          if (namespace && self.namespaceRegistered) {
             if (self.developerMode ) {
               $.notify("REGITERED SCHEMA LOADED",{ globalPosition: 'right',className:'success', showDuration: 40, });
             }
-            axios.get('/api/schema?url='+url).then(res=>{
-              //TODO handle registered schema
+            axios.get("/api/registry/"+namespace).then(res=>{
+              console.log('%c GET REGISTERED SCHEMA RES...','color:purple')
+              console.log(res.data)
+              self.data = res.data;
+              self.loading = false;
+              this.userSchema = res.data
+              this.userSchemaURL = url
+
+              if (self.developerMode ) {
+                $.notify("REGISTERED SCHEMA LOADED",{ globalPosition: 'right',className:'success', showDuration: 40, });
+              }
+
+              var payload = {};
+              payload["schema"] = res.data;
+              store.commit('saveSchema',payload);
+
+              console.log('userSchema',this.userSchema)
+              this.orderAlphabetically();
+
+              if (self.query) {
+                self.handleQuery();
+              }
+
             }).catch(err=>{
+              self.loading = false;
               throw err;
-              Swal.fire(
-                'Oops!',
-                'Something went wrong loading this url',
-                'error'
-              );
-            });
-          }else if(!url){
+            })
+          }else if(!namespace){
             console.log('LOADING SCHEMA FROM LOCALSTORAGE')
             this.userSchema = JSON.parse(localStorage.getItem('user-schema-classes'));
             this.userSchemaURL = localStorage.getItem('user-schema-url');
@@ -686,30 +956,30 @@ var app = new Vue({
 
             self.rootNode= rootNode;
 
-            if (self.developerMode) {
-              jsnx.draw(self.nxG, {
-                element: '#canvasTest',
-                weighted: true,
-                edgeStyle: {
-                    'stroke-width': 10,
-                    'fill': '#b4b4b4'
-                },
-                layoutAttr: {
-                    charge: -800,
-                    linkDistance: 100
-                },
-                height:300,
-                labelStyle: {fill: '#5C3069'},
-                withLabels: true,
-                nodeLabels: 'label',
-                nodeStyle: {
-                    'stroke': '#8feddc',
-                    'fill': '#84dcdf',
-                    'cursor': 'pointer',
-                    'nodeShape':'s'
-                }
-              });
-            }
+            // if (self.developerMode) {
+            //   jsnx.draw(self.nxG, {
+            //     element: '#canvasTest',
+            //     weighted: true,
+            //     edgeStyle: {
+            //         'stroke-width': 10,
+            //         'fill': '#b4b4b4'
+            //     },
+            //     layoutAttr: {
+            //         charge: -800,
+            //         linkDistance: 100
+            //     },
+            //     height:300,
+            //     labelStyle: {fill: '#5C3069'},
+            //     withLabels: true,
+            //     nodeLabels: 'label',
+            //     nodeStyle: {
+            //         'stroke': '#8feddc',
+            //         'fill': '#84dcdf',
+            //         'cursor': 'pointer',
+            //         'nodeShape':'s'
+            //     }
+            //   });
+            // }
           // }
         },
         getName(string){
@@ -736,7 +1006,7 @@ var app = new Vue({
         getNeighbors(node){
           if (node) {
             let neighbors = this.nxG.neighbors(node);
-            console.log('neighbors', neighbors)
+            // console.log('neighbors', neighbors)
             return neighbors;
           }
         },
@@ -749,7 +1019,7 @@ var app = new Vue({
             }
           }
           self.userSchemaAllProps = res;
-          console.log('ALL Props', self.userSchemaAllProps)
+          // console.log('ALL Props', self.userSchemaAllProps)
 
           var payload = {};
           payload["props"] = res;
@@ -850,16 +1120,18 @@ var app = new Vue({
         getParentsOf(classInfo){
           var self = this;
           let res = [];
-          for (var i = 0; i < classInfo["parent_classes"].length; i++) {
-            if (classInfo["parent_classes"][i]) {
-              let parents =classInfo["parent_classes"][i].split(', ');
-              res.push(parents)
+          if (classInfo.hasOwnProperty('parent_classes')) {
+            for (var i = 0; i < classInfo["parent_classes"].length; i++) {
+              if (classInfo["parent_classes"][i]) {
+                let parents =classInfo["parent_classes"][i].split(', ');
+                res.push(parents)
+              }
             }
+            // console.log('ALL PATHS',res)
+            self.topClassParents = self.getUniqueContent(res).reverse();
+            // console.log('TOP CLASS PARENTS...',self.topClassParents)
+            self.getParentsInfo(self.topClassParents)
           }
-          // console.log('ALL PATHS',res)
-          self.topClassParents = self.getUniqueContent(res).reverse();
-          // console.log('TOP CLASS PARENTS...',self.topClassParents)
-          self.getParentsInfo(self.topClassParents)
           return res;
         },
         getParentsInfo(list){
@@ -945,6 +1217,51 @@ var app = new Vue({
           self.drawGraph(self.nxG, '#canvas');
           // jsnx.draw(self.nxG,{element:'#canvas',nodelist:x,nodeStyle:{'fill': '#e02563',},})
         },
+        handleRegistration(){
+          var self = this;
+          let data= {
+            "namespace": self.nameInput,
+            "url": self.userSchemaURL
+          }
+          console.log('registering...',data)
+          axios.post('/api/registry',data).then(res=>{
+            console.log('POST response ',res.data)
+            if (res.data.url) {
+
+              Swal.fire({
+                type: 'success',
+                toast: true,
+                position: 'bottom',
+                title: 'Registration Successful',
+                html: "Data can now be accessed on <a href='/"+self.nameInput+"/'>"+window.location.origin+"/"+self.nameInput+"/"+"</a>"
+              });
+              self.registered = true;
+
+            }else if (res.data.url){
+              Swal.fire({
+                type: 'error',
+                toast: true,
+                position: 'top',
+                title: 'Registration Failed',
+                text: res.data.error
+              });
+            }
+
+          }).catch(err=>{
+
+            Swal.fire({
+              type: 'error',
+              toast: true,
+              position: 'top center',
+              title: 'Registration Failed',
+              text: err,
+              showConfirmButton: false,
+              timer: 2000
+            });
+
+            throw err;
+          });
+        },
 
 			},
 			mounted:function(){
@@ -953,6 +1270,7 @@ var app = new Vue({
          if ( context ) {
            self.query = context.query;
            self.namespace = context.namespace;
+           self.nameInput = context.namespace;
            console.log('namespace', self.namespace)
            console.log('query', self.query)
            self.checkIfNamespaceIsRegistered(self.namespace);
