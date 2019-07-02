@@ -102,6 +102,7 @@ class RegistryHandler(APIBaseHandler):
             return
 
         schema_doc = requests.get(url, timeout=5)
+        schema_doc.raise_for_status()
         schema_parser = self.get_parser(schema_doc.json())
         schema_classes = Class.import_from_parser(schema_parser)
 
