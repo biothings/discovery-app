@@ -100,6 +100,7 @@ class Prop(InnerDoc):
     '''
     A Class Property
     '''
+    uri = Text()
     curie = Text(required=True)
     label = Text()
     range = Text(multi=True)
@@ -115,6 +116,7 @@ class Class(Document):
     # _id : in the format of <schema>:<name>, for example, schema:Thing
     #       accessible through constructor argument 'id' or cls.meta.id
 
+    uri = Text()
     prefix = Text(required=True)  # the prefix (schema _id, not url) it is defined in
     label = Text(required=True)
     parent_classes = Text(multi=True)  # immediate parent class(es) only
@@ -163,6 +165,7 @@ class Class(Document):
                 LOGGER.info("Parsing '%s'.", class_)
 
                 es_class = cls()
+                es_class.uri = class_.uri
                 es_class.prefix = class_.prefix
                 es_class.label = class_.label
                 es_class.description = class_.description
@@ -172,6 +175,7 @@ class Class(Document):
 
                 for prop in class_.list_properties(group_by_class=False):
                     es_class.properties.append(Prop(
+                        uri=prop['uri'],
                         curie=prop['curie'],
                         range=prop['range'],
                         label=prop['label'],
