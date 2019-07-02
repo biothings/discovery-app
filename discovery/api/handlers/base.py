@@ -4,6 +4,7 @@ import json
 import logging
 import pprint
 
+import requests
 import tornado
 from tornado.escape import json_decode
 
@@ -48,6 +49,7 @@ class APIBaseHandler(BaseHandler):
 
             if type(exception) in [tornado.web.MissingArgumentError,
                                    tornado.httpclient.HTTPError,
+                                   requests.exceptions.RequestException,
                                    json.decoder.JSONDecodeError]:
                 self.set_status(422)
                 status_code = 422
