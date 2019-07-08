@@ -188,49 +188,25 @@
   </div>
   <!-- QUERY MODE -->
   <div class="jumbotron" v-if="query">
-
-    <div>
-      <ul class="nav nav-justified">
-        <li class="nav-item">
-          <a class="nav-link mainTextDark" :href="RemoveLastDirectoryPartOf(window.location.href)"><i class="fas fa-chevron-left"></i> Back</a>
-        </li>
-        <li v-if='!validationView' class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle mainTextDark" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Jump To</a>
-          <div class="dropdown-menu">
-            <template v-if='topClass'>
-              <a class="nav-link mainTextDark" v-for="item in topClassParents" :href="'#'+item">
-                <span v-text="item"></span>
-              </a>
-            </template>
-            <a class="nav-link pointer mainTextDark" href="#bottom" >
-               More...
-            </a>
-          </div>
-        </li>
-        <li v-if='validationView' class="nav-item dropdown">
-
-        </li>
-        <li class="nav-item ">
-          <a @click='changeView' class="btn text-light" :class="[validationView?'btn-info':'mainBackDark']">
-            <span v-if="!validationView">
-              <i class="fas fa-star"></i> Show Used Properties Only
-            </span>
-            <span v-if="validationView">
-             <i class="fas fa-stream"></i> Show All Inherited Properties
-            </span>
-          </a>
-        </li>
-      </ul>
-    </div>
-    <div class="d-none">
-      <buttom @click='makeQueryGraph' class="btn btn-success text-light" >graph</buttom>
-      <div id="canvas" class="d-none d-sm-none d-md-block"></div>
+    <!-- Navigation Options -->
+    <div style="height:50px;">
+      <a class="btn btn-outline-secondary float-left" role="button" :href="RemoveLastDirectoryPartOf(window.location.href)"><i class="fas fa-chevron-left"></i> Back</a>
+      <div v-if="queryContent && !queryContent.domain" class="float-right">
+        <a @click='changeView' class="btn text-light" :class="[validationView?'btn-info':'mainBackDark']">
+          <span v-if="!validationView">
+            <i class="fas fa-star"></i> Show Used Properties Only
+          </span>
+          <span v-if="validationView">
+           <i class="fas fa-stream"></i> Show All Inherited Properties
+          </span>
+        </a>
+        <more-info></more-info>
+      </div>
     </div>
     <!-- CLASSES FOR QUERY -->
-    <!-- <a v-if="!showGraph" @click="toggleGraph" class="d-none d-sm-none d-md-block mainTextDark bold float-right pointer" ><i class="fas fa-draw-polygon"></i> View Graph</a> -->
-    <clss-box :parent="false" :clss='topClass' :userSchema='userSchema'></clss-box>
-    <template  v-if='topClass && userSchemaParents' v-for='parent in userSchemaParents'>
-      <clss-box v-show='!validationView' :parent="true" :clss='parent' :userSchema='userSchema'></clss-box>
+    <query-box v-if='queryContent && userSchemaParents' :parent="false" :q='queryContent' :userSchema='userSchema'></query-box>
+    <template  v-if='queryContent && userSchemaParents' v-for='parent in userSchemaParents'>
+      <query-box v-show='!validationView' :parent="true" :q='parent' :userSchema='userSchema'></query-box>
     </template>
   </div>
 
@@ -254,7 +230,7 @@
       'validationView':true,
       'userSchema':Object,
       'userSchemaProps':Array,
-      'queryClass':Object
+      'queryStoreContent':Object
     },
     strict: true,
     mutations: {
@@ -267,11 +243,14 @@
       },
       saveProps(state,payload){
         state.userSchemaProps = payload['props'];
-        console.log('saving props 🛍 ...',state.userSchemaProps)
+        // console.log('saving props 🛍 ...',state.userSchemaProps)
       },
-      saveQueryClass(state,payload){
-        state.queryClass = payload['topclass'];
-        console.log('saved Query Class 🌎...',state.queryClass)
+      savequeryStoreContent(state,payload){
+        state.queryStoreContent = payload['queryContent'];
+        if (!state.queryStoreContent.hasOwnProperty('validation')) {
+          state.validationView = false;
+        }
+        // console.log('saved Query Content 🌎...',state.queryStoreContent)
       },
     },
     getters:{
@@ -326,6 +305,49 @@
     }
   });
 
+  Vue.component('more-info', {
+    data: function(){
+      return{
+
+      }
+    },
+    props: [''],
+    methods:{
+
+    },
+    watch:{
+    },
+    mounted: function(){
+      var self = this;
+      tippy('#showButton', {
+        content: `<div class='alert alert-light m-0'><table class='table'>
+          <tr>
+            <td>
+              <small class='mainTextDark'><i class="fas fa-stream"></i> Show All Inherited Properties</small>
+            </td>
+            <td>
+              <small>Shows all parents classes of the current class and their properties</small>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <small class='mainTextDark'><i class="fas fa-star"></i> Show Used Properties Only</small>
+            </td>
+            <td>
+              <small>Shows only the current class and properties used specified in the <b>validation</b> field</small>
+            </td>
+          </tr>
+        </table></div>`,
+        placement: 'left',
+      })
+    },
+    computed: {
+
+    },
+    template:
+    `<i id='showButton' class="fas fa-info-circle text-info"></i>`
+  });
+
   Vue.component('property-box', {
     data: function(){
       return{
@@ -372,8 +394,8 @@
           return false;
         }
       },
-      getLink(clssName){
-        let link = [store.getters.handleLink(clssName)];
+      getLink(qName){
+        let link = [store.getters.handleLink(qName)];
         return link;
       }
     },
@@ -400,7 +422,7 @@
       <small v-if='name' :id='name' class='text-primary pointer float-right ml-2 unselectable'><i class="fas fa-code"></i></small>
       <template v-if='name'>
         <small class='badge badge-required float-right unselectable' v-if="isRequired(name)">Required</small>
-        <a class='bold d-inline' v-text='name' :href='"/"+name'></a>
+        <a class='bold d-inline' v-text='name' :href='"./"+name'></a>
         <small class="text-muted">from </small>
         <template v-for='item in findDomainOf(name)'>
           <template v-for="link in getLink(item)">
@@ -511,20 +533,20 @@
       validationView () {
           return this.$store.state.validationView
         },
-      topclass(){
-        return this.$store.state.queryClass
+      queryContent(){
+        return this.$store.state.queryStoreContent
       }
     },
     template:
     `<div class="alert alert-dark">
-      <h5 class="mainTextDark" v-if='validation.properties' v-text="'Properties used by '+topclass.label"> </h5>
+      <h5 class="mainTextDark" v-if='validation.properties' v-text="'Properties used by '+queryContent.label"> </h5>
       <ul v-for="(prop,index) in validation.properties">
         <property-box class="alert propbox" :name='index' :fullinfo="prop" :required='validation.required'></property-box>
       </ul>
     </div>`
   });
 
-  Vue.component('clss-box', {
+  Vue.component('query-box', {
     data: function(){
       return{
         userSchema:[],
@@ -534,7 +556,7 @@
         properties:[],
       }
     },
-    props: ['clss','userSchema','parent','validationView'],
+    props: ['q','userSchema','parent','validationView'],
     methods:{
       getPaths(classInfo){
         // console.log('getting all possible paths...')
@@ -594,6 +616,10 @@
         }
         return res
       },
+      getLink(qName){
+        let link = [store.getters.handleLink(qName)];
+        return link;
+      }
     },
     watch:{
 
@@ -620,10 +646,16 @@
     template:
     `<div class="jumbotron message">
       <div>
-        <h1 class="bold" :class='textColor' v-if='clss.label' :id='clss.label' v-text='clss.label'></h1>
-        <template v-if='clss.label && clss.parent_classes'>
+        <h1 class="bold d-inline" :class='textColor' v-if='q.label' :id='q.label' v-text='q.label'></h1>
+        <template v-if="q && q.domain">
+          <small class="text-muted">is a property of: </small>
+          <template v-for='(item,index) in q.domain'>
+            <a :class="[ index !== q.domain.length-1 ? 'text-muted' : textColor]" class="font-weight-bold small" :href="getLink(item)" v-text="getName(item)"></a>
+          </template>
+        </template>
+        <template v-if='q.label && q.parent_classes'>
           <ul style="list-style:none;">
-            <li v-for="path in getPaths(clss)">
+            <li v-for="path in getPaths(q)">
               <span v-for="(item,index) in path">
                 <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold small" :href="'./'+getName(item)" v-text="getName(item)"></a>
                 <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right" :class='textColor'></i>&nbsp;</span>
@@ -631,12 +663,18 @@
             </li>
           </ul>
         </template>
-        <p v-html="clss['description'] || 'No Description Provided'" class="padding20 description" :class='textColor'></p>
-        <div v-if='clss.properties && !validationView'>
+        <p v-html="q['description'] || 'No Description Provided'" class="padding20 description" :class='textColor'></p>
+        <template v-if="q && q.range">
+          <small class="text-muted">Values expected to be one of these types: </small>
+          <template v-for='(item,index) in q.range'>
+            <a :class="[ index !== q.range.length-1 ? 'text-muted' : textColor]" class="font-weight-bold small" :href="getLink(item)" v-text="getName(item)"></a>
+          </template>
+        </template>
+        <div v-if='q.properties && !validationView'>
           <div class="resultsTabFull mt-3 p-3 text-light" :class='backColor'>
-            <h5 class='d-inline'><span v-text='clss.label+" has "'></span>
+            <h5 class='d-inline'><span v-text='q.label+" has "'></span>
               <span class='badge badge-light' :class='textColor'>
-                <span v-if='clss && clss.properties' v-text='clss.properties.length+" properties"'>
+                <span v-if='q && q.properties' v-text='q.properties.length+" properties"'>
 
                 </span>
                 <span v-else>
@@ -644,11 +682,11 @@
                 </span>
               </span>
             </h5>
-            <button v-if='clss && clss.properties.length' @click='expand=!expand' style='border:2px solid white;' class='btn text-light ml-5' :class='backColor' v-text="expand?'Hide All':'Show All'"></button>
+            <button v-if='q && q.properties.length' @click='expand=!expand' style='border:2px solid white;' class='btn text-light ml-5' :class='backColor' v-text="expand?'Hide All':'Show All'"></button>
           </div>
           <table v-show='expand' class="table mb-2" :class='parent?"table-striped-sec":"table-striped-main"'>
             <tbody>
-              <tr v-if='clss && clss.properties' v-for="(item,i) in clss.properties">
+              <tr v-if='q && q.properties' v-for="(item,i) in q.properties">
                 <td >
                   <a class="font-weight-bold" :href='"./"+item.label'>
                     <span v-html='item.label'></span>
@@ -660,7 +698,7 @@
                 <td>
                   <small class="mainTextDark bold">Expected Type: </small>
                   <template v-for="(type,i) in item.range">
-                    <a :href="'/'+getName(type)">
+                    <a :href="getLink(type)">
                       <small >
                         <span v-html='type'></span>
                       </small>
@@ -672,8 +710,8 @@
             </tbody>
           </table>
         </div>
-        <div v-if='validationView && clss.validation'>
-          <validation-box :validation='clss.validation'></validation-box>
+        <div v-if='validationView && q.validation'>
+          <validation-box :validation='q.validation'></validation-box>
         </div>
     </div>`
   });
@@ -710,7 +748,7 @@
           topProp:{},
           filter:'',
           loading:false,
-          topClassParents:[],
+          queryContentParents:[],
           available:false,
           nameInput:'',
           invalidChars:false
@@ -720,8 +758,8 @@
         validationView () {
           return this.$store.state.validationView
         },
-        topClass () {
-          return this.$store.state.queryClass
+        queryContent () {
+          return this.$store.state.queryStoreContent
         },
         schemaFilters(){
           let letters = [];
@@ -760,7 +798,7 @@
             this.searchResultsProps = [];
           }
         },
-        topClass:{
+        queryContent:{
           handler:function(klass,oldklass){
             var self = this;
             let res = [];
@@ -775,9 +813,9 @@
                 }
               }
               if (res.length) {
-                self.topClassParents = res;
+                self.queryContentParents = res;
               }else{
-                self.topClassParents = []
+                self.queryContentParents = []
               }
             }
           },
@@ -813,15 +851,15 @@
         },
         checkIfNamespaceIsRegistered(namespace){
           let self = this;
-          console.log('Checking Namespace..',namespace)
+          if(self.developerMode)console.log('Checking Namespace..',namespace)
           axios.get(`/api/registry/`+namespace).then(function (res) {
-            console.log('Registration Check ', res)
+            if(self.developerMode)console.log('Registration Check ', res)
             if (res.data) {
               let url = res.data.url;
               if (url || res.data) {
                 self.namespaceRegistered = true;
                 self.loadSchema(namespace,url);
-                console.log('%c REGISTERED...'+namespace,'color: green')
+                if(self.developerMode)console.log('%c REGISTERED...'+namespace,'color: green')
                 if (self.developerMode ) {
                   $.notify(namespace+" is registered",{ globalPosition: 'right',className:'info', showDuration: 40, });
                 }
@@ -848,8 +886,8 @@
               $.notify("REGITERED SCHEMA LOADED",{ globalPosition: 'right',className:'success', showDuration: 40, });
             }
             axios.get("/api/registry/"+namespace).then(res=>{
-              console.log('%c GET REGISTERED SCHEMA RES...','color:purple')
-              console.log(res.data)
+              if(self.developerMode)console.log('%c GET REGISTERED SCHEMA RES...','color:purple')
+              if(self.developerMode)console.log(res.data)
               self.data = res.data;
               self.loading = false;
               this.userSchema = res.data
@@ -863,7 +901,7 @@
               payload["schema"] = res.data;
               store.commit('saveSchema',payload);
 
-              console.log('userSchema',this.userSchema)
+              if(self.developerMode)console.log('userSchema',this.userSchema)
               this.orderAlphabetically();
 
               if (self.query) {
@@ -875,7 +913,7 @@
               throw err;
             })
           }else if(!namespace){
-            console.log('LOADING SCHEMA FROM LOCALSTORAGE')
+            if(self.developerMode)console.log('LOADING SCHEMA FROM LOCALSTORAGE')
             this.userSchema = JSON.parse(localStorage.getItem('user-schema-classes'));
             this.userSchemaURL = localStorage.getItem('user-schema-url');
 
@@ -886,7 +924,7 @@
             if (self.developerMode ) {
               $.notify("LOCALSTORAGE SCHEMA LOADED",{ globalPosition: 'right',className:'success', showDuration: 40, });
             }
-            console.log('userSchema',this.userSchema)
+            if(self.developerMode)console.log('userSchema',this.userSchema)
             this.orderAlphabetically();
 
             if (self.query) {
@@ -945,7 +983,7 @@
               }
             }
             let topoRes = jsnx.topologicalSort(self.nxG);
-            console.log('ROOT NODE IS...', topoRes[0])
+            if(self.developerMode)console.log('ROOT NODE IS...', topoRes[0])
             let rootNode = '';
             // if (topoRes.includes('Thing')) {
             //   rootNode ='Thing';
@@ -1031,22 +1069,25 @@
             $.notify(self.query+" is the query",{ globalPosition: 'right',className:'warning', showDuration: 40, });
           }
           // Attempt to find Class first
-          let clss = self.findClass(self.query);
-          if (clss) {
-            // self.topClass = clss;
-            self.getParentsOf(clss);
-            // console.log('>>>>TOP CLASS', clss)
+          let q = self.findClass(self.query);
+          if (q) {
+            // self.queryContent = q;
+            self.getParentsOf(q);
+            // console.log('>>>>TOP CLASS', q)
             var payload = {};
-            payload["topclass"] = clss;
-            store.commit('saveQueryClass',payload);
+            payload["queryContent"] = q;
+            store.commit('savequeryStoreContent',payload);
 
             if (self.developerMode ) {
-              $.notify("CLASS MODE: "+clss.label,{ globalPosition: 'right',className:'warning', showDuration: 40, });
+              $.notify("CLASS MODE: "+q.label,{ globalPosition: 'right',className:'warning', showDuration: 40, });
             }
           }else if (self.findProp(self.query)) {
             let prop = self.findProp(self.query);
-            self.topProp = prop;
-            console.log('FOUND PROP', prop.label)
+            // self.topProp = prop;
+            // console.log('FOUND PROP', self.topProp)
+            var payload = {};
+            payload["queryContent"] = prop;
+            store.commit('savequeryStoreContent',payload);
             if (self.developerMode ) {
               $.notify("PROPERTY MODE: "+prop.label,{ globalPosition: 'right',className:'warning', showDuration: 40, });
             }
@@ -1059,7 +1100,7 @@
         },
         findClass(query){
           let self = this;
-          console.log('Looking in schema for CLASS: ',query)
+          if(self.developerMode)console.log('Looking in schema for CLASS: ',query)
           for (var i = 0; i < self.userSchema['hits'].length; i++) {
             if (self.userSchema['hits'][i]["label"] === query ) {
               return self.userSchema['hits'][i];
@@ -1099,7 +1140,7 @@
             default:
               results = fullList;
               results = fullList.filter(word => word["name"].split(":")[1][0] === target);
-              this.filterResults =  _.sortBy(results, [clss => clss['name'].split(":")[1]], ['asc']);
+              this.filterResults =  _.sortBy(results, [q => q['name'].split(":")[1]], ['asc']);
           }
         },
         getUniqueContent(paths){
@@ -1128,9 +1169,9 @@
               }
             }
             // console.log('ALL PATHS',res)
-            self.topClassParents = self.getUniqueContent(res).reverse();
-            // console.log('TOP CLASS PARENTS...',self.topClassParents)
-            self.getParentsInfo(self.topClassParents)
+            self.queryContentParents = self.getUniqueContent(res).reverse();
+            // console.log('TOP CLASS PARENTS...',self.queryContentParents)
+            self.getParentsInfo(self.queryContentParents)
           }
           return res;
         },
@@ -1148,7 +1189,7 @@
             }
           }
           self.userSchemaParents = res;
-          console.log('ALL PARENTS INFO', self.userSchemaParents)
+          // console.log('ALL PARENTS INFO', self.userSchemaParents)
         },
         changeView(){
           store.commit('toggleView')
@@ -1177,45 +1218,6 @@
                 'nodeShape':'s'
             }
           });
-        },
-        makeQueryGraph(){
-          let self = this;
-          let arr = [];
-          self.makeHierarchyTree();
-
-          // for (var i = 0; i < self.topClass["parent_classes"].length; i++) {
-          //   arr = arr.concat(self.topClass["parent_classes"][i].split(', '))
-          // }
-          // arr = arr.concat([self.schemaClass]);
-          //
-          // console.log('arr',arr)
-          //
-          // if (arr.length) {
-          //   for (var i = 0; i < arr.length; i++) {
-          //     if (arr[i-1]) {
-          //       smallG.addNode(arr[i]);
-          //       smallG.addEdge(arr[i],arr[i-1]);
-          //     }
-          //   }
-          // }else{
-          //   smallG.addNode(this.classInfo["name"],{'label':this.classInfo["name"]});
-          // }
-
-          // # draw path in red
-          //   path = nx.shortest_path(G,source=14,target=16)
-          //   path_edges = zip(path,path[1:])
-          //   nx.draw_networkx_nodes(G,pos,nodelist=path,node_color='r')
-          //   nx.draw_networkx_edges(G,pos,edgelist=path_edges,edge_color='r',width=10)
-          //   plt.axis('equal')
-          //   plt.show()
-          let x = jsnx.allPairsShortestPath(self.nxG);
-          console.log("ALL PATHS",x['_stringValues'])
-          x = x.get(self.rootNode).get(self.query)
-
-          // let x = self.nxG.hasEdge(self.rootNode,self.query);
-          console.log("SHORTEST PATH",x)
-          self.drawGraph(self.nxG, '#canvas');
-          // jsnx.draw(self.nxG,{element:'#canvas',nodelist:x,nodeStyle:{'fill': '#e02563',},})
         },
         handleRegistration(){
           var self = this;
@@ -1271,12 +1273,11 @@
            self.query = context.query;
            self.namespace = context.namespace;
            self.nameInput = context.namespace;
-           console.log('namespace', self.namespace)
-           console.log('query', self.query)
+           if(self.developerMode)console.log('namespace', self.namespace)
+           if(self.developerMode)console.log('query', self.query)
            self.checkIfNamespaceIsRegistered(self.namespace);
          }
         //
-        self.checkUser();
 
 			}
 		});
