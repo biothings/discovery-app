@@ -16,32 +16,65 @@
           </button>
         </div>
         <div class="modal-body text-center">
-          <template v-if="userInfo">
-            <h1 class="logoText">Registration</h1>
-            <div class="form-group">
-              <small class="text-muted">Choose a namespace</small>
-              <input class="form-control w-50 m-auto" type="text" v-model='nameInput'/>
-            </div>
-            <template v-if="available && nameInput.length">
-              <small class="text-success bold"><i class="fas fa-check"></i> AVAILABLE</small>
+          <h1 class="logoText">Registration</h1>
+          <template v-if="regProceed">
+            <template v-if="userInfo">
+              <div class="form-group">
+                <small class="text-muted">Choose a namespace</small>
+                <input class="form-control w-50 m-auto" type="text" v-model='nameInput'/>
+              </div>
+              <template v-if="available && nameInput.length">
+                <small class="text-success bold"><i class="fas fa-check"></i> AVAILABLE</small>
+              </template>
+              <template v-if="!available && nameInput.length">
+                <small class="text-danger bold"><i class="fas fa-times"></i> NOT AVAILABLE</small>
+              </template>
+              <template v-if="invalidChars">
+                <br />
+                <small class="text-warning bold"><i class="fas fa-times"></i> INVALID CHARACTERS</small>
+              </template>
+              <p class="m-2" :class="[available ? 'mainTextDark' : 'text-danger']">
+                discovery.biothings.io/<span class="bold" v-text='nameInput'></span>
+              </p>
+              <template v-if='available && !invalidChars'>
+                <button class="btn btn-danger text-light mr-2" @click="regProceed=!regProceed">Cancel</button>
+                <button class="btn btn-success" @click='handleRegistration()' v-text="'Register '+nameInput"></button>
+              </template>
             </template>
-            <template v-if="!available && nameInput.length">
-              <small class="text-danger bold"><i class="fas fa-times"></i> NOT AVAILABLE</small>
-            </template>
-            <template v-if="invalidChars">
-              <br />
-              <small class="text-warning bold"><i class="fas fa-times"></i> INVALID CHARACTERS</small>
-            </template>
-            <p class="m-2" :class="[available ? 'mainTextDark' : 'text-danger']">
-              discovery.biothings.io/<span class="bold" v-text='nameInput'></span>
-            </p>
-            <template v-if='available && !invalidChars'>
-              <button class="btn btn-success" @click='handleRegistration()' v-text="'Register '+nameInput"></button>
+            <template v-else>
+              <div class="alert alert-warning">
+                <h4>You must be logged in to register this schema</h4>
+              </div>
             </template>
           </template>
           <template v-else>
-            <div class="alert alert-warning">
-              <h4>You must be logged in to register this schema</h4>
+            <div class="text-center">
+              <h5 class="mainTextDark">Why should you register this schema?</h5>
+              <ul class="text-muted text-left">
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> Share your work with other members of the community. Your schema definition could be helpful to many others in the community as a starting point for their reserach.
+                  </small>
+                </li>
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> By registering a schema derived from an existing schema you are helping to maintain the <a href="https://www.go-fair.org/fair-principles/" target="_blank">FAIR</a> (Findable, Accessible, Interoperable, Reusable) principles by making data more <b>Reusable</b>.
+                  </small>
+                </li>
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> It's easy to registrer your schema! If everything looks good here all you have to do is choose a namespace for your schema's homepage.
+                  </small>
+                </li>
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> You'll be able to easily share your schema and visualize it in a way that it's easy to undertand.
+                  </small>
+                </li>
+              </ul>
+              <small class="mainTextDark">Click continue to proceed with registration of this schema</small>
+              <hr />
+              <button class="btn mainBackDark text-light pulse" @click="regProceed=!regProceed">Continue</button>
             </div>
           </template>
         </div>
@@ -65,7 +98,7 @@
     </div>
     <div class="row">
       <form class="col-sm-12">
-        <a class="bold mainTextDark pointer m-2 toggleLink" style="float:right" @click='flipView()'>Toggle View <i class="fas fa-retweet"></i></a>
+        <a class="bold mainTextDark pointer m-2 toggleLink" style="float:right" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
         <div class="input-group mb-2 col-sm-12 col-md-4">
           <div class="input-group-prepend">
             <div class="input-group-text bg-info text-light"><i class="fas fa-search"></i></div>
@@ -650,7 +683,14 @@
         <template v-if="q && q.domain">
           <small class="text-muted">is a property of: </small>
           <template v-for='(item,index) in q.domain'>
-            <a :class="[ index !== q.domain.length-1 ? 'text-muted' : textColor]" class="font-weight-bold small" :href="getLink(item)" v-text="getName(item)"></a>
+            <template v-for="link in getLink(item)">
+              <a class='d-inline bold' :href='link' :target="link[0] !== '.'?'_blank':'_self'" :class="[ index !== q.domain.length-1 ? 'text-muted' : textColor]" >
+                <small >
+                  <span v-html='item'></span>
+                </small>
+                <i v-if="link[0] !== '.'" class="fas small fa-external-link-alt"></i>
+              </a>
+            </template>
           </template>
         </template>
         <template v-if='q.label && q.parent_classes'>
@@ -667,7 +707,14 @@
         <template v-if="q && q.range">
           <small class="text-muted">Values expected to be one of these types: </small>
           <template v-for='(item,index) in q.range'>
-            <a :class="[ index !== q.range.length-1 ? 'text-muted' : textColor]" class="font-weight-bold small" :href="getLink(item)" v-text="getName(item)"></a>
+            <template v-for="link in getLink(item)">
+              <a class='d-inline bold' :href='link' :target="link[0] !== '.'?'_blank':'_self'" :class="[ index !== q.domain.length-1 ? 'text-muted' : textColor]" >
+                <small >
+                  <span v-html='item'></span>
+                </small>
+                <i v-if="link[0] !== '.'" class="fas small fa-external-link-alt"></i>
+              </a>
+            </template>
           </template>
         </template>
         <div v-if='q.properties && !validationView'>
@@ -751,7 +798,8 @@
           queryContentParents:[],
           available:false,
           nameInput:'',
-          invalidChars:false
+          invalidChars:false,
+          regProceed:false
 				}
 			},
       computed:{
