@@ -2,11 +2,11 @@
 <style></style>
 <header id="header">
 <title>CD2H Data Discovery Engine</title>
-<nav class="navbar navbar-expand-md navbar-dark fixed-top">
+<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
   <a class="navbar-brand" href="#">
     <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="">
   </a>
-  <a id="logo" class="navbar-brand mainFont caps" href="/"><b>CD2H</b> Data Discovery Engine</a>
+  <a id="logo" class="navbar-brand mainFont caps logoText" href="/"><b>CD2H</b> Data Discovery Engine</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -14,8 +14,18 @@
     <ul class="navbar-nav" id="user_link">
       <li class="nav-item"><a class="nav-link h-link" href="/guide">Discovery Guide</a></li>
       <li class="nav-item"><a class="nav-link h-link" href="/schema-playground">Schema Playground</a></li>
-      <!-- <li class="nav-item"><a class="nav-link h-link" href="/registry">Registry</a></li>
-      <li class="nav-item"><a class="nav-link h-link" href="/editor">Editor</a></li> -->
+      <template v-if="userInfo && !userInfo.login">
+        <li class='nav-item'><a class='nav-link' href='./oauth'>Login</a></li>
+      </template>
+      <template v-if="userInfo && userInfo.login">
+        <li class='nav-item'>
+          <a class='nav-link pulse' id='navPhotoLink' href='/dashboard/'>
+            <span v-text='userInfo.login'></span>
+            <img id='navPhoto' class='userImage' :src='userInfo.avatar_url' alt='user photo'>
+          </a>
+        </li>
+        <li class='nav-item'><a class='nav-link' :href='"./logout?next="+window.location.pathname'>Logout</a></li>
+      </template>
     </ul>
   </div>
   </nav>
@@ -29,31 +39,22 @@ var app = new Vue({
       el: '#header',
 			data: function(){
 				return {
-
+          userInfo:{}
 				}
 			},
       methods:{
-        scrollFunction() {
-          if ($(window).scrollTop() >= 20) {
-            $(".navbar").addClass("compressed");
-            $(".h-link").removeClass("text-light");
-            $(".h-link").addClass("text-muted");
-            $("#logo").addClass("logoText");
-            $("#logo").removeClass("text-light");
-            $("#navPhotoLink").addClass("text-light");
-            $("#navPhotoLink").removeClass("text-muted");
-          } else {
-            $(".navbar").removeClass("compressed");
-            $(".h-link").removeClass("text-muted");
-            $(".h-link").addClass("text-light");
-            $("#logo").addClass("text-light");
-            $("#logo").removeClass("logoText");
-          }
-        }
+        checkUser(){
+          let self = this;
+          axios.get('/user').then(res=>{
+            self.userInfo = res.data;
+          }).catch(err=>{
+            throw err;
+          });
+        },
     },
     mounted:function(){
       var self = this;
-      window.onscroll = function() {self.scrollFunction()};
+      self.checkUser();
     }
   })
 </script>

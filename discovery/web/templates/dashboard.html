@@ -274,7 +274,7 @@ var app = new Vue({
           let self= this;
           self.dashboard = [];
           if (this.user.login) {
-            axios.get('/api/user/'+self.user.login).then(res=>{
+            axios.get('/api/registry?user='+self.user.login).then(res=>{
               console.log(res.data)
               self.dashboard = res.data.hits;
               self.dashboardTotal = res.data.total;
