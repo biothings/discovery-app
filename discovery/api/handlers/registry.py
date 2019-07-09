@@ -1,13 +1,14 @@
-''' Handlers for Non-Query API Requests '''
+'''
+Handlers for Non-Query Schema API Requests
+'''
 
-import json
 import logging
 
 import requests
+from elasticsearch_dsl import Index
 from tornado.escape import json_decode
 
 from discovery.api.es.doc import Class, Schema
-from elasticsearch_dsl import Index, Search
 
 from .base import APIBaseHandler
 
