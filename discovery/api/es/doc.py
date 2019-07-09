@@ -9,18 +9,18 @@
 '''
 
 import gzip
+import hashlib
 import logging
 from datetime import datetime
 
-from elasticsearch_dsl import (Binary, Date, Document, InnerDoc,
-                               Keyword, Nested, Object, Text)
-
 from biothings_schema import Schema as SchemaParser
+from elasticsearch_dsl import (Binary, Date, Document, InnerDoc, Keyword,
+                               Nested, Object, Text)
 
 LOGGER = logging.getLogger(__name__)
 
 
-class Metadata(InnerDoc):
+class Meta(InnerDoc):
     '''
         The Metadata of a Schema
 
@@ -28,8 +28,8 @@ class Metadata(InnerDoc):
         - Timestamp corresponds to ~raw processing time.
 
     '''
-    url = Text(required=True)
-    username = Text(required=True)
+    url = Text()
+    username = Keyword(required=True)
     timestamp = Date()
 
     def stamp(self):
@@ -44,7 +44,7 @@ class Schema(Document):
         A Top-Level Schema
         https://schema.org/docs/schemas.html
     '''
-    _meta = Object(Metadata, required=True)
+    _meta = Object(Meta, required=True)
     context = Text()
     locals()['~raw'] = Binary()
 
@@ -199,4 +199,42 @@ class Class(Document):
 
         self.meta.id = f"{self.prefix}:{self.label}"
 
-        super().save(**kwargs)
+        return super().save(**kwargs)
+
+
+class Metadata(Document):
+    '''
+        Documents of a certain Schema
+    '''
+    _meta = Object(Meta, required=True)
+    identifier = Text(required=True)
+    name = Text()
+    description = Text()
+    _raw = Object(enabled=False)
+
+    class Index:
+        '''
+        Associated ES index
+        '''
+        name = 'discover_metadata'
+        settings = {
+            "number_of_replicas": 0
+        }
+
+    @classmethod
+    def from_json(cls, doc, user):
+        meta = cls()
+        meta.identifier = doc['identifier']
+        meta.name = doc['name']
+        meta.description = doc['description']
+        meta._meta.username = user
+        meta._raw = doc
+        return meta
+
+    def save(self, **kwargs):
+        '''
+        Create _id basing on identifier
+        '''
+        self.meta.id = hashlib.blake2b(
+            self.identifier.encode(), digest_size=8).hexdigest()
+        return super().save(**kwargs)
