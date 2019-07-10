@@ -124,7 +124,7 @@ class UserInfoHandler(BaseHandler):
 
 class GuideHandler(BaseHandler):
     def get(self):
-        doc_file = "guide.html"
+        doc_file = "metadata-guide.html"
         guide_template = TEMPLATE_ENV.get_template(doc_file)
         guide_output = guide_template.render()
         self.write(guide_output)
