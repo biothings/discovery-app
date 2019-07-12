@@ -6,7 +6,14 @@ from biothings.web.api.es.query_builder import ESQueryBuilder
 
 
 class DiscoveryQueryBuilder(ESQueryBuilder):
-    ''' Allow direct search with class name or partial match '''
+    '''
+    Allow direct search with class name or partial match
+    '''
+
+    def _return_query_kwargs(self, query_kwargs):
+        _kwargs = {"index": self.index, "rest_total_hits_as_int": True}
+        _kwargs.update(query_kwargs)
+        return _kwargs
 
     def _extra_query_types(self, q):
 

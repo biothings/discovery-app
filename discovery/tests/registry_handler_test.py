@@ -19,7 +19,6 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
         The tester will start its own tornado server
         existing 'discovery' will be overwitten
     '''
-    __test__ = True
 
     api = '/api'
 

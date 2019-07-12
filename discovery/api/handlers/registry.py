@@ -142,7 +142,9 @@ class RegistryHandler(APIBaseHandler):
         if not prefix:
 
             user = self.get_query_argument('user', None)
+
             search = Schema.search()
+            search.params(rest_total_hits_as_int=True)
 
             if user:
                 search = search.query("match", ** {"_meta.username": user})
@@ -150,7 +152,7 @@ class RegistryHandler(APIBaseHandler):
                 search = search.query("match_all")
 
             self.write({
-                "total": search.execute().hits.total,
+                "total": search.count(),
                 "context": {
                     schema.meta.id: schema.context
                     for schema in search.scan()
@@ -177,9 +179,10 @@ class RegistryHandler(APIBaseHandler):
         if not label:
 
             search = Class.search().query("match", prefix=prefix)
+            search.params(rest_total_hits_as_int=True)
 
             result['name'] = prefix
-            result['total'] = search.execute().hits.total
+            result['total'] = search.count()
             result['context'] = Schema.gather_contexts()
             result['hits'] = [klass.to_dict()
                               for klass in search.scan()]
