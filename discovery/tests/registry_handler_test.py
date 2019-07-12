@@ -8,7 +8,7 @@ from tornado.web import create_signed_value
 from biothings.tests import BiothingsTestCase, TornadoTestServerMixin
 from discovery.scripts.index_schema import index_schema
 from discovery.tests import run
-from discovery.api.es.doc import Class
+from discovery.api.es.doc import SchemaClass
 
 BTS_URL = ('https://raw.githubusercontent.com/data2health/schemas'
            '/biothings/biothings/biothings_curie.jsonld')
@@ -84,7 +84,7 @@ class DiscoveryAPITest(TornadoTestServerMixin, BiothingsTestCase):
         [REGISTRY POST] /registry/<prefix>
         '''
         doc = {'url': BTS_URL, 'namespace': 'bts'}
-        Class.delete_by_schema('bts')
+        SchemaClass.delete_by_schema('bts')
         self.query(q='BiologicalEntity', expect_hits=False)
         self.request('registry', method='POST', json=doc, headers=self.auth_user, expect_status=201)
         self.query(q='BiologicalEntity')

@@ -20,7 +20,7 @@ from elasticsearch_dsl import (Binary, Date, Document, InnerDoc, Keyword,
 LOGGER = logging.getLogger(__name__)
 
 
-class Meta(InnerDoc):
+class SchemaMeta(InnerDoc):
     '''
         The Metadata of a Schema
 
@@ -44,7 +44,7 @@ class Schema(Document):
         A Top-Level Schema
         https://schema.org/docs/schemas.html
     '''
-    _meta = Object(Meta, required=True)
+    _meta = Object(SchemaMeta, required=True)
     context = Text()
     locals()['~raw'] = Binary()
 
@@ -96,7 +96,7 @@ class Schema(Document):
         return None
 
 
-class Prop(InnerDoc):
+class SchemaClassProp(InnerDoc):
     '''
     A Class Property
     '''
@@ -107,7 +107,7 @@ class Prop(InnerDoc):
     description = Text()
 
 
-class Class(Document):
+class SchemaClass(Document):
     '''
         A Class(Type) in a Schema
         https://schema.org/docs/full.html
@@ -121,7 +121,7 @@ class Class(Document):
     label = Text(required=True)
     parent_classes = Text(multi=True)  # immediate parent class(es) only
     description = Text()
-    properties = Nested(Prop)  # properties that belong directly to this class
+    properties = Nested(SchemaClassProp)  # properties that belong directly to this class
 
     class Index:
         '''
@@ -174,7 +174,7 @@ class Class(Document):
                     es_class.parent_classes.append(', '.join(map(str, parent_line)))
 
                 for prop in class_.list_properties(group_by_class=False):
-                    es_class.properties.append(Prop(
+                    es_class.properties.append(SchemaClassProp(
                         uri=prop['uri'],
                         curie=prop['curie'],
                         range=prop['range'],
@@ -202,11 +202,11 @@ class Class(Document):
         return super().save(**kwargs)
 
 
-class Metadata(Document):
+class DatasetMetadata(Document):
     '''
         Documents of a certain Schema
     '''
-    _meta = Object(Meta, required=True)
+    _meta = Object(SchemaMeta, required=True)
     identifier = Text(required=True)
     name = Text()
     description = Text()

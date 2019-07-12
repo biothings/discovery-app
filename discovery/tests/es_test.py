@@ -5,7 +5,7 @@
 
 from discovery.scripts.index_schema import index_schema
 from discovery.tests import run
-from discovery.api.es.doc import Class, Schema
+from discovery.api.es.doc import SchemaClass, Schema
 
 
 def setup():
@@ -37,7 +37,7 @@ def test_03():
     '''
     [ES Class Class] Retrival by "_id"
     '''
-    Class.get(id="cvisb:CvisbDataset")
+    SchemaClass.get(id="cvisb:CvisbDataset")
 
 
 if __name__ == '__main__':

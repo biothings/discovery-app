@@ -7,7 +7,7 @@ import logging
 from elasticsearch_dsl import Index
 from tornado.escape import json_decode
 
-from discovery.api.es.doc import Metadata
+from discovery.api.es.doc import DatasetMetadata
 
 from .base import APIBaseHandler
 
@@ -51,7 +51,7 @@ class MetadataHandler(APIBaseHandler):
         '''
 
         doc = json_decode(self.request.body)
-        meta = Metadata.from_json(doc, self.current_user)
+        meta = DatasetMetadata.from_json(doc, self.current_user)
 
         self.finish({
             'success': True,
@@ -73,7 +73,7 @@ class MetadataHandler(APIBaseHandler):
 
             user = self.get_query_argument('user', None)
 
-            search = Metadata.search()
+            search = DatasetMetadata.search()
             search.params(rest_total_hits_as_int=True)
 
             if user:
@@ -88,7 +88,7 @@ class MetadataHandler(APIBaseHandler):
             })
             return
 
-        meta = Metadata.get(id=_id, ignore=404)
+        meta = DatasetMetadata.get(id=_id, ignore=404)
 
         if not meta:
             self.send_error(404)
@@ -103,7 +103,7 @@ class MetadataHandler(APIBaseHandler):
         Delete by _id.
         '''
 
-        meta = Metadata.get(id=_id, ignore=404)
+        meta = DatasetMetadata.get(id=_id, ignore=404)
 
         if not meta:
             self.send_error(404)
