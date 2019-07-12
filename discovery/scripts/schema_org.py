@@ -4,7 +4,7 @@
 
 import logging
 from biothings_schema import Schema as SchemaParser
-from discovery.api.es.doc import Class
+from discovery.api.es.doc import SchemaClass
 
 
 def index_schema_org(lazy=False):
@@ -12,11 +12,11 @@ def index_schema_org(lazy=False):
         Setup Script
     '''
     if lazy:
-        if Class.search().query("match", prefix='schema').count() > 770:
+        if SchemaClass.search().query("match", prefix='schema').count() > 770:
             return
 
-    Class.delete_by_schema('schema')
-    classes = Class.import_from_parser(SchemaParser())
+    SchemaClass.delete_by_schema('schema')
+    classes = SchemaClass.import_from_parser(SchemaParser())
 
     for klass in classes:
         klass.save()

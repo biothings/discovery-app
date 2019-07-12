@@ -8,7 +8,7 @@ import requests
 from elasticsearch_dsl import Index
 from tornado.escape import json_decode
 
-from discovery.api.es.doc import Class, Schema
+from discovery.api.es.doc import SchemaClass, Schema
 
 from .base import APIBaseHandler
 
@@ -105,7 +105,7 @@ class RegistryHandler(APIBaseHandler):
         schema_doc = requests.get(url, timeout=5)
         schema_doc.raise_for_status()
         schema_parser = self.get_parser(schema_doc.json())
-        schema_classes = Class.import_from_parser(schema_parser)
+        schema_classes = SchemaClass.import_from_parser(schema_parser)
 
         for klass in schema_classes:
             klass.save()
@@ -178,7 +178,7 @@ class RegistryHandler(APIBaseHandler):
 
         if not label:
 
-            search = Class.search().query("match", prefix=prefix)
+            search = SchemaClass.search().query("match", prefix=prefix)
             search.params(rest_total_hits_as_int=True)
 
             result['name'] = prefix
@@ -190,7 +190,7 @@ class RegistryHandler(APIBaseHandler):
             self.write(result)
             return
 
-        klass = Class.get(id=f"{prefix}:{label}", ignore=404)
+        klass = SchemaClass.get(id=f"{prefix}:{label}", ignore=404)
 
         if not klass:
             self.send_error(404)
@@ -209,6 +209,6 @@ class RegistryHandler(APIBaseHandler):
         sch = Schema.get(id=prefix)
         sch.delete()
 
-        Class.delete_by_schema(prefix)
+        SchemaClass.delete_by_schema(prefix)
 
         Index('discover_class').refresh()

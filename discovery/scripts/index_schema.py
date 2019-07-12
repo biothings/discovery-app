@@ -6,7 +6,7 @@ import logging
 import requests
 
 from biothings_schema import Schema as SchemaParser
-from discovery.api.es.doc import Class, Schema
+from discovery.api.es.doc import SchemaClass, Schema
 
 
 def index_schema(prefix, url, user):
@@ -25,8 +25,8 @@ def index_schema(prefix, url, user):
     schema.encode_raw(req.text)
     schema.save()
 
-    Class.delete_by_schema(prefix)
-    classes = Class.import_from_parser(schema_parser)
+    SchemaClass.delete_by_schema(prefix)
+    classes = SchemaClass.import_from_parser(schema_parser)
 
     logger = logging.getLogger('discovery.scripts.index_schema')
     logger.info("Indexing %s classes.", len(classes))

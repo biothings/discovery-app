@@ -6,7 +6,7 @@ import sys
 from nose.core import runmodule
 
 from biothings_schema import Schema as SchemaParser
-from discovery.api.es.doc import Class, Schema
+from discovery.api.es.doc import SchemaClass, Schema
 from elasticsearch_dsl import Index
 
 
