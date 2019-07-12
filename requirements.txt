@@ -1,6 +1,7 @@
 biothings[web_extra]==0.3.0
 git+git://github.com/biothings/biothings_schema.py.git@master#egg=biothings_schema
-elasticsearch-dsl==6.4.0
+elasticsearch-dsl==7.0.0
+elasticsearch==7.0.2
 PyLD>=0.7.1
 jsonschema>=2.6.0
 torngithub==0.2.0

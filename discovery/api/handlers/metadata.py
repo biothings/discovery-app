@@ -53,10 +53,9 @@ class MetadataHandler(APIBaseHandler):
         doc = json_decode(self.request.body)
         meta = Metadata.from_json(doc, self.current_user)
 
-        self.set_status(201)
         self.finish({
             'success': True,
-            'new': meta.save(),
+            'result': meta.save(),
             'url': self.request.full_url() + '/' + meta.meta.id,
         })
 
@@ -73,7 +72,9 @@ class MetadataHandler(APIBaseHandler):
         if not _id:
 
             user = self.get_query_argument('user', None)
+
             search = Metadata.search()
+            search.params(rest_total_hits_as_int=True)
 
             if user:
                 search = search.query("match", ** {"_meta.username": user})
@@ -81,7 +82,7 @@ class MetadataHandler(APIBaseHandler):
                 search = search.query("match_all")
 
             self.write({
-                "total": search.execute().hits.total,
+                "total": search.count(),
                 "hits": [meta.to_dict()['_raw']
                          for meta in search.scan()]
             })
