@@ -12,6 +12,34 @@
   .notallowed{
     cursor: not-allowed;
   }
+  .inputbox{
+  }
+  .inputbox1{
+    background: darkgrey;
+    border-left: 5px solid var(--main);
+  }
+  .inputbox2{
+    background: lightgrey;
+  }
+  .inputbox3{
+    background: darkgrey;
+  }
+  .inputContainer{
+    border: 2px darkgrey solid;
+  }
+  .small{
+    zoom:.6;
+  }
+
+  .left-arrow{
+    clip-path: polygon(13% 0, 100% 1%, 100% 100%, 13% 100%, 0 50%);
+  }
+  .save:hover i:first-child{
+    color: var(--success) !important;
+  }
+  .delete:hover i:first-child{
+    color: var(--danger) !important;
+  }
 </style>
 <div id="guide" class="container pt-5">
   <div v-if=loading class="loader">
@@ -55,7 +83,9 @@
         <h5>You must be logged in to proceed</h5>
       </div>
     </div>
+    <!-- LOGGED IN DASHBOARD -->
     <template v-if="userInfo && userInfo.login">
+      <!-- FIRST STEP -->
       <div v-if="!validation" class="bg-light jumbotron whitefade text-center">
         <h3 class="text-muted">Choose a metadata schema</h3>
         <div class="d-flex justify-content-center align-items-center flex-wrap">
@@ -66,14 +96,41 @@
               <p>
                 <small v-text="item.description"></small>
               </p>
-              <buttom @click="getAndLoadSchema(item.url)" class="btn themeButton text-light">Next</buttom>
+              <buttom @click="sendRequest(item.url,item.name)" class="btn themeButton text-light">Next</buttom>
             </div>
           </template>
         </div>
       </div>
-      <div v-if="validation" class="bg-light jumbotron whitefade text-center">
-        <h3 class="text-muted">FORM</h3>
-
+      <!-- SECOND STEP -->
+      <!-- AVAILABLE FIELDS -->
+      <div v-if="validation" class="whitefade tippyContainer">
+        <div class="alert alert-secondary text-left mb-0">
+          <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
+            <span class="badge m-1 badge-dark pointer" @click='selectProp(index)' v-if="prop && !prop.value">
+              <small v-text='index'></small>
+              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
+            </span>
+          </template>
+        </div>
+      </div>
+      <!-- COMPLETED FIELDS -->
+      <div v-if="validation" class="whitefade tippyContainer">
+        <div class="alert alert-success text-left mb-0">
+          <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
+            <span class="badge m-1 badge-success pointer" @click='selectProp(index)' v-if="prop && prop.value">
+              <i class="fas fa-check-circle"></i> <small v-text='index'></small>
+              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
+            </span>
+          </template>
+        </div>
+      </div>
+      <!-- FIELD VIEW -->
+      <div v-if="validation" class="bg-light whitefade text-center tippyContainer mb-5">
+        <div class="p-4 inputContainer">
+          <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
+            <input-box v-if='prop && prop.selected' :name='index' :info="prop" :key='index'></input-box>
+          </template>
+        </div>
       </div>
     </template>
   </div>
@@ -90,37 +147,79 @@
   const store = new Vuex.Store({
     state: {
       schema:Object,
-      complete:false
+      complete:false,
+      required:Array,
+      validation:null,
+      schemaName:''
     },
     strict: true,
     mutations: {
       saveSchema(state,payload){
         state.schema = payload['schema'];
-        $.notify("Schema Saved",{ globalPosition: 'right',className:'success', showDuration: 40, });
-        console.log(state.schema)
+        console.log('schema saved',state.schema)
+        // $.notify("Schema Saved",{ globalPosition: 'right',className:'success', showDuration: 40, });
+      },
+      saveSchemaName(state,payload){
+        state.schemaName = payload['name'];
+        // $.notify("Schema Name Saved",{ globalPosition: 'right',className:'success', showDuration: 40, });
       },
       reset(state){
         state.schema = {};
-      }
+        state.validation = null;
+      },
+      markSelected(state,payload){
+        let selection = payload['select'];
+        for (key in state.schema.validation.properties) {
+          if (key === selection) {
+            Vue.set(state.schema.validation.properties[selection],'selected',true);
+          }else{
+            Vue.set(state.schema.validation.properties[key],'selected',false);
+          }
+        }
+      },
+      markCompleted(state,payload){
+        let selection = payload['completed'];
+        for (key in state.schema.validation.properties) {
+          if (key === selection.name) {
+            Vue.set(state.schema.validation.properties[selection.name],'value',selection.value);
+          }
+        }
+      },
+      clearValueOfProp(state,payload){
+        let selection = payload['clear'];
+        for (key in state.schema.validation.properties) {
+          if (key === selection) {
+            Vue.set(state.schema.validation.properties[selection],'value','');
+            $.notify(selection+" was cleared",{ globalPosition: 'right',className:'success', showDuration: 40, });
+          }
+        }
+      },
     },
     getters:{
       // exposed as store.getters.nameOfGetter
-      getSchema: state => {
+      getSchema: (state) => {
         return state.schema
       },
       getValidation: (state) => {
-        if (state.schema && state.schema.hasOwnProperty('@graph')) {
-          for (var i = 0; i < state.schema['@graph'].length; i++) {
-            if (state.schema['@graph'][i].hasOwnProperty('$validation')) {
-              $.notify("Validation Found",{ globalPosition: 'right',className:'success', showDuration: 40, });
-              return state.schema['@graph'][i]['$validation'];
-            }
-          }
+        if (state.schema.hasOwnProperty('validation')) {
+          return state.schema.validation
         }else{
           return false;
         }
-      }
-
+      },
+      isRequired: (state) => (propname) =>{
+        if (state.schema.validation.required.includes(propname)) {
+          return true
+        }else{
+          return false
+        }
+      },
+      getSchemaName: (state)=>{
+        return state.schemaName
+      },
+      getValueOf: (state) => (propname) =>{
+        return state.schema.validation.properties[propname].value
+      },
     },
     actions:{
       reset ({ commit }) {
@@ -130,27 +229,122 @@
   });
 
 
-  Vue.component('comp', {
+  Vue.component('input-box', {
     data: function(){
       return{
-
+        // userInput:''
       }
     },
-    props: ['item'],
+    props: ['name','info'],
     methods:{
+      markCompleted(propname){
+        var self = this;
 
+        var payload = {};
+        payload["completed"] = {'name':propname,'value':self.userInput};
+        store.commit('markCompleted',payload);
+        //unselect after complete
+        var payload = {};
+        payload["select"] = '';
+        store.commit('markSelected',payload);
+      },
+      clearFieldFor:function(propname){
+        var payload = {};
+        payload["clear"] = propname;
+        store.commit('clearValueOfProp',payload);
+      }
     },
     watch:{
 
     },
     mounted: function(){
       var self = this;
+
+      tippy( '.save', {
+        placement:'left',
+        maxWidth:'200px',
+        content: '<div class="alert alert-success m-0" style="border-radius:none">Mark Complete</div>',
+        animation: 'fade',
+        theme:'light'});
+
+      tippy( '.required', {
+        maxWidth:'200px',
+        placement:'left',
+        content: '<div class="alert alert-danger m-0" style="border-radius:none">This field is required</div>',
+        animation: 'fade',
+        theme:'light'});
+
+      tippy( '.delete', {
+        maxWidth:'200px',
+        placement:'left',
+        content: '<div class="alert alert-danger m-0" style="border-radius:none">Clear this field</div>',
+        animation: 'fade',
+        theme:'light'});
+
+      tippy( '.description', {
+        placement:'left',
+        content: 'Loading...',
+        animation: 'fade',
+        theme:'light',
+        onShow(instance) {
+          let desc = instance.reference.dataset.tippyDescription;
+          instance.setContent('<div class="alert alert-info m-0" style="border-radius:none">'+desc+'</div>')
+        },});
     },
     computed: {
-
+      isRequired:function(){
+        return store.getters.isRequired(this.name)
+      },
+    userInput: {
+        get () {
+          return this.$store.getters.getValueOf(this.name)
+        },
+        set (newValue) {
+          var payload = {};
+          payload["completed"] = {'name':this.name,'value':newValue};
+          store.commit('markCompleted',payload);
+        }
+      }
     },
     template:
-    ``
+    `<div class="m-2 inputbox">
+      <div class="row">
+        <div class="col-sm-1 left-arrow bg-secondary">
+
+        </div>
+        <div class="col-sm-9 p-2 inputbox2 text-left">
+          <div class="row">
+            <div class="col-sm-4 d-flex align-items-center justify-content-start">
+              <i class="fas fa-info-circle text-info description pointer unselectable mr-1" :data-tippy-description='info.description' :data-tippy-id='name'></i>
+              <small v-text="name" class="propDescription mainTextLight bold pointer mr-1"></small>
+              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired"></i>
+            </div>
+            <div class="col-sm-8">
+              <!-- INPUT 👀 TYPES-->
+              <template v-if="info && info.type === 'string'">
+                <input type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here">
+              </template>
+              <template v-if="info && info.enum" v-for="(item,i) in info.enum">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item'>
+                  <label class="form-check-label" :for="i" v-text='item'></label>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-2 p-2 inputbox3 d-flex align-items-center justify-content-around">
+          <span class="fa-stack fa-1x pointer save" @click="markCompleted(name)" v-show="userInput">
+            <i class="fas fa-circle text-muted back fa-stack-2x"></i>
+            <i class="fas fa-check fa-stack-1x text-light"></i>
+          </span>
+          <span class="fa-stack fa-1x pointer delete" @click="clearFieldFor(name)" v-show="info && info.value">
+            <i class="fas fa-circle text-muted fa-stack-2x"></i>
+            <i class="fas fa-trash fa-stack-1x text-light"></i>
+          </span>
+        </div>
+      </div>
+    </div>`
   });
 
 
@@ -178,7 +372,7 @@
         },
         isComplete:function(){
           return store.state.complete
-        }
+        },
       },
       watch:{
       },
@@ -207,6 +401,45 @@
             throw err;
           })
         },
+        sendRequest(url,schemaName){
+          let self = this;
+          self.loading = true;
+          axios.get("/api/view?url="+url).then(res=>{
+
+            var payload = {};
+            payload["name"] = schemaName;
+            store.commit('saveSchemaName',payload);
+
+            self.parseData(res.data)
+
+            self.loading = false;
+          }).catch(err=>{
+            self.loading = false;
+            throw err;
+          })
+        },
+        parseData(data){
+
+          let schemaName = store.getters.getSchemaName
+
+          if (data.hits) {
+            for (var i = 0; i < data.hits.length; i++) {
+              if (data.hits[i].hasOwnProperty('name')) {
+                if (data.hits[i].name.includes(schemaName)) {
+                  var payload = {};
+                  payload["schema"] = data.hits[i];
+                  store.commit('saveSchema',payload);
+                }
+              }else if (data.hits[i].hasOwnProperty('label')) {
+                if (data.hits[i].label.includes(schemaName)) {
+                  var payload = {};
+                  payload["schema"] = data.hits[i];
+                  store.commit('saveSchema',payload);
+                }
+              }
+            }
+          }
+        },
         reset(){
           if (this.validation) {
             Swal.fire({
@@ -222,10 +455,33 @@
               }
             });
           }
-        }
+        },
+        isRequired(propname){
+          let req = store.getters.getValidation['required']
+          if (req.includes(propname)) {
+            return true
+          }else{
+            return false
+          }
+        },
+        selectProp(propname){
+          var payload = {};
+          payload["select"] = propname;
+          store.commit('markSelected',payload);
+        },
 			},
 			mounted:function(){
         this.checkUser();
+
+
+        tippy( '#tippyContainer', {
+          target:'.popularity',
+          content: 'Loading...',
+          animateFill: false,
+          animation: 'fade',
+          theme:'light',
+          trigger:'click'
+        });
 			}
 		});
 
