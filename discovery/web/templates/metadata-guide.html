@@ -12,25 +12,22 @@
   .notallowed{
     cursor: not-allowed;
   }
-  .inputbox{
-  }
-  .inputbox1{
-    background: darkgrey;
-    border-left: 5px solid var(--main);
-  }
-  .inputbox2{
-    background: lightgrey;
-  }
-  .inputbox3{
-    background: darkgrey;
-  }
-  .inputContainer{
-    border: 2px darkgrey solid;
-  }
   .small{
     zoom:.6;
   }
+  .actions{
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+  .inputmain{
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#f6f6f6+0,ffffff+100 */
+    background: rgb(246,246,246); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(246,246,246,1) 0%, rgba(255,255,255,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  rgba(246,246,246,1) 0%,rgba(255,255,255,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  rgba(246,246,246,1) 0%,rgba(255,255,255,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f6f6f6', endColorstr='#ffffff',GradientType=0 ); /* IE6-9 */
 
+  }
   .left-arrow{
     clip-path: polygon(13% 0, 100% 1%, 100% 100%, 13% 100%, 0 50%);
   }
@@ -39,6 +36,45 @@
   }
   .delete:hover i:first-child{
     color: var(--danger) !important;
+  }
+  progress[value] {
+    /* Reset the default appearance */
+    -webkit-appearance: none;
+     appearance: none;
+  }
+  progress[value]::-webkit-progress-bar {
+    background-color: #eee;
+    border-radius: 2px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+  }
+  progress[value]::-webkit-progress-value {
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#5c3069+0,006476+100 */
+    background: rgb(92,48,105); /* Old browsers */
+    background: -moz-linear-gradient(left,  rgba(92,48,105,1) 0%, rgba(0,100,118,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(left,  rgba(92,48,105,1) 0%,rgba(0,100,118,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to right,  rgba(92,48,105,1) 0%,rgba(0,100,118,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5c3069', endColorstr='#006476',GradientType=1 ); /* IE6-9 */
+    background-size: cover;
+    border-radius: 2px;
+  }
+  #widget{
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#f2f5f6+0,e3eaed+37,c8d7dc+100 */
+      background: rgb(242,245,246); /* Old browsers */
+      background: -moz-linear-gradient(top,  rgba(242,245,246,1) 0%, rgba(227,234,237,1) 37%, rgba(200,215,220,1) 100%); /* FF3.6-15 */
+      background: -webkit-linear-gradient(top,  rgba(242,245,246,1) 0%,rgba(227,234,237,1) 37%,rgba(200,215,220,1) 100%); /* Chrome10-25,Safari5.1-6 */
+      background: linear-gradient(to bottom,  rgba(242,245,246,1) 0%,rgba(227,234,237,1) 37%,rgba(200,215,220,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f5f6', endColorstr='#c8d7dc',GradientType=0 ); /* IE6-9 */
+
+      padding: 10px;
+      border-radius: 10px;
+      border: solid lightgrey 2px;
+      margin-bottom: 20px;
+  }
+  .inputpreview{
+    cursor: zoom-in;
+  }
+  .fa-times:hover{
+    cursor: pointer !important;
   }
 </style>
 <div id="guide" class="container pt-5">
@@ -51,15 +87,15 @@
       Follow best practices to make your data more findable
     </p>
   </div>
-  <div >
+  <div id="widget">
     <ul class="nav nav-tabs">
       <li class="nav-item" v-if="userInfo && userInfo.login">
-        <span class="nav-link" :class="{ disabled: userInfo }"><small>
+        <span class="nav-link" :class="{ 'disabled text-success': userInfo }"><small>
           <i class="fas fa-user-check"></i> Logged in as <span v-text="userInfo.login"></span></small>
         </span>
       </li>
       <li class='nav-item' v-if="userInfo && !userInfo.login">
-        <a class='nav-link active' href='./oauth'>
+        <a class='nav-link active text-primary' href='./oauth'>
           <small><i class="fas fa-sign-in-alt"></i> Login</small>
         </a>
       </li>
@@ -71,9 +107,23 @@
         </a>
       </li>
       <li class='nav-item'>
-        <a class='nav-link' :class="{ 'disabled notallowed': !isComplete, 'bg-success text-light': isComplete }" href='#' @click.prevent="reset()">
+        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !validation, 'mainBackDark text-light pointer': validation }" href='#'>
+          <small>
+            <i class="fas fa-code"></i> Preview
+          </small>
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a class='nav-link' :class="{ 'disabled notallowed': !isComplete, 'bg-success text-light': isComplete }" href='#'>
           <small>
             <i class="fas fa-cloud-upload-alt"></i> Save
+          </small>
+        </a>
+      </li>
+      <li class='nav-item' v-if="totals && totals.left">
+        <a class='nav-link disabled'>
+          <small >
+            (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)
           </small>
         </a>
       </li>
@@ -87,16 +137,15 @@
     <template v-if="userInfo && userInfo.login">
       <!-- FIRST STEP -->
       <div v-if="!validation" class="bg-light jumbotron whitefade text-center">
-        <h3 class="text-muted">Choose a metadata schema</h3>
+        <h5 class="text-muted">What type of metadata do you need?</h5>
         <div class="d-flex justify-content-center align-items-center flex-wrap">
           <template v-for="item in presets">
             <div class="p-5 m-4 bg-light text-center message text-muted">
               <h4 v-text="item.name"></h4>
-              <a :href="item.url" target="_blank"><small class="mainTextDark">preview <i class="fas fa-external-link-alt"></i></small></a>
-              <p>
+              <p >
                 <small v-text="item.description"></small>
               </p>
-              <buttom @click="sendRequest(item.url,item.name)" class="btn themeButton text-light">Next</buttom>
+              <buttom @click="sendRequest(item.url,item.name)" class="btn themeButton text-light pulse">Next</buttom>
             </div>
           </template>
         </div>
@@ -104,9 +153,9 @@
       <!-- SECOND STEP -->
       <!-- AVAILABLE FIELDS -->
       <div v-if="validation" class="whitefade tippyContainer">
-        <div class="alert alert-secondary text-left mb-0">
+        <div class="p-1 message text-left mb-0" style="border-radius:5px">
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 badge-dark pointer" @click='selectProp(index)' v-if="prop && !prop.value">
+            <span class="badge m-1 badge-dark pointer badgeDesc" @click='selectProp(index)' v-if="prop && !prop.value">
               <small v-text='index'></small>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
             </span>
@@ -114,6 +163,9 @@
         </div>
       </div>
       <!-- COMPLETED FIELDS -->
+      <div class="p-1" v-if="totals && totals.left">
+        <progress class="w-100"  :value="totals.complete" :max="totals.total"></progress>
+      </div>
       <div v-if="validation" class="whitefade tippyContainer">
         <div class="alert alert-success text-left mb-0">
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
@@ -125,12 +177,16 @@
         </div>
       </div>
       <!-- FIELD VIEW -->
-      <div v-if="validation" class="bg-light whitefade text-center tippyContainer mb-5">
-        <div class="p-4 inputContainer">
+      <div v-if="validation" class="text-center tippyContainer mb-5">
+        <div class="p-4" id="masterForm">
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
             <input-box v-if='prop && prop.selected' :name='index' :info="prop" :key='index'></input-box>
           </template>
         </div>
+      </div>
+      <!--  -->
+      <div v-if="validation" class="p-1 text-muted">
+        <small><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
       </div>
     </template>
   </div>
@@ -142,6 +198,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="/static/js/lodash.js"></script>
 <script src="/static/js/notify.min.js"></script>
+<script src="/static/js/parsley.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
   const store = new Vuex.Store({
@@ -190,6 +247,7 @@
         for (key in state.schema.validation.properties) {
           if (key === selection) {
             Vue.set(state.schema.validation.properties[selection],'value','');
+            Vue.set(state.schema.validation.properties[selection],'selected',false);
             $.notify(selection+" was cleared",{ globalPosition: 'right',className:'success', showDuration: 40, });
           }
         }
@@ -218,8 +276,27 @@
         return state.schemaName
       },
       getValueOf: (state) => (propname) =>{
+        console.log('get value of..',propname)
         return state.schema.validation.properties[propname].value
       },
+      getTotals:(state) => {
+        let completeCount = 0;
+        if (state.schema.hasOwnProperty('validation')) {
+          let totalprops = Object.keys(state.schema.validation.properties).length
+          for (key in state.schema.validation.properties) {
+            if (state.schema.validation.properties[key] && state.schema.validation.properties[key].value) {
+              completeCount++;
+            }
+          }
+          let left = totalprops - completeCount;
+          if (left === 0) {
+            state.complete = true
+          }
+          let res = {'left':left,'complete':completeCount,'total':totalprops}
+          return res
+        }
+
+      }
     },
     actions:{
       reset ({ commit }) {
@@ -232,7 +309,19 @@
   Vue.component('input-box', {
     data: function(){
       return{
-        // userInput:''
+        ks:[],
+        creators:[],
+        contributors:[],
+        constFound:false,
+        constObj:{},
+        publishers:[],
+        citations:[],
+        licenseThirdQuestion:false,
+        userLicense:{
+          'text':'',
+          'url':'',
+          'description':''
+        }
       }
     },
     props: ['name','info'],
@@ -252,18 +341,320 @@
         var payload = {};
         payload["clear"] = propname;
         store.commit('clearValueOfProp',payload);
-      }
+      },
+      addKeyword(){
+        let self = this;
+        let value = self.$refs.keywordInput.value;
+        if (value.includes(',')) {
+          let arr = value.split(',');
+          for (var i = 0; i < arr.length; i++) {
+            if (!self.ks.includes(arr[i])) {
+              let val = arr[i].trim();
+              self.ks.push(val);
+              self.$refs.keywordInput.value = '';
+            }else{
+              $.notify(value+" keyword already added",{ globalPosition: 'right',className:'error', showDuration: 40, });
+              self.$refs.keywordInput.value = '';
+            }
+          }
+        }else{
+          if (!self.ks.includes(value)) {
+            self.ks.push(value);
+            self.$refs.keywordInput.value = '';
+          }else{
+            $.notify(value+" keyword already added",{ globalPosition: 'right',className:'error', showDuration: 40, });
+            self.$refs.keywordInput.value = '';
+          }
+        }
+
+      },
+      removeKeyword(name){
+        let self = this;
+        var index = self.ks.indexOf(name);
+        if (index > -1) {
+          self.ks.splice(index, 1);
+        }
+      },
+      addPerson(type){
+        let self = this;
+        switch (type) {
+          case "creator":
+            if (self.creators.length === 1 || self.userInput && self.userInput.length === 1) {
+              $.notify("MAX number of input reached",{ globalPosition: 'right',className:'info', showDuration: 40, });
+            }else{
+              self.addPersonModal(type)
+            }
+            break;
+          case "citation":
+            self.addCitationModal(type)
+            break;
+          default:
+            self.addPersonModal(type)
+        }
+
+      },
+      addPersonModal(type){
+        let self = this;
+        Swal.mixin({
+          input: 'text',
+          confirmButtonText: 'Next &rarr;',
+          showCancelButton: true,
+          progressSteps: ['1', '2',]
+        }).queue([
+          {
+            title: "Name*",
+            text: "Enter the "+type+"'s full name"
+          },
+          {
+            title: "URL",
+            text: "Enter a URL for this "+type+"'s online profile (faculty page, GitHub page, Linkedin page, etc)"
+          }
+
+        ]).then((result) => {
+          if (result.value) {
+            let name='';
+            let url ='';
+            if (result.value[0]) {
+              name = result.value[0]
+            }
+            if (result.value[1]) {
+              url = result.value[1]
+            }else{
+              url = ''
+            }
+            if (name) {
+              let person = {'name':name,'url':url};
+
+            switch (type) {
+              case 'creator':
+                self.creators.push(person)
+                break;
+                case 'publisher':
+                  self.publishers.push(person)
+                  break;
+                  case 'contributor':
+                    self.contributors.push(person)
+                    break;
+              default:
+
+              }
+              $.notify(self.name+" "+type+" was added",{ globalPosition: 'right',className:'success', showDuration: 40, });
+            }else{
+              $.notify("A "+type+"'s name is required",{ globalPosition: 'right',className:'error', showDuration: 40, });
+            }
+
+
+          }
+        })
+      },
+      addCitationModal(type){
+        let self = this;
+        Swal.mixin({
+          input: 'text',
+          confirmButtonText: 'Next &rarr;',
+          showCancelButton: true,
+          progressSteps: ['1', '2',]
+        }).queue([
+          {
+            title: "Name*",
+            text: "Enter the "+type+"'s title or name"
+          },
+          {
+            title: "URL",
+            text: "Enter a URL for this "+type+" (web page, GitHub page, Linkedin page, etc)"
+          },
+          {
+            title: "Identifier",
+            text: "Enter this "+type+"'s PubMed id here"
+          }
+
+        ]).then((result) => {
+          if (result.value) {
+            let name='';
+            let url ='';
+            let ident = '';
+            if (result.value[0]) {
+              name = result.value[0]
+            }
+            if (result.value[1]) {
+              url = result.value[1]
+            }
+            if (result.value[2]) {
+              ident = result.value[2]
+            }
+
+            if (name) {
+              let citation = {'name':name,'url':url,'identifier':ident};
+              self.citations.push(citation)
+              $.notify(self.name+" "+type+" was added",{ globalPosition: 'right',className:'success', showDuration: 40, });
+            }else{
+              $.notify("A "+type+"'s name is required",{ globalPosition: 'right',className:'error', showDuration: 40, });
+            }
+
+
+          }
+        })
+      },
+      removePerson(type,name){
+        let self = this;
+        if (type === 'creator') {
+          for (var i = 0; i < self.creators.length; i++) {
+            if (self.creators[i].name === name) {
+              self.creators.splice(i, 1);
+            }
+          }
+        }
+        if (type === 'contributor') {
+          for (var i = 0; i < self.creators.length; i++) {
+            if (self.creators[i].name === name) {
+              self.creators.splice(i, 1);
+            }
+          }
+        }
+        if (type === 'publisher') {
+          for (var i = 0; i < self.publishers.length; i++) {
+            if (self.publishers[i].name === name) {
+              self.publishers.splice(i, 1);
+            }
+          }
+        }
+        if (type === 'citation') {
+          for (var i = 0; i < self.citations.length; i++) {
+            if (self.citations[i].name === name) {
+              self.citations.splice(i, 1);
+            }
+          }
+        }
+      },
+      checkForConstantKey(obj, keyname, parentkey) {
+        var self=this;
+        _.mapKeys(obj, function(value, key) {
+          if (key === keyname) {
+            self.constFound = true;
+            Vue.set(self.constObj, parentkey, value)
+          }
+          if (typeof value === 'object') {
+            self.checkForConstantKey(value,keyname,key)
+          }
+        });
+
+      },
+      getLicense(specialCase){
+        let self = this;
+        let question1 = this.$refs.license1.value;
+        let question2 = this.$refs.license2.value;
+
+        if (specialCase) {
+          switch (specialCase) {
+            case 'No':
+              self.userLicense.description = 'No Rights Reserved';
+              self.userLicense.url = 'https://creativecommons.org/share-your-work/public-domain/cc0/';
+              self.userLicense.text = 'CC0';
+              break;
+            case "Yes":
+              self.userLicense.description = 'Attribution 4.0 International';
+              self.userLicense.url = 'http://creativecommons.org/licenses/by/4.0/';
+              self.userLicense.text = 'CC BY 4.0';
+              break;
+            default:
+              self.userLicense.description = "We had trouble with your input, please try this link:";
+              self.userLicense.text = '';
+              self.userLicense.url = 'https://creativecommons.org/choose/';
+              self.thirdQuestion = false;
+              break;
+          }
+        }else{
+          switch (question1+'|'+question2) {
+            case "Yes|Yes":
+              // Special Case
+              self.licenseThirdQuestion = true;
+              let question3 = this.$refs['license3'].value;
+              self.getLicense(question3);
+              break;
+            case "No|Yes":
+              self.userLicense.description = 'Attribution-NoDerivatives 4.0 International';
+              self.userLicense.url = 'http://creativecommons.org/licenses/by-nd/4.0/';
+              self.userLicense.text = 'CC BY-ND 4.0';
+              self.licenseThirdQuestion = false;
+              break;
+            case "Yes, as long as others share alike|Yes":
+              self.userLicense.description = 'Attribution-ShareAlike 4.0 International';
+              self.userLicense.url = 'http://creativecommons.org/licenses/by-sa/4.0/';
+              self.userLicense.text = 'CC BY-SA 4.0';
+              self.licenseThirdQuestion = false;
+              break;
+            case "Yes|No":
+              self.userLicense.description = 'Attribution-NonCommercial 4.0 International';
+              self.userLicense.url = 'http://creativecommons.org/licenses/by-nc/4.0/';
+              self.userLicense.text = 'CC BY-NC 4.0';
+              self.licenseThirdQuestion = false;
+              break;
+            case "No|No":
+              self.userLicense.description = 'Attribution-NonCommercial-NoDerivatives 4.0 International';
+              self.userLicense.text = 'CC BY-NC-ND 4.0';
+              self.userLicense.url = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
+              self.licenseThirdQuestion = false;
+              break;
+            case "Yes, as long as others share alike|No":
+              self.userLicense.description = 'Attribution-NonCommercial-ShareAlike 4.0 International';
+              self.userLicense.text = 'CC BY-NC-SA 4.0';
+              self.userLicense.url = 'http://creativecommons.org/licenses/by-nc-nd/4.0/';
+              self.licenseThirdQuestion = false;
+              break;
+            default:
+              self.userLicense.description = "We had trouble with your input, please try this link:";
+              self.userLicense.text = '';
+              self.userLicense.url = 'https://creativecommons.org/choose/';
+              self.licenseThirdQuestion = false;
+              break;
+          }
+        }
+      },
     },
     watch:{
-
+      ks:function(ks,oldks){
+        var payload = {};
+        payload["completed"] = {'name':this.name,'value':ks};
+        store.commit('markCompleted',payload);
+      },
+      creators:function(creators,oldcreators){
+        var payload = {};
+        payload["completed"] = {'name':this.name,'value':creators};
+        store.commit('markCompleted',payload);
+      },
+      contributors:function(contributors,oldcontributors){
+        var payload = {};
+        payload["completed"] = {'name':this.name,'value':contributors};
+        store.commit('markCompleted',payload);
+      },
+      publishers:function(publishers,oldpublishers){
+        var payload = {};
+        payload["completed"] = {'name':this.name,'value':publishers};
+        store.commit('markCompleted',payload);
+      },
+      citations:function(citations,oldcitations){
+        var payload = {};
+        payload["completed"] = {'name':this.name,'value':citations};
+        store.commit('markCompleted',payload);
+      },
+      constObj:{
+        handler(obj){
+          var payload = {};
+          payload["completed"] = {'name':this.name,'value':obj};
+          store.commit('markCompleted',payload);
+        },
+        deep:true
+      }
     },
     mounted: function(){
-      var self = this;
+      var self = this
+
+      self.checkForConstantKey(self.info,'const')
 
       tippy( '.save', {
         placement:'left',
         maxWidth:'200px',
-        content: '<div class="alert alert-success m-0" style="border-radius:none">Mark Complete</div>',
+        content: '<div class="alert alert-success m-0" style="border-radius:none">Save & Close</div>',
         animation: 'fade',
         theme:'light'});
 
@@ -281,59 +672,300 @@
         animation: 'fade',
         theme:'light'});
 
-      tippy( '.description', {
-        placement:'left',
-        content: 'Loading...',
-        animation: 'fade',
-        theme:'light',
-        onShow(instance) {
-          let desc = instance.reference.dataset.tippyDescription;
-          instance.setContent('<div class="alert alert-info m-0" style="border-radius:none">'+desc+'</div>')
-        },});
+      tippy( '#masterForm', {
+          target:'.inputpreview',
+          content: 'Loading...',
+          maxWidth:'200px',
+          placement:'left',
+          animation: 'fade',
+          theme:'light',
+          onShow(instance) {
+            let info = instance.reference.dataset.tippyInfo;
+            instance.setContent("<div class='alert alert-info m-0 text-left wraptext'><pre>"+info+"</pre></div>")
+          }
+        });
     },
     computed: {
       isRequired:function(){
         return store.getters.isRequired(this.name)
       },
-    userInput: {
+      userInput: {
         get () {
-          return this.$store.getters.getValueOf(this.name)
+          return this.$store.state.schema.validation.properties[this.name].value
         },
         set (newValue) {
           var payload = {};
           payload["completed"] = {'name':this.name,'value':newValue};
           store.commit('markCompleted',payload);
         }
+      },
+      datePreset:function(){
+        if (this.$store.state.schema.validation.properties.hasOwnProperty('datePublished') && this.$store.state.schema.validation.properties['datePublished'].value) {
+          return this.$store.state.schema.validation.properties['datePublished'].value
+        }else if (this.$store.state.schema.validation.properties.hasOwnProperty('dateModified') && this.$store.state.schema.validation.properties['dateModified'].value) {
+          return this.$store.state.schema.validation.properties['dateModified'].value
+        }else{
+          return false;
+        }
       }
     },
     template:
-    `<div class="m-2 inputbox">
+    `<div class="m-2 inputbox" :id='name'>
       <div class="row">
+        <div class="col-sm-12 text-center text-muted">
+          <div class="w-50 m-auto">
+            <small>
+              <i class="fas fa-info-circle text-info unselectable mr-1"></i>
+              <span v-text='info.description || "No description provided"'></span>
+            </small>
+          </div>
+        </div>
         <div class="col-sm-1 left-arrow bg-secondary">
 
         </div>
-        <div class="col-sm-9 p-2 inputbox2 text-left">
+        <div class="col-sm-9 p-2 inputmain text-left">
           <div class="row">
             <div class="col-sm-4 d-flex align-items-center justify-content-start">
-              <i class="fas fa-info-circle text-info description pointer unselectable mr-1" :data-tippy-description='info.description' :data-tippy-id='name'></i>
               <small v-text="name" class="propDescription mainTextLight bold pointer mr-1"></small>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired"></i>
             </div>
             <div class="col-sm-8">
-              <!-- INPUT 👀 TYPES-->
+              <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
               <template v-if="info && info.type === 'string'">
-                <input type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here">
+                <!-- 🌈 STRING 🌈 -->
+                <template v-if="info && !info.format">
+                  <input :required="isRequired" type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here">
+                </template>
+                <!-- 🌈 URL 🌈 -->
+                <template v-if="info && info.format === 'uri'">
+                  <input type="url" v-model="userInput" class="form-control form-control-sm" placeholder="enter url here">
+                </template>
               </template>
+              <!-- 🌈 ENUM 🌈 -->
               <template v-if="info && info.enum" v-for="(item,i) in info.enum">
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item'>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
                   <label class="form-check-label" :for="i" v-text='item'></label>
+                </div>
+              </template>
+              <!-- 🌈 LICENSE 🌈 -->
+              <template v-if="info.type=== 'object' && name === 'license'">
+                <form id="licenseForm" class="p-1" v-if="!userInput">
+                  <small class="text-muted">Allow commercial uses of your work?</small>
+                  <select @change="getLicense()" ref="license1" class="form-control form-control-sm" id="ControlSelect1">
+                    <option selected>Choose...</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                    <option value="Yes, as long as others share alike">Yes, as long as others share alike</option>
+                  </select>
+                  <small class="text-muted">Allow commercial uses of your work?</small>
+                  <select @change="getLicense()" ref="license2" class="form-control form-control-sm" id="ControlSelect2" required="">
+                    <option selected>Choose...</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                  <div v-show='licenseThirdQuestion'>
+                    <small class="text-muted">Impose legal requirement for attribution?</small>
+                    <select @change="getLicense()" ref="license3" class="form-control form-control-sm" id="ControlSelect3" required="">
+                      <option selected>Choose...</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+                </form>
+                <template v-if="userLicense.text && !userInput">
+                  <div class="alert alert-success text-center mt-3">
+                    <h6 v-text="userLicense.text"></h6>
+                    <p>
+                      <small v-text="userLicense.description"></small>
+                    </p>
+                    <small>
+                      <a :href="userLicense.url" target="_blank" v-text="'Learn More About '+userLicense.text"></a>
+                    </small>
+                  </div>
+                </template>
+                <template v-if="userInput && userInput.text">
+                  <div class="alert alert-success text-center mt-3">
+                    <small><b>License Chosen:</b> </small>
+                    <h6 v-text="userInput.text"></h6>
+                    <p>
+                      <small v-text="userInput.description"></small>
+                    </p>
+                    <small>
+                      <a :href="userInput.url" target="_blank" v-text="'Learn More About '+userInput.text"></a>
+                    </small>
+                    <hr />
+                  </div>
+                </template>
+                <div class="text-center p-1" v-if="userLicense.text && !userInput">
+                  <button class="btn btn-success" @click="userInput=userLicense">Use This License</button>
+                </div>
+              </template>
+              <!-- 🌈 ONE OF 🌈 -->
+              <template v-if="info.oneOf && name === 'datePublished' || name === 'dateModified'">
+                <div v-if="datePreset && !userInput" class="p-2">
+                  <small>Dates used:</small>
+                  <small class="badge badge-info pointer m-1" v-text="'Click to use '+datePreset" @click="userInput=datePreset"></small>
+                </div>
+                <template v-for="(item,i) in info.oneOf">
+                  <div>
+                    <template v-if="item.format === 'date'">
+                      <input type="date" v-model="userInput" class="form-control form-control-sm" :placeholder="'enter '+item.format">
+                    </template>
+                    <template v-if="item.type === 'string' && !item.format">
+                      <input  type="text" v-model="userInput" class="form-control form-control-sm" :placeholder="'enter '+item.type">
+                    </template>
+                    <!-- 🔥🔥🔥🔥🔥 TODO: handle nested arrays of objects 🔥🔥🔥🔥🔥 -->
+                  </div>
+                </template>
+              </template>
+              <!-- 🌈  KEYWORDS 🌈 -->
+              <template v-if="info.type=== 'array' && name === 'keywords'">
+                <div class="form-group p-2 row">
+                  <div class="col-sm-12 mb-2">
+                    <form @submit.prevent="addKeyword">
+                      <small class="text-muted">Enter single or multiple keywords separated by commas</small>
+                      <input ref="keywordInput" autocomplete="off" type="text" class="form-control form-control-sm" placeholder="Enter text here">
+                    </form>
+                  </div>
+                  <div class="col-sm-12 m-auto">
+                    <template v-for="text in ks">
+                      <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical" title="remove">
+                        <span v-html="text"></span>
+                        <span style="opacity:0;" class="d-inline" @click.prevent="removeKeyword(text)"> <i class="fas fa-times"></i></span>
+                      </span>
+                    </template>
+                  </div>
+                  <div class="alert alert-success m-3 w-75" v-show="userInput">
+                    <small><b>Saved Keywords:</b> </small>
+                    <template v-for="(text,i) in userInput">
+                      <small v-html="text"></small>
+                      <small v-if="i !== userInput.length-1">, </small>
+                    </template>
+                  </div>
+                </div>
+              </template>
+              <!-- 🌈  CREATOR 🌈 -->
+              <template v-if="info.type=== 'object' && name === 'creator'">
+                <div class="form-group p-2 row">
+                  <button class="btn mainBackDark text-light m-auto" @click="addPerson('creator')"><i class="fas fa-plus"></i> Add Creator</button>
+                </div>
+                <div class="col-sm-12 m-auto">
+                  <template v-for="(person,i) in creators">
+                    <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove">
+                      <i class="fas fa-user"></i>
+                      <span v-text="person.name"></span>
+                      <span style="opacity:0;" class="d-inline" @click="removePerson('creator',person.name)"> <i class="fas fa-times"></i></span>
+                    </span>
+                  </template>
+                </div>
+                <div class="alert alert-success m-3 w-75" v-show="userInput">
+                  <small><b>Saved Creators:</b> </small>
+                  <hr />
+                  <template v-for="(person,i) in userInput">
+                    <span :title="person.url"  class="text-success inputpreview mr-1" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i' >
+                      <i class="fas fa-user"></i>
+                      <span v-text="person.name"></span>
+                    </span>
+                    <small class="text-success" v-if="i !== userInput.length-1">, </small>
+                  </template>
+                </div>
+              </template>
+              <!-- 🌈  PUBLISHER 🌈 -->
+              <template v-if="info.type=== 'object' && name === 'publisher'">
+                <div class="form-group p-2 row">
+                  <button class="btn mainBackDark text-light m-auto" @click="addPerson('publisher')"><i class="fas fa-plus"></i> Add Publisher</button>
+                </div>
+                <div class="col-sm-12 m-auto">
+                  <template v-for="(person,i) in publishers">
+                    <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
+                      <i class="fas fa-building"></i>
+                      <span v-text="person.name"></span>
+                      <span style="opacity:0;" class="d-inline" @click="removePerson('publisher',person.name)"> <i class="fas fa-times"></i></span>
+                    </span>
+                  </template>
+                </div>
+                <div class="alert alert-success m-3 w-75" v-show="userInput">
+                  <small><b>Saved Publishers:</b> </small>
+                  <hr />
+                  <template v-for="(person,i) in userInput">
+                    <span :title="person.url"  class="text-success inputpreview mr-1" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
+                      <i class="fas fa-building"></i>
+                      <span v-text="person.name"></span>
+                    </span>
+                    <small class="text-success" v-if="i !== userInput.length-1">, </small>
+                  </template>
+                </div>
+              </template>
+              <!-- 🌈  CITATIONS 🌈 -->
+              <template v-if="info.type=== 'object' && name === 'citation'">
+                <div class="form-group p-2 row">
+                  <button class="btn mainBackDark text-light m-auto" @click="addPerson('citation')"><i class="fas fa-plus"></i> Add Citation</button>
+                </div>
+                <div class="col-sm-12 m-auto">
+                  <template v-for="(person,i) in citations">
+                    <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
+                      <i class="fas fa-file-alt"></i>
+                      <span v-text="person.name"></span>
+                      <span style="opacity:0;" class="d-inline" @click="removePerson('citation',person.name)"> <i class="fas fa-times"></i></span>
+                    </span>
+                  </template>
+                </div>
+                <div class="alert alert-success m-3 w-75" v-show="userInput">
+                  <small><b>Saved Citations:</b> </small>
+                  <hr />
+                  <template v-for="(person,i) in userInput">
+                    <span :title="person.url"  class="text-success inputpreview mr-1" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
+                      <i class="fas fa-file-alt"></i>
+                      <span v-text="person.name"></span>
+                    </span>
+                    <small class="text-success" v-if="i !== userInput.length-1">, </small>
+                  </template>
+                </div>
+              </template>
+              <!-- 🌈  CONSTANT DATA CATALOG 🌈 -->
+              <template v-if="info.type=== 'object' && name === 'includedInDataCatalog'">
+                <div class="text-center">
+                  <div class="text-center bold text-info" v-if="constFound">
+                    <small class="bold m-auto">Fixed Value, No Action Needed</small>
+                  </div>
+                  <div class='alert alert-success m-auto w-75'>
+                  <p v-for="(item,index) in userInput" class="m-0">
+                    <small class="bold" v-text='index'></small>:<small v-text='item'></small>
+                  </p>
+                  </div>
+                </div>
+              </template>
+              <!-- 🌈  CONTRIBUTORS 🌈 -->
+              <template v-if="info.oneOf && name === 'contributor'">
+                <div class="form-group p-2 row">
+                  <button class="btn mainBackDark text-light m-auto" @click="addPerson('contributor')"><i class="fas fa-plus"></i> Add Contributor</button>
+                </div>
+                <div class="col-sm-12 m-auto">
+                  <template v-for="(person,i) in contributors">
+                    <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
+                      <i class="fas fa-user"></i>
+                      <span v-text="person.name"></span>
+                      <span style="opacity:0;" class="d-inline" @click="removePerson('contributor',person.name)"> <i class="fas fa-times"></i></span>
+                    </span>
+                  </template>
+                </div>
+                <div class="alert alert-success m-3 w-75" v-show="userInput">
+                  <small><b>Saved Contributors:</b> </small>
+                  <hr />
+                  <template v-for="(person,i) in userInput">
+                    <span :title="person.url"  class="text-success inputpreview mr-1" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
+                      <i class="fas fa-user"></i>
+                      <span v-text="person.name"></span>
+                    </span>
+                    <small class="text-success" v-if="i !== userInput.length-1">, </small>
+                  </template>
                 </div>
               </template>
             </div>
           </div>
         </div>
-        <div class="col-sm-2 p-2 inputbox3 d-flex align-items-center justify-content-around">
+        <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
           <span class="fa-stack fa-1x pointer save" @click="markCompleted(name)" v-show="userInput">
             <i class="fas fa-circle text-muted back fa-stack-2x"></i>
             <i class="fas fa-check fa-stack-1x text-light"></i>
@@ -373,6 +1005,9 @@
         isComplete:function(){
           return store.state.complete
         },
+        totals:function(){
+          return store.getters.getTotals
+        }
       },
       watch:{
       },
@@ -473,15 +1108,6 @@
 			mounted:function(){
         this.checkUser();
 
-
-        tippy( '#tippyContainer', {
-          target:'.popularity',
-          content: 'Loading...',
-          animateFill: false,
-          animation: 'fade',
-          theme:'light',
-          trigger:'click'
-        });
 			}
 		});
 
