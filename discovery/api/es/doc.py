@@ -231,6 +231,12 @@ class DatasetMetadata(Document):
         meta._raw = doc
         return meta
 
+    def to_json(self):
+        assert self.meta.id
+        json = {'_id': self.meta.id}
+        json.update(self.to_dict()['_raw'])
+        return json
+
     def save(self, **kwargs):
         '''
         Create _id basing on identifier
