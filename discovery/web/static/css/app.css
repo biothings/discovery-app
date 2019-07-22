@@ -107,26 +107,12 @@ h1, h2, h3, h4, h4{
 
 .themeButton{
   border: 1px white solid !important;
-  /* background: var(--main) !important; */
-  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#36747c+0,008b9b+49,0d6f7c+50,004e66+99 */
-  background: rgb(54,116,124); /* Old browsers */
-  background: -moz-linear-gradient(top,  rgba(54,116,124,1) 0%, rgba(0,139,155,1) 49%, rgba(13,111,124,1) 50%, rgba(0,78,102,1) 99%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top,  rgba(54,116,124,1) 0%,rgba(0,139,155,1) 49%,rgba(13,111,124,1) 50%,rgba(0,78,102,1) 99%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom,  rgba(54,116,124,1) 0%,rgba(0,139,155,1) 49%,rgba(13,111,124,1) 50%,rgba(0,78,102,1) 99%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#36747c', endColorstr='#004e66',GradientType=0 ); /* IE6-9 */
-
+  background: var(--main)
 }
 
 .themeButton:hover{
   border: 1px white solid !important;
-  /* background: var(--sec) !important; */
-  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#542b5e+0,7a3f89+49,5c3069+50,5b2d60+99 */
-background: rgb(84,43,94); /* Old browsers */
-background: -moz-linear-gradient(top,  rgba(84,43,94,1) 0%, rgba(122,63,137,1) 49%, rgba(92,48,105,1) 50%, rgba(91,45,96,1) 99%); /* FF3.6-15 */
-background: -webkit-linear-gradient(top,  rgba(84,43,94,1) 0%,rgba(122,63,137,1) 49%,rgba(92,48,105,1) 50%,rgba(91,45,96,1) 99%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to bottom,  rgba(84,43,94,1) 0%,rgba(122,63,137,1) 49%,rgba(92,48,105,1) 50%,rgba(91,45,96,1) 99%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#542b5e', endColorstr='#5b2d60',GradientType=0 ); /* IE6-9 */
-
+  background: #7a3e8c;
 }
 
 .mainBackLight{

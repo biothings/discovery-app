@@ -880,7 +880,6 @@
 
           if (namespace && !self.invalidChars) {
             axios.head(`/api/registry/`+namespace).then(function (res) {
-              console.log('Registration Check ', res)
               self.available= false;
             }).catch(err=>{
               self.available= true;
@@ -1273,17 +1272,16 @@
             "namespace": self.nameInput,
             "url": self.userSchemaURL
           }
-          console.log('registering...',data)
+          // console.log('registering...',data)
           axios.post('/api/registry',data).then(res=>{
-            console.log('POST response ',res.data)
+            // console.log('POST response ',res.data)
             if (res.data.url) {
 
               Swal.fire({
-                type: 'success',
-                toast: true,
-                position: 'bottom',
                 title: 'Registration Successful',
-                html: "Data can now be accessed on <a href='/"+self.nameInput+"/'>"+window.location.origin+"/"+self.nameInput+"/"+"</a>"
+                confirmButtonColor:'#5C3069',
+                cancelButtonColor:'#006476',
+                html: "View now: <a href='/"+self.nameInput+"/'>"+window.location.origin+"/"+self.nameInput+"/"+"</a>"
               });
               self.registered = true;
 
@@ -1292,6 +1290,8 @@
                 type: 'error',
                 toast: true,
                 position: 'top',
+                confirmButtonColor:'#5C3069',
+                cancelButtonColor:'#006476',
                 title: 'Registration Failed',
                 text: res.data.error
               });
@@ -1302,6 +1302,8 @@
             Swal.fire({
               type: 'error',
               toast: true,
+              confirmButtonColor:'#5C3069',
+              cancelButtonColor:'#006476',
               position: 'top center',
               title: 'Registration Failed',
               text: err,

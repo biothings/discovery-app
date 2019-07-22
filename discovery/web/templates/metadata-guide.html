@@ -76,6 +76,12 @@
   .fa-times:hover{
     cursor: pointer !important;
   }
+  .previewBox{
+    min-height: 40vh;
+    background: #dedede;
+    overflow: scroll;
+    border: inset 2px grey;
+  }
 </style>
 <div id="guide" class="container pt-5">
   <div v-if=loading class="loader">
@@ -107,16 +113,16 @@
         </a>
       </li>
       <li class='nav-item'>
-        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !validation, 'mainBackDark text-light pointer': validation }" href='#'>
+        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !validation, 'mainBackDark text-light pointer': validation }" @click='getPreview()'>
           <small>
             <i class="fas fa-code"></i> Preview
           </small>
         </a>
       </li>
       <li class='nav-item'>
-        <a class='nav-link' :class="{ 'disabled notallowed': !isComplete, 'bg-success text-light': isComplete }" href='#'>
+        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light': isComplete }" @click="handleRegistration()">
           <small>
-            <i class="fas fa-cloud-upload-alt"></i> Save
+            <i class="fas fa-cloud-upload-alt"></i> Register
           </small>
         </a>
       </li>
@@ -204,17 +210,21 @@
   const store = new Vuex.Store({
     state: {
       schema:Object,
-      complete:false,
       required:Array,
       validation:null,
-      schemaName:''
+      schemaName:'',
+      output:{
+        "@context": "",
+        "@type": "",
+      }
     },
     strict: true,
     mutations: {
       saveSchema(state,payload){
         state.schema = payload['schema'];
         console.log('schema saved',state.schema)
-        // $.notify("Schema Saved",{ globalPosition: 'right',className:'success', showDuration: 40, });
+        state.output['@type'] = state.schema.label || state.schema.name
+        state.output['@context'] = 'http://discovery.biothings.io/'
       },
       saveSchemaName(state,payload){
         state.schemaName = payload['name'];
@@ -252,6 +262,39 @@
           }
         }
       },
+      removeArrayItemFrom(state,payload){
+        let field = payload['from'];
+        let item = payload['item'];
+        let props = state.schema.validation.properties;
+        for (var i = 0; i < props[field].value.length; i++) {
+          if (props[field].value[i].hasOwnProperty('name')) {
+            if (props[field].value[i].name === item) {
+              Vue.delete(props[field].value,i);
+              $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+            }
+          }else if (props[field].value[i] === item) {
+            Vue.delete(props[field].value,i);
+            $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+          }
+        }
+      },
+      addToArrayFrom(state,payload){
+        let field = payload['from'];
+        let item = payload['item'];
+        //Initialize array
+        if (!state.schema.validation.properties[field].value) {
+          Vue.set(state.schema.validation.properties[field], 'value', [])
+        }
+        state.schema.validation.properties[field]['value'].push(item)
+      },
+      formPreview(state){
+        let props = state.schema.validation.properties;
+        for (key in props) {
+          if (props[key].value) {
+            Vue.set(state.output,key,props[key].value)
+          }
+        }
+      }
     },
     getters:{
       // exposed as store.getters.nameOfGetter
@@ -276,7 +319,6 @@
         return state.schemaName
       },
       getValueOf: (state) => (propname) =>{
-        console.log('get value of..',propname)
         return state.schema.validation.properties[propname].value
       },
       getTotals:(state) => {
@@ -296,6 +338,27 @@
           return res
         }
 
+      },
+      getPreview(state){
+        return state.output
+      },
+      isComplete(state){
+        let complete = false;
+        if (state.schema && state.schema.hasOwnProperty('validation') && state.schema.validation.hasOwnProperty('required')) {
+          let required = state.schema.validation['required']
+          for (var i = 0; i < required.length; i++) {
+            if (state.schema.validation.properties.hasOwnProperty(required[i]) && state.schema.validation.properties[required[i]].value) {
+              complete = true
+            }else{
+              complete = false
+              break;
+            }
+          }
+        }
+        return complete
+      },
+      getOutput(state){
+        return state.output
       }
     },
     actions:{
@@ -309,13 +372,8 @@
   Vue.component('input-box', {
     data: function(){
       return{
-        ks:[],
-        creators:[],
-        contributors:[],
         constFound:false,
         constObj:{},
-        publishers:[],
-        citations:[],
         licenseThirdQuestion:false,
         userLicense:{
           'text':'',
@@ -345,46 +403,36 @@
       addKeyword(){
         let self = this;
         let value = self.$refs.keywordInput.value;
+
         if (value.includes(',')) {
           let arr = value.split(',');
           for (var i = 0; i < arr.length; i++) {
-            if (!self.ks.includes(arr[i])) {
-              let val = arr[i].trim();
-              self.ks.push(val);
-              self.$refs.keywordInput.value = '';
-            }else{
-              $.notify(value+" keyword already added",{ globalPosition: 'right',className:'error', showDuration: 40, });
-              self.$refs.keywordInput.value = '';
-            }
+            let val = arr[i].trim();
+            var payload = {};
+            payload["item"] = val;
+            payload["from"] = self.name;
+            store.commit('addToArrayFrom',payload);
+            self.$refs.keywordInput.value = '';
           }
         }else{
-          if (!self.ks.includes(value)) {
-            self.ks.push(value);
-            self.$refs.keywordInput.value = '';
-          }else{
-            $.notify(value+" keyword already added",{ globalPosition: 'right',className:'error', showDuration: 40, });
-            self.$refs.keywordInput.value = '';
-          }
+          var payload = {};
+          payload["item"] = value;
+          payload["from"] = self.name;
+          store.commit('addToArrayFrom',payload);
+          self.$refs.keywordInput.value = '';
         }
 
       },
-      removeKeyword(name){
+      removeItem(name){
         let self = this;
-        var index = self.ks.indexOf(name);
-        if (index > -1) {
-          self.ks.splice(index, 1);
-        }
+        var payload = {};
+        payload["item"] = name;
+        payload["from"] = self.name;
+        store.commit('removeArrayItemFrom',payload);
       },
       addPerson(type){
         let self = this;
         switch (type) {
-          case "creator":
-            if (self.creators.length === 1 || self.userInput && self.userInput.length === 1) {
-              $.notify("MAX number of input reached",{ globalPosition: 'right',className:'info', showDuration: 40, });
-            }else{
-              self.addPersonModal(type)
-            }
-            break;
           case "citation":
             self.addCitationModal(type)
             break;
@@ -399,15 +447,40 @@
           input: 'text',
           confirmButtonText: 'Next &rarr;',
           showCancelButton: true,
+          confirmButtonColor:'#5C3069',
+          cancelButtonColor:'#006476',
           progressSteps: ['1', '2',]
         }).queue([
           {
             title: "Name*",
-            text: "Enter the "+type+"'s full name"
+            text: "Enter the "+type+"'s full name",
+            inputValidator: (value) => {
+              if (!value) {
+                return 'Name is a required field!'
+              }
+            }
           },
           {
             title: "URL",
-            text: "Enter a URL for this "+type+"'s online profile (faculty page, GitHub page, Linkedin page, etc)"
+            text: "Enter a URL for this "+type+"'s online profile (faculty page, GitHub page, Linkedin page, etc)",
+            inputValidator: (value) => {
+              return new Promise((resolve) => {
+                function validURL(str) {
+                  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+                    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+                    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+                  return !!pattern.test(str);
+                }
+                if (validURL(value)) {
+                  resolve()
+                } else {
+                  resolve('Input must be a valid URL')
+                }
+              })
+            }
           }
 
         ]).then((result) => {
@@ -424,21 +497,11 @@
             }
             if (name) {
               let person = {'name':name,'url':url};
-
-            switch (type) {
-              case 'creator':
-                self.creators.push(person)
-                break;
-                case 'publisher':
-                  self.publishers.push(person)
-                  break;
-                  case 'contributor':
-                    self.contributors.push(person)
-                    break;
-              default:
-
-              }
-              $.notify(self.name+" "+type+" was added",{ globalPosition: 'right',className:'success', showDuration: 40, });
+              let self = this;
+              var payload = {};
+              payload["item"] = person;
+              payload["from"] = self.name;
+              store.commit('addToArrayFrom',payload);
             }else{
               $.notify("A "+type+"'s name is required",{ globalPosition: 'right',className:'error', showDuration: 40, });
             }
@@ -453,19 +516,49 @@
           input: 'text',
           confirmButtonText: 'Next &rarr;',
           showCancelButton: true,
+          confirmButtonColor:'#5C3069',
+          cancelButtonColor:'#006476',
           progressSteps: ['1', '2',]
         }).queue([
           {
             title: "Name*",
-            text: "Enter the "+type+"'s title or name"
+            text: "Enter the "+type+"'s title or name",
+            inputValidator: (value) => {
+              if (!value) {
+                return 'Name is a required field!'
+              }
+            }
           },
           {
             title: "URL",
-            text: "Enter a URL for this "+type+" (web page, GitHub page, Linkedin page, etc)"
+            text: "Enter a URL for this "+type+" (web page, GitHub page, Linkedin page, etc)",
+            inputValidator: (value) => {
+              return new Promise((resolve) => {
+                function validURL(str) {
+                  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+                    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+                    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+                  return !!pattern.test(str);
+                }
+                if (validURL(value)) {
+                  resolve()
+                } else {
+                  resolve('Input must be a valid URL')
+                }
+              })
+            }
           },
           {
             title: "Identifier",
-            text: "Enter this "+type+"'s PubMed id here"
+            text: "Enter this "+type+"'s PubMed id here",
+            inputValidator: (value) => {
+              if (!value) {
+                return 'You need to write something!'
+              }
+            }
           }
 
         ]).then((result) => {
@@ -485,8 +578,10 @@
 
             if (name) {
               let citation = {'name':name,'url':url,'identifier':ident};
-              self.citations.push(citation)
-              $.notify(self.name+" "+type+" was added",{ globalPosition: 'right',className:'success', showDuration: 40, });
+              var payload = {};
+              payload["item"] = citation;
+              payload["from"] = self.name;
+              store.commit('addToArrayFrom',payload);
             }else{
               $.notify("A "+type+"'s name is required",{ globalPosition: 'right',className:'error', showDuration: 40, });
             }
@@ -494,37 +589,6 @@
 
           }
         })
-      },
-      removePerson(type,name){
-        let self = this;
-        if (type === 'creator') {
-          for (var i = 0; i < self.creators.length; i++) {
-            if (self.creators[i].name === name) {
-              self.creators.splice(i, 1);
-            }
-          }
-        }
-        if (type === 'contributor') {
-          for (var i = 0; i < self.creators.length; i++) {
-            if (self.creators[i].name === name) {
-              self.creators.splice(i, 1);
-            }
-          }
-        }
-        if (type === 'publisher') {
-          for (var i = 0; i < self.publishers.length; i++) {
-            if (self.publishers[i].name === name) {
-              self.publishers.splice(i, 1);
-            }
-          }
-        }
-        if (type === 'citation') {
-          for (var i = 0; i < self.citations.length; i++) {
-            if (self.citations[i].name === name) {
-              self.citations.splice(i, 1);
-            }
-          }
-        }
       },
       checkForConstantKey(obj, keyname, parentkey) {
         var self=this;
@@ -612,31 +676,6 @@
       },
     },
     watch:{
-      ks:function(ks,oldks){
-        var payload = {};
-        payload["completed"] = {'name':this.name,'value':ks};
-        store.commit('markCompleted',payload);
-      },
-      creators:function(creators,oldcreators){
-        var payload = {};
-        payload["completed"] = {'name':this.name,'value':creators};
-        store.commit('markCompleted',payload);
-      },
-      contributors:function(contributors,oldcontributors){
-        var payload = {};
-        payload["completed"] = {'name':this.name,'value':contributors};
-        store.commit('markCompleted',payload);
-      },
-      publishers:function(publishers,oldpublishers){
-        var payload = {};
-        payload["completed"] = {'name':this.name,'value':publishers};
-        store.commit('markCompleted',payload);
-      },
-      citations:function(citations,oldcitations){
-        var payload = {};
-        payload["completed"] = {'name':this.name,'value':citations};
-        store.commit('markCompleted',payload);
-      },
       constObj:{
         handler(obj){
           var payload = {};
@@ -734,11 +773,16 @@
               <template v-if="info && info.type === 'string'">
                 <!-- 🌈 STRING 🌈 -->
                 <template v-if="info && !info.format">
-                  <input :required="isRequired" type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here">
+                  <template v-if="name === 'description'">
+                    <textarea pattern=".{20,500}" rows="7" type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here"></textarea>
+                  </template>
+                  <template v-else>
+                    <input :required="isRequired" type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here">
+                  </template>
                 </template>
                 <!-- 🌈 URL 🌈 -->
                 <template v-if="info && info.format === 'uri'">
-                  <input type="url" v-model="userInput" class="form-control form-control-sm" placeholder="enter url here">
+                  <input type="url" data-parsley-type="url" v-model="userInput" class="form-control form-control-sm" placeholder="enter url here">
                 </template>
               </template>
               <!-- 🌈 ENUM 🌈 -->
@@ -829,10 +873,10 @@
                     </form>
                   </div>
                   <div class="col-sm-12 m-auto">
-                    <template v-for="text in ks">
+                    <template v-for="text in userInput">
                       <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical" title="remove">
                         <span v-html="text"></span>
-                        <span style="opacity:0;" class="d-inline" @click.prevent="removeKeyword(text)"> <i class="fas fa-times"></i></span>
+                        <span style="opacity:0;" class="d-inline" @click.prevent="removeItem(text)"> <i class="fas fa-times"></i></span>
                       </span>
                     </template>
                   </div>
@@ -851,11 +895,11 @@
                   <button class="btn mainBackDark text-light m-auto" @click="addPerson('creator')"><i class="fas fa-plus"></i> Add Creator</button>
                 </div>
                 <div class="col-sm-12 m-auto">
-                  <template v-for="(person,i) in creators">
+                  <template v-for="(person,i) in userInput">
                     <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove">
                       <i class="fas fa-user"></i>
                       <span v-text="person.name"></span>
-                      <span style="opacity:0;" class="d-inline" @click="removePerson('creator',person.name)"> <i class="fas fa-times"></i></span>
+                      <span style="opacity:0;" class="d-inline" @click="removeItem(person.name)"> <i class="fas fa-times"></i></span>
                     </span>
                   </template>
                 </div>
@@ -877,11 +921,11 @@
                   <button class="btn mainBackDark text-light m-auto" @click="addPerson('publisher')"><i class="fas fa-plus"></i> Add Publisher</button>
                 </div>
                 <div class="col-sm-12 m-auto">
-                  <template v-for="(person,i) in publishers">
+                  <template v-for="(person,i) in userInput">
                     <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
                       <i class="fas fa-building"></i>
                       <span v-text="person.name"></span>
-                      <span style="opacity:0;" class="d-inline" @click="removePerson('publisher',person.name)"> <i class="fas fa-times"></i></span>
+                      <span style="opacity:0;" class="d-inline" @click="removeItem(person.name)"> <i class="fas fa-times"></i></span>
                     </span>
                   </template>
                 </div>
@@ -903,11 +947,11 @@
                   <button class="btn mainBackDark text-light m-auto" @click="addPerson('citation')"><i class="fas fa-plus"></i> Add Citation</button>
                 </div>
                 <div class="col-sm-12 m-auto">
-                  <template v-for="(person,i) in citations">
+                  <template v-for="(person,i) in userInput">
                     <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
                       <i class="fas fa-file-alt"></i>
                       <span v-text="person.name"></span>
-                      <span style="opacity:0;" class="d-inline" @click="removePerson('citation',person.name)"> <i class="fas fa-times"></i></span>
+                      <span style="opacity:0;" class="d-inline" @click="removeItem(person.name)"> <i class="fas fa-times"></i></span>
                     </span>
                   </template>
                 </div>
@@ -942,11 +986,11 @@
                   <button class="btn mainBackDark text-light m-auto" @click="addPerson('contributor')"><i class="fas fa-plus"></i> Add Contributor</button>
                 </div>
                 <div class="col-sm-12 m-auto">
-                  <template v-for="(person,i) in contributors">
+                  <template v-for="(person,i) in userInput">
                     <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
                       <i class="fas fa-user"></i>
                       <span v-text="person.name"></span>
-                      <span style="opacity:0;" class="d-inline" @click="removePerson('contributor',person.name)"> <i class="fas fa-times"></i></span>
+                      <span style="opacity:0;" class="d-inline" @click="removeItem(person.name)"> <i class="fas fa-times"></i></span>
                     </span>
                   </template>
                 </div>
@@ -1003,7 +1047,7 @@
           return store.getters.getValidation
         },
         isComplete:function(){
-          return store.state.complete
+          return store.getters.isComplete
         },
         totals:function(){
           return store.getters.getTotals
@@ -1081,8 +1125,8 @@
               title: 'Are you sure?',
               text: "You won't be able to revert this!",
               showCancelButton: true,
-              confirmButtonColor: '#3085d6',
-              cancelButtonColor: '#d33',
+              confirmButtonColor:'#5C3069',
+              cancelButtonColor:'#006476',
               confirmButtonText: 'Yes, start over'
             }).then((result) => {
               if (result.value) {
@@ -1104,10 +1148,71 @@
           payload["select"] = propname;
           store.commit('markSelected',payload);
         },
+        getPreview(){
+          store.commit('formPreview');
+          Swal.fire({
+            position: 'center',
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox">
+                    <small>
+                      <pre>
+                        `+JSON.stringify(store.getters.getPreview,null,2)+`
+                      </pre>
+                    </small>
+                  </div>`
+          });
+        },
+        handleRegistration(){
+          var self = this;
+
+          if (this.isComplete) {
+            store.commit('formPreview');
+            let output = store.getters.getOutput
+            self.loading = true;
+
+            Swal.fire({
+              title: 'Register this schema?',
+              html:"<small>Done editing this schema? Click <b>Register Now</b> to proceed.</small>",
+              confirmButtonColor:'#5C3069',
+              cancelButtonColor:'#006476',
+              showCancelButton: true,
+              confirmButtonText: 'Register Now',
+              showLoaderOnConfirm: true,
+              preConfirm: (input) => {
+                axios.post('/api/metadata',output).then(res=>{
+                  self.loading = false;
+                  if (res.data.success) {
+                    Swal.fire({
+                      title: `Registration Successful`,
+                      html:"<small>Your metadata has been saved!</small>",
+                      html:`<a target="_blank" href=`+res.data.url+`>`+res.data.url+`</a>`,
+                      showCancelButton: false,
+                      confirmButtonColor:'#5C3069',
+                      cancelButtonColor:'#006476',
+                      onClose:()=>{
+                        store.dispatch('reset')
+                      }
+                    })
+                  }
+                }).catch(err=>{
+                  self.loading = false;
+                  throw err;
+                  Swal.fire({
+                    title: `Registration Failed`,
+                    html: `<small>`+err+`</small>`
+                  })
+                })
+              },
+              allowOutsideClick: () => !Swal.isLoading(),
+
+            });
+          }
+
+        }
 			},
 			mounted:function(){
         this.checkUser();
-
 			}
 		});
 
