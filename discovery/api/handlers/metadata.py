@@ -34,7 +34,7 @@ def github_authenticated(func):
 
 class MetadataHandler(APIBaseHandler):
     '''
-        Registered Schema Repository
+        Registered Dataset Metadata
 
         Create - POST ./api/metadata
         Fetch  - GET ./api/metadata
@@ -63,10 +63,8 @@ class MetadataHandler(APIBaseHandler):
         '''
             Access the registry.
 
-            - List all schemas.
-            - List schemas by a user.
-            - List a schema by its prefix.
-            - List a class by its name and prefix.
+            - List all metadata documents.
+            - List metadata documents by a user.
         '''
 
         if not _id:
@@ -100,7 +98,7 @@ class MetadataHandler(APIBaseHandler):
     @github_authenticated
     def delete(self, _id):
         '''
-        Delete by _id.
+        Delete by metadata _id.
         '''
 
         meta = DatasetMetadata.get(id=_id, ignore=404)
