@@ -20,9 +20,9 @@ from elasticsearch_dsl import (Binary, Date, Document, InnerDoc, Keyword,
 LOGGER = logging.getLogger(__name__)
 
 
-class SchemaMeta(InnerDoc):
+class DocumentMeta(InnerDoc):
     '''
-        The Metadata of a Schema
+        The Metadata of a Schema or Dataset
 
         - Excluded from the default search fields.
         - Timestamp corresponds to ~raw processing time.
@@ -44,7 +44,7 @@ class Schema(Document):
         A Top-Level Schema
         https://schema.org/docs/schemas.html
     '''
-    _meta = Object(SchemaMeta, required=True)
+    _meta = Object(DocumentMeta, required=True)
     context = Text()
     locals()['~raw'] = Binary()
 
@@ -206,7 +206,7 @@ class DatasetMetadata(Document):
     '''
         Documents of a certain Schema
     '''
-    _meta = Object(SchemaMeta, required=True)
+    _meta = Object(DocumentMeta, required=True)
     identifier = Text(required=True)
     name = Text()
     description = Text()
