@@ -81,7 +81,7 @@ class MetadataHandler(APIBaseHandler):
 
             self.write({
                 "total": search.count(),
-                "hits": [meta.to_dict()['_raw']
+                "hits": [meta.to_json()
                          for meta in search.scan()]
             })
             return
