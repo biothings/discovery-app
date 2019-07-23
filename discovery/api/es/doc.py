@@ -7,13 +7,12 @@
     Reference: https://schema.org/docs/datamodel.html
 
 '''
-
 import gzip
 import hashlib
+import json
 import logging
 from datetime import datetime
 
-from biothings_schema import Schema as SchemaParser
 from elasticsearch_dsl import (Binary, Date, Document, InnerDoc, Keyword,
                                Nested, Object, Text)
 
@@ -94,10 +93,10 @@ class Schema(Document):
     def decode_raw(self):
         '''
         Decode the compressed raw definition.
-        Return decoded text saved in _raw field.
+        Return decoded json saved in _raw field.
         '''
         if '~raw' in self:
-            return gzip.decompress(self['~raw']).decode()
+            return json.loads(gzip.decompress(self['~raw']).decode())
         return None
 
     def save(self, *args, **kwargs):
