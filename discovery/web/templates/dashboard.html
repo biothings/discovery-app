@@ -9,6 +9,7 @@
     <h1 class="text-muted caps">My Dashboard</h1>
     <div class="dashboard">
       <div class="row mb-5">
+        <!-- uSER BOX -->
         <div class="col-sm-2 p-0 userInfo bg-secondary">
           <div class="pRelative">
             <img :src="user.avatar_url" width="100%" alt="logo" style="z-index:1"/>
@@ -23,9 +24,10 @@
             </a>
           </div>
         </div>
+        <!-- RESULTS -->
         <div class="col-sm-10">
-          <div class="mt-3 text-muted lighter">
-            <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Schemas
+          <div class="mt-3 mainTextLight">
+            <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Schema Namespaces
           </div>
           <table class="table">
             <thead class="bg-light text-muted">
@@ -40,23 +42,61 @@
               <template v-if="dashboard && dashboard.length">
                 <tr v-for="item in dashboard">
                   <td>
-                    <a target="_blank" :href="'/'+item.name+'/'" class=" d-block">
-                      <h4 v-text="item.name" class="d-inline"></h4>
-                    </a>
-                    <button style="zoom:.7" class="btn btn-secondary btn-sm d-block" @click="selectedItem = item" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i> Edit</button>
+                    <a target="_blank" :href="'/'+item.prefix+'/'" v-text="item.prefix" class="d-inline mr-2"></a>
+                    <button style="zoom:.7" class="btn btn-secondary btn-sm d-inline" @click="selectedItem = item" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i> Edit</button>
                   </td>
                   <td>
                     <a target="_blank" :href="item.url" :title="item.url">
-                      Source link <i class="fas fa-external-link-alt"></i>
+                      url <i class="fas fa-external-link-alt"></i>
                     </a>
                   </td>
                   <td>
-                    <a role="button" :href="'/'+item.name+'/'" class="btn btn-outline-secondary up">
+                    <a role="button" :href="'/'+item.prefix+'/'" target="_blank" class="btn themeButton text-light">
                       Visualize
                     </a>
                   </td>
                   <td>
-                    <button @click.prevent="deleteSelected(item.name)" class="btn btn-outline-secondary fill">
+                    <button @click.prevent="deleteSelected('schema',item.prefix)" class="btn themeButton text-light">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              </template>
+              <template v-else>
+                <tr>
+                  <td colspan="6" class="text-center text-muted">
+                    No Contributions Yet
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          <!--  -->
+
+          <div class="mt-3 mainTextDark">
+            <div class="numberCircle mainBackDark" v-text="dashboardMetadataTotal"></div> Registered Metadata
+          </div>
+          <table class="table">
+            <thead class="bg-light text-muted">
+              <tr>
+                <th scope="col" class="lighter">Namespace Registered</th>
+                <th scope="col" class="lighter">View</th>
+                <th scope="col" class="lighter">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-if="dashboardMetadata && dashboardMetadata.length">
+                <tr v-for="item in dashboardMetadata">
+                  <td>
+                    <a target="_blank" :href="'/'+item.name+'/'" v-text="item.name" class="d-inline"></a>
+                  </td>
+                  <td>
+                    <a role="button" :href="'/api/metadata/'+item._id" target="_blank" class="btn themeButton text-light">
+                      View
+                    </a>
+                  </td>
+                  <td>
+                    <button @click.prevent="deleteSelected('metadata',item._id)" class="btn themeButton text-light">
                       Delete
                     </button>
                   </td>
@@ -106,13 +146,14 @@
                 <p class="m-2" :class="[availableSlug ? 'mainTextDark' : 'text-danger']">
                   discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
                 </p>
-              <button v-if="availableSlug && slugInput.length" type="submit" @click.prevent="updateSlug()" class="btn themeButton text-light mt-3">Save</button>
+              <button v-if="availableSlug && slugInput.length" type="submit" @click.prevent="updateSlug()" class="btn themeButton text-light text-light mt-3">Save</button>
             </form>
           </div>
         </div>
       </div>
     </div>
   </div>
+
 </section>
 
 {% endblock %}
@@ -128,6 +169,8 @@ var app = new Vue({
           user:{},
           dashboard:[],
           dashboardTotal:"0",
+          dashboardMetadata:[],
+          dashboardMetadataTotal:"0",
           selectedItem:{},
           slugInput:'',
           availableSlug: false,
@@ -157,7 +200,7 @@ var app = new Vue({
           }
         },
         selectedItem:function(n,o){
-          // console.log('new',n);
+          console.log('selected',n);
         }
       },
 			methods:{
@@ -200,26 +243,29 @@ var app = new Vue({
             throw err;
           });
         },
-        deleteSelected(name){
+        deleteSelected(type,identifier){
           var self = this;
+          let index = '/api/registry/';
+          if (type === 'metadata') {
+            index = '/api/metadata/'
+          }
           Swal.fire({
-            title: '<h3>Are you sure you want to delete schema:  <span class="text-danger bold">'+name+'</span> ?</h3>',
+            title: '<h4>Are you sure you want to delete this item?</h4>',
             text: "You won't be able to revert this!",
-            type:'warning',
             showCancelButton: true,
-            confirmButtonColor: '#006476',
-            cancelButtonColor: '#5C3069',
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
             confirmButtonText: 'Yes, delete it!'
           }).then((result) => {
 
             if (result.value) {
-              axios.delete('/api/registry/'+name).then(res=>{
+              axios.delete(index+identifier).then(res=>{
                 if (res.status) {
                   switch (res.status) {
                     case 200:
                       Swal.fire(
                         'Success',
-                        'Schema deleted',
+                        'Item Deleted',
                         'success'
                       );
                       self.getAll();
@@ -227,7 +273,7 @@ var app = new Vue({
                       case 401:
                         Swal.fire(
                           'Oh, no!',
-                          'You must sign-in to delete this schema',
+                          'You must sign-in to delete this item',
                           'error'
                         );
                         self.getAll();
@@ -235,7 +281,7 @@ var app = new Vue({
                         case 403:
                           Swal.fire(
                             'Oh, no!',
-                            'You do not have permission to delete this schema',
+                            'You do not have permission to delete this item',
                             'error'
                           );
                           self.getAll();
@@ -243,7 +289,7 @@ var app = new Vue({
                           case 404:
                             Swal.fire(
                               'Oh, no!',
-                              'This schema does not seem to exist',
+                              'This item does not seem to exist',
                               'error'
                             );
                             self.getAll();
@@ -274,10 +320,19 @@ var app = new Vue({
           let self= this;
           self.dashboard = [];
           if (this.user.login) {
+            //SCHEMA NAMESPACES
             axios.get('/api/registry?user='+self.user.login).then(res=>{
-              console.log(res.data)
+              console.log("SCHEMAS",res.data)
               self.dashboard = res.data.hits;
               self.dashboardTotal = res.data.total;
+            }).catch(err=>{
+              throw err;
+            });
+            // METADATA
+            axios.get('/api/metadata?user='+self.user.login).then(res=>{
+              console.log("METADATA",res.data)
+              self.dashboardMetadata = res.data.hits;
+              self.dashboardMetadataTotal = res.data.total;
             }).catch(err=>{
               throw err;
             });
