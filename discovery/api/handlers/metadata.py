@@ -9,27 +9,7 @@ from tornado.escape import json_decode
 
 from discovery.api.es.doc import DatasetMetadata
 
-from .base import APIBaseHandler
-
-
-def github_authenticated(func):
-    '''
-        RegistryHandler Decorator
-    '''
-
-    def _(self, *args, **kwargs):
-
-        if not self.current_user:
-
-            self.send_error(
-                message='login with github first',
-                status_code=401
-            )
-            return
-
-        func(self, *args, **kwargs)
-
-    return _
+from .base import APIBaseHandler, github_authenticated
 
 
 class MetadataHandler(APIBaseHandler):

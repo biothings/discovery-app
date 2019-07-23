@@ -12,11 +12,11 @@ def index_schema_org(lazy=False):
         Setup Script
     '''
     if lazy:
-        if SchemaClass.search().query("match", prefix='schema').count() > 770:
+        if SchemaClass.search().query("match", namespace='schema').count() > 770:
             return
 
     SchemaClass.delete_by_schema('schema')
-    classes = SchemaClass.import_from_parser(SchemaParser())
+    classes = SchemaClass.import_classes(SchemaParser(), 'schema')
 
     for klass in classes:
         klass.save()
