@@ -51,7 +51,7 @@ class RegistryHandler(APIBaseHandler):
         if Schema.get(id=namespace, ignore=404):
 
             self.send_error(
-                reason=f"'{namespace}'' is already registered.",
+                reason=f"'{namespace}' is already registered.",
                 status_code=403
             )
             return
@@ -128,14 +128,15 @@ class RegistryHandler(APIBaseHandler):
                 self.send_error(404)
                 return
             result['url'] = schema['_meta'].url
+            result['source'] = schema.decode_raw()
 
         if curie is None:
 
             search = SchemaClass.search().query("match", namespace=namespace)
             search.params(rest_total_hits_as_int=True)
 
-            result['total'] = search.count()
             result['context'] = Schema.gather_contexts()
+            result['total'] = search.count()
             result['hits'] = [klass.to_dict()
                               for klass in search.scan()]
 
