@@ -15,7 +15,26 @@ from discovery.api.es.doc import Schema
 L = logging.getLogger(__name__)
 
 
-# pylint: disable=abstract-method, arguments-differ
+def github_authenticated(func):
+    '''
+        RegistryHandler Decorator
+    '''
+
+    def _(self, *args, **kwargs):
+
+        if not self.current_user:
+
+            self.send_error(
+                message='login with github first',
+                status_code=401
+            )
+            return
+
+        func(self, *args, **kwargs)
+
+    return _
+
+
 class APIBaseHandler(BaseHandler):
 
     _PARSER = SchemaParser()

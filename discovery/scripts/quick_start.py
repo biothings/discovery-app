@@ -2,8 +2,9 @@
     Empty Index Creator
 '''
 
-from discovery.api.es.doc import SchemaClass, Schema, DatasetMetadata
 from elasticsearch_dsl import Index
+
+from discovery.api.es.doc import DatasetMetadata, Schema, SchemaClass
 
 
 def main():

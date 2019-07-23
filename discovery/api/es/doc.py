@@ -45,10 +45,10 @@ class Schema(Document):
         https://schema.org/docs/schemas.html
     '''
     _meta = Object(DocumentMeta, required=True)
-    context = Text()
+    context = Object(enabled=False)
     locals()['~raw'] = Binary()
 
-    # _id : schema prefix, for example: bts, schema (for schema.org)
+    # _id : schema namespace, provided by the front-end when registering
     #       accessible through constructor argument 'id' or schema.meta.id
 
     class Index:
@@ -63,10 +63,15 @@ class Schema(Document):
     @classmethod
     def gather_contexts(cls):
 
-        contexts = {
-            schema.meta.id: schema.context
+        contexts = dict()
+
+        context_list = [
+            schema.context.to_dict()
             for schema in cls.search()
-        }
+        ]
+
+        for context in context_list:
+            contexts.update(context)
 
         contexts.update({
             "schema": "http://schema.org/",
@@ -95,10 +100,14 @@ class Schema(Document):
             return gzip.decompress(self['~raw']).decode()
         return None
 
+    def save(self, *args, **kwargs):
+        assert self.meta.id
+        return super().save(*args, **kwargs)
+
 
 class SchemaClassProp(InnerDoc):
     '''
-    A Class Property
+    A Class Property for SchemaClass
     '''
     uri = Text()
     curie = Text(required=True)
@@ -113,15 +122,16 @@ class SchemaClass(Document):
         https://schema.org/docs/full.html
     '''
 
-    # _id : in the format of <schema>:<name>, for example, schema:Thing
+    # _id : in the format of <namespace>:<prefix>:<label>, for example, schema:Thing
     #       accessible through constructor argument 'id' or cls.meta.id
 
-    uri = Text()
-    prefix = Text(required=True)  # the prefix (schema _id, not url) it is defined in
+    namespace = Text(required=True)  # the _id of the schema document defining the class
+    prefix = Text(required=True)
     label = Text(required=True)
-    parent_classes = Text(multi=True)  # immediate parent class(es) only
+    uri = Text()
     description = Text()
-    properties = Nested(SchemaClassProp)  # properties that belong directly to this class
+    parent_classes = Text(multi=True)  # immediate ones only
+    properties = Nested(SchemaClassProp)  # immediate ones only
 
     class Index:
         '''
@@ -133,72 +143,64 @@ class SchemaClass(Document):
         }
 
     @classmethod
-    def delete_by_schema(cls, prefix):
+    def delete_by_schema(cls, namespace):
         '''
-        Delete all classes of the specified schema prefix.
+        Delete all classes of the specified namespace.
         '''
-        existing_classes = cls.search().query("match", prefix=prefix)
+        existing_classes = cls.search().query("match", namespace=namespace)
         existing_classes.delete()
 
-        LOGGER.info("Deleted %s existing '%s' classes.",
-                    existing_classes.count(), prefix)
+        LOGGER.info("Deleted %s classes from namespace %s.",
+                    existing_classes.count(), namespace)
 
     @classmethod
-    def import_from_parser(cls, loaded_parser, reference=False):
-        '''
-        Import classes from a schema to a list of Class objects.
-        The schema is represented by a schema parser instance.
-        The parser should already have loaded the schema.
-        This function does not modify the parser instance.
-        '''
+    def import_referenced_classes(cls, parser, namespace):
+        classes = parser.list_all_referenced_classes()
+        LOGGER.info("Found %s referenced classes.", len(classes))
+        return cls._import_from_parser(classes, namespace)
 
-        assert isinstance(loaded_parser, SchemaParser)
+    @classmethod
+    def import_classes(cls, parser, namespace):
+        classes = parser.list_all_defined_classes()
+        LOGGER.info("Found %s defined classes.", len(classes))
+        return cls._import_from_parser(classes, namespace)
 
-        def get_es_classes(parser_classes):
+    @classmethod
+    def _import_from_parser(cls, classes, namespace):
 
-            es_classes = []
+        es_classes = []
 
-            for class_ in parser_classes:
+        for class_ in classes:
 
-                class_.output_type = "curie"
+            LOGGER.info("Parsing '%s'.", class_)
 
-                LOGGER.info("Parsing '%s'.", class_)
+            class_.output_type = "curie"
+            es_class = cls()
+            es_class.uri = class_.uri
+            es_class.namespace = namespace
+            es_class.prefix = class_.prefix
+            es_class.label = class_.label
+            es_class.description = class_.description
 
-                es_class = cls()
-                es_class.uri = class_.uri
-                es_class.prefix = class_.prefix
-                es_class.label = class_.label
-                es_class.description = class_.description
+            for parent_line in class_.parent_classes:
+                es_class.parent_classes.append(', '.join(map(str, parent_line)))
 
-                for parent_line in class_.parent_classes:
-                    es_class.parent_classes.append(', '.join(map(str, parent_line)))
+            for prop in class_.list_properties(group_by_class=False):
+                es_class.properties.append(SchemaClassProp(
+                    uri=prop['uri'],
+                    curie=prop['curie'],
+                    range=prop['range'],
+                    label=prop['label'],
+                    description=prop['description']
+                ))
 
-                for prop in class_.list_properties(group_by_class=False):
-                    es_class.properties.append(SchemaClassProp(
-                        uri=prop['uri'],
-                        curie=prop['curie'],
-                        range=prop['range'],
-                        label=prop['label'],
-                        description=prop['description']
-                    ))
+            es_classes.append(es_class)
 
-                es_classes.append(es_class)
-
-            return es_classes
-
-        if reference:
-            classes = loaded_parser.list_all_referenced_classes()
-        else:
-            classes = loaded_parser.list_all_defined_classes()
-
-        LOGGER.info("Found %s classes. (ref=%d)", len(classes), reference)
-
-        return get_es_classes(classes)
+        return es_classes
 
     def save(self, **kwargs):
 
-        self.meta.id = f"{self.prefix}:{self.label}"
-
+        self.meta.id = f"{self.namespace}::{self.prefix}:{self.label}"
         return super().save(**kwargs)
 
 
