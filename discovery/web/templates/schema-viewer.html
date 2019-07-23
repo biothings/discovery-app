@@ -1272,9 +1272,11 @@
             "namespace": self.nameInput,
             "url": self.userSchemaURL
           }
+          self.loading = true;
           // console.log('registering...',data)
           axios.post('/api/registry',data).then(res=>{
             // console.log('POST response ',res.data)
+            self.loading = false;
             if (res.data.url) {
 
               Swal.fire({
@@ -1298,6 +1300,7 @@
             }
 
           }).catch(err=>{
+            self.loading = false;
 
             Swal.fire({
               type: 'error',

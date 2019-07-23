@@ -25,92 +25,72 @@
           </div>
         </div>
         <!-- RESULTS -->
-        <div class="col-sm-10">
+        <div class="col-sm-10" id="dashTippyParent">
           <div class="mt-3 mainTextLight">
             <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Schema Namespaces
           </div>
-          <table class="table">
-            <thead class="bg-light text-muted">
-              <tr>
-                <th scope="col" class="lighter">Namespace Registered</th>
-                <th scope="col" class="lighter">Source URL</th>
-                <th scope="col" class="lighter">View</th>
-                <th scope="col" class="lighter">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template v-if="dashboard && dashboard.length">
-                <tr v-for="item in dashboard">
-                  <td>
-                    <a target="_blank" :href="'/'+item.prefix+'/'" v-text="item.prefix" class="d-inline mr-2"></a>
-                    <button style="zoom:.7" class="btn btn-secondary btn-sm d-inline" @click="selectedItem = item" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i> Edit</button>
-                  </td>
-                  <td>
-                    <a target="_blank" :href="item.url" :title="item.url">
-                      url <i class="fas fa-external-link-alt"></i>
-                    </a>
-                  </td>
-                  <td>
-                    <a role="button" :href="'/'+item.prefix+'/'" target="_blank" class="btn themeButton text-light">
-                      Visualize
-                    </a>
-                  </td>
-                  <td>
-                    <button @click.prevent="deleteSelected('schema',item.prefix)" class="btn themeButton text-light">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              </template>
-              <template v-else>
-                <tr>
-                  <td colspan="6" class="text-center text-muted">
-                    No Contributions Yet
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-          <!--  -->
+          <template v-if="dashboard && dashboard.length">
+            <div v-for="item in dashboard" class="row m-1">
+              <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
+                <a target="_blank" :href="'/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
+                <button style="zoom:.7" class="btn btn-secondary btn-sm d-inline tip" :data-tippy-info="'Edit Namespace'" @click="selectedItem = item" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i></button>
+              </div>
+              <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
+                <div>
+                  <a target="_blank" :href="item.url" :title="item.url" >
+                    <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'source URL'">
+                      <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                      <i class="fas fa-code fa-stack-1x text-light"></i>
+                    </span>
+                  </a>
+                </div>
+                <div>
+                  <a :href="'/'+item.namespace+'/'" target="_blank" >
+                    <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'Visualize'">
+                      <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                      <i class="fas fa-eye fa-stack-1x text-light"></i>
+                    </span>
+                  </a>
+                </div>
+                <div>
+                  <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('schema',item.namespace)" :data-tippy-info="'Delete'">
+                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                    <i class="fas fa-trash fa-stack-1x text-light"></i>
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </template>
+
 
           <div class="mt-3 mainTextDark">
             <div class="numberCircle mainBackDark" v-text="dashboardMetadataTotal"></div> Registered Metadata
           </div>
-          <table class="table">
-            <thead class="bg-light text-muted">
-              <tr>
-                <th scope="col" class="lighter">Namespace Registered</th>
-                <th scope="col" class="lighter">View</th>
-                <th scope="col" class="lighter">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template v-if="dashboardMetadata && dashboardMetadata.length">
-                <tr v-for="item in dashboardMetadata">
-                  <td>
-                    <a target="_blank" :href="'/'+item.name+'/'" v-text="item.name" class="d-inline"></a>
-                  </td>
-                  <td>
-                    <a role="button" :href="'/api/metadata/'+item._id" target="_blank" class="btn themeButton text-light">
-                      View
-                    </a>
-                  </td>
-                  <td>
-                    <button @click.prevent="deleteSelected('metadata',item._id)" class="btn themeButton text-light">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              </template>
-              <template v-else>
-                <tr>
-                  <td colspan="6" class="text-center text-muted">
-                    No Contributions Yet
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
+          <template v-if="dashboardMetadata && dashboardMetadata.length">
+            <div v-for="item in dashboardMetadata" class="row m-1">
+              <div class="col-sm-5 p-1 mainBackDark d-flex align-items-center justify-content-left">
+                <a target="_blank" :href="'/api/metadata/'+item._id" v-text="item.name" class="d-inline m-2 text-light"></a>
+              </div>
+              <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
+                <div>
+                  <a :href="'/api/metadata/'+item._id" target="_blank" >
+                    <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'View Metadata'">
+                      <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                      <i class="fas fa-eye fa-stack-1x text-light"></i>
+                    </span>
+                  </a>
+                </div>
+                <div>
+                  <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('metadata',item._id)" :data-tippy-info="'Delete'">
+                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                    <i class="fas fa-trash fa-stack-1x text-light"></i>
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -120,18 +100,18 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header p-1" >
-            <!-- <h5 class="modal-title" id="exampleModalLabel">Edit</h5> -->
+            <h5 class="modal-title text-muted text-center" id="exampleModalLabel">Edit Namespace</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body" v-if="selectedItem">
             <form @submit.prevent="updateSlug()">
-              <div class="form-group">
+              <div class="form-group text-center text-muted">
                 <small>
-                  Enter your new slug then hit Save.
+                  Enter your new namespace then hit Save.
                 </small>
-                <textarea required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" rows="1" class="form-control" id="slugInput" v-model='slugInput'></textarea>
+                <input required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" class="form-control" id="slugInput" v-model='slugInput'></input>
                 <template v-if="availableSlug && slugInput.length">
                   <small class="text-success bold"><i class="fas fa-check"></i> AVAILABLE</small>
                 </template>
@@ -143,7 +123,7 @@
                   <small class="text-warning bold"><i class="fas fa-times"></i> INVALID CHARACTERS</small>
                 </template>
                 <hr />
-                <p class="m-2" :class="[availableSlug ? 'mainTextDark' : 'text-danger']">
+                <p class="m-2 text-center" :class="[availableSlug ? 'text-success' : 'text-danger']">
                   discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
                 </p>
               <button v-if="availableSlug && slugInput.length" type="submit" @click.prevent="updateSlug()" class="btn themeButton text-light text-light mt-3">Save</button>
@@ -322,7 +302,7 @@ var app = new Vue({
           if (this.user.login) {
             //SCHEMA NAMESPACES
             axios.get('/api/registry?user='+self.user.login).then(res=>{
-              console.log("SCHEMAS",res.data)
+              // console.log("SCHEMAS",res.data)
               self.dashboard = res.data.hits;
               self.dashboardTotal = res.data.total;
             }).catch(err=>{
@@ -330,7 +310,7 @@ var app = new Vue({
             });
             // METADATA
             axios.get('/api/metadata?user='+self.user.login).then(res=>{
-              console.log("METADATA",res.data)
+              // console.log("METADATA",res.data)
               self.dashboardMetadata = res.data.hits;
               self.dashboardMetadataTotal = res.data.total;
             }).catch(err=>{
@@ -351,6 +331,17 @@ var app = new Vue({
         },
 			},
 			mounted:function(){
+        tippy( '#dashTippyParent', {
+          target:'.tip',
+          placement:'top',
+          maxWidth:'200px',
+          content: 'loading',
+          animation: 'fade',
+          theme:'light',
+          onShow(instance) {
+            let info = instance.reference.dataset.tippyInfo;
+            instance.setContent("<div class='alert alert-info m-0 text-center wraptext'>"+info+"</div>")
+          }});
 
 			},
       created:function(){
