@@ -5,6 +5,9 @@
 
 </style>
 <div id="registry" class="jumbotron" style="min-height:80vh;">
+  <div v-if=loading class="loader">
+    <img src="/static/img/ripple.svg"/>
+  </div>
   <div class="row">
 
     <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
@@ -17,23 +20,11 @@
             <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';registry=[]">Reset</button>
           </div>
         </form>
-        <!-- <div class="form-group form-inline m-0 ">
-          <select class="browser-default form-control form-control-sm" @change='sortResults($event)'>
-             <option value="" disabled selected>Sort By</option>
-             <option value="Search Relevance">Relevance (default)</option>
-             <option value="Alpabethically A-Z">Alpabethically A-Z</option>
-             <option value="Alpabethically Z-A">Alpabethically Z-A</option>
-             <option value="Recently Updated">Recently Updated</option>
-          </select>
-        </div> -->
-      </div>
-      <div id="searching" class="progress" style="display:none;">
-        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
       </div>
       <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
 
       </div>
-      <ul class="list-group context" style="border-top:solid 3px var(--main)">
+      <ul class="list-group context" style="border-top:solid 3px var(--main)" id="regTippyParent">
         <li class="list-group-item d-flex justify-content-center align-items-center text-muted p-1" style="background:#d0d0d0;">
           <small v-if="registry.length && query" v-text="'results for '+query">
           </small>
@@ -98,31 +89,32 @@ Vue.component('registry-item', {
   },
   props: ['item'],
   methods:{
-    saveDataAndRedirect(item,redirectUrl){
-      if (item && item.uri) {
-        let dataUrl = item.uri;
-        $('#searching').show();
-        if (!dataUrl.includes('.jsonld') && item.prefix === 'schema') {
-          dataUrl = dataUrl+".jsonld"
+    saveDataAndRedirect(item,goesToEditor){
+      var self = this;
+      console.log("ITEM",item)
+      if (goesToEditor) {
+        console.log("TO EDITOR")
+        if (item && item.namespace && item.label && item.prefix) {
+          let obj = JSON.stringify(item)
+          localStorage.setItem('EditorData',obj);
+          localStorage.setItem('EditorStartingPoint',item.prefix+':'+item.label);
+          window.location.href = goesToEditor;
+        }else{
+          Swal.fire(
+            'Oops!',
+            'Action not available for this item',
+          );
         }
-        axios.get('/api/proxy?url='+dataUrl).then(function (res) {
-          console.log('proxy res')
-          console.log(res.data)
-          if (res.data) {
-            let obj = JSON.stringify(res.data)
-            localStorage.setItem('datasetData',obj);
-            // console.log(item)
-            localStorage.setItem('editFrom',item.prefix+':'+item.label);
-            window.location.href = redirectUrl;
-          }
-          $('#searching').hide();
-        });
       }else{
-        Swal.fire(
-          'Oops!',
-          'No schema URL found for this class',
-          'error'
-        );
+        console.log("TO VIEWER")
+        if (item && item.namespace && item.label) {
+          window.location.href = '/'+item.namespace+'/'+item.label;
+        }else{
+            Swal.fire(
+              'Oops!',
+              'Action not available for this item',
+            );
+        }
       }
     },
     getSubclass(parents){
@@ -145,8 +137,7 @@ Vue.component('registry-item', {
   },
   mounted: function(){
     tippy('#'+this.item.label, {
-      content: "<div class='alert alert-info m-0 text-left'><pre style='font-size:10px;'>"+JSON.stringify(this.item,null,2)+"</pre></div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
-      trigger:'click'
+      content: "<div class='alert alert-info m-0 text-left'>"+JSON.stringify(this.item.description,null,2)+"</div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
     })
   },
   template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="options=!options">
@@ -154,84 +145,35 @@ Vue.component('registry-item', {
       <div class="flex-grow-1 p-2">
         <div class="d-flex justify-content-between w-100">
           <h5 class="mb-1 mainTextDark">
-            <small v-text="item.prefix"></small>:<span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-plus-circle text-primary"></i></small>
+            <small v-text="item.prefix"></small>:<span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-info-circle text-info"></i></small>
           </h5>
         </div>
         <p class="mb-1">
           <small>
-            <span class='badge mainBackLight text-light'><span v-text="getPropTotal()"></span> Properties</span>
+            <span class='badge mainBackLight text-light'><span v-text="getPropTotal()"></span> Properties </span>
           </small>
           <small>Subclass of:</small>
           <span class="mb-1" v-text="getSubclass(item.parent_classes)"></span>
         </p>
 
       </div>
-      <div v-if='options' class="d-flex flex-column align-content-center w-25 flip-in-ver-left">
-        <button @click.prevent="saveDataAndRedirect(item,'/'+item.prefix+'/'+item.label)" type="button" class="btn themeButton text-light w-100 h-50 text-center align-self-center br-0"><i class="fas fa-list-alt"></i> Visualize</button>
-        <button @click.prevent="saveDataAndRedirect(item,'editor')" type="button" class="btn themeButton text-light w-100 h-50 text-center align-self-center br-0"><i class="fas fa-project-diagram"></i> Extend</button>
+      <div v-if='options' class="p-1 bg-dark d-flex align-items-center justify-content-around flip-in-ver-left">
+        <div>
+          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item)" :data-tippy-info="'Visualize'">
+            <i class="fas fa-circle text-muted fa-stack-2x"></i>
+            <i class="fas fa-eye fa-stack-1x text-light"></i>
+          </span>
+        </div>
+        <div>
+          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item,'editor')" :data-tippy-info="'Extend'">
+            <i class="fas fa-circle text-muted fa-stack-2x"></i>
+            <i class="fas fa-project-diagram fa-stack-1x text-light"></i>
+          </span>
+        </div>
       </div>
     </div>
   </li>`
 });
-
-// Vue.component('registry-list', {
-//   data: function(){
-//     return{
-//       result:null,
-//       showAll:false,
-//       myList:[],
-//       showButton: false
-//     }
-//   },
-//   props: ['list','slug'],
-//   methods:{
-//
-//
-//   },
-//   watch:{
-//     showAll: function(newVal, oldVal){
-//       if (newVal) {
-//         this.myList = this.list;
-//       }else{
-//         this.myList = this.list.slice(0,5);
-//       }
-//     }
-//   },
-//   mounted: function(){
-//
-//     let self = this;
-//     if (self.list.length>5) {
-//       this.showButton = true;
-//       self.myList = self.list.slice(0,5);
-//     }else{
-//       self.myList = self.list;
-//     }
-//
-//
-//   },
-//   template: `<div>
-//               <template v-if="showAll">
-//                 <div class="text-center d-block">
-//                 <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show Less</a>
-//                 </div>
-//               </template>
-//               <ul>
-//                 <li v-for="c in myList">
-//                   <a :href="slug +'/'+ c" v-text="c"></a>
-//                 </li>
-//               </ul>
-//               <template v-if="!showAll && list.length>5">
-//                 <div class="text-center d-block">
-//                 <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show More (<span class="bold" v-text="list.length"></span>)</a>
-//                 </div>
-//               </template>
-//               <template v-if="showAll">
-//                 <div class="text-center d-block">
-//                 <a role="button" class="btn smallButton btn-secondary text-light" @click.prevent="showAll= !showAll">Show Less</a>
-//                 </div>
-//               </template>
-//             </div>`
-// });
 
 var app = new Vue({
       el: '#registry',
@@ -250,6 +192,7 @@ var app = new Vue({
           page: 1,
           pages: 1,
           perPage: 20,
+          loading:false,
 				}
 			},
       methods:{
@@ -320,7 +263,7 @@ var app = new Vue({
             // if (filters)
             //     params["params"]["filters"] = filters;
 
-            $('#searching').show();
+            self.loading = true;
 
             var context = document.querySelector(".context");
             var instance = new Mark(context);
@@ -329,7 +272,7 @@ var app = new Vue({
             self.registry = [];
             axios.get('/api/query?size=1000', params).then(function (response) {
               console.log('%c SEARCH..','color:hotpink')
-              console.log(response.data.hits[9])
+              console.log(response.data.hits)
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
               // mark results, doc must be loaded
@@ -339,7 +282,7 @@ var app = new Vue({
               if (self.registryTotal) {
                 self.calculatePages();
               }
-              $('#searching').hide();
+              self.loading = false;
             });
         },
         calculatePages: function () {
@@ -373,6 +316,17 @@ var app = new Vue({
     mounted:function(){
       var self = this;
       self.checkLoggedUser();
+      tippy( '#regTippyParent', {
+        target:'.tip',
+        placement:'top',
+        maxWidth:'200px',
+        content: 'loading',
+        animation: 'fade',
+        theme:'light',
+        onShow(instance) {
+          let info = instance.reference.dataset.tippyInfo;
+          instance.setContent("<div class='alert alert-info m-0 text-center wraptext'>"+info+"</div>")
+        }});
     },
     computed: {
                 registryResults: function () {
