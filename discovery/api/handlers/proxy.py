@@ -1,3 +1,4 @@
+# NOT IN USE
 
 import tornado
 
@@ -10,6 +11,8 @@ class ProxyHandler(APIBaseHandler):
     '''
 
     async def get(self):
+
+        assert False, "Not in use."
 
         try:
             url = self.get_argument("url")
