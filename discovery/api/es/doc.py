@@ -13,8 +13,10 @@ import json
 import logging
 from datetime import datetime
 
+from discovery.api.adapters import ClassInfoDict
+
 from elasticsearch_dsl import (Binary, Date, Document, InnerDoc, Keyword,
-                               Nested, Object, Text)
+                               Nested, Object, Text, Boolean)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -131,6 +133,8 @@ class SchemaClass(Document):
     description = Text()
     parent_classes = Text(multi=True)  # immediate ones only
     properties = Nested(SchemaClassProp)  # immediate ones only
+    validation = Object(enabled=False)
+    ref = Boolean()
 
     class Index:
         '''
@@ -153,49 +157,24 @@ class SchemaClass(Document):
                     existing_classes.count(), namespace)
 
     @classmethod
-    def import_referenced_classes(cls, parser, namespace):
-        classes = parser.list_all_referenced_classes()
-        LOGGER.info("Found %s referenced classes.", len(classes))
-        return cls._import_from_parser(classes, namespace)
-
-    @classmethod
     def import_classes(cls, parser, namespace):
-        classes = parser.list_all_defined_classes()
-        LOGGER.info("Found %s defined classes.", len(classes))
-        return cls._import_from_parser(classes, namespace)
 
-    @classmethod
-    def _import_from_parser(cls, classes, namespace):
+        defined_classes = parser.list_all_defined_classes()
+        referenced_classes = (parser.list_all_referenced_classes()
+                              + sum([klass.ancestor_classes for klass in defined_classes], []))
 
-        es_classes = []
+        defined_info = {ClassInfoDict(klass, ref=False, namespace=namespace)
+                        for klass in defined_classes}
+        referenced_info = {ClassInfoDict(klass, ref=True, namespace=namespace)
+                           for klass in referenced_classes}
 
-        for class_ in classes:
+        LOGGER.info("Found %s defined classes: %s", len(defined_info), defined_info)
+        LOGGER.info("Found %s referenced classes: %s", len(referenced_info), referenced_info)
 
-            LOGGER.info("Parsing '%s'.", class_)
+        defined_list = [cls(**info) for info in defined_info]
+        referenced_list = [cls(**info) for info in referenced_info]
 
-            class_.output_type = "curie"
-            es_class = cls()
-            es_class.uri = class_.uri
-            es_class.namespace = namespace
-            es_class.prefix = class_.prefix
-            es_class.label = class_.label
-            es_class.description = class_.description
-
-            for parent_line in class_.parent_classes:
-                es_class.parent_classes.append(', '.join(map(str, parent_line)))
-
-            for prop in class_.list_properties(group_by_class=False):
-                es_class.properties.append(SchemaClassProp(
-                    uri=prop['uri'],
-                    curie=prop['curie'],
-                    range=prop['range'],
-                    label=prop['label'],
-                    description=prop['description']
-                ))
-
-            es_classes.append(es_class)
-
-        return es_classes
+        return defined_list + referenced_list
 
     def save(self, **kwargs):
 
