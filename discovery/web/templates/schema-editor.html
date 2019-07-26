@@ -46,6 +46,13 @@
             <i class="fas fa-check"></i> New Class Added</small>
           </span>
         </li>
+        <li class='nav-item'>
+          <a class='nav-link' :class="{ 'disabled text-muted notallowed': !prefix, 'mainBackLight text-light pointer': prefix }" @click='getPreview()'>
+            <small>
+              <i class="fas fa-code"></i> Preview
+            </small>
+          </a>
+        </li>
       </ul>
       <!-- LOGGED IN DASHBOARD -->
       <template v-if="userInfo && userInfo.login">
@@ -139,6 +146,26 @@ const store = new Vuex.Store({
 
       state.schema.unshift(newClass)
     },
+    addProperty(state,payload){
+      let newProp = {};
+      newProp['label'] = payload['name']
+      newProp['description'] = payload['description']
+      newProp['name'] = state.prefix+":"+payload['name']
+      newProp['range'] = payload['range']
+      newProp['domain'] = state.prefix+":"+payload['domain']
+
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].special) {
+          if (state.schema[i].hasOwnProperty('properties')) {
+            state.schema[i].properties.push(newProp)
+          }else if (!state.schema[i].hasOwnProperty('properties')) {
+            Vue.set(state.schema[i],'properties',[])
+            state.schema[i].properties.push(newProp)
+          }
+
+        }
+      }
+    },
     selectProp(state,payload){
       let label = payload['label']
       for (var i = 0; i < state.schema.length; i++) {
@@ -174,7 +201,20 @@ const store = new Vuex.Store({
           }
         }
       }
-    }
+    },
+    removeProperty(state,payload){
+      let label = payload['label']
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].special) {
+          for (var x = 0; x < state.schema[i].properties.length; x++) {
+            if (state.schema[i].properties[x].label === label) {
+              state.schema[i].properties.pop(x)
+              $.notify(label+" deleted",{ globalPosition: 'right',className:'info', showDuration: 200, });
+            }
+          }
+        }
+      }
+    },
   },
   getters:{
     getSchema:state=>{
@@ -260,8 +300,15 @@ Vue.component('c-box', {
         content: '<div class="alert alert-info m-0" style="border-radius:none">Mark To Re-Use</div>',
         animation: 'fade',
         theme:'light'});
+
+        tippy( '.remove', {
+          maxWidth:'200px',
+          placement:'left',
+          content: '<div class="alert alert-danger m-0" style="border-radius:none">Delete Property</div>',
+          animation: 'fade',
+          theme:'light'});
   },
-  template: `<div class="row m-1 cBox" :class="{'alert-info':item.special,'alert-light':!item.special}">
+  template: `<div class="row m-1 cBox actions" :class="{'alert-info':item.special,'alert-light':!item.special}">
               <div class="col-sm-10 p-2">
                 <div>
                   <small v-if="item.special" class="badge badge-info mr-1">YOUR CLASS</small>
@@ -274,15 +321,16 @@ Vue.component('c-box', {
                   <small class="bold"><span v-text="item.label"></span> <i class="fas fa-info-circle text-info cTip pointer" :data-tippy-description="item.description" :data-tippy-label="item.label"></i></small class="bold">
                   <small v-if="item.properties" class="mainTextDark bold float-right">(<span v-text="item.properties.length"></span> properties)</small>
                 </div>
-                <div v-show='expand'>
+                <div v-show='expand' class="mt-1">
                   <template v-for="prop in item.properties">
-                    <div class="row m-1 alert-secondary pBox">
-                      <div class="col-sm-10">
+                    <div class="row m-1 alert-secondary pBox actions">
+                      <div class="col-sm-9">
                         <small class="text-muted">
                           <span v-text="prop.label"></span> <i class="fas fa-info-circle cTip pointer" :data-tippy-description="prop.description" :data-tippy-label="prop.label"></i>
                         </small>
                       </div>
-                      <div class="col-sm-2 bg-dark actions d-flex align-items-center justify-content-around">
+                      <div class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around">
+                        <i v-show="item.special" class="fas fa-minus-circle pointer text-muted unselectable remove" @click="removeProp(prop.label)"></i>
                         <i class="fas fa-check-circle pointer unselectable select" @click="markSelected(prop.label)" :class="{'text-muted':!prop.selected,'text-success':prop.selected}"></i>
                         <i class="fas fa-exclamation-circle required pointer unselectable" @click="markRequired(prop.label)" :class="{'text-muted':!prop.isRequired,'text-danger':prop.isRequired}"></i>
                       </div>
@@ -291,7 +339,7 @@ Vue.component('c-box', {
                 </div>
               </div>
               <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-                <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click='addProp()'>
+                <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click='addProp(item.label)'>
                   <i class="fas fa-circle text-muted fa-stack-2x"></i>
                   <i class="fas fa-plus fa-stack-1x text-light"></i>
                 </span>
@@ -302,6 +350,22 @@ Vue.component('c-box', {
               </div>
             </div>`,
   methods: {
+    removeProp(propLabel){
+      Swal.fire({
+        title: 'Are you sure you want to delete '+propLabel+'?',
+        text: "You won't be able to revert this",
+        showCancelButton: true,
+        confirmButtonColor:'#5C3069',
+        cancelButtonColor:'#006476',
+        confirmButtonText: 'Yes, Delete it!'
+      }).then((res) => {
+        if (res.value) {
+          let payload = {}
+          payload['label'] = propLabel;
+          store.commit('removeProperty',payload);
+        }
+      })
+    },
     getSubclass(item){
       return item.split(", ")
     },
@@ -322,7 +386,64 @@ Vue.component('c-box', {
         }
       }
     },
-    addProp(){
+    addProp(domain){
+      var self = this;
+
+        Swal.mixin({
+        input: 'text',
+        confirmButtonText: 'Next &rarr;',
+        showCancelButton: true,
+        confirmButtonColor:'#5C3069',
+        cancelButtonColor:'#006476',
+        progressSteps: ['1', '2','3']
+      }).queue([
+        {
+          title: "Choose a name for your property",
+          html: 'input name must be camelCased <b class="text-danger">eg. myProperty </b>',
+          inputValidator: (value) => {
+            return new Promise((resolve) => {
+              if (value.match(/^[a-z]+(?:[A-Z][a-z]+)*$/)) {
+                resolve()
+              } else {
+                resolve('property names must be camelCased')
+              }
+            })
+          }
+        },
+        {
+          title: "What is this property's expected type(s)?",
+          html: 'input name(s) must be Pascal cased <b class="text-danger">eg. schema:MyClass </b>. Multiple types separated by commas.'
+        },
+        {
+          title: "Write a comment about this class",
+          html: 'Write a short summary about this class',
+          input:'textarea',
+          inputValidator: (value) => {
+            return value.length < 10 && 'Description is too short! You should write something meaningful.'
+          }
+        },
+      ]).then((result) => {
+        if (result.value) {
+          Swal.fire({
+            title: 'Add Property '+result.value[0]+'?',
+            text: result.value[2],
+            showCancelButton: true,
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            confirmButtonText: 'Yes, Add It!'
+          }).then((res) => {
+            if (res.value) {
+              $.notify(result.value[0]+" added",{ globalPosition: 'right',className:'success', showDuration: 200, });
+              let payload = {}
+              payload['name'] = result.value[0];
+              payload['range'] = result.value[1];
+              payload['description'] = result.value[2];
+              payload['domain'] = domain;
+              store.commit('addProperty',payload);
+            }
+          })
+        }
+      });
 
     }
   }
@@ -437,6 +558,9 @@ var app = new Vue({
             }
           });
 
+
+        },
+        getPreview(){
 
         },
         checkUser(){
