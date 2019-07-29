@@ -78,11 +78,17 @@
         <div class="jumbotron whitefade text-center text-muted" v-if='prefix && !newClassAdded'>
           <small>Extending schema <i class="fas fa-chevron-right"></i> <span class="text-info" v-text="startingPoint"></span></small>
           <hr />
-          <button class="btn themeButton text-light" @click="addClass()"><i class="fas fa-plus"></i> Class</button>
+          <form @submit.prevent='addClass()'>
+            <button type="submit" class="btn themeButton text-light" ><i class="fas fa-plus"></i> Class</button>
+          </form>
         </div>
 
         <!-- PARENT CLASSES -->
         <div class="jumbotron whitefade" v-if="newClassAdded" id="editorTippy">
+          <div>
+            <input type="checkbox" class="custom-control-input" id="customControlInline" @click="toggleDesc()">
+            <label class="custom-control-label text-muted" for="customControlInline" >Show Descriptions</label>
+          </div>
           <template  v-for="(item,index) in classesAvailable">
             <c-box :item="item" :key="index"></c-box>
           </template>
@@ -115,17 +121,29 @@ const store = new Vuex.Store({
     'prefix':'',
     'finalschema':{
       '@context':{
+        "schema": "http://schema.org/",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       },
       '@graph':[]
     },
+    'validation':{
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {},
+      'required':[]
+    },
+    'showDescriptions':false
   },
   strict: true,
   mutations: {
+    toggleDesc(state){
+      state.showDescriptions = !state.showDescriptions
+    },
     saveSchema(state,payload){
       state.schema.push(payload['schema']);
       state.startingPoint=payload['start'];
-      console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
-      // console.log('🍕🍕🍕 start from ..🍕🍕🍕',state.startingPoint);
+      // console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
     },
     savePrefix(state,payload){
       state.prefix = payload['prefix'];
@@ -215,6 +233,114 @@ const store = new Vuex.Store({
         }
       }
     },
+    formPreview(state){
+
+      Vue.set(state.finalschema,'@graph',[]);
+      Vue.set(state.validation,'properties',{});
+      Vue.set(state.validation,'required',[]);
+
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].special) {
+          //Add Main Class to Graph
+          let mainClass={};
+          Vue.set(mainClass,'@id',state.schema[i]['name'])
+          Vue.set(mainClass,'@type','rdfs:Class')
+          Vue.set(mainClass,'rdfs:comment',state.schema[i]['description'])
+          Vue.set(mainClass,'rdfs:label',state.schema[i]['label'])
+          Vue.set(mainClass,'rdfs:subClassOf',state.startingPoint)
+          Vue.set(mainClass,'$validation',state.startingPoint)
+          //Add New Class
+          state.finalschema['@graph'].push(mainClass)
+          //Handle main Class Properties
+          if (state.schema[i].properties) {
+            for (var x = 0; x < state.schema[i].properties.length; x++) {
+
+              let mainProp = {};
+              Vue.set(mainProp,'@id',state.schema[i].properties[x]['name'])
+              Vue.set(mainProp,'@type','rdfs:Property')
+              Vue.set(mainProp,'rdfs:comment',state.schema[i].properties[x]['description'])
+              Vue.set(mainProp,'rdfs:label',state.schema[i].properties[x]['label'])
+              Vue.set(mainProp,'schema:domainIncludes',{'@id':state.schema[i]['name']})
+              //Ranges of Property
+              if (state.schema[i].properties[x]['range']) {
+                let ranges= state.schema[i].properties[x]['range'].split(',');
+                Vue.set(mainProp,'schema:rangeIncludes',[])
+                for (var rangeIndex = 0; rangeIndex < ranges.length; rangeIndex++) {
+                  mainProp['schema:rangeIncludes'].push({'@id':ranges[rangeIndex]})
+                }
+              }
+              if (state.schema[i].properties[x].selected) {
+                let propValue={};
+                Vue.set(propValue,'description',state.schema[i].properties[x].description)
+                Vue.set(propValue,'type','string')
+                Vue.set(state.validation['properties'],state.schema[i].properties[x].label,propValue)
+              }
+              if (state.schema[i].properties[x].isRequired) {
+                state.validation['required'].push(state.schema[i].properties[x].label)
+              }
+              //Add New Prop
+              state.finalschema['@graph'].push(mainProp)
+            }
+          }
+        }else{
+          //Handle Parent Classes
+          if (state.schema[i].properties) {
+            for (var y = 0; y < state.schema[i].properties.length; y++) {
+              if (state.schema[i].properties[y].selected) {
+                let propValue={};
+                Vue.set(propValue,'description',state.schema[i].properties[y].description)
+                //Assign type
+                if (['name','description','version','identifier'].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','string')
+                }else if (['url','sameAs',].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','string')
+                  Vue.set(propValue,'format','uri')
+                }else if (['keywords',].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','array')
+                  Vue.set(propValue,'items',{'type':'string'})
+                }else if (['datePublished','dateModified',].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'oneOf',[{
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  ]);
+                }else if (['creator','publisher','license','citation','samples','funder','contributor'].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','object')
+                }else if (['measurementTechnique'].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'enum',[])
+                }else if (['includedInDataCatalog'].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','object')
+                  Vue.set(propValue,'properties',{
+                    "name": {
+                      "const": "CTSA Datasets"
+                    },
+                    "url": {
+                      "const": "https://ctsa.ncats.nih.gov/cd2h/"
+                    }
+                  })
+                }else{
+                  //FOR ALL ELSE ASSIGN STRING FOR NOW...
+                  Vue.set(propValue,'type','string')
+                }
+                //Add to temp validation
+                Vue.set(state.validation['properties'],state.schema[i].properties[y].label,propValue)
+              }
+              if (state.schema[i].properties[y].isRequired) {
+                state.validation['required'].push(state.schema[i].properties[y].label)
+              }
+              //Once done add temp validation to finalschema
+              if (state.finalschema['@graph'].length) {
+                Vue.set(state.finalschema['@graph'][0],'$validation',state.validation)
+              }
+            }
+          }
+        }
+      }
+    }
   },
   getters:{
     getSchema:state=>{
@@ -226,6 +352,12 @@ const store = new Vuex.Store({
     getPrefix:state=>{
       return state.prefix
     },
+    getFinalSchema:state=>{
+      return state.finalschema
+    },
+    getShowDesc:state=>{
+      return state.showDescriptions
+    }
   },
   actions:{
     getParents ({commit,state}) {
@@ -258,9 +390,14 @@ Vue.component('c-box', {
     }
   },
   watch:{
-
+  },
+  computed:{
+    showDesc:function(){
+      return store.getters.getShowDesc
+    }
   },
   mounted:function(){
+
     tippy( '#editorTippy', {
         target:'.cTip',
         content: 'Loading...',
@@ -297,7 +434,7 @@ Vue.component('c-box', {
       tippy( '.select', {
         maxWidth:'200px',
         placement:'left',
-        content: '<div class="alert alert-info m-0" style="border-radius:none">Mark To Re-Use</div>',
+        content: '<div class="alert alert-info m-0" style="border-radius:none">Re-Use This Property</div>',
         animation: 'fade',
         theme:'light'});
 
@@ -320,19 +457,25 @@ Vue.component('c-box', {
                   </template>
                   <small class="bold"><span v-text="item.label"></span> <i class="fas fa-info-circle text-info cTip pointer" :data-tippy-description="item.description" :data-tippy-label="item.label"></i></small class="bold">
                   <small v-if="item.properties" class="mainTextDark bold float-right">(<span v-text="item.properties.length"></span> properties)</small>
+                  <template v-if="showDesc">
+                    <small class="d-block text-muted" v-html="item.description || 'No description provided'"></small>
+                  </template>
                 </div>
                 <div v-show='expand' class="mt-1">
                   <template v-for="prop in item.properties">
                     <div class="row m-1 alert-secondary pBox actions">
                       <div class="col-sm-9">
-                        <small class="text-muted">
+                        <small class="mainTextDark">
                           <span v-text="prop.label"></span> <i class="fas fa-info-circle cTip pointer" :data-tippy-description="prop.description" :data-tippy-label="prop.label"></i>
+                          <template v-if="showDesc">
+                            <small class="d-block text-muted" v-html="prop.description || 'No description provided'"></small>
+                          </template>
                         </small>
                       </div>
                       <div class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around">
                         <i v-show="item.special" class="fas fa-minus-circle pointer text-muted unselectable remove" @click="removeProp(prop.label)"></i>
                         <i class="fas fa-check-circle pointer unselectable select" @click="markSelected(prop.label)" :class="{'text-muted':!prop.selected,'text-success':prop.selected}"></i>
-                        <i class="fas fa-exclamation-circle required pointer unselectable" @click="markRequired(prop.label)" :class="{'text-muted':!prop.isRequired,'text-danger':prop.isRequired}"></i>
+                        <i class="fas fa-asterisk required pointer unselectable" @click="markRequired(prop.label)" :class="{'text-muted':!prop.isRequired,'text-danger':prop.isRequired}"></i>
                       </div>
                     </div>
                   </template>
@@ -440,6 +583,7 @@ Vue.component('c-box', {
               payload['description'] = result.value[2];
               payload['domain'] = domain;
               store.commit('addProperty',payload);
+              self.expand = true;
             }
           })
         }
@@ -505,6 +649,9 @@ var app = new Vue({
         },
       },
 			methods:{
+        toggleDesc(){
+          store.commit('toggleDesc');
+        },
         addClass:function(){
           var self = this;
 
@@ -561,7 +708,19 @@ var app = new Vue({
 
         },
         getPreview(){
-
+          store.commit('formPreview');
+          Swal.fire({
+            position: 'center',
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox">
+                    <small>
+                      <pre>
+                        `+JSON.stringify(store.getters.getFinalSchema,null,2)+`
+                      </pre>
+                    </small>
+                  </div>`
+          });
         },
         checkUser(){
           let self = this;
