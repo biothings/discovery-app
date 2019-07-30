@@ -123,7 +123,7 @@ class SchemaClass(Document):
         https://schema.org/docs/full.html
     '''
 
-    # _id : in the format of <namespace>:<prefix>:<label>, for example, schema:Thing
+    # _id : in the format of <namespace>::<prefix>:<label>, for example, schema:Thing
     #       accessible through constructor argument 'id' or cls.meta.id
 
     namespace = Text(required=True)  # the _id of the schema document defining the class
