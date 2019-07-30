@@ -153,7 +153,7 @@ class PGHandler(BaseHandler):
 
 class EditorHandler(BaseHandler):
     def get(self):
-        doc_file = "editor.html"
+        doc_file = "schema-editor.html"
         editor_template = TEMPLATE_ENV.get_template(doc_file)
         editor_output = editor_template.render()
         self.write(editor_output)

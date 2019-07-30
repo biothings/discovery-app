@@ -1,0 +1,815 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<style>
+  .unselectable:focus{
+    outline: none !important;
+  }
+  .pBox{
+    border-left: 4px solid var(--main);
+    border-radius: 2px;
+  }
+  .cBox{
+    border-left: 4px solid var(--sec);
+    border-radius: 2px;
+  }
+</style>
+
+<section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
+  <div>
+    <div class="jumbotron bg-light text-center mt-5">
+      <h1 class="logoText">Editor</h1>
+      <small @click.prevent='help()' class="pointer text-muted">What's this <i class="fas fa-question" ></i></small>
+    </div>
+    <div v-if="loading" class="loader">
+      <img src="/static/img/ripple.svg"/>
+    </div>
+    <div id="widget">
+      <ul class="nav nav-tabs">
+        <li class="nav-item" v-if="userInfo && userInfo.login">
+          <span class="nav-link" :class="{ 'disabled text-success': userInfo }"><small>
+            <i class="fas fa-user-check"></i> Logged in as <span v-text="userInfo.login"></span></small>
+          </span>
+        </li>
+        <li class='nav-item' v-if="userInfo && !userInfo.login">
+          <a class='nav-link active text-primary' href='./oauth'>
+            <small><i class="fas fa-sign-in-alt"></i> Login</small>
+          </a>
+        </li>
+        <li class="nav-item" v-if="prefix">
+          <span class="nav-link text-success"><small>
+            <i class="fas fa-check"></i> Namespace <span class="bold" v-text="prefix"></span></small>
+          </span>
+        </li>
+        <li class="nav-item" v-if="newClassAdded">
+          <span class="nav-link text-success"><small>
+            <i class="fas fa-check"></i> New Class Added</small>
+          </span>
+        </li>
+        <li class='nav-item'>
+          <a class='nav-link' :class="{ 'disabled text-muted notallowed': !prefix, 'mainBackLight text-light pointer': prefix }" @click='getPreview()'>
+            <small>
+              <i class="fas fa-code"></i> Preview
+            </small>
+          </a>
+        </li>
+      </ul>
+      <!-- LOGGED IN DASHBOARD -->
+      <template v-if="userInfo && userInfo.login">
+        <!-- NAMESPACE -->
+        <div class="jumbotron whitefade" v-if='!prefix'>
+          <div class="d-flex justify-content-center align-items-center flex-wrap">
+            <form @submit.prevent="savePrefix" class="text-center">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">Choose a short namespace</div>
+                </div>
+                <input type="text" pattern="[A-Za-z]{3,10}" v-model='inputNamespace' class="form-control m-auto text-center" :class="{'text-success':availableNamespace, 'text-danger': !availableNamespace}" placeholder="3-10 chars max.">
+                <div class="input-group-append">
+                  <button :disabled="!availableNamespace" class="btn themeButton text-light" type="submit" v-text="'Use This'"></button>
+                </div>
+              </div>
+              <small class="text-muted">Warning: This cannot be edited once saved!</small>
+            </form>
+          </div>
+        </div>
+
+        <!-- Custom Class -->
+        <div class="jumbotron whitefade text-center text-muted" v-if='prefix && !newClassAdded'>
+          <small>Extending schema <i class="fas fa-chevron-right"></i> <span class="text-info" v-text="startingPoint"></span></small>
+          <hr />
+          <form @submit.prevent='addClass()'>
+            <button type="submit" class="btn themeButton text-light" ><i class="fas fa-plus"></i> Class</button>
+          </form>
+        </div>
+
+        <!-- PARENT CLASSES -->
+        <div class="jumbotron whitefade" v-if="newClassAdded" id="editorTippy">
+          <div>
+            <input type="checkbox" class="custom-control-input" id="customControlInline" @click="toggleDesc()">
+            <label class="custom-control-label text-muted" for="customControlInline" >Show Descriptions</label>
+          </div>
+          <template  v-for="(item,index) in classesAvailable">
+            <c-box :item="item" :key="index"></c-box>
+          </template>
+        </div>
+
+      </template>
+      <template v-else>
+        <div class="alert alert-light text-danger text-center p-5">
+          <h5>You must be logged in to proceed</h5>
+        </div>
+      </template>
+
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://unpkg.com/vuex"></script>
+<script src="./static/js/lodash.js"></script>
+<script src="./static/js/notify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
+<script>
+
+const store = new Vuex.Store({
+  state: {
+    'schema':[],
+    'startingPoint':'',
+    'prefix':'',
+    'finalschema':{
+      '@context':{
+        "schema": "http://schema.org/",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      },
+      '@graph':[]
+    },
+    'validation':{
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {},
+      'required':[]
+    },
+    'showDescriptions':false
+  },
+  strict: true,
+  mutations: {
+    toggleDesc(state){
+      state.showDescriptions = !state.showDescriptions
+    },
+    saveSchema(state,payload){
+      state.schema.push(payload['schema']);
+      state.startingPoint=payload['start'];
+      // console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
+    },
+    savePrefix(state,payload){
+      state.prefix = payload['prefix'];
+      Vue.set(state.finalschema['@context'],state.prefix,'http://discovery.biothings.io/')
+    },
+    saveParent(state,payload){
+      state.schema.push(payload['parent'])
+      // console.log(state.schema)
+    },
+    addClass(state,payload){
+      let newClass = {};
+      newClass['special'] = true
+      newClass['label'] = payload['name']
+      newClass['description'] = payload['description']
+      newClass['name'] = state.prefix+":"+payload['name']
+      newClass['prefix'] = state.prefix
+      newClass['parent_classes'] = [state.schema[0].name]
+
+      state.schema.unshift(newClass)
+    },
+    addProperty(state,payload){
+      let newProp = {};
+      newProp['label'] = payload['name']
+      newProp['description'] = payload['description']
+      newProp['name'] = state.prefix+":"+payload['name']
+      newProp['range'] = payload['range']
+      newProp['domain'] = state.prefix+":"+payload['domain']
+
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].special) {
+          if (state.schema[i].hasOwnProperty('properties')) {
+            state.schema[i].properties.push(newProp)
+          }else if (!state.schema[i].hasOwnProperty('properties')) {
+            Vue.set(state.schema[i],'properties',[])
+            state.schema[i].properties.push(newProp)
+          }
+
+        }
+      }
+    },
+    selectProp(state,payload){
+      let label = payload['label']
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].hasOwnProperty('properties')) {
+          for (var x = 0; x < state.schema[i]['properties'].length; x++) {
+            if (state.schema[i]['properties'][x].hasOwnProperty('label') && state.schema[i]['properties'][x].label === label) {
+              if (state.schema[i]['properties'][x].hasOwnProperty('selected')) {
+                Vue.set(state.schema[i]['properties'][x],'selected',!state.schema[i]['properties'][x]['selected'])
+                //If unselected also mark as not required
+                if (!state.schema[i]['properties'][x]['selected']) {
+                  Vue.set(state.schema[i]['properties'][x],'isRequired',false)
+                }
+              }else{
+                Vue.set(state.schema[i]['properties'][x],'selected',true)
+              }
+            }
+          }
+        }
+      }
+    },
+    requireProp(state,payload){
+      let label = payload['label']
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].hasOwnProperty('properties')) {
+          for (var x = 0; x < state.schema[i]['properties'].length; x++) {
+            if (state.schema[i]['properties'][x].hasOwnProperty('label') && state.schema[i]['properties'][x].label === label) {
+              if (state.schema[i]['properties'][x].hasOwnProperty('isRequired')) {
+                Vue.set(state.schema[i]['properties'][x],'isRequired',!state.schema[i]['properties'][x]['isRequired'])
+              }else{
+                Vue.set(state.schema[i]['properties'][x],'isRequired',true)
+              }
+            }
+          }
+        }
+      }
+    },
+    removeProperty(state,payload){
+      let label = payload['label']
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].special) {
+          for (var x = 0; x < state.schema[i].properties.length; x++) {
+            if (state.schema[i].properties[x].label === label) {
+              state.schema[i].properties.pop(x)
+              $.notify(label+" deleted",{ globalPosition: 'right',className:'info', showDuration: 200, });
+            }
+          }
+        }
+      }
+    },
+    formPreview(state){
+
+      Vue.set(state.finalschema,'@graph',[]);
+      Vue.set(state.validation,'properties',{});
+      Vue.set(state.validation,'required',[]);
+
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].special) {
+          //Add Main Class to Graph
+          let mainClass={};
+          Vue.set(mainClass,'@id',state.schema[i]['name'])
+          Vue.set(mainClass,'@type','rdfs:Class')
+          Vue.set(mainClass,'rdfs:comment',state.schema[i]['description'])
+          Vue.set(mainClass,'rdfs:label',state.schema[i]['label'])
+          Vue.set(mainClass,'rdfs:subClassOf',state.startingPoint)
+          Vue.set(mainClass,'$validation',state.startingPoint)
+          //Add New Class
+          state.finalschema['@graph'].push(mainClass)
+          //Handle main Class Properties
+          if (state.schema[i].properties) {
+            for (var x = 0; x < state.schema[i].properties.length; x++) {
+
+              let mainProp = {};
+              Vue.set(mainProp,'@id',state.schema[i].properties[x]['name'])
+              Vue.set(mainProp,'@type','rdfs:Property')
+              Vue.set(mainProp,'rdfs:comment',state.schema[i].properties[x]['description'])
+              Vue.set(mainProp,'rdfs:label',state.schema[i].properties[x]['label'])
+              Vue.set(mainProp,'schema:domainIncludes',{'@id':state.schema[i]['name']})
+              //Ranges of Property
+              if (state.schema[i].properties[x]['range']) {
+                let ranges= state.schema[i].properties[x]['range'].split(',');
+                Vue.set(mainProp,'schema:rangeIncludes',[])
+                for (var rangeIndex = 0; rangeIndex < ranges.length; rangeIndex++) {
+                  mainProp['schema:rangeIncludes'].push({'@id':ranges[rangeIndex]})
+                }
+              }
+              if (state.schema[i].properties[x].selected) {
+                let propValue={};
+                Vue.set(propValue,'description',state.schema[i].properties[x].description)
+                Vue.set(propValue,'type','string')
+                Vue.set(state.validation['properties'],state.schema[i].properties[x].label,propValue)
+              }
+              if (state.schema[i].properties[x].isRequired) {
+                state.validation['required'].push(state.schema[i].properties[x].label)
+              }
+              //Add New Prop
+              state.finalschema['@graph'].push(mainProp)
+            }
+          }
+        }else{
+          //Handle Parent Classes
+          if (state.schema[i].properties) {
+            for (var y = 0; y < state.schema[i].properties.length; y++) {
+              if (state.schema[i].properties[y].selected) {
+                let propValue={};
+                Vue.set(propValue,'description',state.schema[i].properties[y].description)
+                //Assign type
+                if (['name','description','version','identifier'].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','string')
+                }else if (['url','sameAs',].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','string')
+                  Vue.set(propValue,'format','uri')
+                }else if (['keywords',].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','array')
+                  Vue.set(propValue,'items',{'type':'string'})
+                }else if (['datePublished','dateModified',].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'oneOf',[{
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  ]);
+                }else if (['creator','publisher','license','citation','samples','funder','contributor'].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','object')
+                }else if (['measurementTechnique'].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'enum',[])
+                }else if (['includedInDataCatalog'].includes(state.schema[i].properties[y].label)) {
+                  Vue.set(propValue,'type','object')
+                  Vue.set(propValue,'properties',{
+                    "name": {
+                      "const": "CTSA Datasets"
+                    },
+                    "url": {
+                      "const": "https://ctsa.ncats.nih.gov/cd2h/"
+                    }
+                  })
+                }else{
+                  //FOR ALL ELSE ASSIGN STRING FOR NOW...
+                  Vue.set(propValue,'type','string')
+                }
+                //Add to temp validation
+                Vue.set(state.validation['properties'],state.schema[i].properties[y].label,propValue)
+              }
+              if (state.schema[i].properties[y].isRequired) {
+                state.validation['required'].push(state.schema[i].properties[y].label)
+              }
+              //Once done add temp validation to finalschema
+              if (state.finalschema['@graph'].length) {
+                Vue.set(state.finalschema['@graph'][0],'$validation',state.validation)
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  getters:{
+    getSchema:state=>{
+      return state.schema
+    },
+    getStartingPoint:state=>{
+      return state.startingPoint
+    },
+    getPrefix:state=>{
+      return state.prefix
+    },
+    getFinalSchema:state=>{
+      return state.finalschema
+    },
+    getShowDesc:state=>{
+      return state.showDescriptions
+    }
+  },
+  actions:{
+    getParents ({commit,state}) {
+      let list =[];
+      for (var i = 0; i < state.schema[0].parent_classes.length; i++) {
+        list = list.concat(state.schema[0].parent_classes[i].split(", "))
+      }
+      let uniqueParents = new Set(list)
+      let pList = [...uniqueParents]
+      for (var i = 0; i < pList.length; i++) {
+        state.loading = true;
+        axios.get("api/registry/"+state.schema[0].namespace+"/"+pList[i]).then(res=>{
+          if (res.data) {
+            commit('saveParent',{'parent':res.data})
+          }
+        }).catch(err=>{
+          $.notify("Failed to get class "+pList[i],{ globalPosition: 'right',className:'error', showDuration: 40, });
+          throw err;
+        })
+      }
+    }
+  }
+});
+
+Vue.component('c-box', {
+  props: ['item'],
+  data: function(){
+    return{
+      expand: false
+    }
+  },
+  watch:{
+  },
+  computed:{
+    showDesc:function(){
+      return store.getters.getShowDesc
+    }
+  },
+  mounted:function(){
+
+    tippy( '#editorTippy', {
+        target:'.cTip',
+        content: 'Loading...',
+        placement:'right',
+        animation: 'fade',
+        trigger:'click',
+        theme:'light',
+        onShow(instance) {
+          let desc = instance.reference.dataset.tippyDescription;
+          instance.setContent("<div class='alert alert-info m-0 text-left wraptext'>"+desc+"</div>")
+        }
+      });
+      tippy( '.expand', {
+        maxWidth:'200px',
+        placement:'left',
+        content: '<div class="alert alert-info m-0" style="border-radius:none">Show/Hide Properties</div>',
+        animation: 'fade',
+        theme:'light'});
+
+        tippy( '.addprop', {
+          maxWidth:'200px',
+          placement:'left',
+          content: '<div class="alert alert-info m-0" style="border-radius:none">Add New Property</div>',
+          animation: 'fade',
+          theme:'light'});
+
+      tippy( '.required', {
+        maxWidth:'200px',
+        placement:'left',
+        content: '<div class="alert alert-danger m-0" style="border-radius:none">Mark As Required</div>',
+        animation: 'fade',
+        theme:'light'});
+
+      tippy( '.select', {
+        maxWidth:'200px',
+        placement:'left',
+        content: '<div class="alert alert-info m-0" style="border-radius:none">Re-Use This Property</div>',
+        animation: 'fade',
+        theme:'light'});
+
+        tippy( '.remove', {
+          maxWidth:'200px',
+          placement:'left',
+          content: '<div class="alert alert-danger m-0" style="border-radius:none">Delete Property</div>',
+          animation: 'fade',
+          theme:'light'});
+  },
+  template: `<div class="row m-1 cBox actions" :class="{'alert-info':item.special,'alert-light':!item.special}">
+              <div class="col-sm-10 p-2">
+                <div>
+                  <small v-if="item.special" class="badge badge-info mr-1">YOUR CLASS</small>
+                  <template v-if="item.parent_classes.length" v-for="tree in item.parent_classes">
+                    <template v-for="(name,i) in getSubclass(tree)">
+                      <small v-text="name"></small>
+                      <small><i class="fas fa-chevron-right"></i></small>
+                    </template>
+                  </template>
+                  <small class="bold"><span v-text="item.label"></span> <i class="fas fa-info-circle text-info cTip pointer" :data-tippy-description="item.description" :data-tippy-label="item.label"></i></small class="bold">
+                  <small v-if="item.properties" class="mainTextDark bold float-right">(<span v-text="item.properties.length"></span> properties)</small>
+                  <template v-if="showDesc">
+                    <small class="d-block text-muted" v-html="item.description || 'No description provided'"></small>
+                  </template>
+                </div>
+                <div v-show='expand' class="mt-1">
+                  <template v-for="prop in item.properties">
+                    <div class="row m-1 alert-secondary pBox actions">
+                      <div class="col-sm-9">
+                        <small class="mainTextDark">
+                          <span v-text="prop.label"></span> <i class="fas fa-info-circle cTip pointer" :data-tippy-description="prop.description" :data-tippy-label="prop.label"></i>
+                          <template v-if="showDesc">
+                            <small class="d-block text-muted" v-html="prop.description || 'No description provided'"></small>
+                          </template>
+                        </small>
+                      </div>
+                      <div class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around">
+                        <i v-show="item.special" class="fas fa-minus-circle pointer text-muted unselectable remove" @click="removeProp(prop.label)"></i>
+                        <i class="fas fa-check-circle pointer unselectable select" @click="markSelected(prop.label)" :class="{'text-muted':!prop.selected,'text-success':prop.selected}"></i>
+                        <i class="fas fa-asterisk required pointer unselectable" @click="markRequired(prop.label)" :class="{'text-muted':!prop.isRequired,'text-danger':prop.isRequired}"></i>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+              <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+                <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click='addProp(item.label)'>
+                  <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                  <i class="fas fa-plus fa-stack-1x text-light"></i>
+                </span>
+                <span class="fa-stack fa-1x pointer expand unselectable" @click='expand=!expand'>
+                  <i class="fas fa-circle fa-stack-2x" :class="{'text-muted':!expand,'text-success':expand}"></i>
+                  <i class="fas fa-list-ul fa-stack-1x text-light"></i>
+                </span>
+              </div>
+            </div>`,
+  methods: {
+    removeProp(propLabel){
+      Swal.fire({
+        title: 'Are you sure you want to delete '+propLabel+'?',
+        text: "You won't be able to revert this",
+        showCancelButton: true,
+        confirmButtonColor:'#5C3069',
+        cancelButtonColor:'#006476',
+        confirmButtonText: 'Yes, Delete it!'
+      }).then((res) => {
+        if (res.value) {
+          let payload = {}
+          payload['label'] = propLabel;
+          store.commit('removeProperty',payload);
+        }
+      })
+    },
+    getSubclass(item){
+      return item.split(", ")
+    },
+    markSelected(propLabel){
+      var payload = {};
+      payload["label"] = propLabel
+      store.commit('selectProp',payload);
+    },
+    markRequired(propLabel){
+      var self = this;
+      for (var i = 0; i < self.item.properties.length; i++) {
+        if (self.item.properties[i].label === propLabel && self.item.properties[i].selected) {
+          var payload = {};
+          payload["label"] = propLabel
+          store.commit('requireProp',payload);
+        }else if (self.item.properties[i].label === propLabel && !self.item.properties[i].selected){
+          $.notify("Can't require an unselected property",{ globalPosition: 'right',className:'error', showDuration: 40, });
+        }
+      }
+    },
+    addProp(domain){
+      var self = this;
+
+        Swal.mixin({
+        input: 'text',
+        confirmButtonText: 'Next &rarr;',
+        showCancelButton: true,
+        confirmButtonColor:'#5C3069',
+        cancelButtonColor:'#006476',
+        progressSteps: ['1', '2','3']
+      }).queue([
+        {
+          title: "Choose a name for your property",
+          html: 'input name must be camelCased <b class="text-danger">eg. myProperty </b>',
+          inputValidator: (value) => {
+            return new Promise((resolve) => {
+              if (value.match(/^[a-z]+(?:[A-Z][a-z]+)*$/)) {
+                resolve()
+              } else {
+                resolve('property names must be camelCased')
+              }
+            })
+          }
+        },
+        {
+          title: "What is this property's expected type(s)?",
+          html: 'input name(s) must be Pascal cased <b class="text-danger">eg. schema:MyClass </b>. Multiple types separated by commas.'
+        },
+        {
+          title: "Write a comment about this class",
+          html: 'Write a short summary about this class',
+          input:'textarea',
+          inputValidator: (value) => {
+            return value.length < 10 && 'Description is too short! You should write something meaningful.'
+          }
+        },
+      ]).then((result) => {
+        if (result.value) {
+          Swal.fire({
+            title: 'Add Property '+result.value[0]+'?',
+            text: result.value[2],
+            showCancelButton: true,
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            confirmButtonText: 'Yes, Add It!'
+          }).then((res) => {
+            if (res.value) {
+              $.notify(result.value[0]+" added",{ globalPosition: 'right',className:'success', showDuration: 200, });
+              let payload = {}
+              payload['name'] = result.value[0];
+              payload['range'] = result.value[1];
+              payload['description'] = result.value[2];
+              payload['domain'] = domain;
+              store.commit('addProperty',payload);
+              self.expand = true;
+            }
+          })
+        }
+      });
+
+    }
+  }
+});
+
+
+var app = new Vue({
+      el: '#editor',
+      store: store,
+			data: function(){
+				return {
+          loading: false,
+          inputNamespace:'',
+          availableNamespace:false,
+          userInfo:null,
+				}
+			},
+      computed:{
+        startingPoint:function(){
+          return store.getters.getStartingPoint
+        },
+        prefix:function(){
+          return store.getters.getPrefix
+        },
+        classesAvailable:function(){
+          return store.getters.getSchema
+        },
+        newClassAdded:function(){
+          for (var i = 0; i < store.state.schema.length; i++) {
+            if (store.state.schema[i].special) {
+              return true
+            }
+          }
+          return false
+        }
+      },
+      watch:{
+        prefix:function(prefix,oldprefix){
+          if (prefix) {
+            store.dispatch('getParents')
+          }
+        },
+        inputNamespace:function(value,oldvalue){
+          let self=this;
+          var re = /^[a-zA-Z0-9_.-]*$/;
+          if (!re.test(value) ) {
+            $.notify(value+" contains invalid characters",{ globalPosition: 'right',className:'error', showDuration: 100, });
+          }
+          if (value.length) {
+            axios.head(`/api/registry/`+value).then(function (res) {
+              self.availableNamespace= false;
+            }).catch(err=>{
+              self.availableNamespace= true;
+              throw err;
+            });
+          }else{
+            self.availableNamespace=false;
+          }
+        },
+      },
+			methods:{
+        toggleDesc(){
+          store.commit('toggleDesc');
+        },
+        addClass:function(){
+          var self = this;
+
+            Swal.mixin({
+            input: 'text',
+            confirmButtonText: 'Next &rarr;',
+            showCancelButton: true,
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            progressSteps: ['1', '2']
+          }).queue([
+            {
+              title: "Choose a name for your class",
+              html: 'Input name must be Pascal cased <b class="text-danger">eg. MyClass </b>',
+              inputValidator: (value) => {
+                return new Promise((resolve) => {
+                  if (value.match(/^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/)) {
+                    resolve()
+                  } else {
+                    resolve('class names must be PascalCased')
+                  }
+                })
+              }
+            },
+            {
+              title: "Write a comment about this class",
+              html: 'Write a short summary about this class',
+              input:'textarea',
+              inputValidator: (value) => {
+                return value.length < 10 && 'Description is too short! You should write something meaningful.'
+              }
+            },
+          ]).then((result) => {
+            if (result.value) {
+              Swal.fire({
+                title: 'Add Class '+result.value[0]+'?',
+                text: result.value[1],
+                showCancelButton: true,
+                confirmButtonColor:'#5C3069',
+                cancelButtonColor:'#006476',
+                confirmButtonText: 'Yes, Add It!'
+              }).then((res) => {
+                if (res.value) {
+                  $.notify(result.value[0]+" added",{ globalPosition: 'right',className:'success', showDuration: 200, });
+                  let payload = {}
+                  payload['name'] = result.value[0];
+                  payload['description'] = result.value[1];
+                  store.commit('addClass',payload);
+                }
+              })
+            }
+          });
+
+
+        },
+        getPreview(){
+          store.commit('formPreview');
+          Swal.fire({
+            position: 'center',
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox">
+                    <small>
+                      <pre>
+                        `+JSON.stringify(store.getters.getFinalSchema,null,2)+`
+                      </pre>
+                    </small>
+                  </div>`
+          });
+        },
+        checkUser(){
+          let self = this;
+          self.loading = true;
+          $.ajax({url: "/user", success: function(result){
+            self.loading = false;
+             self.userInfo = result;
+          },
+          cache: false});
+        },
+        checkForData(){
+          var schema = localStorage.getItem('EditorData');
+          var startingPoint = localStorage.getItem('EditorStartingPoint');
+
+          if (schema && startingPoint) {
+            var payload = {};
+            payload["schema"] = JSON.parse(schema);
+            payload["start"] = startingPoint;
+            store.commit('saveSchema',payload);
+          }else{
+            Swal({
+              title: 'No Schema Selected',
+              imageAlt: 'Warning',
+              html:
+                '<p>You have not selected a schema to start with.</p> ' +
+                '<p>Search the <a href="/registry">Registry</a> for a schema to start from.</p>',
+              showCancelButton: false,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+            });
+          }
+        },
+        handleSubmit(){
+          var self = this;
+          if (self.url) {
+            axios.get(self.url).then(res=>{
+              // console.log(res.data)
+            }).catch(err=>{
+              throw err;
+            });
+          }
+        },
+        help(){
+          Swal.mixin({
+            confirmButtonText: 'Next &rarr;',
+            showCancelButton: true,
+            progressSteps: ['i', '1','2','3','4','5']
+          }).queue([
+            {
+              title: "Schema Editor",
+              html: "<p>With this tool you will be able to extend an existing schema to define your new schema.</p><p>It's as easy as picking the things you want to re-use and enter only any new information.</p>",
+            },
+            {
+              title: "Step 1: Namespace",
+              html: "<p>The namespace will be used for both extending the prefixes in the classes and properties definitions but also as a namespace for your landing page should you register it here. We will check that your namespace is available, it's simple just enter a name that represents your schema or organization.</p>"
+            },
+            {
+              title: "Step 2: Add A New Class",
+              html: "<p>Here you will define your new class with the class from the schema you selected as a starting point as it's subclass.</p><p>Any new properties not present in any other schema class should be added here. Just click the <b class='text-info'>Add New Property</b> button and follow the instructions.</p>"
+            },
+            {
+              title: "Step 3: Parent Classes",
+              html: "<p>Here you will see the classes in the schema you selected and all of their properties.</p><p>It's important to understand that all properties are inherited by default but you should only represent in your schema the properties you will actually re-use and require.</p><p>Just click the <b class='text-info'>+</b> button and that property will be added to your new class. To mark it as required, simply check the <b>required</b> checkbox.</p>"
+            },
+            {
+              title: "Step 4: Schema",
+              html: "<p>Finally here you can see how your schema is coming along.</p><p>When you are satisfied with the result simply copy and paste that into your project repo and use our viewer to visualize and register your schema.</p>"
+            },
+            {
+              title: "Step 4: Hosting",
+              html: "<p>You now have a schema based on your starting point. Feel free to add more custom validation fields and modify to your own needs.</p><p>Host your schema on your preferred service and come back to try out our viewer and register so others can see your schema.</p>"
+            },
+          ]);
+        },
+        savePrefix(){
+          if (this.availableNamespace) {
+            var payload = {};
+            payload["prefix"] = this.inputNamespace
+            store.commit('savePrefix',payload);
+          }
+        }
+			},
+			mounted:function(){
+        var self = this;
+        self.checkUser();
+        self.checkForData();
+			}
+		});
+
+</script>
+{% include "footer.html" %}
+{% endblock %}
