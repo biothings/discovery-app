@@ -36,7 +36,7 @@ class MetadataHandler(APIBaseHandler):
         self.finish({
             'success': True,
             'result': meta.save(),
-            'url': self.request.full_url() + '/' + meta.meta.id,
+            'id': meta.meta.id,
         })
 
     def get(self, _id=None):
