@@ -1,10 +1,12 @@
 '''
-    Schema.org Datasource Indexer
+    Create Indexes and Index Schema.org Datasource
 '''
 
 import logging
+
 from biothings_schema import Schema as SchemaParser
-from discovery.api.es.doc import SchemaClass
+
+from discovery.api.es.doc import DatasetMetadata, Schema, SchemaClass
 
 
 def index_schema_org(lazy=False):
@@ -31,4 +33,7 @@ if __name__ == "__main__":
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%H:%M:%S')
     logging.captureWarnings(True)
-    index_schema_org()
+    Schema.init()
+    SchemaClass.init()
+    DatasetMetadata.init()
+    index_schema_org(True)
