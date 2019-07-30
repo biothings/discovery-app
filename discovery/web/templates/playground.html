@@ -25,10 +25,13 @@
 }
 </style>
 <div id="playground" class="container" style="min-height: 70vh;padding-top:60px;">
-  <div class="jumbotron animatedBack text-center mt-5">
-    <h1 class="text-light">SCHEMA PLAYGROUND</h1>
+  <div class="jumbotron bg-light text-center mt-5">
+    <h1 class="logoText">SCHEMA PLAYGROUND</h1>
+		<p class="text-muted">
+      View, Register and Expand Schemas
+    </p>
   </div>
-  <div v-if="!choice" class=" jumbotron bg-light row mb-4">
+  <div v-if="!choice" class=" jumbotron animatedBack row mb-4">
     <div class="col-sm-12 p-5 text-center text-muted speech-bubble mb-5">
       <h2 class="logoText">DO YOU HAVE A SCHEMA?</h2>
     </div>
@@ -46,7 +49,7 @@
     </div>
   </div>
   <div v-if="choice" class="">
-    <buttom @click.prevent="choice=''" class="btn w-100 text-center p-4 mainBackLight text-light">
+    <buttom @click.prevent="choice=''" class="btn w-100 text-center p-4 mainBackDark text-light">
       <i class="fas fa-chevron-left"></i> Back
     </buttom>
   </div>
@@ -78,7 +81,7 @@
   </div>
   <div v-if="choice === 'dont'" class="jumbotron text-muted text-center">
     <h3 class="logoText">COMMON STARTING POINTS</h3>
-    <div class="row">
+    <div class="d-flex align-items-center justify-content-around">
       <template v-for='item in presets'>
         <preset-box :preset='item'></preset-box>
       </template>
@@ -114,7 +117,7 @@ Vue.component('preset-box', {
   mounted:function(){
 
   },
-  template: `<div class="bg-light text-center p-5 col-sm-6 col-md-6 col-lg-3">
+  template: `<div class="bg-light text-center p-4">
               <h4 class="m-1">
               <i v-if="preset.name === 'Cvisb:Dataset'" class="far fa-calendar"></i>
               <i v-if="preset.name === 'Cvisb:Experiment'" class="fas fa-flask"></i>
@@ -127,14 +130,16 @@ Vue.component('preset-box', {
             </div>`,
   methods: {
     handleClick(name,url){
-        axios.get('/api/proxy?url='+url).then(res=> {
-          if (res.data) {
-            let obj = JSON.stringify(res.data)
-            localStorage.setItem('datasetData',obj);
-            localStorage.setItem('editFrom',name);
-            window.location.href = '/editor';
-          }
-        });
+			var self = this;
+			axios.get('/api/registry/schema/schema:Dataset').then(res=>{
+				console.log(res.data)
+				let obj = JSON.stringify(res.data)
+				localStorage.setItem('EditorData',obj);
+				localStorage.setItem('EditorStartingPoint','schema:'+name);
+				window.location.href ='/editor'
+			}).catch(err=>{
+				throw err;
+			})
     }
   }
 });
@@ -149,26 +154,31 @@ var app = new Vue({
           choice:'',
           loading:false,
           presets:[
-            {
-              'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_dataset.json',
-              'name':'Cvisb:Dataset',
-              'description':'A schema describing Dataset in the Center for Viral Systems Biology'
+						{
+              'url':'https://schema.org/Dataset.jsonld',
+              'name':'Dataset',
+              'description':'A body of structured information describing some topic(s) of interest.'
             },
-            {
-              'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_experiment.json',
-              'name':'Cvisb:Experiment',
-              'description':'A schema describing a Systems Serology Experiment in the Center for Viral Systems Biology '
-            },
-            {
-              'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_patient.json',
-              'name':'Cvisb:Patient',
-              'description':'A schema describing a Patient/Person in the Center for Viral Systems Biology experiments '
-            },
-            {
-              'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_sample.json',
-              'name':'Cvisb:Sample',
-              'description':'A schema describing a derived sample from a primary source in the Center for Viral Systems Biology '
-            }
+            // {
+            //   'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_dataset.json',
+            //   'name':'Cvisb:Dataset',
+            //   'description':'A schema describing Dataset in the Center for Viral Systems Biology'
+            // },
+            // {
+            //   'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_experiment.json',
+            //   'name':'Cvisb:Experiment',
+            //   'description':'A schema describing a Systems Serology Experiment in the Center for Viral Systems Biology '
+            // },
+            // {
+            //   'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_patient.json',
+            //   'name':'Cvisb:Patient',
+            //   'description':'A schema describing a Patient/Person in the Center for Viral Systems Biology experiments '
+            // },
+            // {
+            //   'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_sample.json',
+            //   'name':'Cvisb:Sample',
+            //   'description':'A schema describing a derived sample from a primary source in the Center for Viral Systems Biology '
+            // }
           ]
 				}
 			},

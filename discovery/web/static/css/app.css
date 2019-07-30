@@ -1,6 +1,6 @@
 :root {
-    --main: #5C3069;
-    --sec:#006476;
+    --main: #63296b;
+    --sec:#4a7d8f;
 }
 
 /* BOOTSTRAP OVERRRIDE */
@@ -35,13 +35,8 @@ pre code {
   text-transform: uppercase;
 }
 
-@font-face {
-    font-family: mainFont;
-    src: url('../misc/express.ttf');
-}
-
-h1, h2, h3, h4, h4{
-  font-family: mainFont !important;
+a, p, small,h1, h2, h3, h4, h4{
+  font-family: helvetica !important;
 }
 
 #keywords span.badge:hover{
@@ -78,7 +73,7 @@ h1, h2, h3, h4, h4{
 }
 
 .mainFont{
-  font-family: mainFont !important;
+  font-family: helvetica !important;
 }
 
 .noPadding{

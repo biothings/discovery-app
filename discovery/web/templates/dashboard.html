@@ -45,7 +45,7 @@
                   </a>
                 </div>
                 <div>
-                  <a :href="'/'+item.namespace+'/'" target="_blank" >
+                  <a :href="'/'+item.namespace+'/'">
                     <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'Visualize'">
                       <i class="fas fa-circle text-muted fa-stack-2x"></i>
                       <i class="fas fa-eye fa-stack-1x text-light"></i>
@@ -74,7 +74,7 @@
               </div>
               <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
                 <div>
-                  <a :href="'/api/metadata/'+item._id" target="_blank" >
+                  <a :href="'/metadata/'+item._id">
                     <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'View Metadata'">
                       <i class="fas fa-circle text-muted fa-stack-2x"></i>
                       <i class="fas fa-eye fa-stack-1x text-light"></i>

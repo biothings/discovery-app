@@ -1,0 +1,125 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<style>
+
+</style>
+<div id="registry" class="jumbotron mb-0" style="min-height:80vh;">
+  <div v-if=loading class="loader">
+    <img src="/static/img/ripple.svg"/>
+  </div>
+  <div v-if="metadata && metadata.name" class="row">
+    <div class="col-sm-12 col-md-10 col-lg-7 text-center" style="margin:auto;">
+      <h1 class="text-center logoText mt-5">
+        <span v-text="metadata.name"></span>
+      </h1>
+      <small v-if="metadata && metadata.version"  class="text-muted d-block text-center" v-text="'Version '+metadata.version"></small>
+      <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
+      <div class="bg-light p-4 text-center m-4">
+        <p class="text-muted m-auto" v-text="metadata.description"></p>
+        <template v-for="item in metadata.keywords">
+          <small class="text-muted mr-1" v-text='"#"+item'></small>
+        </template>
+        <hr />
+        <a v-if="metadata.url" target="_blank" :href="metadata.url">Learn More</a>
+      </div>
+      <button class="smallButton btn m-auto" @click="getPreview">View Metadata</button>
+    </div>
+    <div v-if="metadata && !metadata.name" class="jumbotron text-center text-muted">
+      <h2>Nothing to see here...</h2>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://unpkg.com/vuex"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
+<script>
+  const store = new Vuex.Store({
+    state: {
+      'metadata':{},
+    },
+    strict: true,
+    mutations: {
+      saveMetadata (state,payload) {
+        state.metadata = payload['metadata']
+        console.log(state.metadata)
+      },
+    },
+    getters:{
+      // exposed as store.getters.nameOfGetter
+      getMetadata: state => {
+        return state.metadata
+      },
+    }
+  });
+
+  var app = new Vue({
+    el: '#registry',
+  	data: function(){
+  		return {
+        query:'',
+        loading:false,
+  	  }
+    },
+    methods:{
+      getMetadata(id){
+        var self = this;
+        id = id.replace('/',"");
+        self.loading = true;
+        axios.get('/api/metadata/'+id).then(res=>{
+          self.loading = false;
+          if (res.data) {
+            let payload = {}
+            payload['metadata']= res.data
+            store.commit('saveMetadata',payload)
+            self.createScript();
+          }
+        }).catch(err=>{
+          self.loading = false;
+          throw err;
+        });
+      },
+      createScript() {
+        let scriptTag = document.createElement('script');
+        var str = JSON.stringify(this.metadata, null, 2);
+        scriptTag.setAttribute('type',"application/ld+json");
+        scriptTag.text= str;
+        document.head.appendChild(scriptTag);
+      },
+      getPreview(){
+        var self = this;
+        Swal.fire({
+          position: 'center',
+          confirmButtonColor:'#5C3069',
+          cancelButtonColor:'#006476',
+          html: `<h6 class="text-center mainTextDark">Metadata</h6><div class="text-left p-1 previewBox">
+                  <small>
+                    <pre>
+                      `+JSON.stringify(self.metadata,null,2)+`
+                    </pre>
+                  </small>
+                </div>`
+        });
+      },
+    },
+    mounted:function(){
+      var self = this;
+      let context = {{Context}}
+       if ( context.Query ) {
+         self.query = context.Query;
+         self.getMetadata(self.query)
+       }
+    },
+    computed:{
+      metadata:function(){
+        return store.getters.getMetadata
+      }
+    }
+  });
+</script>
+{% include "footer.html" %}
+{% endblock %}
