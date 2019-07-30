@@ -11,7 +11,7 @@
   <div class="row">
 
     <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
-      <h1 class="text-center logoText mb-5 mt-5">REGISTRY</h1>
+      <h1 class="text-center logoText mb-5 mt-5">METADATA REGISTRY</h1>
       <div class="p-3">
         <form @submit.prevent="search(query)">
           <div class="form-group form-row">
@@ -89,32 +89,15 @@ Vue.component('registry-item', {
   },
   props: ['item'],
   methods:{
-    saveDataAndRedirect(item,goesToEditor){
+    saveDataAndRedirect(item){
       var self = this;
-      console.log("ITEM",item)
-      if (goesToEditor) {
-        console.log("TO EDITOR")
-        if (item && item.namespace && item.label && item.prefix) {
-          let obj = JSON.stringify(item)
-          localStorage.setItem('EditorData',obj);
-          localStorage.setItem('EditorStartingPoint',item.prefix+':'+item.label);
-          window.location.href = goesToEditor;
-        }else{
+      if (item) {
+        window.location.href = '/metadata/'+item._id;
+      }else{
           Swal.fire(
             'Oops!',
             'Action not available for this item',
           );
-        }
-      }else{
-        console.log("TO VIEWER")
-        if (item && item.namespace && item.label) {
-          window.location.href = '/'+item.namespace+'/'+item.label;
-        }else{
-            Swal.fire(
-              'Oops!',
-              'Action not available for this item',
-            );
-        }
       }
     },
     getSubclass(parents){
@@ -136,38 +119,29 @@ Vue.component('registry-item', {
   watch:{
   },
   mounted: function(){
-    tippy('#'+this.item.label, {
-      content: "<div class='alert alert-info m-0 text-left'>"+JSON.stringify(this.item.description,null,2)+"</div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
+    tippy('#'+this.item.name, {
+      trigger:'click',
+      interactive:'true',
+      content: "<div class='alert alert-info m-0 text-left'><pre>"+JSON.stringify(this.item,null,2)+"</pre></div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
     })
   },
   template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="options=!options">
     <div class="d-flex">
       <div class="flex-grow-1 p-2">
-        <div class="d-flex justify-content-between w-100">
-          <h5 class="mb-1 mainTextDark">
-            <small v-text="item.prefix"></small>:<span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-info-circle text-info"></i></small>
-          </h5>
+        <div class="w-100">
+          <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
+          <small v-if="item && item.version" class="text-muted" v-text="'Version '+item.version"></small>
+          <small><i :id="item.name" class="fas fa-search-plus text-info"></i></small>
+          <p v-if="item && item.description" class="text-muted">
+            <small v-html="item.description"></small>
+          </p>
         </div>
-        <p class="mb-1">
-          <small>
-            <span class='badge mainBackLight text-light'><span v-text="getPropTotal()"></span> Properties </span>
-          </small>
-          <small>Subclass of:</small>
-          <span class="mb-1" v-text="getSubclass(item.parent_classes)"></span>
-        </p>
-
       </div>
       <div v-if='options' class="p-1 bg-dark d-flex align-items-center justify-content-around flip-in-ver-left">
         <div>
           <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item)" :data-tippy-info="'Visualize'">
             <i class="fas fa-circle text-muted fa-stack-2x"></i>
             <i class="fas fa-eye fa-stack-1x text-light"></i>
-          </span>
-        </div>
-        <div>
-          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item,'editor')" :data-tippy-info="'Extend'">
-            <i class="fas fa-circle text-muted fa-stack-2x"></i>
-            <i class="fas fa-plus fa-stack-1x text-light"></i>
           </span>
         </div>
       </div>
@@ -270,9 +244,7 @@ var app = new Vue({
             instance.unmark();
             //clear registry to fix mixing results info
             self.registry = [];
-            axios.get('/api/query?size=1000', params).then(function (response) {
-              // console.log('%c SEARCH..','color:hotpink')
-              // console.log(response.data.hits)
+            axios.get('/api/metadata?size=1000', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
               // mark results, doc must be loaded
@@ -316,6 +288,7 @@ var app = new Vue({
     mounted:function(){
       var self = this;
       self.checkLoggedUser();
+      self.search();
       tippy( '#regTippyParent', {
         target:'.tip',
         placement:'top',

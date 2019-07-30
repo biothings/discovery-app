@@ -8,10 +8,14 @@
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>
   </div>
-  <div class="jumbotron bg-light text-center">
+  <div class="jumbotron bg-light text-center m-0">
     <h1 class="logoText">DISCOVERY GUIDE</h1>
     <p class="text-muted">
       Follow best practices to make your data more findable
+    </p>
+    <a href="/metadata">Explore registered metadata <i class="fas fa-chevron-right"></i></a>
+    <p class="text-muted">
+      OR<br/>Create your own metadata
     </p>
   </div>
   <div id="widget">
@@ -1105,9 +1109,9 @@
                   self.loading = false;
                   if (res.data.success) {
                     Swal.fire({
-                      title: `Registration Successful`,
-                      html:"<small>Your metadata has been saved!</small>",
-                      html:`<a target="_blank" href=`+res.data.url+`>`+res.data.url+`</a>`,
+                      title: `View Your Metadata`,
+                      html:`<a href="/metadata/`+res.data.id+`">Click Here</a>`,
+                      footer:'Your metadata is also accessible via your dashboard',
                       showCancelButton: false,
                       confirmButtonColor:'#5C3069',
                       cancelButtonColor:'#006476',

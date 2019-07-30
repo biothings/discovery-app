@@ -44,22 +44,6 @@ class MainHandler(BaseHandler):
             index_output = index_template.render()
             self.write(index_output)
 
-
-class SchemaOrgHandler(BaseHandler):
-    def get(self, yourQuery=None):
-        template_file = "schema.html"
-        schema_template = TEMPLATE_ENV.get_template(template_file)
-        if yourQuery:
-            schema_output = schema_template.render(
-                Context=json.dumps({"Query": yourQuery, "Content": True}))
-        elif self.get_argument('q', False):
-            schema_output = schema_template.render(
-                Context=json.dumps({"Query": '', "Content": False}))
-        else:
-            schema_output = schema_template.render(Context=json.dumps({}))
-        self.write(schema_output)
-
-
 class LoginHandler(BaseHandler):
     def get(self):
         xsrf = self.xsrf_token
@@ -167,6 +151,22 @@ class VisualizerHandler(BaseHandler):
             {"namespace": namespace, "query": className}))
         self.write(test_output)
 
+class MetadataHandler(BaseHandler):
+    def get(self, yourQuery=None):
+        test_file = "metadata-page.html"
+        metadata_template = TEMPLATE_ENV.get_template(test_file)
+        if yourQuery:
+            metadata_output = metadata_template.render(Context=json.dumps({"Query": yourQuery}))
+        else:
+            metadata_output = metadata_template.render(Context=json.dumps({"Query":''}))
+        self.write(metadata_output)
+
+class MetadataRegistryHandler(BaseHandler):
+    def get(self):
+        doc_file = "metadata-registry.html"
+        doc_template = TEMPLATE_ENV.get_template(doc_file)
+        doc_output = doc_template.render()
+        self.write(doc_output)
 
 APP_LIST = [
     (r"/?", MainHandler),
@@ -179,6 +179,7 @@ APP_LIST = [
     (r"/login/?", LoginHandler),
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),
     (r"/logout/?", LogoutHandler),
-    (r"/schema-org/(.+)/?", SchemaOrgHandler),
+    (r"/metadata/?", MetadataRegistryHandler),
+    (r"/metadata/(.+)/?", MetadataHandler),
     (r"/(.+)/(.*)/?", VisualizerHandler),
 ]
