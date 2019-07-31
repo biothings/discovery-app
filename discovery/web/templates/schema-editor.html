@@ -54,9 +54,9 @@
           </a>
         </li>
         <li class='nav-item'>
-          <a class='nav-link' :class="{ 'disabled text-muted notallowed': !prefix, 'bg-success text-light pointer': prefix }" @click='downnloadSchema()'>
+          <a class='nav-link' :class="{ 'disabled text-muted notallowed': !prefix, 'bg-primary text-light pointer': prefix }" @click='downnloadSchema()'>
             <small>
-              <i class="fas fa-file-download"></i> download
+              <i class="fas fa-file-download"></i> Download
             </small>
           </a>
         </li>
@@ -126,7 +126,8 @@ const store = new Vuex.Store({
     'schema':[],
     'startingPoint':'',
     'prefix':'',
-    'finalschema':{
+    'finalschema':
+    {
       '@context':{
         "schema": "http://schema.org/",
         "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
