@@ -47,9 +47,16 @@
           </span>
         </li>
         <li class='nav-item'>
-          <a class='nav-link' :class="{ 'disabled text-muted notallowed': !prefix, 'mainBackLight text-light pointer': prefix }" @click='getPreview()'>
+          <a class='nav-link' :class="{ 'disabled text-muted notallowed': !prefix, 'mainBackDark text-light pointer': prefix }" @click='getPreview()'>
             <small>
               <i class="fas fa-code"></i> Preview
+            </small>
+          </a>
+        </li>
+        <li class='nav-item'>
+          <a class='nav-link' :class="{ 'disabled text-muted notallowed': !prefix, 'bg-success text-light pointer': prefix }" @click='downnloadSchema()'>
+            <small>
+              <i class="fas fa-file-download"></i> download
             </small>
           </a>
         </li>
@@ -802,6 +809,31 @@ var app = new Vue({
             payload["prefix"] = this.inputNamespace
             store.commit('savePrefix',payload);
           }
+        },
+        downnloadSchema(){
+          var self = this;
+          store.commit('formPreview');
+          Swal.fire({
+            title: 'Name your file',
+            input: 'text',
+            inputAttributes: {
+              autocapitalize: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Download',
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            if (result.value) {
+              self.download(JSON.stringify(store.getters.getFinalSchema,null,2), result.value+'.txt', 'text/plain')
+            }
+          })
+        },
+        download(content, fileName, contentType) {
+          var a = document.createElement("a");
+          var file = new Blob([content], {type: contentType});
+          a.href = URL.createObjectURL(file);
+          a.download = fileName;
+          a.click();
         }
 			},
 			mounted:function(){

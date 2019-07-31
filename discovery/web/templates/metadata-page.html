@@ -88,7 +88,7 @@
         var str = JSON.stringify(this.metadata, null, 2);
         scriptTag.setAttribute('type',"application/ld+json");
         scriptTag.text= str;
-        document.head.appendChild(scriptTag);
+        document.body.appendChild(scriptTag);
       },
       getPreview(){
         var self = this;
