@@ -821,11 +821,11 @@ var app = new Vue({
               autocapitalize: 'off'
             },
             showCancelButton: true,
-            confirmButtonText: 'Download',
+            confirmButtonText: 'Download JSON-LD',
             allowOutsideClick: () => !Swal.isLoading()
           }).then((result) => {
             if (result.value) {
-              self.download(JSON.stringify(store.getters.getFinalSchema,null,2), result.value+'.txt', 'text/plain')
+              self.download(JSON.stringify(store.getters.getFinalSchema,null,2), result.value+'.jsonld', 'text/plain')
             }
           })
         },

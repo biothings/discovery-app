@@ -120,7 +120,6 @@ Vue.component('registry-item', {
   },
   mounted: function(){
     tippy('#'+this.item.name, {
-      trigger:'click',
       interactive:'true',
       content: "<div class='alert alert-info m-0 text-left'><pre>"+JSON.stringify(this.item,null,2)+"</pre></div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
     })
@@ -139,7 +138,7 @@ Vue.component('registry-item', {
       </div>
       <div v-if='options' class="p-1 bg-dark d-flex align-items-center justify-content-around flip-in-ver-left">
         <div>
-          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item)" :data-tippy-info="'Visualize'">
+          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item)" :data-tippy-info="'View'">
             <i class="fas fa-circle text-muted fa-stack-2x"></i>
             <i class="fas fa-eye fa-stack-1x text-light"></i>
           </span>

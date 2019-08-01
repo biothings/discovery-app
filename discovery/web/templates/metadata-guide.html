@@ -188,7 +188,8 @@
         let selection = payload['clear'];
         for (key in state.schema.validation.properties) {
           if (key === selection) {
-            Vue.set(state.schema.validation.properties[selection],'value','');
+            console.log(key,selection,state.schema.validation.properties)
+            Vue.delete(state.schema.validation.properties[selection],'value');
             Vue.set(state.schema.validation.properties[selection],'selected',false);
             $.notify(selection+" was cleared",{ globalPosition: 'right',className:'success', showDuration: 40, });
           }
@@ -221,8 +222,9 @@
       },
       formPreview(state){
         let props = state.schema.validation.properties;
+        //TODO Need to reset the output each time
         for (key in props) {
-          if (props[key].value) {
+          if (props[key].hasOwnProperty('value') && props[key]['value']) {
             Vue.set(state.output,key,props[key].value)
           }
         }
@@ -429,6 +431,12 @@
             }
             if (name) {
               let person = {'name':name,'url':url};
+              if (type === 'publisher') {
+                person['@type'] = 'Organization'
+              }
+              if (type === 'creator' || type === 'contributor' ) {
+                person['@type'] = 'Person'
+              }
               let self = this;
               var payload = {};
               payload["item"] = person;
@@ -1105,12 +1113,15 @@
 
             Swal.fire({
               title: 'Register this schema?',
-              html:"<small>Done editing this schema? Click <b>Register Now</b> to proceed.</small>",
+              html:"<small>Done editing this schema? You won't be able to edit after this. Click <b>Register Now</b> to proceed.</small>",
               confirmButtonColor:'#5C3069',
               cancelButtonColor:'#006476',
               showCancelButton: true,
               confirmButtonText: 'Register Now',
               showLoaderOnConfirm: true,
+              onClose:function(){
+                self.loading = false;
+              },
               preConfirm: (input) => {
                 axios.post('/api/metadata',output).then(res=>{
                   self.loading = false;
@@ -1153,11 +1164,11 @@
               autocapitalize: 'off'
             },
             showCancelButton: true,
-            confirmButtonText: 'Download',
+            confirmButtonText: 'Download JSON-LD',
             allowOutsideClick: () => !Swal.isLoading()
           }).then((result) => {
             if (result.value) {
-              self.download(JSON.stringify(store.getters.getPreview,null,2), result.value+'.txt', 'text/plain')
+              self.download(JSON.stringify(store.getters.getPreview,null,2), result.value+'.jsonld', 'text/plain')
             }
           })
         },
