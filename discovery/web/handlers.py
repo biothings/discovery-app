@@ -113,6 +113,20 @@ class GuideHandler(BaseHandler):
         guide_output = guide_template.render()
         self.write(guide_output)
 
+class AboutHandler(BaseHandler):
+    def get(self):
+        doc_file = "about.html"
+        about_template = TEMPLATE_ENV.get_template(doc_file)
+        about_output = about_template.render()
+        self.write(about_output)
+
+class FAQHandler(BaseHandler):
+    def get(self):
+        doc_file = "faq.html"
+        faq_template = TEMPLATE_ENV.get_template(doc_file)
+        faq_output = faq_template.render()
+        self.write(faq_output)
+
 class RegistryHandler(BaseHandler):
     def get(self):
         doc_file = "registry.html"
@@ -172,6 +186,8 @@ APP_LIST = [
     (r"/?", MainHandler),
     (r"/schema-playground/?", PGHandler),
     (r"/dashboard/?", DashboardHandler),
+    (r"/about/?", AboutHandler),
+    (r"/faq/?", FAQHandler),
     (r"/guide/?", GuideHandler),
     (r"/registry/?", RegistryHandler),
     (r"/editor/?", EditorHandler),

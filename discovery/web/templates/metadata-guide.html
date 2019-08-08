@@ -631,23 +631,23 @@
       self.checkForConstantKey(self.info,'const')
 
       tippy( '.save', {
-        placement:'left',
+        placement:'top',
         maxWidth:'200px',
-        content: '<div class="alert alert-success m-0" style="border-radius:none">Save & Close</div>',
+        content: '<div class="text-success m-0" style="border-radius:none">Save & Close</div>',
         animation: 'fade',
         theme:'light'});
 
       tippy( '.required', {
         maxWidth:'200px',
-        placement:'left',
-        content: '<div class="alert alert-danger m-0" style="border-radius:none">This field is required</div>',
+        placement:'top',
+        content: '<div class="text-danger m-0" style="border-radius:none">This field is required</div>',
         animation: 'fade',
         theme:'light'});
 
       tippy( '.delete', {
         maxWidth:'200px',
-        placement:'left',
-        content: '<div class="alert alert-danger m-0" style="border-radius:none">Clear this field</div>',
+        placement:'top',
+        content: '<div class="text-danger m-0" style="border-radius:none">Clear this field</div>',
         animation: 'fade',
         theme:'light'});
 
@@ -660,7 +660,7 @@
           theme:'light',
           onShow(instance) {
             let info = instance.reference.dataset.tippyInfo;
-            instance.setContent("<div class='alert alert-info m-0 text-left wraptext'><pre>"+info+"</pre></div>")
+            instance.setContent("<div class='text-muted m-0 text-left wraptext'><pre>"+info+"</pre></div>")
           }
         });
     },

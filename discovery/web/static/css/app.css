@@ -1758,3 +1758,51 @@ ul.tree, ul.tree ul {
     .tip:hover i:first-child{
       color: #7c868f !important;
     }
+
+    .speech-bubble {
+    	position: relative;
+    	background: white;
+    	border-radius: .4em;
+    }
+
+    .speech-bubble:after {
+    	content: '';
+      z-index: 1000;
+    	position: absolute;
+    	bottom: 0;
+    	left: 50%;
+    	width: 0;
+    	height: 0;
+    	border: 20px solid transparent;
+    	border-top-color: white;
+    	border-bottom: 0;
+    	border-left: 0;
+    	margin-left: -10px;
+    	margin-bottom: -20px;
+    }
+
+    .footer{
+      position: static;
+      bottom: 0;
+    }
+
+    .grad{
+      /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#4a7d8f+0,63296b+100 */
+    background: rgb(74,125,143); /* Old browsers */
+    background: -moz-linear-gradient(left,  rgba(74,125,143,1) 0%, rgba(99,41,107,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(left,  rgba(74,125,143,1) 0%,rgba(99,41,107,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to right,  rgba(74,125,143,1) 0%,rgba(99,41,107,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4a7d8f', endColorstr='#63296b',GradientType=1 ); /* IE6-9 */
+
+    }
+    @media only screen and (max-width: 600px) {
+      .grad{
+        /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#4a7d8f+0,63296b+100 */
+      background: rgb(74,125,143); /* Old browsers */
+      background: -moz-linear-gradient(top,  rgba(74,125,143,1) 0%, rgba(99,41,107,1) 100%); /* FF3.6-15 */
+      background: -webkit-linear-gradient(top,  rgba(74,125,143,1) 0%,rgba(99,41,107,1) 100%); /* Chrome10-25,Safari5.1-6 */
+      background: linear-gradient(to bottom,  rgba(74,125,143,1) 0%,rgba(99,41,107,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4a7d8f', endColorstr='#63296b',GradientType=0 ); /* IE6-9 */
+
+      }
+    }

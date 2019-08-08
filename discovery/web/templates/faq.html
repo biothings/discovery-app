@@ -1,0 +1,238 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+{% raw %}
+<style>
+code {
+  background-color: rgba(27,31,35,.05);
+  border-radius: 3px;
+  font-size: 85%;
+  margin: 0;
+  padding: .2em .4em;
+}
+</style>
+<main id="faq-app" class="bg-light" style="min-height: 100vh;padding-top:60px;">
+  <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
+    <h1 class="logoText">FAQ</h1>
+    <small class="text-muted">
+      Jump To:
+      <template v-for="section in faq">
+        <a class="badge badge-secondary mr-2" v-text='section.sectionName' :href='"#"+section.sectionName'></a>
+      </template>
+    </small>
+
+  </div>
+  <div class="container" style="margin-bottom:10vh;">
+    <template v-for="section in faq">
+      <div class="card">
+        <h4 class="mainTextLight card-header pt-5 pb-5" v-text='section.sectionName' :id='section.sectionName'></h4>
+        <div class="card-body">
+          <ul class="list-group card-text">
+            <template v-for="item in section.questions">
+              <li class="list-group-item">
+                <div class="mainTextDark bold" :id="item.anchor" :value="window.location+item.anchor">
+                  <span v-text="item.question"></span> <a :href="'#'+item.anchor" class="secondary-content"><i class="fas fa-link"></i></a>
+                </div>
+                <div class="text-muted p-2" v-html="item.answer"></div>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </div>
+    </template>
+  </div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript">
+    var app = new Vue({
+        el: '#faq-app',
+        data: function(){
+          return {
+            faq:[
+                {
+                  'sectionName': 'CTSA Data Discovery Engine',
+                  'questions':[
+                    {
+                      'anchor':'what-is-dde',
+                      'question':'What is the CTSA Data Discovery Engine?',
+                      'answer':`<p>
+                      The CTSA Data Discovery Engine is a website that provides guidance for reserachers on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole.
+                      </p>`
+                    },
+                    {
+                      'anchor':'what-is-schema',
+                      'question':'What is a schema?',
+                      'answer':`<p>
+                                  Schemas can be thought of as a set of 'types', each associated with a set of properties that further define that type. The types are arranged in a hierarchy and each type inherits the properties of all its parents.
+                                </p>
+                                <p class="alert alert-info">
+                                  An example of a type's hierarchy can be seen here: <a href='https://schema.org/Thing' target="_blank">Thing</a> > <a href='https://schema.org/Person' target="_blank">Person</a> > <a href='https://schema.org/Patient' target="_blank">Patient</a>
+                                </p>
+                                <p>
+                                  We use <a href="https://schema.org/" target="_blank">Schema.org</a>'s schemas as the base vocabulary due to it's very generic nature. From that collection of schemas you can easily find a starting point, extend that schema and define more specific schemas related to your reserach.
+                                </p>
+                                <p>
+                                  All registered schemas are also available via our <a href="/registry">registry</a>. Feel free to browse it for existing examples.
+                                </p>`
+                    },
+                    {
+                      'anchor':'what-is-dashboard',
+                      'question':'What is a dashboard and how do I access it?',
+                      'answer':`<p>
+                                  Your user <a href="/dashboard">dashboard</a> is place where you can easily manage and quickly access your registered schemas and registered metadata. To view your dashboard you must log in using a valid <a href='https://github.com/' target="_blank">GitHub</a> account.
+                                </p>
+                                <p class="alert alert-info text-center">
+                                  <img class="m-2 w-75" src="./static/img/dashhelp.png" alt="dashboard"/><br />
+                                  <small>From your dashboard you can edit a registered namespace, or view and delete any registered item.</small>
+                                </p>`
+                    },
+                    {
+                      'anchor':'delete-item',
+                      'question':'How do I delete a registered schema or metadata?',
+                      'answer':`<p>
+                                  Your user <a href="/dashboard">dashboard</a> is the place to do that. If you are the user that registered that item you will see it listed in your dashboard.
+                                </p>
+                                <p class="alert alert-danger text-center">
+                                  <img class="m-2 w-75" src="./static/img/deletehelp.png" alt="dashboard"/><br />
+                                  <small>Click on the <i class="fas fa-trash"></i> icon and it will be deleted. Caution: This action cannot be reversed!</small>
+                                </p>`
+                    },
+                  ]
+                },
+                {
+                  'sectionName': 'Schema Playground',
+                  'questions':[
+                    {
+                      'anchor':'what-is-schema-playground',
+                      'question':'What is the Schema Playground?',
+                      'answer':`<p>
+                                  The schema playground is a tool that lets you browse and visualize <a href="https://schema.org/" target="_blank">Schema.org</a> and community schemas and pick one to start your own.
+                                  <ul>
+                                    <li>
+                                      <i class="text-danger">If you DON'T have a schema</i> > Search for existing schemas and create your own from there.
+                                    </li>
+                                    <li>
+                                      <i class="text-success">If you DO have a schema</i> > Visualize it and register it so others can use it and in turn helping our efforts to make data re-usable.
+                                    </li>
+                                  </ul>
+                                </p>
+                                <p class="alert alert-warning">
+                                  <i class="fas fa-asterisk"></i> You will need a valid <a href='https://github.com/' target="_blank">GitHub</a> account to register new schemas. Sign up for one, it's easy and free!
+                                </p>`
+                    },
+                    {
+                      'anchor':'choosing-schema',
+                      'question':'How do I choose a schema to author my own?',
+                      'answer':`<p>
+                                  Our <a href="/schema-playground">Schema Playground</a> features <b>common starting points</b> (Dataset, CreativeWork, etc) and also a <a href="/registry">registry</a> of classes from reputable schemas to help you decide the right starting point.
+                                </p>
+                                <p>
+                                  You can browse existing schemas from the community and <a href="https://schema.org/" target="_blank">Schema.org</a> schemas in our <a href="/metadata">registry</a>.
+                                </p>
+                                <p class="alert alert-warning">
+                                  <i class="fas fa-asterisk"></i> You will need a valid <a href='https://github.com/' target="_blank">GitHub</a> account to extend and register new schemas. Sign up for one, it's easy and free!
+                                </p>`
+                    },
+                    {
+                      'anchor':'register-namespace',
+                      'question':'What is a namespace and how do I register a custom namespace for my schema?',
+                      'answer':`<p>
+                                  A namespace is a part of a URL which identifies a particular page on a website in a form readable by users.
+                                </p>
+                                <p>
+                                  To register a schema with us and set a custom namespace you must be logged in and have successfully viewed your schema in our <a href="/schema-playground">Schema Playground</a>.
+                                  The namespace will be the new homepage for your schema. E.g. http://discovery.biothings.io/<b>&lt;namespace&gt;</b>.
+                                </p>
+                                <p class="alert alert-info">
+                                  Your namespace must be unique and it can only contain lower-case web-safe characters.
+                                </p>`
+                    },
+                    {
+                      'anchor':'schema-registration',
+                      'question':'How do I register my schema?',
+                      'answer':`<p>
+                                  After you log in the registration option will be available to you when you view your schema using it's url in the <a href="/schema-playground">Schema Playground</a>. Registration is simple and it only requires you to choose a <a href="#namespace">namespace</a>
+                                </p>
+                                <p class="alert alert-warning">
+                                  <i class="fas fa-asterisk"></i> You will need a valid <a href='https://github.com/' target="_blank">GitHub</a> account to log in to our website. Sign up for one, it's easy and free!
+                                </p>`
+                    },
+                  ]
+                },
+                {
+                  'sectionName': 'Discovery Guide',
+                  'questions':[
+                    {
+                      'anchor':'why-use-discovery-guide',
+                      'question':"Why should I use this guide?",
+                      'answer':`<p>
+                                  This guide is not only easy to use but also helps you structure the data corretly in the case that you are not familiar with json-ld schemas.  In addition, by guiding users and making sure every person uses a set standard we are in turn making our data more reusable and findable.
+                                </p>`
+                    },
+                    {
+                      'anchor':'access-metadata',
+                      'question':"How do I access my registered metadata?",
+                      'answer':`<p>
+                                  After successfully registering some metadata you will be prompted to a link to it but you can also log in to your <a href="/dashboard">dashboard</a>. From here you will be able to quickly access your registered metadata. To view your dashboard you must log in using a valid <a href='https://github.com/' target="_blank">GitHub</a> account.
+                                </p>
+                                <p>
+                                  All registered metadata is also available via our <a href="/metadata">metadata registry</a>. Feel free to browse it for existing examples.
+                                </p>
+                                <p class="alert alert-info text-center">
+                                  <img class="m-2 w-75" src="./static/img/metahelp.png" alt="metadata-dashboard"/><br />
+                                  <small>From your dashboard you can view and delete any registered item.</small>
+                                </p>`
+                    },
+                  ]
+                }
+              ]
+          }
+        },
+        methods: {
+
+        },
+        mounted: function(){
+        }
+    });
+    // Smooth Scrolling to Anchors
+      // Select all links with hashes
+      $('a[href*="#"]')
+        // Remove links that don't actually link to anything
+        .not('[href="#"]')
+        .not('[href="#0"]')
+        .click(function(event) {
+          // On-page links
+          if (
+            location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '')
+            &&
+            location.hostname == this.hostname
+          ) {
+            // Figure out element to scroll to
+            var target = $(this.hash);
+            target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+            // Does a scroll target exist?
+            if (target.length) {
+              // Only prevent default if animation is actually gonna happen
+              event.preventDefault();
+              $('html, body').animate({
+                scrollTop: target.offset().top
+              }, 1000, function() {
+                // Callback after animation
+                // Must change focus!
+                var $target = $(target);
+                $target.focus();
+                if ($target.is(":focus")) { // Checking if the target was focused
+                  return false;
+                } else {
+                  $target.attr('tabindex','-1'); // Adding tabindex for elements not focusable
+                  $target.focus(); // Set focus again
+                };
+              });
+            }
+          }
+        });
+</script>
+{% endraw %}
+{% include "footer.html" %}
+{% endblock %}
