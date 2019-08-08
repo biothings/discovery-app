@@ -5,7 +5,7 @@
 
 </style>
 <section id="dashboard">
-  <div  class="container" style="min-height: 70vh;padding-top:80px;">
+  <div  class="container" style="min-height: 100vh;padding-top:80px;">
     <h1 class="text-muted caps">My Dashboard</h1>
     <div class="dashboard">
       <div class="row mb-5">
@@ -340,7 +340,7 @@ var app = new Vue({
           theme:'light',
           onShow(instance) {
             let info = instance.reference.dataset.tippyInfo;
-            instance.setContent("<div class='alert alert-info m-0 text-center wraptext'>"+info+"</div>")
+            instance.setContent("<div class='text-muted m-0 text-center wraptext'>"+info+"</div>")
           }});
 
 			},

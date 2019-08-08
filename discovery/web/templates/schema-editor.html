@@ -416,41 +416,41 @@ Vue.component('c-box', {
         theme:'light',
         onShow(instance) {
           let desc = instance.reference.dataset.tippyDescription;
-          instance.setContent("<div class='alert alert-info m-0 text-left wraptext'>"+desc+"</div>")
+          instance.setContent("<div class='text-muted m-0 text-left wraptext'>"+desc+"</div>")
         }
       });
       tippy( '.expand', {
         maxWidth:'200px',
-        placement:'left',
-        content: '<div class="alert alert-info m-0" style="border-radius:none">Show/Hide Properties</div>',
+        placement:'top',
+        content: '<div class="text-muted m-0" style="border-radius:none">Show/Hide Properties</div>',
         animation: 'fade',
         theme:'light'});
 
         tippy( '.addprop', {
           maxWidth:'200px',
-          placement:'left',
-          content: '<div class="alert alert-info m-0" style="border-radius:none">Add New Property</div>',
+          placement:'top',
+          content: '<div class="text-muted m-0" style="border-radius:none">Add New Property</div>',
           animation: 'fade',
           theme:'light'});
 
       tippy( '.required', {
         maxWidth:'200px',
-        placement:'left',
-        content: '<div class="alert alert-danger m-0" style="border-radius:none">Mark As Required</div>',
+        placement:'top',
+        content: '<div class="text-danger m-0" style="border-radius:none">Mark As Required</div>',
         animation: 'fade',
         theme:'light'});
 
       tippy( '.select', {
         maxWidth:'200px',
-        placement:'left',
-        content: '<div class="alert alert-info m-0" style="border-radius:none">Re-Use This Property</div>',
+        placement:'top',
+        content: '<div class="text-muted m-0" style="border-radius:none">Re-Use This Property</div>',
         animation: 'fade',
         theme:'light'});
 
         tippy( '.remove', {
           maxWidth:'200px',
-          placement:'left',
-          content: '<div class="alert alert-danger m-0" style="border-radius:none">Delete Property</div>',
+          placement:'top',
+          content: '<div class="text-danger m-0" style="border-radius:none">Delete Property</div>',
           animation: 'fade',
           theme:'light'});
   },

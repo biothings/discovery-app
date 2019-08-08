@@ -84,7 +84,7 @@
 Vue.component('registry-item', {
   data: function(){
     return{
-      options:false
+      options:true
     }
   },
   props: ['item'],
@@ -121,10 +121,10 @@ Vue.component('registry-item', {
   mounted: function(){
     tippy('#'+this.item.name, {
       interactive:'true',
-      content: "<div class='alert alert-info m-0 text-left'><pre>"+JSON.stringify(this.item,null,2)+"</pre></div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
+      content: "<div class='text-muted m-0 text-left'><pre>"+JSON.stringify(this.item,null,2)+"</pre></div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
     })
   },
-  template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="options=!options">
+  template: `<li class="list-group-item list-group-item-action p-0">
     <div class="d-flex">
       <div class="flex-grow-1 p-2">
         <div class="w-100">
@@ -297,7 +297,7 @@ var app = new Vue({
         theme:'light',
         onShow(instance) {
           let info = instance.reference.dataset.tippyInfo;
-          instance.setContent("<div class='alert alert-info m-0 text-center wraptext'>"+info+"</div>")
+          instance.setContent("<div class='text-muted m-0 text-center wraptext'>"+info+"</div>")
         }});
     },
     computed: {
