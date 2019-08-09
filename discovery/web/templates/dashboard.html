@@ -33,7 +33,6 @@
             <div v-for="item in dashboard" class="row m-1">
               <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
                 <a target="_blank" :href="'/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
-                <button style="zoom:.7" class="btn btn-secondary btn-sm d-inline tip" :data-tippy-info="'Edit Namespace'" @click="selectedItem = item" data-toggle="modal" data-target="#editModal"><i class="fas fa-edit"></i></button>
               </div>
               <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
                 <div>
@@ -96,44 +95,6 @@
     </div>
   </div>
 
-  <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header p-1" >
-            <h5 class="modal-title text-muted text-center" id="exampleModalLabel">Edit Namespace</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body" v-if="selectedItem">
-            <form @submit.prevent="updateSlug()">
-              <div class="form-group text-center text-muted">
-                <small>
-                  Enter your new namespace then hit Save.
-                </small>
-                <input required="" data-parsley-trigger="keyup" data-parsley-minlength="2" data-parsley-maxlength="30" data-parsley-minlength-message="Must me at least 2 letters" data-parsley-validation-threshold="10" type="text" class="form-control" id="slugInput" v-model='slugInput'></input>
-                <template v-if="availableSlug && slugInput.length">
-                  <small class="text-success bold"><i class="fas fa-check"></i> AVAILABLE</small>
-                </template>
-                <template v-if="!availableSlug && slugInput.length">
-                  <small class="text-danger bold"><i class="fas fa-times"></i> NOT AVAILABLE</small>
-                </template>
-                <template v-if="invalidChars">
-                  <br />
-                  <small class="text-warning bold"><i class="fas fa-times"></i> INVALID CHARACTERS</small>
-                </template>
-                <hr />
-                <p class="m-2 text-center" :class="[availableSlug ? 'text-success' : 'text-danger']">
-                  discovery.biothings.io/<span class="bold" v-text='slugInput'></span>
-                </p>
-              <button v-if="availableSlug && slugInput.length" type="submit" @click.prevent="updateSlug()" class="btn themeButton text-light text-light mt-3">Save</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </section>
 
 {% endblock %}
@@ -179,50 +140,8 @@ var app = new Vue({
             });
           }
         },
-        selectedItem:function(n,o){
-          console.log('selected',n);
-        }
       },
 			methods:{
-        updateSlug(){
-          let self = this;
-          axios.put('/api/registry/'+self.selectedItem["_id"],{"slug":self.slugInput}).then(res=>{
-            console.log(res.data)
-            if (res.data.success) {
-              swal({
-                toast: true,
-                timer: 3000,
-                showConfirmButton: false,
-                title: "Success",
-                footer:'Slug Updated',
-                position: 'center-top',
-                type:'success'
-              });
-              self.getAll();
-            }else{
-              swal({
-                toast: true,
-                timer: 3000,
-                showConfirmButton: false,
-                title: "Oh no!",
-                footer:'Slug Update failed',
-                position: 'center-top',
-                type:'error'
-              });
-            }
-          }).catch(err=>{
-            swal({
-              toast: true,
-              timer: 3000,
-              showConfirmButton: false,
-              title: "Oh no!",
-              footer:'Slug Update Failed, let us know if this issue persists',
-              position: 'center-top',
-              type:'error'
-            });
-            throw err;
-          });
-        },
         deleteSelected(type,identifier){
           var self = this;
           let index = '/api/registry/';
@@ -243,12 +162,8 @@ var app = new Vue({
                 if (res.status) {
                   switch (res.status) {
                     case 200:
-                      Swal.fire(
-                        'Success',
-                        'Item Deleted',
-                        'success'
-                      );
-                      self.getAll();
+                      //reload with no cache
+                      location.reload(true);
                       break;
                       case 401:
                         Swal.fire(
@@ -298,7 +213,7 @@ var app = new Vue({
         },
         getAll(){
           let self= this;
-          self.dashboard = [];
+          Vue.set(self.dashboard,[])
           if (this.user.login) {
             //SCHEMA NAMESPACES
             axios.get('/api/registry?user='+self.user.login).then(res=>{
