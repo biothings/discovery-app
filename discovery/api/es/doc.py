@@ -126,7 +126,7 @@ class SchemaClass(Document):
     # _id : in the format of <namespace>::<prefix>:<label>, for example, schema:Thing
     #       accessible through constructor argument 'id' or cls.meta.id
 
-    namespace = Text(required=True)  # the _id of the schema document defining the class
+    namespace = Keyword(required=True)  # the _id of the schema document defining the class
     prefix = Text(required=True)
     label = Text(required=True)
     uri = Text()
