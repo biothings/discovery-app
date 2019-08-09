@@ -23,7 +23,7 @@ from discovery.web.handlers import APP_LIST as WEB_ENDPOINTS
 # Elasticsearch
 # *****************************************************************************
 ES_INDEX = 'discover_class'
-ES_DOC_TYPE = 'doc'
+ES_DOC_TYPE = '_doc'
 
 # *****************************************************************************
 # Tornado URL Patterns
