@@ -278,7 +278,7 @@
     mounted: function(){
       var self = this;
       tippy('#showButton', {
-        content: `<div class='alert alert-light m-0'><table class='table'>
+        content: `<div class='m-0'><table class='table'>
           <tr>
             <td>
               <small class='mainTextDark'><i class="fas fa-stream"></i> Show All Inherited Properties</small>
@@ -297,6 +297,7 @@
           </tr>
         </table></div>`,
         placement: 'left',
+        theme:'light',
       })
     },
     computed: {
@@ -362,8 +363,9 @@
     mounted: function(){
       var self = this;
       tippy('#'+self.name, {
-        content: "<div class='mainBackDark text-light'><h3>"+self.name+"</h3><pre class='alert alert-info m-0 text-left wraptext'>"+JSON.stringify(self.fullinfo,null,2)+"</pre></div>",
+        content: "<div class='mainTextDark'><h3>"+self.name+"</h3><pre class='text-left text-muted wraptext d-block'>"+JSON.stringify(self.fullinfo,null,2)+"</pre></div>",
         placement: 'left',
+        theme:'light',
         trigger:'click'
       })
     },

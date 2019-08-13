@@ -562,9 +562,24 @@ Vue.component('c-box', {
             })
           }
         },
+        // {
+        //   title: "What is this property's expected type(s)?",
+        //   html: 'input name(s) must be Pascal cased <b class="text-danger">eg. schema:MyClass </b>. Multiple types separated by commas.'
+        // },
         {
           title: "What is this property's expected type(s)?",
-          html: 'input name(s) must be Pascal cased <b class="text-danger">eg. schema:MyClass </b>. Multiple types separated by commas.'
+          html: '<datalist id="myCustomList">' +
+              '<option  value="schema:Text"/>' +
+              '<option  value="schema:URL"/>' +
+              '<option  value="schema:Integer"/>' +
+            '</datalist>',
+            input: 'text',
+            inputAttributes: {
+              list: 'myCustomList'
+            },
+            inputValidator: (value) => {
+              return value.length < 10 && 'Property should have at least 1 input type'
+            }
         },
         {
           title: "Write a comment about this class",
