@@ -43,19 +43,31 @@ class RegistryHandler(APIBaseHandler):
             Create a new schema entry in the registry.
         '''
         args = json_decode(self.request.body)
+
+        assert 'namespace' in args, "must provide namespace string"
+        assert 'url' in args, "must provide schema url to register"
+
         namespace = args['namespace']
         url = args['url']
 
-        assert namespace != 'schema', "cannot rewrite core schema."
-        assert namespace != 'metadata', "cannot use reserved keywords."
+        assert namespace != 'schema', "cannot rewrite core schema"
+        assert namespace != 'metadata', "cannot use reserved keywords"
 
         if Schema.get(id=namespace, ignore=404):
 
             self.send_error(
-                reason=f"'{namespace}' is already registered.",
-                status_code=403
-            )
+                reason=f"'{namespace}' is already registered",
+                status_code=403)
             return
+
+        if Schema.exists(url=url):
+
+            self.send_error(
+                reason="the provided url is already registered",
+                status_code=403)
+            return
+
+        # post-validation
 
         schema_doc = requests.get(url, timeout=5)
         schema_doc.raise_for_status()
@@ -68,8 +80,8 @@ class RegistryHandler(APIBaseHandler):
         schema = Schema(**{
             "meta": {"id": namespace},
             "context": schema_parser.context,
+            "url": url
         })
-        schema._meta.url = url
         schema._meta.username = self.current_user
         schema.encode_raw(schema_doc.text)
 
@@ -96,39 +108,36 @@ class RegistryHandler(APIBaseHandler):
 
         if namespace is None:
 
-            user = self.get_query_argument('user', None)
-
             search = Schema.search()
             search.params(rest_total_hits_as_int=True)
 
+            user = self.get_query_argument('user', None)
             if user:
-                search = search.query("match", ** {"_meta.username": user})
+                search = search.query("term", ** {"_meta.username": user})
             else:
                 search = search.query("match_all")
 
-            schema_context = dict()
-            for schema in search.scan():
-                schema_context.update(schema.context.to_dict())
-
             self.write({
                 "total": search.count(),
-                "context": schema_context,
+                "context": Schema.gather_contexts(),
                 "hits": [{
                     "namespace": schema.meta.id,
-                    "url": schema['_meta'].url,
+                    "url": schema.url,
                 } for schema in search.scan()]
             })
             return
 
+        # namespace lookup
+
         result = {}
 
-        if namespace != 'schema':
+        if namespace != 'schema':  # core schema is handled by parser
 
             schema = Schema.get(id=namespace, ignore=404)
             if not schema:
                 self.send_error(404)
                 return
-            result['url'] = schema['_meta'].url
+            result['url'] = schema.url
             result['source'] = schema.decode_raw()
 
         if curie is None:
@@ -144,6 +153,8 @@ class RegistryHandler(APIBaseHandler):
 
             self.write(result)
             return
+
+        # schemaclass lookup
 
         klass = SchemaClass.get(id=f"{namespace}::{curie}", ignore=404)
 
