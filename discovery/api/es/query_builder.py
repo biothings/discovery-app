@@ -17,40 +17,21 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
 
     def _extra_query_types(self, q):
 
-        dis_max_query = {
+        query = {
             "query": {
-                "dis_max": {
-                    "queries": [
-                        {
-                            "term": {
-                                "_id": {
-                                    "value": q,
-                                    "boost": 2
-                                }
-                            }
-                        },
-                        {
-                            "term": {
-                                "prefix": {
-                                    "value": q,
-                                    "boost": 1.5
-                                }
-                            }
-                        },
-                        {
-                            "query_string": {
-                                "query": q
-                            }
-                        },
-                        {
-                            "query_string": {
-                                "default_field": "label",
-                                "query": url_escape(q) + "*",
-                                "boost": 0.8
-                            }
-                        },
+                "function_score": {
+                    "query": {"dis_max": {"queries": [
+                        {"term": {"_id": {"value": q, "boost": 15.0}}},
+                        {"term": {"label.raw": {"value": q, "boost": 10.0}}},
+                        {"prefix": {"label": {"value": q}}},
+                        {"simple_query_string": {"query": q}}
+                    ]}},
+                    "functions": [
+                        {"filter": {"term": {"namespace": "schema"}}, "weight": 0.5},
+                        {"filter": {"term": {"prefix.raw": "schema"}}, "weight": 0.5},
+                        {"filter": {"match": {"parent_classes": "bts:BiologicalEntity"}}, "weight": 1.5}
                     ]
                 }
             }
         }
-        return dis_max_query
+        return query

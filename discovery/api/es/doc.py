@@ -110,10 +110,10 @@ class SchemaClassProp(InnerDoc):
     '''
     A Class Property for SchemaClass
     '''
-    uri = Text()
-    curie = Text(required=True)
-    label = Text()
-    range = Text(multi=True)
+    uri = Text(fields={'raw': Keyword()})
+    curie = Text(required=True, fields={'raw': Keyword()})
+    label = Text(boost=1.5, fields={'raw': Keyword()})
+    range = Text(multi=True, fields={'raw': Keyword()})
     description = Text()
 
 
@@ -127,9 +127,11 @@ class SchemaClass(Document):
     #       accessible through constructor argument 'id' or cls.meta.id
 
     namespace = Keyword(required=True)  # the _id of the schema document defining the class
-    prefix = Text(required=True)
-    label = Text(required=True)
-    uri = Text()
+    name = Keyword()  # curie
+
+    prefix = Text(required=True, fields={'raw': Keyword()})
+    label = Text(required=True, boost=2, fields={'raw': Keyword()})
+    uri = Text(fields={'raw': Keyword()})
     description = Text()
     parent_classes = Text(multi=True)  # immediate ones only
     properties = Nested(SchemaClassProp)  # immediate ones only
