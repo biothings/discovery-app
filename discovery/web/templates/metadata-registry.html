@@ -14,10 +14,22 @@
       <h1 class="text-center logoText mb-5 mt-5">METADATA REGISTRY</h1>
       <div class="p-3">
         <form @submit.prevent="search(query)">
-          <div class="form-group form-row">
-            <input class="form-control col-6" id="search_query" type="text" v-model="query" name="query" placeholder="Search Registry" >
-            <button class="col btn ml-2 themeButton text-light pulse" type="button" @click.prevent="search(query)">Search</button>
-            <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';registry=[]">Reset</button>
+          <div class="row m-1 cBox actions bg-secondary">
+            <div class="col-sm-10 p-2">
+              <div class="">
+                <input class="form-control col-12" id="search_query" type="text" v-model="query" name="query" placeholder="Search..." >
+              </div>
+            </div>
+            <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+              <span class="fa-stack fa-1x pointer search unselectable tip" @click.prevent="search(query)">
+                <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                <i class="fas fa-search fa-stack-1x text-light"></i>
+              </span>
+              <span class="fa-stack fa-1x pointer reset unselectable" @click.prevent="query='';registry=[]">
+                <i class="fas fa-circle fa-stack-2x text-muted"></i>
+                <i class="fas fa-undo fa-stack-1x text-light"></i>
+              </span>
+            </div>
           </div>
         </form>
       </div>
@@ -34,11 +46,7 @@
         </template>
         <li v-if="!registry.length" class="text-center text-muted list-group-item">
           <div class="jumbotron">
-            <h4>Search for existing schemas</h4>
-            <h5>For example:</h5>
-            <a href="#" class="badge mainBackLight text-light mr-1" @click.prevent='search("Thing")'>Thing</a>
-            <a href="#" class="badge mainBackLight text-light mr-1" @click.prevent='search("CreativeWork")'>CreativeWork</a>
-            <a href="#" class="badge mainBackLight text-light mr-1" @click.prevent='search("Dataset")'>Dataset</a>
+            <h4>Search for existing metadata</h4>
           </div>
         </li>
       </ul>
@@ -288,6 +296,18 @@ var app = new Vue({
       var self = this;
       self.checkLoggedUser();
       self.search();
+      tippy( '.search', {
+        maxWidth:'200px',
+        placement:'top',
+        content: '<div class="text-muted m-0" style="border-radius:none">Search</div>',
+        animation: 'fade',
+        theme:'light'});
+        tippy( '.reset', {
+          maxWidth:'200px',
+          placement:'top',
+          content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
+          animation: 'fade',
+          theme:'light'});
       tippy( '#regTippyParent', {
         target:'.tip',
         placement:'top',

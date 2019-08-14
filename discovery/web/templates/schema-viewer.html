@@ -26,7 +26,7 @@
         <a class="bold mainTextDark pointer m-2 toggleLink" style="float:right" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
         <div class="input-group mb-2 col-sm-12 col-md-4">
           <div class="input-group-prepend">
-            <div class="input-group-text bg-info text-light"><i class="fas fa-search"></i></div>
+            <div class="input-group-text bg-secondary text-light"><i class="fas fa-search"></i></div>
           </div>
           <input type="text" v-model='searchQuery' class="form-control" id="inlineFormInputGroup" placeholder="Search...">
         </div>
@@ -1192,7 +1192,7 @@
                     resolve('Namespace contains invalid characters')
                   }else{
                     axios.head(`/api/registry/`+input).then(function (res) {
-                      resolve('Namespace not available')
+                      resolve('<small>Sorry, that namespace is already taken: <a href="/'+input+'/" target="_blank">http://discovery.biothings.io/'+input+'</a></small>')
                     }).catch(err=>{
                       resolve()
                       throw err;

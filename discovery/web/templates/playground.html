@@ -8,7 +8,7 @@
   <div class="jumbotron bg-light text-center mt-5">
     <h1 class="logoText">SCHEMA PLAYGROUND</h1>
 		<p class="text-muted">
-      View, Register and Expand Schemas
+      View, Register and Extend Schemas
     </p>
   </div>
   <div v-if="!choice" class=" jumbotron animatedBack row mb-4">
@@ -19,17 +19,17 @@
       <div class="row">
         <buttom @click.prevent="choice='have'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted" style="white-space: normal;">
           <h3 class="mainTextDark bold"><i class="fas fa-check-circle text-success"></i> Yes</h3>
-          <p>Visualize your schema and register it</p>
+          <p>Visualize your schema <i class="fas fa-chevron-right"></i> Register your schema</p>
         </buttom>
         <buttom @click.prevent="choice='dont'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted" style="white-space: normal;">
           <h3 class="mainTextLight bold"><i class="fas fa-times-circle text-danger"></i> No</h3>
-          <p>Search existing schemas to start your own</p>
+          <p>Browse existing schema classes <i class="fas fa-chevron-right"></i> Create your own schema by extending any schema class</p>
         </buttom>
       </div>
     </div>
   </div>
   <div v-if="choice" class="">
-    <buttom @click.prevent="choice=''" class="btn w-100 text-center p-4 mainBackDark text-light">
+    <buttom @click.prevent="choice=''" class="btn w-100 text-center p-4 bg-danger text-light">
       <i class="fas fa-chevron-left"></i> Back
     </buttom>
   </div>
@@ -37,8 +37,8 @@
     <h3 class="logoText">VISUALIZE &amp; REGISTER YOUR SCHEMA</h3>
     <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
       <div class="form-group">
-        <label for="urlform">Paste your URL here:</label>
-        <input style="margin:auto;" data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="" required ref="my_input" class="form-control" type="url" placeholder="Paste Link Here" required="">
+        <label for="urlform">Paste your link here:</label>
+        <input style="margin:auto;" data-parsley-trigger="change" v-model="input" id="urlform" autocomplete="" required ref="my_input" class="form-control" type="url" placeholder="Paste your link here" required="">
         <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
       </div>
       <div v-if=loading class="loader">
@@ -53,10 +53,6 @@
       @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
         <i class="fas fa-question-circle" data-tippy="CTSA Schema"></i> CTSA Dataset Schema
       </small>
-      <!-- <small class="badge badge-pill badge-secondary pointer mr-1"
-      @click="input = 'https://schema.org/Dataset.jsonld'">
-        <i class="fas fa-question-circle" data-tippy="Dataset Schema"></i> Schema.org Dataset Schema
-      </small> -->
     </form>
   </div>
   <div v-if="choice === 'dont'" class="jumbotron text-muted text-center">
@@ -228,11 +224,11 @@ var app = new Vue({
             self.assignTempName(res.data.hits);
           }).catch(err=>{
             self.loading = false;
-            // Swal(
-            //   'Something went wrong.',
-            //   'Make sure your GitHub link links directly to your data page or raw data',
-            //   'error'
-            // );
+            Swal(
+              'Something went wrong.',
+              err,
+              'error'
+            );
             throw err;
           })
         },
