@@ -31,10 +31,10 @@ ES_DOC_TYPE = '_doc'
 # *****************************************************************************
 API_ENDPOINTS = [
     (r"/api/query/?", QueryHandler),
-    (r"/api/registry/(.+)/(.+)/?", RegistryHandler),
-    (r"/api/registry/(.+)/?", RegistryHandler),
+    (r"/api/registry/([^/]+)/([^/]+)/?", RegistryHandler),
+    (r"/api/registry/([^/]+)/?", RegistryHandler),
     (r"/api/registry/?", RegistryHandler),
-    (r"/api/metadata/(.+)/?", MetadataHandler),
+    (r"/api/metadata/([^/]+)/?", MetadataHandler),
     (r"/api/metadata/?", MetadataHandler),
     (r"/api/view/?", SchemaViewHandler),
 ]
