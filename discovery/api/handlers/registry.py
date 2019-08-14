@@ -132,13 +132,14 @@ class RegistryHandler(APIBaseHandler):
 
         if curie is None:
 
-            search = SchemaClass.search().query("match", namespace=namespace)
+            search = SchemaClass.search().filter(
+                "term", namespace=namespace).source(
+                self.get_query_argument('field', None))
             search.params(rest_total_hits_as_int=True)
 
-            result['context'] = Schema.gather_contexts()
             result['total'] = search.count()
-            result['hits'] = [klass.to_dict()
-                              for klass in search.scan()]
+            result['context'] = Schema.gather_contexts()
+            result['hits'] = [klass.to_dict() for klass in search.scan()]
 
             self.write(result)
             return
