@@ -47,6 +47,7 @@ class RegistryHandler(APIBaseHandler):
         url = args['url']
 
         assert namespace != 'schema', "cannot rewrite core schema."
+        assert namespace != 'metadata', "cannot use reserved keywords."
 
         if Schema.get(id=namespace, ignore=404):
 

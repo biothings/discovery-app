@@ -64,15 +64,14 @@ class APIBaseHandler(BaseHandler):
         if 'exc_info' in kwargs:
 
             exception = kwargs.pop('exc_info')[1]
-            kwargs['exception'] = exception.__class__.__name__
 
             if type(exception) in [tornado.web.MissingArgumentError,
                                    tornado.httpclient.HTTPError,
                                    requests.exceptions.RequestException,
-                                   json.decoder.JSONDecodeError]:
-                self.set_status(422)
-                status_code = 422
-            else:
+                                   json.decoder.JSONDecodeError,
+                                   AssertionError]:
+                status_code = 400
+                self.set_status(status_code)
                 self._reason = str(exception)
 
         template = {
