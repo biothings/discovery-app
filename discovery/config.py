@@ -4,9 +4,10 @@
 
 from biothings.web.api.es.handlers import QueryHandler
 from biothings.web.settings.default import *
+
 from discovery.api.es.query_builder import DiscoveryQueryBuilder
-from discovery.api.handlers import (ProxyHandler, RegistryHandler,
-                                    SchemaViewHandler, MetadataHandler)
+from discovery.api.handlers import (MetadataHandler, RegistryHandler,
+                                    SchemaViewHandler)
 from discovery.config_key import (COOKIE_SECRET, GITHUB_CLIENT_ID,
                                   GITHUB_CLIENT_SECRET)
 from discovery.web.handlers import APP_LIST as WEB_ENDPOINTS
@@ -29,7 +30,6 @@ ES_DOC_TYPE = '_doc'
 # Tornado URL Patterns
 # *****************************************************************************
 API_ENDPOINTS = [
-    (r"/api/proxy/?", ProxyHandler),
     (r"/api/query/?", QueryHandler),
     (r"/api/registry/(.+)/(.+)/?", RegistryHandler),
     (r"/api/registry/(.+)/?", RegistryHandler),
