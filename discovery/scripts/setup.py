@@ -13,9 +13,8 @@ def index_schema_org(lazy=False):
     '''
         Setup Script
     '''
-    if lazy:
-        if SchemaClass.search().query("match", namespace='schema').count() > 770:
-            return
+    if lazy and SchemaClass.search().query("term", namespace='schema').count() > 770:
+        return
 
     SchemaClass.delete_by_schema('schema')
     classes = SchemaClass.import_classes(SchemaParser(), 'schema')

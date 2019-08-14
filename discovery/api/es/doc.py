@@ -29,15 +29,8 @@ class DocumentMeta(InnerDoc):
         - Timestamp corresponds to ~raw processing time.
 
     '''
-    url = Text()
     username = Keyword(required=True)
     timestamp = Date()
-
-    def stamp(self):
-        '''
-        Record current datetime.
-        '''
-        self.timestamp = datetime.now()
 
 
 class Schema(Document):
@@ -47,6 +40,7 @@ class Schema(Document):
     '''
     _meta = Object(DocumentMeta, required=True)
     context = Object(enabled=False)
+    url = Keyword(required=True)
     locals()['~raw'] = Binary()
 
     # _id : schema namespace, provided by the front-end when registering
@@ -64,21 +58,22 @@ class Schema(Document):
     @classmethod
     def gather_contexts(cls):
 
-        contexts = dict()
+        contexts = {}
 
-        context_list = [
-            schema.context.to_dict()
-            for schema in cls.search()
-        ]
-
-        for context in context_list:
-            contexts.update(context)
+        for schema in cls.search().scan():
+            contexts.update(schema.context.to_dict())
 
         contexts.update({
             "schema": "http://schema.org/",
         })
 
         return {k: v for k, v in contexts.items() if v}
+
+    @classmethod
+    def exists(cls, url):
+
+        search = cls.search().source(False).query('term', url=url)
+        return bool(search.execute().hits)
 
     def encode_raw(self, text):
         '''
@@ -89,7 +84,7 @@ class Schema(Document):
         assert isinstance(text, str)
         _raw = gzip.compress(text.encode())
         self['~raw'] = _raw
-        self._meta.stamp()
+        self._meta.timestamp = datetime.now()
         return _raw
 
     def decode_raw(self):
