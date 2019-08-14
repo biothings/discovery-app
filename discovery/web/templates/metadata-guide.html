@@ -65,6 +65,13 @@
           </small>
         </a>
       </li>
+      <li class='nav-item'>
+        <a class='nav-link text-muted pointer' @click.prevent="showHelp()">
+          <small >
+            <i class="fas fa-question-circle text-info"></i> Help!
+          </small>
+        </a>
+      </li>
     </ul>
     <div v-if="userInfo && !userInfo.login">
       <div class="alert alert-light text-danger text-center p-5">
@@ -1178,6 +1185,55 @@
           a.href = URL.createObjectURL(file);
           a.download = fileName;
           a.click();
+        },
+        showHelp(){
+          Swal.fire({
+            title: 'Metadata Guide',
+            html:`<p>
+                    After selecting a starting point you will be able complete a series of fields. It's really easy and fast! Here's a quick introduction to the layout:
+                  </p>
+                  <small>
+                    <ul class="text-left">
+                      <li>
+                        1. Log-in status
+                      </li>
+                      <li>
+                        2. Start over from scratch
+                      </li>
+                      <li>
+                        3. Preview your progress
+                      </li>
+                      <li>
+                        4. Download your progress (Available after completing all required fields)
+                      </li>
+                      <li>
+                        5. Register your metadata (Available after completing all required fields)
+                      </li>
+                      <li>
+                        6. All fields availble to complete (* Required)
+                      </li>
+                      <li>
+                        7. Progress bar
+                      </li>
+                      <li>
+                        8. Complete fields
+                      </li>
+                      <li>
+                        9. Current field clicked
+                      </li>
+                      <li>
+                        10. Actions: Save & Close and Clear Field
+                      </li>
+                    </ul>
+                  </small>`,
+            footer:'',
+            width:'52em',
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            confirmButtonText:"Ready!",
+            imageUrl: '/static/img/metadata.png',
+            imageAlt: 'Metadata Editor'
+          })
         }
 			},
 			mounted:function(){

@@ -60,16 +60,26 @@
             </small>
           </a>
         </li>
+        <li class='nav-item'>
+          <a class='nav-link text-muted pointer' @click.prevent="showHelp()">
+            <small >
+              <i class="fas fa-question-circle text-info"></i> Help!
+            </small>
+          </a>
+        </li>
       </ul>
       <!-- LOGGED IN DASHBOARD -->
       <template v-if="userInfo && userInfo.login">
         <!-- NAMESPACE -->
         <div class="jumbotron whitefade" v-if='!prefix'>
+          <p class="text-center text-muted">
+            <small>Extending schema: <span class="text-info" v-text="startingPoint"></span></small>  <small class="text-muted bold"><i class="fas fa-chevron-right"></i> Choose a namespace</small>
+          </p>
           <div class="d-flex justify-content-center align-items-center flex-wrap">
             <form @submit.prevent="savePrefix" class="text-center">
               <div class="input-group">
                 <div class="input-group-prepend">
-                  <div class="input-group-text">Choose a short namespace</div>
+                  <div class="input-group-text">Choose a short namespace (a-z)</div>
                 </div>
                 <input type="text" pattern="[A-Za-z]{3,10}" v-model='inputNamespace' class="form-control m-auto text-center" :class="{'text-success':availableNamespace, 'text-danger': !availableNamespace}" placeholder="3-10 chars max.">
                 <div class="input-group-append">
@@ -83,7 +93,11 @@
 
         <!-- Custom Class -->
         <div class="jumbotron whitefade text-center text-muted" v-if='prefix && !newClassAdded'>
-          <small>Extending schema <i class="fas fa-chevron-right"></i> <span class="text-info" v-text="startingPoint"></span></small>
+          <p class="text-center text-muted">
+            <small>Extending schema: <span class="text-info" v-text="startingPoint"></span></small>
+            <small class="text-muted"><i class="fas fa-chevron-right"></i> namespace: <span class="text-info" v-text="prefix"></span></small>
+            <small class="text-muted bold"><i class="fas fa-chevron-right"></i> Create a new class</small>
+          </p>
           <hr />
           <form @submit.prevent='addClass()'>
             <button type="submit" class="btn themeButton text-light" ><i class="fas fa-plus"></i> Class</button>
@@ -562,21 +576,39 @@ Vue.component('c-box', {
             })
           }
         },
-        // {
-        //   title: "What is this property's expected type(s)?",
-        //   html: 'input name(s) must be Pascal cased <b class="text-danger">eg. schema:MyClass </b>. Multiple types separated by commas.'
-        // },
         {
           title: "What is this property's expected type(s)?",
-          html: '<datalist id="myCustomList">' +
-              '<option  value="schema:Text"/>' +
-              '<option  value="schema:URL"/>' +
-              '<option  value="schema:Integer"/>' +
-            '</datalist>',
+          footer:"Start typing to check for existing classes. If none found specify it's context prefix and name. eg. prefix:Name",
+          html: '<datalist id="myCustomList"></datalist>',
             input: 'text',
             inputAttributes: {
               list: 'myCustomList'
             },
+            onOpen:function(){
+               var options = '';
+               options += '<option value="schema:Text" />';
+               options += '<option value="schema:URL" />';
+               options += '<option value="schema:Integer" />';
+               options += '<option value="schema:Number" />';
+               options += '<option value="schema:Date" />';
+               options += '<option value="schema:Float" />';
+               options += '<option value="schema:Boolean" />';
+               options += '<option value="schema:DateTime" />';
+               options += '<option value="schema:Time" />';
+               Swal.isLoading();
+               axios.get('/api/registry/schema?field=name'). then(res=>{
+                 Swal.hideLoading();
+                 if (res.data.hits) {
+                   for(var i = 0; i < res.data.hits.length; i++){
+                     options += '<option value="'+res.data.hits[i].name+'" />';
+                   }
+                   document.getElementById('myCustomList').innerHTML = options;
+                 }
+               }).catch(err=>{
+                 Swal.hideLoading();
+                 throw err;
+               });
+             },
             inputValidator: (value) => {
               return value.length < 10 && 'Property should have at least 1 input type'
             }
@@ -658,18 +690,21 @@ var app = new Vue({
           let self=this;
           var re = /^[a-zA-Z0-9_.-]*$/;
           if (!re.test(value) ) {
-            $.notify(value+" contains invalid characters",{ globalPosition: 'right',className:'error', showDuration: 100, });
-          }
-          if (value.length) {
-            axios.head(`/api/registry/`+value).then(function (res) {
-              self.availableNamespace= false;
-            }).catch(err=>{
-              self.availableNamespace= true;
-              throw err;
-            });
+            $.notify(value+"  cannot contain invalid characters or spaces",{ globalPosition: 'right',className:'error', showDuration: 100, });
+            self.availableNamespace= false;
           }else{
-            self.availableNamespace=false;
+            if (value.length) {
+              axios.head(`/api/registry/`+value).then(function (res) {
+                self.availableNamespace= false;
+              }).catch(err=>{
+                self.availableNamespace= true;
+                throw err;
+              });
+            }else{
+              self.availableNamespace=false;
+            }
           }
+
         },
       },
 			methods:{
@@ -850,6 +885,64 @@ var app = new Vue({
           a.href = URL.createObjectURL(file);
           a.download = fileName;
           a.click();
+        },
+        showHelp(){
+          Swal.fire({
+            title: 'Editor',
+            html:`<p>
+                    After choosing a namespace and creating your class you will be able to edit the schema you decided to extend. It's really easy and fast! Here's a quick introduction to the layout:
+                  </p>
+                  <small>
+                    <ul class="text-left">
+                      <li>
+                        1. Log-in status
+                      </li>
+                      <li>
+                        2. Namespace chosen
+                      </li>
+                      <li>
+                        3. New class added
+                      </li>
+                      <li>
+                        4. Preview your progress
+                      </li>
+                      <li>
+                        5. Download your progress (Once you are happy with your schema, download and host on your preferred service.  After hosting it view it in our <a href="/schema-playground">Schema Viewer</a>)
+                      </li>
+                      <li>
+                        6. Show/Hide all descriptions
+                      </li>
+                      <li>
+                        7. Your new top-level class (blue) and actions. All parent class will appear under it.
+                      </li>
+                      <li>
+                        8. Add a new property to your class
+                      </li>
+                      <li>
+                        9. Show/Hide all properties of this class
+                      </li>
+                      <li>
+                        10. Property description and actions
+                      </li>
+                      <li>
+                        10. Property description and actions
+                      </li>
+                      <li>
+                        11. Click to mark it as selected to be used by your schema. (All properties are inherited but you should select only those that will actually be used by your schema.)
+                      </li>
+                      <li>
+                        12. Click to mark this property as a required field by your schema (Only selected properties can be marked as required)
+                      </li>
+                    </ul>
+                  </small>`,
+            footer:'',
+            width:'52em',
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            confirmButtonText:"Ready!",
+            imageUrl: '/static/img/editor.png',
+            imageAlt: 'Metadata Editor'
+          })
         }
 			},
 			mounted:function(){

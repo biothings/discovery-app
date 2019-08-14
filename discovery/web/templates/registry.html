@@ -10,14 +10,33 @@
   </div>
   <div class="row">
 
-    <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
+    <div class="col-sm-12 col-md-10 col-lg-7 m-auto">
       <h1 class="text-center logoText mb-5 mt-5">REGISTRY</h1>
       <div class="p-3">
-        <form @submit.prevent="search(query)">
+        <!-- <form @submit.prevent="search(query)">
           <div class="form-group form-row">
             <input class="form-control col-6" id="search_query" type="text" v-model="query" name="query" placeholder="Search Registry" >
             <button class="col btn ml-2 themeButton text-light pulse" type="button" @click.prevent="search(query)">Search</button>
             <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';registry=[]">Reset</button>
+          </div>
+        </form> -->
+        <form @submit.prevent="search(query)">
+          <div class="row m-1 cBox actions bg-secondary">
+            <div class="col-sm-10 p-2">
+              <div class="">
+                <input class="form-control col-12" id="search_query" type="text" v-model="query" name="query" placeholder="Search..." >
+              </div>
+            </div>
+            <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+              <span class="fa-stack fa-1x pointer search unselectable tip" @click.prevent="search(query)">
+                <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                <i class="fas fa-search fa-stack-1x text-light"></i>
+              </span>
+              <span class="fa-stack fa-1x pointer reset unselectable" @click.prevent="query='';registry=[]">
+                <i class="fas fa-circle fa-stack-2x text-muted"></i>
+                <i class="fas fa-undo fa-stack-1x text-light"></i>
+              </span>
+            </div>
           </div>
         </form>
       </div>
@@ -137,7 +156,8 @@ Vue.component('registry-item', {
   },
   mounted: function(){
     tippy('#'+this.item.label, {
-      content: "<div class='alert alert-info m-0 text-left'>"+JSON.stringify(this.item.description,null,2)+"</div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
+      theme:'light',
+      content: "<div class='text-left text-muted'>"+JSON.stringify(this.item.description,null,2)+"</div>" || "<div class='m-0'>No Description Available</div>",
     })
   },
   template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="options=!options">
@@ -316,6 +336,18 @@ var app = new Vue({
     mounted:function(){
       var self = this;
       self.checkLoggedUser();
+      tippy( '.search', {
+        maxWidth:'200px',
+        placement:'top',
+        content: '<div class="text-muted m-0" style="border-radius:none">Search</div>',
+        animation: 'fade',
+        theme:'light'});
+        tippy( '.reset', {
+          maxWidth:'200px',
+          placement:'top',
+          content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
+          animation: 'fade',
+          theme:'light'});
       tippy( '#regTippyParent', {
         target:'.tip',
         placement:'top',
