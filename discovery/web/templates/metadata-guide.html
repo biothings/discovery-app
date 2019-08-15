@@ -13,9 +13,9 @@
     <p class="text-muted">
       Follow best practices to make your data more findable
     </p>
-    <a href="/metadata">Explore registered metadata <i class="fas fa-chevron-right"></i></a>
+    <a href="/dataset">Explore registered datasets <i class="fas fa-chevron-right"></i></a>
     <p class="text-muted">
-      OR<br/>Create your own metadata
+      OR<br/>Register your own dataset
     </p>
   </div>
   <div id="widget">
@@ -82,7 +82,7 @@
     <template v-if="userInfo && userInfo.login">
       <!-- FIRST STEP -->
       <div v-if="!validation" class="bg-light jumbotron whitefade text-center">
-        <h5 class="text-muted">What type of metadata do you need?</h5>
+        <h5 class="text-muted">What type of dataset do you have?</h5>
         <div class="d-flex justify-content-center align-items-center flex-wrap">
           <template v-for="item in presets">
             <div class="p-5 m-4 bg-light text-center message text-muted">
@@ -1118,8 +1118,8 @@
             self.loading = true;
 
             Swal.fire({
-              title: 'Register this schema?',
-              html:"<small>Done editing this schema? You won't be able to edit after this. Click <b>Register Now</b> to proceed.</small>",
+              title: 'Register this dataset?',
+              html:"<small>Done editing this dataset? You won't be able to edit after this. Click <b>Register Now</b> to proceed.</small>",
               confirmButtonColor:'#5C3069',
               cancelButtonColor:'#006476',
               showCancelButton: true,
@@ -1129,13 +1129,13 @@
                 self.loading = false;
               },
               preConfirm: (input) => {
-                axios.post('/api/metadata',output).then(res=>{
+                axios.post('/api/dataset',output).then(res=>{
                   self.loading = false;
                   if (res.data.success) {
                     Swal.fire({
-                      title: `View Your Metadata`,
-                      html:`<a href="/metadata/`+res.data.id+`">Click Here</a>`,
-                      footer:'Your metadata is also accessible via your dashboard',
+                      title: `View Your Dataset`,
+                      html:`<a href="/dataset/`+res.data.id+`">Click Here</a>`,
+                      footer:'Your dataset is also accessible via your dashboard',
                       showCancelButton: false,
                       confirmButtonColor:'#5C3069',
                       cancelButtonColor:'#006476',
@@ -1187,7 +1187,7 @@
         },
         showHelp(){
           Swal.fire({
-            title: 'Metadata Guide',
+            title: 'Dataset Guide',
             html:`<p>
                     After selecting a starting point you will be able complete a series of fields. It's really easy and fast! Here's a quick introduction to the layout:
                   </p>
@@ -1206,7 +1206,7 @@
                         4. Download your progress (Available after completing all required fields)
                       </li>
                       <li>
-                        5. Register your metadata (Available after completing all required fields)
+                        5. Register your dataset (Available after completing all required fields)
                       </li>
                       <li>
                         6. All fields availble to complete (* Required)
@@ -1231,7 +1231,7 @@
             cancelButtonColor:'#006476',
             confirmButtonText:"Ready!",
             imageUrl: '/static/img/metadata.png',
-            imageAlt: 'Metadata Editor'
+            imageAlt: 'Dataset Editor'
           })
         }
 			},

@@ -11,7 +11,7 @@
   <div class="row">
 
     <div class="col-sm-12 col-md-10 col-lg-7" style="margin:auto;">
-      <h1 class="text-center logoText mb-5 mt-5">METADATA REGISTRY</h1>
+      <h1 class="text-center logoText mb-5 mt-5">DATASET REGISTRY</h1>
       <div class="p-3">
         <form @submit.prevent="search(query)">
           <div class="row m-1 cBox actions bg-secondary">
@@ -46,7 +46,7 @@
         </template>
         <li v-if="!registry.length" class="text-center text-muted list-group-item">
           <div class="jumbotron">
-            <h4>Search for existing metadata</h4>
+            <h4>Search for existing datasets</h4>
           </div>
         </li>
       </ul>
