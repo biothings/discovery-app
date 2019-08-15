@@ -1243,13 +1243,26 @@
                     }
                   })
                 }else{
-                  Swal.fire({
-                    type: 'error',
-                    toast: true,
-                    position: 'top',
-                    title: 'Registration Failed',
-                    text: result
-                  });
+
+                  if (result.value.response.statusText) {
+                    Swal.fire({
+                      type: 'error',
+                      toast: true,
+                      position: 'top center',
+                      title: 'Registration Failed: ',
+                      text: result.value.response.statusText
+                    });
+                  }else{
+                    console.error('Error:',result)
+                    Swal.fire({
+                      type: 'error',
+                      toast: true,
+                      position: 'top center',
+                      title: 'Registration Failed: ',
+                      text: 'Check console'
+                    });
+                  }
+
                 }
               }
             })
