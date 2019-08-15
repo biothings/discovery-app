@@ -34,8 +34,8 @@ API_ENDPOINTS = [
     (r"/api/registry/([^/]+)/([^/]+)/?", RegistryHandler),
     (r"/api/registry/([^/]+)/?", RegistryHandler),
     (r"/api/registry/?", RegistryHandler),
-    (r"/api/metadata/([^/]+)/?", MetadataHandler),
-    (r"/api/metadata/?", MetadataHandler),
+    (r"/api/dataset/([^/]+)/?", MetadataHandler),
+    (r"/api/dataset/?", MetadataHandler),
     (r"/api/view/?", SchemaViewHandler),
 ]
 APP_LIST = API_ENDPOINTS + WEB_ENDPOINTS

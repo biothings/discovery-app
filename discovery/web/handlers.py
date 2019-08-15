@@ -44,6 +44,7 @@ class MainHandler(BaseHandler):
             index_output = index_template.render()
             self.write(index_output)
 
+
 class LoginHandler(BaseHandler):
     def get(self):
         xsrf = self.xsrf_token
@@ -113,12 +114,14 @@ class GuideHandler(BaseHandler):
         guide_output = guide_template.render()
         self.write(guide_output)
 
+
 class AboutHandler(BaseHandler):
     def get(self):
         doc_file = "about.html"
         about_template = TEMPLATE_ENV.get_template(doc_file)
         about_output = about_template.render()
         self.write(about_output)
+
 
 class FAQHandler(BaseHandler):
     def get(self):
@@ -127,12 +130,14 @@ class FAQHandler(BaseHandler):
         faq_output = faq_template.render()
         self.write(faq_output)
 
+
 class RegistryHandler(BaseHandler):
     def get(self):
         doc_file = "registry.html"
         registry_template = TEMPLATE_ENV.get_template(doc_file)
         registry_output = registry_template.render()
         self.write(registry_output)
+
 
 class DashboardHandler(BaseHandler):
     def get(self):
@@ -148,6 +153,7 @@ class PGHandler(BaseHandler):
         playground_template = TEMPLATE_ENV.get_template(doc_file)
         playground_output = playground_template.render()
         self.write(playground_output)
+
 
 class EditorHandler(BaseHandler):
     def get(self):
@@ -172,7 +178,7 @@ class DatasetHandler(BaseHandler):
         if yourQuery:
             metadata_output = metadata_template.render(Context=json.dumps({"Query": yourQuery}))
         else:
-            metadata_output = metadata_template.render(Context=json.dumps({"Query":''}))
+            metadata_output = metadata_template.render(Context=json.dumps({"Query": ''}))
         self.write(metadata_output)
 
 class DatasetRegistryHandler(BaseHandler):
@@ -181,6 +187,15 @@ class DatasetRegistryHandler(BaseHandler):
         doc_template = TEMPLATE_ENV.get_template(doc_file)
         doc_output = doc_template.render()
         self.write(doc_output)
+
+
+class PageNotFoundHandler(BaseHandler):
+    def get(self):
+        doc_file = "404.html"
+        doc_template = TEMPLATE_ENV.get_template(doc_file)
+        doc_output = doc_template.render()
+        self.write(doc_output)
+
 
 APP_LIST = [
     (r"/?", MainHandler),
@@ -195,7 +210,8 @@ APP_LIST = [
     (r"/login/?", LoginHandler),
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),
     (r"/logout/?", LogoutHandler),
-    (r"/metadata/?", DatasetRegistryHandler),
-    (r"/metadata/(.+)/?", DatasetHandler),
-    (r"/(.+)/(.*)/?", VisualizerHandler),
+    (r"/dataset/?", DatasetRegistryHandler),
+    (r"/dataset/([^/]+)/?", DatasetHandler),
+    (r"/([^/]+)/([^/]*)/?", VisualizerHandler),
+    (r".*", PageNotFoundHandler)
 ]

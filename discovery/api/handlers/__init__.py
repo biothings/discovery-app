@@ -1,3 +1,3 @@
-from .registry import *
-from .metadata import *
+from .dataset import *
+from .schema import *
 from .view import *
