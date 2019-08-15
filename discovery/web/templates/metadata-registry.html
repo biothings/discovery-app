@@ -100,7 +100,7 @@ Vue.component('registry-item', {
     saveDataAndRedirect(item){
       var self = this;
       if (item) {
-        window.location.href = '/metadata/'+item._id;
+        window.location.href = '/dataset/'+item._id;
       }else{
           Swal.fire(
             'Oops!',
@@ -251,7 +251,7 @@ var app = new Vue({
             instance.unmark();
             //clear registry to fix mixing results info
             self.registry = [];
-            axios.get('/api/metadata?size=1000', params).then(function (response) {
+            axios.get('/api/dataset?size=1000', params).then(function (response) {
               self.registry = response.data.hits;
               self.registryTotal = response.data.total;
               // mark results, doc must be loaded
