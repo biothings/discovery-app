@@ -1,6 +1,3 @@
-'''
-Handlers for Non-Query Schema API Requests
-'''
 
 import logging
 
@@ -50,8 +47,8 @@ class RegistryHandler(APIBaseHandler):
         namespace = args['namespace']
         url = args['url']
 
-        assert namespace != 'schema', "cannot rewrite core schema"
-        assert namespace != 'metadata', "cannot use reserved keywords"
+        assert namespace not in ['metadata', 'dataset', 'schema'],\
+            "cannot use a reserved keyword as a namespace"
 
         if Schema.get(id=namespace, ignore=404):
 
