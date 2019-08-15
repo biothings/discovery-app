@@ -161,13 +161,12 @@
     mutations: {
       saveSchema(state,payload){
         state.schema = payload['schema'];
-        console.log('schema saved',state.schema)
+        // console.log('schema saved',state.schema)
         state.output['@type'] = state.schema.label || state.schema.name
         state.output['@context'] = 'http://discovery.biothings.io/'
       },
       saveSchemaName(state,payload){
         state.schemaName = payload['name'];
-        // $.notify("Schema Name Saved",{ globalPosition: 'right',className:'success', showDuration: 40, });
       },
       reset(state){
         state.schema = {};
