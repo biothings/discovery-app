@@ -23,7 +23,7 @@
         <hr />
         <a v-if="metadata.url" target="_blank" :href="metadata.url">Learn More</a>
       </div>
-      <button class="smallButton btn m-auto" @click="getPreview">View Metadata</button>
+      <button class="smallButton btn m-auto" @click="getPreview">View Dataset Metadata</button>
     </div>
     <div v-if="metadata && !metadata.name" class="jumbotron text-center text-muted">
       <h2>Nothing to see here...</h2>
@@ -70,7 +70,7 @@
         var self = this;
         id = id.replace('/',"");
         self.loading = true;
-        axios.get('/api/metadata/'+id).then(res=>{
+        axios.get('/api/dataset/'+id).then(res=>{
           self.loading = false;
           if (res.data) {
             let payload = {}
