@@ -1,6 +1,3 @@
-'''
-Handlers for Non-Query Schema API Requests
-'''
 
 import logging
 
@@ -16,11 +13,11 @@ class MetadataHandler(APIBaseHandler):
     '''
         Registered Dataset Metadata
 
-        Create - POST ./api/metadata
-        Fetch  - GET ./api/metadata
-        Fetch  - GET ./api/metadata?user=<username>
-        Fetch  - GET ./api/metadata/<_id>
-        Remove - DELETE ./api/metadata/<_id>
+        Create - POST ./api/dataset
+        Fetch  - GET ./api/dataset
+        Fetch  - GET ./api/dataset?user=<username>
+        Fetch  - GET ./api/dataset/<_id>
+        Remove - DELETE ./api/dataset/<_id>
 
     '''
 
