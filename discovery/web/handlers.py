@@ -165,7 +165,7 @@ class VisualizerHandler(BaseHandler):
             {"namespace": namespace, "query": className}))
         self.write(test_output)
 
-class MetadataHandler(BaseHandler):
+class DatasetHandler(BaseHandler):
     def get(self, yourQuery=None):
         test_file = "metadata-page.html"
         metadata_template = TEMPLATE_ENV.get_template(test_file)
@@ -175,7 +175,7 @@ class MetadataHandler(BaseHandler):
             metadata_output = metadata_template.render(Context=json.dumps({"Query":''}))
         self.write(metadata_output)
 
-class MetadataRegistryHandler(BaseHandler):
+class DatasetRegistryHandler(BaseHandler):
     def get(self):
         doc_file = "metadata-registry.html"
         doc_template = TEMPLATE_ENV.get_template(doc_file)
@@ -195,7 +195,7 @@ APP_LIST = [
     (r"/login/?", LoginHandler),
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),
     (r"/logout/?", LogoutHandler),
-    (r"/metadata/?", MetadataRegistryHandler),
-    (r"/metadata/(.+)/?", MetadataHandler),
+    (r"/metadata/?", DatasetRegistryHandler),
+    (r"/metadata/(.+)/?", DatasetHandler),
     (r"/(.+)/(.*)/?", VisualizerHandler),
 ]
