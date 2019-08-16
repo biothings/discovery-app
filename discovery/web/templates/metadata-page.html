@@ -77,7 +77,7 @@
     },
     methods:{
       generateScriptText(id){
-        this.scripttext='<sc'+'ript src="http://host.docker.internal:8000/api/dataset/'+id+'"/></scr'+'ipt>'
+        this.scripttext='<sc'+'ript src="'+window.location.origin+'/api/dataset/'+id+'"/></scr'+'ipt>'
       },
       copyScript(){
         var copyText = document.getElementById("myInput");
