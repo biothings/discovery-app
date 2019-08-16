@@ -1,4 +1,4 @@
-biothings[web_extra]==0.3.0
+biothings[web_extra]
 git+git://github.com/biothings/biothings_schema.py.git@master#egg=biothings_schema
 elasticsearch-dsl==7.0.0
 elasticsearch==7.0.2
