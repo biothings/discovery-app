@@ -13,10 +13,7 @@
     <p class="text-muted">
       Follow best practices to make your data more findable
     </p>
-    <a href="/dataset">Explore registered datasets <i class="fas fa-chevron-right"></i></a>
-    <p class="text-muted">
-      OR<br/>Register your own dataset
-    </p>
+    <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
   <div id="widget">
     <ul class="nav nav-tabs">
@@ -1119,7 +1116,8 @@
 
             Swal.fire({
               title: 'Register this dataset?',
-              html:"<small>Done editing this dataset? You won't be able to edit after this. Click <b>Register Now</b> to proceed.</small>",
+              html:"<small>Are you all done? Click <b>Register Now</b> to proceed.</small>",
+              footer:`<small class='text-danger'>You won't be able to edit anymore after it's been registered.</small>`,
               confirmButtonColor:'#5C3069',
               cancelButtonColor:'#006476',
               showCancelButton: true,
@@ -1132,15 +1130,27 @@
                 axios.post('/api/dataset',output).then(res=>{
                   self.loading = false;
                   if (res.data.success) {
+                    let timerInterval
                     Swal.fire({
-                      title: `View Your Dataset`,
-                      html:`<a href="/dataset/`+res.data.id+`">Click Here</a>`,
-                      footer:'Your dataset is also accessible via your dashboard',
-                      showCancelButton: false,
-                      confirmButtonColor:'#5C3069',
-                      cancelButtonColor:'#006476',
-                      onClose:()=>{
+                      type:'success',
+                      title: 'Registration Successful',
+                      html:
+                        'Taking you to your dataset page in <strong></strong> seconds.',
+                      timer: 3000,
+                      onBeforeOpen: () => {
+                        const content = Swal.getContent()
+                        const $ = content.querySelector.bind(content)
+                        Swal.showLoading()
+                        timerInterval = setInterval(() => {
+                          Swal.getContent().querySelector('strong')
+                            .textContent = (Swal.getTimerLeft() / 1000)
+                              .toFixed(0)
+                        }, 100)
+                      },
+                      onClose: () => {
+                        clearInterval(timerInterval)
                         store.dispatch('reset')
+                        window.location.href='/dataset/'+res.data.id
                       }
                     })
                   }
@@ -1148,9 +1158,12 @@
                   self.loading = false;
                   throw err;
                   Swal.fire({
-                    title: `Registration Failed`,
-                    html: `<small>`+err+`</small>`
-                  })
+                    type: 'error',
+                    toast: true,
+                    position: 'top center',
+                    title: 'Registration Failed: ',
+                    text: err
+                  });
                 })
               },
               allowOutsideClick: () => !Swal.isLoading(),
@@ -1162,21 +1175,24 @@
         },
         downnloadSchema(){
           var self = this;
-          store.commit('formPreview');
-          Swal.fire({
-            title: 'Name your file',
-            input: 'text',
-            inputAttributes: {
-              autocapitalize: 'off'
-            },
-            showCancelButton: true,
-            confirmButtonText: 'Download JSON-LD',
-            allowOutsideClick: () => !Swal.isLoading()
-          }).then((result) => {
-            if (result.value) {
-              self.download(JSON.stringify(store.getters.getPreview,null,2), result.value+'.jsonld', 'text/plain')
-            }
-          })
+          if (this.isComplete){
+            store.commit('formPreview');
+            Swal.fire({
+              title: 'Name your file',
+              input: 'text',
+              inputAttributes: {
+                autocapitalize: 'off'
+              },
+              showCancelButton: true,
+              confirmButtonText: 'Download JSON-LD',
+              allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+              if (result.value) {
+                self.download(JSON.stringify(store.getters.getPreview,null,2), result.value+'.jsonld', 'text/plain')
+              }
+            })
+          }
+
         },
         download(content, fileName, contentType) {
           var a = document.createElement("a");

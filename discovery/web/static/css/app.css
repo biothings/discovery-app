@@ -1806,3 +1806,8 @@ ul.tree, ul.tree ul {
 
       }
     }
+
+    .tippy-tooltip, .tippy-content, .tippy-backdrop, .tippy-popper{
+      border-radius: 0px !important;
+      background: white;
+    }

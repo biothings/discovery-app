@@ -362,6 +362,7 @@
     },
     mounted: function(){
       var self = this;
+      console.log(self.name,self.fullinfo)
       tippy('#'+self.name, {
         content: "<div class='mainTextDark'><h3>"+self.name+"</h3><pre class='text-left text-muted wraptext d-block'>"+JSON.stringify(self.fullinfo,null,2)+"</pre></div>",
         placement: 'left',
@@ -403,6 +404,7 @@
           <span v-text="'type'"></span>
           <span v-text="fullinfo.type"></span>
         </div>
+        <i v-if="fullinfo.type !== 'string'" class="fas fa-chevron-right text-muted"></i>
       </template>
       <template v-if="fullinfo.format">
         <div class="pillType d-inline">
@@ -433,17 +435,15 @@
         </div>
       </template>
       <template v-if="fullinfo.items">
-        <div class="dropdown">
-          <button class="btn smallButton btn-info text-light btn-sm dropdown-toggle m-1" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Items
-          </button>
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <div v-for="(item,index) in fullinfo.items" class="dropdown-item">
-              <div class="pillType d-inline">
-                <span class="mainBackLight" v-text="index"></span>
-                <span v-text="item"></span>
-              </div>
-            </div>
+        <template v-if='fullinfo.items.type ==="object"'>
+          <hr />
+          <h6 class="text-muted">Properties used:</h6>
+          <property-box v-for="(prop,index) in fullinfo.items.properties" style='background:#dcf2f7' class="alert propbox" :name='index' :fullinfo="prop" :required='fullinfo.required'></property-box>
+        </template>
+        <div v-else v-for="(item,index) in fullinfo.items" class="text-left">
+          <div class="pillType d-inline">
+            <span class="mainBackLight" v-text="index"></span>
+            <span v-text="item"></span>
           </div>
         </div>
       </template>
@@ -1178,94 +1178,129 @@
           var self = this;
           if (self.userInfo && self.userInfo.login) {
             Swal.fire({
-              title: 'Registration',
-              input:'text',
-              text:"Choose a namespace (a-z,0-9)",
+              title: 'Why should I register my schema?',
+              html:`<ul class="text-muted text-left">
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> Share your work with other members of the community. Your schema definition could be helpful to many others in the community as a starting point for their reserach.
+                  </small>
+                </li>
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> By registering a schema derived from an existing schema you are helping to maintain the <a href="https://www.go-fair.org/fair-principles/" target="_blank">FAIR</a> (Findable, Accessible, Interoperable, Reusable) principles of data-sharing/creation.
+                  </small>
+                </li>
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> It's easy to registrer your schema! If everything looks good here all you have to do is choose a namespace for your schema's homepage.
+                  </small>
+                </li>
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> You'll be able to easily share your schema and visualize it in a way that it's easy to undertand.
+                  </small>
+                </li>
+              </ul>`,
+              footer:'<p>If everything looks good, click <b> Continue</b></p>',
+              showCancelButton: true,
               confirmButtonColor:'#5C3069',
               cancelButtonColor:'#006476',
-              showCancelButton: true,
-              confirmButtonText: 'Register',
-              inputValidator: (input) => {
-                return new Promise((resolve) => {
-                  var re = /^[a-zA-Z0-9_.-]*$/;
-                  if (!re.test(input) ) {
-                    resolve('Namespace contains invalid characters')
-                  }else{
-                    axios.head(`/api/registry/`+input).then(function (res) {
-                      resolve('<small>Sorry, that namespace is already taken: <a href="/'+input+'/" target="_blank">http://discovery.biothings.io/'+input+'</a></small>')
-                    }).catch(err=>{
-                      resolve()
-                      throw err;
-                    });
-                  }
-                })
-              },
-              showLoaderOnConfirm: true,
-              preConfirm: (input) => {
-                 console.log('make it',input)
-                 let data= {
-                   "namespace": input,
-                   "url": self.userSchemaURL
-                 }
-                 return axios.post('/api/registry',data).then(res=>{
-                   return res.data
-                 }).catch(err=>{
-                   return err;
-                   throw err;
-                 });
-              },
-              allowOutsideClick: () => !Swal.isLoading()
+              confirmButtonText: 'Continue'
             }).then((result) => {
               if (result.value) {
-                // console.log("FINAL",result)
-                if (result.value.success) {
-                  let name = result.value.url.split('/').splice(-1,1);
-                  let timerInterval
-                  Swal.fire({
-                    type:'success',
-                    title: 'Registration Successful',
-                    html:
-                      'Taking you to your schema homepage in <strong></strong> seconds.',
-                    timer: 3000,
-                    onBeforeOpen: () => {
-                      const content = Swal.getContent()
-                      const $ = content.querySelector.bind(content)
-                      Swal.showLoading()
-                      timerInterval = setInterval(() => {
-                        Swal.getContent().querySelector('strong')
-                          .textContent = (Swal.getTimerLeft() / 1000)
-                            .toFixed(0)
-                      }, 100)
-                    },
-                    onClose: () => {
-                      clearInterval(timerInterval)
-                      window.location.href='/'+name+'/'
+                Swal.fire({
+                  title: 'Registration',
+                  input:'text',
+                  text:"Choose a namespace (a-z,0-9)",
+                  footer:`<small>Namespace must be unique and cannot be 'metadata','dataset' or 'schema'</small>`,
+                  confirmButtonColor:'#5C3069',
+                  cancelButtonColor:'#006476',
+                  showCancelButton: true,
+                  confirmButtonText: 'Register',
+                  inputValidator: (input) => {
+                    return new Promise((resolve) => {
+                      var re = /^[a-zA-Z0-9_.-]*$/;
+                      if (!re.test(input) ) {
+                        resolve('Namespace contains invalid characters')
+                      }else{
+                        axios.head(`/api/registry/`+input).then(function (res) {
+                          resolve('<small>Sorry, that namespace is already taken: <a href="/'+input+'/" target="_blank">http://discovery.biothings.io/'+input+'</a></small>')
+                        }).catch(err=>{
+                          resolve()
+                          throw err;
+                        });
+                      }
+                    })
+                  },
+                  showLoaderOnConfirm: true,
+                  preConfirm: (input) => {
+                     console.log('make it',input)
+                     let data= {
+                       "namespace": input,
+                       "url": self.userSchemaURL
+                     }
+                     return axios.post('/api/registry',data).then(res=>{
+                       return res.data
+                     }).catch(err=>{
+                       return err;
+                       throw err;
+                     });
+                  },
+                  allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                  if (result.value) {
+                    // console.log("FINAL",result)
+                    if (result.value.success) {
+                      let name = result.value.url.split('/').splice(-1,1);
+                      let timerInterval
+                      Swal.fire({
+                        type:'success',
+                        title: 'Registration Successful',
+                        html:
+                          'Taking you to your schema homepage in <strong></strong> seconds.',
+                        timer: 3000,
+                        onBeforeOpen: () => {
+                          const content = Swal.getContent()
+                          const $ = content.querySelector.bind(content)
+                          Swal.showLoading()
+                          timerInterval = setInterval(() => {
+                            Swal.getContent().querySelector('strong')
+                              .textContent = (Swal.getTimerLeft() / 1000)
+                                .toFixed(0)
+                          }, 100)
+                        },
+                        onClose: () => {
+                          clearInterval(timerInterval)
+                          window.location.href='/'+name+'/'
+                        }
+                      })
+                    }else{
+
+                      if (result.value.response.statusText) {
+                        Swal.fire({
+                          type: 'error',
+                          toast: true,
+                          position: 'top center',
+                          title: 'Registration Failed: ',
+                          text: result.value.response.statusText
+                        });
+                      }else{
+                        console.error('Error:',result)
+                        Swal.fire({
+                          type: 'error',
+                          toast: true,
+                          position: 'top center',
+                          title: 'Registration Failed: ',
+                          text: 'Check console'
+                        });
+                      }
+
                     }
-                  })
-                }else{
-
-                  if (result.value.response.statusText) {
-                    Swal.fire({
-                      type: 'error',
-                      toast: true,
-                      position: 'top center',
-                      title: 'Registration Failed: ',
-                      text: result.value.response.statusText
-                    });
-                  }else{
-                    console.error('Error:',result)
-                    Swal.fire({
-                      type: 'error',
-                      toast: true,
-                      position: 'top center',
-                      title: 'Registration Failed: ',
-                      text: 'Check console'
-                    });
                   }
-
-                }
+                })
               }
             })
+
           }else{
             Swal.fire({
               type: 'error',
