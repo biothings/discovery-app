@@ -6,10 +6,12 @@ import pprint
 
 import requests
 import tornado
-from tornado.escape import json_decode
-
 from biothings.web.api.helper import BaseHandler
 from biothings_schema import Schema as SchemaParser
+from tornado.escape import json_decode
+from tornado.httpclient import AsyncHTTPClient
+from torngithub import json_encode
+
 from discovery.api.es.doc import Schema
 
 L = logging.getLogger(__name__)
@@ -50,14 +52,29 @@ class APIBaseHandler(BaseHandler):
         parser.load_schema(doc)
         return parser
 
-    def get_current_user(self):
+    async def prepare(self):
 
         user_json = self.get_secure_cookie("user")
 
         if user_json:
-            return json_decode(user_json).get('login')
+            self.current_user = json_decode(user_json).get('login')
 
-        return None
+        elif 'Authorization' in self.request.headers:
+            if self.request.headers['Authorization'].startswith('Bearer '):
+                token = self.request.headers['Authorization'].split(' ', 1)[1]
+                http_client = AsyncHTTPClient()
+                try:
+                    response = await http_client.fetch(
+                        "https://api.github.com/user", request_timeout=3,
+                        headers={'Authorization': 'token ' + token})
+                    user = json.loads(response.body)
+                except Exception as e:
+                    logging.warning(e)
+                else:
+                    if 'login' in user:
+                        logging.info('logged in user from github token: %s', user)
+                        self.set_secure_cookie("user", json_encode(user))
+                        self.current_user = user['login']
 
     def write_error(self, status_code, **kwargs):
 
