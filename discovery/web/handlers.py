@@ -196,6 +196,13 @@ class PageNotFoundHandler(BaseHandler):
         doc_output = doc_template.render()
         self.write(doc_output)
 
+class GuideIntroHandler(BaseHandler):
+    def get(self):
+        doc_file = "guide-intro.html"
+        doc_template = TEMPLATE_ENV.get_template(doc_file)
+        doc_output = doc_template.render()
+        self.write(doc_output)
+
 
 APP_LIST = [
     (r"/?", MainHandler),
@@ -203,6 +210,7 @@ APP_LIST = [
     (r"/dashboard/?", DashboardHandler),
     (r"/about/?", AboutHandler),
     (r"/faq/?", FAQHandler),
+    (r"/best-practices/?", GuideIntroHandler),
     (r"/guide/?", GuideHandler),
     (r"/registry/?", RegistryHandler),
     (r"/editor/?", EditorHandler),

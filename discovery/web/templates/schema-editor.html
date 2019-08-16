@@ -767,19 +767,23 @@ var app = new Vue({
 
         },
         getPreview(){
-          store.commit('formPreview');
-          Swal.fire({
-            position: 'center',
-            confirmButtonColor:'#5C3069',
-            cancelButtonColor:'#006476',
-            html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox">
-                    <small>
-                      <pre>
-                        `+JSON.stringify(store.getters.getFinalSchema,null,2)+`
-                      </pre>
-                    </small>
-                  </div>`
-          });
+          let self = this;
+          if (self.prefix) {
+            store.commit('formPreview');
+            Swal.fire({
+              position: 'center',
+              confirmButtonColor:'#5C3069',
+              cancelButtonColor:'#006476',
+              html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox">
+                      <small>
+                        <pre>
+                          `+JSON.stringify(store.getters.getFinalSchema,null,2)+`
+                        </pre>
+                      </small>
+                    </div>`
+            });
+          }
+
         },
         checkUser(){
           let self = this;
@@ -830,7 +834,7 @@ var app = new Vue({
           }).queue([
             {
               title: "Schema Editor",
-              html: "<p>With this tool you will be able to extend an existing schema to define your new schema.</p><p>It's as easy as picking the things you want to re-use and enter only any new information.</p>",
+              html: "<p>With this tool you will be able to extend an existing class from a schema to a more specific class taylored to your reserach.</p><p>It's as easy as picking the things you want to re-use and enter only any new information.</p>",
             },
             {
               title: "Step 1: Namespace",
@@ -838,19 +842,19 @@ var app = new Vue({
             },
             {
               title: "Step 2: Add A New Class",
-              html: "<p>Here you will define your new class with the class from the schema you selected as a starting point as it's subclass.</p><p>Any new properties not present in any other schema class should be added here. Just click the <b class='text-info'>Add New Property</b> button and follow the instructions.</p>"
+              html: "<p>Here you will define your new class with the class from the schema you selected as a starting point as it's subclass.</p><p>Any new properties not present in any other schema class should be added here. Just click the <b class='text-info'>Add Property</b> button and follow the instructions.</p>"
             },
             {
               title: "Step 3: Parent Classes",
-              html: "<p>Here you will see the classes in the schema you selected and all of their properties.</p><p>It's important to understand that all properties are inherited by default but you should only represent in your schema the properties you will actually re-use and require.</p><p>Just click the <b class='text-info'>+</b> button and that property will be added to your new class. To mark it as required, simply check the <b>required</b> checkbox.</p>"
+              html: "<p>Here you will see the classes in the schema you selected and all of their properties.</p><p>It's important to understand that all properties are inherited by default but you should only represent in your schema the properties you will actually re-use and require.</p><p>Just click the <b class='text-info'>+</b> button and that property will be added to your new class. To mark it as required, simply click the required symbol.</p>"
             },
             {
-              title: "Step 4: Schema",
-              html: "<p>Finally here you can see how your schema is coming along.</p><p>When you are satisfied with the result simply copy and paste that into your project repo and use our viewer to visualize and register your schema.</p>"
+              title: "Step 4: Preview",
+              html: "<p>Finally here you can see how your schema is coming along. You can view this at any time and it's always updated with your latest changes.</p>"
             },
             {
-              title: "Step 4: Hosting",
-              html: "<p>You now have a schema based on your starting point. Feel free to add more custom validation fields and modify to your own needs.</p><p>Host your schema on your preferred service and come back to try out our viewer and register so others can see your schema.</p>"
+              title: "Step 4: Download",
+              html: "<p>When you are happy with your schema, simply download the JSON-LD file and host it with your preferred service. Eg. GitHub. Once hosted come back and try our schema visualizer <a href='/schema-playground'>here</a></p>"
             },
           ]);
         },
@@ -863,21 +867,24 @@ var app = new Vue({
         },
         downnloadSchema(){
           var self = this;
-          store.commit('formPreview');
-          Swal.fire({
-            title: 'Name your file',
-            input: 'text',
-            inputAttributes: {
-              autocapitalize: 'off'
-            },
-            showCancelButton: true,
-            confirmButtonText: 'Download JSON-LD',
-            allowOutsideClick: () => !Swal.isLoading()
-          }).then((result) => {
-            if (result.value) {
-              self.download(JSON.stringify(store.getters.getFinalSchema,null,2), result.value+'.jsonld', 'text/plain')
-            }
-          })
+          if (self.prefix) {
+            store.commit('formPreview');
+            Swal.fire({
+              title: 'Name your file',
+              input: 'text',
+              inputAttributes: {
+                autocapitalize: 'off'
+              },
+              showCancelButton: true,
+              confirmButtonText: 'Download JSON-LD',
+              allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+              if (result.value) {
+                self.download(JSON.stringify(store.getters.getFinalSchema,null,2), result.value+'.jsonld', 'text/plain')
+              }
+            })
+          }
+
         },
         download(content, fileName, contentType) {
           var a = document.createElement("a");

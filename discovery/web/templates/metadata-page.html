@@ -15,15 +15,25 @@
       </h1>
       <small v-if="metadata && metadata.version"  class="text-muted d-block text-center" v-text="'Version '+metadata.version"></small>
       <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
-      <div class="bg-light p-4 text-center m-4">
-        <p class="text-muted m-auto" v-text="metadata.description"></p>
-        <template v-for="item in metadata.keywords">
-          <small class="text-muted mr-1" v-text='"#"+item'></small>
-        </template>
-        <hr />
-        <a v-if="metadata.url" target="_blank" :href="metadata.url">Learn More</a>
+      <div class="grad p-2 m-2">
+        <div class="bg-light p-4 text-center">
+          <p class="text-muted m-auto" v-text="metadata.description"></p>
+          <div class="d-flex flex-wrap mt-5 justify-content-center">
+            <template v-for="item in metadata.keywords">
+              <small class="text-muted m-1" ><i class="fas fa-tag"></i> <span v-text='item'></span></small>
+            </template>
+          </div>
+          <hr />
+          <a v-if="metadata.url" target="_blank" :href="metadata.url">Learn More</a>
+        </div>
       </div>
-      <button class="smallButton btn m-auto" @click="getPreview">View Dataset Metadata</button>
+      <div class="jumbotron">
+        <small class="d-block text-muted">Embed this dataset's metada to your site. Just copy and paste this code!</small>
+        <input id="myInput" @click="copyScript()" data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="form-control p-2 w-75 m-auto pointer" v-model='scripttext' type="text"/>
+        <small class="d-block text-muted">OR add it manually</small>
+        <button class="themeButton text-light btn m-auto" @click="getPreview">View Dataset Metadata</button>
+      </div>
+
     </div>
     <div v-if="metadata && !metadata.name" class="jumbotron text-center text-muted">
       <h2>Nothing to see here...</h2>
@@ -46,7 +56,6 @@
     mutations: {
       saveMetadata (state,payload) {
         state.metadata = payload['metadata']
-        console.log(state.metadata)
       },
     },
     getters:{
@@ -63,12 +72,27 @@
   		return {
         query:'',
         loading:false,
+        scripttext:''
   	  }
     },
     methods:{
+      generateScriptText(id){
+        this.scripttext='<sc'+'ript src="http://host.docker.internal:8000/api/dataset/'+id+'"/></scr'+'ipt>'
+      },
+      copyScript(){
+        var copyText = document.getElementById("myInput");
+        copyText.select();
+        document.execCommand("Copy");
+        Swal.fire({type:'success',
+          toast:true,
+          title: 'Copied',
+          showConfirmButton:false,
+          timer:1000})
+      },
       getMetadata(id){
         var self = this;
         id = id.replace('/',"");
+        self.generateScriptText(id);
         self.loading = true;
         axios.get('/api/dataset/'+id).then(res=>{
           self.loading = false;
@@ -89,6 +113,15 @@
         scriptTag.setAttribute('type',"application/ld+json");
         scriptTag.text= str;
         document.body.appendChild(scriptTag);
+        this.createCanonicalTag(this.metadata);
+      },
+      createCanonicalTag(meta){
+        if (meta && meta.url) {
+          let linkTag = document.createElement('link');
+          linkTag.setAttribute('rel',"canonical");
+          linkTag.setAttribute('href',meta.url);
+          document.head.appendChild(linkTag);
+        }
       },
       getPreview(){
         var self = this;
