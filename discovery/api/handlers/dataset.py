@@ -1,4 +1,4 @@
-
+import json
 import logging
 
 from elasticsearch_dsl import Index
@@ -63,13 +63,26 @@ class MetadataHandler(APIBaseHandler):
             })
             return
 
-        meta = DatasetMetadata.get(id=_id, ignore=404)
+        id = _id[:-3] if _id.endswith('.js') else _id
+        meta = DatasetMetadata.get(id=id, ignore=404)
 
         if not meta:
             self.send_error(404)
             return
 
-        self.write(meta.to_dict()['_raw'])
+        doc = meta.to_dict()["_raw"]
+
+        if _id.endswith('.js'):
+            js = json.dumps(doc).replace("'", r"\'")
+            self.write(
+                'var script = document.createElement("script");'
+                f"var content = document.createTextNode('{js}');"
+                'script.type = "application/ld+json";'
+                'script.appendChild(content);'
+                'document.head.appendChild(script);')
+        else:
+            self.write(doc)
+
         return
 
     @github_authenticated
