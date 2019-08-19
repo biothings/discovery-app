@@ -633,17 +633,21 @@
                 title: key,
                 text: propInfo.properties[key].description,
                 inputValidator: (value) => {
-                  return new Promise((resolve) => {
-                    function validURL(str) {
-                      var pattern = new RegExp('^[0-9]*$');
-                      return !!pattern.test(str);
-                    }
-                    if (validURL(value)) {
-                      resolve()
-                    } else {
-                      resolve('Input must be an integer')
-                    }
-                  })
+                  if (!value) {
+                    return 'You should write something meanignful'
+                  }else{
+                    return new Promise((resolve) => {
+                      function validURL(str) {
+                        var pattern = new RegExp('^[0-9]*$');
+                        return !!pattern.test(str);
+                      }
+                      if (validURL(value)) {
+                        resolve()
+                      } else {
+                        resolve('Input must be an integer')
+                      }
+                    })
+                  }
                 }
               });
               break;
@@ -696,6 +700,11 @@
           }
         }
 
+        let arr = [] //modal header steps
+        for (var i = 0; i < progressSteps.length; i++) {
+          arr.push(i+1)
+        }
+
         Swal.mixin({
           input: 'text',
           confirmButtonText: 'Next &rarr;',
@@ -704,7 +713,7 @@
           cancelButtonColor:'#006476',
           animation:false,
           customClass:'scale-in-center',
-          progressSteps: progressSteps
+          progressSteps: arr
         }).queue(questions).then((result) => {
           if (result.value) {
             let obj = {}
