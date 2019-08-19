@@ -78,6 +78,9 @@ class APIBaseHandler(BaseHandler):
 
     def write_error(self, status_code, **kwargs):
 
+        reason = kwargs.pop('reason', self._reason)
+        assert '\n' not in reason
+
         if 'exc_info' in kwargs:
 
             exception = kwargs.pop('exc_info')[1]
@@ -89,12 +92,12 @@ class APIBaseHandler(BaseHandler):
                                    AssertionError]:
                 status_code = 400
                 self.set_status(status_code)
-                self._reason = str(exception)
+                reason = str(exception)
 
         template = {
             "code": status_code,
             "success": False,
-            "reason": self._reason,
+            "reason": reason,
         }
 
         for key in ['code', 'success']:

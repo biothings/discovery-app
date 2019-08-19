@@ -1,12 +1,28 @@
 import json
 import logging
+import sys
+from io import StringIO
 
 from elasticsearch_dsl import Index
+from jsonschema.exceptions import ValidationError
 from tornado.escape import json_decode
 
 from discovery.api.es.doc import DatasetMetadata
 
 from .base import APIBaseHandler, github_authenticated
+
+
+class Capturing(list):
+
+    def __enter__(self):
+        self._stdout = sys.stdout
+        sys.stdout = self._stringio = StringIO()
+        return self
+
+    def __exit__(self, *args):
+        self.extend(self._stringio.getvalue().splitlines())
+        del self._stringio    # free up some memory
+        sys.stdout = self._stdout
 
 
 class MetadataHandler(APIBaseHandler):
@@ -20,6 +36,10 @@ class MetadataHandler(APIBaseHandler):
         Remove - DELETE ./api/dataset/<_id>
 
     '''
+    CTSA_DATASET = APIBaseHandler.get_parser(
+        "https://raw.githubusercontent.com/data2health/"
+        "schemas/master/Dataset/CTSADataset.json"
+    ).get_class('bts:CTSADataset')
 
     @github_authenticated
     def post(self):
@@ -28,8 +48,18 @@ class MetadataHandler(APIBaseHandler):
         '''
 
         doc = json_decode(self.request.body)
-        meta = DatasetMetadata.from_json(doc, self.current_user)
 
+        with Capturing() as output:
+            try:
+                self.CTSA_DATASET.validate_against_schema(doc)
+            except ValidationError as err:
+                self.send_error(400, reason=str(err).splitlines()[0])
+                return
+
+        assert "The JSON document is valid" in output,\
+            "document did not pass validation"
+
+        meta = DatasetMetadata.from_json(doc, self.current_user)
         self.finish({
             'success': True,
             'result': meta.save(),
