@@ -132,13 +132,12 @@ Vue.component('registry-item', {
       content: "<div class='text-muted m-0 text-left'><pre>"+JSON.stringify(this.item,null,2)+"</pre></div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
     })
   },
-  template: `<li class="list-group-item list-group-item-action p-0">
+  template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="saveDataAndRedirect(item)">
     <div class="d-flex">
       <div class="flex-grow-1 p-2">
         <div class="w-100">
           <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
           <small v-if="item && item.version" class="text-muted" v-text="'Version '+item.version"></small>
-          <small><i :id="item.name" class="fas fa-search-plus text-info"></i></small>
           <p v-if="item && item.description" class="text-muted">
             <small v-html="item.description"></small>
           </p>

@@ -28,7 +28,7 @@
         </div>
       </div>
       <div class="jumbotron">
-        <small class="d-block text-muted">Embed this dataset's metada to your site. Just copy and paste this code!</small>
+        <small class="d-block text-muted">Embed this dataset's metada to your site. <b>CLICK TO COPY</b></small>
         <input id="myInput" @click="copyScript()" data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="form-control p-2 w-75 m-auto pointer" v-model='scripttext' type="text"/>
         <small class="d-block text-muted">OR add it manually</small>
         <button class="themeButton text-light btn m-auto" @click="getPreview">View Dataset Metadata</button>
@@ -114,6 +114,10 @@
         scriptTag.text= str;
         document.body.appendChild(scriptTag);
         this.createCanonicalTag(this.metadata);
+        if (this.metadata.name)
+          document.title = 'CTSA DATA DISCOVERY ENGINE / '+this.metadata.name
+        if (this.metadata.description)
+          document.description = 'CTSA DATA DISCOVERY ENGINE / '+this.metadata.description
       },
       createCanonicalTag(meta){
         if (meta && meta.url) {
@@ -129,6 +133,8 @@
           position: 'center',
           confirmButtonColor:'#5C3069',
           cancelButtonColor:'#006476',
+          animation:false,
+          customClass:'scale-in-center',
           html: `<h6 class="text-center mainTextDark">Metadata</h6><div class="text-left p-1 previewBox">
                   <small>
                     <pre>
