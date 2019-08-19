@@ -814,6 +814,11 @@ ul.tree, ul.tree ul {
       }
     }
 
+    .scale-in-center {
+	-webkit-animation: scale-in-center 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+	        animation: scale-in-center 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
     .preLink:hover::before{
       content: 'Search: '
     }
@@ -1809,5 +1814,4 @@ ul.tree, ul.tree ul {
 
     .tippy-tooltip, .tippy-content, .tippy-backdrop, .tippy-popper{
       border-radius: 0px !important;
-      background: white;
     }

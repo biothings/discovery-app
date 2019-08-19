@@ -1178,6 +1178,8 @@
           var self = this;
           if (self.userInfo && self.userInfo.login) {
             Swal.fire({
+              animation:false,
+              customClass:'scale-in-center',
               title: 'Why should I register my schema?',
               html:`<ul class="text-muted text-left">
                 <li>
@@ -1211,6 +1213,8 @@
                 Swal.fire({
                   title: 'Registration',
                   input:'text',
+                  animation:false,
+                  customClass:'scale-in-center',
                   text:"Choose a namespace (a-z,0-9)",
                   footer:`<small>Namespace must be unique and cannot be 'metadata','dataset' or 'schema'</small>`,
                   confirmButtonColor:'#5C3069',
@@ -1256,6 +1260,8 @@
                       Swal.fire({
                         type:'success',
                         title: 'Registration Successful',
+                        animation:false,
+                        customClass:'scale-in-center',
                         html:
                           'Taking you to your schema homepage in <strong></strong> seconds.',
                         timer: 3000,
