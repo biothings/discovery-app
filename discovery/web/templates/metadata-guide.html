@@ -150,8 +150,6 @@
       validation:null,
       schemaName:'',
       output:{
-        "@context": "",
-        "@type": "",
       }
     },
     strict: true,
@@ -191,7 +189,6 @@
         let selection = payload['clear'];
         for (key in state.schema.validation.properties) {
           if (key === selection) {
-            console.log(key,selection,state.schema.validation.properties)
             Vue.delete(state.schema.validation.properties[selection],'value');
             Vue.set(state.schema.validation.properties[selection],'selected',false);
             $.notify(selection+" was cleared",{ globalPosition: 'right',className:'success', showDuration: 40, });
@@ -228,10 +225,17 @@
       },
       formPreview(state){
         let props = state.schema.validation.properties;
-        //TODO Need to reset the output each time
+        Vue.set(state,'output',{})
+        Vue.set(state.output,'@type',state.schema.label || state.schema.name)
+        Vue.set(state.output,'@context','http://discovery.biothings.io/')
         for (key in props) {
           if (props[key].hasOwnProperty('value') && props[key]['value']) {
-            Vue.set(state.output,key,props[key].value)
+            if (_.isArray(props[key]['value']) && props[key]['value'].length === 1) {
+              Vue.set(state.output,key,props[key].value[0])
+            }else{
+              Vue.set(state.output,key,props[key].value)
+            }
+
           }
         }
       }
@@ -635,11 +639,11 @@
                     return 'You should write something meanignful'
                   }else{
                     return new Promise((resolve) => {
-                      function validURL(str) {
+                      function validInteger(str) {
                         var pattern = new RegExp('^[0-9]*$');
                         return !!pattern.test(str);
                       }
-                      if (validURL(value)) {
+                      if (validInteger(value)) {
                         resolve()
                       } else {
                         resolve('Input must be an integer')
@@ -716,10 +720,20 @@
           if (result.value) {
             let obj = {}
             for (var i = 0; i < progressSteps.length; i++) {
-              let val = result.value[i].split(',');
-              Vue.set(obj,progressSteps[i],val)
+              if (result.value[i].includes(",")) {
+                let val = result.value[i].split(',');
+                Vue.set(obj,progressSteps[i],val)
+              }else{
+                if (propInfo.properties[progressSteps[i]].hasOwnProperty('type') && propInfo.properties[progressSteps[i]]['type']==='integer') {
+                  let val = parseInt(result.value[i]);
+                  Vue.set(obj,progressSteps[i],val)
+                }else{
+                  let val = result.value[i];
+                  Vue.set(obj,progressSteps[i],val)
+                }
+              }
+
             }
-            console.log('OBJ RESULT', obj)
             var payload = {};
             payload["item"] = obj;
             payload["from"] = propName;
@@ -824,10 +838,6 @@
     },
     mounted: function(){
       var self = this
-
-      if (self.name === 'funder'||self.name === 'samples') {
-        console.log(self.name,self.info)
-      }
 
       self.checkForConstantKey(self.info,'const')
 
@@ -1073,7 +1083,7 @@
               <!-- 🌈  OBJECT 🌈 -->
               <template v-if="info.type=== 'object' && name !== 'license' && name !== 'includedInDataCatalog' ">
                 <div class="form-group p-2 row">
-                  <button class="btn themeButton text-light m-auto" @click="addItem(name,info)">
+                  <button class="btn themeButton text-light m-auto" @click="addItem(name,info)" v-if="info.type=== 'object' && !userInput">
                     <i class="fas fa-plus"></i> <span v-text="'Add '+name"></span>
                   </button>
                 </div>
