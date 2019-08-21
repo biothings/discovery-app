@@ -27,13 +27,33 @@
           <a v-if="metadata.url" target="_blank" :href="metadata.url">Learn More</a>
         </div>
       </div>
-      <div class="jumbotron">
-        <small class="d-block text-muted">Embed this dataset's metada to your site. <b>CLICK TO COPY</b></small>
-        <input id="myInput" @click="copyScript()" data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="form-control p-2 w-75 m-auto pointer" v-model='scripttext' type="text"/>
-        <small class="d-block text-muted">OR add it manually</small>
-        <button class="themeButton text-light btn m-auto" @click="getPreview">View Dataset Metadata</button>
+      <div class="alert alert-secondary text-muted mt-5 ">
+        <h4>Embed this dataset on your website</h4>
+        <h5>Embedding options:</h5>
+        <div class="row">
+          <div class="col-sm-12 col-md-6 p-3">
+            <h5>Dynamic Embedding</h5>
+            <p>
+              <small>Leave it up to us! Just copy the following code and paste it immediately after the closing <code>&lt;head&gt;</code> tag on your website's code.</small>
+            </p>
+            <small class="d-block text-muted">
+              <b>CLICK TO COPY</b>
+            </small>
+            <input id="myInput" @click="copyScript()" data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="form-control p-2 w-75 m-auto pointer" v-model='scripttext' type="text"/>
+          </div>
+          <div class="col-sm-12 col-md-6 p-3">
+            <h5>Hard Coded</h5>
+            <p>
+              <small>In your website's code immediately after the closing <code>&lt;head&gt;</code> tag, create a <code>&lt;script type="application/ld+json" &gt;</code>...<code>&lt;/script&gt;</code>  and paste the following text inside that tag:</small>
+            </p>
+            </p>
+            <small class="d-block text-muted">
+              <b>CLICK TO OPEN</b>
+            </small>
+            <button class="btn-secondary text-light btn m-auto" @click="getPreview">View Dataset Metadata</button>
+          </div>
+        </div>
       </div>
-
     </div>
     <div v-if="metadata && !metadata.name" class="jumbotron text-center text-muted">
       <h2>Nothing to see here...</h2>
@@ -135,7 +155,7 @@
           cancelButtonColor:'#006476',
           animation:false,
           customClass:'scale-in-center',
-          html: `<h6 class="text-center mainTextDark">Metadata</h6><div class="text-left p-1 previewBox">
+          html: `<h6 class="text-center mainTextDark">COPY THIS CODE</h6><div class="text-left p-1 previewBox">
                   <small>
                     <pre>
                       `+JSON.stringify(self.metadata,null,2)+`
