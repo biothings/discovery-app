@@ -4,7 +4,7 @@
 <style>
 
 </style>
-<div id="guide" class="container pt-5">
+<div id="guide" class="container pt-5" style="min-height:90vh;">
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>
   </div>
@@ -49,7 +49,7 @@
         </a>
       </li>
       <li class='nav-item'>
-        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light': isComplete }" @click="handleRegistration()">
+        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()">
           <small>
             <i class="fas fa-cloud-upload-alt"></i> Register
           </small>
@@ -203,21 +203,19 @@
         let item = payload['item']; //full info
         let props = state.schema.validation.properties;
 
-        let res = _.reject(props[field].value,item)
-        props[field].value=res
-        $.notify("Item removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+        if(typeof item === 'string'){
+          for (var i = 0; i < props[field].value.length; i++){
+            if (props[field].value[i] === item) {
+              Vue.delete(props[field].value,i);
+              $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+            }
+          }
+        }else if (typeof item === 'object') {
+          let res = _.reject(props[field].value,item)
+          props[field].value=res
+          $.notify("Item removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+        }
 
-        // for (var i = 0; i < props[field].value.length; i++) {
-        //   if (props[field].value[i].hasOwnProperty('name')) {
-        //     if (props[field].value[i].name === item) {
-        //       Vue.delete(props[field].value,i);
-        //       $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
-        //     }
-        //   }else if (props[field].value[i] === item) {
-        //     Vue.delete(props[field].value,i);
-        //     $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
-        //   }
-        // }
       },
       addToArrayFrom(state,payload){
         let field = payload['from'];
@@ -1073,7 +1071,7 @@
                 </div>
               </template>
               <!-- 🌈  OBJECT 🌈 -->
-              <template v-if="info.type=== 'object' && name !== 'license' ">
+              <template v-if="info.type=== 'object' && name !== 'license' && name !== 'includedInDataCatalog' ">
                 <div class="form-group p-2 row">
                   <button class="btn themeButton text-light m-auto" @click="addItem(name,info)">
                     <i class="fas fa-plus"></i> <span v-text="'Add '+name"></span>
