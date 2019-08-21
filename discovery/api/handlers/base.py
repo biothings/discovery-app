@@ -4,6 +4,7 @@ import json
 import logging
 import pprint
 
+import elasticsearch
 import requests
 import tornado
 from biothings.web.api.helper import BaseHandler
@@ -93,6 +94,8 @@ class APIBaseHandler(BaseHandler):
                 status_code = 400
                 self.set_status(status_code)
                 reason = str(exception)
+            elif isinstance(exception, elasticsearch.exceptions.ConnectionError):
+                reason = 'elasticsearch connection error'
 
         template = {
             "code": status_code,

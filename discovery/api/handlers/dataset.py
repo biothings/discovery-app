@@ -36,10 +36,7 @@ class MetadataHandler(APIBaseHandler):
         Remove - DELETE ./api/dataset/<_id>
 
     '''
-    CTSA_DATASET = APIBaseHandler.get_parser(
-        "https://raw.githubusercontent.com/data2health/"
-        "schemas/master/Dataset/CTSADataset.json"
-    ).get_class('bts:CTSADataset')
+    CTSA_DATASET = None
 
     @github_authenticated
     def post(self):
@@ -51,7 +48,13 @@ class MetadataHandler(APIBaseHandler):
 
         with Capturing() as output:
             try:
+                if not self.CTSA_DATASET:
+                    MetadataHandler.CTSA_DATASET = APIBaseHandler.get_parser(
+                        "https://raw.githubusercontent.com/data2health/"
+                        "schemas/master/Dataset/CTSADataset.json"
+                    ).get_class('bts:CTSADataset')
                 self.CTSA_DATASET.validate_against_schema(doc)
+
             except ValidationError as err:
                 self.send_error(400, reason=str(err).splitlines()[0])
                 return
