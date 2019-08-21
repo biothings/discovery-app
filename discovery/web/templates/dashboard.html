@@ -81,6 +81,12 @@
                   </a>
                 </div>
                 <div>
+                  <span class="fa-stack fa-1x pointer tip" @click="edit(item._id)" :data-tippy-info="'Quick Edit'">
+                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                    <i class="fas fa-bolt fa-stack-1x text-light"></i>
+                  </span>
+                </div>
+                <div>
                   <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('metadata',item._id)" :data-tippy-info="'Delete'">
                     <i class="fas fa-circle text-muted fa-stack-2x"></i>
                     <i class="fas fa-trash fa-stack-1x text-light"></i>
@@ -101,6 +107,7 @@
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="/static/js/lodash.js"></script>
+<script src="/static/js/notify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 var app = new Vue({
@@ -115,7 +122,8 @@ var app = new Vue({
           selectedItem:{},
           slugInput:'',
           availableSlug: false,
-          invalidChars : false
+          invalidChars : false,
+          meta:{}
 				}
 			},
       watch:{
@@ -142,6 +150,129 @@ var app = new Vue({
         },
       },
 			methods:{
+        edit(id){
+          var self = this;
+          axios.get('/api/dataset/'+id).then(res=>{
+            if (res.data) {
+              self.meta = res.data
+              let list ={}
+              let notAllowed=['@context','@type','includedInDataCatalog','identifier']
+              for(key in self.meta){
+                if (!notAllowed.includes(key)) {
+                  list[key] = key
+                }
+              }
+
+              Swal.fire({
+                title: `Quick Edit`,
+                text:"Which field would you like to edit?",
+                input: 'select',
+                inputOptions: list,
+                inputPlaceholder: 'Select a field to edit',
+                showCancelButton: true,
+                confirmButtonColor:'#5C3069',
+                cancelButtonColor:'#006476',
+                confirmButtonText: 'Edit',
+                inputValidator: (value) => {
+                  return new Promise((resolve) => {
+                    if (!value) {
+                      resolve('You must select something first')
+                    }else{
+                      resolve()
+                    }
+                  })
+                }
+              }).then((keyname) => {
+                if (keyname.value) {
+                  let iValue =''
+
+                  if (typeof self.meta[keyname.value] === 'string' ||  typeof self.meta[keyname.value] === 'number' ||  typeof self.meta[keyname.value] === 'boolean') {
+                    iValue = self.meta[keyname.value]
+                  }else{
+                    iValue = JSON.stringify(self.meta[keyname.value],null,2)
+                  }
+
+                  Swal.fire({
+                    title: "Edit: "+keyname.value,
+                    input: 'textarea',
+                    footer:`<small>Make sure to close all: {},[] and quotes</small>`,
+                    confirmButtonColor:'#5C3069',
+                    cancelButtonColor:'#006476',
+                    animation:false,
+                    customClass:'scale-in-center',
+                    inputPlaceholder: self.meta[keyname.value],
+                    inputValue: iValue,
+                    inputAttributes: {
+                      'aria-label': keyname.value,
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Save',
+                    inputValidator: (value) => {
+                      return new Promise((resolve) => {
+                        if (value === self.meta[keyname.value]) {
+                          resolve("You haven't changed anything yet!")
+                        }else{
+                          resolve()
+                        }
+                      })
+                    }
+                  }).then((newdata) => {
+                    if (newdata.value) {
+
+                      if (newdata.value[0]==="{" || newdata.value[0]==="[") {
+                        Vue.set(self.meta,keyname.value,JSON.parse(newdata.value) )
+                      }else{
+                        Vue.set(self.meta,keyname.value,newdata.value)
+                      }
+
+                      Swal.showLoading();
+                      axios.post('/api/dataset',self.meta).then(res=>{
+                        Swal.hideLoading();
+                        if (res.data.success) {
+                          $.notify("Field Updated",{ globalPosition: 'right',className:'success', showDuration: 40, });
+                          Swal.fire({
+                            title: 'Make other changes?',
+                            confirmButtonColor:'#5C3069',
+                            cancelButtonColor:'#006476',
+                            animation:false,
+                            showCancelButton: true,
+                            customClass:'scale-in-center',
+                            confirmButtonText: 'Yes',
+                            cancelButtonText: 'No',
+                          }).then((r) => {
+                            if (r.value) {
+                              self.edit(id)
+                            }else{
+                              location.reload(true);
+                            }
+                          })
+                        }
+                      }).catch(err=>{
+                        throw err;
+                        Swal.fire({
+                          type: 'error',
+                          toast: true,
+                          position: 'top center',
+                          title: 'Registration Failed: ',
+                          text: err
+                        });
+                      })
+
+                    }
+                  })
+                }
+              })
+
+            }
+          }).catch(err=>{
+            throw err;
+            Swal.fire(
+              'Oh, no!',
+              "Can't edit at this time",
+              'error'
+            );
+          });
+        },
         deleteSelected(type,identifier){
           var self = this;
           let index = '/api/registry/';
