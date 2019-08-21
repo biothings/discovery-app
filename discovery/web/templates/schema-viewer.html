@@ -12,14 +12,26 @@
   </div>
   <!-- HOMEPAGE MODE -->
   <div class="jumbotron" v-if="!query">
-    <div class="engineBox w-50 m-auto p-2" v-if='!namespaceRegistered'>
+    <div class="engineBox w-50 m-auto p-2" v-show='!namespaceRegistered'>
       <div class="bg-light p-3 text-center grad">
         <h3 class="text-light">Register Your Schema</h3>
         <button role="button" class="btn themeButton text-light" @click='openRegistration()'>Click Here</button>
       </div>
     </div>
     <div class="text-center p-5">
-      <h1 style="font-size:3em" class="logoText" v-if='namespaceRegistered' v-text='namespace'></h1>
+      <template v-if='namespaceRegistered'>
+        <h1 style="font-size:3em" class="logoText" v-if='namespace === "schema"' >Schema.org</h1>
+        <p class="text-muted" v-if='namespace === "schema"'>
+        Schema.org is a collaborative, community activity with a mission to create,
+        maintain, and promote schemas for structured data on the Internet. In addition
+        to people from the founding companies (Google, Microsoft, Yahoo and Yandex), there is  substantial participation by the
+        larger Web community, through public mailing lists such as <a target="_blank" href="https://lists.w3.org/Archives/Public/public-vocabs/">public-vocabs@w3.org</a>
+        and through <a target="_blank" href="http://github.com/schemaorg/schemaorg">GitHub</a>. <a target="_blank" href="https://schema.org/">Learn More.</a>
+         </p>
+        <h1 style="font-size:3em" class="logoText" v-if='namespace === "bts"' >BioThings</h1>
+        <h1 style="font-size:3em" class="logoText" v-if='namespace === "ctsa"' >CTSA</h1>
+        <h1 style="font-size:3em" class="logoText" v-if='namespaceRegistered === "schema"' v-text='namespace'></h1>
+      </template>
     </div>
     <div class="row">
       <form class="col-sm-12">
