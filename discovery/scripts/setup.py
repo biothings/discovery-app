@@ -3,6 +3,7 @@
 '''
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 from biothings_schema import Schema as SchemaParser
 from elasticsearch_dsl import Index
@@ -23,27 +24,22 @@ def index_schema_org(lazy=False):
     for klass in classes:
         klass.save()
 
-    logger = logging.getLogger('discovery.scripts.schema_org')
+    logger = logging.getLogger('discovery.scripts.setup')
     logger.info("Indexed 'schema'.")
 
 
 def es_data_setup():
-    '''
-        Called when web server starts.
-    '''
 
     try:
 
         if not Index('discover_schema').exists():
             Schema.init()
-
         if not Index('discover_class').exists():
             SchemaClass.init()
-
         if not Index('discover_metadata').exists():
             DatasetMetadata.init()
 
-        index_schema_org(True)
+        return ThreadPoolExecutor().submit(index_schema_org, True)
 
     except Exception as exc:
 
