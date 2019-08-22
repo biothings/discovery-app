@@ -31,6 +31,7 @@ class DocumentMeta(InnerDoc):
     '''
     username = Keyword(required=True)
     timestamp = Date()
+    private = Boolean()
 
 
 class Schema(Document):
@@ -199,12 +200,21 @@ class DatasetMetadata(Document):
         }
 
     @classmethod
-    def from_json(cls, doc, user):
+    def search(cls):
+        '''
+            Exclude archived documents
+        '''
+        return super().search().exclude(
+            "term", **{"_meta.private": "true"})
+
+    @classmethod
+    def from_json(cls, doc, user, private=False):
         meta = cls()
         meta.identifier = doc['identifier']
         meta.name = doc['name']
         meta.description = doc['description']
         meta._meta.username = user
+        meta._meta.private = private
         meta._raw = doc
         return meta
 
