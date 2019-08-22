@@ -1,5 +1,5 @@
 '''
-    Quick (Re)Start
+    Reset es indexes
 
     - Remove existing indexes
     - No data will be populated

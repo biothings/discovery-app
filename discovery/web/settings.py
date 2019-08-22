@@ -9,6 +9,6 @@ class DiscoveryWebSettings(BiothingESWebSettings):
         return Elasticsearch(
             self.ES_HOST,
             timeout=getattr(self, 'ES_CLIENT_TIMEOUT', 120),
-            sniff_on_start=True,
+            sniff_on_connection_fail=True,
             max_retries=1,
         )

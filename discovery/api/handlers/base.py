@@ -94,7 +94,8 @@ class APIBaseHandler(BaseHandler):
                 status_code = 400
                 self.set_status(status_code)
                 reason = str(exception)
-            elif isinstance(exception, elasticsearch.exceptions.ConnectionError):
+            elif isinstance(exception, (elasticsearch.exceptions.ConnectionError,
+                                        elasticsearch.exceptions.TransportError)):
                 reason = 'elasticsearch connection error'
 
         template = {

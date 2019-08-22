@@ -2,12 +2,11 @@
 
 ''' Discovery App Configuration '''
 
-from biothings.web.api.es.handlers import QueryHandler
 from biothings.web.settings.default import *
 
 from discovery.api.es.query_builder import DiscoveryQueryBuilder
-from discovery.api.handlers import (MetadataHandler, RegistryHandler,
-                                    SchemaViewHandler)
+from discovery.api.handlers import (MetadataHandler, QueryHandler,
+                                    RegistryHandler, SchemaViewHandler)
 from discovery.config_key import (COOKIE_SECRET, GITHUB_CLIENT_ID,
                                   GITHUB_CLIENT_SECRET)
 from discovery.web.handlers import APP_LIST as WEB_ENDPOINTS
