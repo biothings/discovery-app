@@ -1,0 +1,27 @@
+version: "3.7"
+services:
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - es
+    ports:
+      - "8000:8000"
+    restart: on-failure
+    networks:
+      - net0
+
+  es:
+    image: elasticsearch:7.3.0
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+    networks:
+      - net0
+
+networks:
+  net0:
+    driver: bridge
