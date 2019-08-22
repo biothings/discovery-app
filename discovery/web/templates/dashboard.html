@@ -2,7 +2,10 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-
+.swal2-popup .swal2-textarea {
+    height: auto !important;
+    padding: .75em;
+}
 </style>
 <section id="dashboard">
   <div  class="container" style="min-height: 100vh;padding-top:80px;">
@@ -204,13 +207,14 @@ var app = new Vue({
                     inputValue: iValue,
                     inputAttributes: {
                       'aria-label': keyname.value,
+                      'rows':15
                     },
                     showCancelButton: true,
                     confirmButtonText: 'Save',
                     inputValidator: (value) => {
                       return new Promise((resolve) => {
                         if (value === self.meta[keyname.value]) {
-                          resolve("You haven't changed anything yet!")
+                          resolve("You haven't changed anything yet")
                         }else{
                           resolve()
                         }
