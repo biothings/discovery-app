@@ -35,3 +35,34 @@ A Web Schema Visualization App
     python index.py --debug
     ```
 You should now be able to access the homepage at http://localhost:8000/
+
+## Run in Docker
+
+First refer to step 5 above to setup the credentials required to run the program.  
+The following commands should be issued under the first level project folder.  
+Make sure you have port `8000` and `9200` not in use when starting containers.
+
+### Build
+
+```
+docker-compose up --detach
+```
+
+### Stop and restart
+
+```
+docker-compose stop
+docker-compose start
+```
+
+### Update codebase
+
+```
+docker-compose exec web git pull
+```
+
+### Remove containers
+
+```
+docker-compose down
+```
