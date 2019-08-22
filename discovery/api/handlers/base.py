@@ -14,6 +14,7 @@ from tornado.httpclient import AsyncHTTPClient
 from torngithub import json_encode
 
 from discovery.api.es.doc import Schema
+from discovery.scripts.setup import es_data_setup
 
 L = logging.getLogger(__name__)
 
@@ -94,9 +95,15 @@ class APIBaseHandler(BaseHandler):
                 status_code = 400
                 self.set_status(status_code)
                 reason = str(exception)
-            elif isinstance(exception, (elasticsearch.exceptions.ConnectionError,
-                                        elasticsearch.exceptions.TransportError)):
+            elif isinstance(exception, elasticsearch.exceptions.ConnectionError) or \
+                    (isinstance(exception, elasticsearch.exceptions.TransportError) and
+                     exception.status_code == 'N/A'):
                 reason = 'elasticsearch connection error'
+            elif isinstance(exception, elasticsearch.exceptions.NotFoundError) and \
+                    exception.error == 'index_not_found_exception':
+                reason = 'initializing elasticsearch (try again later)'
+                status_code = 503
+                es_data_setup()
 
         template = {
             "code": status_code,
