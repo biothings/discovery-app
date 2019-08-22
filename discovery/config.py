@@ -25,6 +25,7 @@ from discovery.web.handlers import APP_LIST as WEB_ENDPOINTS
 # *****************************************************************************
 ES_INDEX = 'discover_class'
 ES_DOC_TYPE = '_doc'
+ES_HOST = ['localhost', 'es']
 
 # *****************************************************************************
 # Tornado URL Patterns
