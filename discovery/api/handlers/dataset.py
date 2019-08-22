@@ -62,7 +62,8 @@ class MetadataHandler(APIBaseHandler):
         assert "The JSON document is valid" in output,\
             "document did not pass validation"
 
-        meta = DatasetMetadata.from_json(doc, self.current_user)
+        private = self.get_query_argument('private', '').lower() == 'true'
+        meta = DatasetMetadata.from_json(doc, self.current_user, private)
         self.finish({
             'success': True,
             'result': meta.save(),
