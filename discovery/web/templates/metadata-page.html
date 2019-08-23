@@ -17,7 +17,7 @@
       <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
       <div class="grad p-2 m-2">
         <div class="bg-light p-4 text-center">
-          <p class="text-muted m-auto" v-text="metadata.description"></p>
+          <p class="text-muted m-auto" v-html="metadata.description"></p>
           <div class="d-flex flex-wrap mt-5 justify-content-center">
             <template v-for="item in metadata.keywords">
               <small class="text-muted m-1" ><i class="fas fa-tag"></i> <span v-text='item'></span></small>

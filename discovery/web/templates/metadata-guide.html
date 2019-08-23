@@ -140,7 +140,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="/static/js/lodash.js"></script>
 <script src="/static/js/notify.min.js"></script>
-<script src="/static/js/parsley.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
   const store = new Vuex.Store({
@@ -933,7 +932,7 @@
                 </template>
                 <!-- 🌈 URL 🌈 -->
                 <template v-if="info && info.format === 'uri'">
-                  <input type="url" data-parsley-type="url" v-model="userInput" class="form-control form-control-sm" placeholder="enter url here">
+                  <input type="url" v-model="userInput" class="form-control form-control-sm" placeholder="enter url here">
                 </template>
               </template>
               <!-- 🌈 ENUM 🌈 -->
@@ -1190,6 +1189,25 @@
             var payload = {};
             payload["name"] = schemaName;
             store.commit('saveSchemaName',payload);
+
+            Swal.fire({
+              title: 'Discovery Guide',
+              html:`<img alt="editor-help-1" src="/static/img/editor1.jpg" class="w-100" />
+                    <p class="text-muted">
+                      Click on any badge to begin.
+                    </p>
+                    <img alt="editor-help-2" src="/static/img/editor2.jpg" class="w-100" />
+                    <p class="text-muted">
+                      Registration and Download options will be available when you complete the required fields.
+                    </p>`,
+              confirmButtonColor:'#5C3069',
+              cancelButtonColor:'#006476',
+              animation:false,
+              showCancelButton: true,
+              customClass:'scale-in-center',
+              confirmButtonText: 'Got it!',
+              showCancelButton: false,
+            });
 
             self.parseData(res.data)
 
