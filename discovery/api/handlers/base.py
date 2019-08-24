@@ -95,15 +95,15 @@ class APIBaseHandler(BaseHandler):
                 status_code = 400
                 self.set_status(status_code)
                 reason = str(exception)
-            elif isinstance(exception, elasticsearch.exceptions.ConnectionError) or \
-                    (isinstance(exception, elasticsearch.exceptions.TransportError) and
-                     exception.status_code == 'N/A'):
+
+            elif isinstance(exception, elasticsearch.exceptions.ConnectionError):
                 reason = 'elasticsearch connection error'
+
             elif isinstance(exception, elasticsearch.exceptions.NotFoundError) and \
                     exception.error == 'index_not_found_exception':
-                reason = 'initializing elasticsearch (try again later)'
-                status_code = 503
                 es_data_setup()
+                self.redirect(self.request.uri)
+                return
 
         template = {
             "code": status_code,

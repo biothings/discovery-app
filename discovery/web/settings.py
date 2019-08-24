@@ -1,6 +1,15 @@
 from biothings.web.settings import BiothingESWebSettings
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl.connections import connections
+from elasticsearch import ConnectionSelector
+
+
+class KnownLiveSelecter(ConnectionSelector):
+    """
+    Select the first connection all the time
+    """
+
+    def select(self, connections):
+        return connections[0]
 
 
 class DiscoveryWebSettings(BiothingESWebSettings):
@@ -10,8 +19,8 @@ class DiscoveryWebSettings(BiothingESWebSettings):
         settings = {
             "hosts": self.ES_HOST,
             "timeout": self.ES_CLIENT_TIMEOUT,
-            "sniff_on_connection_fail": True,
             "max_retries": 1,
+            "timeout_cutoff": 1,
+            "selector_class": KnownLiveSelecter
         }
-        connections.create_connection(**settings)
-        return Elasticsearch(**settings)
+        return connections.create_connection(**settings)
