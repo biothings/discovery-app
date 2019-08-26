@@ -80,8 +80,18 @@ class MetadataHandler(APIBaseHandler):
 
         if not _id:
 
-            if self.get_query_argument('private', None) is not None:
+            if self.get_query_argument('private', 'false').lower() != 'false':
+
+                if not self.current_user:
+                    self.send_error(401)
+                    return
+
                 private = True
+
+                if self.get_query_argument('user', None):
+                    assert self.get_query_argument('user') == self.current_user, \
+                        "cannot access other users' private datasets"
+
                 user = self.current_user
             else:
                 private = False
