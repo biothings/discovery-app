@@ -200,10 +200,14 @@ class DatasetMetadata(Document):
         }
 
     @classmethod
-    def search(cls):
+    def search(cls, private=False):
         '''
             Exclude archived documents
         '''
+        if private:
+            return super().search().filter(
+                "term", **{"_meta.private": "true"})
+
         return super().search().exclude(
             "term", **{"_meta.private": "true"})
 
