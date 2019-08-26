@@ -44,13 +44,15 @@
           <div class="col-sm-12 col-md-6 p-3">
             <h5>Hard Coded</h5>
             <p>
-              <small>In your website's code immediately after the closing <code>&lt;head&gt;</code> tag, create a <code>&lt;script type="application/ld+json" &gt;</code>...<code>&lt;/script&gt;</code>  and paste the following text inside that tag:</small>
+              <small>In your website's code immediately after the closing <code>&lt;head&gt;</code> tag, paste the code here:</small>
             </p>
             </p>
             <small class="d-block text-muted">
-              <b>CLICK TO OPEN</b>
+              <b>CLICK TO DOWNLOAD</b>
             </small>
-            <button class="btn-secondary text-light btn m-auto" @click="getPreview">View Dataset Metadata</button>
+            <button class="btn-secondary text-light btn m-auto" @click="download()">Download HTML</button>
+            <br />
+            <small><a class="pointer" @click="getPreview()">View Metadata</a></small>
           </div>
         </div>
       </div>
@@ -155,7 +157,7 @@
           cancelButtonColor:'#006476',
           animation:false,
           customClass:'scale-in-center',
-          html: `<h6 class="text-center mainTextDark">COPY THIS CODE</h6><div class="text-left p-1 previewBox">
+          html: `<h6 class="text-center mainTextDark">Dataset Metadata</h6><div class="text-left p-1 previewBox">
                   <small>
                     <pre>
                       `+JSON.stringify(self.metadata,null,2)+`
@@ -163,6 +165,14 @@
                   </small>
                 </div>`
         });
+      },
+      download() {
+        var self = this;
+        var a = document.createElement("a");
+        var file = new Blob(['<sc'+'ript type="application/ld+json" >'+JSON.stringify(self.metadata,null,2)+'</scr'+'ipt>'], {type: 'text/html'});
+        a.href = URL.createObjectURL(file);
+        a.download = 'meta-download';
+        a.click();
       },
     },
     mounted:function(){

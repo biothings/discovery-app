@@ -89,6 +89,14 @@
                     <i class="fas fa-bolt fa-stack-1x text-light"></i>
                   </span>
                 </div>
+                <!-- <div>
+                  <span class="fa-stack fa-1x pointer tip" @click="edit(item._id)" :data-tippy-info="'Edit Privacy'">
+                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                    <i class="fas fa-lock fa-stack-1x text-light"></i>
+                  </span>
+                  <small class="text-warning tip bold" :data-tippy-info="'Only YOU can see this entry'">PRIVATE</small>
+                  <small class="text-info tip bold" :data-tippy-info="'Anybody can see this entry'">PUBLIC</small>
+                </div> -->
                 <div>
                   <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('metadata',item._id)" :data-tippy-info="'Delete'">
                     <i class="fas fa-circle text-muted fa-stack-2x"></i>
