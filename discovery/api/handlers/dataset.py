@@ -80,9 +80,14 @@ class MetadataHandler(APIBaseHandler):
 
         if not _id:
 
-            user = self.get_query_argument('user', None)
+            if self.get_query_argument('private', None) is not None:
+                private = True
+                user = self.current_user
+            else:
+                private = False
+                user = self.get_query_argument('user', None)
 
-            search = DatasetMetadata.search()
+            search = DatasetMetadata.search(private=private)
             search.params(rest_total_hits_as_int=True)
 
             if user:
