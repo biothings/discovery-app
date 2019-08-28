@@ -17,10 +17,10 @@
           <small class="bold text-muted">SHORTCUTS</small>
           <div class="d-flex justify-content-start">
             <div class="row m-1 cBox actions mainBackDark">
-              <div class="col-sm-9 p-2 text-light text-center d-flex align-items-center">
+              <div class="col-sm-8 p-2 text-light text-center d-flex align-items-center">
                 <small>Visualize Schema.org</small>
               </div>
-              <div class="col-sm-3 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+              <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
                 <span class="fa-stack fa-1x pointer unselectable" data-tippy="Visualize Classes in Schema.org" data-tippy-theme="light" @click.prevent="window.location.href='/schema/'">
                   <i class="fas fa-circle text-muted fa-stack-2x"></i>
                   <i class="fas fa-eye fa-stack-1x text-light"></i>
@@ -28,10 +28,10 @@
               </div>
             </div>
             <div class="row m-1 cBox actions mainBackDark">
-              <div class="col-sm-9 p-2 text-light text-center d-flex align-items-center">
+              <div class="col-sm-8 p-2 text-light text-center d-flex align-items-center">
                 <small>Visualize BioThings</small>
               </div>
-              <div class="col-sm-3 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+              <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
                 <span class="fa-stack fa-1x pointer unselectable" data-tippy="Visualize Classes in BioThings" data-tippy-theme="light" @click.prevent="window.location.href='/bts/'">
                   <i class="fas fa-circle text-muted fa-stack-2x"></i>
                   <i class="fas fa-eye fa-stack-1x text-light"></i>
@@ -44,12 +44,15 @@
           </div>
         </div>
       </div>
-      <div class="p-3">
+      <div class="mt-4">
         <form @submit.prevent="search(query)">
           <div class="row m-1 cBox actions bg-secondary">
             <div class="col-sm-10 p-2">
               <div class="">
                 <input class="form-control col-12" id="search_query" type="text" v-model="query" name="query" placeholder="Search..." >
+                <template v-show="registryTotal && registry.length">
+                  <small class="text-light" v-text="registryTotal+' Results'"></small>
+                </template>
               </div>
             </div>
             <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
@@ -66,14 +69,7 @@
         </form>
       </div>
 
-      <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
-
-      </div>
-      <ul class="list-group context" style="border-top:solid 3px var(--main)" id="regTippyParent">
-        <li class="list-group-item d-flex justify-content-center align-items-center text-muted p-1" style="background:#d0d0d0;">
-          <small v-if="registry.length && query" v-text="'results for '+query">
-          </small>
-        </li>
+      <ul class="list-group context" id="regTippyParent">
         <template v-if="registry.length" v-for="(item,index) in registryResults">
           <registry-item :item='item' :key="index"></registry-item>
         </template>
@@ -129,10 +125,10 @@
 Vue.component('preset-box', {
   props: ['preset'],
   template: `<div class="row m-1 cBox actions mainBackLight">
-              <div class="col-sm-9 p-2 text-light text-center d-flex align-items-center">
+              <div class="col-sm-8 p-2 text-light text-center d-flex align-items-center">
                 <small>Extend <span class="bold" v-text="preset.name"></span> schema</small>
               </div>
-              <div class="col-sm-3 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+              <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
                 <span class="fa-stack fa-1x pointer unselectable" data-tippy="Create a new schema from this starting point" data-tippy-theme="light" @click.prevent="handleClick()">
                   <i class="fas fa-circle text-muted fa-stack-2x"></i>
                   <i class="fas fa-plus fa-stack-1x text-light"></i>
