@@ -82,7 +82,7 @@
               <h1 :id="item.group" class="mainTextLight" v-text="item.group "></h1>
               <ul>
                 <li v-for="def in item.children">
-                  <a class="goLink" :href="'./'+def" v-text="def"></a>
+                  <a  :href="'./'+def" v-text="def"></a> <a v-show='namespaceRegistered' class="pointer extend tip" data-tipy="Extend" @click="extend(def)"><i class="fas fa-plus-circle"></i></a>
                 </li>
               </ul>
             </li>
@@ -99,37 +99,37 @@
           </ul>
           <ul class="tree">
             <li>
-              <a class="text-0 goLink" :href="'./'+rootNode" v-text="rootNode" ></a>
+              <a class="text-0 " :href="'./'+rootNode" v-text="rootNode" ></a>
               <ul>
                 <li v-for="item in getNeighbors(rootNode)">
-                  <a class="text-1 goLink" :href="'./'+item" v-text="item"></a>
+                  <a class="text-1 " :href="'./'+item" v-text="item"></a>
                   <ul>
                     <li v-for="item2 in getNeighbors(item)">
-                      <a class="text-2 goLink" :href="'./'+item2" v-text="item2"></a>
+                      <a class="text-2 " :href="'./'+item2" v-text="item2"></a>
                       <ul>
                         <li v-for="item3 in getNeighbors(item2)">
-                          <a class="text-3 goLink" :href="'./'+item3" v-text="item3"></a>
+                          <a class="text-3 " :href="'./'+item3" v-text="item3"></a>
                           <ul>
                             <li v-for="item4 in getNeighbors(item3)">
-                              <a class="text-4 goLink" :href="'./'+item4" v-text="item4"></a>
+                              <a class="text-4 " :href="'./'+item4" v-text="item4"></a>
                               <ul>
                                 <li v-for="item5 in getNeighbors(item4)">
-                                  <a class="text-5 goLink" :href="'./'+item5" v-text="item5"></a>
+                                  <a class="text-5 " :href="'./'+item5" v-text="item5"></a>
                                   <ul>
                                     <li v-for="item6 in getNeighbors(item5)">
-                                      <a class="text-6 goLink" :href="'./'+item6" v-text="item6"></a>
+                                      <a class="text-6 " :href="'./'+item6" v-text="item6"></a>
                                       <ul>
                                         <li v-for="item7 in getNeighbors(item6)">
-                                          <a class="text-7 goLink" :href="'./'+item7" v-text="item7"></a>
+                                          <a class="text-7 " :href="'./'+item7" v-text="item7"></a>
                                           <ul>
                                             <li v-for="item8 in getNeighbors(item7)">
-                                              <a class="text-8 goLink" :href="'./'+item8" v-text="item8"></a>
+                                              <a class="text-8 " :href="'./'+item8" v-text="item8"></a>
                                               <ul>
                                                 <li v-for="item9 in getNeighbors(item8)">
-                                                  <a class="text-9 goLink" :href="'./'+item9" v-text="item9"></a>
+                                                  <a class="text-9 " :href="'./'+item9" v-text="item9"></a>
                                                   <ul>
                                                     <li v-for="item10 in getNeighbors(item9)">
-                                                      <a class="text-10 goLink" :href="'./'+item10" v-text="item10"></a>
+                                                      <a class="text-10 " :href="'./'+item10" v-text="item10"></a>
                                                     </li>
                                                   </ul>
                                                 </li>
@@ -374,7 +374,6 @@
     },
     mounted: function(){
       var self = this;
-      console.log(self.name,self.fullinfo)
       tippy('#'+self.name, {
         content: "<div class='mainTextDark'><h3>"+self.name+"</h3><pre class='text-left text-muted wraptext d-block'>"+JSON.stringify(self.fullinfo,null,2)+"</pre></div>",
         placement: 'left',
@@ -1328,6 +1327,32 @@
             });
           }
         },
+        extend(itemname){
+    			var self = this;
+          Swal.fire({
+            title: "Extend class: "+itemname,
+            html:'<small>By entending this class you are creating a more specific version of this class</small>',
+            showCancelButton: true,
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            animation:false,
+            customClass:'scale-in-center',
+            confirmButtonText: 'Extend',
+          }).then((result) => {
+            if (result.value) {
+              let q = self.findClass(itemname);
+              axios.get('/api/registry/'+q.namespace+'/'+q.name).then(res=>{
+        				let obj = JSON.stringify(res.data)
+        				localStorage.setItem('EditorData',obj);
+        				localStorage.setItem('EditorStartingPoint',q.name);
+        				window.location.href ='/editor'
+        			}).catch(err=>{
+        				throw err;
+        			})
+            }
+          });
+
+        }
 			},
 			mounted:function(){
         let context = {{Context}}
