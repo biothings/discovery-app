@@ -15,7 +15,7 @@
       </h1>
       <small v-if="metadata && metadata.version"  class="text-muted d-block text-center" v-text="'Version '+metadata.version"></small>
       <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
-      <div class="grad p-2 m-2">
+      <div class="alert-secondary p-1 m-2">
         <div class="bg-light p-4 text-center">
           <p class="text-muted m-auto" v-html="metadata.description"></p>
           <div class="d-flex flex-wrap mt-5 justify-content-center">
@@ -28,31 +28,31 @@
         </div>
       </div>
       <div class="alert alert-secondary text-muted mt-5 ">
-        <h4>Embed this dataset on your website</h4>
-        <h5>Embedding options:</h5>
+        <h5>Embed this dataset on your website</h5>
+        <h6>Embedding options:</h6>
         <div class="row">
           <div class="col-sm-12 col-md-6 p-3">
-            <h5>Dynamic Embedding</h5>
+            <h6>Dynamic Embedding</h6>
             <p>
-              <small>Leave it up to us! Just copy the following code and paste it immediately after the closing <code>&lt;head&gt;</code> tag on your website's code.</small>
+              <small>Leave it up to us! Just copy the following code and paste it immediately after the closing <code>&lt;head&gt;</code> tag on your website's code. This javascript code will dynamically add this dataset metadata to your site and any changes made to it.</small>
             </p>
             <small class="d-block text-muted">
               <b>CLICK TO COPY</b>
             </small>
-            <input id="myInput" @click="copyScript()" data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="form-control p-2 w-75 m-auto pointer" v-model='scripttext' type="text"/>
+            <input id="myInput" @click="copyScript('myInput')" data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="form-control p-2 w-75 m-auto pointer" v-model='scripttext' type="text"/>
           </div>
           <div class="col-sm-12 col-md-6 p-3">
-            <h5>Hard Coded</h5>
+            <h6>Hard Coded</h6>
             <p>
-              <small>In your website's code immediately after the closing <code>&lt;head&gt;</code> tag, paste the code here:</small>
+              <small>In your website's code immediately after the closing <code>&lt;head&gt;</code> tag, paste the code below. This method will require you to input any changes manually.</small>
             </p>
             </p>
             <small class="d-block text-muted">
-              <b>CLICK TO DOWNLOAD</b>
+              <b>COPY THIS CODE:</b>
             </small>
-            <button class="btn-secondary text-light btn m-auto" @click="download()">Download HTML</button>
+            <button class="btn-secondary text-light btn m-auto" @click="getPreview()">View Code</button>
             <br />
-            <small><a class="pointer" @click="getPreview()">View Metadata</a></small>
+            <small><a class="pointer" @click="download()">Download Code</a></small>
           </div>
         </div>
       </div>
@@ -101,8 +101,8 @@
       generateScriptText(id){
         this.scripttext='<sc'+'ript src="'+window.location.origin+'/api/dataset/'+id+'.js"/></scr'+'ipt>'
       },
-      copyScript(){
-        var copyText = document.getElementById("myInput");
+      copyScript(id){
+        var copyText = document.getElementById(id);
         copyText.select();
         document.execCommand("Copy");
         Swal.fire({type:'success',
@@ -151,25 +151,28 @@
       },
       getPreview(){
         var self = this;
+        let txt = '&lt;sc'+'ript type="application/ld+json" &gt;'+JSON.stringify(self.metadata,null,2)+'&lt;/scr'+'ipt&gt;'
         Swal.fire({
           position: 'center',
           confirmButtonColor:'#5C3069',
           cancelButtonColor:'#006476',
           animation:false,
           customClass:'scale-in-center',
-          html: `<h6 class="text-center mainTextDark">Dataset Metadata</h6><div class="text-left p-1 previewBox">
-                  <small>
-                    <pre>
-                      `+JSON.stringify(self.metadata,null,2)+`
-                    </pre>
-                  </small>
+          html: `<h6 class="text-center mainTextDark">Copy this code</h6><div class="text-left previewBox">
+                  <div>
+                    <small>
+                      <pre>
+                        `+txt+`
+                      </pre>
+                    </small>
+                  </div>
                 </div>`
         });
       },
       download() {
         var self = this;
         var a = document.createElement("a");
-        var file = new Blob(['<sc'+'ript type="application/ld+json" >'+JSON.stringify(self.metadata,null,2)+'</scr'+'ipt>'], {type: 'text/html'});
+        var file = new Blob(['<sc'+'ript type="application/ld+json" >'+JSON.stringify(self.metadata,null,2)+'</scr'+'ipt>'], {type: 'text/plain'});
         a.href = URL.createObjectURL(file);
         a.download = 'meta-download';
         a.click();
