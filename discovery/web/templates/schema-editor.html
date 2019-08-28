@@ -703,7 +703,12 @@ var app = new Vue({
               axios.head(`/api/registry/`+value).then(function (res) {
                 self.availableNamespace= false;
               }).catch(err=>{
-                self.availableNamespace= true;
+                //last check for reserved names
+                if (value === 'metadata' || value === 'dataset') {
+                  self.availableNamespace= false;
+                }else{
+                  self.availableNamespace= true;
+                }
                 throw err;
               });
             }else{
