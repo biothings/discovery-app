@@ -28,7 +28,10 @@
         larger Web community, through public mailing lists such as <a target="_blank" href="https://lists.w3.org/Archives/Public/public-vocabs/">public-vocabs@w3.org</a>
         and through <a target="_blank" href="http://github.com/schemaorg/schemaorg">GitHub</a>. <a target="_blank" href="https://schema.org/">Learn More.</a>
          </p>
-        <h1 style="font-size:3em" class="logoText" v-if='namespace === "bts"' >BioThings</h1>
+        <h1 style="font-size:3em" class="logoText" v-if='namespace === "bts"' >BioLink Schema</h1>
+        <p class="text-muted" v-if='namespace === "bts"'>
+          A high level datamodel of biological entities (genes, diseases, phenotypes, pathways, individuals, substances, etc) and their associations. Maintained by <a target="_blank" rel="noreferrer" href="https://github.com/biolink">biolink</a>.
+         </p>
         <h1 style="font-size:3em" class="logoText" v-if='namespace === "ctsa"' >CTSA</h1>
         <h1 style="font-size:3em" class="logoText" v-if='namespaceRegistered === "schema"' v-text='namespace'></h1>
       </template>
@@ -66,7 +69,7 @@
         </div>
       </form>
     </div>
-    <div class="flipcard">
+    <div class="flipcard" id="regTippyParent">
       <div class="face front">
         <!-- alpabetical view -->
         <div id="alpabetical-order" class="text-left p-4 bg-light overflow-x-scroll">
@@ -83,7 +86,7 @@
               <ul>
                 <li v-for="def in item.children">
                   <a  :href="'./'+def" v-text="def"></a>
-                  <a v-show='namespaceRegistered' class="pointer extend tip" data-tipy="Extend" @click="extend(def)">
+                  <a v-show='namespaceRegistered' class="pointer tip text-muted" :data-tippy-info="'Extend '+def" @click="extend(def)">
                     <i class="fas fa-code-branch"></i>
                   </a>
                 </li>
@@ -102,7 +105,7 @@
           </ul>
           <ul class="tree">
             <li>
-              <a class="text-0 " :href="'./'+rootNode" v-text="rootNode" ></a>
+              <a class="text-0" :href="'./'+rootNode" v-text="rootNode"></a>
               <ul>
                 <li v-for="item in getNeighbors(rootNode)">
                   <a class="text-1 " :href="'./'+item" v-text="item"></a>
@@ -1387,6 +1390,17 @@
 			mounted:function(){
         let context = {{Context}}
         let self= this;
+        tippy( '#regTippyParent', {
+          target:'.tip',
+          placement:'top',
+          maxWidth:'200px',
+          content: 'loading',
+          animation: 'fade',
+          theme:'light',
+          onShow(instance) {
+            let info = instance.reference.dataset.tippyInfo;
+            instance.setContent(info)
+          }});
         self.checkUser()
          if ( context ) {
            self.query = context.query;
