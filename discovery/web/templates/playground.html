@@ -5,77 +5,94 @@
 
 </style>
 <div id="playground" class="container" style="min-height: 100vh;padding-top:60px;">
-  <div class="jumbotron bg-light text-center mt-5">
+  <div class="bg-light text-center mt-5">
     <h1 class="logoText">SCHEMA PLAYGROUND</h1>
 		<p class="text-muted">
       Create, Visualize and Register Your Own Schema
     </p>
+    <p class="text-center">
+      <a href="/registry">Go To Registry <i class="fas fa-chevron-right"></i></a>
+    </p>
   </div>
-  <div v-if="!choice" class=" jumbotron animatedBack row mb-4">
-    <div class="col-sm-12 mb-5">
-      <div class="p-5 w-75 text-center text-muted speech-bubble m-auto">
-        <h2 class="logoText">DO YOU HAVE A SCHEMA?</h2>
+  <div class="jumbotron bg-light row">
+    <div class="col-sm-12 p-5 message mb-4">
+      <div class="text-center">
+        <img alt="discovery" class="m-5 w-75 rounded" src="/static/img/create-schema.jpg" />
       </div>
-    </div>
-    <div class="col-sm-12">
-      <div class="row">
-        <buttom @click.prevent="choice='have'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted" style="white-space: normal;">
-          <h3 class="mainTextDark bold"><i class="fas fa-check-circle text-success"></i> Yes</h3>
-          <p>Visualize your schema <i class="fas fa-chevron-right"></i> Register your schema</p>
-        </buttom>
-        <buttom @click.prevent="choice='dont'" class="btn no-br col-sm-12 col-md-6 text-center p-5 btn-light text-muted" style="white-space: normal;">
-          <h3 class="mainTextLight bold"><i class="fas fa-times-circle text-danger"></i> No</h3>
-          <p>Browse existing schema classes <i class="fas fa-chevron-right"></i> Create your own schema by extending any schema class</p>
-        </buttom>
-      </div>
-    </div>
-  </div>
-  <div v-if="choice" class="">
-    <buttom @click.prevent="choice=''" class="btn w-100 text-center p-4 bg-danger text-light">
-      <i class="fas fa-chevron-left"></i> Back
-    </buttom>
-  </div>
-  <div v-if="choice === 'have'" class="jumbotron text-muted text-center">
-    <h3 class="logoText">VISUALIZE &amp; REGISTER YOUR SCHEMA</h3>
-    <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
-      <div class="form-group">
-        <label for="urlform">Paste your link here:</label>
-        <input style="margin:auto;"  v-model="input" id="urlform" autocomplete="" required ref="my_input" class="form-control" type="url" placeholder="Paste your link here" required="">
-        <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Submit</button>
-      </div>
-      <div v-if=loading class="loader">
-        <img src="./static/img/ripple.svg"/>
-      </div>
-      <small class="text-muted">Examples:</small>
-      <small class="badge badge-pill badge-secondary pointer mr-1"
-      @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
-        <i class="fas fa-question-circle" data-tippy="BioThings Schema"></i> BioThings Schema
-      </small>
-      <small class="badge badge-pill badge-secondary pointer mr-1"
-      @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
-        <i class="fas fa-question-circle" data-tippy="CTSA Schema"></i> CTSA Dataset Schema
-      </small>
-    </form>
-  </div>
-  <div v-if="choice === 'dont'" class="jumbotron text-muted text-center">
-    <h3 class="logoText">COMMON STARTING POINTS</h3>
-    <div class="d-flex align-items-center justify-content-around">
-      <template v-for='item in presets'>
-        <preset-box :preset='item'></preset-box>
-      </template>
-    </div>
-    <hr />
-    <div class="p-5">
-      <h4>
-        Don't see the right starting point?
-      </h4>
-      <h3 class="logoText">SEARCH FOR EXISTING SCHEMAS</h3>
-      <p>
-        The registry includes schemas from the community and <a target="_blank" href="https://schema.org/">Schema.org</a> core schemas.
+      <h1 class="text-center text-muted">What is a schema?</h1>
+      <p class="text-muted">
+        The term "schema" refers to the organization of data as a blueprint and can be thought of as the graphical depiction of the database structure.
+        A schema specifies the facts that can enter a database, or those of interest to the possible end-users.
       </p>
-      <a role="button" class="btn themeButton text-light pulse" href="/registry">Go To Registry</a>
+      <p class="text-muted">
+        A schema contains classes and properties, classes can be thought as a set of 'types', each associated with a set of properties. <i>Eg. class <a href="https://schema.org/Person" target="_blank">Person</a> has property <a href="https://schema.org/birthDate" target="_blank">birthDate</a></i>
+      </p>
+      <p class="text-muted">
+        Our <a href="/registry">registry</a> includes classes from <a target="_blank" href="https://schema.org/docs/schemas.html">Schema.org</a>'s schema. Schema.org provides an extensive collection of schema classes in addition to schema classes by the research community.'
+      </p>
+      <div class="alert grad text-center text-light mb-0">
+        <h4>Already have a schema?</h4>
+      </div>
+      <div class="text-center alert alert-secondary" >
+        <h4 class="logoText">Visualize and register your schema</h4>
+        <p class="text-muted">
+          <b class="mainTextDark">Visualize</b> your schema in a way easy to undertand.  The visualization can be registered as a homepage for your schema so you can share it.
+        </p>
+        <p class="text-muted">
+          <b class="mainTextDark">Register</b> your schema so others will be able to use your schema as a starting point to build their schema.
+        </p>
+        <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
+          <div class="form-group">
+            <input style="margin:auto;"  v-model="input" id="urlform" autocomplete="" required ref="my_input" class="form-control" type="url" placeholder="Paste your link here" required="">
+            <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Visualize</button>
+          </div>
+          <div v-if=loading class="loader">
+            <img src="./static/img/ripple.svg"/>
+          </div>
+          <small class="text-muted">Examples:</small>
+          <small class="badge badge-pill badge-secondary pointer mr-1"
+          @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
+            <i class="fas fa-question-circle" data-tippy="BioThings Schema"></i> BioThings Schema
+          </small>
+          <small class="badge badge-pill badge-secondary pointer mr-1"
+          @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
+            <i class="fas fa-question-circle" data-tippy="CTSA Schema"></i> CTSA Dataset Schema
+          </small>
+        </form>
+      </div>
+    </div>
+    <div class="col-sm-12 p-5 message mb-4">
+      <h1 class="text-center text-muted">Why do I need a schema?</h1>
+      <p class="text-muted">
+        A schema is a way to logically group objects such as tables, views, stored procedures etc.
+        In addition to providing a structure to your database, data based on an existing schema or extended from one makes your data <a target="_blank" href="https://en.wikipedia.org/wiki/Interoperability">interopeable</a>.
+      </p>
+      <p class="text-muted">
+        Furthermore, by creating a schema derived from an existing schema, you will be contributing to the <a target="_blank" href="https://en.wikipedia.org/wiki/Reusability">data reusability</a> efforts to make data more <a target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a>.
+      </p>
+      <div class="alert grad text-center text-light mb-0">
+        <h4>Don't have a schema?</h4>
+      </div>
+      <div class="text-center alert alert-secondary" >
+        <h4 class="logoText">Create a schema</h4>
+        <p class="text-muted">
+          <b class="mainTextDark">Create</b> your own schema by defining a more specific version of an existing schema class and create a schema tailored to your needs.
+        </p>
+        <h4 class="logoText">Create from common starting points:</h4>
+        <div class="d-flex align-items-center justify-content-around">
+          <template v-for='item in startingPoints'>
+            <preset-box :preset='item'></preset-box>
+          </template>
+        </div>
+        <div class="p-5">
+          <h4 class="logoText">Or search for a different starting point in the</h4>
+          <h2 class="logoText">SCHEMA REGISTRY</h2>
+          <a role="button" class="btn themeButton text-light m-3" href="/registry">Continue</a>
+        </div>
+      </div>
     </div>
   </div>
+
 </div>
 {% endblock %}
 {% block extra_scripts %}
@@ -86,33 +103,22 @@
 
 Vue.component('preset-box', {
   props: ['preset'],
-  data: function(){
-    return{
-
-    }
-  },
-  mounted:function(){
-
-  },
-  template: `<div class="message text-center p-4">
+  template: `<div class="message text-center text-muted p-4">
               <h4 class="m-1">
               <i v-if="preset.name === 'Dataset'" class="far fa-calendar"></i>
-              <i v-if="preset.name === 'Cvisb:Experiment'" class="fas fa-flask"></i>
-              <i v-if="preset.name === 'Cvisb:Sample'" class="fas fa-vial"></i>
-              <i v-if="preset.name === 'Cvisb:Patient'" class="fas fa-id-card"></i>
               <span v-text='preset.name'></span></h4>
               <small><span v-text='preset.description'></span></small>
               <br />
-              <a role="button" @click='handleClick(preset.name,preset.url)' class="btn themeButton text-light pulse m-1" href="#">Go</a>
+              <a role="button" @click='handleClick(preset.name,preset.url)' class="btn themeButton text-light pulse m-1" href="#">Extend</a>
             </div>`,
   methods: {
     handleClick(name,url){
 			var self = this;
-			axios.get('/api/registry/schema/schema:Dataset').then(res=>{
-				console.log(res.data)
+      console.log(self.item)
+			axios.get('/api/registry/'+self.preset.namespace+'/'+self.preset.prefix+':'+self.preset.name).then(res=>{
 				let obj = JSON.stringify(res.data)
 				localStorage.setItem('EditorData',obj);
-				localStorage.setItem('EditorStartingPoint','schema:'+name);
+				localStorage.setItem('EditorStartingPoint',self.preset.prefix+':'+self.preset.name);
 				window.location.href ='/editor'
 			}).catch(err=>{
 				throw err;
@@ -130,32 +136,13 @@ var app = new Vue({
           slug:'',
           choice:'',
           loading:false,
-          presets:[
+          startingPoints:[
 						{
-              'url':'https://schema.org/Dataset.jsonld',
+              'namespace':'schema',
+              'prefix':'schema',
               'name':'Dataset',
               'description':'A body of structured information describing some topic(s) of interest.'
             },
-            // {
-            //   'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_dataset.json',
-            //   'name':'Cvisb:Dataset',
-            //   'description':'A schema describing Dataset in the Center for Viral Systems Biology'
-            // },
-            // {
-            //   'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_experiment.json',
-            //   'name':'Cvisb:Experiment',
-            //   'description':'A schema describing a Systems Serology Experiment in the Center for Viral Systems Biology '
-            // },
-            // {
-            //   'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_patient.json',
-            //   'name':'Cvisb:Patient',
-            //   'description':'A schema describing a Patient/Person in the Center for Viral Systems Biology experiments '
-            // },
-            // {
-            //   'url':'https://raw.githubusercontent.com/data2health/schemas/master/cvisb/cvisb_sample.json',
-            //   'name':'Cvisb:Sample',
-            //   'description':'A schema describing a derived sample from a primary source in the Center for Viral Systems Biology '
-            // }
           ]
 				}
 			},
@@ -190,6 +177,56 @@ var app = new Vue({
         }
       },
 			methods:{
+        handleChoice(choice){
+          var self = this;
+          if (choice === 'visualize') {
+            Swal.fire({
+              title: 'Visualize a schema',
+              text:'Paste your link here:',
+              input: 'text',
+              inputAttributes: {
+                autocapitalize: 'off',
+              },
+              showCancelButton: true,
+              confirmButtonText: 'Go',
+              showLoaderOnConfirm: true,
+              preConfirm: (value) => {
+                if (value.includes('blob') || value.includes('github.com')) {
+                  self.suggestedURL = value.replace('blob/', '')
+                  .replace('github.com', 'raw.githubusercontent.com')
+                  .replace('www.github.com', 'raw.githubusercontent.com');;
+
+                  Swal({
+                    title: 'Link Converted',
+                    imageAlt: 'Warning',
+                    animation:false,
+                    customClass:'scale-in-center',
+                    html:
+                      '<p>We noticed that was not a raw data link. We have converted it to: </p> ' +
+                      '<p><a target="_blank" href="'+self.suggestedURL+'">'+self.suggestedURL+'</a></p>' +
+                      '<p>Proceed with this link?</p>',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, use this link!'
+                  }).then((result) => {
+                    if (result.value) {
+                      return result.value
+                    }
+                  });
+                }
+              },
+              allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+              if (result.value) {
+                self.input = result.value
+                this.sendRequest()
+              }
+            })
+          }else{
+            window.location.href = "./registry"
+          }
+        },
         getFormValues () {
           this.input = this.$refs.my_input.value;
           this.$refs.my_input.value = '';
@@ -230,7 +267,7 @@ var app = new Vue({
             Swal.fire({
               type: 'error',
               toast: true,
-              position: 'top center',
+              position: 'center',
               title: 'Oops',
               text: err
             });

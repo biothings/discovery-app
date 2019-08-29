@@ -216,6 +216,7 @@
       addToArrayFrom(state,payload){
         let field = payload['from'];
         let item = payload['item'];
+        console.log(item)
         //Initialize array
         if (!state.schema.validation.properties[field].value) {
           Vue.set(state.schema.validation.properties[field], 'value', [])
@@ -520,12 +521,12 @@
               url = ''
             }
             if (name) {
-              let person = {'name':name,'url':url};
+
               if (type === 'publisher') {
-                person['@type'] = 'Organization'
+                let person = {'@type':'Organization','name':name,'url':url};
               }
               if (type === 'creator' || type === 'contributor' ) {
-                person['@type'] = 'Person'
+                let person = {'@type':'Person','name':name,'url':url};
               }
               let self = this;
               var payload = {};
@@ -718,6 +719,18 @@
         }).queue(questions).then((result) => {
           if (result.value) {
             let obj = {}
+            switch (propName) {
+              case 'creator':
+                Vue.set(obj,'@type','Person')
+                break;
+                case 'contributor':
+                  Vue.set(obj,'@type','Person')
+                  break;
+                  case 'publisher':
+                    Vue.set(obj,'@type','Organization')
+                    break;
+              default:
+            }
             for (var i = 0; i < progressSteps.length; i++) {
               if (result.value[i].includes(",")) {
                 let val = result.value[i].split(',');
@@ -731,8 +744,8 @@
                   Vue.set(obj,progressSteps[i],val)
                 }
               }
-
             }
+
             var payload = {};
             payload["item"] = obj;
             payload["from"] = propName;
@@ -1298,7 +1311,7 @@
             Swal.fire({
               title: 'Register this dataset?',
               html:"<small>Are you all done? Click <b>Register Now</b> to proceed.</small>",
-              footer:`<small class='text-danger'>You won't be able to edit anymore after it's been registered.</small>`,
+              footer:`<small class='text-danger'>You will leave this page after successfully registerign this dataset.</small>`,
               confirmButtonColor:'#5C3069',
               cancelButtonColor:'#006476',
               animation:false,

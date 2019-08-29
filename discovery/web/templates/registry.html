@@ -12,19 +12,47 @@
 
     <div class="col-sm-12 col-md-10 col-lg-7 m-auto">
       <h1 class="text-center logoText mb-5 mt-5">REGISTRY</h1>
-      <div class="p-3">
-        <!-- <form @submit.prevent="search(query)">
-          <div class="form-group form-row">
-            <input class="form-control col-6" id="search_query" type="text" v-model="query" name="query" placeholder="Search Registry" >
-            <button class="col btn ml-2 themeButton text-light pulse" type="button" @click.prevent="search(query)">Search</button>
-            <button class="col btn ml-2 btn-secondary fill" type="button" @click.prevent="query='';registry=[]">Reset</button>
+      <div class="message p-1">
+        <div class="m-2">
+          <small class="bold text-muted">SHORTCUTS</small>
+          <div class="d-flex justify-content-start">
+            <div class="row m-1 cBox actions mainBackDark">
+              <div class="col-sm-8 p-2 text-light text-center d-flex align-items-center">
+                <small>Visualize Schema.org</small>
+              </div>
+              <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+                <span class="fa-stack fa-1x pointer unselectable" data-tippy="Visualize Classes in Schema.org" data-tippy-theme="light" @click.prevent="window.location.href='/schema/'">
+                  <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                  <i class="fas fa-eye fa-stack-1x text-light"></i>
+                </span>
+              </div>
+            </div>
+            <div class="row m-1 cBox actions mainBackDark">
+              <div class="col-sm-8 p-2 text-light text-center d-flex align-items-center">
+                <small>Visualize BioThings</small>
+              </div>
+              <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+                <span class="fa-stack fa-1x pointer unselectable" data-tippy="Visualize Classes in BioThings" data-tippy-theme="light" @click.prevent="window.location.href='/bts/'">
+                  <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                  <i class="fas fa-eye fa-stack-1x text-light"></i>
+                </span>
+              </div>
+            </div>
+            <template v-for='item in startingPoints'>
+              <preset-box :preset='item'></preset-box>
+            </template>
           </div>
-        </form> -->
+        </div>
+      </div>
+      <div class="mt-4">
         <form @submit.prevent="search(query)">
           <div class="row m-1 cBox actions bg-secondary">
             <div class="col-sm-10 p-2">
               <div class="">
                 <input class="form-control col-12" id="search_query" type="text" v-model="query" name="query" placeholder="Search..." >
+                <template v-show="registryTotal && registry.length">
+                  <small class="text-light" v-text="registryTotal+' Results'"></small>
+                </template>
               </div>
             </div>
             <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
@@ -33,31 +61,25 @@
                 <i class="fas fa-search fa-stack-1x text-light"></i>
               </span>
               <span class="fa-stack fa-1x pointer reset unselectable" @click.prevent="query='';registry=[]">
-                <i class="fas fa-circle fa-stack-2x text-muted"></i>
+                <i class="fas fa-circle fa-stack-2x text-danger"></i>
                 <i class="fas fa-undo fa-stack-1x text-light"></i>
               </span>
             </div>
           </div>
         </form>
       </div>
-      <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
 
-      </div>
-      <ul class="list-group context" style="border-top:solid 3px var(--main)" id="regTippyParent">
-        <li class="list-group-item d-flex justify-content-center align-items-center text-muted p-1" style="background:#d0d0d0;">
-          <small v-if="registry.length && query" v-text="'results for '+query">
-          </small>
-        </li>
+      <ul class="list-group context" id="regTippyParent">
         <template v-if="registry.length" v-for="(item,index) in registryResults">
           <registry-item :item='item' :key="index"></registry-item>
         </template>
         <li v-if="!registry.length" class="text-center text-muted list-group-item">
           <div class="jumbotron">
-            <h4>Search for existing schemas</h4>
+            <h4>Search for schema classes</h4>
             <h5>For example:</h5>
-            <a href="#" class="badge mainBackLight text-light mr-1" @click.prevent='search("Thing")'>Thing</a>
-            <a href="#" class="badge mainBackLight text-light mr-1" @click.prevent='search("CreativeWork")'>CreativeWork</a>
-            <a href="#" class="badge mainBackLight text-light mr-1" @click.prevent='search("Dataset")'>Dataset</a>
+            <a href="#" class="text-muted mr-1" @click.prevent='search("Thing")'>Thing <i class="fas fa-chevron-right"></i></a>
+            <a href="#" class="text-muted mr-1" @click.prevent='search("CreativeWork")'>CreativeWork <i class="fas fa-chevron-right"></i></a>
+            <a href="#" class="text-muted mr-1" @click.prevent='search("Dataset")'>Dataset <i class="fas fa-chevron-right"></i></a>
           </div>
         </li>
       </ul>
@@ -99,6 +121,34 @@
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
+
+Vue.component('preset-box', {
+  props: ['preset'],
+  template: `<div class="row m-1 cBox actions mainBackLight">
+              <div class="col-sm-8 p-2 text-light text-center d-flex align-items-center">
+                <small>Extend <span class="bold" v-text="preset.name"></span> schema</small>
+              </div>
+              <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+                <span class="fa-stack fa-1x pointer unselectable" data-tippy="Create a new schema from this starting point" data-tippy-theme="light" @click.prevent="handleClick()">
+                  <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                  <i class="fas fa-plus fa-stack-1x text-light"></i>
+                </span>
+              </div>
+            </div>`,
+  methods: {
+    handleClick(){
+			var self = this;
+			axios.get('/api/registry/'+self.preset.namespace+'/'+self.preset.prefix+':'+self.preset.name).then(res=>{
+				let obj = JSON.stringify(res.data)
+				localStorage.setItem('EditorData',obj);
+				localStorage.setItem('EditorStartingPoint',self.preset.prefix+':'+self.preset.name);
+				window.location.href ='/editor'
+			}).catch(err=>{
+				throw err;
+			})
+    }
+  }
+});
 
 Vue.component('registry-item', {
   data: function(){
@@ -213,6 +263,14 @@ var app = new Vue({
           pages: 1,
           perPage: 20,
           loading:false,
+          startingPoints:[
+						{
+              'namespace':'schema',
+              'prefix':'schema',
+              'name':'Dataset',
+              'description':'A body of structured information describing some topic(s) of interest.'
+            },
+          ]
 				}
 			},
       methods:{
@@ -348,6 +406,12 @@ var app = new Vue({
           content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
           animation: 'fade',
           theme:'light'});
+          tippy( '.reset', {
+            maxWidth:'200px',
+            placement:'top',
+            content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
+            animation: 'fade',
+            theme:'light'});
       tippy( '#regTippyParent', {
         target:'.tip',
         placement:'top',
