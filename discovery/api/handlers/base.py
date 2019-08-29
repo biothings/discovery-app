@@ -78,6 +78,13 @@ class APIBaseHandler(BaseHandler):
                         self.set_secure_cookie("user", json_encode(user))
                         self.current_user = user['login']
 
+    def get_boolean_argument(self, full_term, short_form=None):
+
+        if not short_form:
+            short_form = full_term
+        return self.get_query_argument(full_term, 'false').lower() in ['', 'true', '1'] or \
+            self.get_query_argument(short_form, 'false').lower() in ['', 'true', '1']
+
     def write_error(self, status_code, **kwargs):
 
         reason = kwargs.pop('reason', self._reason)
