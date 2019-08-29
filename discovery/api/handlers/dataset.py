@@ -80,7 +80,7 @@ class MetadataHandler(APIBaseHandler):
 
         if not _id:
 
-            if self.get_query_argument('private', 'false').lower() != 'false':
+            if self.get_boolean_argument('private'):
 
                 if not self.current_user:
                     self.send_error(401)
