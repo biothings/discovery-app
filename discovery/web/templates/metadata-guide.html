@@ -15,6 +15,9 @@
     </p>
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
+  <div class="text-right" v-if="validation">
+    <button class="btn btn-info text-light" @click="loadData()" data-tippy-content="Load existing data into this form"><i class="fas fa-download"></i> Load Data</button>
+  </div>
   <div id="widget">
     <ul class="nav nav-tabs">
       <li class="nav-item" v-if="userInfo && userInfo.login">
@@ -1444,6 +1447,110 @@
             confirmButtonText:"Ready!",
             imageUrl: '/static/img/metadata.png',
             imageAlt: 'Dataset Editor'
+          })
+        },
+        loadData(){
+          var self = this;
+
+          Swal.fire({
+            title: 'Load & Edit Existing Data',
+            text: "Load Data From:",
+            showCancelButton: true,
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            confirmButtonText: 'Dataset URL',
+            cancelButtonText: 'Registered',
+          }).then((result) => {
+            if (result.value) {
+              // URL
+              Swal.fire({
+                title: 'Enter the URL here',
+                input: 'text',
+                inputAttributes: {
+                  autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Go',
+                allowOutsideClick: () => !Swal.isLoading()
+              }).then((result) => {
+                if (result.value) {
+                  let url = result.value
+                  axios.get(url).then(res=>{
+                    let selected = res.data;
+                    for(key in selected){
+                      if (!['@context','@type','_id'].includes(key)) {
+                        var payload = {};
+                        if (typeof selected[key] === 'object') {
+                          let value = [selected[key]]
+                          payload["completed"] = {'name':key,'value':value};
+                          store.commit('markCompleted',payload);
+                        }else{
+                          let value = selected[key]
+                          payload["completed"] = {'name':key,'value':value};
+                          store.commit('markCompleted',payload);
+                        }
+
+                      }
+                    }
+                  }).catch(err=>{
+                    Swal.fire({
+                      type: 'error',
+                      title: 'Oops...',
+                      text: 'Something went wrong!',
+                    })
+                    throw err;
+                  })
+                }
+              })
+            }else{
+              Swal.isLoading()
+              axios.get('/api/dataset?&user='+self.userInfo.login).then(publicres=>{
+                // console.log("PUBLIC",res.data)
+                let list = publicres.data.hits;
+                axios.get('/api/dataset?private=true&user='+self.userInfo.login).then(privateres=>{
+                  list =list.concat(privateres.data.hits)
+                  let options = {};
+                  !Swal.isLoading()
+                  for (var i = 0; i < list.length; i++) {
+                    Vue.set(options,list[i]['name'],list[i]['name'])
+                  }
+                  Swal.fire({
+                    title: 'Select dataset to load',
+                    input: 'select',
+                    inputOptions: options,
+                    inputPlaceholder: 'Select a dataset',
+                    showCancelButton: true,
+                  }).then((result) => {
+                    if (result.value) {
+                      for (var i = 0; i < list.length; i++) {
+                        if (result.value === list[i]['name']) {
+                          let selected = list[i]
+                          for(key in selected){
+                            if (!['@context','@type','_id'].includes(key)) {
+                              var payload = {};
+                              if (typeof selected[key] === 'object') {
+                                let value = [selected[key]]
+                                payload["completed"] = {'name':key,'value':value};
+                                store.commit('markCompleted',payload);
+                              }else{
+                                let value = selected[key]
+                                payload["completed"] = {'name':key,'value':value};
+                                store.commit('markCompleted',payload);
+                              }
+
+                            }
+                          }
+                        }
+                      }
+                    }
+                  })
+                }).catch(err=>{
+                  throw err;
+                });
+              }).catch(err=>{
+                throw err;
+              });
+            }
           })
         }
 			},
