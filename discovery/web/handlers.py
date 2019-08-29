@@ -194,6 +194,7 @@ class PageNotFoundHandler(BaseHandler):
         doc_file = "404.html"
         doc_template = TEMPLATE_ENV.get_template(doc_file)
         doc_output = doc_template.render()
+        self.set_status(404)
         self.write(doc_output)
 
 class GuideIntroHandler(BaseHandler):
