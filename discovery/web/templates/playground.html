@@ -109,7 +109,7 @@ Vue.component('preset-box', {
               <span v-text='preset.name'></span></h4>
               <small><span v-text='preset.description'></span></small>
               <br />
-              <a role="button" @click='handleClick(preset.name,preset.url)' class="btn themeButton text-light pulse m-1" href="#">Extend</a>
+              <a role="button" @click='handleClick(preset.name,preset.url)' class="btn themeButton text-light pulse m-1" href="#"><i class="fas fa-code-branch"></i> Extend</a>
             </div>`,
   methods: {
     handleClick(name,url){

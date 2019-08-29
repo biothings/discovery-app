@@ -2,19 +2,19 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-
-
+[v-cloak] > * { display:none; }
+[v-cloak]::before { content: "Please wait..."; }
 </style>
-<div id="viewer" class="container pt-5">
+<div id="viewer" class="container pt-5" v-cloak>
   <!-- Loader -->
   <div v-if="loading" class="loader">
     <img src="/static/img/ripple.svg"/>
   </div>
   <!-- HOMEPAGE MODE -->
   <div class="jumbotron" v-if="!query">
-    <div class="engineBox w-50 m-auto p-2" v-show='!namespaceRegistered'>
-      <div class="bg-light p-3 text-center grad">
-        <h3 class="text-light">Register Your Schema</h3>
+    <div class="message w-50 m-auto p-2" v-show='!namespaceRegistered'>
+      <div class="p-3 text-center">
+        <h3 class="text-muted">Register Your Schema</h3>
         <button role="button" class="btn themeButton text-light" @click='openRegistration()'>Click Here</button>
       </div>
     </div>
@@ -70,7 +70,7 @@
       <div class="face front">
         <!-- alpabetical view -->
         <div id="alpabetical-order" class="text-left p-4 bg-light overflow-x-scroll">
-          <h1 class="logoText">Alphabetical</h1>
+          <h1 class="text-muted">Alphabetical</h1>
           <div v-show='developerMode' id="canvasTest"></div>
           <ul class="pagination overflow-x-scroll">
             <li class="page-link" v-for="(item,i) in classesGroupByLetter">
@@ -82,7 +82,10 @@
               <h1 :id="item.group" class="mainTextLight" v-text="item.group "></h1>
               <ul>
                 <li v-for="def in item.children">
-                  <a  :href="'./'+def" v-text="def"></a> <a v-show='namespaceRegistered' class="pointer extend tip" data-tipy="Extend" @click="extend(def)"><i class="fas fa-plus-circle"></i></a>
+                  <a  :href="'./'+def" v-text="def"></a>
+                  <a v-show='namespaceRegistered' class="pointer extend tip" data-tipy="Extend" @click="extend(def)">
+                    <i class="fas fa-code-branch"></i>
+                  </a>
                 </li>
               </ul>
             </li>
@@ -92,7 +95,7 @@
       <div class="face back">
         <!--hierarchical view -->
         <div id="hierarchical" class="text-left p-4 bg-light overflow-x-scroll">
-          <h1 class="logoText">Hierarchical</h1>
+          <h1 class="text-muted">Hierarchical</h1>
           <ul class="pagination">
             <li v-for="n in [0,1,2,3,4,5,6,7,8,9,10]" class="d-inline hierarchicalSwatch" :class="'bg-'+n" >
             </li>
@@ -209,7 +212,7 @@
       },
       saveSchema(state,payload){
         state.userSchema = payload['schema'];
-        console.log('saved schema 🦄 ...',state.userSchema)
+        // console.log('saved schema 🦄 ...',state.userSchema)
       },
       saveProps(state,payload){
         state.userSchemaProps = payload['props'];
@@ -276,17 +279,7 @@
   });
 
   Vue.component('more-info', {
-    data: function(){
-      return{
-
-      }
-    },
     props: [''],
-    methods:{
-
-    },
-    watch:{
-    },
     mounted: function(){
       var self = this;
       tippy('#showButton', {
@@ -311,9 +304,6 @@
         placement: 'left',
         theme:'light',
       })
-    },
-    computed: {
-
     },
     template:
     `<i id='showButton' class="fas fa-info-circle text-info"></i>`
@@ -544,10 +534,10 @@
       },
       getPropertiesFor(classInfo){
         var self = this;
-        console.log('getting props for ', classInfo.name);
+        // console.log('getting props for ', classInfo.name);
         if (classInfo.hasOwnProperty('properties') && classInfo['properties'].length>0) {
           return classInfo['properties'];
-          console.log('returning ', classInfo['properties']);
+          // console.log('returning ', classInfo['properties']);
         }else{
           return ['This class has no properties of its own']
         }
@@ -588,8 +578,24 @@
         return res
       },
       getLink(qName){
-        let link = [store.getters.handleLink(qName)];
-        return link;
+        try {
+          let link = [store.getters.handleLink(qName)];
+          return link;
+        } catch (e) {
+          if (qName.includes(':')) {
+            let arr = qName.split(':')
+            return '/'+arr[0]+'/'+arr[1]
+          }else{
+            return false
+          }
+        } finally {
+          if (qName.includes(':')) {
+            let arr = qName.split(':')
+            return '/'+arr[0]+'/'+arr[1]
+          }else{
+            return false
+          }
+        }
       }
     },
     watch:{
@@ -635,7 +641,7 @@
           <ul style="list-style:none;">
             <li v-for="path in getPaths(q)">
               <span v-for="(item,index) in path">
-                <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold small" :href="'./'+getName(item)" v-text="getName(item)"></a>
+                <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold" :href="'./'+getName(item)" v-text="getName(item)"></a>
                 <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right" :class='textColor'></i>&nbsp;</span>
               </span>
             </li>
@@ -1066,13 +1072,37 @@
         },
         findClass(query){
           let self = this;
-          if(self.developerMode)console.log('Looking in schema for CLASS: ',query)
-          for (var i = 0; i < self.userSchema['hits'].length; i++) {
-            if (self.userSchema['hits'][i]["label"] === query ) {
-              return self.userSchema['hits'][i];
+          if (self.namespace === 'schema') {
+            console.log("SCHEMA.org case")
+            return axios.get('/api/registry/'+self.namespace +'/'+'schema:'+self.query+'?v').then(res=>{
+              var payload = {};
+              payload["schema"] = res.data;
+              store.commit('saveSchema',payload);
+              this.userSchema = res.data
+              for (var i = 0; i < self.userSchema['hits'].length; i++) {
+                if (self.userSchema['hits'][i]["label"] === query ) {
+                  // console.log("MATCH",self.userSchema['hits'][i])
+                  let q = self.userSchema['hits'][i];
+                  self.getParentsOf(q);
+                  var payload = {};
+                  payload["queryContent"] = q;
+                  store.commit('savequeryStoreContent',payload);
+                }
+              }
+              return false;
+            }).catch(err=>{
+              throw err;
+            });
+
+          }else{
+            if(self.developerMode)console.log('Looking in schema for CLASS: ',query)
+            for (var i = 0; i < self.userSchema['hits'].length; i++) {
+              if (self.userSchema['hits'][i]["label"] === query ) {
+                return self.userSchema['hits'][i];
+              }
             }
+            return false;
           }
-          return false;
         },
         findProp(query){
           let self = this;
@@ -1125,6 +1155,7 @@
           return finalArr;
         },
         getParentsOf(classInfo){
+          // console.log("Getting parents of ",classInfo)
           var self = this;
           let res = [];
           if (classInfo.hasOwnProperty('parent_classes')) {
@@ -1142,7 +1173,6 @@
           return res;
         },
         getParentsInfo(list){
-          // console.log('Getting Parent Class Data...')
           var self= this;
           let res = [];
           for (var i = 0; i < list.length; i++) {
