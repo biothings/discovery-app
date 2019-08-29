@@ -29,12 +29,12 @@
         </div>
         <!-- RESULTS -->
         <div class="col-sm-10" id="dashTippyParent">
-          <div class="mt-3 mainTextLight">
-            <div class="numberCircle mainBackLight" v-text="dashboardTotal"></div> Registered Schema Namespaces
+          <div class="mt-3 mainTextDark">
+            <div class="numberCircle mainBackDark" v-text="dashboardTotal"></div> Registered Schema Namespaces
           </div>
           <template v-if="dashboard && dashboard.length">
             <div v-for="item in dashboard" class="row m-1">
-              <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
+              <div class="col-sm-5 p-1 mainBackDark d-flex align-items-center justify-content-left">
                 <a target="_blank" :href="'/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
               </div>
               <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
@@ -66,12 +66,12 @@
           </template>
 
 
-          <div class="mt-3 mainTextDark">
-            <div class="numberCircle mainBackDark" v-text="dashboardMetadataTotal"></div> Registered Datasets
+          <div class="mt-3 mainTextLight">
+            <div class="numberCircle mainBackLight" v-text="datasetsTotal"></div> Registered Datasets
           </div>
-          <template v-if="dashboardMetadata && dashboardMetadata.length">
-            <div v-for="item in dashboardMetadata" class="row m-1">
-              <div class="col-sm-5 p-1 mainBackDark d-flex align-items-center justify-content-left">
+          <template v-if="privateDatasets && privateDatasets.length">
+            <div v-for="item in privateDatasets" class="row m-1">
+              <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
                 <a target="_blank" :href="'/api/dataset/'+item._id" v-text="item.name" class="d-inline m-2 text-light"></a>
               </div>
               <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
@@ -89,14 +89,13 @@
                     <i class="fas fa-bolt fa-stack-1x text-light"></i>
                   </span>
                 </div>
-                <!-- <div>
-                  <span class="fa-stack fa-1x pointer tip" @click="edit(item._id)" :data-tippy-info="'Edit Privacy'">
+                <div>
+                  <span class="fa-stack fa-1x pointer tip" @click="handlePrivacy(item,'private')" :data-tippy-info="'Edit Privacy'">
                     <i class="fas fa-circle text-muted fa-stack-2x"></i>
                     <i class="fas fa-lock fa-stack-1x text-light"></i>
                   </span>
                   <small class="text-warning tip bold" :data-tippy-info="'Only YOU can see this entry'">PRIVATE</small>
-                  <small class="text-info tip bold" :data-tippy-info="'Anybody can see this entry'">PUBLIC</small>
-                </div> -->
+                </div>
                 <div>
                   <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('metadata',item._id)" :data-tippy-info="'Delete'">
                     <i class="fas fa-circle text-muted fa-stack-2x"></i>
@@ -104,7 +103,42 @@
                   </span>
                 </div>
               </div>
-
+            </div>
+          </template>
+          <template v-if="publicDatasets && publicDatasets.length">
+            <div v-for="item in publicDatasets" class="row m-1">
+              <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
+                <a target="_blank" :href="'/api/dataset/'+item._id" v-text="item.name" class="d-inline m-2 text-light"></a>
+              </div>
+              <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
+                <div>
+                  <a :href="'/dataset/'+item._id">
+                    <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'View Dataset'">
+                      <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                      <i class="fas fa-eye fa-stack-1x text-light"></i>
+                    </span>
+                  </a>
+                </div>
+                <div>
+                  <span class="fa-stack fa-1x pointer tip" @click="edit(item._id)" :data-tippy-info="'Quick Edit'">
+                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                    <i class="fas fa-bolt fa-stack-1x text-light"></i>
+                  </span>
+                </div>
+                <div>
+                  <span class="fa-stack fa-1x pointer tip" @click="handlePrivacy(item,'public')" :data-tippy-info="'Edit Privacy'">
+                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                    <i class="fas fa-lock-open fa-stack-1x text-light"></i>
+                  </span>
+                  <small class="text-info tip bold" :data-tippy-info="'Anybody can see this entry'">PUBLIC</small>
+                </div>
+                <div>
+                  <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('metadata',item._id)" :data-tippy-info="'Delete'">
+                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                    <i class="fas fa-trash fa-stack-1x text-light"></i>
+                  </span>
+                </div>
+              </div>
             </div>
           </template>
         </div>
@@ -127,9 +161,10 @@ var app = new Vue({
 				return {
           user:{},
           dashboard:[],
-          dashboardTotal:"0",
-          dashboardMetadata:[],
-          dashboardMetadataTotal:"0",
+          dashboardTotal:0,
+          privateDatasets:[],
+          publicDatasets:[],
+          datasetsTotal:0,
           selectedItem:{},
           slugInput:'',
           availableSlug: false,
@@ -178,6 +213,7 @@ var app = new Vue({
                 title: `Quick Edit`,
                 text:"Which field would you like to edit?",
                 input: 'select',
+                footer:"Making changes will change privacy to default: PUBLIC. You can change privacy settings again when you are done.",
                 inputOptions: list,
                 inputPlaceholder: 'Select a field to edit',
                 showCancelButton: true,
@@ -368,15 +404,49 @@ var app = new Vue({
             }).catch(err=>{
               throw err;
             });
-            // METADATA
-            axios.get('/api/dataset?user='+self.user.login).then(res=>{
-              // console.log("METADATA",res.data)
-              self.dashboardMetadata = res.data.hits;
-              self.dashboardMetadataTotal = res.data.total;
+            // DATASETS PUBLIC
+            axios.get('/api/dataset?&user='+self.user.login).then(res=>{
+              // console.log("PUBLIC",res.data)
+              self.publicDatasets = self.publicDatasets.concat(res.data.hits);
+              self.datasetsTotal += res.data.total;
+            }).catch(err=>{
+              throw err;
+            });
+            // DATASETS PRIVATE
+            axios.get('/api/dataset?private=true&user='+self.user.login).then(res=>{
+              // console.log("PRIVATE",res.data)
+              self.privateDatasets = self.privateDatasets.concat(res.data.hits);
+              self.datasetsTotal += res.data.total;
             }).catch(err=>{
               throw err;
             });
           }
+        },
+        handlePrivacy(item,privacyStatus){
+          var self = this;
+          var title = () => privacyStatus === 'private' ? '<h4>Make this item PUBLIC?</h4>' :'<h4>Make this item PRIVATE?</h4>'
+          Swal.fire({
+            title: title(),
+            footer: "<small>You can change the privacy settings anytime.</small>",
+            showCancelButton: true,
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            animation:false,
+            customClass:'scale-in-center',
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+          }).then((result) => {
+            if (result.value) {
+              let data = item;
+              var url = () => privacyStatus === 'private' ? '/api/dataset?private=false' :'/api/dataset?private=true'
+              axios.post(url(),data).then(res=>{
+                //reload with no cache
+                setTimeout(function(){ location.reload(true); }, 1000);
+              }).catch(err=>{
+                throw err;
+              })
+            }
+          });
         },
         checkLoggedUser(){
           var self = this;
