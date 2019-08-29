@@ -159,8 +159,29 @@ class RegistryHandler(APIBaseHandler):
             self.send_error(404)
             return
 
-        self.write(klass.to_dict())
-        return
+        if self.get_boolean_argument('verbose', 'v'):
+            queue = [klass]
+            index = 0
+            while index < len(queue):
+                for parent_line_string in klass.parent_classes:
+                    parents = parent_line_string.split(', ')
+                    ids = [f"{parent.split(':')[0]}::{parent}"
+                           for parent in parents if ':' in parent][::-1]
+                    for id in ids:
+                        klass = SchemaClass.get(id=id, ignore=404)
+                        if klass and klass not in queue:
+                            queue.append(klass)
+                index += 1
+            self.write({
+                "total": len(queue),
+                "names": [klass.meta.id.split('::')[1] for klass in queue],
+                "hits": [klass.to_dict() for klass in queue]
+            })
+            return
+
+        else:
+            self.write(klass.to_dict())
+            return
 
     @github_authenticated
     def delete(self, namespace):
