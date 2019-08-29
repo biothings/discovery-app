@@ -581,20 +581,21 @@
         return res
       },
       getLink(qName){
+
         try {
           let link = [store.getters.handleLink(qName)];
           return link;
         } catch (e) {
           if (qName.includes(':')) {
             let arr = qName.split(':')
-            return '/'+arr[0]+'/'+arr[1]
+            return ['./'+arr[arr.length-1]]
           }else{
             return false
           }
         } finally {
           if (qName.includes(':')) {
             let arr = qName.split(':')
-            return '/'+arr[0]+'/'+arr[1]
+            return ['./'+arr[arr.length-1]]
           }else{
             return false
           }
@@ -631,7 +632,7 @@
           <small class="text-muted">is a property of: </small>
           <template v-for='(item,index) in q.domain'>
             <template v-for="link in getLink(item)">
-              <a class='d-inline bold' :href='link' :target="link[0] !== '.'?'_blank':'_self'" :class="[ index !== q.domain.length-1 ? 'text-muted' : textColor]" >
+              <a class='d-inline bold mr-1' :href='link' :target="link[0] !== '.'?'_blank':'_self'" :class="[ index !== q.domain.length-1 ? 'text-muted' : textColor]" >
                 <small >
                   <span v-html='item'></span>
                 </small>
@@ -1077,7 +1078,7 @@
           let self = this;
           if (self.namespace === 'schema') {
             console.log("SCHEMA.org case")
-            return axios.get('/api/registry/'+self.namespace +'/'+'schema:'+self.query+'?v').then(res=>{
+            axios.get('/api/registry/'+self.namespace +'/'+'schema:'+self.query+'?v').then(res=>{
               var payload = {};
               payload["schema"] = res.data;
               store.commit('saveSchema',payload);
@@ -1109,7 +1110,7 @@
         },
         findProp(query){
           let self = this;
-          console.log('Looking in schema for PROP: ',query)
+          // console.log('Looking in schema for PROP: ',query)
           for (var i = 0; i < self.userSchemaAllProps.length; i++) {
             if (self.userSchemaAllProps[i]["label"] === query ) {
               return self.userSchemaAllProps[i];
