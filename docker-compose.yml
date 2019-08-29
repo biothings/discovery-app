@@ -14,12 +14,11 @@ services:
       - net0
 
   es:
-    image: elasticsearch:7.3.0
+    image: elasticsearch:7.3.1
     environment:
       - discovery.type=single-node
       - http.cors.enabled=true
-      - http.cors.allow-origin=http://localhost:1358,http://localhost:9000
-      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-origin=/https?:\/\/localhost(:[0-9]+)?/
     ports:
       - "9200:9200"
     networks:
