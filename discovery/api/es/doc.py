@@ -16,7 +16,7 @@ from datetime import datetime
 from discovery.api.adapters import ClassInfoDict
 
 from elasticsearch_dsl import (Binary, Date, Document, InnerDoc, Keyword,
-                               Nested, Object, Text, Boolean)
+                               Nested, Object, Text, Boolean, Q)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -71,9 +71,10 @@ class Schema(Document):
         return {k: v for k, v in contexts.items() if v}
 
     @classmethod
-    def exists(cls, url):
-
-        search = cls.search().source(False).query('term', url=url)
+    def exists(cls, url_or_ns):
+        '''check if a schema exists by url or namespace.'''
+        q = Q('bool', should=[Q('term', _id=url_or_ns), Q('term', url=url_or_ns)])
+        search = cls.search().source(False).query(q)
         return bool(search.execute().hits)
 
     def encode_raw(self, text):
