@@ -57,7 +57,7 @@ class RegistryHandler(APIBaseHandler):
                 status_code=403)
             return
 
-        if Schema.exists(url=url):
+        if Schema.exists(url):
 
             self.send_error(
                 reason="the provided url is already registered",
