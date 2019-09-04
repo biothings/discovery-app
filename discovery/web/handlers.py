@@ -11,6 +11,8 @@ from tornado.httputil import url_concat
 from torngithub import GithubMixin, json_decode, json_encode
 
 from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
+from discovery.api.es.doc import Schema
+
 
 GITHUB_CALLBACK_PATH = "/oauth"
 GITHUB_SCOPE = ""
@@ -26,6 +28,14 @@ class BaseHandler(BioThingsBaseHandler):
         if not user_json:
             return None
         return json_decode(user_json)
+
+    def return_404(self):
+        '''return a custom 404 page'''
+        doc_file = "404.html"
+        doc_template = TEMPLATE_ENV.get_template(doc_file)
+        doc_output = doc_template.render()
+        self.set_status(404)
+        self.write(doc_output)
 
 
 class MainHandler(BaseHandler):
@@ -165,11 +175,14 @@ class EditorHandler(BaseHandler):
 
 class VisualizerHandler(BaseHandler):
     def get(self, namespace=None, className=None):
-        test_file = "schema-viewer.html"
-        test_template = TEMPLATE_ENV.get_template(test_file)
-        test_output = test_template.render(Context=json.dumps(
-            {"namespace": namespace, "query": className}))
-        self.write(test_output)
+        if namespace == 'schema' or Schema.exists(namespace):
+            test_file = "schema-viewer.html"
+            test_template = TEMPLATE_ENV.get_template(test_file)
+            test_output = test_template.render(Context=json.dumps(
+                {"namespace": namespace, "query": className}))
+            self.write(test_output)
+        else:
+            self.return_404()
 
 class DatasetHandler(BaseHandler):
     def get(self, yourQuery=None):
@@ -191,11 +204,7 @@ class DatasetRegistryHandler(BaseHandler):
 
 class PageNotFoundHandler(BaseHandler):
     def get(self):
-        doc_file = "404.html"
-        doc_template = TEMPLATE_ENV.get_template(doc_file)
-        doc_output = doc_template.render()
-        self.set_status(404)
-        self.write(doc_output)
+        self.return_404()
 
 class GuideIntroHandler(BaseHandler):
     def get(self):
@@ -221,6 +230,6 @@ APP_LIST = [
     (r"/logout/?", LogoutHandler),
     (r"/dataset/?", DatasetRegistryHandler),
     (r"/dataset/([^/]+)/?", DatasetHandler),
-    (r"/([^/]+)/([^/]*)/?", VisualizerHandler),
+    (r"/([^/]+)/?([^/]*)/?", VisualizerHandler),
     (r".*", PageNotFoundHandler)
 ]
