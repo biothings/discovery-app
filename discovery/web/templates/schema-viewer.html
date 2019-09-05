@@ -69,7 +69,7 @@
         </div>
       </form>
     </div>
-    <div class="flipcard" id="regTippyParent">
+    <div class="flipcard">
       <div class="face front">
         <!-- alpabetical view -->
         <div id="alpabetical-order" class="text-left p-4 bg-light overflow-x-scroll">
@@ -85,7 +85,7 @@
               <h1 :id="item.group" class="mainTextLight" v-text="item.group "></h1>
               <ul>
                 <li v-for="def in item.children">
-                  <a  :href="'./'+def" v-text="def"></a>
+                  <a  :href="'/'+namespace+'/'+def" v-text="def"></a>
                   <a v-show='namespaceRegistered' class="pointer tip text-muted" :data-tippy-info="'Extend '+def" @click="extend(def)">
                     <i class="fas fa-code-branch"></i>
                   </a>
@@ -105,37 +105,37 @@
           </ul>
           <ul class="tree">
             <li>
-              <a class="text-0" :href="'./'+rootNode" v-text="rootNode"></a>
+              <a class="text-0" :href="'/'+namespace+'/'+rootNode" v-text="rootNode"></a>
               <ul>
                 <li v-for="item in getNeighbors(rootNode)">
-                  <a class="text-1 " :href="'./'+item" v-text="item"></a>
+                  <a class="text-1 " :href="'/'+namespace+'/'+item" v-text="item"></a>
                   <ul>
                     <li v-for="item2 in getNeighbors(item)">
-                      <a class="text-2 " :href="'./'+item2" v-text="item2"></a>
+                      <a class="text-2 " :href="'/'+namespace+'/'+item2" v-text="item2"></a>
                       <ul>
                         <li v-for="item3 in getNeighbors(item2)">
-                          <a class="text-3 " :href="'./'+item3" v-text="item3"></a>
+                          <a class="text-3 " :href="'/'+namespace+'/'+item3" v-text="item3"></a>
                           <ul>
                             <li v-for="item4 in getNeighbors(item3)">
-                              <a class="text-4 " :href="'./'+item4" v-text="item4"></a>
+                              <a class="text-4 " :href="'/'+namespace+'/'+item4" v-text="item4"></a>
                               <ul>
                                 <li v-for="item5 in getNeighbors(item4)">
-                                  <a class="text-5 " :href="'./'+item5" v-text="item5"></a>
+                                  <a class="text-5 " :href="'/'+namespace+'/'+item5" v-text="item5"></a>
                                   <ul>
                                     <li v-for="item6 in getNeighbors(item5)">
-                                      <a class="text-6 " :href="'./'+item6" v-text="item6"></a>
+                                      <a class="text-6 " :href="'/'+namespace+'/'+item6" v-text="item6"></a>
                                       <ul>
                                         <li v-for="item7 in getNeighbors(item6)">
-                                          <a class="text-7 " :href="'./'+item7" v-text="item7"></a>
+                                          <a class="text-7 " :href="'/'+namespace+'/'+item7" v-text="item7"></a>
                                           <ul>
                                             <li v-for="item8 in getNeighbors(item7)">
-                                              <a class="text-8 " :href="'./'+item8" v-text="item8"></a>
+                                              <a class="text-8 " :href="'/'+namespace+'/'+item8" v-text="item8"></a>
                                               <ul>
                                                 <li v-for="item9 in getNeighbors(item8)">
-                                                  <a class="text-9 " :href="'./'+item9" v-text="item9"></a>
+                                                  <a class="text-9 " :href="'/'+namespace+'/'+item9" v-text="item9"></a>
                                                   <ul>
                                                     <li v-for="item10 in getNeighbors(item9)">
-                                                      <a class="text-10 " :href="'./'+item10" v-text="item10"></a>
+                                                      <a class="text-10 " :href="'/'+namespace+'/'+item10" v-text="item10"></a>
                                                     </li>
                                                   </ul>
                                                 </li>
@@ -163,10 +163,15 @@
     </div>
   </div>
   <!-- QUERY MODE -->
-  <div class="jumbotron" v-if="query">
+  <div class="container" v-if="query">
     <!-- Navigation Options -->
-    <div style="height:50px;">
+    <!-- <div style="height:50px;">
       <a class="btn btn-outline-secondary float-left" role="button" :href="RemoveLastDirectoryPartOf(window.location.href)"><i class="fas fa-chevron-left"></i> Back</a>
+      <div class="d-inline">
+        <form @submit.prevent="searchView(q)">
+          <input class="form-control" type="text" v-model="q"/>
+        </form>
+      </div>
       <div v-if="queryContent && !queryContent.domain" class="float-right">
         <a @click='changeView' class="btn text-light" :class="[validationView?'btn-info':'mainBackDark']">
           <span v-if="!validationView">
@@ -178,12 +183,32 @@
         </a>
         <more-info></more-info>
       </div>
+    </div> -->
+    <div class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around">
+      <span class="fa-stack fa-1x pointer unselectable tip" :data-tippy-info="'Go Back'" @click.prevent="window.location.href=RemoveLastDirectoryPartOf(window.location.href)">
+        <i class="fas fa-circle text-muted fa-stack-2x"></i>
+        <i class="fas fa-chevron-left fa-stack-1x text-light"></i>
+      </span>
+      <div>
+        <div>
+          <input class="form-control text-light tip d-inline-block" @change="showAll()" :data-tippy-info="'Show/Hide All Properties On Page'"  type="checkbox" v-model="checkbox"/>
+        </div>
+      </div>
+      <div>
+        <span class="fa-stack fa-1x pointer unselectable" @click='changeView()' id="showButton">
+          <i class="fas fa-circle fa-stack-2x text-muted"></i>
+          <i class="fa-stack-1x text-light" :class="[validationView?'fas fa-star':'far fa-star']"></i>
+        </span>
+        <more-info></more-info>
+      </div>
     </div>
     <!-- CLASSES FOR QUERY -->
-    <query-box v-if='queryContent && userSchemaParents' :parent="false" :q='queryContent' :userSchema='userSchema'></query-box>
-    <template  v-if='queryContent && userSchemaParents' v-for='parent in userSchemaParents'>
-      <query-box v-show='!validationView' :parent="true" :q='parent' :userSchema='userSchema'></query-box>
-    </template>
+    <div class="context">
+      <query-box v-if='queryContent && userSchemaParents' :parent="false" :q='queryContent' :userSchema='userSchema'></query-box>
+      <template  v-if='queryContent && userSchemaParents' v-for='parent in userSchemaParents'>
+        <query-box v-show='!validationView' :parent="true" :q='parent' :userSchema='userSchema'></query-box>
+      </template>
+    </div>
   </div>
 
 </div>
@@ -192,6 +217,8 @@
 {% block extra_scripts %}
 <script src="https://unpkg.com/vuex"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 <script src="/static/js/lodash.js"></script>
 <script src="https://d3js.org/d3.v3.js"></script>
 <script src="/static/js/networkx.js"></script>
@@ -206,12 +233,16 @@
       'validationView':true,
       'userSchema':Object,
       'userSchemaProps':Array,
-      'queryStoreContent':Object
+      'queryStoreContent':Object,
+      'showAll':false,
     },
     strict: true,
     mutations: {
       toggleView (state) {
         state.validationView = !state.validationView
+      },
+      toggleShowAll (state) {
+        state.showAll = !state.showAll
       },
       saveSchema(state,payload){
         state.userSchema = payload['schema'];
@@ -233,6 +264,9 @@
       // exposed as store.getters.nameOfGetter
       getViewMode: state => {
         return state.validationView
+      },
+      getShowAll: state => {
+        return state.showAll
       },
       getDomainOfProp: (state) => (propname) => {
 
@@ -278,6 +312,11 @@
         }
         return res
       }
+    },
+    actions: {
+      toggleShowAll (context) {
+        context.commit('toggleShowAll')
+      }
     }
   });
 
@@ -289,7 +328,7 @@
         content: `<div class='m-0'><table class='table'>
           <tr>
             <td>
-              <small class='mainTextDark'><i class="fas fa-stream"></i> Show All Inherited Properties</small>
+              <small class='mainTextDark'><i class="far fa-star"></i> Show All Inherited Properties</small>
             </td>
             <td>
               <small>Shows all parents classes of the current class and their properties</small>
@@ -603,7 +642,14 @@
       }
     },
     watch:{
-
+      expandAll:function(exp){
+        var self = this;
+        if (exp) {
+          self.expand = true;
+        }else{
+          self.expand = false;
+        }
+      }
     },
     mounted: function(){
       var self = this;
@@ -622,6 +668,9 @@
     computed: {
       validationView () {
         return this.$store.state.validationView
+      },
+      expandAll () {
+        return this.$store.getters.getShowAll
       }
     },
     template:
@@ -679,7 +728,7 @@
             </h5>
             <button v-if='q && q.properties.length' @click='expand=!expand' style='border:2px solid white;' class='btn text-light ml-5' :class='backColor' v-text="expand?'Hide All':'Show All'"></button>
           </div>
-          <table v-show='expand' class="table mb-2" :class='parent?"table-striped-sec":"table-striped-main"'>
+          <table v-show='expand' class="table mb-2" :class='!parent?"table-striped-sec":"table-striped-main"'>
             <tbody>
               <tr v-if='q && q.properties' v-for="(item,i) in q.properties">
                 <td >
@@ -744,6 +793,7 @@
           filter:'',
           loading:false,
           queryContentParents:[],
+          checkbox:null
 				}
 			},
       computed:{
@@ -1386,12 +1436,15 @@
             }
           });
 
+        },
+        showAll(){
+          store.dispatch('toggleShowAll');
         }
 			},
 			mounted:function(){
         let context = {{Context}}
         let self= this;
-        tippy( '#regTippyParent', {
+        tippy( '#viewer', {
           target:'.tip',
           placement:'top',
           maxWidth:'200px',
@@ -1402,6 +1455,28 @@
             let info = instance.reference.dataset.tippyInfo;
             instance.setContent(info)
           }});
+          tippy('#showButton', {
+            content: `<div class='m-0'><table class='table'>
+              <tr>
+                <td>
+                  <small class='mainTextDark'><i class="far fa-star"></i> Show All Inherited Properties</small>
+                </td>
+                <td>
+                  <small>Shows all parents classes of the current class and their properties</small>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <small class='mainTextDark'><i class="fas fa-star"></i> Show Used Properties Only</small>
+                </td>
+                <td>
+                  <small>Shows only the current class and properties used specified in the <b>validation</b> field</small>
+                </td>
+              </tr>
+            </table></div>`,
+            placement: 'left',
+            theme:'light',
+          })
         self.checkUser()
          if ( context ) {
            self.query = context.query;
