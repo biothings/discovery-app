@@ -175,14 +175,11 @@ class EditorHandler(BaseHandler):
 
 class VisualizerHandler(BaseHandler):
     def get(self, namespace=None, className=None):
-        if namespace == 'schema' or Schema.exists(namespace):
-            test_file = "schema-viewer.html"
-            test_template = TEMPLATE_ENV.get_template(test_file)
-            test_output = test_template.render(Context=json.dumps(
-                {"namespace": namespace, "query": className}))
-            self.write(test_output)
-        else:
-            self.return_404()
+        test_file = "schema-viewer.html"
+        test_template = TEMPLATE_ENV.get_template(test_file)
+        test_output = test_template.render(Context=json.dumps(
+            {"namespace": namespace, "query": className}))
+        self.write(test_output)
 
 class DatasetHandler(BaseHandler):
     def get(self, yourQuery=None):
