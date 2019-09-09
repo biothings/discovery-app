@@ -15,9 +15,9 @@
     </p>
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
-  <div class="text-right" v-if="validation">
+  <!-- <div class="text-right" v-if="validation">
     <button class="btn btn-info text-light" @click="loadData()" data-tippy-content="Load existing data into this form"><i class="fas fa-download"></i> Load Data</button>
-  </div>
+  </div> -->
   <div id="widget">
     <ul class="nav nav-tabs">
       <li class="nav-item" v-if="userInfo && userInfo.login">
@@ -51,7 +51,7 @@
           </small>
         </a>
       </li>
-      <li class='nav-item'>
+      <li class='nav-item' id="registerReady">
         <a class='nav-link' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()">
           <small>
             <i class="fas fa-cloud-upload-alt"></i> Register
@@ -69,6 +69,13 @@
         <a class='nav-link text-muted pointer' @click.prevent="showHelp()">
           <small >
             <i class="fas fa-question-circle text-info"></i> Help!
+          </small>
+        </a>
+      </li>
+      <li class='nav-item' v-show="validation">
+        <a class='nav-link text-muted pointer' @click="loadData()">
+          <small class="text-info bold">
+            <i class="fas fa-download"></i> Load Existing Data
           </small>
         </a>
       </li>
@@ -130,8 +137,28 @@
         </div>
       </div>
       <!--  -->
-      <div v-if="validation" class="p-1 text-muted">
-        <small><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
+      <div v-if="validation" class="p-1 d-flex justify-content-center flex-wrap">
+        <template v-if="categoryTotals && categoryTotals.minimum" v-for="(totals,cat) in categoryTotals">
+          <chart :name="cat" :totals="totals" :key="cat"></chart>
+          <!-- Requires to NOT change the number of TODOs -->
+          <!-- <div class="row flex-fill p-1 m-2">
+            <div class="col-sm-2">
+              <small v-if="cat === 'google'"><i  class="fab fa-google googleText unselectable" ></i></small>
+              <small v-if="cat === 'google_req'"><i  class="fab fa-google text-danger unselectable" ></i></small>
+              <small v-if="cat === 'gold'"><i  class="fas fa-star text-warning unselectable" ></i></small>
+              <small v-if="cat === 'minimum'"><i  class="fas fa-seedling text-success unselectable" ></i></small>
+              <small>(<span v-text="totals.completed"></span>/<span v-text="totals.todo"></span>)</small>
+            </div>
+            <meter :value="totals.completed" low='1' :max="totals.todo" :high="totals.todo" class="col-sm-10 p-0"></meter>
+          </div> -->
+        </template>
+      </div>
+      <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
+        <small class="mr-1"><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
+        <small class="mr-1"><i class="fab fa-google googleText unselectable" ></i> = Recommended by Google</small>
+        <small class="mr-1"><i class="fab fa-google text-danger unselectable" ></i> = Required by Google</small>
+        <small class="mr-1"><i class="fas fa-star text-warning unselectable" ></i> = Gold-Standard Requirement</small>
+        <small class="mr-1"><i class="fas fa-seedling text-success unselectable" ></i> = Minimum Requirement</small>
       </div>
     </template>
   </div>
@@ -141,6 +168,7 @@
 {% block extra_scripts %}
 <script src="https://unpkg.com/vuex"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
 <script src="/static/js/lodash.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
@@ -219,7 +247,7 @@
       addToArrayFrom(state,payload){
         let field = payload['from'];
         let item = payload['item'];
-        console.log(item)
+        // console.log(item)
         //Initialize array
         if (!state.schema.validation.properties[field].value) {
           Vue.set(state.schema.validation.properties[field], 'value', [])
@@ -286,6 +314,35 @@
         }
 
       },
+      getCategoryTotals: (state)=>{
+        let cats = {}
+        if (state.schema.hasOwnProperty('validation')) {
+          for (key in state.schema.validation.properties) {
+            if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
+              for (var i = 0; i < state.schema.validation.properties[key]['categories'].length; i++) {
+                let c = state.schema.validation.properties[key]['categories'][i]
+                if(!cats.hasOwnProperty(c)) {
+                  Vue.set(cats,c,{'completed':0,'todo':1})
+                }else{
+                  cats[c]['todo']+=1
+                }
+              }
+            }
+          }
+          for (key in state.schema.validation.properties) {
+            if (state.schema.validation.properties[key] && state.schema.validation.properties[key].value) {
+              if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
+                for (var i = 0; i < state.schema.validation.properties[key]['categories'].length; i++) {
+                  let c = state.schema.validation.properties[key]['categories'][i]
+                  cats[c]['completed']+=1
+                  cats[c]['todo']-=1
+                }
+              }
+            }
+          }
+        }
+        return cats
+      },
       getPreview(state){
         return state.output
       },
@@ -315,84 +372,67 @@
     }
   });
 
-  // <!-- 🌈  CREATOR 🌈 -->
-  // <template v-if="info.type=== 'object' && name === 'creator'">
-  //   <div class="form-group p-2 row">
-  //     <button class="btn mainBackDark text-light m-auto" @click="addPerson('creator')"><i class="fas fa-plus"></i> Add Creator</button>
-  //   </div>
-  //   <div class="col-sm-12 m-auto">
-  //     <template v-for="(person,i) in userInput">
-  //       <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove">
-  //         <i class="fas fa-user"></i>
-  //         <span v-text="person.name"></span>
-  //         <span style="opacity:0;" class="d-inline" @click="removeItem(person.name)"> <i class="fas fa-times"></i></span>
-  //       </span>
-  //     </template>
-  //   </div>
-  //   <div class="alert alert-success m-3 w-75" v-show="userInput">
-  //     <small><b>Saved Creators:</b> </small>
-  //     <hr />
-  //     <template v-for="(person,i) in userInput">
-  //       <span :title="person.url"  class="text-success inputpreview mr-1" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i' >
-  //         <i class="fas fa-user"></i>
-  //         <span v-text="person.name"></span>
-  //       </span>
-  //       <small class="text-success" v-if="i !== userInput.length-1">, </small>
-  //     </template>
-  //   </div>
-  // </template>
-  // <!-- 🌈  PUBLISHER 🌈 -->
-  // <template v-if="info.type=== 'object' && name === 'publisher'">
-  //   <div class="form-group p-2 row">
-  //     <button class="btn mainBackDark text-light m-auto" @click="addPerson('publisher')"><i class="fas fa-plus"></i> Add Publisher</button>
-  //   </div>
-  //   <div class="col-sm-12 m-auto">
-  //     <template v-for="(person,i) in userInput">
-  //       <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
-  //         <i class="fas fa-building"></i>
-  //         <span v-text="person.name"></span>
-  //         <span style="opacity:0;" class="d-inline" @click="removeItem(person.name)"> <i class="fas fa-times"></i></span>
-  //       </span>
-  //     </template>
-  //   </div>
-  //   <div class="alert alert-success m-3 w-75" v-show="userInput">
-  //     <small><b>Saved Publishers:</b> </small>
-  //     <hr />
-  //     <template v-for="(person,i) in userInput">
-  //       <span :title="person.url"  class="text-success inputpreview mr-1" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
-  //         <i class="fas fa-building"></i>
-  //         <span v-text="person.name"></span>
-  //       </span>
-  //       <small class="text-success" v-if="i !== userInput.length-1">, </small>
-  //     </template>
-  //   </div>
-  // </template>
-  // <!-- 🌈  CITATIONS 🌈 -->
-  // <template v-if="info.type=== 'object' && name === 'citation'">
-  //   <div class="form-group p-2 row">
-  //     <button class="btn mainBackDark text-light m-auto" @click="addPerson('citation')"><i class="fas fa-plus"></i> Add Citation</button>
-  //   </div>
-  //   <div class="col-sm-12 m-auto">
-  //     <template v-for="(person,i) in userInput">
-  //       <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
-  //         <i class="fas fa-file-alt"></i>
-  //         <span v-text="person.name"></span>
-  //         <span style="opacity:0;" class="d-inline" @click="removeItem(person.name)"> <i class="fas fa-times"></i></span>
-  //       </span>
-  //     </template>
-  //   </div>
-  //   <div class="alert alert-success m-3 w-75" v-show="userInput">
-  //     <small><b>Saved Citations:</b> </small>
-  //     <hr />
-  //     <template v-for="(person,i) in userInput">
-  //       <span :title="person.url"  class="text-success inputpreview mr-1" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
-  //         <i class="fas fa-file-alt"></i>
-  //         <span v-text="person.name"></span>
-  //       </span>
-  //       <small class="text-success" v-if="i !== userInput.length-1">, </small>
-  //     </template>
-  //   </div>
-  // </template>
+  Vue.component('chart', {
+    data: function(){
+      return{
+      }
+    },
+    props: ['name','totals'],
+    methods:{
+      visualize(){
+        var self = this;
+        let progressColor = self['totals']['todo'] === 0 ?"#28A744":'#17A2B7'
+        new Chart(document.getElementById(self.name), {
+            type: 'pie',
+            data: {
+              labels: ["Done","To-Do"],
+              datasets: [{
+                backgroundColor: [progressColor,"#6c757d"],
+                data: [self.totals['completed'],self.totals['todo']]
+              }]
+            },
+            options: {
+              animation: false,
+              title: {
+                display: false,
+                text:self.name
+              },
+              legend:{
+                display:false
+              },
+              elements: {
+                arc: {
+                    borderWidth: 0
+                }
+              }
+            }
+        });
+      }
+    },
+    watch:{
+      totals:function(n){
+        this.visualize()
+      }
+    },
+    mounted: function(){
+
+    },
+    computed: {
+
+    },
+    template:
+    `<div>
+      <div class="text-center">
+        <small v-if="name === 'google'"><i  class="fab fa-google googleText unselectable fa-2x" ></i></small>
+        <small v-if="name === 'google_req'"><i  class="fab fa-google text-danger unselectable fa-2x" ></i></small>
+        <small v-if="name === 'gold'"><i  class="fas fa-star text-warning unselectable fa-2x" ></i></small>
+        <small v-if="name === 'minimum'"><i  class="fas fa-seedling text-success unselectable fa-2x" ></i></small>
+      </div>
+      <canvas :id=name width="100"></canvas>
+    </div>`
+  });
+
+
 
 
   Vue.component('input-box', {
@@ -889,6 +929,19 @@
             instance.setContent("<div class='text-muted m-0 text-left wraptext'><pre>"+info+"</pre></div>")
           }
         });
+
+        tippy( '#widget', {
+            target:'.info',
+            content: 'Loading...',
+            maxWidth:'200px',
+            placement:'left',
+            animation: 'fade',
+            theme:'light',
+            onShow(instance) {
+              let info = instance.reference.dataset.tippyInfo;
+              instance.setContent("<div class='text-muted m-0'>"+info+"</div>")
+            }
+          });
     },
     computed: {
       isRequired:function(){
@@ -925,10 +978,21 @@
             </small>
           </div>
         </div>
-        <div class="col-sm-1 left-arrow bg-secondary">
-
+        <div class="col-sm-2 categoryBox bg-dark d-flex align-items-center justify-content-center">
+          <div>
+            <small class="text-light">Completing Will Satisfy:</small>
+            <br />
+            <div>
+              <template v-if="info && info.categories" v-for="category in info.categories">
+                <i v-if="category==='google'" class="fab fa-google googleText info mr-1" data-tippy-info="Recommended by Google"></i>
+                <i v-if="category==='google_req'" class="fab fa-google text-danger info mr-1" data-tippy-info="Required by Google"></i>
+                <i v-if="category==='gold'" class="fas fa-star text-warning info mr-1" data-tippy-info="Gold Standard"></i>
+                <i v-if="category==='minimum'" class="fas fa-seedling text-success info mr-1" data-tippy-info="Minimum Requirement"></i>
+              </template>
+            </div>
+          </div>
         </div>
-        <div class="col-sm-9 p-2 inputmain text-left">
+        <div class="col-sm-8 p-2 inputmain text-left">
           <div class="row">
             <div class="col-sm-4 d-flex align-items-center justify-content-start">
               <small v-text="name" class="propDescription mainTextLight bold pointer mr-1"></small>
@@ -1156,7 +1220,11 @@
               'url':'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json',
               'description':'A schema describing Dataset from CTSA center'
             },
-          ]
+          ],
+          categories:{
+            'google_req':['name','description'],
+            'google':['name','description','alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
+          }
 				}
 			},
       computed:{
@@ -1164,10 +1232,88 @@
           return store.getters.getValidation
         },
         isComplete:function(){
-          return store.getters.isComplete
+          let res = store.getters.isComplete
+          if (res) {
+            $.notify.addStyle('trophy', {
+              html: `<div class="bg-dark p-1 text-light">
+                  <i class="fas fa-thumbs-up text-success"></i> <span data-notify-text/>
+                </div>`,
+                classes: {
+                  base: {
+                    "white-space": "nowrap",
+                    "background-color": "#343a40",
+                    "padding": "5px",
+                    "color":'white',
+                    "border-radius":"5px"
+                  }
+                }
+            });
+            // id is the id of the chart
+            $("#registerReady").notify("Available Now",{style:'trophy', showDuration: 40, });
+          }
+          return res
         },
         totals:function(){
           return store.getters.getTotals
+        },
+        categoryTotals:function(){
+          let totals = store.getters.getCategoryTotals
+          for (key in totals) {
+            if (totals[key]['todo'] === 0) {
+              $.notify.addStyle('trophy', {
+                html: `<div class="bg-dark p-1 text-light">
+                    <i class="fas fa-trophy text-warning"></i> <span data-notify-text/>
+                  </div>`,
+                  classes: {
+                    base: {
+                      "white-space": "nowrap",
+                      "background-color": "#343a40",
+                      "padding": "5px",
+                      "color":'white',
+                      "border-radius":"5px"
+                    }
+                  }
+              });
+              // id is the id of the chart
+              $("#"+key).notify("Complete!",{style:'trophy', showDuration: 40, });
+            }else if (totals[key]['completed'] > totals[key]['todo']/2 ) {
+              $.notify.addStyle('trophyb', {
+                html: `<div class="bg-dark p-1 text-light">
+                    <i class="fas fa-hand-rock text-info"></i> <span data-notify-text/>
+                  </div>`,
+                  classes: {
+                    base: {
+                      "white-space": "nowrap",
+                      "background-color": "#343a40",
+                      "padding": "5px",
+                      "color":'white',
+                      "border-radius":"5px"
+                    }
+                  }
+              });
+              // id is the id of the chart
+              $("#"+key).notify("Almost there!",{style:'trophyb', showDuration: 40, });
+            }
+            else if (totals[key]['completed'] === 0) {
+              $.notify.addStyle('trophyc', {
+                html: `<div class="bg-dark p-1 text-light">
+                    <i class="fas fa-frown-open text-danger"></i> <span data-notify-text/>
+                  </div>`,
+                  classes: {
+                    base: {
+                      "white-space": "nowrap",
+                      "background-color": "#343a40",
+                      "padding": "5px",
+                      "color":'white',
+                      "border-radius":"5px"
+                    }
+                  }
+              });
+              // id is the id of the chart
+              $("#"+key).notify("Nothing Yet!",{style:'trophyc', showDuration: 40, });
+            }
+          }
+          return totals
         }
       },
       watch:{
@@ -1234,7 +1380,7 @@
           })
         },
         parseData(data){
-
+          let self = this;
           let schemaName = store.getters.getSchemaName
 
           if (data.hits) {
@@ -1242,17 +1388,39 @@
               if (data.hits[i].hasOwnProperty('name')) {
                 if (data.hits[i].name.includes(schemaName)) {
                   var payload = {};
-                  payload["schema"] = data.hits[i];
+                  payload["schema"] = self.assignCategories(data.hits[i]);
                   store.commit('saveSchema',payload);
                 }
               }else if (data.hits[i].hasOwnProperty('label')) {
                 if (data.hits[i].label.includes(schemaName)) {
                   var payload = {};
-                  payload["schema"] = data.hits[i];
+                  payload["schema"] = self.assignCategories(data.hits[i]);
                   store.commit('saveSchema',payload);
                 }
               }
             }
+          }
+        },
+        assignCategories(schema){
+          var self = this;
+          if (schema.hasOwnProperty('validation')) {
+            //set minimum req by schema
+            if (schema['validation'].hasOwnProperty('required')) {
+              Vue.set(self.categories,'minimum',schema['validation']['required'])
+            }
+            for (prop in schema['validation']['properties']) {
+              //set default
+              Vue.set(schema['validation']['properties'][prop],'categories',['gold']);
+              //assign if found
+              for (category in self.categories) {
+                if (self.categories[category].includes(prop)) {
+                  schema['validation']['properties'][prop]['categories'].unshift(category);
+                }
+              }
+            }
+            return schema
+          }else{
+            return schema
           }
         },
         reset(){
@@ -1503,14 +1671,12 @@
                 }
               })
             }else{
-              Swal.isLoading()
               axios.get('/api/dataset?&user='+self.userInfo.login).then(publicres=>{
                 // console.log("PUBLIC",res.data)
                 let list = publicres.data.hits;
                 axios.get('/api/dataset?private=true&user='+self.userInfo.login).then(privateres=>{
                   list =list.concat(privateres.data.hits)
                   let options = {};
-                  !Swal.isLoading()
                   for (var i = 0; i < list.length; i++) {
                     Vue.set(options,list[i]['name'],list[i]['name'])
                   }
