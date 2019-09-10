@@ -565,12 +565,22 @@
             }
             if (name) {
 
-              if (type === 'publisher') {
-                let person = {'@type':'Organization','name':name,'url':url};
+              let person = {'name':name,'url':url};
+
+              switch (type) {
+                case 'publisher':
+                  Vue.set(person,'@type','Organization')
+                  break;
+                case 'creator':
+                  Vue.set(person,'@type','Person')
+                  break;
+                case 'contributor':
+                  Vue.set(person,'@type','Person')
+                  break;
+                default:
+                  Vue.set(person,'@type','Thing')
               }
-              if (type === 'creator' || type === 'contributor' ) {
-                let person = {'@type':'Person','name':name,'url':url};
-              }
+
               let self = this;
               var payload = {};
               payload["item"] = person;
