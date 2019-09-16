@@ -861,7 +861,7 @@ ul.tree, ul.tree ul {
     }
 
     .buildBack{
-      background-image: url('/static/img/build.jpeg');
+      background-image: url('/static/img/buildnew.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -875,7 +875,7 @@ ul.tree, ul.tree ul {
     }
 
     .discoverBack{
-      background-image: url('/static/img/discover.jpg');
+      background-image: url('/static/img/discovernew.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
