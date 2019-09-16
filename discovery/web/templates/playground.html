@@ -270,8 +270,8 @@ var app = new Vue({
               type: 'error',
               toast: true,
               position: 'center',
-              title: 'Oops',
-              text: err
+              title: 'Failed because: ',
+              text: err.response.data.reason
             });
             throw err;
           })

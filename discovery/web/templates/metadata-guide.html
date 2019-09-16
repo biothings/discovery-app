@@ -1538,8 +1538,8 @@
                     type: 'error',
                     toast: true,
                     position: 'top center',
-                    title: 'Registration Failed: ',
-                    text: err
+                    title: 'Registration failed because: ',
+                    text: err.response.data.reason
                   });
                 })
               },
