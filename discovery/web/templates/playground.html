@@ -16,80 +16,101 @@
   </div>
   <div class="jumbotron bg-light row">
     <div class="col-sm-12 p-5 message mb-4">
-      <div class="text-center">
-        <img alt="discovery" class="m-5 w-75 rounded" src="/static/img/create-schema.jpg" />
-      </div>
       <h1 class="text-center text-muted">What is a schema?</h1>
-      <p class="text-muted">
-        The term "schema" refers to the organization of data as a blueprint and can be thought of as the graphical depiction of the database structure.
-        A schema specifies the facts that can enter a database, or those of interest to the possible end-users.
-      </p>
-      <p class="text-muted">
-        A schema contains classes and properties, classes can be thought as a set of 'types', each associated with a set of properties. <i>Eg. class <a href="https://schema.org/Person" target="_blank">Person</a> has property <a href="https://schema.org/birthDate" target="_blank">birthDate</a></i>
-      </p>
-      <p class="text-muted">
-        Our <a href="/registry">registry</a> includes classes from <a target="_blank" href="https://schema.org/docs/schemas.html">Schema.org</a>'s schema. Schema.org provides an extensive collection of schema classes in addition to schema classes by the research community.'
-      </p>
+      <div class="alert alert-light m-5 p-3">
+        <p class="text-muted">
+          The term "schema" refers to the organization of data as a blueprint and can be thought of as the graphical depiction of the database structure.
+          A schema specifies the facts that can enter a database, or those of interest to the possible end-users.
+        </p>
+        <p class="text-muted">
+          A schema contains classes and properties, classes can be thought as a set of 'types', each associated with a set of properties. <i>Eg. class <a href="https://schema.org/Person" target="_blank">Person</a> has property <a href="https://schema.org/birthDate" target="_blank">birthDate</a></i>
+        </p>
+        <p class="text-muted">
+          Our <a href="/registry">registry</a> includes classes from <a target="_blank" href="https://schema.org/docs/schemas.html">Schema.org</a>'s schema. Schema.org provides an extensive collection of schema classes in addition to schema classes by the research community.'
+        </p>
+      </div>
       <div class="alert grad text-center text-light mb-0">
         <h4>Already have a schema?</h4>
       </div>
       <div class="text-center alert alert-secondary" >
-        <img width="300px" src="/static/img/visualize-01.png" style="border-radius:20px;" alt="join us"/>
+
         <h4 class="logoText">Visualize and register your schema</h4>
-        <p class="text-muted">
-          <b class="mainTextDark">Visualize</b> your schema in a way easy to undertand.  The visualization can be registered as a homepage for your schema so you can share it.
-        </p>
-        <p class="text-muted">
-          <b class="mainTextDark">Register</b> your schema so others will be able to use your schema as a starting point to build their schema.
-        </p>
-        <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
-          <div class="form-group">
-            <input style="margin:auto;"  v-model="input" id="urlform" autocomplete="" required ref="my_input" class="form-control" type="url" placeholder="Paste your link here" required="">
-            <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Visualize</button>
+        <div class="row">
+          <div class="col-sm-6">
+            <img class="w-75" src="/static/img/visualize-01.png" alt="Visualize"/>
+            <p class="text-muted">
+              <b class="mainTextDark">Visualize</b> your schema in a way easy to undertand.  The visualization can be registered as a homepage for your schema so you can share it.
+            </p>
           </div>
-          <div v-if=loading class="loader">
-            <img src="./static/img/ripple.svg"/>
+          <div class="col-sm-6">
+            <img class="w-75" src="/static/img/registerschema.png" alt="Register"/>
+            <p class="text-muted">
+              <b class="mainTextDark">Register</b> your schema so others will be able to use your schema as a starting point to build their schema.
+            </p>
           </div>
-          <small class="text-muted">Examples:</small>
-          <small class="badge badge-pill badge-secondary pointer mr-1"
-          @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
-            <i class="fas fa-question-circle" data-tippy="BioThings Schema"></i> BioThings Schema
-          </small>
-          <small class="badge badge-pill badge-secondary pointer mr-1"
-          @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
-            <i class="fas fa-question-circle" data-tippy="CTSA Schema"></i> CTSA Dataset Schema
-          </small>
-        </form>
+        </div>
+        <div class="alert p-4 alert-dark">
+          <h4 class="logoText">Start Here</h4>
+          <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
+            <div class="form-group">
+              <input style="margin:auto;"  v-model="input" id="urlform" autocomplete="" required ref="my_input" class="form-control" type="url" placeholder="Paste your link here" required="">
+              <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Visualize</button>
+            </div>
+            <div v-if=loading class="loader">
+              <img src="./static/img/ripple.svg"/>
+            </div>
+            <small class="text-muted">Examples:</small>
+            <small class="badge badge-pill badge-secondary pointer mr-1"
+            @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
+              <i class="fas fa-question-circle" data-tippy="BioThings Schema"></i> BioThings Schema
+            </small>
+            <small class="badge badge-pill badge-secondary pointer mr-1"
+            @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
+              <i class="fas fa-question-circle" data-tippy="CTSA Schema"></i> CTSA Dataset Schema
+            </small>
+          </form>
+        </div>
       </div>
     </div>
     <div class="col-sm-12 p-5 message mb-4">
       <h1 class="text-center text-muted">Why do I need a schema?</h1>
-      <p class="text-muted">
-        A schema is a way to logically group objects such as tables, views, stored procedures etc.
-        In addition to providing a structure to your database, data based on an existing schema or extended from one makes your data <a target="_blank" href="https://en.wikipedia.org/wiki/Interoperability">interopeable</a>.
-      </p>
-      <p class="text-muted">
-        Furthermore, by creating a schema derived from an existing schema, you will be contributing to the <a target="_blank" href="https://en.wikipedia.org/wiki/Reusability">data reusability</a> efforts to make data more <a target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a>.
-      </p>
+      <div class="alert alert-light m-5 p-3">
+        <p class="text-muted">
+          A schema is a way to logically group objects such as tables, views, stored procedures etc.
+          In addition to providing a structure to your database, data based on an existing schema or extended from one makes your data <a target="_blank" href="https://en.wikipedia.org/wiki/Interoperability">interopeable</a>.
+        </p>
+        <p class="text-muted">
+          Furthermore, by creating a schema derived from an existing schema, you will be contributing to the <a target="_blank" href="https://en.wikipedia.org/wiki/Reusability">data reusability</a> efforts to make data more <a target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a>.
+        </p>
+      </div>
       <div class="alert grad text-center text-light mb-0">
         <h4>Don't have a schema?</h4>
       </div>
       <div class="text-center alert alert-secondary" >
-        <img width="300px" src="/static/img/create-01.png" style="border-radius:20px;" alt="join us"/>
         <h4 class="logoText">Create a schema</h4>
-        <p class="text-muted">
-          <b class="mainTextDark">Create</b> your own schema by defining a more specific version of an existing schema class and create a schema tailored to your needs.
-        </p>
-        <h4 class="logoText">Create from common starting points:</h4>
-        <div class="d-flex align-items-center justify-content-around">
-          <template v-for='item in startingPoints'>
-            <preset-box :preset='item'></preset-box>
-          </template>
+        <div class="row">
+          <div class="col-sm-6 m-auto">
+            <img class="w-75" src="/static/img/create-01.png" alt="Create"/>
+            <p class="text-muted w-75 m-auto">
+              <b class="mainTextDark">Create</b> your own schema by defining a more specific version of an existing schema class and create a schema tailored to your needs.
+            </p>
+          </div>
         </div>
-        <div class="p-5">
-          <h4 class="logoText">Or search for a different starting point in the</h4>
-          <h2 class="logoText">SCHEMA REGISTRY</h2>
-          <a role="button" class="btn themeButton text-light m-3" href="/registry">Continue</a>
+        <div class="alert p-4 alert-dark mt-3">
+          <h4 class="logoText">
+            Create from common starting points (&starf;):
+          </h4>
+
+          <div class="d-flex align-items-center justify-content-around">
+            <template v-for='item in startingPoints'>
+              <preset-box :preset='item'></preset-box>
+            </template>
+          </div>
+          <div class="p-5">
+            <h4 class="text-muted">OR <br />Search for a different starting point in the</h4>
+            <h2 class="logoText">SCHEMA REGISTRY</h2>
+            <a role="button" class="btn themeButton text-light m-3" href="/registry">Continue</a>
+          </div>
         </div>
       </div>
     </div>
@@ -107,7 +128,7 @@ Vue.component('preset-box', {
   props: ['preset'],
   template: `<div class="message text-center text-muted p-4">
               <h4 class="m-1">
-              <i v-if="preset.name === 'Dataset'" class="far fa-calendar"></i>
+              <span>&starf;</span>
               <span v-text='preset.name'></span></h4>
               <small><span v-text='preset.description'></span></small>
               <br />

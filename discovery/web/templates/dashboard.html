@@ -141,6 +141,13 @@
               </div>
             </div>
           </template>
+          <template v-if="publicDatasets || privateDatasets">
+            <div class="alert alert-secondary mt-3">
+              <small>
+                Want to edit a registered dataset? Learn how <a target="_blank" href="/faq#edit-dataset">HERE</a>
+              </small>
+            </div>
+          </template>
         </div>
       </div>
     </div>
