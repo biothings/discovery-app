@@ -1362,25 +1362,6 @@
             payload["name"] = schemaName;
             store.commit('saveSchemaName',payload);
 
-            Swal.fire({
-              title: 'Discovery Guide',
-              html:`<img alt="editor-help-1" src="/static/img/editor1.jpg" class="w-100" />
-                    <p class="text-muted">
-                      Click on any badge to begin.
-                    </p>
-                    <img alt="editor-help-2" src="/static/img/editor2.jpg" class="w-100" />
-                    <p class="text-muted">
-                      Registration and Download options will be available when you complete the required fields.
-                    </p>`,
-              confirmButtonColor:'#5C3069',
-              cancelButtonColor:'#006476',
-              animation:false,
-              showCancelButton: true,
-              customClass:'scale-in-center',
-              confirmButtonText: 'Got it!',
-              showCancelButton: false,
-            });
-
             self.parseData(res.data)
 
             self.loading = false;
