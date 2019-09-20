@@ -2,7 +2,9 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-
+  .highlight{
+    outline: #ffc107 3px solid !important;
+  }
 </style>
 <div id="guide" class="container pt-5" style="min-height:90vh;">
   <div v-if=loading class="loader">
@@ -15,9 +17,6 @@
     </p>
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
-  <!-- <div class="text-right" v-if="validation">
-    <button class="btn btn-info text-light" @click="loadData()" data-tippy-content="Load existing data into this form"><i class="fas fa-download"></i> Load Data</button>
-  </div> -->
   <div id="widget">
     <ul class="nav nav-tabs">
       <li class="nav-item" v-if="userInfo && userInfo.login">
@@ -107,7 +106,7 @@
       <div v-if="validation" class="whitefade tippyContainer">
         <div class="p-1 message text-left mb-0" style="border-radius:5px">
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 badge-dark pointer badgeDesc" @click='selectProp(index)' v-if="prop && !prop.value">
+            <span class="badge m-1 badge-dark pointer badgeDesc" @click='selectProp(index)' v-if="prop && !prop.value" :class="[prop.highlighted ? 'highlight': '']">
               <small v-text='index'></small>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
             </span>
@@ -121,7 +120,7 @@
       <div v-if="validation" class="whitefade tippyContainer">
         <div class="alert alert-success text-left mb-0">
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 badge-success pointer" @click='selectProp(index)' v-if="prop && prop.value">
+            <span class="badge m-1 badge-success pointer" @click='selectProp(index)' v-if="prop && prop.value" :class="[prop.highlighted ? 'highlight': '']">
               <i class="fas fa-check-circle"></i> <small v-text='index'></small>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
             </span>
@@ -136,29 +135,31 @@
           </template>
         </div>
       </div>
-      <!--  -->
-      <div v-if="validation" class="p-1 d-flex justify-content-center flex-wrap">
-        <template v-if="categoryTotals && categoryTotals.minimum" v-for="(totals,cat) in categoryTotals">
+      <!-- CHARTS -->
+      <!-- <div v-if="validation" class="p-1 d-flex justify-content-center flex-wrap">
+        <template v-if="categoryTotals && categoryTotals.Google" v-for="(totals,cat) in categoryTotals">
           <chart :name="cat" :totals="totals" :key="cat"></chart>
-          <!-- Requires to NOT change the number of TODOs -->
-          <!-- <div class="row flex-fill p-1 m-2">
-            <div class="col-sm-2">
-              <small v-if="cat === 'google'"><i  class="fab fa-google googleText unselectable" ></i></small>
-              <small v-if="cat === 'google_req'"><i  class="fab fa-google text-danger unselectable" ></i></small>
-              <small v-if="cat === 'gold'"><i  class="fas fa-star text-warning unselectable" ></i></small>
-              <small v-if="cat === 'minimum'"><i  class="fas fa-seedling text-success unselectable" ></i></small>
-              <small>(<span v-text="totals.completed"></span>/<span v-text="totals.todo"></span>)</small>
-            </div>
-            <meter :value="totals.completed" low='1' :max="totals.todo" :high="totals.todo" class="col-sm-10 p-0"></meter>
-          </div> -->
+        </template>
+      </div> -->
+      <div v-if="validation" class="p-1 d-flex justify-content-center flex-wrap">
+        <template v-if="categoryTotals && categoryTotals.Google" v-for="(subcats,cat) in categoryTotals">
+          <div class="message m-1 text-center p-1">
+            <small  class="bold text-info d-block">
+              <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
+              <span v-text="cat"></span>
+            </small>
+            <template v-for="(totals,subcat) in subcats">
+              <chart class="d-inline-block" :name="subcat" :unique="cat+subcat" :maincategory="cat" :totals="totals" :key="cat"></chart>
+            </template>
+          </div>
         </template>
       </div>
       <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
         <small class="mr-1"><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
-        <small class="mr-1"><i class="fab fa-google googleText unselectable" ></i> = Recommended by Google</small>
-        <small class="mr-1"><i class="fab fa-google text-danger unselectable" ></i> = Required by Google</small>
-        <small class="mr-1"><i class="fas fa-star text-warning unselectable" ></i> = Gold-Standard Requirement</small>
-        <small class="mr-1"><i class="fas fa-seedling text-success unselectable" ></i> = Minimum Requirement</small>
+        <small class="mr-1"><i class="fas fa-stop text-danger unselectable" ></i> = Required Incomplete</small>
+        <small class="mr-1"><i class="fas fa-stop text-muted unselectable" ></i> = Incomplete</small>
+        <small class="mr-1"><i class="fas fa-stop text-info unselectable" ></i> = Progress</small>
+        <small class="mr-1"><i class="fas fa-stop text-success unselectable" ></i> = Complete</small>
       </div>
     </template>
   </div>
@@ -204,6 +205,27 @@
             Vue.set(state.schema.validation.properties[selection],'selected',true);
           }else{
             Vue.set(state.schema.validation.properties[key],'selected',false);
+          }
+        }
+      },
+      highlight(state,payload){
+        let cat = payload['category'];
+        let subcat = payload['subcategory'];
+        for (prop in state.schema.validation.properties) {
+          Vue.set(state.schema.validation.properties[prop],'highlighted',false);
+        }
+        for (prop in state.schema.validation.properties) {
+          if (state.schema.validation.properties[prop].hasOwnProperty('categories')) {
+            for (var i = 0; i < state.schema.validation.properties[prop]['categories'].length; i++) {
+              if (state.schema.validation.properties[prop]['categories'][i]['category'] === cat && state.schema.validation.properties[prop]['categories'][i]['subcategory'] === subcat  ) {
+                //Match found
+                if (state.schema.validation.properties[prop]['highlighted']) {
+                  Vue.set(state.schema.validation.properties[prop],'highlighted',false);
+                }else {
+                  Vue.set(state.schema.validation.properties[prop],'highlighted',true);
+                }
+              }
+            }
           }
         }
       },
@@ -316,31 +338,91 @@
       },
       getCategoryTotals: (state)=>{
         let cats = {}
+        // if (state.schema.hasOwnProperty('validation')) {
+        //   for (key in state.schema.validation.properties) {
+        //     if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
+        //       for (var i = 0; i < state.schema.validation.properties[key]['categories'].length; i++) {
+        //         let c = state.schema.validation.properties[key]['categories'][i]
+        //         if(!cats.hasOwnProperty(c)) {
+        //           Vue.set(cats,c,{'completed':0,'todo':1})
+        //         }else{
+        //           cats[c]['todo']+=1
+        //         }
+        //       }
+        //     }
+        //   }
+        //   for (key in state.schema.validation.properties) {
+        //     if (state.schema.validation.properties[key] && state.schema.validation.properties[key].value) {
+        //       if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
+        //         for (var i = 0; i < state.schema.validation.properties[key]['categories'].length; i++) {
+        //           let c = state.schema.validation.properties[key]['categories'][i]
+        //           cats[c]['completed']+=1
+        //           cats[c]['todo']-=1
+        //         }
+        //       }
+        //     }
+        //   }
+        // }
+        // return cats
         if (state.schema.hasOwnProperty('validation')) {
           for (key in state.schema.validation.properties) {
             if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
               for (var i = 0; i < state.schema.validation.properties[key]['categories'].length; i++) {
-                let c = state.schema.validation.properties[key]['categories'][i]
+                let c = state.schema.validation.properties[key]['categories'][i]['category']
                 if(!cats.hasOwnProperty(c)) {
-                  Vue.set(cats,c,{'completed':0,'todo':1})
+                  Vue.set(cats,c,{})
+                  Vue.set(cats[c],'Required',{'completed':0,'todo':0})
+                  Vue.set(cats[c],'Recommended',{'completed':0,'todo':0})
+
+                  switch (state.schema.validation.properties[key]['categories'][i]['subcategory']) {
+                    case 'Required':
+                      cats[c]['Required']['todo'] += 1
+                      break;
+                    case 'Recommended':
+                      cats[c]['Recommended']['todo'] += 1
+                      break;
+                    default:
+                  }
+
                 }else{
-                  cats[c]['todo']+=1
+                  switch (state.schema.validation.properties[key]['categories'][i]['subcategory']) {
+                    case 'Required':
+                      cats[c]['Required']['todo'] += 1
+                      break;
+                    case 'Recommended':
+                      cats[c]['Recommended']['todo'] += 1
+                      break;
+                    default:
+                  }
                 }
               }
             }
           }
+          // UPDATE TOTALS
           for (key in state.schema.validation.properties) {
             if (state.schema.validation.properties[key] && state.schema.validation.properties[key].value) {
               if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
                 for (var i = 0; i < state.schema.validation.properties[key]['categories'].length; i++) {
-                  let c = state.schema.validation.properties[key]['categories'][i]
-                  cats[c]['completed']+=1
-                  cats[c]['todo']-=1
+
+                  let c = state.schema.validation.properties[key]['categories'][i]['category']
+
+                  switch (state.schema.validation.properties[key]['categories'][i]['subcategory']) {
+                    case 'Required':
+                      cats[c]['Required']['todo'] -= 1
+                      cats[c]['Required']['completed'] += 1
+                      break;
+                    case 'Recommended':
+                      cats[c]['Recommended']['todo'] -= 1
+                      cats[c]['Recommended']['completed'] += 1
+                      break;
+                    default:
+                  }
                 }
               }
             }
           }
         }
+        console.log('CATS',cats)
         return cats
       },
       getPreview(state){
@@ -377,17 +459,18 @@
       return{
       }
     },
-    props: ['name','totals'],
+    props: ['name','totals','unique','maincategory'],
     methods:{
       visualize(){
         var self = this;
         let progressColor = self['totals']['todo'] === 0 ?"#28A744":'#17A2B7'
-        new Chart(document.getElementById(self.name), {
+        let mainColor = self.name === "Required" ? "#dc3545":"#6c757d"
+        new Chart(document.getElementById(self.unique), {
             type: 'pie',
             data: {
               labels: ["Done","To-Do"],
               datasets: [{
-                backgroundColor: [progressColor,"#6c757d"],
+                backgroundColor: [progressColor,mainColor],
                 data: [self.totals['completed'],self.totals['todo']]
               }]
             },
@@ -407,7 +490,15 @@
               }
             }
         });
-      }
+      },
+      highlight(){
+        var self = this;
+
+        var payload = {};
+        payload["category"] = self.maincategory;
+        payload["subcategory"] = self.name;
+        store.commit('highlight',payload);
+      },
     },
     watch:{
       totals:function(n){
@@ -415,20 +506,27 @@
       }
     },
     mounted: function(){
-
+      tippy( '.fa-highlighter', {
+        maxWidth:'200px',
+        placement:'top',
+        content: '<div class="text-muted m-0" style="border-radius:none">Highlight All</div>',
+        animation: 'fade',
+        theme:'light'});
     },
     computed: {
 
     },
     template:
-    `<div>
+    `<div class="chartBox">
       <div class="text-center">
-        <small v-if="name === 'google'"><i  class="fab fa-google googleText unselectable fa-2x" ></i></small>
-        <small v-if="name === 'google_req'"><i  class="fab fa-google text-danger unselectable fa-2x" ></i></small>
-        <small v-if="name === 'gold'"><i  class="fas fa-star text-warning unselectable fa-2x" ></i></small>
-        <small v-if="name === 'minimum'"><i  class="fas fa-seedling text-success unselectable fa-2x" ></i></small>
+        <small :class="[name === 'Required' ? 'text-danger': 'text-muted']">
+          <span v-text="name"></span>
+          <span class="badge badge-dark badge-pill pointer unselectable" @click="highlight()">
+            <i class="fas fa-highlighter pointer text-warning unselectable" ></i>
+          </span>
+        </small>
       </div>
-      <canvas :id=name width="100"></canvas>
+      <canvas :id=unique width="100"></canvas>
     </div>`
   });
 
@@ -988,16 +1086,16 @@
             </small>
           </div>
         </div>
-        <div class="col-sm-2 categoryBox bg-dark d-flex align-items-center justify-content-center">
+        <div class="col-sm-2 categoryBox bg-dark d-flex align-items-center justify-content-center flex-wrap">
           <div>
-            <small class="text-light">Completing Will Satisfy:</small>
+            <small class="text-info bold">Complete To Satisfy:</small>
             <br />
             <div>
               <template v-if="info && info.categories" v-for="category in info.categories">
-                <i v-if="category==='google'" class="fab fa-google googleText info mr-1" data-tippy-info="Recommended by Google"></i>
-                <i v-if="category==='google_req'" class="fab fa-google text-danger info mr-1" data-tippy-info="Required by Google"></i>
-                <i v-if="category==='gold'" class="fas fa-star text-warning info mr-1" data-tippy-info="Gold Standard"></i>
-                <i v-if="category==='minimum'" class="fas fa-seedling text-success info mr-1" data-tippy-info="Minimum Requirement"></i>
+                <div class="pillType d-block m-1">
+                  <span v-text="category.category"></span>
+                  <span v-text="category.subcategory"></span>
+                </div>
               </template>
             </div>
           </div>
@@ -1231,9 +1329,15 @@
               'description':'A schema describing Dataset from CTSA center'
             },
           ],
-          categories:{
-            'google_req':['name','description'],
-            'google':['name','description','alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
+          // categories:{
+          //   'google_req':['name','description'],
+          //   'google':['name','description','alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
+          // },
+          newcategories:{
+            'Google':{
+              'Required':['name','description'],
+              'Recommended':['name','description','alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
+            }
           }
 				}
 			},
@@ -1268,61 +1372,61 @@
         },
         categoryTotals:function(){
           let totals = store.getters.getCategoryTotals
-          for (key in totals) {
-            if (totals[key]['todo'] === 0) {
-              $.notify.addStyle('trophy', {
-                html: `<div class="bg-dark p-1 text-light">
-                    <i class="fas fa-trophy text-warning"></i> <span data-notify-text/>
-                  </div>`,
-                  classes: {
-                    base: {
-                      "white-space": "nowrap",
-                      "background-color": "#343a40",
-                      "padding": "5px",
-                      "color":'white',
-                      "border-radius":"5px"
-                    }
-                  }
-              });
-              // id is the id of the chart
-              $("#"+key).notify("Complete!",{style:'trophy', showDuration: 40, });
-            }else if (totals[key]['completed'] > totals[key]['todo']/2 ) {
-              $.notify.addStyle('trophyb', {
-                html: `<div class="bg-dark p-1 text-light">
-                    <i class="fas fa-hand-rock text-info"></i> <span data-notify-text/>
-                  </div>`,
-                  classes: {
-                    base: {
-                      "white-space": "nowrap",
-                      "background-color": "#343a40",
-                      "padding": "5px",
-                      "color":'white',
-                      "border-radius":"5px"
-                    }
-                  }
-              });
-              // id is the id of the chart
-              $("#"+key).notify("Almost there!",{style:'trophyb', showDuration: 40, });
-            }
-            else if (totals[key]['completed'] === 0) {
-              $.notify.addStyle('trophyc', {
-                html: `<div class="bg-dark p-1 text-light">
-                    <i class="fas fa-frown-open text-danger"></i> <span data-notify-text/>
-                  </div>`,
-                  classes: {
-                    base: {
-                      "white-space": "nowrap",
-                      "background-color": "#343a40",
-                      "padding": "5px",
-                      "color":'white',
-                      "border-radius":"5px"
-                    }
-                  }
-              });
-              // id is the id of the chart
-              $("#"+key).notify("Nothing Yet!",{style:'trophyc', showDuration: 40, });
-            }
-          }
+          // for (key in totals) {
+          //   if (totals[key]['todo'] === 0) {
+          //     $.notify.addStyle('trophy', {
+          //       html: `<div class="bg-dark p-1 text-light">
+          //           <i class="fas fa-trophy text-warning"></i> <span data-notify-text/>
+          //         </div>`,
+          //         classes: {
+          //           base: {
+          //             "white-space": "nowrap",
+          //             "background-color": "#343a40",
+          //             "padding": "5px",
+          //             "color":'white',
+          //             "border-radius":"5px"
+          //           }
+          //         }
+          //     });
+          //     // id is the id of the chart
+          //     $("#"+key).notify("Complete!",{style:'trophy', showDuration: 40, });
+          //   }else if (totals[key]['completed'] > totals[key]['todo']/2 ) {
+          //     $.notify.addStyle('trophyb', {
+          //       html: `<div class="bg-dark p-1 text-light">
+          //           <i class="fas fa-hand-rock text-info"></i> <span data-notify-text/>
+          //         </div>`,
+          //         classes: {
+          //           base: {
+          //             "white-space": "nowrap",
+          //             "background-color": "#343a40",
+          //             "padding": "5px",
+          //             "color":'white',
+          //             "border-radius":"5px"
+          //           }
+          //         }
+          //     });
+          //     // id is the id of the chart
+          //     $("#"+key).notify("Almost there!",{style:'trophyb', showDuration: 40, });
+          //   }
+          //   else if (totals[key]['completed'] === 0) {
+          //     $.notify.addStyle('trophyc', {
+          //       html: `<div class="bg-dark p-1 text-light">
+          //           <i class="fas fa-frown-open text-danger"></i> <span data-notify-text/>
+          //         </div>`,
+          //         classes: {
+          //           base: {
+          //             "white-space": "nowrap",
+          //             "background-color": "#343a40",
+          //             "padding": "5px",
+          //             "color":'white',
+          //             "border-radius":"5px"
+          //           }
+          //         }
+          //     });
+          //     // id is the id of the chart
+          //     $("#"+key).notify("Nothing Yet!",{style:'trophyc', showDuration: 40, });
+          //   }
+          // }
           return totals
         }
       },
@@ -1394,21 +1498,67 @@
         },
         assignCategories(schema){
           var self = this;
+          // if (schema.hasOwnProperty('validation')) {
+          //   //set minimum req by schema
+          //   if (schema['validation'].hasOwnProperty('required')) {
+          //     Vue.set(self.categories,'minimum',schema['validation']['required'])
+          //   }
+          //   for (prop in schema['validation']['properties']) {
+          //     //set default
+          //     Vue.set(schema['validation']['properties'][prop],'categories',['gold']);
+          //     //assign if found
+          //     for (category in self.categories) {
+          //       if (self.categories[category].includes(prop)) {
+          //         schema['validation']['properties'][prop]['categories'].unshift(category);
+          //       }
+          //     }
+          //   }
+          //   return schema
+          // }else{
+          //   return schema
+          // }
           if (schema.hasOwnProperty('validation')) {
-            //set minimum req by schema
+            //FIRST find schema specific requirements and add to hardcoded list
             if (schema['validation'].hasOwnProperty('required')) {
-              Vue.set(self.categories,'minimum',schema['validation']['required'])
+              let name = ''
+              try {
+                name = schema['label']
+              } catch (e) {
+                name = schema['name']
+              }
+              // set SCHEMA Required
+              let requiredProps = schema['validation']['required']
+              Vue.set(self.newcategories,name,{ 'Required': requiredProps })
+              // set SCHEMA Recommended
+              let recommendedProps =[]
+              for (var prop in schema['validation']['properties']) {
+                let currentProp = prop
+                if ( !requiredProps.includes(currentProp)) {
+                  recommendedProps.push(currentProp)
+                }
+              }
+              console.log('recommendedProps',recommendedProps)
+              Vue.set(self.newcategories[name],'Recommended',recommendedProps)
             }
+
+            //THEN assign categories
             for (prop in schema['validation']['properties']) {
-              //set default
-              Vue.set(schema['validation']['properties'][prop],'categories',['gold']);
               //assign if found
-              for (category in self.categories) {
-                if (self.categories[category].includes(prop)) {
-                  schema['validation']['properties'][prop]['categories'].unshift(category);
+              Vue.set(schema['validation']['properties'][prop],'categories',[])
+
+              for (category in self.newcategories) {
+                for (var subcategory in self.newcategories[category]) {
+                  if (self.newcategories[category][subcategory].includes(prop)) {
+                    let cat={
+                      'category': category,
+                      'subcategory':subcategory
+                    }
+                    schema['validation']['properties'][prop]['categories'].unshift(cat);
+                  }
                 }
               }
             }
+            console.log('WITH CATS', schema)
             return schema
           }else{
             return schema

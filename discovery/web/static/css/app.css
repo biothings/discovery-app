@@ -1733,11 +1733,7 @@ ul.tree, ul.tree ul {
     }
     progress[value]::-webkit-progress-value {
       /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#5c3069+0,006476+100 */
-      background: rgb(92,48,105); /* Old browsers */
-      background: -moz-linear-gradient(left,  rgba(92,48,105,1) 0%, rgba(0,100,118,1) 100%); /* FF3.6-15 */
-      background: -webkit-linear-gradient(left,  rgba(92,48,105,1) 0%,rgba(0,100,118,1) 100%); /* Chrome10-25,Safari5.1-6 */
-      background: linear-gradient(to right,  rgba(92,48,105,1) 0%,rgba(0,100,118,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5c3069', endColorstr='#006476',GradientType=1 ); /* IE6-9 */
+      background: #17A2B7;
       background-size: cover;
       border-radius: 2px;
     }
