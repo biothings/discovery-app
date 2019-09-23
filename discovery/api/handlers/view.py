@@ -18,6 +18,7 @@ class SchemaViewHandler(APIBaseHandler):
     async def get(self):
 
         url = self.get_argument("url")
+        assert url, "empty url query string"
 
         logger = logging.getLogger(__name__)
         logger.info("Loading %s.", url)
