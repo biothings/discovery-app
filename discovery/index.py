@@ -13,9 +13,18 @@ SRC_PATH = os.path.dirname(os.path.abspath(__file__))
 STATIC_PATH = os.path.join(SRC_PATH, 'web', 'static')
 
 if __name__ == '__main__':
+
     logging.captureWarnings(True)
     es_data_setup()
-    main(WEB_SETTINGS.generate_app_list(),
-         app_settings={"cookie_secret": WEB_SETTINGS.COOKIE_SECRET},
-         debug_settings={"static_path": STATIC_PATH},
-         use_curl=True)
+
+    main(
+        WEB_SETTINGS.generate_app_list(),
+        app_settings={
+            "cookie_secret": WEB_SETTINGS.COOKIE_SECRET,
+            "autoreload": True
+        },
+        debug_settings={
+            "static_path": STATIC_PATH
+        },
+        use_curl=True
+    )
