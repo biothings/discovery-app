@@ -5,6 +5,10 @@
   .highlight{
     outline: #ffc107 3px solid !important;
   }
+  .verticaltext {
+	transform: rotate(90deg);
+	transform-origin: left top 0;
+}
 </style>
 <div id="guide" class="container pt-5" style="min-height:90vh;">
   <div v-if=loading class="loader">
@@ -104,7 +108,7 @@
       <!-- SECOND STEP -->
       <!-- AVAILABLE FIELDS -->
       <div v-if="validation" class="whitefade tippyContainer">
-        <div class="p-1 message text-left mb-0" style="border-radius:5px">
+        <div class="p-1 bg-dark text-left mb-0">
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
             <span class="badge m-1 badge-dark pointer badgeDesc" @click='selectProp(index)' v-if="prop && !prop.value" :class="[prop.highlighted ? 'highlight': '']">
               <small v-text='index'></small>
@@ -135,15 +139,9 @@
           </template>
         </div>
       </div>
-      <!-- CHARTS -->
-      <!-- <div v-if="validation" class="p-1 d-flex justify-content-center flex-wrap">
-        <template v-if="categoryTotals && categoryTotals.Google" v-for="(totals,cat) in categoryTotals">
-          <chart :name="cat" :totals="totals" :key="cat"></chart>
-        </template>
-      </div> -->
       <div v-if="validation" class="p-1 d-flex justify-content-center flex-wrap">
         <template v-if="categoryTotals && categoryTotals.Google" v-for="(subcats,cat) in categoryTotals">
-          <div class="message m-1 text-center p-1">
+          <div class="bg-light m-1 text-center p-2">
             <small  class="bold text-info d-block">
               <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
               <span v-text="cat"></span>
@@ -156,8 +154,6 @@
       </div>
       <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
         <small class="mr-1"><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
-        <small class="mr-1"><i class="fas fa-stop text-danger unselectable" ></i> = Required Incomplete</small>
-        <small class="mr-1"><i class="fas fa-stop text-muted unselectable" ></i> = Incomplete</small>
         <small class="mr-1"><i class="fas fa-stop text-info unselectable" ></i> = Progress</small>
         <small class="mr-1"><i class="fas fa-stop text-success unselectable" ></i> = Complete</small>
       </div>
@@ -227,6 +223,11 @@
               }
             }
           }
+        }
+      },
+      unhighlight(state){
+        for (prop in state.schema.validation.properties) {
+          Vue.set(state.schema.validation.properties[prop],'highlighted',false);
         }
       },
       markCompleted(state,payload){
@@ -422,7 +423,7 @@
             }
           }
         }
-        console.log('CATS',cats)
+        // console.log('CATS',cats)
         return cats
       },
       getPreview(state){
@@ -457,6 +458,7 @@
   Vue.component('chart', {
     data: function(){
       return{
+        shouldHighlight:false
       }
     },
     props: ['name','totals','unique','maincategory'],
@@ -464,7 +466,7 @@
       visualize(){
         var self = this;
         let progressColor = self['totals']['todo'] === 0 ?"#28A744":'#17A2B7'
-        let mainColor = self.name === "Required" ? "#dc3545":"#6c757d"
+        let mainColor = self.name === "Required" ? "#9fa7aa":"#b4b7b8"
         new Chart(document.getElementById(self.unique), {
             type: 'pie',
             data: {
@@ -503,6 +505,13 @@
     watch:{
       totals:function(n){
         this.visualize()
+      },
+      shouldHighlight:function(h){
+        if (h) {
+          this.highlight()
+        }else {
+          store.commit('unhighlight');
+        }
       }
     },
     mounted: function(){
@@ -521,8 +530,8 @@
       <div class="text-center">
         <small :class="[name === 'Required' ? 'text-danger': 'text-muted']">
           <span v-text="name"></span>
-          <span class="badge badge-dark badge-pill pointer unselectable" @click="highlight()">
-            <i class="fas fa-highlighter pointer text-warning unselectable" ></i>
+          <span class="badge badge-pill pointer unselectable" @click="shouldHighlight = !shouldHighlight" :class="[!shouldHighlight? 'badge-dark text-warning' :'badge-warning text-dark']">
+            <i class="fas fa-highlighter pointer unselectable" ></i>
           </span>
         </small>
       </div>
@@ -1086,22 +1095,23 @@
             </small>
           </div>
         </div>
-        <div class="col-sm-2 categoryBox bg-dark d-flex align-items-center justify-content-center flex-wrap">
+        <div class="col-sm-2 categoryBox alert-info d-flex align-items-center justify-content-center flex-wrap">
           <div>
-            <small class="text-info bold">Complete To Satisfy:</small>
+            <small class="text-muted bold">Complete To Satisfy:</small>
             <br />
             <div>
               <template v-if="info && info.categories" v-for="category in info.categories">
-                <div class="pillType d-block m-1">
+                <small class="d-block m-1 mainTextDark">
                   <span v-text="category.category"></span>
-                  <span v-text="category.subcategory"></span>
-                </div>
+                  <i class="fas fa-chevron-right text-muted"></i>
+                  <span class="mainTextLight" v-text="category.subcategory"></span>
+                </small>
               </template>
             </div>
           </div>
         </div>
-        <div class="col-sm-8 p-2 inputmain text-left">
-          <div class="row">
+        <div class="col-sm-8 p-2 inputmain text-left d-flex align-items-center justify-content-center">
+          <div class="row w-100">
             <div class="col-sm-4 d-flex align-items-center justify-content-start">
               <small v-text="name" class="propDescription mainTextLight bold pointer mr-1"></small>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired"></i>
@@ -1329,14 +1339,10 @@
               'description':'A schema describing Dataset from CTSA center'
             },
           ],
-          // categories:{
-          //   'google_req':['name','description'],
-          //   'google':['name','description','alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
-          // },
-          newcategories:{
+          categories:{
             'Google':{
               'Required':['name','description'],
-              'Recommended':['name','description','alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
+              'Recommended':['alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
             }
           }
 				}
@@ -1528,7 +1534,7 @@
               }
               // set SCHEMA Required
               let requiredProps = schema['validation']['required']
-              Vue.set(self.newcategories,name,{ 'Required': requiredProps })
+              Vue.set(self.categories,name,{ 'Required': requiredProps })
               // set SCHEMA Recommended
               let recommendedProps =[]
               for (var prop in schema['validation']['properties']) {
@@ -1537,8 +1543,8 @@
                   recommendedProps.push(currentProp)
                 }
               }
-              console.log('recommendedProps',recommendedProps)
-              Vue.set(self.newcategories[name],'Recommended',recommendedProps)
+              // console.log('recommendedProps',recommendedProps)
+              Vue.set(self.categories[name],'Recommended',recommendedProps)
             }
 
             //THEN assign categories
@@ -1546,9 +1552,9 @@
               //assign if found
               Vue.set(schema['validation']['properties'][prop],'categories',[])
 
-              for (category in self.newcategories) {
-                for (var subcategory in self.newcategories[category]) {
-                  if (self.newcategories[category][subcategory].includes(prop)) {
+              for (category in self.categories) {
+                for (var subcategory in self.categories[category]) {
+                  if (self.categories[category][subcategory].includes(prop)) {
                     let cat={
                       'category': category,
                       'subcategory':subcategory
@@ -1558,7 +1564,7 @@
                 }
               }
             }
-            console.log('WITH CATS', schema)
+            // console.log('WITH CATS', schema)
             return schema
           }else{
             return schema

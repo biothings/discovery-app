@@ -12,14 +12,8 @@
   </div>
   <!-- HOMEPAGE MODE -->
   <div class="jumbotron" v-if="!query">
-    <div class="message w-50 m-auto p-2" v-show='!namespaceRegistered'>
-      <div class="p-3 text-center">
-        <h3 class="text-muted">Register Your Schema</h3>
-        <button role="button" class="btn themeButton text-light" @click='openRegistration()'>Click Here</button>
-      </div>
-    </div>
-    <div class="text-center p-5">
-      <template v-if='namespaceRegistered'>
+    <template v-if='namespaceRegistered'>
+      <div class="text-center p-5">
         <h1 style="font-size:3em" class="logoText" v-if='namespace === "schema"' >Schema.org</h1>
         <p class="text-muted" v-if='namespace === "schema"'>
         Schema.org is a collaborative, community activity with a mission to create,
@@ -34,7 +28,13 @@
          </p>
         <h1 style="font-size:3em" class="logoText" v-if='namespace === "ctsa"' >CTSA</h1>
         <h1 style="font-size:3em" class="logoText" v-if='namespaceRegistered === "schema"' v-text='namespace'></h1>
-      </template>
+      </div>
+    </template>
+
+    <div class="row" v-show='!namespaceRegistered'>
+      <div class="col-sm-12 text-right p-3">
+        <button role="button" class="btn themeButton text-light" @click='openRegistration()'>Register Your Schema</button>
+      </div>
     </div>
     <div class="row">
       <form class="col-sm-12">
@@ -164,26 +164,6 @@
   </div>
   <!-- QUERY MODE -->
   <div class="container" v-if="query">
-    <!-- Navigation Options -->
-    <!-- <div style="height:50px;">
-      <a class="btn btn-outline-secondary float-left" role="button" :href="RemoveLastDirectoryPartOf(window.location.href)"><i class="fas fa-chevron-left"></i> Back</a>
-      <div class="d-inline">
-        <form @submit.prevent="searchView(q)">
-          <input class="form-control" type="text" v-model="q"/>
-        </form>
-      </div>
-      <div v-if="queryContent && !queryContent.domain" class="float-right">
-        <a @click='changeView' class="btn text-light" :class="[validationView?'btn-info':'mainBackDark']">
-          <span v-if="!validationView">
-            <i class="fas fa-star"></i> Show Used Properties Only
-          </span>
-          <span v-if="validationView">
-           <i class="fas fa-stream"></i> Show All Inherited Properties
-          </span>
-        </a>
-        <more-info></more-info>
-      </div>
-    </div> -->
     <div class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around">
       <span class="fa-stack fa-1x pointer unselectable tip" :data-tippy-info="'Go Back'" @click.prevent="window.location.href=RemoveLastDirectoryPartOf(window.location.href)">
         <i class="fas fa-circle text-muted fa-stack-2x"></i>
@@ -674,9 +654,9 @@
       }
     },
     template:
-    `<div class="jumbotron message">
+    `<div class="p-3 mb-2 alert alert-light">
       <div>
-        <h1 class="bold d-inline" :class='textColor' v-if='q.label' :id='q.label' v-text='q.label'></h1>
+        <h3 class="bold d-inline" :class='textColor' v-if='q.label' :id='q.label' v-text='q.label'></h3>
         <template v-if="q && q.domain">
           <small class="text-muted">is a property of: </small>
           <template v-for='(item,index) in q.domain'>
