@@ -169,6 +169,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
 <script src="/static/js/lodash.js"></script>
+<script src="/static/js/mousetrap.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
@@ -203,6 +204,14 @@
             Vue.set(state.schema.validation.properties[selection],'selected',true);
           }else{
             Vue.set(state.schema.validation.properties[key],'selected',false);
+          }
+        }
+      },
+      selectNext(state){
+        for (key in state.schema.validation.properties) {
+          if (state.schema.validation.properties[key] && !state.schema.validation.properties[key].value) {
+            Vue.set(state.schema.validation.properties[key],'selected',true);
+            break;
           }
         }
       },
@@ -1015,10 +1024,30 @@
 
       self.checkForConstantKey(self.info,'const')
 
+
+      try {
+        var x = document.getElementsByClassName("form-control");
+        x[0].focus();
+      } catch (e) {
+        var x = document.getElementsByClassName("btnfocus");
+        x[0].focus();
+      }
+
+      document.onkeydown = checkKey;
+
+      function checkKey(e) {
+          e = e || window.event;
+          if (e.keyCode == '39') {
+             // right arrow
+             self.markCompleted(self.name);
+             store.commit('selectNext');
+          }
+      }
+
       tippy( '.save', {
         placement:'top',
         maxWidth:'200px',
-        content: '<div class="text-success m-0" style="border-radius:none">Save & Close</div>',
+        content: '<div class="text-success m-0" style="border-radius:none">Save & Close <br />(Keyboard: <i class="fas fa-arrow-right"></i>)</div>',
         animation: 'fade',
         theme:'light'});
 
@@ -1122,21 +1151,21 @@
                 <!-- 🌈 STRING 🌈 -->
                 <template v-if="info && !info.format">
                   <template v-if="name === 'description'">
-                    <textarea pattern=".{20,500}" rows="7" type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here"></textarea>
+                    <textarea pattern=".{20,500}" rows="7" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here"></textarea>
                   </template>
                   <template v-else>
-                    <input :required="isRequired" type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here">
+                    <input :required="isRequired" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here">
                   </template>
                 </template>
                 <!-- 🌈 URL 🌈 -->
                 <template v-if="info && info.format === 'uri'">
-                  <input type="url" v-model="userInput" class="form-control form-control-sm" placeholder="enter url here">
+                  <input type="url" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter url here">
                 </template>
               </template>
               <!-- 🌈 ENUM 🌈 -->
               <template v-if="info && info.enum" v-for="(item,i) in info.enum">
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
+                  <input class="form-check-input mousetrap" type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
                   <label class="form-check-label" :for="i" v-text='item'></label>
                 </div>
               </template>
@@ -1202,10 +1231,10 @@
                 <template v-for="(item,i) in info.oneOf">
                   <div>
                     <template v-if="item.format === 'date'">
-                      <input type="date" v-model="userInput" class="form-control form-control-sm" :placeholder="'enter '+item.format">
+                      <input type="date" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.format">
                     </template>
                     <template v-if="item.type === 'string' && !item.format">
-                      <input  type="text" v-model="userInput" class="form-control form-control-sm" :placeholder="'enter '+item.type">
+                      <input  type="text" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.type">
                     </template>
                     <!-- 🔥🔥🔥🔥🔥 TODO: handle nested arrays of objects 🔥🔥🔥🔥🔥 -->
                   </div>
@@ -1217,7 +1246,7 @@
                   <div class="col-sm-12 mb-2">
                     <form @submit.prevent="addKeyword">
                       <small class="text-muted">Enter single or multiple keywords separated by commas</small>
-                      <input ref="keywordInput" autocomplete="off" type="text" class="form-control form-control-sm" placeholder="Enter text here">
+                      <input ref="keywordInput" autocomplete="off" type="text" class="form-control form-control-sm mousetrap" placeholder="Enter text here">
                     </form>
                   </div>
                   <div class="col-sm-12 m-auto">
@@ -1254,7 +1283,7 @@
               <!-- 🌈  CONTRIBUTORS 🌈 -->
               <template v-if="info.oneOf && name === 'contributor'">
                 <div class="form-group p-2 row">
-                  <button class="btn mainBackDark text-light m-auto" @click="addPerson('contributor')"><i class="fas fa-plus"></i> Add Contributor</button>
+                  <button class="btn mainBackDark text-light m-auto btnfocus" @click="addPerson('contributor')"><i class="fas fa-plus"></i> Add Contributor</button>
                 </div>
                 <div class="col-sm-12 m-auto">
                   <template v-for="(person,i) in userInput">
@@ -1280,7 +1309,7 @@
               <!-- 🌈  OBJECT 🌈 -->
               <template v-if="info.type=== 'object' && name !== 'license' && name !== 'includedInDataCatalog' ">
                 <div class="form-group p-2 row">
-                  <button class="btn themeButton text-light m-auto" @click="addItem(name,info)" v-if="info.type=== 'object' && !userInput">
+                  <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="info.type=== 'object' && !userInput">
                     <i class="fas fa-plus"></i> <span v-text="'Add '+name"></span>
                   </button>
                 </div>
