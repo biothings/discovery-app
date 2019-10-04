@@ -9,10 +9,12 @@ import os
 from jinja2 import Environment, FileSystemLoader
 from tornado.httputil import url_concat
 from torngithub import GithubMixin, json_decode, json_encode
+import sass
 
 from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 from discovery.api.es.doc import Schema
 
+import discovery.web.siteconfig as siteconfig
 
 GITHUB_CALLBACK_PATH = "/oauth"
 GITHUB_SCOPE = ""
@@ -20,6 +22,28 @@ GITHUB_SCOPE = ""
 TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 TEMPLATE_LOADER = FileSystemLoader(searchpath=TEMPLATE_PATH)
 TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER, cache_size=0)
+
+# Project specific globals
+TEMPLATE_ENV.globals['site_name'] = siteconfig.SITE_NAME
+TEMPLATE_ENV.globals['site_desc'] = siteconfig.SITE_DESC
+TEMPLATE_ENV.globals['contact_email'] = siteconfig.CONTACT_EMAIL
+TEMPLATE_ENV.globals['contact_repo'] = siteconfig.CONTACT_REPO
+# Metadata
+TEMPLATE_ENV.globals['metadata_desc'] = siteconfig.METADATA_DESC
+TEMPLATE_ENV.globals['metadata_featured_image'] = siteconfig.METADATA_FEATURED_IMAGE
+TEMPLATE_ENV.globals['metadata_url'] = siteconfig.METADATA_CONTENT_URL
+TEMPLATE_ENV.globals['metadata_main_color'] = siteconfig.METADATA_MAIN_COLOR
+# Metadata
+TEMPLATE_ENV.globals['guide_presets'] = siteconfig.GUIDE_PRESETS
+TEMPLATE_ENV.globals['guide_categories'] = siteconfig.GUIDE_CATEGORIES
+# SCHEMA
+TEMPLATE_ENV.globals['starting_points'] = siteconfig.STARTING_POINTS
+TEMPLATE_ENV.globals['registry_shortcuts'] = siteconfig.REGISTRY_SHORTCUTS
+# IMAGES FOLDER
+TEMPLATE_ENV.globals['static_image_folder'] = siteconfig.STATIC_IMAGE_FOLDER
+
+# Compile site specific minified css
+sass.compile(dirname=(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/scss'), os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/css')), output_style='compressed')
 
 
 class BaseHandler(BioThingsBaseHandler):

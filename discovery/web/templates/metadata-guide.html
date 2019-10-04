@@ -1360,43 +1360,8 @@
 				return {
           userInfo:null,
           loading: false,
-          presets:[
-            {
-              'name':'CTSADataset',
-              'url':'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json',
-              'description':'A schema describing Dataset from CTSA center'
-            },
-          ],
-          categories:{
-            'Google':{
-              'Required':['name','description'],
-              'Recommended':['alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
-            },
-            'DataCite':{
-              'Required':['title','creator','identifier','identifierType','publisher','publicationYear','resourceType','resourceTypeGeneral'],
-              'Recommended':['contributor','date','description','descriptionType','format','fundingReference','funderName','awardNumber','awardURI','awardTitle','subject','rights','geolocation','size','version']
-            },
-            'DCAT_Ontology':{
-              'Required':['title','accrualPeriodicity','contactPoint','issued','description','identifier','keywords','landingPage','language','modified','spatial','temporal'],
-              'Recommended':[]
-            },
-            'Schema:Dataset':{
-              'Required':['title','rights','publisher','publicationYear','resourceType'],
-              'Recommended':['contributor','creator','citation','dateCreated','description','distribution','format','funderName','hasPart','identifier/DOI','alternateIdentifier','includedInDataCatalog','keywords','measurementTechnique','dateModified','relatedIdentifiers','sameAs','spatialCoverage','size','temporalCoverage','variableMeasured','version','URL']
-            },
-            'Zenodo':{
-              'Required':['title','accessRight','authors','description','identifier/DOI','license','publicationDate','resourceType'],
-              'Recommended':['additionalNotes','contributor','contributorAffiliation','contributorORCiD','contributorRole','funderName','awardNumber','keywords','subjectIdentifier','language','refences','relatedIdentifiers','relatedIdentifiersType','relationType','version']
-            },
-            'OpenAIRE_Data_Archives':{
-              'Required':['title','creator','creatorName','date','dateType','description','descriptionType','identifier','identifierType','rights','rightsURI','publisher','publisherYear'],
-              'Recommended':['contributor','contributorName','contributorNameIdentifier','contributorNameIdentifierScheme','contributorType','nameIdentifier','nameIdentifierScheme','nameIdentifierSchemeURI','affiliation','subject','language','relatedIdentifiers','relatedIdentifiersType','resourceType','resourceTypeGeneral']
-            },
-            'OAI-DC':{
-              'Required':['title','accessLevel','creator','description','resourceIdentifier','subject','publisher','publicationDate','publicationType'],
-              'Recommended':['audience','contributor','embargoEndDate','format','alternateIdentifier','projectIdentifier','language','licenseCondition','publicationReference','datasetReference','relation','coverage','source','publicationVersion']
-            },
-          }
+          presets:{{guide_presets}},
+          categories: {{guide_categories}},
 				}
 			},
       computed:{
