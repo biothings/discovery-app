@@ -86,9 +86,9 @@
               <ul>
                 <li v-for="def in item.children">
                   <a  :href="'/'+namespace+'/'+def" v-text="def"></a>
-                  <a v-show='namespaceRegistered' class="pointer tip text-muted" :data-tippy-info="'Extend '+def" @click="extend(def)">
+                  <!-- <a v-show='namespaceRegistered' class="pointer tip text-muted" :data-tippy-info="'Extend '+def" @click="extend(def)">
                     <i class="fas fa-code-branch"></i>
-                  </a>
+                  </a> -->
                 </li>
               </ul>
             </li>
@@ -164,7 +164,7 @@
   </div>
   <!-- QUERY MODE -->
   <div class="container" v-if="query">
-    <div class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around">
+    <div class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around p-3">
       <span class="fa-stack fa-1x pointer unselectable tip" :data-tippy-info="'Go Back'" @click.prevent="window.location.href=RemoveLastDirectoryPartOf(window.location.href)">
         <i class="fas fa-circle text-muted fa-stack-2x"></i>
         <i class="fas fa-chevron-left fa-stack-1x text-light"></i>
@@ -1405,14 +1405,20 @@
           }).then((result) => {
             if (result.value) {
               let q = self.findClass(itemname);
-              axios.get('/api/registry/'+q.namespace+'/'+q.name).then(res=>{
-        				let obj = JSON.stringify(res.data)
-        				localStorage.setItem('EditorData',obj);
-        				localStorage.setItem('EditorStartingPoint',q.name);
-        				window.location.href ='/editor'
-        			}).catch(err=>{
-        				throw err;
-        			})
+              console.log('q',q)
+              if (q) {
+                axios.get('/api/registry/'+q.namespace+'/'+q.name).then(res=>{
+          				let obj = JSON.stringify(res.data)
+          				localStorage.setItem('EditorData',obj);
+          				localStorage.setItem('EditorStartingPoint',q.name);
+          				window.location.href ='/editor'
+          			}).catch(err=>{
+          				throw err;
+          			})
+              }else{
+
+              }
+
             }
           });
 
