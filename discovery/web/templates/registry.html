@@ -16,28 +16,19 @@
         <div class="m-2">
           <small class="bold text-muted">SHORTCUTS</small>
           <div class="d-flex justify-content-start">
-            <div class="row m-1 cBox actions mainBackDark">
-              <div class="col-sm-8 p-2 text-light text-center d-flex align-items-center">
-                <small>Visualize Schema.org</small>
+            <template v-for="item in shortcuts">
+              <div class="row m-1 cBox actions mainBackDark">
+                <div class="col-sm-8 p-2 text-light text-center d-flex align-items-center">
+                  <small>Visualize <span v-text="item.name"></span></small>
+                </div>
+                <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+                  <span class="fa-stack fa-1x pointer unselectable" :data-tippy="'Visualize Classes in '+item.name" data-tippy-theme="light" @click.prevent="window.location.href='/'+item.registered_namespace+'/'">
+                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                    <i class="fas fa-eye fa-stack-1x text-light"></i>
+                  </span>
+                </div>
               </div>
-              <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-                <span class="fa-stack fa-1x pointer unselectable" data-tippy="Visualize Classes in Schema.org" data-tippy-theme="light" @click.prevent="window.location.href='/schema/'">
-                  <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                  <i class="fas fa-eye fa-stack-1x text-light"></i>
-                </span>
-              </div>
-            </div>
-            <div class="row m-1 cBox actions mainBackDark">
-              <div class="col-sm-8 p-2 text-light text-center d-flex align-items-center">
-                <small>Visualize BioThings</small>
-              </div>
-              <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-                <span class="fa-stack fa-1x pointer unselectable" data-tippy="Visualize Classes in BioThings" data-tippy-theme="light" @click.prevent="window.location.href='/bts/'">
-                  <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                  <i class="fas fa-eye fa-stack-1x text-light"></i>
-                </span>
-              </div>
-            </div>
+            </template>
             <template v-for='item in startingPoints'>
               <preset-box :preset='item'></preset-box>
             </template>
@@ -74,13 +65,15 @@
           <registry-item :item='item' :key="index"></registry-item>
         </template>
         <li v-if="!registry.length" class="text-center text-muted list-group-item">
-          <div class="jumbotron">
-            <h4>Search for schema classes</h4>
-            <h5>For example:</h5>
-            <a href="#" class="text-muted mr-1" @click.prevent='search("Thing")'>Thing <i class="fas fa-chevron-right"></i></a>
-            <a href="#" class="text-muted mr-1" @click.prevent='search("CreativeWork")'>CreativeWork <i class="fas fa-chevron-right"></i></a>
-            <a href="#" class="text-muted mr-1" @click.prevent='search("Dataset")'>Dataset <i class="fas fa-chevron-right"></i></a>
-          </div>
+          {% if site_name == "CTSA Data Discovery Engine" %}
+            <div class="jumbotron">
+              <h4>Search for schema classes</h4>
+              <h5>For example:</h5>
+              <a href="#" class="text-muted mr-1" @click.prevent='search("Thing")'>Thing <i class="fas fa-chevron-right"></i></a>
+              <a href="#" class="text-muted mr-1" @click.prevent='search("CreativeWork")'>CreativeWork <i class="fas fa-chevron-right"></i></a>
+              <a href="#" class="text-muted mr-1" @click.prevent='search("Dataset")'>Dataset <i class="fas fa-chevron-right"></i></a>
+            </div>
+          {% endif %}
         </li>
       </ul>
       <div class="bg-light">
@@ -263,14 +256,8 @@ var app = new Vue({
           pages: 1,
           perPage: 20,
           loading:false,
-          startingPoints:[
-						{
-              'namespace':'schema',
-              'prefix':'schema',
-              'name':'Dataset',
-              'description':'A body of structured information describing some topic(s) of interest.'
-            },
-          ]
+          startingPoints:{{starting_points}},
+          shortcuts:{{registry_shortcuts}}
 				}
 			},
       methods:{

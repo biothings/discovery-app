@@ -412,6 +412,7 @@ Vue.component('c-box', {
     }
   },
   watch:{
+
   },
   computed:{
     showDesc:function(){
@@ -485,7 +486,7 @@ Vue.component('c-box', {
                   </template>
                 </div>
                 <div v-show='expand' class="mt-1">
-                  <template v-for="prop in item.properties">
+                  <template v-for="prop in sortedList()">
                     <div class="row m-1 alert-secondary pBox actions">
                       <div class="col-sm-9">
                         <small class="mainTextDark">
@@ -533,6 +534,14 @@ Vue.component('c-box', {
           store.commit('removeProperty',payload);
         }
       })
+    },
+    sortedList(){
+      var self = this;
+      try {
+        return _.orderBy(self.item.properties, ['label'], ['asc']);
+      } catch (e) {
+        self.item.properties
+      }
     },
     getSubclass(item){
       return item.split(", ")

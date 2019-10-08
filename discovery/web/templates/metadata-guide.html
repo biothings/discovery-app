@@ -17,7 +17,7 @@
     </p>
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
-  <div id="widget">
+  <div id="widget" class="mb-5">
     <ul class="nav nav-tabs">
       <li class="nav-item" v-if="userInfo && userInfo.login">
         <span class="nav-link" :class="{ 'disabled text-success': userInfo }"><small>
@@ -74,7 +74,7 @@
       <li class='nav-item' v-show="validation">
         <a class='nav-link text-muted pointer' @click="loadData()">
           <small class="text-info bold">
-            <i class="fas fa-download"></i> Load Existing Data
+            <i class="fas fa-download"></i> Load Existing Dataset
           </small>
         </a>
       </li>
@@ -104,7 +104,10 @@
       <!-- SECOND STEP -->
       <!-- AVAILABLE FIELDS -->
       <div v-if="validation" class="whitefade tippyContainer">
-        <div class="p-1 message text-left mb-0" style="border-radius:5px">
+        <div class="p-1 bg-dark text-left mb-0">
+          <span class="badge m-1 badge-dark text-warning">
+            TO-DO <i class="fas fa-chevron-right"></i>
+          </span>
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
             <span class="badge m-1 badge-dark pointer badgeDesc" @click='selectProp(index)' v-if="prop && !prop.value" :class="[prop.highlighted ? 'highlight': '']">
               <small v-text='index'></small>
@@ -115,10 +118,13 @@
       </div>
       <!-- COMPLETED FIELDS -->
       <div class="p-1" v-if="totals && totals.left">
-        <progress class="w-100"  :value="totals.complete" :max="totals.total"></progress>
+        <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress>
       </div>
       <div v-if="validation" class="whitefade tippyContainer">
         <div class="alert alert-success text-left mb-0">
+          <span class="badge m-1 alert-success text-success">
+            DONE <i class="fas fa-chevron-right"></i>
+          </span>
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
             <span class="badge m-1 badge-success pointer" @click='selectProp(index)' v-if="prop && prop.value" :class="[prop.highlighted ? 'highlight': '']">
               <i class="fas fa-check-circle"></i> <small v-text='index'></small>
@@ -135,15 +141,9 @@
           </template>
         </div>
       </div>
-      <!-- CHARTS -->
-      <!-- <div v-if="validation" class="p-1 d-flex justify-content-center flex-wrap">
-        <template v-if="categoryTotals && categoryTotals.Google" v-for="(totals,cat) in categoryTotals">
-          <chart :name="cat" :totals="totals" :key="cat"></chart>
-        </template>
-      </div> -->
       <div v-if="validation" class="p-1 d-flex justify-content-center flex-wrap">
         <template v-if="categoryTotals && categoryTotals.Google" v-for="(subcats,cat) in categoryTotals">
-          <div class="message m-1 text-center p-1">
+          <div class="bg-light m-1 text-center p-2">
             <small  class="bold text-info d-block">
               <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
               <span v-text="cat"></span>
@@ -156,8 +156,6 @@
       </div>
       <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
         <small class="mr-1"><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
-        <small class="mr-1"><i class="fas fa-stop text-danger unselectable" ></i> = Required Incomplete</small>
-        <small class="mr-1"><i class="fas fa-stop text-muted unselectable" ></i> = Incomplete</small>
         <small class="mr-1"><i class="fas fa-stop text-info unselectable" ></i> = Progress</small>
         <small class="mr-1"><i class="fas fa-stop text-success unselectable" ></i> = Complete</small>
       </div>
@@ -208,6 +206,14 @@
           }
         }
       },
+      selectNext(state){
+        for (key in state.schema.validation.properties) {
+          if (state.schema.validation.properties[key] && !state.schema.validation.properties[key].value) {
+            Vue.set(state.schema.validation.properties[key],'selected',true);
+            break;
+          }
+        }
+      },
       highlight(state,payload){
         let cat = payload['category'];
         let subcat = payload['subcategory'];
@@ -227,6 +233,11 @@
               }
             }
           }
+        }
+      },
+      unhighlight(state){
+        for (prop in state.schema.validation.properties) {
+          Vue.set(state.schema.validation.properties[prop],'highlighted',false);
         }
       },
       markCompleted(state,payload){
@@ -422,7 +433,7 @@
             }
           }
         }
-        console.log('CATS',cats)
+        // console.log('CATS',cats)
         return cats
       },
       getPreview(state){
@@ -457,6 +468,7 @@
   Vue.component('chart', {
     data: function(){
       return{
+        shouldHighlight:false
       }
     },
     props: ['name','totals','unique','maincategory'],
@@ -464,7 +476,7 @@
       visualize(){
         var self = this;
         let progressColor = self['totals']['todo'] === 0 ?"#28A744":'#17A2B7'
-        let mainColor = self.name === "Required" ? "#dc3545":"#6c757d"
+        let mainColor = self.name === "Required" ? "#9fa7aa":"#b4b7b8"
         new Chart(document.getElementById(self.unique), {
             type: 'pie',
             data: {
@@ -503,6 +515,13 @@
     watch:{
       totals:function(n){
         this.visualize()
+      },
+      shouldHighlight:function(h){
+        if (h) {
+          this.highlight()
+        }else {
+          store.commit('unhighlight');
+        }
       }
     },
     mounted: function(){
@@ -521,8 +540,8 @@
       <div class="text-center">
         <small :class="[name === 'Required' ? 'text-danger': 'text-muted']">
           <span v-text="name"></span>
-          <span class="badge badge-dark badge-pill pointer unselectable" @click="highlight()">
-            <i class="fas fa-highlighter pointer text-warning unselectable" ></i>
+          <span class="badge badge-pill pointer unselectable" @click="shouldHighlight = !shouldHighlight" :class="[!shouldHighlight? 'badge-dark text-warning' :'badge-warning text-dark']">
+            <i class="fas fa-highlighter pointer unselectable" ></i>
           </span>
         </small>
       </div>
@@ -1004,10 +1023,30 @@
 
       self.checkForConstantKey(self.info,'const')
 
+
+      try {
+        var x = document.getElementsByClassName("form-control");
+        x[0].focus();
+      } catch (e) {
+        var x = document.getElementsByClassName("btnfocus");
+        x[0].focus();
+      }
+
+      document.onkeydown = checkKey;
+
+      function checkKey(e) {
+          e = e || window.event;
+          if (e.keyCode == '39') {
+             // right arrow
+             self.markCompleted(self.name);
+             store.commit('selectNext');
+          }
+      }
+
       tippy( '.save', {
         placement:'top',
         maxWidth:'200px',
-        content: '<div class="text-success m-0" style="border-radius:none">Save & Close</div>',
+        content: '<div class="text-success m-0" style="border-radius:none">Save & Close <br />(Keyboard: <i class="fas fa-arrow-right"></i>)</div>',
         animation: 'fade',
         theme:'light'});
 
@@ -1086,22 +1125,21 @@
             </small>
           </div>
         </div>
-        <div class="col-sm-2 categoryBox bg-dark d-flex align-items-center justify-content-center flex-wrap">
+        <div class="col-sm-2 categoryBox alert-info d-flex align-items-center justify-content-center flex-wrap">
           <div>
-            <small class="text-info bold">Complete To Satisfy:</small>
-            <br />
-            <div>
+            <small class="text-muted bold">Complete To Satisfy:</small>
+            <div class="text-left">
               <template v-if="info && info.categories" v-for="category in info.categories">
-                <div class="pillType d-block m-1">
+                <small class="d-block m-1 mainTextDark">
                   <span v-text="category.category"></span>
-                  <span v-text="category.subcategory"></span>
-                </div>
+                  <i class="fas fa-asterisk text-danger required" v-if="category.subcategory === 'Required'"></i>
+                </small>
               </template>
             </div>
           </div>
         </div>
-        <div class="col-sm-8 p-2 inputmain text-left">
-          <div class="row">
+        <div class="col-sm-8 p-2 inputmain text-left d-flex align-items-center justify-content-center">
+          <div class="row w-100">
             <div class="col-sm-4 d-flex align-items-center justify-content-start">
               <small v-text="name" class="propDescription mainTextLight bold pointer mr-1"></small>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired"></i>
@@ -1112,21 +1150,21 @@
                 <!-- 🌈 STRING 🌈 -->
                 <template v-if="info && !info.format">
                   <template v-if="name === 'description'">
-                    <textarea pattern=".{20,500}" rows="7" type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here"></textarea>
+                    <textarea pattern=".{20,500}" rows="7" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here"></textarea>
                   </template>
                   <template v-else>
-                    <input :required="isRequired" type="text" v-model="userInput" class="form-control form-control-sm" placeholder="enter text here">
+                    <input :required="isRequired" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here">
                   </template>
                 </template>
                 <!-- 🌈 URL 🌈 -->
                 <template v-if="info && info.format === 'uri'">
-                  <input type="url" v-model="userInput" class="form-control form-control-sm" placeholder="enter url here">
+                  <input type="url" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter url here">
                 </template>
               </template>
               <!-- 🌈 ENUM 🌈 -->
               <template v-if="info && info.enum" v-for="(item,i) in info.enum">
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
+                  <input class="form-check-input mousetrap" type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
                   <label class="form-check-label" :for="i" v-text='item'></label>
                 </div>
               </template>
@@ -1192,10 +1230,10 @@
                 <template v-for="(item,i) in info.oneOf">
                   <div>
                     <template v-if="item.format === 'date'">
-                      <input type="date" v-model="userInput" class="form-control form-control-sm" :placeholder="'enter '+item.format">
+                      <input type="date" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.format">
                     </template>
                     <template v-if="item.type === 'string' && !item.format">
-                      <input  type="text" v-model="userInput" class="form-control form-control-sm" :placeholder="'enter '+item.type">
+                      <input  type="text" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.type">
                     </template>
                     <!-- 🔥🔥🔥🔥🔥 TODO: handle nested arrays of objects 🔥🔥🔥🔥🔥 -->
                   </div>
@@ -1207,7 +1245,7 @@
                   <div class="col-sm-12 mb-2">
                     <form @submit.prevent="addKeyword">
                       <small class="text-muted">Enter single or multiple keywords separated by commas</small>
-                      <input ref="keywordInput" autocomplete="off" type="text" class="form-control form-control-sm" placeholder="Enter text here">
+                      <input ref="keywordInput" autocomplete="off" type="text" class="form-control form-control-sm mousetrap" placeholder="Enter text here">
                     </form>
                   </div>
                   <div class="col-sm-12 m-auto">
@@ -1244,7 +1282,7 @@
               <!-- 🌈  CONTRIBUTORS 🌈 -->
               <template v-if="info.oneOf && name === 'contributor'">
                 <div class="form-group p-2 row">
-                  <button class="btn mainBackDark text-light m-auto" @click="addPerson('contributor')"><i class="fas fa-plus"></i> Add Contributor</button>
+                  <button class="btn mainBackDark text-light m-auto btnfocus" @click="addPerson('contributor')"><i class="fas fa-plus"></i> Add Contributor</button>
                 </div>
                 <div class="col-sm-12 m-auto">
                   <template v-for="(person,i) in userInput">
@@ -1270,7 +1308,7 @@
               <!-- 🌈  OBJECT 🌈 -->
               <template v-if="info.type=== 'object' && name !== 'license' && name !== 'includedInDataCatalog' ">
                 <div class="form-group p-2 row">
-                  <button class="btn themeButton text-light m-auto" @click="addItem(name,info)" v-if="info.type=== 'object' && !userInput">
+                  <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="info.type=== 'object' && !userInput">
                     <i class="fas fa-plus"></i> <span v-text="'Add '+name"></span>
                   </button>
                 </div>
@@ -1322,23 +1360,8 @@
 				return {
           userInfo:null,
           loading: false,
-          presets:[
-            {
-              'name':'CTSADataset',
-              'url':'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json',
-              'description':'A schema describing Dataset from CTSA center'
-            },
-          ],
-          // categories:{
-          //   'google_req':['name','description'],
-          //   'google':['name','description','alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
-          // },
-          newcategories:{
-            'Google':{
-              'Required':['name','description'],
-              'Recommended':['name','description','alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
-            }
-          }
+          presets:{{guide_presets}},
+          categories: {{guide_categories}},
 				}
 			},
       computed:{
@@ -1363,7 +1386,7 @@
                 }
             });
             // id is the id of the chart
-            $("#registerReady").notify("Available Now",{style:'trophy', showDuration: 40, });
+            $("#registerReady").notify("Available Now",{style:'trophy', showDuration: 40, placement:'top'});
           }
           return res
         },
@@ -1372,61 +1395,6 @@
         },
         categoryTotals:function(){
           let totals = store.getters.getCategoryTotals
-          // for (key in totals) {
-          //   if (totals[key]['todo'] === 0) {
-          //     $.notify.addStyle('trophy', {
-          //       html: `<div class="bg-dark p-1 text-light">
-          //           <i class="fas fa-trophy text-warning"></i> <span data-notify-text/>
-          //         </div>`,
-          //         classes: {
-          //           base: {
-          //             "white-space": "nowrap",
-          //             "background-color": "#343a40",
-          //             "padding": "5px",
-          //             "color":'white',
-          //             "border-radius":"5px"
-          //           }
-          //         }
-          //     });
-          //     // id is the id of the chart
-          //     $("#"+key).notify("Complete!",{style:'trophy', showDuration: 40, });
-          //   }else if (totals[key]['completed'] > totals[key]['todo']/2 ) {
-          //     $.notify.addStyle('trophyb', {
-          //       html: `<div class="bg-dark p-1 text-light">
-          //           <i class="fas fa-hand-rock text-info"></i> <span data-notify-text/>
-          //         </div>`,
-          //         classes: {
-          //           base: {
-          //             "white-space": "nowrap",
-          //             "background-color": "#343a40",
-          //             "padding": "5px",
-          //             "color":'white',
-          //             "border-radius":"5px"
-          //           }
-          //         }
-          //     });
-          //     // id is the id of the chart
-          //     $("#"+key).notify("Almost there!",{style:'trophyb', showDuration: 40, });
-          //   }
-          //   else if (totals[key]['completed'] === 0) {
-          //     $.notify.addStyle('trophyc', {
-          //       html: `<div class="bg-dark p-1 text-light">
-          //           <i class="fas fa-frown-open text-danger"></i> <span data-notify-text/>
-          //         </div>`,
-          //         classes: {
-          //           base: {
-          //             "white-space": "nowrap",
-          //             "background-color": "#343a40",
-          //             "padding": "5px",
-          //             "color":'white',
-          //             "border-radius":"5px"
-          //           }
-          //         }
-          //     });
-          //     // id is the id of the chart
-          //     $("#"+key).notify("Nothing Yet!",{style:'trophyc', showDuration: 40, });
-          //   }
-          // }
           return totals
         }
       },
@@ -1528,7 +1496,7 @@
               }
               // set SCHEMA Required
               let requiredProps = schema['validation']['required']
-              Vue.set(self.newcategories,name,{ 'Required': requiredProps })
+              Vue.set(self.categories,name,{ 'Required': requiredProps })
               // set SCHEMA Recommended
               let recommendedProps =[]
               for (var prop in schema['validation']['properties']) {
@@ -1537,8 +1505,8 @@
                   recommendedProps.push(currentProp)
                 }
               }
-              console.log('recommendedProps',recommendedProps)
-              Vue.set(self.newcategories[name],'Recommended',recommendedProps)
+              // console.log('recommendedProps',recommendedProps)
+              Vue.set(self.categories[name],'Recommended',recommendedProps)
             }
 
             //THEN assign categories
@@ -1546,9 +1514,9 @@
               //assign if found
               Vue.set(schema['validation']['properties'][prop],'categories',[])
 
-              for (category in self.newcategories) {
-                for (var subcategory in self.newcategories[category]) {
-                  if (self.newcategories[category][subcategory].includes(prop)) {
+              for (category in self.categories) {
+                for (var subcategory in self.categories[category]) {
+                  if (self.categories[category][subcategory].includes(prop)) {
                     let cat={
                       'category': category,
                       'subcategory':subcategory
@@ -1558,7 +1526,7 @@
                 }
               }
             }
-            console.log('WITH CATS', schema)
+            // console.log('WITH CATS', schema)
             return schema
           }else{
             return schema
@@ -1762,13 +1730,13 @@
           var self = this;
 
           Swal.fire({
-            title: 'Load & Edit Existing Data',
-            text: "Load Data From:",
+            title: 'Load & Edit Existing Dataset',
+            text: "Load Dataset From:",
             showCancelButton: true,
             confirmButtonColor:'#5C3069',
             cancelButtonColor:'#006476',
-            confirmButtonText: 'Dataset URL',
-            cancelButtonText: 'Registered',
+            confirmButtonText: 'A Dataset URL',
+            cancelButtonText: 'My Registered Datasets',
           }).then((result) => {
             if (result.value) {
               // URL
@@ -1863,6 +1831,19 @@
 			},
 			mounted:function(){
         this.checkUser();
+        tippy( '#guide', {
+            target:'.bar',
+            content: 'Loading...',
+            maxWidth:'200px',
+            placement:'top',
+            animation: 'fade',
+            theme:'light',
+            onShow(instance) {
+              let totals = store.getters.getTotals
+              let percentage = Math.ceil((totals.complete/totals.total)*100)
+              instance.setContent("<div class='text-success bold m-0'>"+percentage+"% Completed</div>")
+            }
+          });
 			}
 		});
 

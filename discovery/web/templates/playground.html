@@ -37,13 +37,17 @@
         <h4 class="logoText">Visualize and register your schema</h4>
         <div class="row">
           <div class="col-sm-6">
-            <img class="w-75" src="/static/img/visualize-01.png" alt="Visualize"/>
+            {% if site_name == "CTSA Data Discovery Engine" %}
+              <img class="w-75" src="/static/img/visualize-01.png" alt="Visualize"/>
+            {% endif %}
             <p class="text-muted">
               <b class="mainTextDark">Visualize</b> your schema in a way easy to undertand.  The visualization can be registered as a homepage for your schema so you can share it.
             </p>
           </div>
           <div class="col-sm-6">
-            <img class="w-75" src="/static/img/registerschema.png" alt="Register"/>
+            {% if site_name == "CTSA Data Discovery Engine" %}
+              <img class="w-75" src="/static/img/registerschema.png" alt="Register"/>
+            {% endif %}
             <p class="text-muted">
               <b class="mainTextDark">Register</b> your schema so others will be able to use your schema as a starting point to build their schema.
             </p>
@@ -59,15 +63,17 @@
             <div v-if=loading class="loader">
               <img src="./static/img/ripple.svg"/>
             </div>
-            <small class="text-muted">Examples:</small>
-            <small class="badge badge-pill badge-secondary pointer mr-1"
-            @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
-              <i class="fas fa-question-circle" data-tippy="BioThings Schema"></i> BioThings Schema
-            </small>
-            <small class="badge badge-pill badge-secondary pointer mr-1"
-            @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
-              <i class="fas fa-question-circle" data-tippy="CTSA Schema"></i> CTSA Dataset Schema
-            </small>
+            {% if site_name == "CTSA Data Discovery Engine" %}
+              <small class="text-muted">Examples:</small>
+              <small class="badge badge-pill badge-secondary pointer mr-1"
+              @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
+                BioThings Schema
+              </small>
+              <small class="badge badge-pill badge-secondary pointer mr-1"
+              @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
+                CTSA Dataset Schema
+              </small>
+            {% endif %}
           </form>
         </div>
       </div>
@@ -90,7 +96,9 @@
         <h4 class="logoText">Create a schema</h4>
         <div class="row">
           <div class="col-sm-6 m-auto">
-            <img class="w-75" src="/static/img/create-01.png" alt="Create"/>
+            {% if site_name == "CTSA Data Discovery Engine" %}
+              <img class="w-75" src="/static/img/create-01.png" alt="Create"/>
+            {% endif %}
             <p class="text-muted w-75 m-auto">
               <b class="mainTextDark">Create</b> your own schema by defining a more specific version of an existing schema class and create a schema tailored to your needs.
             </p>
@@ -159,14 +167,7 @@ var app = new Vue({
           slug:'',
           choice:'',
           loading:false,
-          startingPoints:[
-						{
-              'namespace':'schema',
-              'prefix':'schema',
-              'name':'Dataset',
-              'description':'A body of structured information describing some topic(s) of interest.'
-            },
-          ]
+          startingPoints:{{starting_points}}
 				}
 			},
       watch:{
