@@ -18,6 +18,12 @@ from discovery.scripts.setup import es_data_setup
 
 L = logging.getLogger(__name__)
 
+class DiscoveryAPIException(Exception):
+    pass
+
+class ParserLoadingError(DiscoveryAPIException):
+    pass
+
 
 def github_authenticated(func):
     '''
@@ -51,7 +57,11 @@ class APIBaseHandler(BaseHandler):
         L.debug("Server-side contexts:\n%s",
                 pprint.pformat(contexts))
         parser.context.update({k: v for k, v in contexts.items() if v})
-        parser.load_schema(doc)
+        try:
+            parser.load_schema(doc)
+        except ValueError as error:
+            raise ParserLoadingError(str(error).split(':')[0])
+
         return parser
 
     async def prepare(self):
@@ -98,7 +108,7 @@ class APIBaseHandler(BaseHandler):
                                    tornado.httpclient.HTTPError,
                                    requests.exceptions.RequestException,
                                    json.decoder.JSONDecodeError,
-                                   AssertionError]:
+                                   AssertionError, ParserLoadingError]:
                 status_code = 400
                 self.set_status(status_code)
                 reason = str(exception)
