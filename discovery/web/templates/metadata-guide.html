@@ -96,12 +96,13 @@
               <p >
                 <small v-text="item.description"></small>
               </p>
-              <buttom @click="sendRequest(item.url,item.name)" class="btn themeButton text-light pulse">Next</buttom>
+              <buttom @click="sendRequest(item,item.name)" class="btn themeButton text-light pulse">Next</buttom>
             </div>
           </template>
         </div>
       </div>
       <!-- SECOND STEP -->
+
       <!-- AVAILABLE FIELDS -->
       <div v-if="validation" class="whitefade tippyContainer">
         <div class="p-1 bg-dark text-left mb-0">
@@ -109,7 +110,7 @@
             TO-DO <i class="fas fa-chevron-right"></i>
           </span>
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 badge-dark pointer badgeDesc" @click='selectProp(index)' v-if="prop && !prop.value" :class="[prop.highlighted ? 'highlight': '']">
+            <span class="badge m-1 badge-dark pointer badgeDesc" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
               <small v-text='index'></small>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
             </span>
@@ -141,18 +142,26 @@
           </template>
         </div>
       </div>
-      <div v-if="validation" class="p-1 d-flex justify-content-center flex-wrap">
-        <template v-if="categoryTotals && categoryTotals.Google" v-for="(subcats,cat) in categoryTotals">
-          <div class="bg-light m-1 text-center p-2">
-            <small  class="bold text-info d-block">
-              <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
-              <span v-text="cat"></span>
-            </small>
-            <template v-for="(totals,subcat) in subcats">
-              <chart class="d-inline-block" :name="subcat" :unique="cat+subcat" :maincategory="cat" :totals="totals" :key="cat"></chart>
-            </template>
-          </div>
-        </template>
+      <div v-if="validation">
+        <div class="p-1 d-flex justify-content-center flex-wrap">
+          <template v-if="categoryTotals" v-for="(subcats,cat) in categoryTotals">
+            <div class="bg-light m-1 text-center p-2">
+              <small  class="bold text-info d-block">
+                <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
+                <span v-text="cat"></span>
+              </small>
+              <template v-for="(totals,subcat) in subcats">
+                <chart class="d-inline-block" :name="subcat" :unique="cat+subcat" :maincategory="cat" :totals="totals" :key="cat"></chart>
+              </template>
+            </div>
+          </template>
+        </div>
+        <h5 class="text-muted text-center d-block mt-3">Get Discovered By More Portals:</h5>
+        <div class="p-1 d-flex justify-content-center flex-wrap">
+          <template v-if="categories" v-for="(cat,i) in categories">
+            <addcategory :item="cat" :key="i"></addcategory>
+          </template>
+        </div>
       </div>
       <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
         <small class="mr-1"><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
@@ -302,6 +311,83 @@
 
           }
         }
+      },
+      mergeCategoryProps(state,payload){
+        let origin = payload['origin'];
+        let catprops = payload['catprops'];
+        let catpropsrequired = payload['catpropsrequired'];
+        // console.log(catprops)
+        // console.log(catpropsrequired)
+        // console.log(origin)
+
+        // add requirements to main reqs to be able to show asterisk
+        state.schema.validation.required = state.schema.validation.required.concat(catpropsrequired)
+
+        // helper func to decide right succategory
+        function getProp(propname){
+          let cat={
+            'category': origin,
+          }
+          if (catpropsrequired.includes(propname)) {
+            Vue.set(cat,'subcategory','Required')
+          }else{
+            Vue.set(cat,'subcategory','Recommended')
+          }
+          return cat
+        }
+
+        // if matching add cat {name:orgin, subcategory: req/rec}
+        // else add new prop with origin = name
+        for (prop in catprops) {
+          if (prop in state.schema.validation.properties) {
+            // check if prop has guide_categories
+            // if YES push new
+            // if NO set-up and add
+            if (state.schema.validation.properties[prop].hasOwnProperty('categories')) {
+              state.schema.validation.properties[prop]['categories'].unshift(getProp(prop))
+            }else{
+              Vue.set(state.schema.validation.properties[prop],'categories',[])
+              state.schema.validation.properties[prop]['categories'].unshift(getProp(prop))
+            }
+          }else{
+            let newProp = catprops[prop]
+            Vue.set(newProp,'categories',[])
+            // set origin to remove by origin
+            Vue.set(newProp,'origin', origin)
+
+            newProp['categories'].unshift(getProp(prop))
+            Vue.set(state.schema.validation.properties,prop,newProp)
+          }
+        }
+
+        // console.log("ALL DONE", state.schema.validation.properties)
+
+      },
+      removeCategory(state,payload){
+        let origin = payload['origin'];
+        let catpropsrequired = payload['catpropsrequired'];
+
+        console.log("remove",catpropsrequired)
+        console.log("remove",origin)
+
+        for (prop in state.schema.validation.properties) {
+          // if origin matches remove prop
+          if (state.schema.validation.properties[prop].hasOwnProperty('origin') && state.schema.validation.properties[prop]['origin'] === origin ) {
+            Vue.delete(state.schema.validation.properties,prop)
+          }else {
+            // if not check categories and remove mention of origin
+            if (state.schema.validation.properties[prop].hasOwnProperty('categories')) {
+              for (var i = 0; i < state.schema.validation.properties[prop]['categories'].length; i++) {
+                if (state.schema.validation.properties[prop]['categories'][i]['category'] === origin) {
+                  state.schema.validation.properties[prop]['categories'].splice(i,1)
+                }
+              }
+            }
+          }
+        }
+
+        // console.log("ALL DONE", state.schema.validation.properties)
+
       }
     },
     getters:{
@@ -349,32 +435,6 @@
       },
       getCategoryTotals: (state)=>{
         let cats = {}
-        // if (state.schema.hasOwnProperty('validation')) {
-        //   for (key in state.schema.validation.properties) {
-        //     if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
-        //       for (var i = 0; i < state.schema.validation.properties[key]['categories'].length; i++) {
-        //         let c = state.schema.validation.properties[key]['categories'][i]
-        //         if(!cats.hasOwnProperty(c)) {
-        //           Vue.set(cats,c,{'completed':0,'todo':1})
-        //         }else{
-        //           cats[c]['todo']+=1
-        //         }
-        //       }
-        //     }
-        //   }
-        //   for (key in state.schema.validation.properties) {
-        //     if (state.schema.validation.properties[key] && state.schema.validation.properties[key].value) {
-        //       if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
-        //         for (var i = 0; i < state.schema.validation.properties[key]['categories'].length; i++) {
-        //           let c = state.schema.validation.properties[key]['categories'][i]
-        //           cats[c]['completed']+=1
-        //           cats[c]['todo']-=1
-        //         }
-        //       }
-        //     }
-        //   }
-        // }
-        // return cats
         if (state.schema.hasOwnProperty('validation')) {
           for (key in state.schema.validation.properties) {
             if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
@@ -546,6 +606,119 @@
         </small>
       </div>
       <canvas :id=unique width="100"></canvas>
+    </div>`
+  });
+
+  Vue.component('addcategory', {
+    data: function(){
+      return{
+        added:false,
+        loading: false,
+        reqfields: []
+      }
+    },
+    props: ['item'],
+    methods:{
+      getCatData:function(){
+        var self = this;
+        if (!self.added) {
+          self.loading = true;
+          axios.get('/api/registry/'+self.item.namespace+'/'+self.item.prefix+':'+self.item.name).then(res=>{
+            self.loading = false;
+            console.log('CAT DATA', res.data)
+            Swal.fire({
+              title: 'Add '+self.item.name+' fields?',
+              showCancelButton: true,
+              animation:false,
+              customClass:'scale-in-center',
+              showCancelButton: true,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              confirmButtonText: 'Yes, add them!'
+            }).then((result) => {
+              if (result.value) {
+                var payload = {};
+                payload["origin"] = self.item.name
+                payload["catprops"] = res.data.validation.properties;
+                if (res.data.validation.required) {
+                  payload["catpropsrequired"] = res.data.validation.required;
+                  self.reqfields = res.data.validation.required;
+                }else{
+                  payload["catpropsrequired"] = [];
+                }
+                store.commit('mergeCategoryProps',payload);
+                self.added = true;
+              }
+            })
+
+          }).catch(err=>{
+            throw err;
+            self.loading = false;
+          })
+        }
+      },
+      removeCat(){
+        var self = this;
+        Swal.fire({
+          title: 'Are you sure you want to remove '+self.item.name+' fields?',
+          showCancelButton: true,
+          animation:false,
+          customClass:'scale-in-center',
+          showCancelButton: true,
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          confirmButtonText: 'Yes, remove them!'
+        }).then((result) => {
+          if (result.value) {
+            var payload = {};
+            payload["origin"] = self.item.name
+            payload["catpropsrequired"] = self.reqfields
+            store.commit('removeCategory',payload);
+            self.added = false;
+          }
+        })
+      }
+    },
+    watch:{
+
+    },
+    mounted: function(){
+
+      tippy( '#widget',{
+          target:'.desc',
+          content: 'Loading...',
+          maxWidth:'200px',
+          placement:'bottom',
+          animation: 'fade',
+          theme:'light',
+          onShow(instance) {
+            let info = instance.reference.dataset.tippyInfo;
+            instance.setContent("<div class='text-muted m-0'>"+info+"</div>")
+          }
+        });
+    },
+    computed: {
+
+    },
+    template:
+    `<div class="mr-2 w-25" :class="{'bg-light': !added, 'alert-success': added}">
+      <div class="row m-0">
+        <div class="col-sm-8 p-1 d-flex align-items-center justify-content-around desc" :data-tippy-info="item.description">
+          <small class="bold text-info">
+            <i v-if="item.name ==='Google'" class="fab fa-google googleText mr-1"></i>
+            <span v-text="item.name"></span>
+          </small>
+          <small v-if="loading">Loading...</small>
+        </div>
+        <div class="col-sm-4 p-1 bg-dark actions d-flex align-items-center justify-content-around">
+          <span v-if="!added" class="p-1 desc" @click="getCatData" data-tippy-info="Add Fields">
+            <i class="fas fa-plus-circle pointer text-muted"></i>
+          </span>
+          <span v-if="added" @click="removeCat" class="p-1 desc" data-tippy-info="Remove Fields">
+            <i class="fas fa-minus-circle pointer text-danger"></i>
+          </span>
+        </div>
+      </div>
     </div>`
   });
 
@@ -1425,22 +1598,37 @@
             throw err;
           })
         },
-        sendRequest(url,schemaName){
+        // sendRequest(url,schemaName){
+        //   let self = this;
+        //   self.loading = true;
+        //   axios.get("/api/view?url="+url).then(res=>{
+        //
+        //     var payload = {};
+        //     payload["name"] = schemaName;
+        //     store.commit('saveSchemaName',payload);
+        //
+        //     self.parseData(res.data)
+        //
+        //     self.loading = false;
+        //   }).catch(err=>{
+        //     self.loading = false;
+        //     throw err;
+        //   })
+        // },
+        sendRequest(item, schemaName){
           let self = this;
           self.loading = true;
-          axios.get("/api/view?url="+url).then(res=>{
-
+          axios.get('/api/registry/'+item.namespace+'/'+item.prefix+':'+item.name).then(res=>{
             var payload = {};
             payload["name"] = schemaName;
             store.commit('saveSchemaName',payload);
-
             self.parseData(res.data)
 
             self.loading = false;
-          }).catch(err=>{
+    			}).catch(err=>{
             self.loading = false;
-            throw err;
-          })
+    				throw err;
+    			})
         },
         parseData(data){
           let self = this;
@@ -1462,54 +1650,27 @@
                 }
               }
             }
+          }else {
+            if (data.hasOwnProperty('name')) {
+              if (data.name.includes(schemaName)) {
+                var payload = {};
+                payload["schema"] = data;
+                store.commit('saveSchema',payload);
+              }
+            }else if (data.hasOwnProperty('label')) {
+              if (data.label.includes(schemaName)) {
+                var payload = {};
+                payload["schema"] = data;
+                store.commit('saveSchema',payload);
+              }
+            }
           }
         },
         assignCategories(schema){
           var self = this;
-          // if (schema.hasOwnProperty('validation')) {
-          //   //set minimum req by schema
-          //   if (schema['validation'].hasOwnProperty('required')) {
-          //     Vue.set(self.categories,'minimum',schema['validation']['required'])
-          //   }
-          //   for (prop in schema['validation']['properties']) {
-          //     //set default
-          //     Vue.set(schema['validation']['properties'][prop],'categories',['gold']);
-          //     //assign if found
-          //     for (category in self.categories) {
-          //       if (self.categories[category].includes(prop)) {
-          //         schema['validation']['properties'][prop]['categories'].unshift(category);
-          //       }
-          //     }
-          //   }
-          //   return schema
-          // }else{
-          //   return schema
-          // }
-          if (schema.hasOwnProperty('validation')) {
-            //FIRST find schema specific requirements and add to hardcoded list
-            if (schema['validation'].hasOwnProperty('required')) {
-              let name = ''
-              try {
-                name = schema['label']
-              } catch (e) {
-                name = schema['name']
-              }
-              // set SCHEMA Required
-              let requiredProps = schema['validation']['required']
-              Vue.set(self.categories,name,{ 'Required': requiredProps })
-              // set SCHEMA Recommended
-              let recommendedProps =[]
-              for (var prop in schema['validation']['properties']) {
-                let currentProp = prop
-                if ( !requiredProps.includes(currentProp)) {
-                  recommendedProps.push(currentProp)
-                }
-              }
-              // console.log('recommendedProps',recommendedProps)
-              Vue.set(self.categories[name],'Recommended',recommendedProps)
-            }
 
-            //THEN assign categories
+          if (schema.hasOwnProperty('validation')) {
+
             for (prop in schema['validation']['properties']) {
               //assign if found
               Vue.set(schema['validation']['properties'][prop],'categories',[])

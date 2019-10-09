@@ -269,7 +269,7 @@ const store = new Vuex.Store({
           Vue.set(mainClass,'@type','rdfs:Class')
           Vue.set(mainClass,'rdfs:comment',state.schema[i]['description'])
           Vue.set(mainClass,'rdfs:label',state.schema[i]['label'])
-          Vue.set(mainClass,'rdfs:subClassOf',state.startingPoint)
+          Vue.set(mainClass,'rdfs:subClassOf',{"@id": state.startingPoint})
           Vue.set(mainClass,'$validation',state.startingPoint)
           //Add New Class
           state.finalschema['@graph'].push(mainClass)
