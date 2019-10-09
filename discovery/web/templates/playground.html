@@ -189,8 +189,8 @@ var app = new Vue({
                 '<p><a target="_blank" href="'+this.suggestedURL+'">'+this.suggestedURL+'</a></p>' +
                 '<p>Proceed with this link?</p>',
               showCancelButton: true,
-              confirmButtonColor: '#3085d6',
-              cancelButtonColor: '#d33',
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
               confirmButtonText: 'Yes, use this link!'
             }).then((result) => {
               if (result.value) {
@@ -230,8 +230,8 @@ var app = new Vue({
                       '<p><a target="_blank" href="'+self.suggestedURL+'">'+self.suggestedURL+'</a></p>' +
                       '<p>Proceed with this link?</p>',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
+                    confirmButtonColor:"{{color_main}}",
+                    cancelButtonColor:"{{color_sec}}",
                     confirmButtonText: 'Yes, use this link!'
                   }).then((result) => {
                     if (result.value) {
