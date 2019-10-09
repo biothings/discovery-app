@@ -41,6 +41,9 @@ TEMPLATE_ENV.globals['starting_points'] = siteconfig.STARTING_POINTS
 TEMPLATE_ENV.globals['registry_shortcuts'] = siteconfig.REGISTRY_SHORTCUTS
 # IMAGES FOLDER
 TEMPLATE_ENV.globals['static_image_folder'] = siteconfig.STATIC_IMAGE_FOLDER
+# Colors used
+TEMPLATE_ENV.globals['color_main'] = siteconfig.MAIN_COLOR
+TEMPLATE_ENV.globals['color_sec'] = siteconfig.SEC_COLOR
 
 # Compile site specific minified css
 sass.compile(dirname=(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/scss'), os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/css')), output_style='compressed')
