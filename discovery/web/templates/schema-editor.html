@@ -522,8 +522,8 @@ Vue.component('c-box', {
         title: 'Are you sure you want to delete '+propLabel+'?',
         text: "You won't be able to revert this",
         showCancelButton: true,
-        confirmButtonColor:'#5C3069',
-        cancelButtonColor:'#006476',
+        confirmButtonColor:"{{color_main}}",
+        cancelButtonColor:"{{color_sec}}",
         animation:false,
         customClass:'scale-in-center',
         confirmButtonText: 'Yes, Delete it!'
@@ -570,8 +570,8 @@ Vue.component('c-box', {
         input: 'text',
         confirmButtonText: 'Next &rarr;',
         showCancelButton: true,
-        confirmButtonColor:'#5C3069',
-        cancelButtonColor:'#006476',
+        confirmButtonColor:"{{color_main}}",
+        cancelButtonColor:"{{color_sec}}",
         animation:false,
         customClass:'scale-in-center',
         progressSteps: ['1', '2','3']
@@ -640,8 +640,8 @@ Vue.component('c-box', {
             title: 'Add Property '+result.value[0]+'?',
             text: result.value[2],
             showCancelButton: true,
-            confirmButtonColor:'#5C3069',
-            cancelButtonColor:'#006476',
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
             confirmButtonText: 'Yes, Add It!',
             animation:false,
             customClass:'scale-in-center',
@@ -740,8 +740,8 @@ var app = new Vue({
             showCancelButton: true,
             animation:false,
             customClass:'scale-in-center',
-            confirmButtonColor:'#5C3069',
-            cancelButtonColor:'#006476',
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
             progressSteps: ['1', '2']
           }).queue([
             {
@@ -771,8 +771,8 @@ var app = new Vue({
                 title: 'Add Class '+result.value[0]+'?',
                 text: result.value[1],
                 showCancelButton: true,
-                confirmButtonColor:'#5C3069',
-                cancelButtonColor:'#006476',
+                confirmButtonColor:"{{color_main}}",
+                cancelButtonColor:"{{color_sec}}",
                 animation:false,
                 customClass:'scale-in-center',
                 confirmButtonText: 'Yes, Add It!'
@@ -796,8 +796,8 @@ var app = new Vue({
             store.commit('formPreview');
             Swal.fire({
               position: 'center',
-              confirmButtonColor:'#5C3069',
-              cancelButtonColor:'#006476',
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
               html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox">
                       <small>
                         <pre>
@@ -835,8 +835,8 @@ var app = new Vue({
                 '<p>You have not selected a schema to start with.</p> ' +
                 '<p>Search the <a href="/registry">Registry</a> for a schema to start from.</p>',
               showCancelButton: false,
-              confirmButtonColor: '#3085d6',
-              cancelButtonColor: '#d33',
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
             });
           }
         },
@@ -974,8 +974,8 @@ var app = new Vue({
                   </small>`,
             footer:'',
             width:'52em',
-            confirmButtonColor:'#5C3069',
-            cancelButtonColor:'#006476',
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
             confirmButtonText:"Ready!",
             imageUrl: '/static/img/editor.png',
             imageAlt: 'Metadata Editor'

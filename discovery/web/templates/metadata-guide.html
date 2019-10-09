@@ -367,8 +367,8 @@
         let origin = payload['origin'];
         let catpropsrequired = payload['catpropsrequired'];
 
-        console.log("remove",catpropsrequired)
-        console.log("remove",origin)
+        // console.log("remove",catpropsrequired)
+        // console.log("remove",origin)
 
         for (prop in state.schema.validation.properties) {
           // if origin matches remove prop
@@ -805,8 +805,8 @@
           showCancelButton: true,
           animation:false,
           customClass:'scale-in-center',
-          confirmButtonColor:'#5C3069',
-          cancelButtonColor:'#006476',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
           progressSteps: ['1', '2',]
         }).queue([
           {
@@ -890,8 +890,8 @@
           input: 'text',
           confirmButtonText: 'Next &rarr;',
           showCancelButton: true,
-          confirmButtonColor:'#5C3069',
-          cancelButtonColor:'#006476',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
           progressSteps: ['1', '2',]
         }).queue([
           {
@@ -1054,8 +1054,8 @@
           input: 'text',
           confirmButtonText: 'Next &rarr;',
           showCancelButton: true,
-          confirmButtonColor:'#5C3069',
-          cancelButtonColor:'#006476',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
           animation:false,
           customClass:'scale-in-center',
           progressSteps: arr
@@ -1701,8 +1701,8 @@
               animation:false,
               customClass:'scale-in-center',
               showCancelButton: true,
-              confirmButtonColor:'#5C3069',
-              cancelButtonColor:'#006476',
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
               confirmButtonText: 'Yes, start over'
             }).then((result) => {
               if (result.value) {
@@ -1728,8 +1728,8 @@
           store.commit('formPreview');
           Swal.fire({
             position: 'center',
-            confirmButtonColor:'#5C3069',
-            cancelButtonColor:'#006476',
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
             animation:false,
             customClass:'scale-in-center',
             html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox">
@@ -1753,8 +1753,8 @@
               title: 'Register this dataset?',
               html:"<small>Are you all done? Click <b>Register Now</b> to proceed.</small>",
               footer:`<small class='text-danger'>You will leave this page after successfully registering this dataset.</small>`,
-              confirmButtonColor:'#5C3069',
-              cancelButtonColor:'#006476',
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
               animation:false,
               customClass:'scale-in-center',
               showCancelButton: true,
@@ -1880,8 +1880,8 @@
                   </small>`,
             footer:'',
             width:'52em',
-            confirmButtonColor:'#5C3069',
-            cancelButtonColor:'#006476',
+            cconfirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
             confirmButtonText:"Ready!",
             imageUrl: '/static/img/metadata.png',
             imageAlt: 'Dataset Editor'
@@ -1894,8 +1894,8 @@
             title: 'Load & Edit Existing Dataset',
             text: "Load Dataset From:",
             showCancelButton: true,
-            confirmButtonColor:'#5C3069',
-            cancelButtonColor:'#006476',
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
             confirmButtonText: 'A Dataset URL',
             cancelButtonText: 'My Registered Datasets',
           }).then((result) => {
