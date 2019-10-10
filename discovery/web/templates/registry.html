@@ -22,7 +22,7 @@
                   <small>Visualize <span v-text="item.name"></span></small>
                 </div>
                 <div class="col-sm-4 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-                  <span class="fa-stack fa-1x pointer unselectable" :data-tippy="'Visualize Classes in '+item.name" data-tippy-theme="light" @click.prevent="window.location.href='/'+item.registered_namespace+'/'">
+                  <span class="fa-stack fa-1x pointer unselectable" :data-tippy="'Visualize Classes in '+item.name" data-tippy-theme="light" @click.prevent="window.location.href='/view/'+item.registered_namespace+'/'">
                     <i class="fas fa-circle text-muted fa-stack-2x"></i>
                     <i class="fas fa-eye fa-stack-1x text-light"></i>
                   </span>
@@ -153,9 +153,9 @@ Vue.component('registry-item', {
   methods:{
     saveDataAndRedirect(item,goesToEditor){
       var self = this;
-      console.log("ITEM",item)
+      // console.log("ITEM",item)
       if (goesToEditor) {
-        console.log("TO EDITOR")
+        // console.log("TO EDITOR")
         if (item && item.namespace && item.label && item.prefix) {
           let obj = JSON.stringify(item)
           localStorage.setItem('EditorData',obj);
@@ -168,9 +168,9 @@ Vue.component('registry-item', {
           );
         }
       }else{
-        console.log("TO VIEWER")
+        // console.log("TO VIEWER")
         if (item && item.namespace && item.label) {
-          window.location.href = '/'+item.namespace+'/'+item.label;
+          window.location.href = '/view/'+item.namespace+'/'+item.label;
         }else{
             Swal.fire(
               'Oops!',
