@@ -254,6 +254,6 @@ APP_LIST = [
     (r"/logout/?", LogoutHandler),
     (r"/dataset/?", DatasetRegistryHandler),
     (r"/dataset/([^/]+)/?", DatasetHandler),
-    (r"/([^/]+)/([^/]*)/?", VisualizerHandler),
+    (r"/view/([^/]+)/([^/]*)/?", VisualizerHandler),
     (r".*", PageNotFoundHandler)
 ]

@@ -1907,3 +1907,18 @@ progress[value]::-webkit-progress-value {
     display: none;
   }
 }
+
+.unselectable:focus{
+  outline: none !important;
+}
+.pBox{
+  border-left: 4px solid var(--main);
+  border-radius: 2px;
+}
+.cBox{
+  border-left: 4px solid var(--sec);
+  border-radius: 2px;
+}
+.highlight{
+  outline: #ffc107 3px solid !important;
+}
