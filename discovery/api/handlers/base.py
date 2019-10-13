@@ -9,6 +9,7 @@ import requests
 import tornado
 from biothings.web.api.helper import BaseHandler
 from biothings_schema import Schema as SchemaParser
+from jsonschema.exceptions import SchemaError
 from tornado.escape import json_decode
 from tornado.httpclient import AsyncHTTPClient
 from torngithub import json_encode
@@ -61,6 +62,8 @@ class APIBaseHandler(BaseHandler):
             parser.load_schema(doc)
         except ValueError as error:
             raise ParserLoadingError(str(error).split(':')[0])
+        except SchemaError as error:
+            raise ParserLoadingError(str(error))
 
         return parser
 
