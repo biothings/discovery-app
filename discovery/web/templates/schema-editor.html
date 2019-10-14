@@ -183,6 +183,8 @@ const store = new Vuex.Store({
       newProp['name'] = state.prefix+":"+payload['name']
       newProp['range'] = payload['range']
       newProp['domain'] = state.prefix+":"+payload['domain']
+      // if new prop added it should appear in validation by default
+      newProp['selected'] = payload['special']
 
       for (var i = 0; i < state.schema.length; i++) {
         if (state.schema[i].special) {
@@ -302,15 +304,17 @@ const store = new Vuex.Store({
                 let propValue={};
                 Vue.set(propValue,'description',state.schema[i].properties[y].description)
                 //Assign type
-                if (['name','description','version','identifier'].includes(state.schema[i].properties[y].label)) {
+                let myLabel = state.schema[i].properties[y].label;
+
+                if (['name','description','version','identifier'].includes(myLabel)) {
                   Vue.set(propValue,'type','string')
-                }else if (['url','sameAs',].includes(state.schema[i].properties[y].label)) {
+                }else if (['url','sameAs',].includes(myLabel)) {
                   Vue.set(propValue,'type','string')
                   Vue.set(propValue,'format','uri')
-                }else if (['keywords',].includes(state.schema[i].properties[y].label)) {
+                }else if (['keywords',].includes(myLabel)) {
                   Vue.set(propValue,'type','array')
                   Vue.set(propValue,'items',{'type':'string'})
-                }else if (['datePublished','dateModified',].includes(state.schema[i].properties[y].label)) {
+                }else if (['datePublished','dateModified',].includes(myLabel)) {
                   Vue.set(propValue,'oneOf',[{
                       "type": "string",
                       "format": "date-time"
@@ -320,11 +324,11 @@ const store = new Vuex.Store({
                       "format": "date"
                     }
                   ]);
-                }else if (['creator','publisher','license','citation','samples','funder','contributor'].includes(state.schema[i].properties[y].label)) {
+                }else if (['creator','publisher','license','citation','samples','funder','contributor'].includes(myLabel)) {
                   Vue.set(propValue,'type','object')
-                }else if (['measurementTechnique'].includes(state.schema[i].properties[y].label)) {
+                }else if (['measurementTechnique'].includes(myLabel)) {
                   Vue.set(propValue,'enum',[])
-                }else if (['includedInDataCatalog'].includes(state.schema[i].properties[y].label)) {
+                }else if (['includedInDataCatalog'].includes(myLabel)) {
                   Vue.set(propValue,'type','object')
                   Vue.set(propValue,'properties',{
                     "name": {
@@ -339,10 +343,10 @@ const store = new Vuex.Store({
                   Vue.set(propValue,'type','string')
                 }
                 //Add to temp validation
-                Vue.set(state.validation['properties'],state.schema[i].properties[y].label,propValue)
+                Vue.set(state.validation['properties'],myLabel,propValue)
               }
               if (state.schema[i].properties[y].isRequired) {
-                state.validation['required'].push(state.schema[i].properties[y].label)
+                state.validation['required'].push(myLabel)
               }
               //Once done add temp validation to finalschema
               if (state.finalschema['@graph'].length) {
@@ -643,6 +647,11 @@ Vue.component('c-box', {
               payload['range'] = result.value[1];
               payload['description'] = result.value[2];
               payload['domain'] = domain;
+              if (self.item.special) {
+                payload['special'] = true;
+              }else {
+                payload['special'] = false;
+              }
               store.commit('addProperty',payload);
               self.expand = true;
             }

@@ -108,8 +108,8 @@
             TO-DO <i class="fas fa-chevron-right"></i>
           </span>
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 badge-dark pointer badgeDesc" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
-              <small v-text='index'></small>
+            <span class="badge m-1 pointer badgeDesc font-weight-normal" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted,'badge-secondary': prop.origin,'badge-dark': !prop.origin, 'badge-danger': prop.duplicate}">
+              <span v-text='index'></span>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
             </span>
           </template>
@@ -125,7 +125,7 @@
             DONE <i class="fas fa-chevron-right"></i>
           </span>
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 badge-success pointer" @click='selectProp(index)' v-if="prop && prop.value" :class="[prop.highlighted ? 'highlight': '']">
+            <span class="badge m-1 badge-success pointer" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted, 'badge-danger': prop.duplicate}">
               <i class="fas fa-check-circle"></i> <small v-text='index'></small>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
             </span>
@@ -185,8 +185,7 @@
       required:Array,
       validation:null,
       schemaName:'',
-      output:{
-      }
+      output:{}
     },
     strict: true,
     mutations: {
@@ -251,6 +250,14 @@
         let selection = payload['completed'];
         for (key in state.schema.validation.properties) {
           if (key === selection.name) {
+            //Check if selection has duplicates
+            if (key+"s" in state.schema.validation.properties && state.schema.validation.properties[key+"s"].hasOwnProperty('duplicate') ) {
+              console.log('HAS DUPLICATE')
+              let obj ={}
+              Vue.set(obj,key,selection.value)
+              console.log(obj)
+              Vue.set(state.schema.validation.properties[key+"s"],'value',obj);
+            }
             Vue.set(state.schema.validation.properties[selection.name],'value',selection.value);
           }
         }
@@ -347,6 +354,20 @@
               Vue.set(state.schema.validation.properties[prop],'categories',[])
               state.schema.validation.properties[prop]['categories'].unshift(getProp(prop))
             }
+          }else if (prop.slice(0, -1)  in state.schema.validation.properties) {
+            //plural form exists
+            console.log(prop.slice(0, -1))
+
+            let newProp = catprops[prop]
+            Vue.set(newProp,'categories',[])
+            // set origin to remove by origin
+            Vue.set(newProp,'origin', origin)
+            // is a duplicate
+            Vue.set(newProp,'duplicate', true)
+
+            newProp['categories'].unshift(getProp(prop))
+            Vue.set(state.schema.validation.properties,prop,newProp)
+
           }else{
             let newProp = catprops[prop]
             Vue.set(newProp,'categories',[])
@@ -714,6 +735,9 @@
           </span>
           <span v-if="added" @click="removeCat" class="p-1 desc" data-tippy-info="Remove Fields">
             <i class="fas fa-minus-circle pointer text-danger"></i>
+          </span>
+          <span v-if="added" class="p-1 desc" :data-tippy-info="'Export '+item.name+' dataset'">
+            <i class="fas fa-file-export pointer text-warning"></i>
           </span>
         </div>
       </div>
@@ -1193,7 +1217,6 @@
       var self = this
 
       self.checkForConstantKey(self.info,'const')
-
 
       try {
         var x = document.getElementsByClassName("form-control");
