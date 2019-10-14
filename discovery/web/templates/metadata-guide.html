@@ -252,11 +252,13 @@
           if (key === selection.name) {
             //Check if selection has duplicates
             if (key+"s" in state.schema.validation.properties && state.schema.validation.properties[key+"s"].hasOwnProperty('duplicate') ) {
-              console.log('HAS DUPLICATE')
+              // console.log('HAS DUPLICATE')
               let obj ={}
               Vue.set(obj,key,selection.value)
+              let typeProp= key+'Type';
+              Vue.set(obj,typeProp,'')
               console.log(obj)
-              Vue.set(state.schema.validation.properties[key+"s"],'value',obj);
+              Vue.set(state.schema.validation.properties[key+"s"],'value',[obj]);
             }
             Vue.set(state.schema.validation.properties[selection.name],'value',selection.value);
           }
