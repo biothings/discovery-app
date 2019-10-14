@@ -11,7 +11,7 @@ from discovery.api.es.doc import DatasetMetadata
 
 from .base import APIBaseHandler, github_authenticated
 
-
+# https://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call
 class Capturing(list):
 
     def __enter__(self):
