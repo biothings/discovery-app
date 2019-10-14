@@ -48,16 +48,6 @@ GUIDE_PRESETS = [
                     'description':'A schema describing Dataset from CTSA center'
                     },
                 ]
-# GUIDE_CATEGORIES = {
-#                     'Google':{
-#                     'Required':['name','description'],
-#                     'Recommended':['alternateName','creator','citation','identifier','keywords','license','sameAs','version','url','temporalCoverage','spatialCoverage','includedInDataCatalog'],
-#                     },
-#                     'DataCite':{
-#                     'Required':['title','creator','identifier','identifierType','publisher','publicationYear','resourceType','resourceTypeGeneral'],
-#                     'Recommended':['contributor','date','description','descriptionType','format','fundingReference','funderName','awardNumber','awardURI','awardTitle','subject','rights','geolocation','size','version']
-#                     },
-#                 }
 
 GUIDE_CATEGORIES = [
                     {
