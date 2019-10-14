@@ -1,9 +1,11 @@
 '''
-    Create Indexes and Index Schema.org Datasource
+    Create Indexes and Index Core Datasources
 '''
 
 import logging
 from concurrent.futures import ThreadPoolExecutor
+from elasticsearch_dsl import connections
+
 
 from biothings_schema import Schema as SchemaParser
 from elasticsearch_dsl import Index
@@ -11,21 +13,30 @@ from elasticsearch_dsl import Index
 from discovery.api.es.doc import DatasetMetadata, Schema, SchemaClass
 
 
-def index_schema_org(lazy=False):
+def index_core_schema(lazy=False):
     '''
         Setup Script
     '''
-    if lazy and SchemaClass.search().query("term", namespace='schema').count() > 770:
-        return
+    schemas = (
+        ('schema', None),
+        ('google', 'https://raw.githubusercontent.com/data2health/schemas/master/Google/Google.jsonld'),
+        ('datacite', 'https://raw.githubusercontent.com/data2health/schemas/master/DataCite/DataCite.jsonld'),
+        ('ctsa', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json')
+    )
 
-    SchemaClass.delete_by_schema('schema')
-    classes = SchemaClass.import_classes(SchemaParser(), 'schema')
+    for namespace, url in schemas:
 
-    for klass in classes:
-        klass.save()
+        if lazy and SchemaClass.search().query("term", namespace=namespace).count() > 1:
+            continue
+
+        SchemaClass.delete_by_schema(namespace)
+        classes = SchemaClass.import_classes(SchemaParser(url), namespace)
+
+        for klass in classes:
+            klass.save()
 
     logger = logging.getLogger('discovery.scripts.setup')
-    logger.info("Indexed 'schema'.")
+    logger.info("Indexed.")
 
 
 def es_data_setup():
@@ -39,7 +50,7 @@ def es_data_setup():
         if not Index('discover_metadata').exists():
             DatasetMetadata.init()
 
-        return ThreadPoolExecutor().submit(index_schema_org, True)
+        return ThreadPoolExecutor().submit(index_core_schema, True)
 
     except Exception as exc:
 
@@ -51,8 +62,9 @@ if __name__ == "__main__":
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%H:%M:%S')
+    connections.create_connection(hosts=['localhost'], timeout=20)
     logging.captureWarnings(True)
     Schema.init()
     SchemaClass.init()
     DatasetMetadata.init()
-    index_schema_org()
+    index_core_schema()
