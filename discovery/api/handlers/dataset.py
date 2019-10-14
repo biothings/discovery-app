@@ -9,9 +9,11 @@ from tornado.escape import json_decode
 
 from discovery.api.es.doc import DatasetMetadata
 
-from .base import APIBaseHandler, github_authenticated
+from .base import APIBaseHandler, github_authenticated, ParserValidationError
 
 # https://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call
+
+
 class Capturing(list):
 
     def __enter__(self):
@@ -38,14 +40,21 @@ class MetadataHandler(APIBaseHandler):
     '''
     CTSA_DATASET = None
 
-    @github_authenticated
-    def post(self):
+    async def prepare(self):
         '''
-            Create a document.
+            Load the schema to validate against.
         '''
+        await super().prepare()
+        if not self.CTSA_DATASET:
+            MetadataHandler.CTSA_DATASET = APIBaseHandler.get_parser(
+                "https://raw.githubusercontent.com/data2health/"
+                "schemas/master/Dataset/CTSADataset.json"
+            ).get_class('bts:CTSADataset')
 
-        doc = json_decode(self.request.body)
-
+    def validate(self, doc):
+        '''
+            Raise an exception if the dataset does not pass validation.
+        '''
         with Capturing() as output:
             try:
                 if not self.CTSA_DATASET:
@@ -56,18 +65,56 @@ class MetadataHandler(APIBaseHandler):
                 self.CTSA_DATASET.validate_against_schema(doc)
 
             except ValidationError as err:
-                self.send_error(400, reason=str(err).splitlines()[0])
-                return
+                raise ParserValidationError(str(err).splitlines()[0])
 
         assert "The JSON document is valid" in output,\
             "document did not pass validation"
 
-        private = self.get_query_argument('private', '').lower() == 'true'
+    @github_authenticated
+    def post(self):
+        '''
+            Create a document.
+        '''
+
+        doc = json_decode(self.request.body)
+        self.validate(doc)
+
+        private = self.get_boolean_argument('private')
         meta = DatasetMetadata.from_json(doc, self.current_user, private)
+
         self.finish({
             'success': True,
             'result': meta.save(),
             'id': meta.meta.id,
+        })
+
+    @github_authenticated
+    def put(self, _id=None):
+        '''
+            Update a document with id.
+            Does not change the privacy setting.
+        '''
+        assert _id, 'missing id in path'
+        meta = DatasetMetadata.get(id=_id)
+        assert meta, 'document does not exist'
+
+        if self.current_user != meta._meta.username:
+            self.send_error(401)
+            return
+
+        doc = json_decode(self.request.body)
+        self.validate(doc)
+
+        new_meta = DatasetMetadata.from_json(
+            doc=doc,
+            user=self.current_user,
+            private=meta._meta.private
+        )
+
+        self.finish({
+            'success': True,
+            'result': new_meta.save(),
+            'id': new_meta.meta.id,
         })
 
     def get(self, _id=None):

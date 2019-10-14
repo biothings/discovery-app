@@ -19,10 +19,20 @@ from discovery.scripts.setup import es_data_setup
 
 L = logging.getLogger(__name__)
 
+
 class DiscoveryAPIException(Exception):
     pass
 
-class ParserLoadingError(DiscoveryAPIException):
+
+class SchemaParserError(DiscoveryAPIException):
+    pass
+
+
+class ParserLoadingError(SchemaParserError):
+    pass
+
+
+class ParserValidationError(SchemaParserError):
     pass
 
 
@@ -91,12 +101,13 @@ class APIBaseHandler(BaseHandler):
                         self.set_secure_cookie("user", json_encode(user))
                         self.current_user = user['login']
 
-    def get_boolean_argument(self, full_term, short_form=None):
+    def get_boolean_argument(self, full_term, short_form=None, default='false'):
 
+        true_values = ['', 'true', '1']
         if not short_form:
             short_form = full_term
-        return self.get_query_argument(full_term, 'false').lower() in ['', 'true', '1'] or \
-            self.get_query_argument(short_form, 'false').lower() in ['', 'true', '1']
+        return self.get_query_argument(full_term, default).lower() in true_values or \
+            self.get_query_argument(short_form, default).lower() in true_values
 
     def write_error(self, status_code, **kwargs):
 
@@ -107,11 +118,11 @@ class APIBaseHandler(BaseHandler):
 
             exception = kwargs.pop('exc_info')[1]
 
-            if type(exception) in [tornado.web.MissingArgumentError,
-                                   tornado.httpclient.HTTPError,
-                                   requests.exceptions.RequestException,
-                                   json.decoder.JSONDecodeError,
-                                   AssertionError, ParserLoadingError]:
+            if isinstance(exception, (tornado.web.MissingArgumentError,
+                                      tornado.httpclient.HTTPError,
+                                      requests.exceptions.RequestException,
+                                      json.decoder.JSONDecodeError,
+                                      AssertionError, DiscoveryAPIException)):
                 status_code = 400
                 self.set_status(status_code)
                 reason = str(exception)
