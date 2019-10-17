@@ -285,7 +285,6 @@ var app = new Vue({
             self.loading = false;
             Swal.fire({
               type: 'error',
-              toast: true,
               position: 'center',
               title: 'Failed because: ',
               text: err.response.data.reason
