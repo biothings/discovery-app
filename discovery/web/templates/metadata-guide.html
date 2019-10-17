@@ -1221,6 +1221,8 @@
     mounted: function(){
       var self = this
 
+      console.log('prop info', self.info)
+
       self.checkForConstantKey(self.info,'const')
 
       try {
@@ -1508,6 +1510,34 @@
               <template v-if="info.type=== 'object' && name !== 'license' && name !== 'includedInDataCatalog' ">
                 <div class="form-group p-2 row">
                   <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="info.type=== 'object' && !userInput">
+                    <i class="fas fa-plus"></i> <span v-text="'Add '+name"></span>
+                  </button>
+                </div>
+                <div class="col-sm-12 m-auto">
+                  <template v-for="(person,i) in userInput">
+                    <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical inputpreview" title="remove">
+                      <i class="fas fa-circle"></i>
+                      <span v-text="name+' '+(i+1)"></span>
+                      <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
+                    </span>
+                  </template>
+                </div>
+                <div class="alert alert-success m-3 w-75" v-show="userInput">
+                  <small><b>Saved <span v-text="name"></span>:</b> </small>
+                  <hr />
+                  <template v-for="(person,i) in userInput">
+                    <span :title="person.url"  class="text-success inputpreview mr-1" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i' >
+                      <i class="fas fa-circle"></i>
+                      <span v-text="name+' '+(i+1)"></span>
+                    </span>
+                    <small class="text-success" v-if="i !== userInput.length-1">, </small>
+                  </template>
+                </div>
+              </template>
+              <!-- 🌈  FUNDING🌈 -->
+              <template v-if="info.oneOf && name ==='funding' ">
+                <div class="form-group p-2 row">
+                  <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="info.oneOf && !userInput">
                     <i class="fas fa-plus"></i> <span v-text="'Add '+name"></span>
                   </button>
                 </div>
