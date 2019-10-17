@@ -1,4 +1,4 @@
-Sitemap: http://www.example.com/sitemap.xml
+Sitemap: https://discovery.biothings.io/sitemap.xml
 
 User-agent: *
 Disallow: /api
