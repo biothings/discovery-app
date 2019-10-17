@@ -117,7 +117,11 @@
       </div>
       <!-- COMPLETED FIELDS -->
       <div class="p-1" v-if="totals && totals.left">
-        <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress>
+        <div class="d-flex p-1">
+          <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress>
+          <small class="bold text-info" v-text="Math.ceil((totals.complete/totals.total)*100)+'%'"></small>
+        </div>
+        <!-- <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress> -->
       </div>
       <div v-if="validation" class="whitefade tippyContainer">
         <div class="alert alert-success text-left mb-0">
@@ -722,14 +726,13 @@
 
     },
     template:
-    `<div class="mr-2 w-25" :class="{'bg-light': !added, 'alert-success': added}">
+    `<div class="mr-2 w-25" :class="{'bg-secondary': !added, 'bg-light': added}">
       <div class="row m-0">
         <div class="col-sm-8 p-1 d-flex align-items-center justify-content-around desc" :data-tippy-info="item.description">
-          <small class="bold text-info">
+          <span :class="{'text-light': !added, 'text-info': added}">
             <i v-if="item.name ==='Google'" class="fab fa-google googleText mr-1"></i>
             <span v-text="item.name"></span>
-          </small>
-          <small v-if="loading">Loading...</small>
+          </span>
         </div>
         <div class="col-sm-4 p-1 bg-dark actions d-flex align-items-center justify-content-around">
           <span v-if="!added" class="p-1 desc" @click="getCatData" data-tippy-info="Add Fields">
@@ -1819,7 +1822,6 @@
                   throw err;
                   Swal.fire({
                     type: 'error',
-                    toast: true,
                     position: 'top center',
                     title: 'Registration failed because: ',
                     text: err.response.data.reason
