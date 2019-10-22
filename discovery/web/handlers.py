@@ -6,15 +6,14 @@ import json
 import logging
 import os
 
+import sass
+from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 from jinja2 import Environment, FileSystemLoader
 from tornado.httputil import url_concat
 from torngithub import GithubMixin, json_decode, json_encode
-import sass
-
-from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
-from discovery.api.es.doc import Schema
 
 import discovery.web.siteconfig as siteconfig
+from discovery.api.es.doc import Schema
 
 GITHUB_CALLBACK_PATH = "/oauth"
 GITHUB_SCOPE = ""
@@ -46,7 +45,17 @@ TEMPLATE_ENV.globals['color_main'] = siteconfig.MAIN_COLOR
 TEMPLATE_ENV.globals['color_sec'] = siteconfig.SEC_COLOR
 
 # Compile site specific minified css
-sass.compile(dirname=(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/scss'), os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/css')), output_style='compressed')
+sass.compile(
+    dirname=(
+        os.path.join(
+            os.path.dirname(
+                os.path.abspath(__file__)),
+            'static/scss'),
+        os.path.join(
+            os.path.dirname(
+                os.path.abspath(__file__)),
+            'static/css')),
+    output_style='compressed')
 
 
 class BaseHandler(BioThingsBaseHandler):
@@ -208,6 +217,7 @@ class VisualizerHandler(BaseHandler):
             {"namespace": namespace, "query": className}))
         self.write(test_output)
 
+
 class DatasetHandler(BaseHandler):
     def get(self, yourQuery=None):
         test_file = "metadata-page.html"
@@ -217,6 +227,7 @@ class DatasetHandler(BaseHandler):
         else:
             metadata_output = metadata_template.render(Context=json.dumps({"Query": ''}))
         self.write(metadata_output)
+
 
 class DatasetRegistryHandler(BaseHandler):
     def get(self):
@@ -229,6 +240,7 @@ class DatasetRegistryHandler(BaseHandler):
 class PageNotFoundHandler(BaseHandler):
     def get(self):
         self.return_404()
+
 
 class GuideIntroHandler(BaseHandler):
     def get(self):
