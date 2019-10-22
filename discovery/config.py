@@ -3,6 +3,7 @@
 ''' Discovery App Configuration '''
 
 from biothings.web.settings.default import *
+from tornado.web import RedirectHandler
 
 from discovery.api.es.query_builder import DiscoveryQueryBuilder
 from discovery.api.handlers import (MetadataHandler, QueryHandler,
@@ -30,6 +31,9 @@ ES_CLIENT_TIMEOUT = 10
 # *****************************************************************************
 # Tornado URL Patterns
 # *****************************************************************************
+UNINITIALIZED_APP_LIST = [
+    (r"/sitemap.xml", RedirectHandler, {"url": "/static/sitemap.xml"}),
+]
 API_ENDPOINTS = [
     (r"/api/query/?", QueryHandler),
     (r"/api/registry/([^/]+)/([^/]+)/?", RegistryHandler),
