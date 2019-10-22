@@ -3,6 +3,7 @@
 {% include "header.html" %}
 <style>
 
+
 </style>
 <div id="guide" class="container pt-5" style="min-height:90vh;">
   <div v-if=loading class="loader">
@@ -49,19 +50,19 @@
         </a>
       </li>
       <li class='nav-item' id="registerReady">
-        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()">
+        <a class='nav-link desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
           <small>
             <i class="fas fa-cloud-upload-alt"></i> Register
           </small>
         </a>
       </li>
-      <li class='nav-item' v-if="totals && totals.left">
+      <!-- <li class='nav-item' v-if="totals && totals.left">
         <a class='nav-link disabled'>
           <small >
             (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)
           </small>
         </a>
-      </li>
+      </li> -->
       <li class='nav-item'>
         <a class='nav-link text-muted pointer' @click.prevent="showHelp()">
           <small >
@@ -72,7 +73,7 @@
       <li class='nav-item' v-show="validation">
         <a class='nav-link text-muted pointer' @click="loadData()">
           <small class="text-info bold">
-            <i class="fas fa-download"></i> Load Existing Dataset
+            <i class="fas fa-download"></i> Load Existing Dataset Metadata
           </small>
         </a>
       </li>
@@ -101,14 +102,31 @@
       </div>
       <!-- SECOND STEP -->
 
+      <div v-if="validation">
+        <div class="d-flex justify-content-start flex-wrap">
+          <template v-if="categoryTotals" v-for="(subcats,cat) in categoryTotals">
+            <catcontainer class="fade-in" :cat="cat" :subcats="subcats" :key="cat+subcats"></catcontainer>
+          </template>
+          <!-- <div class="alert-secondary text-muted text-center desc d-flex align-items-center" data-tippy-info="Add Discovery Portal">
+            <i class="fas fa-plus fa-3x p-3"></i>
+          </div> -->
+        </div>
+      </div>
+
       <!-- AVAILABLE FIELDS -->
       <div v-if="validation" class="whitefade tippyContainer">
         <div class="p-1 bg-dark text-left mb-0">
           <span class="badge m-1 badge-dark text-warning">
-            TO-DO <i class="fas fa-chevron-right"></i>
+            <span class="text-info" v-text="filter"></span> TO-DO<i class="fas fa-chevron-right"></i>
           </span>
-          <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 pointer badgeDesc font-weight-normal" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted,'badge-secondary': prop.origin,'badge-dark': !prop.origin, 'badge-danger': prop.duplicate}">
+          <!-- <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
+            <span class="badge m-1 pointer badgeDesc font-weight-normal" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted,'badge-secondary': prop.origin,'badge-dark': !prop.origin}">
+              <span v-text='index'></span>
+              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
+            </span>
+          </template> -->
+          <template v-if="validation.properties" v-for="(prop,index) in selectedProps">
+            <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
               <span v-text='index'></span>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
             </span>
@@ -117,47 +135,55 @@
       </div>
       <!-- COMPLETED FIELDS -->
       <div class="p-1" v-if="totals && totals.left">
-        <div class="d-flex p-1">
-          <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress>
-          <small class="bold text-info" v-text="Math.ceil((totals.complete/totals.total)*100)+'%'"></small>
+        <div class="row p-1">
+          <div class="col-sm-10">
+            <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress>
+          </div>
+          <div class="col-sm-2">
+            <small class="bold text-info" v-text="Math.ceil((totals.complete/totals.total)*100)+'% COMPLETE'"></small>
+            <small class="text-info"> (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)</small>
+          </div>
         </div>
         <!-- <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress> -->
       </div>
       <div v-if="validation" class="whitefade tippyContainer">
-        <div class="alert alert-success text-left mb-0">
-          <span class="badge m-1 alert-success text-success">
+        <div class="alert-secondary text-left mb-4">
+          <span class="badge m-1 text-success">
             DONE <i class="fas fa-chevron-right"></i>
           </span>
-          <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 badge-success pointer" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted, 'badge-danger': prop.duplicate}">
-              <i class="fas fa-check-circle"></i> <small v-text='index'></small>
+          <!-- <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
+            <span class="badge m-1 text-muted pointer" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}">
+              <i class="fas fa-check-circle text-success"></i> <small v-text='index'></small>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
             </span>
+          </template> -->
+          <template v-if="validation.properties" v-for="(prop,index) in selectedProps">
+            <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
+              <i class="fas fa-check-circle text-success"></i> <span v-text='index'></span>
+              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
+            </small>
           </template>
         </div>
       </div>
       <!-- FIELD VIEW -->
       <div v-if="validation" class="text-center tippyContainer mb-5">
-        <div class="p-4" id="masterForm">
+        <div class="p-4 bg-light" id="masterForm">
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
             <input-box v-if='prop && prop.selected' :name='index' :info="prop" :key='index'></input-box>
           </template>
+          <!-- <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
+            <small class="mr-1"><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
+            <small class="mr-1"><i class="fas fa-stop text-info unselectable" ></i> = Progress</small>
+            <small class="mr-1"><i class="fas fa-stop text-success unselectable" ></i> = Complete</small>
+          </div> -->
         </div>
       </div>
-      <div v-if="validation">
-        <div class="p-1 d-flex justify-content-center flex-wrap">
-          <template v-if="categoryTotals" v-for="(subcats,cat) in categoryTotals">
-            <div class="bg-light m-1 text-center p-2">
-              <small  class="bold text-info d-block">
-                <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
-                <span v-text="cat"></span>
-              </small>
-              <template v-for="(totals,subcat) in subcats">
-                <chart class="d-inline-block" :name="subcat" :unique="cat+subcat" :maincategory="cat" :totals="totals" :key="cat"></chart>
-              </template>
-            </div>
-          </template>
-        </div>
+
+      <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
+        <exportbox :filter='filter'></exportbox>
+      </div>
+
+      <div v-if="validation" class="alert-dark p-2">
         <h5 class="text-muted text-center d-block mt-3">Get Discovered By More Portals:</h5>
         <div class="p-1 d-flex justify-content-center flex-wrap">
           <template v-if="categories" v-for="(cat,i) in categories">
@@ -165,11 +191,7 @@
           </template>
         </div>
       </div>
-      <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
-        <small class="mr-1"><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
-        <small class="mr-1"><i class="fas fa-stop text-info unselectable" ></i> = Progress</small>
-        <small class="mr-1"><i class="fas fa-stop text-success unselectable" ></i> = Complete</small>
-      </div>
+
     </template>
   </div>
 </div>
@@ -189,7 +211,8 @@
       required:Array,
       validation:null,
       schemaName:'',
-      output:{}
+      output:{},
+      filter:String
     },
     strict: true,
     mutations: {
@@ -198,6 +221,34 @@
         console.log('schema saved',state.schema)
         state.output['@type'] = state.schema.label || state.schema.name
         state.output['@context'] = 'http://discovery.biothings.io/'
+
+        state.filter = state.schema.label || state.schema.name
+
+        // helper func to decide right subcategory
+        function getProp(propname){
+          let cat={
+            'category': state.schema.label || state.schema.name
+          }
+          if (state.schema.validation.required.includes(propname)) {
+            Vue.set(cat,'subcategory','Required')
+          }else{
+            Vue.set(cat,'subcategory','Recommended')
+          }
+          return cat
+        }
+
+        // Assign initial guide_categories
+        for (var prop in state.schema.validation.properties) {
+          if (state.schema.validation.properties[prop].hasOwnProperty('categories')) {
+            state.schema.validation.properties[prop]['categories'].unshift(getProp(prop))
+          }else{
+            Vue.set(state.schema.validation.properties[prop],'categories',[])
+            state.schema.validation.properties[prop]['categories'].unshift(getProp(prop))
+          }
+        }
+      },
+      filterProps(state,payload){
+        state.filter = payload['cat'];
       },
       saveSchemaName(state,payload){
         state.schemaName = payload['name'];
@@ -330,6 +381,7 @@
         // console.log(catprops)
         // console.log(catpropsrequired)
         // console.log(origin)
+        $.notify(origin+" added",{ globalPosition: 'right',className:'success', showDuration: 40, });
 
         // add requirements to main reqs to be able to show asterisk
         state.schema.validation.required = state.schema.validation.required.concat(catpropsrequired)
@@ -394,6 +446,7 @@
 
         // console.log("remove",catpropsrequired)
         // console.log("remove",origin)
+        $.notify(origin+" removed",{ globalPosition: 'right',className:'info', showDuration: 40, });
 
         for (prop in state.schema.validation.properties) {
           // if origin matches remove prop
@@ -541,6 +594,23 @@
       },
       getOutput(state){
         return state.output
+      },
+      getSelectedProps: (state)=>{
+        let selected = {}
+
+        for (var prop in state.schema.validation.properties) {
+          if (state.schema.validation.properties[prop].hasOwnProperty('categories')) {
+            for (var i = 0; i < state.schema.validation.properties[prop]['categories'].length; i++) {
+              if (state.schema.validation.properties[prop]['categories'][i]['category'] === state.filter) {
+                Vue.set(selected,prop,state.schema.validation.properties[prop])
+              }
+            }
+          }
+        }
+        return selected
+      },
+      getFilter: (state)=>{
+        return state.filter
       }
     },
     actions:{
@@ -550,10 +620,59 @@
     }
   });
 
-  Vue.component('chart', {
+  Vue.component('exportbox', {
     data: function(){
       return{
         shouldHighlight:false
+      }
+    },
+    props: ['filter'],
+    methods:{
+      filterProps(cat){
+        var payload = {};
+        payload["cat"] = cat
+        store.commit('filterProps',payload);
+      }
+    },
+    watch:{
+
+    },
+    mounted: function(){
+
+    },
+    computed: {
+      complete:function(){
+        var self = this;
+        let val = store.getters.getValidation
+        let check = true;
+
+        for (var prop in val.properties) {
+          if (val.properties[prop].hasOwnProperty('categories')) {
+            for (var i = 0; i < val.properties[prop]['categories'].length; i++) {
+              if (val.properties[prop]['categories'][i]['category'] === self.filter && val.properties[prop]['categories'][i]['subcategory'] === 'Required') {
+                if (!val.properties[prop]['value']) {
+                  return false;
+                }
+              }
+            }
+          }
+        }
+        return check
+      }
+    },
+    template:
+    `<div class="mt-1 text-center p-2 pointer desc" data-tippy-info="EXPORT">
+      <button :disabled="!complete" class="btn btn-primary">
+        <i class="fas fa-file-export pointer text-light"></i> Export
+      </button>
+    </div>`
+  });
+
+  Vue.component('chart', {
+    data: function(){
+      return{
+        shouldHighlight:false,
+        myChart : null
       }
     },
     props: ['name','totals','unique','maincategory'],
@@ -562,7 +681,7 @@
         var self = this;
         let progressColor = self['totals']['todo'] === 0 ?"#28A744":'#17A2B7'
         let mainColor = self.name === "Required" ? "#9fa7aa":"#b4b7b8"
-        new Chart(document.getElementById(self.unique), {
+        self.myChart = new Chart(document.getElementById(self.unique), {
             type: 'pie',
             data: {
               labels: ["Done","To-Do"],
@@ -573,6 +692,7 @@
             },
             options: {
               animation: false,
+              responsive: true,
               title: {
                 display: false,
                 text:self.name
@@ -621,16 +741,63 @@
 
     },
     template:
-    `<div class="chartBox">
+    `<div>
       <div class="text-center">
         <small :class="[name === 'Required' ? 'text-danger': 'text-muted']">
           <span v-text="name"></span>
-          <span class="badge badge-pill pointer unselectable" @click="shouldHighlight = !shouldHighlight" :class="[!shouldHighlight? 'badge-dark text-warning' :'badge-warning text-dark']">
+          <!--<span class="badge badge-pill pointer unselectable" @click="shouldHighlight = !shouldHighlight" :class="[!shouldHighlight? 'badge-dark text-warning' :'badge-warning text-dark']">
             <i class="fas fa-highlighter pointer unselectable" ></i>
-          </span>
+          </span>-->
         </small>
       </div>
-      <canvas :id=unique width="100"></canvas>
+      <canvas :id=unique width="90"></canvas>
+    </div>`
+  });
+
+  Vue.component('catcontainer', {
+    data: function(){
+      return{
+        shouldHighlight:false,
+        clicked: false
+      }
+    },
+    props: ['cat','subcats','totals'],
+    methods:{
+      filterProps(cat){
+        var payload = {};
+        payload["cat"] = cat
+        store.commit('filterProps',payload);
+      }
+    },
+    watch:{
+
+    },
+    mounted: function(){
+      // Update chart on mount
+      // Chart.update()
+    },
+    computed: {
+      currentlySelected:function(){
+        let f = store.getters.getFilter
+        if (this.cat === f) {
+          return true
+        }else {
+          return false
+        }
+      }
+    },
+    template:
+    `<div class="mt-1 text-center p-2 pointer desc" @click="filterProps(cat); clicked = true" :class="{'alert-secondary': !currentlySelected, 'bg-light': currentlySelected}" data-tippy-info="View Properties" style="max-height:109px;outline:none !important;">
+      <small  class="bold text-info d-block">
+        <i v-show="!clicked" class="fas fa-star text-danger"></i>
+        <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
+        <span v-text="cat"></span>
+      </small>
+      <div class="d-flex justify-content-around">
+        <template v-for="(totals,subcat) in subcats">
+          <chart class="d-inline-block" :name="subcat" :unique="cat+subcat" :maincategory="cat" :totals="totals" :key="cat+subcat"></chart>
+        </template>
+      </div>
     </div>`
   });
 
@@ -639,7 +806,8 @@
       return{
         added:false,
         loading: false,
-        reqfields: []
+        reqfields: [],
+        specificSchema:{}
       }
     },
     props: ['item'],
@@ -650,7 +818,10 @@
           self.loading = true;
           axios.get('/api/registry/'+self.item.namespace+'/'+self.item.prefix+':'+self.item.name).then(res=>{
             self.loading = false;
-            console.log('CAT DATA', res.data)
+            // console.log('CAT DATA', res.data)
+            //save schema
+            self.specificSchema=res.data
+
             Swal.fire({
               title: 'Add '+self.item.name+' fields?',
               showCancelButton: true,
@@ -702,7 +873,77 @@
             self.added = false;
           }
         })
-      }
+      },
+      formPreviewSpecific(){
+        var self = this;
+        store.commit('formPreview')
+        console.log(store.getters.getPreview)
+        let output = store.getters.getPreview
+
+        let previewObj = {}
+        Vue.set(previewObj,'@type',self.item.name)
+        Vue.set(previewObj,'@context','http://discovery.biothings.io/view/')
+
+        // compare combined output and export only props found in this schema
+        for (var key in output) {
+          if (self.specificSchema.validation.properties.hasOwnProperty(key)) {
+            console.log('key match', key)
+            Vue.set(previewObj,key,output[key])
+          }
+        }
+
+        return previewObj
+
+      },
+      previewMetadata(){
+        var self = this;
+        let preview = self.formPreviewSpecific();
+
+        console.log('preview', preview)
+
+        Swal.fire({
+          position: 'center',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          animation:false,
+          footer:`<small><b>NOTE: </b>Some inputs may be missing as they do not match those specified by `+self.item.name+`</small>`,
+          customClass:'scale-in-center',
+          html: `<h6 class="text-center mainTextDark">`+self.item.name+` compliant structured metadata</h6><div class="text-left p-1 previewBox">
+                  <small>
+                    <pre>
+                      `+JSON.stringify(preview,null,2)+`
+                    </pre>
+                  </small>
+                </div>`
+        });
+      },
+      exportSchema(){
+        var self = this;
+          let preview = self.formPreviewSpecific();
+
+          Swal.fire({
+            title: 'Name your file',
+            input: 'text',
+            inputAttributes: {
+              autocapitalize: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Download JSON-LD',
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            if (result.value) {
+              self.download(JSON.stringify(preview,null,2), result.value+'.jsonld', 'text/plain')
+            }
+          })
+
+      },
+      download(content, fileName, contentType) {
+        var a = document.createElement("a");
+        var file = new Blob([content], {type: contentType});
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+      },
     },
     watch:{
 
@@ -741,7 +982,10 @@
           <span v-if="added" @click="removeCat" class="p-1 desc" data-tippy-info="Remove Fields">
             <i class="fas fa-minus-circle pointer text-danger"></i>
           </span>
-          <span v-if="added" class="p-1 desc" :data-tippy-info="'Export '+item.name+' dataset'">
+          <span v-if="added" class="p-1 desc" @click="previewMetadata" :data-tippy-info="'Preview'">
+            <i class="fas fa-code pointer text-success"></i>
+          </span>
+          <span v-if="added" class="p-1 desc" @click="exportSchema" :data-tippy-info="'Export '+item.name+' compliant structured metadata'">
             <i class="fas fa-file-export pointer text-warning"></i>
           </span>
         </div>
@@ -777,6 +1021,7 @@
         var payload = {};
         payload["select"] = '';
         store.commit('markSelected',payload);
+        store.commit('selectNext');
       },
       clearFieldFor:function(propname){
         var payload = {};
@@ -1221,7 +1466,7 @@
     mounted: function(){
       var self = this
 
-      console.log('prop info', self.info)
+      // console.log('prop info', self.info)
 
       self.checkForConstantKey(self.info,'const')
 
@@ -1316,12 +1561,15 @@
       }
     },
     template:
-    `<div class="m-2 inputbox" :id='name'>
+    `<div class="m-2 inputbox fade-in" :id='name'>
       <div class="row">
         <div class="col-sm-12 text-center text-muted">
-          <div class="w-50 m-auto">
+          <div class="w-75 m-auto">
+            <div class="w-100 text-center">
+              <h4 v-text="name" class="text-muted bold pointer mr-1 d-inline"></h4>
+              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired"></i>
+            </div>
             <small>
-              <i class="fas fa-info-circle text-info unselectable mr-1"></i>
               <span v-text='info.description || "No description provided"'></span>
             </small>
           </div>
@@ -1331,7 +1579,7 @@
             <small class="text-muted bold">Complete To Satisfy:</small>
             <div class="text-left">
               <template v-if="info && info.categories" v-for="category in info.categories">
-                <small class="d-block m-1 mainTextDark">
+                <small class="d-block m-1 text-info bold">
                   <span v-text="category.category"></span>
                   <i class="fas fa-asterisk text-danger required" v-if="category.subcategory === 'Required'"></i>
                 </small>
@@ -1339,13 +1587,9 @@
             </div>
           </div>
         </div>
-        <div class="col-sm-8 p-2 inputmain text-left d-flex align-items-center justify-content-center">
-          <div class="row w-100">
-            <div class="col-sm-4 d-flex align-items-center justify-content-start">
-              <small v-text="name" class="propDescription mainTextLight bold pointer mr-1"></small>
-              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired"></i>
-            </div>
-            <div class="col-sm-8">
+        <div class="col-sm-8 p-2 text-left d-flex align-items-center justify-content-center alert-secondary">
+          <div class="d-flex w-100 justify-content-center">
+            <div class="w-75 p-3">
               <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
               <template v-if="info && info.type === 'string'">
                 <!-- 🌈 STRING 🌈 -->
@@ -1625,7 +1869,13 @@
         categoryTotals:function(){
           let totals = store.getters.getCategoryTotals
           return totals
-        }
+        },
+        selectedProps: function(){
+          return store.getters.getSelectedProps
+        },
+        filter: function(){
+          return store.getters.getFilter
+        },
       },
       watch:{
       },
@@ -1938,6 +2188,8 @@
             cconfirmButtonColor:"{{color_main}}",
             cancelButtonColor:"{{color_sec}}",
             confirmButtonText:"Ready!",
+            animation:false,
+            customClass:'scale-in-center',
             imageUrl: '/static/img/metadata.png',
             imageAlt: 'Dataset Editor'
           })
@@ -1946,13 +2198,15 @@
           var self = this;
 
           Swal.fire({
-            title: 'Load & Edit Existing Dataset',
-            text: "Load Dataset From:",
+            title: 'Load & Edit Existing Dataset Metadata',
+            text: "Load Metadata From:",
             showCancelButton: true,
+            animation:false,
+            customClass:'scale-in-center',
             confirmButtonColor:"{{color_main}}",
             cancelButtonColor:"{{color_sec}}",
-            confirmButtonText: 'A Dataset URL',
-            cancelButtonText: 'My Registered Datasets',
+            confirmButtonText: 'A Dataset Metadata URL',
+            cancelButtonText: 'A Registered Dataset Metadata',
           }).then((result) => {
             if (result.value) {
               // URL
@@ -2006,10 +2260,12 @@
                     Vue.set(options,list[i]['name'],list[i]['name'])
                   }
                   Swal.fire({
-                    title: 'Select dataset to load',
+                    title: 'Select Metadata To Load',
                     input: 'select',
                     inputOptions: options,
-                    inputPlaceholder: 'Select a dataset',
+                    animation:false,
+                    customClass:'scale-in-center',
+                    inputPlaceholder: 'Select an item',
                     showCancelButton: true,
                   }).then((result) => {
                     if (result.value) {
