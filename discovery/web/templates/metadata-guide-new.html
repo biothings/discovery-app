@@ -10,7 +10,7 @@
     <img src="/static/img/ripple.svg"/>
   </div>
   <div class="jumbotron bg-light text-center m-0">
-    <h1 class="logoText">DISCOVERY GUIDE</h1>
+    <h1 class="logoText">DISCOVERY GUIDE (WIP)</h1>
     <p class="text-muted">
       Follow best practices to make your data more findable
     </p>
@@ -35,7 +35,7 @@
           </small>
         </a>
       </li>
-      <li class='nav-item'>
+      <!-- <li class='nav-item'>
         <a class='nav-link' :class="{ 'disabled text-muted notallowed': !validation, 'mainBackDark text-light pointer': validation }" @click='getPreview()'>
           <small>
             <i class="fas fa-code"></i> Preview
@@ -56,20 +56,13 @@
           </small>
         </a>
       </li>
-      <!-- <li class='nav-item' v-if="totals && totals.left">
-        <a class='nav-link disabled'>
-          <small >
-            (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)
-          </small>
-        </a>
-      </li> -->
       <li class='nav-item'>
         <a class='nav-link text-muted pointer' @click.prevent="showHelp()">
           <small >
             <i class="fas fa-question-circle text-info"></i> Help!
           </small>
         </a>
-      </li>
+      </li> -->
       <li class='nav-item' v-show="validation">
         <a class='nav-link text-muted pointer' @click="loadData()">
           <small class="text-info bold">
@@ -78,14 +71,52 @@
         </a>
       </li>
     </ul>
+
     <div v-if="userInfo && !userInfo.login">
       <div class="alert alert-light text-danger text-center p-5">
         <h5>You must be logged in to proceed</h5>
       </div>
     </div>
-    <!-- LOGGED IN DASHBOARD -->
-    <template v-if="userInfo && userInfo.login">
-      <!-- FIRST STEP -->
+
+    <div class="widgetContainer bg-light jumbotron whitefade text-center">
+
+        <template v-if="step === '1' ">
+          <!-- STARTING POINT -->
+          <h5 class="text-muted">Select type of dataset metadata</h5>
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <template v-for="item in presets">
+              <buttom @click="setStartingPoint(item)" class="btn themeButton text-light m-2" v-text="item.name"></buttom>
+            </template>
+          </div>
+        </template>
+
+        <!-- OPTIONAL PORTALS -->
+        <template v-if=" step === '2' ">
+          <h5 class="text-muted">Get discovered by more portals</h5>
+          <form @submit.prevent="getFormValues()">
+            <template v-for="item in portals">
+              <div class="p-2">
+                <input class="form-check-input" type="checkbox" name="portal" :id="item.name" :value="item.name" :checked="item.selected" @click="item.selected = !item.selected">
+                <label class="form-check-label" :for="item.name">
+                  <span v-text="item.name"></span>
+                  <i class="fas fa-info-circle text-info desc" :data-tippy-info="item.description"></i>
+                </label>
+              </div>
+            </template>
+            <button class="btn themeButton text-light" type="submit">NEXT</button>
+          </form>
+        </template>
+
+        <template v-if=" step === '3' ">
+          <propcontainer :type="'REQUIREMENTS'"></propcontainer>
+        </template>
+
+        <template v-if=" step === '4' ">
+          <propcontainer :type="'RECOMMENDED'"></propcontainer>
+        </template>
+
+
+    <!-- <template v-if="userInfo && userInfo.login">
       <div v-if="!validation" class="bg-light jumbotron whitefade text-center">
         <h5 class="text-muted">What type of dataset do you have?</h5>
         <div class="d-flex justify-content-center align-items-center flex-wrap">
@@ -95,36 +126,25 @@
               <p >
                 <small v-text="item.description"></small>
               </p>
-              <buttom @click="sendRequest(item,item.name)" class="btn themeButton text-light pulse">Next</buttom>
+              <buttom @click="getStartingPointSchema(item,item.name)" class="btn themeButton text-light pulse">Next</buttom>
             </div>
           </template>
         </div>
       </div>
-      <!-- SECOND STEP -->
 
       <div v-if="validation">
         <div class="d-flex justify-content-start flex-wrap">
           <template v-if="categoryTotals" v-for="(subcats,cat) in categoryTotals">
             <catcontainer class="fade-in" :cat="cat" :subcats="subcats" :key="cat+subcats"></catcontainer>
           </template>
-          <!-- <div class="alert-secondary text-muted text-center desc d-flex align-items-center" data-tippy-info="Add Discovery Portal">
-            <i class="fas fa-plus fa-3x p-3"></i>
-          </div> -->
         </div>
       </div>
 
-      <!-- AVAILABLE FIELDS -->
       <div v-if="validation" class="whitefade tippyContainer">
         <div class="p-1 bg-dark text-left mb-0">
           <span class="badge m-1 badge-dark text-warning">
             <span class="text-info" v-text="filter"></span> TO-DO<i class="fas fa-chevron-right"></i>
           </span>
-          <!-- <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 pointer badgeDesc font-weight-normal" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted,'badge-secondary': prop.origin,'badge-dark': !prop.origin}">
-              <span v-text='index'></span>
-              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
-            </span>
-          </template> -->
           <template v-if="validation.properties" v-for="(prop,index) in selectedProps">
             <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
               <span v-text='index'></span>
@@ -133,7 +153,7 @@
           </template>
         </div>
       </div>
-      <!-- COMPLETED FIELDS -->
+
       <div class="p-1" v-if="totals && totals.left">
         <div class="row p-1">
           <div class="col-sm-10">
@@ -144,19 +164,12 @@
             <small class="text-info"> (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)</small>
           </div>
         </div>
-        <!-- <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress> -->
       </div>
       <div v-if="validation" class="whitefade tippyContainer">
         <div class="alert-secondary text-left mb-4">
           <span class="badge m-1 text-success">
             DONE <i class="fas fa-chevron-right"></i>
           </span>
-          <!-- <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <span class="badge m-1 text-muted pointer" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}">
-              <i class="fas fa-check-circle text-success"></i> <small v-text='index'></small>
-              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
-            </span>
-          </template> -->
           <template v-if="validation.properties" v-for="(prop,index) in selectedProps">
             <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
               <i class="fas fa-check-circle text-success"></i> <span v-text='index'></span>
@@ -165,17 +178,12 @@
           </template>
         </div>
       </div>
-      <!-- FIELD VIEW -->
+
       <div v-if="validation" class="text-center tippyContainer mb-5">
         <div class="p-4 bg-light" id="masterForm">
           <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
             <input-box v-if='prop && prop.selected' :name='index' :info="prop" :key='index'></input-box>
           </template>
-          <!-- <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
-            <small class="mr-1"><i class="fas fa-asterisk text-danger unselectable"></i> = Field is required</small>
-            <small class="mr-1"><i class="fas fa-stop text-info unselectable" ></i> = Progress</small>
-            <small class="mr-1"><i class="fas fa-stop text-success unselectable" ></i> = Complete</small>
-          </div> -->
         </div>
       </div>
 
@@ -192,7 +200,8 @@
         </div>
       </div>
 
-    </template>
+    </template> -->
+
   </div>
 </div>
 
@@ -212,7 +221,10 @@
       validation:null,
       schemaName:'',
       output:{},
-      filter:String
+      filter:String,
+      startingPoint: null,
+      selectedPortals:[],
+      step: String
     },
     strict: true,
     mutations: {
@@ -256,6 +268,9 @@
       reset(state){
         state.schema = {};
         state.validation = null;
+        state.step = '1';
+        state.selectedPortals = []
+        state.startingPoint = null
       },
       markSelected(state,payload){
         let selection = payload['select'];
@@ -466,6 +481,18 @@
 
         // console.log("ALL DONE", state.schema.validation.properties)
 
+      },
+      setStartingPoint(state,payload){
+        state.startingPoint= payload['startingPoint'];
+        console.log("startingPoint selected ",JSON.stringify(state.startingPoint,null,2))
+      },
+      addPortalSchema(state,payload){
+        let portal = payload['portal']
+        state.selectedPortals.push(portal)
+        console.log("PORTALS SELECTED ",state.selectedPortals)
+      },
+      changeStep(state,payload){
+        state.step = payload['step']
       }
     },
     getters:{
@@ -611,12 +638,21 @@
       },
       getFilter: (state)=>{
         return state.filter
+      },
+      getStartingPoint:(state)=>{
+        return state.startingPoint
+      },
+      getSelectedPortals:(state)=>{
+        return state.selectedPortals
+      },
+      getStep:(state)=>{
+        return state.step
       }
     },
     actions:{
       reset ({ commit }) {
         commit('reset')
-      }
+      },
     }
   });
 
@@ -758,7 +794,6 @@
     data: function(){
       return{
         shouldHighlight:false,
-        clicked: false
       }
     },
     props: ['cat','subcats','totals'],
@@ -787,9 +822,8 @@
       }
     },
     template:
-    `<div class="mt-1 text-center p-2 pointer desc" @click="filterProps(cat); clicked = true" :class="{'alert-secondary': !currentlySelected, 'bg-light': currentlySelected}" data-tippy-info="View Properties" style="max-height:109px;outline:none !important;">
+    `<div class="mt-1 text-center p-2 desc"  data-tippy-info="View Properties" style="max-height:109px;outline:none !important;">
       <small  class="bold text-info d-block">
-        <i v-show="!clicked" class="fas fa-star text-danger"></i>
         <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
         <span v-text="cat"></span>
       </small>
@@ -1028,7 +1062,7 @@
         var payload = {};
         payload["select"] = '';
         store.commit('markSelected',payload);
-        store.commit('selectNext');
+        // store.commit('selectNext');
       },
       clearFieldFor:function(propname){
         var payload = {};
@@ -1487,19 +1521,19 @@
 
       document.onkeydown = checkKey;
 
-      function checkKey(e) {
-          e = e || window.event;
-          if (e.keyCode == '39') {
-             // right arrow
-             self.markCompleted(self.name);
-             store.commit('selectNext');
-          }
-      }
+      // function checkKey(e) {
+      //     e = e || window.event;
+      //     if (e.keyCode == '39') {
+      //        // right arrow
+      //        self.markCompleted(self.name);
+      //        store.commit('selectNext');
+      //     }
+      // }
 
       tippy( '.save', {
         placement:'top',
         maxWidth:'200px',
-        content: '<div class="text-success m-0" style="border-radius:none">Save & Close <br />(Keyboard: <i class="fas fa-arrow-right"></i>)</div>',
+        content: '<div class="text-success m-0" style="border-radius:none">Save</div>',
         animation: 'fade',
         theme:'light'});
 
@@ -1587,7 +1621,7 @@
             <div class="text-left">
               <template v-if="info && info.categories" v-for="category in info.categories">
                 <small class="d-block m-1 text-info bold">
-                  <span v-text="category.category"></span>
+                  <small v-text="category.category"></small>
                   <i class="fas fa-asterisk text-danger required" v-if="category.subcategory === 'Required'"></i>
                 </small>
               </template>
@@ -1818,13 +1852,175 @@
         </div>
         <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
           <span class="fa-stack fa-1x pointer save" @click="markCompleted(name)" v-show="userInput">
-            <i class="fas fa-circle text-muted back fa-stack-2x"></i>
+            <i class="fas fa-circle text-success back fa-stack-2x"></i>
             <i class="fas fa-check fa-stack-1x text-light"></i>
           </span>
           <span class="fa-stack fa-1x pointer delete" @click="clearFieldFor(name)" v-show="info && info.value">
             <i class="fas fa-circle text-muted fa-stack-2x"></i>
             <i class="fas fa-trash fa-stack-1x text-light"></i>
           </span>
+        </div>
+      </div>
+    </div>`
+  });
+
+  Vue.component('propcontainer', {
+    data: function(){
+      return{
+        settings: {{guide_settings}},
+        allMode: false
+      }
+    },
+    props: ['type'],
+    methods:{
+      isRequired(propname){
+        let req = store.getters.getValidation['required']
+        if (req.includes(propname)) {
+          return true
+        }else{
+          return false
+        }
+      },
+      nextStep(){
+        var self = this;
+        if (self.type === "REQUIREMENTS") {
+          let payload = {}
+          payload["step"] = '4';
+          store.commit('changeStep',payload);
+        }else{
+          if (self.isComplete) {
+            let payload = {}
+            payload["step"] = '5';
+            store.commit('changeStep',payload);
+          }else{
+            $.notify("Incomplete",{ globalPosition: 'right',className:'error', showDuration: 40, });
+          }
+        }
+      },
+      selectProp(propname){
+        var payload = {};
+        payload["select"] = propname;
+        store.commit('markSelected',payload);
+      },
+    },
+    watch:{
+
+    },
+    mounted: function(){
+      if (self.settings && self.settings.hasOwnProperty('sorting_type')) {
+        if ( self.settings['sorting_type'] === '1by1') {
+          self.allMode = false
+        }else{
+          self.allMode = true
+        }
+      }
+    },
+    computed: {
+      validation:function(){
+        return store.getters.getValidation
+      },
+      isComplete:function(){
+        return store.getters.isComplete
+      },
+      categoryTotals:function(){
+        let totals = store.getters.getCategoryTotals
+        return totals
+      },
+    },
+    template:
+    `<div class="">
+      <div class="row">
+        <div class="col-sm-12 col-md-8">
+
+
+          <div class="d-flex justify-content-around align-items-center">
+            <h3 class="text-danger d-inline mr-5" v-text="type"></h3>
+            <div>
+              <small>MODE </small> <button class="btn themeButton text-light" v-text="!allMode ? 'ALL' : '1 BY 1'" @click="allMode = !allMode"></button>
+            </div>
+          </div>
+
+          <template v-if="allMode && validation">
+            <!-- 🌈  ALL MODE 🌈 -->
+            <small class="mainTextLight text-left" v-text="allMode ? 'ALL' : '1 BY 1'"></small>
+            <template v-if="type === 'REQUIREMENTS' ">
+              <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
+                <input-box :name='index' :info="prop" :key='index'></input-box>
+              </template>
+            </template>
+            <template v-if="type === 'RECOMMENDED' ">
+              <template v-for="(prop,index) in validation.properties" v-if="!isRequired(index)">
+                <input-box :name='index' :info="prop" :key='index'></input-box>
+              </template>
+            </template>
+          </template>
+
+          <template v-if="!allMode && validation">
+            <!-- 🌈  1 BY 1 MODE 🌈 -->
+            <small class="mainTextLight text-left" v-text="allMode ? 'ALL' : '1 BY 1'"></small>
+            <!-- 🌈  TODO 🌈 -->
+            <div class="p-1 bg-dark text-left mb-0">
+              <span class="badge m-1 badge-dark text-warning">
+                TO-DO<i class="fas fa-chevron-right"></i>
+              </span>
+              <template v-if="type === 'REQUIREMENTS' ">
+                <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
+                  <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
+                    <span v-text='index'></span>
+                    <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
+                  </span>
+                </template>
+              </template>
+              <template v-if="type === 'RECOMMENDED' ">
+                <template v-for="(prop,index) in validation.properties" v-if="!isRequired(index)">
+                  <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
+                    <span v-text='index'></span>
+                  </span>
+                </template>
+              </template>
+            </div>
+            <!-- 🌈  DONE 🌈 -->
+            <div class="p-1 alert-secondary text-left mb-0">
+              <span class="badge m-1 badge-light text-success">
+                TO-DO<i class="fas fa-chevron-right"></i>
+              </span>
+              <template v-if="type === 'REQUIREMENTS' ">
+                <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
+                  <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
+                    <i class="fas fa-check-circle text-success"></i> <span v-text='index'></span>
+                    <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
+                  </small>
+                </template>
+              </template>
+              <template v-if="type === 'RECOMMENDED' ">
+                <template v-for="(prop,index) in validation.properties" v-if="!isRequired(index)">
+                  <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
+                    <i class="fas fa-check-circle text-success"></i> <span v-text='index'></span>
+                  </small>
+                </template>
+              </template>
+            </div>
+            <div>
+              <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
+                <input-box v-if='prop && prop.selected' :name='index' :info="prop" :key='index'></input-box>
+              </template>
+            </div>
+          </template>
+
+        </div>
+        <div class="col-sm-12 col-md-4">
+          <template v-if="categoryTotals" v-for="(subcats,cat) in categoryTotals">
+            <catcontainer class="fade-in" :cat="cat" :subcats="subcats" :key="cat+subcats"></catcontainer>
+          </template>
+        </div>
+        <div class="col-sm-12 p-4 text-right">
+          <template v-if="type === 'REQUIREMENTS' && isComplete ">
+            <small class="text-success">Ready to proceed!</small>
+          </template>
+          <template v-if="type === 'REQUIREMENTS' && !isComplete ">
+            <small class="text-danger">Complete ALL to proceed!</small>
+          </template>
+          <button class="btn themeButton text-light" @click="nextStep()" :disabled="!isComplete">NEXT</button>
         </div>
       </div>
     </div>`
@@ -1841,7 +2037,7 @@
           userInfo:null,
           loading: false,
           presets:{{guide_presets}},
-          categories: {{guide_categories}},
+          portals: {{guide_portals}},
 				}
 			},
       computed:{
@@ -1883,6 +2079,12 @@
         filter: function(){
           return store.getters.getFilter
         },
+        startingPoint: function(){
+          return store.getters.getStartingPoint
+        },
+        step: function(){
+          return store.getters.getStep
+        }
       },
       watch:{
       },
@@ -1911,7 +2113,7 @@
             throw err;
           })
         },
-        // sendRequest(url,schemaName){
+        // getStartingPointSchema(url,schemaName){
         //   let self = this;
         //   self.loading = true;
         //   axios.get("/api/view?url="+url).then(res=>{
@@ -1928,15 +2130,44 @@
         //     throw err;
         //   })
         // },
-        sendRequest(item, schemaName){
+        getStartingPointSchema(item){
           let self = this;
           self.loading = true;
           axios.get('/api/registry/'+item.namespace+'/'+item.prefix+':'+item.name).then(res=>{
             var payload = {};
-            payload["name"] = schemaName;
+            payload["name"] = item.name;
             store.commit('saveSchemaName',payload);
             self.parseData(res.data)
 
+            // IF ANY PORTALS AND IF ANY ARE SELECTED
+            if (self.portals && self.portals.length) {
+              for (var i = 0; i < self.portals.length; i++) {
+                if (self.portals[i]['selected']) {
+                  axios.get('/api/registry/'+self.portals[i].namespace+'/'+self.portals[i].prefix+':'+self.portals[i].name).then(result=>{
+
+                    var payload = {};
+                    payload["portal"] = result.data;
+                    store.commit('addPortalSchema',payload);
+
+                    var payload = {};
+                    payload["origin"] = result.data.label
+                    payload["catprops"] = result.data.validation.properties;
+                    if (result.data.validation.required) {
+                      payload["catpropsrequired"] = result.data.validation.required;
+                      self.reqfields = result.data.validation.required;
+                    }else{
+                      payload["catpropsrequired"] = [];
+                    }
+                    store.commit('mergeCategoryProps',payload);
+
+
+                  }).catch(error=>{
+
+            				throw error;
+                  });
+                }
+              }
+            }
             self.loading = false;
     			}).catch(err=>{
             self.loading = false;
@@ -2312,10 +2543,53 @@
               });
             }
           })
+        },
+        checkAutoLoad(){
+          var self = this;
+          console.log('checkAutoLoad')
+          let payload = {}
+          if (self.presets && self.presets.length === 1) {
+            payload["startingPoint"] = self.presets[0];
+            store.commit('setStartingPoint',payload);
+            if (self.portals && self.portals.length) {
+              payload["step"] = '2';
+              store.commit('changeStep',payload);
+            }else{
+              payload["step"] = '3';
+              store.commit('changeStep',payload);
+            }
+          }else{
+            payload["step"] = '1';
+            store.commit('changeStep',payload);
+          }
+        },
+        getFormValues () {
+          var self = this;
+          // Handle selections for startingPoint and Portals IF any
+          self.getStartingPointSchema(self.startingPoint)
+          let payload = {}
+          payload["step"] = '3';
+          store.commit('changeStep',payload);
+
+        },
+        setStartingPoint(startingPointInfo){
+          var self = this;
+          let payload = {}
+          payload["startingPoint"] = startingPointInfo;
+          store.commit('setStartingPoint',payload);
+          if (self.portals && self.portals.length) {
+            payload["step"] = '2';
+            store.commit('changeStep',payload);
+          }else{
+            payload["step"] = '3';
+            store.commit('changeStep',payload);
+          }
+
         }
 			},
 			mounted:function(){
         this.checkUser();
+        this.checkAutoLoad();
         tippy( '#guide', {
             target:'.bar',
             content: 'Loading...',
@@ -2327,6 +2601,18 @@
               let totals = store.getters.getTotals
               let percentage = Math.ceil((totals.complete/totals.total)*100)
               instance.setContent("<div class='text-success bold m-0'>"+percentage+"% Completed</div>")
+            }
+          });
+        tippy( '#widget',{
+            target:'.desc',
+            content: 'Loading...',
+            maxWidth:'200px',
+            placement:'bottom',
+            animation: 'fade',
+            theme:'light',
+            onShow(instance) {
+              let info = instance.reference.dataset.tippyInfo;
+              instance.setContent("<div class='text-muted m-0'>"+info+"</div>")
             }
           });
 			}

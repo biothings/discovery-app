@@ -15,6 +15,9 @@
     <template v-if='namespaceRegistered'>
       <div class="text-center p-5">
         <h1 style="font-size:3em" class="logoText" v-if='namespace === "schema"' >Schema.org</h1>
+        <h1 style="font-size:3em" class="logoText" v-else-if='namespace === "bts"' >BioLink Schema</h1>
+        <h1 style="font-size:3em" class="logoText" v-else-if='namespace === "ctsa"' >CTSA</h1>
+        <h1 style="font-size:3em" class="logoText" v-else v-text='namespace' ></h1>
         <p class="text-muted" v-if='namespace === "schema"'>
         Schema.org is a collaborative, community activity with a mission to create,
         maintain, and promote schemas for structured data on the Internet. In addition
@@ -22,13 +25,15 @@
         larger Web community, through public mailing lists such as <a target="_blank" href="https://lists.w3.org/Archives/Public/public-vocabs/">public-vocabs@w3.org</a>
         and through <a target="_blank" href="http://github.com/schemaorg/schemaorg">GitHub</a>. <a target="_blank" href="https://schema.org/">Learn More.</a>
          </p>
-        <h1 style="font-size:3em" class="logoText" v-if='namespace === "bts"' >BioLink Schema</h1>
         <p class="text-muted" v-if='namespace === "bts"'>
           A high level datamodel of biological entities (genes, diseases, phenotypes, pathways, individuals, substances, etc) and their associations. Maintained by <a target="_blank" rel="noreferrer" href="https://github.com/biolink">biolink</a>.
          </p>
-        <h1 style="font-size:3em" class="logoText" v-if='namespace === "ctsa"' >CTSA</h1>
-        <h1 style="font-size:3em" class="logoText" v-if='namespaceRegistered === "schema"' v-text='namespace'></h1>
-        <h1 style="font-size:3em" class="logoText" v-else v-text='namespace' ></h1>
+      </div>
+    </template>
+    <template v-else>
+      <div class="text-center p-5">
+        <h1 style="font-size:3em" class="logoText" v-text='namespace' ></h1>
+        <small class="text-muted">(Temporary Namespace)</small>
       </div>
     </template>
 
