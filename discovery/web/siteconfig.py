@@ -47,20 +47,33 @@ GUIDE_PRESETS = [
                     'name':'CTSADataset',
                     'description':'A schema describing Dataset from CTSA center'
                     },
+                    {
+                    'namespace':'biomedical',
+                    'prefix':'bts',
+                    'name':'BioMedicalDataset',
+                    'description':'A schema describing a BioMedical Dataset'
+                    },
                 ]
 
-GUIDE_CATEGORIES = [
+GUIDE_SETTINGS = {
+                    "sorting_type": 'all',
+                    # 1by1 or all
+                }
+
+GUIDE_PORTALS = [
                     {
                     'namespace':'google',
                     'prefix':'bts',
                     'name':'Google',
-                    'description':'A list of metadata fields required and recommended by Google Dataset Search Engine.'
+                    'description':'A list of metadata fields required and recommended by Google Dataset Search Engine.',
+                    'selected': 1
                     },
                     {
                     'namespace':'datacite',
                     'prefix':'bts',
                     'name':'DataCite',
-                    'description':'A list of core metadata properties chosen for an accurate and consistent identification of a resource for citation and retrieval purposes by DataCite'
+                    'description':'A list of core metadata properties chosen for an accurate and consistent identification of a resource for citation and retrieval purposes by DataCite',
+                    'selected': 0
                     },
                 ]
 # *****************************************************************************
