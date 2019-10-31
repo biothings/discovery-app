@@ -41,12 +41,12 @@ STATIC_IMAGE_FOLDER = 'dde'
 # *****************************************************************************
 
 GUIDE_PRESETS = [
-                    {
-                    'namespace':'ctsa',
-                    'prefix':'bts',
-                    'name':'CTSADataset',
-                    'description':'A schema describing Dataset from CTSA center'
-                    },
+                    # {
+                    # 'namespace':'ctsa',
+                    # 'prefix':'bts',
+                    # 'name':'CTSADataset',
+                    # 'description':'A schema describing Dataset from CTSA center'
+                    # },
                     {
                     'namespace':'biomedical',
                     'prefix':'bts',
