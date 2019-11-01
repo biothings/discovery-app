@@ -42,27 +42,6 @@
           </small>
         </a>
       </li>
-      <!-- <li class='nav-item'>
-        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-primary text-light pointer': isComplete }" @click="downnloadSchema()">
-          <small>
-            <i class="fas fa-file-download"></i> Download
-          </small>
-        </a>
-      </li> -->
-      <!-- <li class='nav-item' id="registerReady">
-        <a class='nav-link desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
-          <small>
-            <i class="fas fa-cloud-upload-alt"></i> Register
-          </small>
-        </a>
-      </li> -->
-      <!-- <li class='nav-item'>
-        <a class='nav-link text-muted pointer' @click.prevent="showHelp()">
-          <small >
-            <i class="fas fa-question-circle text-info"></i> Help!
-          </small>
-        </a>
-      </li> -->
       <li class='nav-item' v-show="validation">
         <a class='nav-link mainBackDark text-light pointer' @click="loadData()">
           <small >
@@ -86,10 +65,6 @@
           <div>
             <template v-for="item in presets">
               <buttom  @click="setStartingPoint(item)" class="btn themeButton text-light mr-2 desc" v-text="item.name" :data-tippy-info="item.description"></buttom>
-              <!-- <presetbutton :item="item" :portals="portals" :key="item"></presetbutton> -->
-              <!-- <button :disabled="!available" @click="setStartingPoint(item)" class="btn themeButton text-light mr-2 desc" :data-tippy-info="item.description">
-                  <i :data-tippy-info="tip" class="fas fa-circle desc" :class="available ? 'text-success' : 'text-danger' "></i> <span v-text="item.name"></span>
-              </button> -->
             </template>
           </div>
         </template>
@@ -121,8 +96,11 @@
 
         <template v-if=" step === '5' ">
           <h5 class="text-muted">Registration</h5>
-          <div class="p-5 text-center">
-            <a class='btn btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
+          <div class="p-5 text-center m-3">
+            <p class="text-muted text-center">
+              Are you all done? Click Register Now to proceed. <br />You will leave this page after successfully registering this dataset.
+            </p>
+            <a class='btn btn-success text-light desc heartbeat' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
               <small>
                 <i class="fas fa-check"></i> Register
               </small>
@@ -130,103 +108,20 @@
           </div>
           <div class="col-sm-12">
             <div class="row">
-              <div class="col-sm-12 text-center">
+              <div class="col-sm-12 text-center p-3">
                 <small class="bold text-info" v-text="Math.ceil((totals.complete/totals.total)*100)+'% OVERALL COMPLETE'"></small>
                 <small class="text-info"> (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)</small>
               </div>
+            </div>
+            <div v-show="fieldsleftRegistration !== 0" class="col-sm-12 text-center p-2 message m-2">
+              <h5 class="text-muted">Only <span class="text-danger bold" v-text="fieldsleftRegistration"></span> fields left!</h5>
+              <button class="btn themeButton text-light" @click="gotToStep('4')">Fill Out Now</button>
             </div>
             <template v-if="categoryTotals" v-for="(subcats,cat) in categoryTotals">
               <catcontainer class="fade-in" :cat="cat" :subcats="subcats" :key="cat+subcats"></catcontainer>
             </template>
           </div>
         </template>
-
-
-    <!-- <template v-if="userInfo && userInfo.login">
-      <div v-if="!validation" class="bg-light jumbotron whitefade text-center">
-        <h5 class="text-muted">What type of dataset do you have?</h5>
-        <div class="d-flex justify-content-center align-items-center flex-wrap">
-          <template v-for="item in presets">
-            <div class="p-5 m-4 bg-light text-center message text-muted">
-              <h4 v-text="item.name"></h4>
-              <p >
-                <small v-text="item.description"></small>
-              </p>
-              <buttom @click="getStartingPointSchema(item,item.name)" class="btn themeButton text-light pulse">Next</buttom>
-            </div>
-          </template>
-        </div>
-      </div>
-
-      <div v-if="validation">
-        <div class="d-flex justify-content-start flex-wrap">
-          <template v-if="categoryTotals" v-for="(subcats,cat) in categoryTotals">
-            <catcontainer class="fade-in" :cat="cat" :subcats="subcats" :key="cat+subcats"></catcontainer>
-          </template>
-        </div>
-      </div>
-
-      <div v-if="validation" class="whitefade tippyContainer">
-        <div class="p-1 bg-dark text-left mb-0">
-          <span class="badge m-1 badge-dark text-warning">
-            <span class="text-info" v-text="filter"></span> TO-DO<i class="fas fa-chevron-right"></i>
-          </span>
-          <template v-if="validation.properties" v-for="(prop,index) in selectedProps">
-            <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
-              <span v-text='index'></span>
-              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
-            </span>
-          </template>
-        </div>
-      </div>
-
-      <div class="p-1" v-if="totals && totals.left">
-        <div class="row p-1">
-          <div class="col-sm-10">
-            <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress>
-          </div>
-          <div class="col-sm-2">
-            <small class="bold text-info" v-text="Math.ceil((totals.complete/totals.total)*100)+'% COMPLETE'"></small>
-            <small class="text-info"> (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)</small>
-          </div>
-        </div>
-      </div>
-      <div v-if="validation" class="whitefade tippyContainer">
-        <div class="alert-secondary text-left mb-4">
-          <span class="badge m-1 text-success">
-            DONE <i class="fas fa-chevron-right"></i>
-          </span>
-          <template v-if="validation.properties" v-for="(prop,index) in selectedProps">
-            <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
-              <i class="fas fa-check-circle text-success"></i> <span v-text='index'></span>
-              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
-            </small>
-          </template>
-        </div>
-      </div>
-
-      <div v-if="validation" class="text-center tippyContainer mb-5">
-        <div class="p-4 bg-light" id="masterForm">
-          <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-            <input-box v-if='prop && prop.selected' :name='index' :info="prop" :key='index'></input-box>
-          </template>
-        </div>
-      </div>
-
-      <div v-if="validation" class="p-1 text-muted d-flex justify-content-center flex-wrap">
-        <exportbox :filter='filter'></exportbox>
-      </div>
-
-      <div v-if="validation" class="alert-dark p-2">
-        <h5 class="text-muted text-center d-block mt-3">Get Discovered By More Portals:</h5>
-        <div class="p-1 d-flex justify-content-center flex-wrap">
-          <template v-if="categories" v-for="(cat,i) in categories">
-            <addcategory :item="cat" :key="i"></addcategory>
-          </template>
-        </div>
-      </div>
-
-    </template> -->
 
   </div>
 </div>
@@ -481,13 +376,46 @@
         // console.log("ALL DONE", state.schema.validation.properties)
 
       },
+      // removeCategory(state,payload){
+      //   let origin = payload['origin'];
+      //   let catpropsrequired = payload['catpropsrequired'];
+      //
+      //   // console.log("remove",catpropsrequired)
+      //   // console.log("remove",origin)
+      //   $.notify(origin+" removed",{ globalPosition: 'right',className:'info', showDuration: 40, });
+      //
+      //   for (prop in state.schema.validation.properties) {
+      //     // if origin matches remove prop
+      //     if (state.schema.validation.properties[prop].hasOwnProperty('origin') && state.schema.validation.properties[prop]['origin'] === origin ) {
+      //       Vue.delete(state.schema.validation.properties,prop)
+      //     }else {
+      //       // if not check categories and remove mention of origin
+      //       if (state.schema.validation.properties[prop].hasOwnProperty('categories')) {
+      //         for (var i = 0; i < state.schema.validation.properties[prop]['categories'].length; i++) {
+      //           if (state.schema.validation.properties[prop]['categories'][i]['category'] === origin) {
+      //             state.schema.validation.properties[prop]['categories'].splice(i,1)
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      //
+      //   // console.log("ALL DONE", state.schema.validation.properties)
+      //
+      // },
       removeCategory(state,payload){
         let origin = payload['origin'];
-        let catpropsrequired = payload['catpropsrequired'];
+        let catpropsrequired = [];
 
         // console.log("remove",catpropsrequired)
         // console.log("remove",origin)
         $.notify(origin+" removed",{ globalPosition: 'right',className:'info', showDuration: 40, });
+
+        for (var i = 0; i < state.selectedPortals.length; i++) {
+          if (state.selectedPortals[i]['label'] === origin) {
+            catpropsrequired = state.selectedPortals[i]['validation']['required']
+          }
+        }
 
         for (prop in state.schema.validation.properties) {
           // if origin matches remove prop
@@ -510,12 +438,12 @@
       },
       setStartingPoint(state,payload){
         state.startingPoint= payload['startingPoint'];
-        console.log("startingPoint selected ",JSON.stringify(state.startingPoint,null,2))
+        // console.log("startingPoint selected ",JSON.stringify(state.startingPoint,null,2))
       },
       addPortalSchema(state,payload){
         let portal = payload['portal']
         state.selectedPortals.push(portal)
-        console.log("PORTALS SELECTED ",state.selectedPortals)
+        // console.log("PORTALS SELECTED ",state.selectedPortals)
       },
       changeStep(state,payload){
         state.step = payload['step']
@@ -682,90 +610,6 @@
     }
   });
 
-  // Vue.component('presetbutton', {
-  //   data: function(){
-  //     return{
-  //       available:true,
-  //       tip:''
-  //     }
-  //   },
-  //   props: ['item','portals'],
-  //   methods:{
-  //     setStartingPoint(startingPointInfo){
-  //       var self = this;
-  //       let payload = {}
-  //       payload["startingPoint"] = startingPointInfo;
-  //       store.commit('setStartingPoint',payload);
-  //       if (self.portals && self.portals.length) {
-  //         payload["step"] = '2';
-  //         store.commit('changeStep',payload);
-  //       }else{
-  //         payload["step"] = '3';
-  //         store.commit('changeStep',payload);
-  //       }
-  //
-  //     },
-  //     checkAvailability(item){
-  //       var self = this;
-  //
-  //       axios.get('/api/registry/'+item.namespace+'/'+item.prefix+':'+item.name).then(res=>{
-  //         console.log(res.data)
-  //         self.available = true
-  //         self.tip = 'Available'
-  //       }).catch(err=>{
-  //         self.available = false
-  //         if (err.response.data.reason) {
-  //           console.log(err.response.data.reason)
-  //           self.tip = err.response.data.reason
-  //         }
-  //         throw err;
-  //       })
-  //     },
-  //     getStartingPointSchema(item){
-  //       let self = this;
-  //       self.loading = true;
-  //       axios.get('/api/registry/'+item.namespace+'/'+item.prefix+':'+item.name).then(res=>{
-  //         var payload = {};
-  //         payload["name"] = item.name;
-  //         store.commit('saveSchemaName',payload);
-  //         self.parseData(res.data)
-  //         self.loading = false;
-  //       }).catch(err=>{
-  //         self.loading = false;
-  //         Swal.fire({
-  //           type: 'error',
-  //           position: 'center',
-  //           title: 'Failed because: ',
-  //           text: err.response.data.reason
-  //         });
-  //         throw err;
-  //       })
-  //     },
-  //   },
-  //   mounted: function(){
-  //
-  //     if (this.item) {
-  //       this.checkAvailability(this.item)
-  //     }
-  //     tippy( '#widget',{
-  //         target:'.desc',
-  //         content: 'Loading...',
-  //         maxWidth:'200px',
-  //         placement:'bottom',
-  //         animation: 'fade',
-  //         theme:'light',
-  //         onShow(instance) {
-  //           let info = instance.reference.dataset.tippyInfo;
-  //           instance.setContent("<div class='text-muted m-0'>"+info+"</div>")
-  //         }
-  //       });
-  //   },
-  //   template:
-  //   `<button :disabled="!available" @click="setStartingPoint(item)" class="btn themeButton text-light mr-2 desc" :data-tippy-info="item.description">
-  //       <i :data-tippy-info="tip" class="fas fa-circle desc" :class="available ? 'text-success' : 'text-danger' "></i> <span v-text="item.name"></span>
-  //   </button>`
-  // });
-
   Vue.component('chart', {
     data: function(){
       return{
@@ -856,6 +700,7 @@
     data: function(){
       return{
         shouldHighlight:false,
+        canRemove: true,
       }
     },
     props: ['cat','subcats','totals'],
@@ -865,27 +710,26 @@
         payload["cat"] = cat
         store.commit('filterProps',payload);
       },
-      // removeCat(){
-      //   var self = this;
-      //   Swal.fire({
-      //     title: 'Are you sure you want to remove '+self.item.name+' fields?',
-      //     showCancelButton: true,
-      //     animation:false,
-      //     customClass:'scale-in-center',
-      //     showCancelButton: true,
-      //     confirmButtonColor:"{{color_main}}",
-      //     cancelButtonColor:"{{color_sec}}",
-      //     confirmButtonText: 'Yes, remove them!'
-      //   }).then((result) => {
-      //     if (result.value) {
-      //       var payload = {};
-      //       payload["origin"] = self.item.name
-      //       payload["catpropsrequired"] = self.reqfields
-      //       store.commit('removeCategory',payload);
-      //       self.added = false;
-      //     }
-      //   })
-      // },
+      removeCat(){
+        var self = this;
+        Swal.fire({
+          title: 'Are you sure you want to remove '+self.cat+'?',
+          showCancelButton: true,
+          animation:false,
+          customClass:'scale-in-center',
+          showCancelButton: true,
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          confirmButtonText: 'Yes'
+        }).then((result) => {
+          if (result.value) {
+            var payload = {};
+            payload["origin"] = self.cat
+            store.commit('removeCategory',payload);
+            self.added = false;
+          }
+        })
+      },
     },
     watch:{
 
@@ -893,6 +737,11 @@
     mounted: function(){
       // Update chart on mount
       // Chart.update()
+      var self = this;
+      let sp= store.getters.getStartingPoint
+      if (sp.name == self.cat) {
+        self.canRemove = false
+      }
     },
     computed: {
       currentlySelected:function(){
@@ -905,10 +754,11 @@
       }
     },
     template:
-    `<div class="mt-1 text-center p-2 desc"  :data-tippy-info="cat" style="max-height:109px;outline:none !important;">
+    `<div class="m-1 text-center p-2 desc message"  :data-tippy-info="cat" style="max-height:109px;outline:none !important;">
       <small  class="bold text-info d-block">
         <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
         <span v-text="cat"></span>
+        <i v-if="canRemove" class="fas fa-minus-square text-danger pointer desc" data-tippy-info="Remove" @click="removeCat()"></i>
       </small>
       <div class="d-flex justify-content-around">
         <template v-for="(totals,subcat) in subcats">
@@ -1979,6 +1829,16 @@
       totals:function(){
         return store.getters.getTotals
       },
+      fieldsleft:function(){
+        let v = store.getters.getValidation
+        let n = 0
+        for (var  key in v["properties"]) {
+          if (!v["properties"][key]['value']) {
+            n += 1
+          }
+        }
+        return n
+      }
     },
     template:
     `<div class="">
@@ -1987,9 +1847,9 @@
 
 
           <div class="d-flex justify-content-around align-items-center">
-            <h3 class="d-inline mr-5" v-text="type" :class="type === 'REQUIREMENTS' ?'text-danger':'text-info'"></h3>
+            <h3 class="d-inline mr-5 bold" v-text="type" :class="type === 'REQUIREMENTS' ?'text-danger':'text-info'"></h3>
             <div>
-              <small class="text-muted">CHANGE MODE </small> <button class="btn themeButton text-light" v-text="!allMode ? 'ALL' : '1 BY 1'" @click="allMode = !allMode"></button>
+              <small class="text-muted">CHANGE VIEW </small> <button class="btn btn-sm themeButton text-light" v-text="!allMode ? 'ALL' : '1 BY 1'" @click="allMode = !allMode"></button>
             </div>
           </div>
 
@@ -2077,18 +1937,19 @@
             <catcontainer class="fade-in" :cat="cat" :subcats="subcats" :key="cat+subcats"></catcontainer>
           </template>
         </div>
-        <div class="col-sm-12 p-4 text-right mt-2 alert-info">
+        <div class="col-sm-12 p-4 text-right mt-2 message">
           <template v-if="type === 'REQUIREMENTS' && isComplete ">
             <small class="text-success bold">Ready to proceed!</small>
             <button class="btn themeButton text-light" @click="nextStep()" :class="{'heartbeat':isComplete}" :disabled="!isComplete">NEXT</button>
           </template>
           <template v-if="type === 'REQUIREMENTS' && !isComplete ">
-            <small class="text-danger">Complete ALL requirements to proceed!</small>
+            <small class="text-danger bold">Complete ALL requirements to proceed!</small>
             <button class="btn themeButton text-light" @click="nextStep()" :class="{'heartbeat':isComplete}" :disabled="!isComplete">NEXT</button>
           </template>
 
           <template v-if="type === 'RECOMMENDED' ">
-            <small class="text-info">Complete any recommended fields</small>
+            <small v-show="fieldsleft !== 0" class="text-info">Complete as many recommended fields as possible <b class="text-danger">ONLY <span v-text="fieldsleft"></span> LEFT!</b></small>
+            <small v-show="fieldsleft === 0" class="text-success bold">Great job! Ready to procee!</small>
             <button class="btn themeButton text-light" @click="nextStep()">NEXT</button>
           </template>
 
@@ -2155,9 +2016,25 @@
         },
         step: function(){
           return store.getters.getStep
+        },
+        fieldsleftRegistration:function(){
+          let v = store.getters.getValidation
+          let n = 0
+          for (var  key in v["properties"]) {
+            if (!v["properties"][key]['value']) {
+              n += 1
+            }
+          }
+          return n
         }
       },
       watch:{
+        step:function(s){
+          if (s === '5') {
+            store.getters.getCategoryTotals
+            store.getters.getTotals
+          }
+        }
       },
 			methods:{
         checkUser(){
@@ -2635,7 +2512,7 @@
         },
         checkAutoLoad(){
           var self = this;
-          console.log('checkAutoLoad')
+          // console.log('checkAutoLoad')
           let payload = {}
           if (self.presets && self.presets.length === 1) {
             payload["startingPoint"] = self.presets[0];
@@ -2678,6 +2555,12 @@
           }
 
         },
+        gotToStep(s){
+          var self = this;
+          let payload = {}
+          payload["step"] = s;
+          store.commit('changeStep',payload);
+        }
 			},
 			mounted:function(){
         this.checkUser();
