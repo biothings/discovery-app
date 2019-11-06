@@ -57,13 +57,7 @@ class MetadataHandler(APIBaseHandler):
         '''
         with Capturing() as output:
             try:
-                if not self.CTSA_DATASET:
-                    MetadataHandler.CTSA_DATASET = APIBaseHandler.get_parser(
-                        "https://raw.githubusercontent.com/data2health/"
-                        "schemas/master/Dataset/CTSADataset.json"
-                    ).get_class('bts:CTSADataset')
                 self.CTSA_DATASET.validate_against_schema(doc)
-
             except ValidationError as err:
                 raise ParserValidationError(str(err).splitlines()[0])
 
