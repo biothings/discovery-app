@@ -21,13 +21,19 @@ def index_core_schema(lazy=False):
         ('schema', None),
         ('google', 'https://raw.githubusercontent.com/data2health/schemas/master/Google/Google.jsonld'),
         ('datacite', 'https://raw.githubusercontent.com/data2health/schemas/master/DataCite/DataCite.jsonld'),
-        ('ctsa', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json')
+        # ('ctsa', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'),
+        ('biomedical', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/BioMedical/BioMedicalDataset.json')
     )
+
+    logger = logging.getLogger('discovery.scripts.setup')
 
     for namespace, url in schemas:
 
         if lazy and SchemaClass.search().query("term", namespace=namespace).count() > 1:
+            logging.log("Found %s.", namespace)
             continue
+
+        logging.log("Indexing %s.", namespace)
 
         SchemaClass.delete_by_schema(namespace)
         classes = SchemaClass.import_classes(SchemaParser(url), namespace)
@@ -35,8 +41,7 @@ def index_core_schema(lazy=False):
         for klass in classes:
             klass.save()
 
-    logger = logging.getLogger('discovery.scripts.setup')
-    logger.info("Core Schemas Indexed.")
+    logger.info("Core schemas are registered.")
 
 
 def es_data_setup():
