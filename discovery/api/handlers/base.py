@@ -58,7 +58,11 @@ def github_authenticated(func):
 
 class APIBaseHandler(BaseHandler):
 
-    _PARSER = SchemaParser()
+    try:
+        _PARSER = SchemaParser()
+    except Exception:
+        logging.exception('Cannot load biothings_schema parser.')
+        pass
 
     @classmethod
     def get_parser(cls, doc):
