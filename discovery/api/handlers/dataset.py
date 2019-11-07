@@ -3,28 +3,14 @@ import logging
 import sys
 from io import StringIO
 
+import elasticsearch
+import jsonschema
 from elasticsearch_dsl import Index
-from jsonschema.exceptions import ValidationError
 from tornado.escape import json_decode
 
-from discovery.api.es.doc import DatasetMetadata
+from discovery.api.es.doc import DatasetMetadata, SchemaClass
 
-from .base import APIBaseHandler, github_authenticated, ParserValidationError
-
-# https://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call
-
-
-class Capturing(list):
-
-    def __enter__(self):
-        self._stdout = sys.stdout
-        sys.stdout = self._stringio = StringIO()
-        return self
-
-    def __exit__(self, *args):
-        self.extend(self._stringio.getvalue().splitlines())
-        del self._stringio    # free up some memory
-        sys.stdout = self._stdout
+from .base import APIBaseHandler, ParserValidationError, github_authenticated
 
 
 class MetadataHandler(APIBaseHandler):
@@ -38,31 +24,23 @@ class MetadataHandler(APIBaseHandler):
         Remove - DELETE ./api/dataset/<_id>
 
     '''
-    CTSA_DATASET = None
-
-    async def prepare(self):
-        '''
-            Load the schema to validate against.
-        '''
-        await super().prepare()
-        if not self.CTSA_DATASET:
-            MetadataHandler.CTSA_DATASET = APIBaseHandler.get_parser(
-                "https://raw.githubusercontent.com/data2health/"
-                "schemas/master/Dataset/CTSADataset.json"
-            ).get_class('bts:CTSADataset')
 
     def validate(self, doc):
         '''
             Raise an exception if the dataset does not pass validation.
         '''
-        with Capturing() as output:
-            try:
-                self.CTSA_DATASET.validate_against_schema(doc)
-            except ValidationError as err:
-                raise ParserValidationError(str(err).splitlines()[0])
 
-        assert "The JSON document is valid" in output,\
-            "document did not pass validation"
+        try:
+            _id = self.get_argument('schema', 'ctsa::bts:CTSADataset')
+            schema = SchemaClass.get(id=_id).validation
+            jsonschema.validate(instance=doc, schema=schema.to_dict(),
+                                format_checker=jsonschema.FormatChecker())
+
+        except elasticsearch.exceptions.NotFoundError:
+            raise ParserValidationError("specified schema class does not exist")
+
+        except jsonschema.exceptions.ValidationError as err:
+            raise ParserValidationError(str(err).splitlines()[0])
 
     @github_authenticated
     def post(self):
