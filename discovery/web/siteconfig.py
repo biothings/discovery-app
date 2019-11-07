@@ -56,8 +56,7 @@ GUIDE_PRESETS = [
                 ]
 
 GUIDE_SETTINGS = {
-                    "sorting_type": 'all',
-                    # 1by1 or all
+                    "form-mode": 0,
                 }
 
 GUIDE_PORTALS = [

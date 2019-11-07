@@ -10,14 +10,14 @@
     <img src="/static/img/ripple.svg"/>
   </div>
   <div class="jumbotron bg-light text-center m-0">
-    <h1 class="logoText">DISCOVERY GUIDE (WIP)</h1>
+    <h1 class="logoText">DISCOVERY GUIDE</h1>
     <p class="text-muted">
-      Follow best practices to make your data more findable
+      Follow best practices to make your dataset metadata more findable
     </p>
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
-  <div id="widget" class="mb-5">
-    <ul class="nav nav-tabs">
+  <div id="widget" class="mb-5 grad">
+    <!-- <ul class="nav nav-tabs">
       <li class="nav-item" v-if="userInfo && userInfo.login">
         <span class="nav-link" :class="{ 'disabled text-success': userInfo }"><small>
           <i class="fas fa-user-check"></i> Logged in as <span v-text="userInfo.login"></span></small>
@@ -49,7 +49,34 @@
           </small>
         </a>
       </li>
-    </ul>
+    </ul> -->
+
+    <div>
+      <div class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start">
+        <span class="fa-stack fa-1x pointer desc mr-2" :data-tippy-info="'Logged in as '+userInfo.login" v-if="userInfo && userInfo.login">
+          <i class="fas fa-circle text-success fa-stack-2x"></i>
+          <i class="fas fa-user-check fa-stack-1x fa-inverse"></i>
+        </span>
+        <a class='nav-link active text-primary mr-2' href='./oauth' v-if="userInfo && !userInfo.login">
+          <span class="fa-stack fa-1x pointer desc" data-tippy-info="Click to log in">
+            <i class="fas fa-circle text-primary fa-stack-2x"></i>
+            <i class="fas fa-sign-in-alt fa-stack-1x fa-inverse"></i>
+          </span>
+        </a>
+        <span class="fa-stack fa-1x pointer desc mr-2" data-tippy-info="Start Over" @click="reset()"  :class="{ 'disabled notallowed': !validation, 'pointer': validation }">
+          <i class="fas fa-circle text-success fa-stack-2x"  :class="{ 'text-muted': !validation, 'text-danger': validation }"></i>
+          <i class="fas fa-undo fa-stack-1x fa-inverse"></i>
+        </span>
+        <span class="fa-stack fa-1x pointer desc mr-2" data-tippy-info="Preview Progress" @click="getPreview()"  :class="{ 'disabled notallowed': !validation, 'pointer': validation }">
+          <i class="fas fa-circle text-success fa-stack-2x"  :class="{ 'text-muted': !validation, 'mainTextDark': validation }"></i>
+          <i class="fas fa-code fa-stack-1x fa-inverse"></i>
+        </span>
+        <span class="fa-stack fa-1x pointer desc mr-2" data-tippy-info="Import Metadata" @click="loadData()"  v-show="validation">
+          <i class="fas fa-circle text-success fa-stack-2x"  :class="{ 'text-muted': !validation, 'mainTextDark': validation }"></i>
+          <i class="fas fa-file-import fa-stack-1x fa-inverse"></i>
+        </span>
+      </div>
+    </div>
 
     <div v-if="userInfo && !userInfo.login">
       <div class="alert alert-light text-danger text-center p-5">
@@ -57,7 +84,7 @@
       </div>
     </div>
 
-    <div class="widgetContainer bg-light jumbotron whitefade text-center">
+    <div class="widgetContainer bg-light jumbotron whitefade text-center m-1">
 
         <template v-if="step === '1' ">
           <!-- STARTING POINT -->
@@ -87,7 +114,7 @@
         </template>
 
         <template v-if=" step === '3' ">
-          <propcontainer v-show="validation" :type="'REQUIREMENTS'"></propcontainer>
+          <propcontainer v-show="validation" :type="'REQUIRED'"></propcontainer>
         </template>
 
         <template v-if=" step === '4' ">
@@ -95,12 +122,12 @@
         </template>
 
         <template v-if=" step === '5' ">
-          <h5 class="text-muted">Registration</h5>
+          <h1 class="logoText">Registration</h1>
           <div class="p-5 text-center m-3">
             <p class="text-muted text-center">
-              Are you all done? Click Register Now to proceed. <br />You will leave this page after successfully registering this dataset.
+              Are you all done? Click Register Now to proceed. <br />You will leave this page after successfully registering this metadata.
             </p>
-            <a class='btn btn-success text-light desc heartbeat' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
+            <a class='btn btn-lg btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
               <small>
                 <i class="fas fa-check"></i> Register
               </small>
@@ -113,7 +140,7 @@
                 <small class="text-info"> (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)</small>
               </div>
             </div>
-            <div v-show="fieldsleftRegistration !== 0" class="col-sm-12 text-center p-2 message m-2">
+            <div v-show="fieldsleftRegistration !== 0" class="col-sm-12 text-center p-3 rounded alert-info m-2">
               <h5 class="text-muted">Only <span class="text-danger bold" v-text="fieldsleftRegistration"></span> fields left!</h5>
               <button class="btn themeButton text-light" @click="gotToStep('4')">Fill Out Now</button>
             </div>
@@ -146,6 +173,7 @@
       startingPoint: null,
       selectedPortals:[],
       step: String,
+      settings: Object
     },
     strict: true,
     mutations: {
@@ -210,6 +238,10 @@
             break;
           }
         }
+      },
+      saveSettings(state,payload){
+        state.settings = payload['settings']
+        console.log(state.settings)
       },
       highlight(state,payload){
         let cat = payload['category'];
@@ -601,6 +633,9 @@
       },
       getStep:(state)=>{
         return state.step
+      },
+      getSettings:(state)=>{
+        return state.settings
       }
     },
     actions:{
@@ -672,6 +707,7 @@
       }
     },
     mounted: function(){
+      this.visualize()
       tippy( '.fa-highlighter', {
         maxWidth:'200px',
         placement:'top',
@@ -754,7 +790,7 @@
       }
     },
     template:
-    `<div class="m-1 text-center p-2 desc message"  :data-tippy-info="cat" style="max-height:109px;outline:none !important;">
+    `<div class="m-1 text-center p-2 desc rounded" :data-tippy-info="cat" style="max-height:109px;outline:none !important;">
       <small  class="bold text-info d-block">
         <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
         <span v-text="cat"></span>
@@ -1548,20 +1584,15 @@
             </small>
           </div>
         </div>
-        <div class="col-sm-2 categoryBox alert-info d-flex align-items-center justify-content-center flex-wrap">
-          <div>
+        <div class="col-sm-2 categoryBox d-flex align-items-center justify-content-center flex-wrap" :class="[userInput ? 'alert-success':'alert-secondary']">
+          <div class="text-left p-1">
             <small class="text-muted bold">Part of</small>
-            <div class="text-left">
-              <template v-if="info && info.categories" v-for="category in info.categories">
-                <small class="d-block m-1 text-info bold">
-                  <small v-text="category.category"></small>
-                  <i class="fas fa-asterisk text-danger required" v-if="category.subcategory === 'Required'"></i>
-                </small>
-              </template>
-            </div>
+            <template v-if="info && info.categories" v-for="category in info.categories">
+              <small v-text="category.category" class="d-block desc pointer" :data-tippy-info="[category.subcategory === 'Required' ? 'Required' : 'Recommended']" :class="[category.subcategory === 'Required' ? 'text-danger' : 'text-info']"></small>
+            </template>
           </div>
         </div>
-        <div class="col-sm-8 p-2 text-left d-flex align-items-center justify-content-center alert-secondary">
+        <div class="col-sm-8 p-2 text-left d-flex align-items-center justify-content-center" :class="[userInput ? 'alert-success':'alert-secondary']">
           <div class="d-flex w-100 justify-content-center">
             <div class="w-75 p-3">
               <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
@@ -1757,7 +1788,7 @@
           </span>
           <span class="fa-stack fa-1x pointer delete" @click="clearFieldFor(name)" v-show="info && info.value">
             <i class="fas fa-circle text-muted fa-stack-2x"></i>
-            <i class="fas fa-trash fa-stack-1x text-light"></i>
+            <i class="fas fa-times fa-stack-1x text-light"></i>
           </span>
         </div>
       </div>
@@ -1768,7 +1799,7 @@
     data: function(){
       return{
         settings: {{guide_settings}},
-        allMode: false
+        allMode: Boolean
       }
     },
     props: ['type'],
@@ -1783,7 +1814,7 @@
       },
       nextStep(){
         var self = this;
-        if (self.type === "REQUIREMENTS") {
+        if (self.type === "REQUIRED") {
           let payload = {}
           payload["step"] = '4';
           store.commit('changeStep',payload);
@@ -1802,18 +1833,20 @@
         payload["select"] = propname;
         store.commit('markSelected',payload);
       },
+      checkSettings(){
+        var self = this;
+        if (self.settings && self.settings.hasOwnProperty('form-mode')) {
+          self.allMode = self.settings['form-mode']
+        }else{
+          self.allMode = false
+        }
+      }
     },
     watch:{
 
     },
     mounted: function(){
-      if (self.settings && self.settings.hasOwnProperty('sorting_type')) {
-        if ( self.settings['sorting_type'] === '1by1') {
-          self.allMode = false
-        }else{
-          self.allMode = true
-        }
-      }
+      this.checkSettings();
     },
     computed: {
       validation:function(){
@@ -1847,7 +1880,7 @@
 
 
           <div class="d-flex justify-content-around align-items-center">
-            <h3 class="d-inline mr-5 bold" v-text="type" :class="type === 'REQUIREMENTS' ?'text-danger':'text-info'"></h3>
+            <h1 class="d-inline mr-5 bold" v-text="type" :class="type === 'REQUIRED' ?'text-danger':'text-info'"></h1>
             <div>
               <small class="text-muted">CHANGE VIEW </small> <button class="btn btn-sm themeButton text-light" v-text="!allMode ? 'ALL' : '1 BY 1'" @click="allMode = !allMode"></button>
             </div>
@@ -1855,9 +1888,8 @@
 
           <template v-if="allMode && validation">
             <!-- 🌈  ALL MODE 🌈 -->
-            <small class="mainTextLight text-left" v-text="allMode ? 'Showing: ALL' : 'Showing: 1 BY 1'"></small>
-            <div class="p-2 rounded" style="border:2px solid #d7d7d7">
-              <template v-if="type === 'REQUIREMENTS' ">
+            <div class="p-3 rounded" style="border:2px solid #d7d7d7">
+              <template v-if="type === 'REQUIRED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
                   <input-box :name='index' :info="prop" :key='index'></input-box>
                 </template>
@@ -1872,13 +1904,12 @@
 
           <template v-if="!allMode && validation">
             <!-- 🌈  1 BY 1 MODE 🌈 -->
-            <small class="mainTextLight text-left" v-text="allMode ? 'Showing: ALL' : 'Showing: 1 BY 1'"></small>
             <!-- 🌈  TODO 🌈 -->
             <div class="p-1 bg-dark text-left mb-0">
               <span class="badge m-1 badge-dark text-warning">
-                TO-DO<i class="fas fa-chevron-right"></i>
+                TO-DO <i class="fas fa-chevron-right"></i>
               </span>
-              <template v-if="type === 'REQUIREMENTS' ">
+              <template v-if="type === 'REQUIRED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
                   <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal slit-in-vertical" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
                     <span v-text='index'></span>
@@ -1895,11 +1926,11 @@
               </template>
             </div>
             <!-- 🌈  DONE 🌈 -->
-            <div class="p-1 alert-secondary text-left mb-0">
+            <div class="p-1 alert-success text-left mb-0">
               <span class="badge m-1 badge-light text-success">
-                TO-DO<i class="fas fa-chevron-right"></i>
+                DONE <i class="fas fa-chevron-right"></i>
               </span>
-              <template v-if="type === 'REQUIREMENTS' ">
+              <template v-if="type === 'REQUIRED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
                   <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
                     <i class="fas fa-check-circle text-success"></i> <span v-text='index'></span>
@@ -1924,35 +1955,27 @@
 
         </div>
         <div class="col-sm-12 col-md-4">
-          <div class="row" v-if="totals">
-            <div class="col-sm-12">
-              <progress class="w-100 bar" :value="totals.complete" :max="totals.total"></progress>
-            </div>
-            <div class="col-sm-12 text-center">
-              <small class="bold text-info" v-text="Math.ceil((totals.complete/totals.total)*100)+'% COMPLETE'"></small>
-              <small class="text-info"> (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)</small>
-            </div>
-          </div>
           <template v-if="categoryTotals" v-for="(subcats,cat) in categoryTotals">
             <catcontainer class="fade-in" :cat="cat" :subcats="subcats" :key="cat+subcats"></catcontainer>
           </template>
         </div>
-        <div class="col-sm-12 p-4 text-right mt-2 message">
-          <template v-if="type === 'REQUIREMENTS' && isComplete ">
-            <small class="text-success bold">Ready to proceed!</small>
-            <button class="btn themeButton text-light" @click="nextStep()" :class="{'heartbeat':isComplete}" :disabled="!isComplete">NEXT</button>
-          </template>
-          <template v-if="type === 'REQUIREMENTS' && !isComplete ">
-            <small class="text-danger bold">Complete ALL requirements to proceed!</small>
-            <button class="btn themeButton text-light" @click="nextStep()" :class="{'heartbeat':isComplete}" :disabled="!isComplete">NEXT</button>
-          </template>
+        <div class="col-sm-12 text-right mt-2 rounded p-1" :class="{'bg-success':isComplete, 'bg-warning': !isComplete}">
+          <div class="bg-light p-2 rounded">
+            <template v-if="type === 'REQUIRED' && isComplete ">
+              <small class="text-success bold">Ready to proceed!</small>
+              <button class="btn themeButton text-light" @click="nextStep()" :class="{'heartbeat':isComplete}" :disabled="!isComplete">NEXT</button>
+            </template>
+            <template v-if="type === 'REQUIRED' && !isComplete ">
+              <small class="text-danger bold">Complete ALL requirements to proceed!</small>
+              <button class="btn themeButton text-light" @click="nextStep()" :class="{'heartbeat':isComplete, 'notallowed': !isComplete}" :disabled="!isComplete">NEXT</button>
+            </template>
 
-          <template v-if="type === 'RECOMMENDED' ">
-            <small v-show="fieldsleft !== 0" class="text-info">Complete as many recommended fields as possible <b class="text-danger">ONLY <span v-text="fieldsleft"></span> LEFT!</b></small>
-            <small v-show="fieldsleft === 0" class="text-success bold">Great job! Ready to procee!</small>
-            <button class="btn themeButton text-light" @click="nextStep()">NEXT</button>
-          </template>
-
+            <template v-if="type === 'RECOMMENDED' ">
+              <small v-show="fieldsleft !== 0" class="text-info">Complete as many recommended fields as possible <b class="text-danger">ONLY <span v-text="fieldsleft"></span> LEFT!</b></small>
+              <small v-show="fieldsleft === 0" class="text-success bold">Great job! Ready to procee!</small>
+              <button class="btn themeButton text-light" @click="nextStep()">NEXT</button>
+            </template>
+          </div>
         </div>
       </div>
     </div>`
@@ -2262,7 +2285,10 @@
                 self.loading = false;
               },
               preConfirm: (input) => {
-                axios.post('/api/dataset',output).then(res=>{
+                
+                let schema = store.getters.getSchema
+
+                axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label'],output).then(res=>{
                   self.loading = false;
                   if (res.data.success) {
                     let timerInterval
@@ -2404,14 +2430,14 @@
           var self = this;
 
           Swal.fire({
-            title: 'Import & Edit Existing Dataset Metadata',
+            title: 'Import Dataset Metadata',
             text: "Import Metadata From:",
             showCancelButton: true,
             animation:false,
             customClass:'scale-in-center',
             confirmButtonColor:"{{color_main}}",
             cancelButtonColor:"{{color_sec}}",
-            confirmButtonText: 'A Dataset Metadata URL',
+            confirmButtonText: 'Raw GitHub URL',
             cancelButtonText: 'A Registered Dataset Metadata',
           }).then((result) => {
             if (result.value) {
@@ -2521,8 +2547,10 @@
               payload["step"] = '2';
               store.commit('changeStep',payload);
             }else{
+              console.log('3')
               payload["step"] = '3';
               store.commit('changeStep',payload);
+              self.getFormValues();
             }
           }else{
             payload["step"] = '1';
