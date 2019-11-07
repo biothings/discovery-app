@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>https://discovery.biothings.io/metadata/geo/sitemap.xml</loc>
+    <loc>https://discovery.biothings.io/dataset/geo/sitemap.xml</loc>
   </sitemap>
   <sitemap>
     <url>
