@@ -36,7 +36,7 @@ def index_core_schema(lazy=False):
             klass.save()
 
     logger = logging.getLogger('discovery.scripts.setup')
-    logger.info("Indexed.")
+    logger.info("Core Schemas Indexed.")
 
 
 def es_data_setup():
