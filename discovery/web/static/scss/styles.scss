@@ -1733,10 +1733,11 @@ progress[value]::-webkit-progress-value {
   border-radius: 2px;
 }
 #widget{
-  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#f2f5f6+0,e3eaed+37,c8d7dc+100 */
-    background:rgb(218, 218, 218);
     padding: 10px;
     margin-bottom: 20px;
+}
+.widgetContainer{
+  min-height: 400px;
 }
 .inputpreview{
   cursor: zoom-in;
