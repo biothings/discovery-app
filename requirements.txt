@@ -1,5 +1,6 @@
 git+git://github.com/biothings/biothings.api.git@es7#egg=biothings[web_extra]
-git+git://github.com/biothings/biothings_schema.py.git@master#egg=biothings_schema
+git+git://github.com/biothings/biothings_schema.py.git@6ceff7d3063996134d59a778702f68b17e8bac9e#egg=biothings_schema
+tornado==5.1.1
 PyLD>=0.7.1
 jsonschema>=2.6.0
 torngithub==0.2.0
