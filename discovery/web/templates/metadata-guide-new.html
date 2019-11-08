@@ -17,40 +17,6 @@
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
   <div id="widget" class="mb-5 grad">
-    <!-- <ul class="nav nav-tabs">
-      <li class="nav-item" v-if="userInfo && userInfo.login">
-        <span class="nav-link" :class="{ 'disabled text-success': userInfo }"><small>
-          <i class="fas fa-user-check"></i> Logged in as <span v-text="userInfo.login"></span></small>
-        </span>
-      </li>
-      <li class='nav-item' v-if="userInfo && !userInfo.login">
-        <a class='nav-link active text-primary' href='./oauth'>
-          <small><i class="fas fa-sign-in-alt"></i> Login</small>
-        </a>
-      </li>
-      <li class='nav-item'>
-        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !validation, 'bg-danger text-light pointer': validation }" @click="reset()">
-          <small>
-            <i class="fas fa-undo"></i> Start Over
-          </small>
-        </a>
-      </li>
-      <li class='nav-item'>
-        <a class='nav-link' :class="{ 'disabled text-muted notallowed': !validation, 'mainBackDark text-light pointer': validation }" @click='getPreview()'>
-          <small>
-            <i class="fas fa-code"></i> Preview
-          </small>
-        </a>
-      </li>
-      <li class='nav-item' v-show="validation">
-        <a class='nav-link mainBackDark text-light pointer' @click="loadData()">
-          <small >
-            <i class="fas fa-download"></i> Import Metadata
-          </small>
-        </a>
-      </li>
-    </ul> -->
-
     <div>
       <div class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start">
         <span class="fa-stack fa-1x pointer desc mr-2" :data-tippy-info="'Logged in as '+userInfo.login" v-if="userInfo && userInfo.login">
@@ -78,13 +44,14 @@
       </div>
     </div>
 
-    <div v-if="userInfo && !userInfo.login">
-      <div class="alert alert-light text-danger text-center p-5">
+    <div v-if="userInfo && !userInfo.login" class="widgetContainer bg-light jumbotron whitefade text-center m-1">
+      <div class="alert text-danger text-center p-5">
+        <h2><i class="fas fa-exclamation"></i></h2>
         <h5>You must be logged in to proceed</h5>
       </div>
     </div>
 
-    <div class="widgetContainer bg-light jumbotron whitefade text-center m-1">
+    <div v-else class="widgetContainer bg-light jumbotron whitefade text-center m-1">
 
         <template v-if="step === '1' ">
           <!-- STARTING POINT -->
@@ -137,7 +104,7 @@
             <div class="row">
               <div class="col-sm-12 text-center p-3">
                 <small class="bold text-info" v-text="Math.ceil((totals.complete/totals.total)*100)+'% OVERALL COMPLETE'"></small>
-                <small class="text-info"> (<span v-text='totals.left'></span>/<span v-text='totals.total'></span>)</small>
+                <small class="text-info"> (<span v-text='totals.complete'></span>/<span v-text='totals.total'></span>)</small>
               </div>
             </div>
             <div v-show="fieldsleftRegistration !== 0" class="col-sm-12 text-center p-3 rounded alert-info m-2">
@@ -1016,7 +983,8 @@
           'text':'',
           'url':'',
           'description':''
-        }
+        },
+        canAcceptMultiple:false
       }
     },
     props: ['name','info'],
@@ -1149,6 +1117,9 @@
                 case 'contributor':
                   Vue.set(person,'@type','Person')
                   break;
+                case 'funding':
+                  Vue.set(person,'@type','Organization')
+                  break;
                 default:
                   Vue.set(person,'@type','Thing')
               }
@@ -1251,14 +1222,29 @@
         let progressSteps =[]
         let questions =[]
 
+        let props = {}
+
+        if (propInfo.hasOwnProperty('oneOf')) {
+          for (var i = 0; i < propInfo['oneOf'].length; i++) {
+            if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'object') {
+              props = propInfo['oneOf'][i]['properties']
+            }
+            if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'array') {
+              self.canAcceptMultiple = true
+            }
+          }
+        }else if (propInfo.hasOwnProperty('properties')){
+          props = propInfo.properties
+        }
+
         // Create questions
-        for (key in propInfo.properties) {
+        for (key in props) {
           progressSteps.push(key)
           switch (key) {
             case 'size':
               questions.push({
                 title: key,
-                text: propInfo.properties[key].description,
+                text: props[key].description,
                 inputValidator: (value) => {
                   if (!value) {
                     return 'You should write something meanignful'
@@ -1281,7 +1267,7 @@
             case 'name':
               questions.push({
                 title: key,
-                text: propInfo.properties[key].description,
+                text: props[key].description,
                 inputValidator: (value) => {
                   if (!value) {
                     return 'Name is a required field'
@@ -1292,7 +1278,7 @@
             case 'url':
               questions.push({
                 title: key,
-                text: propInfo.properties[key].description,
+                text: props[key].description,
                 inputValidator: (value) => {
                   return new Promise((resolve) => {
                     function validURL(str) {
@@ -1316,7 +1302,7 @@
             default:
             questions.push({
               title: key,
-              text: propInfo.properties[key].description,
+              text: props[key].description,
               footer:`<small>If applicable: mutliple items must be separated by commmas</small>`,
               inputValidator: (value) => {
                 if (!value) {
@@ -1354,6 +1340,9 @@
                   case 'publisher':
                     Vue.set(obj,'@type','Organization')
                     break;
+                    case 'funding':
+                      Vue.set(obj,'@type','Organization')
+                      break;
               default:
             }
             for (var i = 0; i < progressSteps.length; i++) {
@@ -1361,7 +1350,7 @@
                 let val = result.value[i].split(',');
                 Vue.set(obj,progressSteps[i],val)
               }else{
-                if (propInfo.properties[progressSteps[i]].hasOwnProperty('type') && propInfo.properties[progressSteps[i]]['type']==='integer') {
+                if (props[progressSteps[i]].hasOwnProperty('type') && props[progressSteps[i]]['type']==='integer') {
                   let val = parseInt(result.value[i]);
                   Vue.set(obj,progressSteps[i],val)
                 }else{
@@ -1671,24 +1660,7 @@
                   <button class="btn btn-success" @click="userInput=userLicense">Use This License</button>
                 </div>
               </template>
-              <!-- 🌈 ONE OF 🌈 -->
-              <template v-if="info.oneOf && name === 'datePublished' || name === 'dateModified'">
-                <div v-if="datePreset && !userInput" class="p-2">
-                  <small>Dates used:</small>
-                  <small class="badge badge-info pointer m-1" v-text="'Click to use '+datePreset" @click="userInput=datePreset"></small>
-                </div>
-                <template v-for="(item,i) in info.oneOf">
-                  <div>
-                    <template v-if="item.format === 'date'">
-                      <input type="date" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.format">
-                    </template>
-                    <template v-if="item.type === 'string' && !item.format">
-                      <input  type="text" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.type">
-                    </template>
-                    <!-- 🔥🔥🔥🔥🔥 TODO: handle nested arrays of objects 🔥🔥🔥🔥🔥 -->
-                  </div>
-                </template>
-              </template>
+
               <!-- 🌈  KEYWORDS 🌈 -->
               <template v-if="info.type=== 'array' && name === 'keywords'">
                 <div class="form-group p-2 row">
@@ -1729,21 +1701,6 @@
                   </div>
                 </div>
               </template>
-              <!-- 🌈  CONTRIBUTORS 🌈 -->
-              <template v-if="info.oneOf && name === 'contributor'">
-                <div class="form-group p-2 row">
-                  <button class="btn mainBackDark text-light m-auto btnfocus" @click="addPerson('contributor')"><i class="fas fa-plus"></i> Add Contributor</button>
-                </div>
-                <div class="col-sm-12 m-auto">
-                  <template v-for="(person,i) in userInput">
-                    <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove" :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'>
-                      <i class="fas fa-user"></i>
-                      <span v-text="person.name"></span>
-                      <span style="opacity:0;" class="d-inline" @click="removeItem(person.name)"> <i class="fas fa-times"></i></span>
-                    </span>
-                  </template>
-                </div>
-              </template>
               <!-- 🌈  OBJECT 🌈 -->
               <template v-if="info.type=== 'object' && name !== 'license' && name !== 'includedInDataCatalog' ">
                 <div class="form-group p-2 row">
@@ -1761,22 +1718,44 @@
                   </template>
                 </div>
               </template>
-              <!-- 🌈  FUNDING🌈 -->
-              <template v-if="info.oneOf && name ==='funding' ">
-                <div class="form-group p-2 row">
-                  <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="info.oneOf && !userInput">
-                    <i class="fas fa-plus"></i> <span v-text="'Add '+name"></span>
-                  </button>
-                </div>
-                <div class="col-sm-12 m-auto">
-                  <template v-for="(person,i) in userInput">
-                    <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
-                      <i class="fas fa-circle"></i>
-                      <span v-text="name+' '+(i+1)"></span>
-                      <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
-                    </span>
+              <!-- 🌈  ONE OF 🌈 -->
+              <template v-if="info.oneOf">
+                <!-- 🌈  ONE OF ANYTHING🌈 -->
+                <template v-if="name !== 'datePublished' && name !== 'dateModified'">
+                  <div class="form-group p-2 row">
+                    <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="!userInput || canAcceptMultiple">
+                      <i class="fas fa-plus"></i> <span v-text="'Add new '+name"></span>
+                    </button>
+                  </div>
+                  <div class="col-sm-12 m-auto">
+                    <template v-for="(person,i) in userInput">
+                      <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
+                        <i class="fas fa-circle"></i>
+                        <span v-text="name+' '+(i+1)"></span>
+                        <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
+                      </span>
+                    </template>
+                  </div>
+                </template>
+
+                <!-- 🌈  ONE OF  DATES🌈 -->
+                <template v-if="name === 'datePublished' || name === 'dateModified'">
+                  <div v-if="datePreset && !userInput" class="p-2">
+                    <small>Dates used:</small>
+                    <small class="badge badge-info pointer m-1" v-text="'Click to use '+datePreset" @click="userInput=datePreset"></small>
+                  </div>
+                  <template v-for="(item,i) in info.oneOf">
+                    <div>
+                      <template v-if="item.format === 'date'">
+                        <input type="date" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.format">
+                      </template>
+                      <template v-if="item.type === 'string' && !item.format">
+                        <input  type="text" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.type">
+                      </template>
+                    </div>
                   </template>
-                </div>
+                </template>
+
               </template>
             </div>
           </div>
@@ -1972,7 +1951,7 @@
 
             <template v-if="type === 'RECOMMENDED' ">
               <small v-show="fieldsleft !== 0" class="text-info">Complete as many recommended fields as possible <b class="text-danger">ONLY <span v-text="fieldsleft"></span> LEFT!</b></small>
-              <small v-show="fieldsleft === 0" class="text-success bold">Great job! Ready to procee!</small>
+              <small v-show="fieldsleft === 0" class="text-success bold">Great job! Ready to proceed!</small>
               <button class="btn themeButton text-light" @click="nextStep()">NEXT</button>
             </template>
           </div>
@@ -2285,7 +2264,7 @@
                 self.loading = false;
               },
               preConfirm: (input) => {
-                
+
                 let schema = store.getters.getSchema
 
                 axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label'],output).then(res=>{
