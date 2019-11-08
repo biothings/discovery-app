@@ -128,7 +128,7 @@ class RegistryHandler(APIBaseHandler):
 
         result = {}
 
-        if namespace != 'schema':  # core schema is handled by parser
+        if namespace not in ('schema', 'biomedical', 'datacite', 'google'):
 
             schema = Schema.get(id=namespace, ignore=404)
             if not schema:
