@@ -30,10 +30,10 @@ def index_core_schema(lazy=False):
     for namespace, url in schemas:
 
         if lazy and SchemaClass.search().query("term", namespace=namespace).count() > 1:
-            logging.log("Found %s.", namespace)
+            logger.info("Found %s.", namespace)
             continue
 
-        logging.log("Indexing %s.", namespace)
+        logger.info("Indexing %s.", namespace)
 
         SchemaClass.delete_by_schema(namespace)
         classes = SchemaClass.import_classes(SchemaParser(url), namespace)
