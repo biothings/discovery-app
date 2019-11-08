@@ -24,7 +24,7 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                         {"term": {"_id": {"value": q, "boost": 15.0}}},
                         {"term": {"label.raw": {"value": q, "boost": 10.0}}},
                         {"prefix": {"label": {"value": q}}},
-                        {"simple_query_string": {"query": q}}
+                        {"query_string": {"query": q}}
                     ]}},
                     "functions": [
                         {"filter": {"term": {"namespace": "schema"}}, "weight": 0.5},
