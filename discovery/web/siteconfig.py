@@ -64,14 +64,14 @@ GUIDE_PORTALS = [
                     'namespace':'google',
                     'prefix':'bts',
                     'name':'Google',
-                    'description':'A list of metadata fields required and recommended by Google Dataset Search Engine.',
+                    'description':'A list of metadata fields required and recommended by Google Dataset Search Engine. <a target="_blank" href="https://developers.google.com/search/docs/data-types/dataset">Learn More<a/>',
                     'selected': 1
                     },
                     {
                     'namespace':'datacite',
                     'prefix':'bts',
                     'name':'DataCite',
-                    'description':'A list of core metadata properties chosen for an accurate and consistent identification of a resource for citation and retrieval purposes by DataCite',
+                    'description':'A list of core metadata properties chosen for an accurate and consistent identification of a resource for citation and retrieval purposes by DataCite. <a target="_blank" href="https://schema.datacite.org/">Learn More<a/>',
                     'selected': 0
                     },
                 ]
