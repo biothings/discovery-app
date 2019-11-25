@@ -299,12 +299,13 @@ const store = new Vuex.Store({
         }else{
           //Handle Parent Classes
           if (state.schema[i].properties) {
+            let myLabel = "";
             for (var y = 0; y < state.schema[i].properties.length; y++) {
               if (state.schema[i].properties[y].selected) {
                 let propValue={};
                 Vue.set(propValue,'description',state.schema[i].properties[y].description)
                 //Assign type
-                let myLabel = state.schema[i].properties[y].label;
+                myLabel = state.schema[i].properties[y].label;
 
                 if (['name','description','version','identifier'].includes(myLabel)) {
                   Vue.set(propValue,'type','string')

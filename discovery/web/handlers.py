@@ -238,6 +238,13 @@ class GuideIntroHandler(BaseHandler):
         doc_output = doc_template.render()
         self.write(doc_output)
 
+class GuideSpecialHandler(BaseHandler):
+    def get(self):
+        doc_file = "metadata-guide-new.html"
+        guide_template = TEMPLATE_ENV.get_template(doc_file)
+        guide_output = guide_template.render()
+        self.write(guide_output)
+
 
 APP_LIST = [
     (r"/?", MainHandler),
@@ -246,6 +253,7 @@ APP_LIST = [
     (r"/about/?", AboutHandler),
     (r"/faq/?", FAQHandler),
     (r"/best-practices/?", GuideIntroHandler),
+    (r"/guide/niaid/?", GuideSpecialHandler),
     (r"/guide/?", GuideHandler),
     (r"/registry/?", RegistryHandler),
     (r"/editor/?", EditorHandler),

@@ -2146,12 +2146,18 @@
             self.loading = false;
     			}).catch(err=>{
             self.loading = false;
-            Swal.fire({
-              type: 'error',
-              position: 'center',
-              title: 'Failed because: ',
-              text: err.response.data.reason
-            });
+            try {
+              Swal.fire({
+                type: 'error',
+                position: 'center',
+                title: 'Failed because: ',
+                text: err.response.data.reason
+              });
+            } catch (e) {
+              console.log(e)
+            } finally {
+
+            }
     				throw err;
     			})
         },
