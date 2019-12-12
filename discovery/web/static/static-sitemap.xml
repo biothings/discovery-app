@@ -30,9 +30,6 @@
     <loc>https://discovery.biothings.io/dataset/83dc3401f86819de</loc>
   </url>
   <url>
-    <loc>https://discovery.biothings.io/metadata/geo/GSE9</loc>
-  </url>
-  <url>
     <loc>https://discovery.biothings.io/faq</loc>
     <priority>0.5</priority>
     <lastmod>2019-10-06</lastmod>
@@ -43,9 +40,6 @@
   </url>
   <url>
     <loc>https://discovery.biothings.io/registry</loc>
-  </url>
-  <url>
-    <loc>https://discovery.biothings.io/bts</loc>
   </url>
   <url>
     <loc>https://discovery.biothings.io/schema-playground</loc>
