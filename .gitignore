@@ -9,6 +9,7 @@ __pycache__/
 
 # Credentials
 discovery/config_key.py
+config_key.py
 
 # Distribution / packaging
 .Python

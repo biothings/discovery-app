@@ -5,17 +5,16 @@
 from biothings.web.settings.default import *
 from tornado.web import RedirectHandler
 
+from config_key import COOKIE_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 from discovery.api.es.query_builder import DiscoveryQueryBuilder
 from discovery.api.handlers import (MetadataHandler, QueryHandler,
                                     RegistryHandler, SchemaViewHandler)
-from discovery.config_key import (COOKIE_SECRET, GITHUB_CLIENT_ID,
-                                  GITHUB_CLIENT_SECRET)
 from discovery.web.handlers import APP_LIST as WEB_ENDPOINTS
 
 # *****************************************************************************
 # Credentials
 # *****************************************************************************
-# Define in ./config_key.py:
+# Define in <project_folder>/config_key.py:
 #   COOKIE_SECRET = '<Any Random String>'
 #   GITHUB_CLIENT_ID = '<your Github application Client ID>'
 #   GITHUB_CLIENT_SECRET = '<your Github application Client Secret>'
