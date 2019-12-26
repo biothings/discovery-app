@@ -19,11 +19,7 @@ A Web Schema Visualization App
     ```
     pip install -r requirements.txt
     ```
-4. Change directory to python source folder
-    ```
-    cd discovery
-    ```
-5. Create a *config_key.py* under *discovery* folder with
+5. Create a *config_key.py* under project folder with
     ```
     COOKIE_SECRET = '<Any Random String>'
     GITHUB_CLIENT_ID = '<your Github application Client ID>'

@@ -6,9 +6,9 @@ RUN apt update -o Acquire::Check-Date=false && \
     git clone https://github.com/biothings/discovery-app.git && \
     pip3 install -r /discovery-app/requirements.txt
 
-COPY ./discovery/config_key.py /discovery-app/discovery/config_key.py
+COPY ./config_key.py /discovery-app/config_key.py
 WORKDIR /discovery-app
 EXPOSE 8000
 
 RUN git pull
-ENTRYPOINT ["python3", "discovery/index.py", "--debug"]
+ENTRYPOINT ["python3", "index.py", "--debug"]
