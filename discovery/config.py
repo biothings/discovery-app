@@ -32,6 +32,7 @@ ES_CLIENT_TIMEOUT = 10
 # *****************************************************************************
 UNINITIALIZED_APP_LIST = [
     (r"/sitemap.xml", RedirectHandler, {"url": "/static/sitemap.xml"}),
+    (r"/dataset/(geo/.+)", RedirectHandler, {"url": "http://metadataplus.biothings.io/{0}"}),
 ]
 API_ENDPOINTS = [
     (r"/api/query/?", QueryHandler),
