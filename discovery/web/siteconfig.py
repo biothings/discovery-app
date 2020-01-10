@@ -28,6 +28,7 @@ METADATA_MAIN_COLOR = "#63296b"
 
 MAIN_COLOR = "#63296b"
 SEC_COLOR = "#4a7d8f"
+DARK_MODE = False
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - IMAGES (REQ)
