@@ -15,6 +15,7 @@ from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 from discovery.api.es.doc import Schema
 
 import discovery.web.siteconfig as siteconfig
+import discovery.web.siteconfigniaid as siteconfigniaid
 
 GITHUB_CALLBACK_PATH = "/oauth"
 GITHUB_SCOPE = ""
@@ -23,32 +24,49 @@ TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templa
 TEMPLATE_LOADER = FileSystemLoader(searchpath=TEMPLATE_PATH)
 TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER, cache_size=0)
 
-# Project specific globals
-TEMPLATE_ENV.globals['site_name'] = siteconfig.SITE_NAME
-TEMPLATE_ENV.globals['site_desc'] = siteconfig.SITE_DESC
-TEMPLATE_ENV.globals['contact_email'] = siteconfig.CONTACT_EMAIL
-TEMPLATE_ENV.globals['contact_repo'] = siteconfig.CONTACT_REPO
-# Metadata
-TEMPLATE_ENV.globals['metadata_desc'] = siteconfig.METADATA_DESC
-TEMPLATE_ENV.globals['metadata_featured_image'] = siteconfig.METADATA_FEATURED_IMAGE
-TEMPLATE_ENV.globals['metadata_url'] = siteconfig.METADATA_CONTENT_URL
-TEMPLATE_ENV.globals['metadata_main_color'] = siteconfig.METADATA_MAIN_COLOR
-# Metadata
-TEMPLATE_ENV.globals['guide_presets'] = siteconfig.GUIDE_PRESETS
-TEMPLATE_ENV.globals['guide_portals'] = siteconfig.GUIDE_PORTALS
-TEMPLATE_ENV.globals['guide_settings'] = siteconfig.GUIDE_SETTINGS
-# SCHEMA
-TEMPLATE_ENV.globals['starting_points'] = siteconfig.STARTING_POINTS
-TEMPLATE_ENV.globals['registry_shortcuts'] = siteconfig.REGISTRY_SHORTCUTS
-# IMAGES FOLDER
-TEMPLATE_ENV.globals['static_image_folder'] = siteconfig.STATIC_IMAGE_FOLDER
-# Colors used
-TEMPLATE_ENV.globals['color_main'] = siteconfig.MAIN_COLOR
-TEMPLATE_ENV.globals['color_sec'] = siteconfig.SEC_COLOR
 
-# Compile site specific minified css
-sass.compile(dirname=(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/scss'), os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/css')), output_style='compressed')
+def createStyles():
+    # Compile site specific minified css
+    sass.compile(dirname=(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/scss'), os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/css')), output_style='compressed',custom_functions={
+        sass.SassFunction('mainC', (), lambda: siteconfig.MAIN_COLOR),
+        sass.SassFunction('secC', (),lambda: siteconfig.SEC_COLOR),
+        sass.SassFunction('dm', (), lambda: siteconfig.DARK_MODE),
+    })
+    # Compile site specific minified css NIAAID
+    # in main.html create matching rules and link to styles directory
+    sass.compile(dirname=(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/scss'), os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/css/niaid')), output_style='compressed',custom_functions={
+        sass.SassFunction('mainC', (), lambda: siteconfigniaid.MAIN_COLOR),
+        sass.SassFunction('secC', (),lambda: siteconfigniaid.SEC_COLOR),
+        sass.SassFunction('dm', (), lambda: siteconfigniaid.DARK_MODE),
+    })
 
+def setEnvVars(config):
+    # Project specific globals
+    TEMPLATE_ENV.globals['site_name'] = config.SITE_NAME
+    TEMPLATE_ENV.globals['site_desc'] = config.SITE_DESC
+    TEMPLATE_ENV.globals['contact_email'] = config.CONTACT_EMAIL
+    TEMPLATE_ENV.globals['contact_repo'] = config.CONTACT_REPO
+    # Metadata
+    TEMPLATE_ENV.globals['metadata_desc'] = config.METADATA_DESC
+    TEMPLATE_ENV.globals['metadata_featured_image'] = config.METADATA_FEATURED_IMAGE
+    TEMPLATE_ENV.globals['metadata_url'] = config.METADATA_CONTENT_URL
+    TEMPLATE_ENV.globals['metadata_main_color'] = config.METADATA_MAIN_COLOR
+    # Metadata
+    TEMPLATE_ENV.globals['guide_presets'] = config.GUIDE_PRESETS
+    TEMPLATE_ENV.globals['guide_portals'] = config.GUIDE_PORTALS
+    TEMPLATE_ENV.globals['guide_settings'] = config.GUIDE_SETTINGS
+    # SCHEMA
+    TEMPLATE_ENV.globals['starting_points'] = config.STARTING_POINTS
+    TEMPLATE_ENV.globals['registry_shortcuts'] = config.REGISTRY_SHORTCUTS
+    # IMAGES FOLDER
+    TEMPLATE_ENV.globals['static_image_folder'] = config.STATIC_IMAGE_FOLDER
+    # Colors used
+    TEMPLATE_ENV.globals['color_main'] = siteconfig.MAIN_COLOR
+    TEMPLATE_ENV.globals['color_sec'] = siteconfig.SEC_COLOR
+
+# Initial global settings
+setEnvVars(siteconfig)
+createStyles()
 
 class BaseHandler(BioThingsBaseHandler):
     def get_current_user(self):
@@ -240,10 +258,12 @@ class GuideIntroHandler(BaseHandler):
 
 class GuideSpecialHandler(BaseHandler):
     def get(self):
+        setEnvVars(siteconfigniaid)
         doc_file = "metadata-guide-new.html"
         guide_template = TEMPLATE_ENV.get_template(doc_file)
         guide_output = guide_template.render()
         self.write(guide_output)
+        setEnvVars(siteconfig)
 
 
 APP_LIST = [

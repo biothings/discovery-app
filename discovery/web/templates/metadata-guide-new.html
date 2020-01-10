@@ -935,7 +935,7 @@
         a.href = URL.createObjectURL(file);
         a.download = fileName;
         a.click();
-      },
+      }
     },
     watch:{
 
@@ -994,12 +994,17 @@
         constFound:false,
         constObj:{},
         licenseThirdQuestion:false,
+        vocabTerm:'',
+        vocab:Array,
         userLicense:{
           'text':'',
           'url':'',
           'description':''
         },
-        canAcceptMultiple:false
+        canAcceptMultiple:false,
+        vocabDetails:Object,
+        vocabSuggestions:[],
+        loading:false
       }
     },
     props: ['name','info'],
@@ -1259,6 +1264,7 @@
             case 'size':
               questions.push({
                 title: key,
+                input: 'number',
                 text: props[key].description,
                 inputValidator: (value) => {
                   if (!value) {
@@ -1312,6 +1318,21 @@
                     }
                   })
                 }
+              })
+              break;
+            case 'dateModified' || 'datePublished':
+              questions.push({
+                title: key,
+                inputAttributes: {
+                  id:'hideThis'
+                },
+                html: '<input type="date" id="datePicked"/>',
+                onOpen: ()=>{
+                  document.getElementById("hideThis").classList.add('d-none');
+                },
+                preConfirm: () => {
+                  return document.getElementById('datePicked').value
+                },
               })
               break;
             default:
@@ -1466,6 +1487,55 @@
           }
         }
       },
+      getVocabulary(){
+        var self=this;
+        let obj = self.info
+
+        if (obj.hasOwnProperty('vocabulary')) {
+          try {
+            let query = self.vocabTerm
+            let ontologies = obj['vocabulary']['ontology'].toString()
+            let children = obj['vocabulary']['children_of'].toString()
+
+            // AUTOSUGGEST
+
+            // self.loading = true;
+            //
+            // axios.get("http://www.ebi.ac.uk/ols/api/suggest?q="+query+"&ontology="+ontologies+"&rows=5").then(res=>{
+            //   self.vocabSuggestions = res.data.response.docs;
+            //   self.loading = false;
+            // }).catch(err=>{
+            //   throw err;
+            // });
+
+            let url = "http://www.ebi.ac.uk/ols/api/search?q="+query
+            +"&ontology="+ontologies
+            +"&childrenOf="+children
+            +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+            +"&queryFields=label"
+            +"&rows=100"
+
+            self.loading = true;
+
+            axios.get(url).then(res=>{
+              // console.log('result VOCAB',res.data.response)
+              if (res.data.response.hasOwnProperty('docs')&& res.data.response.docs.length >= 1) {
+                self.vocab= res.data.response.docs
+                self.loading = false;
+                // console.log('res',self.vocab.length)
+              }else{
+                self.vocab= []
+              }
+
+            }).catch(err=>{
+              self.vocab= []
+              throw err;
+            });
+          } catch (e) {
+
+          }
+        }
+      }
     },
     watch:{
       constObj:{
@@ -1475,12 +1545,13 @@
           store.commit('markCompleted',payload);
         },
         deep:true
+      },
+      vocabTerm(term){
+        this.getVocabulary()
       }
     },
     mounted: function(){
       var self = this
-
-      // console.log('prop info', self.info)
 
       self.checkForConstantKey(self.info,'const')
 
@@ -1599,15 +1670,89 @@
         <div class="col-sm-8 p-2 text-left d-flex align-items-center justify-content-center" :class="[userInput ? 'alert-success':'alert-secondary']">
           <div class="d-flex w-100 justify-content-center">
             <div class="w-75 p-3">
+              <h6 v-show="loading" class="text-primary">Loading <i class="fas fa-spinner fa-pulse"></i></h6>
               <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
               <template v-if="info && info.type === 'string'">
                 <!-- 🌈 STRING 🌈 -->
                 <template v-if="info && !info.format">
-                  <template v-if="name === 'description'">
-                    <textarea pattern=".{20,500}" rows="7" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here"></textarea>
+                  <!-- 🌈 STRING VOCABULARY🌈 -->
+                  <template v-if="info && info.vocabulary">
+                    <small>Input <b v-text="info.vocabulary && !info.vocabulary.strict ? 'CAN' : 'MUST' "></b> be from existing ontology terms.</small>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <div class="input-group-text bg-secondary text-light"><i class="fas fa-search"></i></div>
+                      </div>
+                      <input :required="isRequired" type="text" v-model="vocabTerm" class="form-control form-control-sm mousetrap" :placeholder="userInput? userInput:'Type to begin search' " id="stringInput" list="suggestionlist">
+                    </div>
+                    <datalist id="suggestionlist">
+                      <template v-for="item in vocabSuggestions">
+                        <option :value="item.autosuggest" @click="vocabTerm=item.autosuggest;vocabSuggestions=[]">
+                      </template>
+                    </datalist>
+                    <div v-show="vocabTerm" class="alert alert-light optionBox">
+                      <small><b class="text-primary" v-text="'('+vocab.length+')'"></b> Existing results related to: <i v-text='vocabTerm'></i></small>
+                      <template v-if="vocab.length" v-for="(item,i) in vocab">
+                        <div class="form-check">
+                          <input class="form-check-input mousetrap" type="radio" name="exampleRadios" :id="i" :value="item.iri" @click='userInput=item.iri;vocabDetails=item' v-model="userInput">
+                          <label class="form-check-label" :for="i">
+                            <span v-text='item.label' ></span>
+                            <i v-if="userInput && userInput === item.iri" class="fas fa-check text-success"></i>
+                          </label>
+                        </div>
+                      </template>
+                      <template v-if="info.vocabulary && !info.vocabulary.strict ">
+                        <div class="alert alert-warning">
+                          <h6>Didn't find what you are looking for?</h6>
+                          <p class="text-muted">
+                            Just use <b class="pointer text-success" v-text="vocabTerm" @click="userInput=vocabTerm;vocabDetails={}"></b>
+                          </p>
+                        </div>
+                      </template>
+                    </div>
                   </template>
+                  <!-- 🌈 STRING NORMAL🌈 -->
                   <template v-else>
-                    <input :required="isRequired" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here">
+                    <textarea :rows="name ==='name'?1:7" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here"></textarea>
+                  </template>
+                    <!-- 🌈 VOCAB PREVIEW🌈 -->
+                  <template v-if="vocabDetails && vocab.length && vocabDetails.ontology_prefix">
+                    <div class="alert alert-info optionBox">
+                      <h6>
+                        <span v-text='vocabDetails.label' class="bold"></span>
+                        <template v-if="vocabDetails && vocabDetails.short_form">
+                          (<small v-text='vocabDetails.short_form' ></small>)
+                        </template>
+                      </h6>
+                      <table>
+                        <tbody>
+                          <tr>
+                            <td>
+                              <div class="pillType d-block m-1">
+                                <span class="mainBackDark" style="font-size:1em;">Ontology</span>
+                                <span style="font-size:1em;">
+                                  <a :href="vocabDetails.iri" v-text="vocabDetails.ontology_prefix" rel="nonreferrer" target="_blank"></a>
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <div class="pillType d-block m-1">
+                                <span class="mainBackLight" style="font-size:1em;">ID</span>
+                                <span style="font-size:1em;">
+                                  <a :href="vocabDetails.iri" v-text="vocabDetails.obo_id" rel="nonreferrer" target="_blank"></a>
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr v-if="vocabDetails && vocabDetails.description">
+                            <td>
+                              <small v-html="vocabDetails.description[0]"></small>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </template>
                 </template>
                 <!-- 🌈 URL 🌈 -->
@@ -1891,7 +2036,7 @@
 
           <template v-if="allMode && validation">
             <!-- 🌈  ALL MODE 🌈 -->
-            <div class="p-3 rounded" style="border:2px solid #d7d7d7">
+            <div class="p-3 rounded" style="border:2px solid rgb(230, 230, 230)">
               <template v-if="type === 'REQUIRED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
                   <input-box :name='index' :info="prop" :key='index'></input-box>
@@ -2620,16 +2765,17 @@
         tippy( '#widget',{
             target:'.desc',
             content: 'Loading...',
-            maxWidth:'200px',
-            placement:'bottom',
+            // maxWidth:'200px',
+            placement:'top',
             animation: 'fade',
             interactive: true,
             theme:'light',
             onShow(instance) {
               let info = instance.reference.dataset.tippyInfo;
-              instance.setContent("<div class='text-muted m-0'>"+info+"</div>")
+              instance.setContent("<div class='text-muted m-0 p-1'>"+info+"</div>")
             }
           });
+
 			}
 		});
 

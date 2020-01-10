@@ -1,12 +1,8 @@
 
-/* COLORS */
-
-/* Substitute values of main and sec to change look of site main colors */
-
-$main: #63296b;
-$lightermain: #7a3e8c;
-$sec:#4a7d8f;
-$darkmode: false;
+/* COLORS and DARK MODE*/
+$darkmode: dm();
+$hierachy: rgb(62, 111, 168);
+$color: secc();
 
 //MIXINS
 
@@ -36,19 +32,25 @@ $darkmode: false;
   }
 }
 
+@mixin backandtext($c){
+  border: 1px white solid !important;
+  background: $c;
+}
 
 // Loops
 
 $percent-color-actions:5%;
 
-@for $i from 0 through 20 {
-  .text-#{$i} {
-    color: darken( $sec, $percent-color-actions ) !important;
+@if secC() {
+  @for $i from 0 through 20 {
+    .text-#{$i} {
+      color: darken( $hierachy, $percent-color-actions ) !important;
+    }
+    .bg-#{$i} {
+      background: darken( $hierachy, $percent-color-actions ) !important;
+    }
+    $percent-color-actions : $percent-color-actions + 4%;
   }
-  .bg-#{$i} {
-    background: darken( $sec, $percent-color-actions ) !important;
-  }
-  $percent-color-actions : $percent-color-actions + 4%;
 }
 
 
@@ -66,7 +68,7 @@ $percent-color-actions:5%;
   @include theme-colors($darkmode);
 }
 
-p.text-muted, small.text-muted, h1.text-muted,h2.text-muted,h3.text-muted,h4.text-muted, .navbar-light .navbar-nav .nav-link, .text-light {
+p.text-muted, h1.text-muted,h2.text-muted,h3.text-muted,h4.text-muted, .navbar-light .navbar-nav .nav-link, .text-light {
   @include theme-colors-text($darkmode);
 }
 
@@ -81,6 +83,12 @@ p.text-muted, small.text-muted, h1.text-muted,h2.text-muted,h3.text-muted,h4.tex
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: scroll;
+}
+
+.optionBox{
+  max-height: 350px;
+  overflow: scroll;
+  max-width: 100%;
 }
 
 .buildBack{
@@ -115,25 +123,16 @@ p.text-muted, small.text-muted, h1.text-muted,h2.text-muted,h3.text-muted,h4.tex
 
 .logoText{
   background: rgb(0,100,118); /* Old browsers */
-  background: -moz-linear-gradient(left,  $sec 0%, $main 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(left,  $sec 0%,$main 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to right,  $sec 0%,$main 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr= $sec, endColorstr=$main,GradientType=1 ); /* IE6-9 */
+  background: -moz-linear-gradient(left,  secC() 0%, mainC() 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(left,  secC() 0%,mainC() 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to right,  secC() 0%,mainC() 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr= secC(), endColorstr=mainC(),GradientType=1 ); /* IE6-9 */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-// .grad{
-//   /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#4a7d8f+0,63296b+100 */
-// background: rgb(74,125,143); /* Old browsers */
-// background: -moz-linear-gradient(left,  $sec 0%, $main 100%); /* FF3.6-15 */
-// background: -webkit-linear-gradient(left,  $sec 0%,$main 100%); /* Chrome10-25,Safari5.1-6 */
-// background: linear-gradient(to right,  $sec 0%,$main 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-// filter: progid:DXImageTransform.Microsoft.gradient( startColorstr= $sec, endColorstr=$main,GradientType=1 ); /* IE6-9 */
-//
-// }
 .grad{
-  @include hor-gradient($sec, $main);
+  @include hor-gradient(secC(), mainC());
 }
 
 @media only screen and (max-width: 600px) {
@@ -149,59 +148,58 @@ p.text-muted, small.text-muted, h1.text-muted,h2.text-muted,h3.text-muted,h4.tex
 }
 
 .userButton{
-  background: $main !important;
+  background: mainC() !important;
   color: white;
   border-radius: 5px;
-  border: 2px solid $sec;
+  border: 2px solid secC();
   padding-left: 3px;
   padding-right: 3px;
 }
 
 .mainBackDark{
-  background: $main !important;
+  background: mainC() !important;
 }
 
 .themeButton{
   border: 1px white solid !important;
-  background: $main
+  background: mainC()
 }
 
 .themeButton:hover{
-  border: 1px white solid !important;
-  background: $lightermain;
+  @include backandtext(secC());
 }
 
 .mainBackLight{
-  background: $sec !important;
+  background: secC() !important;
 }
 
 .mainTextDark{
-   color: $main !important;
+   color: mainC() !important;
 }
 
 .mainTextLight{
-   color: $sec !important;
+   color: secC() !important;
 }
 
 .gradientVertical{
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/$main+0,fc506d+100 */
-  background: $main; /* Old browsers */
-  background: -moz-linear-gradient(top, $main 0%, $sec 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top, $main 0%,$sec 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom, $main 0%,$sec 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=$main, endColorstr=$sec,GradientType=0 ); /* IE6-9 */
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/mainC()+0,fc506d+100 */
+  background: mainC(); /* Old browsers */
+  background: -moz-linear-gradient(top, mainC() 0%, secC() 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, mainC() 0%,secC() 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, mainC() 0%,secC() 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=mainC(), endColorstr=secC(),GradientType=0 ); /* IE6-9 */
 }
 
 .gradientHorizontal{
-background: $main; /* Old browsers */
-background: -moz-linear-gradient(left, $main 0%, $sec 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(left, $main 0%,$sec 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to right, $main 0%,$sec 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=$main, endColorstr=$sec,GradientType=1 ); /* IE6-9 */
+background: mainC(); /* Old browsers */
+background: -moz-linear-gradient(left, mainC() 0%, secC() 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(left, mainC() 0%,secC() 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to right, mainC() 0%,secC() 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=mainC(), endColorstr=secC(),GradientType=1 ); /* IE6-9 */
 }
 
 .animatedBack{
-  background: linear-gradient(270deg, $main, $sec);
+  background: linear-gradient(270deg, mainC(), secC());
   background-size: 400% 400%;
 
   -webkit-animation: AnimationName 30s ease infinite;
@@ -282,8 +280,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=$main, endColo
 }
 
 .pulse {
-  --color: $main;
-  --hover: $main;
+  --color: mainC();
+  --hover: mainC();
 }
 
 .raise {
@@ -293,7 +291,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=$main, endColo
 
 .up {
   --color: var(--light);
-  --hover: $main;
+  --hover: mainC();
 }
 
 .slide {
@@ -307,39 +305,39 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=$main, endColo
 }
 
 .page-item.active .page-link{
-  background-color: $main;
-  border-color: $main;
+  background-color: mainC();
+  border-color: mainC();
 }
 
 .mainBackDarkFade{
-   background: -moz-linear-gradient(left, $main 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
-   background: -webkit-linear-gradient(left, $main 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
-   background: linear-gradient(to right, $main 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+   background: -moz-linear-gradient(left, mainC() 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
+   background: -webkit-linear-gradient(left, mainC() 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
+   background: linear-gradient(to right, mainC() 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
 }
 
 .mainBackLightFade{
-  background: -moz-linear-gradient(left, $sec 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(left, $sec 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to right, $sec 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: -moz-linear-gradient(left, secC() 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(left, secC() 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to right, secC() 0%,rgba(0,0,0,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
 }
 
 .userInfo{
   box-shadow: -5px 2px 10px grey;
-  border-bottom: 10px solid $main;
+  border-bottom: 10px solid mainC();
 }
 
 .stepBox{
   position: relative;
   width: 100%;
   height: 100px;
-  background: $main;
+  background: mainC();
 }
 
 .propbox{
   border: 2px lightgrey solid;
-  border-left: 6px $main solid !important;
+  border-left: 6px mainC() solid !important;
   transition: all .5s;
   border-radius: 5px;
   /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#ededed+0,f6f6f6+53,ffffff+100 */
@@ -397,7 +395,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr=$main, endColo
   top: 0;
   left: 0;
   opacity: 1;
-  background: $sec;
+  background: secC();
   filter: progid:DXImageTransform.Microsoft.gradient(
       startColorstr="#e6000000",
       endColorstr="#00000000",
@@ -488,7 +486,7 @@ ul.tree li {
  line-height: 20px;
  color: #369;
  font-weight: bold;
- border-left:1px solid $sec;
+ border-left:1px solid secC();
 
 }
 ul.tree li:last-child {
@@ -500,17 +498,17 @@ ul.tree li:before {
   height:1em;
   width:12px;
   color:white;
-  border-bottom:1px solid $sec;
+  border-bottom:1px solid secC();
   content:"";
   display:inline-block;
   left:-7px;
 }
 ul.tree li:last-child:before {
-  border-left:1px solid $sec;
+  border-left:1px solid secC();
 }
 
 .smallButton:hover{
- background: $sec;
+ background: secC();
 }
 
 .goLink:hover{
@@ -519,7 +517,7 @@ ul.tree li:last-child:before {
 
 .goLink:hover::after{
  content: ' >';
- color: $sec;
+ color: secC();
 }
 
 .navigation{
@@ -537,11 +535,11 @@ ul.tree li:last-child:before {
 }
 
 .navigation li:hover a{
-  color: $sec;
+  color: secC();
 }
 
 #navPhotoLink{
-  background: $sec;
+  background: secC();
   color: var(--light);
   border-radius: 50px;
   text-align: center;
@@ -550,7 +548,7 @@ ul.tree li:last-child:before {
 
 .p-r{
   position: relative;
-  border-left: 5px solid $sec;
+  border-left: 5px solid secC();
 }
 
 .p-a{
@@ -590,7 +588,7 @@ ul.tree li:last-child:before {
 .pillType span:last-child{
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
-  color: $sec;
+  color: secC();
   background: #d7d7d7;
   padding: 2px 4px;
   margin-left: -5px;

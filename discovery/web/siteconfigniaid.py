@@ -7,7 +7,7 @@
 # *****************************************************************************
 
 # name also used on metadata
-SITE_NAME = "NIAID Discovery Engine"
+SITE_NAME = "NIAID Data Portal"
 SITE_DESC = 'A <a class="mainTextLight bold" data-tippy="Learn More About CD2H" data-tippy-theme="light" href="https://ctsa.ncats.nih.gov/cd2h/" target="_blank">CD2H</a> project to prompt <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="mainTextLight bold" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR data-sharing</a> best practices<br /> &amp; maximize the research impact of CTSA hubs'
 
 CONTACT_REPO = "https://github.com/data2health/rdp-portal"
@@ -26,8 +26,9 @@ METADATA_MAIN_COLOR = "#113B56"
 # DATA DISCOVERY ENGINE - COLORS (REQ)
 # *****************************************************************************
 
-MAIN_COLOR = "#113B56"
-SEC_COLOR = "#306094"
+MAIN_COLOR = "#9f3660"
+SEC_COLOR = "#3b86b5"
+DARK_MODE = False
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - IMAGES (REQ)
