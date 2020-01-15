@@ -57,4 +57,24 @@
       {% block extra_scripts %}
       {% endblock %}
   </body>
+  <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+  <script>
+  var app = new Vue({
+      el: '#bodymain',
+      mounted:function(){
+        tippy( '#ontology', {
+            target:'.checkinfo',
+            content: 'Loading...',
+            maxWidth:'200px',
+            placement:'left',
+            animation: 'fade',
+            theme:'light',
+            onShow(instance) {
+              let info = instance.reference.dataset.tippyInfo;
+              instance.setContent("<div class='text-muted m-0'>"+info+"</div>")
+            }
+          });
+      }
+    })
+  </script>
 </html>
