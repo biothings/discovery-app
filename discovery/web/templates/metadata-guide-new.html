@@ -1302,12 +1302,19 @@
                     tippy('#cb'+i,{
                       content:result.value.response.docs[i]
                     });
+
                     html += `<div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="`+result.value.response.docs[i]['iri']+`" id="cb`+i+`">
                                 <label class="form-check-label" for="cb`+i+`">
                                     `+result.value.response.docs[i]['label']+`
                                     <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
                                 </label>
+                            </div>`
+                  }
+                  if (propInfo && !propInfo.strict) {
+                    html += `<div class="alert alert-info mt-1">
+                                <h6>Didn't find what you are looking for? Enter value here:</h6>
+                                <input class="form-control" type="text" id="qTerm">
                             </div>`
                   }
                   html += "</div>";
@@ -1328,6 +1335,10 @@
                           if (x && x.checked) {
                             checked.push(x.value)
                           }
+                        }
+                        let y = document.getElementById("qTerm")
+                        if (y.value) {
+                          checked.push(y.value)
                         }
                         return checked
                     }
