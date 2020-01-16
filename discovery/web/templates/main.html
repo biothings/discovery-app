@@ -49,32 +49,73 @@
     {% block extra_head %}
     {% endblock %}
   </head>
-  <body class="bg-light">
+  <body class="bg-light" id="bodymain">
       {% block content %}
       {% endblock %}
       <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+      <script>
+      // sweetalert2 modal tippy setup
+      // must be at top most location to access modal DOM location
+      tippy( '#bodymain', {
+          target:'.modaltip',
+          content: 'Loading...',
+          placement:'right',
+          animation: 'fade',
+          interactive:true,
+          theme:'light',
+          onShow(instance) {
+
+            let info = JSON.parse(instance.reference.dataset.tippyInfo);
+
+            if (info) {
+              let html = `<table class='table mb-0'>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <h6><b>`+info.label+"</b><span class='text-info'> ("+info.short_form+")</span>"+`</h6>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <div class="pillType d-inline">
+                                  <span class='mainBackDark' style='font-size:1em;'> Ontology</span>
+                                  <span style='font-size:1em;'>
+                                    <a href="`+info.iri+`" target="_blank">`+info.ontology_prefix+`</a>
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <div class="pillType d-inline">
+                                  <span class='mainBackLight' style='font-size:1em;'> ID</span>
+                                  <span style='font-size:1em;'>
+                                    <a href="`+info.id+`" target="_blank">`+info.obo_id+`</a>
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          `;
+              if (info && info.description) {
+                let str = info.description[0]
+                if (info.description[0].length >200 ) {
+                  str = info.description[0].substring(0,200)
+                }
+                html+=`<tr><td><p>
+                `+str+`...`+`
+                </p></td></tr>`
+              }
+              html += "</tbody></table>";
+              instance.setContent(html)
+            }else {
+              instance.setContent("NOT AVAILABLE")
+            }
+          }
+        });
+      </script>
       {% block extra_scripts %}
       {% endblock %}
   </body>
-  <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
-  <script>
-  var app = new Vue({
-      el: '#bodymain',
-      mounted:function(){
-        tippy( '#ontology', {
-            target:'.checkinfo',
-            content: 'Loading...',
-            maxWidth:'200px',
-            placement:'left',
-            animation: 'fade',
-            theme:'light',
-            onShow(instance) {
-              let info = instance.reference.dataset.tippyInfo;
-              instance.setContent("<div class='text-muted m-0'>"+info+"</div>")
-            }
-          });
-      }
-    })
-  </script>
 </html>

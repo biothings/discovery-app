@@ -798,13 +798,7 @@ var app = new Vue({
               position: 'center',
               confirmButtonColor:"{{color_main}}",
               cancelButtonColor:"{{color_sec}}",
-              html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox">
-                      <small>
-                        <pre>
-                          `+JSON.stringify(store.getters.getFinalSchema,null,2)+`
-                        </pre>
-                      </small>
-                    </div>`
+              html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><small><pre>`+JSON.stringify(store.getters.getFinalSchema,null,2)+`</pre></small></div>`
             });
           }
 
