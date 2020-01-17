@@ -1273,7 +1273,7 @@
                   let ontologies = propInfo['oneOf'][i]['vocabulary']['ontology'].toString()
                   let children = propInfo['oneOf'][i]['vocabulary']['children_of'].toString()
 
-                  let url = `http://www.ebi.ac.uk/ols/api/search?q=${query}`
+                  let url = `https://www.ebi.ac.uk/ols/api/search?q=${query}`
                   +"&ontology="+ontologies
                   +"&childrenOf="+children
                   +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
@@ -1622,7 +1622,7 @@
             //   throw err;
             // });
 
-            let url = "http://www.ebi.ac.uk/ols/api/search?q="+query
+            let url = "https://www.ebi.ac.uk/ols/api/search?q="+query
             +"&ontology="+ontologies
             +"&childrenOf="+children
             +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
