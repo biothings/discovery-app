@@ -1239,7 +1239,6 @@
         var self=this;
         let progressSteps =[]
         let questions =[]
-        let vocabQ = ''
 
         let props = {}
 
@@ -1273,7 +1272,6 @@
 
                   let ontologies = propInfo['oneOf'][i]['vocabulary']['ontology'].toString()
                   let children = propInfo['oneOf'][i]['vocabulary']['children_of'].toString()
-                  vocabQ = query
 
                   let url = `https://www.ebi.ac.uk/ols/api/search?q=${query}`
                   +"&ontology="+ontologies
@@ -1316,7 +1314,7 @@
                   if (propInfo && !propInfo.strict) {
                     html += `<div class="alert alert-info mt-1">
                                 <h6>Didn't find what you are looking for? Enter value here:</h6>
-                                <input class="form-control" type="text" id="qTerm" value=${vocabQ}>
+                                <input class="form-control" type="text" id="qTerm">
                             </div>`
                   }
                   html += "</div>";
