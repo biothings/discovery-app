@@ -214,6 +214,8 @@ class DatasetMetadata(Document):
 
     @classmethod
     def from_json(cls, doc, user, private=False):
+        for field in ('identifier', 'name', 'description'):
+            assert field in doc, f"missing field '{field}'"
         meta = cls()
         meta.identifier = doc['identifier']
         meta.name = doc['name']
