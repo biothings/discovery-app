@@ -2697,114 +2697,275 @@
         },
         loadData(){
           var self = this;
-
           Swal.fire({
-            title: 'Import Dataset Metadata',
-            text: "Import Metadata From:",
+            title: 'Import from',
+            input: 'select',
+            inputOptions: {
+              'giturl': 'Hosted metadata on GitHub (raw url)',
+              'registered': 'Metadata registered here',
+              'text':'Not Hosted JSON metadata'
+            },
+            inputPlaceholder: 'Select method',
             showCancelButton: true,
-            animation:false,
-            customClass:'scale-in-center',
-            confirmButtonColor:"{{color_main}}",
-            cancelButtonColor:"{{color_sec}}",
-            confirmButtonText: 'Raw GitHub URL',
-            cancelButtonText: 'A Registered Dataset Metadata',
+            confirmButtonText: 'Next',
+            showLoaderOnConfirm: true,
+            preConfirm: (method) => {
+              return method
+            },
+            allowOutsideClick: () => !Swal.isLoading()
           }).then((result) => {
             if (result.value) {
-              // URL
-              Swal.fire({
-                title: 'Enter the URL here',
-                input: 'text',
-                inputAttributes: {
-                  autocapitalize: 'off'
-                },
-                showCancelButton: true,
-                confirmButtonText: 'Go',
-                allowOutsideClick: () => !Swal.isLoading()
-              }).then((result) => {
-                if (result.value) {
-                  let url = result.value
-                  axios.get(url).then(res=>{
-                    let selected = res.data;
-                    for(key in selected){
-                      if (!['@context','@type','_id'].includes(key)) {
-                        var payload = {};
-                        if (typeof selected[key] === 'object') {
-                          let value = [selected[key]]
-                          payload["completed"] = {'name':key,'value':value};
-                          store.commit('markCompleted',payload);
-                        }else{
-                          let value = selected[key]
-                          payload["completed"] = {'name':key,'value':value};
-                          store.commit('markCompleted',payload);
-                        }
-
-                      }
-                    }
-                  }).catch(err=>{
-                    Swal.fire({
-                      type: 'error',
-                      title: 'Oops...',
-                      text: 'Something went wrong!',
-                    })
-                    throw err;
-                  })
-                }
-              })
-            }else{
-              self.loading = true;
-              axios.get('/api/dataset?&user='+self.userInfo.login).then(publicres=>{
-                // console.log("PUBLIC",res.data)
-                let list = publicres.data.hits;
-                self.loading = false;
-                self.loading = true;
-                axios.get('/api/dataset?private=true&user='+self.userInfo.login).then(privateres=>{
-                  self.loading = false;
-                  list =list.concat(privateres.data.hits)
-                  let options = {};
-                  for (var i = 0; i < list.length; i++) {
-                    Vue.set(options,list[i]['name'],list[i]['name'])
-                  }
+              switch (result.value) {
+                case 'giturl':
+                  // URL
                   Swal.fire({
-                    title: 'Select Metadata To Import',
-                    input: 'select',
-                    inputOptions: options,
-                    animation:false,
-                    customClass:'scale-in-center',
-                    inputPlaceholder: 'Select an item',
+                    title: 'Enter the URL here',
+                    input: 'text',
+                    inputAttributes: {
+                      autocapitalize: 'off'
+                    },
                     showCancelButton: true,
+                    confirmButtonText: 'Go',
+                    allowOutsideClick: () => !Swal.isLoading()
                   }).then((result) => {
                     if (result.value) {
-                      for (var i = 0; i < list.length; i++) {
-                        if (result.value === list[i]['name']) {
-                          let selected = list[i]
-                          for(key in selected){
-                            if (!['@context','@type','_id'].includes(key)) {
-                              var payload = {};
-                              if (typeof selected[key] === 'object') {
-                                let value = [selected[key]]
-                                payload["completed"] = {'name':key,'value':value};
-                                store.commit('markCompleted',payload);
-                              }else{
-                                let value = selected[key]
-                                payload["completed"] = {'name':key,'value':value};
-                                store.commit('markCompleted',payload);
-                              }
+                      let url = result.value
+                      axios.get(url).then(res=>{
+                        let selected = res.data;
+                        for(key in selected){
+                          if (!['@context','@type','_id'].includes(key)) {
+                            var payload = {};
+                            if (typeof selected[key] === 'object') {
+                              let value = [selected[key]]
+                              payload["completed"] = {'name':key,'value':value};
+                              store.commit('markCompleted',payload);
+                            }else{
+                              let value = selected[key]
+                              payload["completed"] = {'name':key,'value':value};
+                              store.commit('markCompleted',payload);
+                            }
 
+                          }
+                        }
+                      }).catch(err=>{
+                        Swal.fire({
+                          type: 'error',
+                          title: 'Oops...',
+                          text: 'Something went wrong!',
+                        })
+                        throw err;
+                      })
+                    }
+                  });
+                  break;
+                case 'registered':
+                  axios.get('/api/dataset?&user='+self.userInfo.login).then(publicres=>{
+                    // console.log("PUBLIC",res.data)
+                    let list = publicres.data.hits;
+                    self.loading = false;
+                    self.loading = true;
+                    axios.get('/api/dataset?private=true&user='+self.userInfo.login).then(privateres=>{
+                      self.loading = false;
+                      list =list.concat(privateres.data.hits)
+                      let options = {};
+                      for (var i = 0; i < list.length; i++) {
+                        Vue.set(options,list[i]['name'],list[i]['name'])
+                      }
+                      Swal.fire({
+                        title: 'Select Metadata To Import',
+                        input: 'select',
+                        inputOptions: options,
+                        animation:false,
+                        footer:`<p>
+                        WARNING: <span class='text-danger'>You are loading already registered metadata.</span> If -identifier- field <b>IS NOT</b> changed, changes will override current saved data. If -identifier- field <b>IS</b> changed this this create a new entry.
+                        </p>`,
+                        customClass:'scale-in-center',
+                        inputPlaceholder: 'Select an item',
+                        showCancelButton: true,
+                      }).then((result) => {
+                        if (result.value) {
+                          for (var i = 0; i < list.length; i++) {
+                            if (result.value === list[i]['name']) {
+                              let selected = list[i]
+                              for(key in selected){
+                                if (!['@context','@type','_id'].includes(key)) {
+                                  var payload = {};
+                                  if (typeof selected[key] === 'object') {
+                                    let value = [selected[key]]
+                                    payload["completed"] = {'name':key,'value':value};
+                                    store.commit('markCompleted',payload);
+                                  }else{
+                                    let value = selected[key]
+                                    payload["completed"] = {'name':key,'value':value};
+                                    store.commit('markCompleted',payload);
+                                  }
+
+                                }
+                              }
                             }
                           }
                         }
+                      })
+                    }).catch(err=>{
+                      throw err;
+                    });
+                  }).catch(err=>{
+                    throw err;
+                  });
+
+                  break;
+                case 'text':
+                  Swal.fire({
+                    title: 'Enter JSON here:',
+                    input: 'textarea',
+                    inputAttributes: {
+                      autocapitalize: 'off'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Go',
+                    allowOutsideClick: () => !Swal.isLoading()
+                  }).then((result) => {
+                    if (result.value) {
+
+                      let selected = JSON.parse(result.value)
+
+                      for(key in selected){
+                        if (!['@context','@type','_id'].includes(key)) {
+                          var payload = {};
+                          if (typeof selected[key] === 'object') {
+                            let value = [selected[key]]
+                            payload["completed"] = {'name':key,'value':value};
+                            store.commit('markCompleted',payload);
+                          }else{
+                            let value = selected[key]
+                            payload["completed"] = {'name':key,'value':value};
+                            store.commit('markCompleted',payload);
+                          }
+
+                        }
                       }
+
                     }
-                  })
-                }).catch(err=>{
-                  throw err;
-                });
-              }).catch(err=>{
-                throw err;
-              });
+                  });
+
+                  break;
+                default:
+              }
             }
           })
+
+
         },
+        // loadData(){
+        //   var self = this;
+        //
+        //   Swal.fire({
+        //     title: 'Import Dataset Metadata',
+        //     text: "Import Metadata From:",
+        //     showCancelButton: true,
+        //     animation:false,
+        //     customClass:'scale-in-center',
+        //     confirmButtonColor:"{{color_main}}",
+        //     cancelButtonColor:"{{color_sec}}",
+        //     confirmButtonText: 'Raw GitHub URL',
+        //     cancelButtonText: 'A Registered Dataset Metadata',
+        //   }).then((result) => {
+        //     if (result.value) {
+        //       // URL
+        //       Swal.fire({
+        //         title: 'Enter the URL here',
+        //         input: 'text',
+        //         inputAttributes: {
+        //           autocapitalize: 'off'
+        //         },
+        //         showCancelButton: true,
+        //         confirmButtonText: 'Go',
+        //         allowOutsideClick: () => !Swal.isLoading()
+        //       }).then((result) => {
+        //         if (result.value) {
+        //           let url = result.value
+        //           axios.get(url).then(res=>{
+        //             let selected = res.data;
+        //             for(key in selected){
+        //               if (!['@context','@type','_id'].includes(key)) {
+        //                 var payload = {};
+        //                 if (typeof selected[key] === 'object') {
+        //                   let value = [selected[key]]
+        //                   payload["completed"] = {'name':key,'value':value};
+        //                   store.commit('markCompleted',payload);
+        //                 }else{
+        //                   let value = selected[key]
+        //                   payload["completed"] = {'name':key,'value':value};
+        //                   store.commit('markCompleted',payload);
+        //                 }
+        //
+        //               }
+        //             }
+        //           }).catch(err=>{
+        //             Swal.fire({
+        //               type: 'error',
+        //               title: 'Oops...',
+        //               text: 'Something went wrong!',
+        //             })
+        //             throw err;
+        //           })
+        //         }
+        //       })
+        //     }else{
+        //       self.loading = true;
+        //       axios.get('/api/dataset?&user='+self.userInfo.login).then(publicres=>{
+        //         // console.log("PUBLIC",res.data)
+        //         let list = publicres.data.hits;
+        //         self.loading = false;
+        //         self.loading = true;
+        //         axios.get('/api/dataset?private=true&user='+self.userInfo.login).then(privateres=>{
+        //           self.loading = false;
+        //           list =list.concat(privateres.data.hits)
+        //           let options = {};
+        //           for (var i = 0; i < list.length; i++) {
+        //             Vue.set(options,list[i]['name'],list[i]['name'])
+        //           }
+        //           Swal.fire({
+        //             title: 'Select Metadata To Import',
+        //             input: 'select',
+        //             inputOptions: options,
+        //             animation:false,
+        //             customClass:'scale-in-center',
+        //             inputPlaceholder: 'Select an item',
+        //             showCancelButton: true,
+        //           }).then((result) => {
+        //             if (result.value) {
+        //               for (var i = 0; i < list.length; i++) {
+        //                 if (result.value === list[i]['name']) {
+        //                   let selected = list[i]
+        //                   for(key in selected){
+        //                     if (!['@context','@type','_id'].includes(key)) {
+        //                       var payload = {};
+        //                       if (typeof selected[key] === 'object') {
+        //                         let value = [selected[key]]
+        //                         payload["completed"] = {'name':key,'value':value};
+        //                         store.commit('markCompleted',payload);
+        //                       }else{
+        //                         let value = selected[key]
+        //                         payload["completed"] = {'name':key,'value':value};
+        //                         store.commit('markCompleted',payload);
+        //                       }
+        //
+        //                     }
+        //                   }
+        //                 }
+        //               }
+        //             }
+        //           })
+        //         }).catch(err=>{
+        //           throw err;
+        //         });
+        //       }).catch(err=>{
+        //         throw err;
+        //       });
+        //     }
+        //   })
+        // },
         checkAutoLoad(){
           var self = this;
           // console.log('checkAutoLoad')
