@@ -5,7 +5,10 @@
   <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="#">
       {% if site_name == "CTSA Data Discovery Engine" %}
-        <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="">
+        <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="DDE">
+      {% endif %}
+      {% if site_name == "NIAID Data Portal" %}
+        <img src="/static/img/niaid/icon.svg" width="50" height="50" alt="NIAID Data Portal">
       {% endif %}
     </a>
     <a id="logo" class="navbar-brand mainFont caps logoText" href="/">{{site_name}}</a>
