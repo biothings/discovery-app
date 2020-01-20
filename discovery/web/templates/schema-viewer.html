@@ -176,7 +176,7 @@
         <i class="fas fa-chevron-left fa-stack-1x text-light"></i>
       </span>
       <div>
-        <div>
+        <div v-show='!validationView'>
           <input class="form-control text-light tip d-inline-block" @change="showAll()" :data-tippy-info="'Show/Hide All Properties On Page'"  type="checkbox" v-model="checkbox"/>
         </div>
       </div>
