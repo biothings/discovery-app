@@ -1505,7 +1505,7 @@
               }
             }
 
-            if (propInfo && propInfo['oneOf'][0].hasOwnProperty('vocabulary')){
+            if ((propInfo && propInfo.hasOwnProperty('oneOf')) && (propInfo['oneOf'][0].hasOwnProperty('vocabulary'))){
               //if its a vocab enum field do nothing. separate modal will launch
             }else {
               var payload = {};
@@ -1984,12 +1984,17 @@
                   </button>
                 </div>
                 <div class="col-sm-12 m-auto">
-                  <template v-for="(person,i) in userInput">
+                <!-- 🌈  input preview for object or array🌈 -->
+                  <template v-if="typeof userInput === 'object' || typeof userInput === 'array'  " v-for="(person,i) in userInput">
                     <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
                       <i class="fas fa-circle"></i>
                       <span v-text="name+' '+(i+1)"></span>
                       <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
                     </span>
+                  </template>
+                <!-- 🌈  input preview for string🌈 -->
+                  <template v-if="typeof userInput === 'string'">
+                    <span style="overflow:hidden; max-width:100%;" class="badge badge-success text-light" v-text="userInput"></span>
                   </template>
                 </div>
               </template>
@@ -2003,12 +2008,17 @@
                     </button>
                   </div>
                   <div class="col-sm-12 m-auto">
-                    <template v-for="(person,i) in userInput">
+                  <!-- 🌈  input preview for object or array🌈 -->
+                    <template v-if="typeof userInput === 'object' || typeof userInput === 'array'  " v-for="(person,i) in userInput">
                       <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
                         <i class="fas fa-circle"></i>
                         <span v-text="name+' '+(i+1)"></span>
                         <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
                       </span>
+                    </template>
+                  <!-- 🌈  input preview for string🌈 -->
+                    <template v-if="typeof userInput === 'string'">
+                      <span style="overflow:hidden; max-width:100%;" class="badge badge-success text-light" v-text="userInput"></span>
                     </template>
                   </div>
                 </template>
@@ -2698,12 +2708,12 @@
         loadData(){
           var self = this;
           Swal.fire({
-            title: 'Import from',
+            title: 'Import metadata from',
             input: 'select',
             inputOptions: {
               'giturl': 'Hosted metadata on GitHub (raw url)',
-              'registered': 'Metadata registered here',
-              'text':'Not Hosted JSON metadata'
+              'registered': 'Metadata by you registered here',
+              'text':'JSON metadata text'
             },
             inputPlaceholder: 'Select method',
             showCancelButton: true,
