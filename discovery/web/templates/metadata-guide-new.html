@@ -1376,21 +1376,23 @@
                 input: 'number',
                 text: props[key].description,
                 inputValidator: (value) => {
-                  if (!value) {
-                    return 'You should write something meanignful'
-                  }else{
-                    return new Promise((resolve) => {
-                      function validInteger(str) {
-                        var pattern = new RegExp('^[0-9]*$');
-                        return !!pattern.test(str);
-                      }
-                      if (validInteger(value)) {
-                        resolve()
-                      } else {
-                        resolve('Input must be an integer')
-                      }
-                    })
-                  }
+                  return new Promise((resolve) => {
+                    if (!value) {
+                      return 'You should write something meanignful'
+                    }else{
+                      return new Promise((resolve) => {
+                        function validInteger(str) {
+                          var pattern = new RegExp('^[0-9]*$');
+                          return !!pattern.test(str);
+                        }
+                        if (validInteger(value)) {
+                          resolve()
+                        } else {
+                          resolve('Input must be an integer')
+                        }
+                      })
+                    }
+                  })
                 }
               });
               break;
@@ -1399,9 +1401,44 @@
                 title: key,
                 text: props[key].description,
                 inputValidator: (value) => {
-                  if (!value) {
-                    return 'Name is a required field'
-                  }
+                  return new Promise((resolve) => {
+
+                    if (propInfo && propInfo.hasOwnProperty('required')) {
+
+                      let currentField = document.getElementById("swal2-title").textContent;
+                      if (propInfo['required'].includes(currentField)) {
+                        // is required needs to be validated
+                        if (value) {
+                          resolve()
+                        } else {
+                          resolve(currentField+' is required')
+                        }
+                      }else {
+                        // not required user can skip
+                        resolve()
+                      }
+                    }
+                    if (propInfo && propInfo.hasOwnProperty('oneOf')) {
+                      for (var i = 0; i < propInfo['oneOf'].length; i++) {
+                        if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
+
+                          let currentField = document.getElementById("swal2-title").textContent;
+                          if (propInfo['oneOf'][i]['required'].includes(currentField)) {
+                            // is required needs to be validated
+                            if (value) {
+                              resolve()
+                            } else {
+                              resolve(currentField+' is required')
+                            }
+                          }else {
+                            // not required user can skip
+                            resolve()
+                          }
+                        }
+                      }
+                    }
+
+                  })
                 }
               });
               break;
@@ -1411,6 +1448,7 @@
                 text: props[key].description,
                 inputValidator: (value) => {
                   return new Promise((resolve) => {
+
                     function validURL(str) {
                       var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
                         '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
@@ -1420,11 +1458,51 @@
                         '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
                       return !!pattern.test(str);
                     }
-                    if (validURL(value)) {
-                      resolve()
-                    } else {
-                      resolve('Input must be a valid URL')
+
+                    if (propInfo && propInfo.hasOwnProperty('required')) {
+
+                      let currentField = document.getElementById("swal2-title").textContent;
+                      if (propInfo['required'].includes(currentField)) {
+                        // is required needs to be validated
+                        if (value) {
+                          if (validURL(value)) {
+                            resolve()
+                          } else {
+                            resolve('Input must be a valid URL')
+                          }
+                        }else{
+                          resolve(currentField+' is required')
+                        }
+                      }else {
+                        // not required user can skip
+                        resolve()
+                      }
                     }
+                    if (propInfo && propInfo.hasOwnProperty('oneOf')) {
+                      for (var i = 0; i < propInfo['oneOf'].length; i++) {
+                        if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
+
+                          let currentField = document.getElementById("swal2-title").textContent;
+                          if (propInfo['oneOf'][i]['required'].includes(currentField)) {
+                            // is required needs to be validated
+                            if (value) {
+                              if (validURL(value)) {
+                                resolve()
+                              } else {
+                                resolve('Input must be a valid URL')
+                              }
+                            }else{
+                              resolve(currentField+' is required')
+                            }
+                          }else {
+                            // not required user can skip
+                            resolve()
+                          }
+                        }
+                      }
+                    }
+
+
                   })
                 }
               })
@@ -1450,9 +1528,43 @@
               text: props[key].description,
               footer:`<small>If applicable: mutliple items must be separated by commmas</small>`,
               inputValidator: (value) => {
-                if (!value) {
-                  return 'You should write something meanignful'
-                }
+                return new Promise((resolve) => {
+
+                  if (propInfo && propInfo.hasOwnProperty('required')) {
+
+                    let currentField = document.getElementById("swal2-title").textContent;
+                    if (propInfo['required'].includes(currentField)) {
+                      // is required needs to be validated
+                      if (value) {
+                        resolve()
+                      } else {
+                        resolve(currentField+' is required')
+                      }
+                    }else {
+                      // not required user can skip
+                      resolve()
+                    }
+                  }
+                  if (propInfo && propInfo.hasOwnProperty('oneOf')) {
+                    for (var i = 0; i < propInfo['oneOf'].length; i++) {
+                      if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
+
+                        let currentField = document.getElementById("swal2-title").textContent;
+                        if (propInfo['oneOf'][i]['required'].includes(currentField)) {
+                          // is required needs to be validated
+                          if (value) {
+                            resolve()
+                          } else {
+                            resolve(currentField+' is required')
+                          }
+                        }else {
+                          // not required user can skip
+                          resolve()
+                        }
+                      }
+                    }
+                  }
+                })
               }
             });
           }
@@ -1491,16 +1603,19 @@
               default:
             }
             for (var i = 0; i < progressSteps.length; i++) {
-              if (result.value[i].includes(",")) {
-                let val = result.value[i].split(',');
-                Vue.set(obj,progressSteps[i],val)
-              }else{
-                if (props[progressSteps[i]].hasOwnProperty('type') && props[progressSteps[i]]['type']==='integer') {
-                  let val = parseInt(result.value[i]);
+              // check if value is empty if so skip
+              if (result && result.value[i]) {
+                if (result.value[i].includes(",")) {
+                  let val = result.value[i].split(',');
                   Vue.set(obj,progressSteps[i],val)
                 }else{
-                  let val = result.value[i];
-                  Vue.set(obj,progressSteps[i],val)
+                  if (props[progressSteps[i]].hasOwnProperty('type') && props[progressSteps[i]]['type']==='integer') {
+                    let val = parseInt(result.value[i]);
+                    Vue.set(obj,progressSteps[i],val)
+                  }else{
+                    let val = result.value[i];
+                    Vue.set(obj,progressSteps[i],val)
+                  }
                 }
               }
             }
