@@ -141,6 +141,7 @@ class MetadataHandler(APIBaseHandler):
         doc = meta.to_dict()["_raw"]
 
         if _id.endswith('.js'):
+
             js = json.dumps(doc).replace("'", r"\'")
             self.write(
                 'var script = document.createElement("script");'
@@ -149,6 +150,24 @@ class MetadataHandler(APIBaseHandler):
                 'script.appendChild(content);'
                 'document.head.appendChild(script);')
         else:
+
+            # experiment adding proxy site info so when crawled by google bot,
+            # it wouldn't appear that our link claims to be the original site
+            # the link generated might not be as expected in docker containers
+
+            if "includedInDataCatalog" in doc:
+                if isinstance(doc["includedInDataCatalog"], dict):
+                    dataset = doc["includedInDataCatalog"].get("name", "Dataset")
+                    url_prefix = self.request.protocol + "://" + self.request.host + "/dataset/"
+                    doc["includedInDataCatalog"] = [
+                        {
+                            "@type": "DataCatalog",
+                            "name": dataset + " from Data Discovery Engine",
+                            "url": url_prefix + _id
+                        },
+                        doc["includedInDataCatalog"]
+                    ]
+
             self.write(doc)
 
         return
