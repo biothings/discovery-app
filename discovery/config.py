@@ -23,17 +23,12 @@ from discovery.web.handlers import APP_LIST as WEB_ENDPOINTS
 # Elasticsearch
 # *****************************************************************************
 ES_INDEX = 'discover_class'
-ES_DOC_TYPE = '_doc'
-ES_HOST = ['localhost', 'es']
+ES_DOC_TYPE = 'schema'
 ES_CLIENT_TIMEOUT = 10
 
 # *****************************************************************************
 # Tornado URL Patterns
 # *****************************************************************************
-UNINITIALIZED_APP_LIST = [
-    (r"/sitemap.xml", RedirectHandler, {"url": "/static/sitemap.xml"}),
-    (r"/dataset/(geo/.+)", RedirectHandler, {"url": "http://metadataplus.biothings.io/{0}"}),
-]
 API_ENDPOINTS = [
     (r"/api/query/?", QueryHandler),
     (r"/api/registry/([^/]+)/([^/]+)/?", RegistryHandler),
