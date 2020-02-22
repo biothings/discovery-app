@@ -1,4 +1,4 @@
-git+git://github.com/biothings/biothings.api.git@28571ae3c4fed75edef684786898af21293d09ea#egg=biothings[web_extra]
+git+git://github.com/biothings/biothings.api.git@5d1801e2aee34c69c083baa033fa878026b1b8c7#egg=biothings[web_extra]
 git+git://github.com/biothings/biothings_schema.py.git@6ceff7d3063996134d59a778702f68b17e8bac9e#egg=biothings_schema
 elasticsearch>=7, <8
 elasticsearch-dsl>=7, <8
