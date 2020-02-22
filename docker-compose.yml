@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - ES_INDEX=es
     depends_on:
       - es
     ports:
