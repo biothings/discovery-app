@@ -6,16 +6,17 @@ import json
 import logging
 import os
 
+import sass
+from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 from jinja2 import Environment, FileSystemLoader
 from tornado.httputil import url_concat
 from torngithub import GithubMixin, json_decode, json_encode
-import sass
-
-from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
-from discovery.api.es.doc import Schema
 
 import discovery.web.siteconfig as siteconfig
 import discovery.web.siteconfigniaid as siteconfigniaid
+from discovery.api.es.doc import Schema
+
+from .saml import SAML_HANDLERS
 
 GITHUB_CALLBACK_PATH = "/oauth"
 GITHUB_SCOPE = ""
@@ -277,12 +278,14 @@ APP_LIST = [
     (r"/guide/?", GuideHandler),
     (r"/registry/?", RegistryHandler),
     (r"/editor/?", EditorHandler),
-    (r"/user/?", UserInfoHandler),
     (r"/login/?", LoginHandler),
+    # Git Auth
+    (r"/user/?", UserInfoHandler),
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),
     (r"/logout/?", LogoutHandler),
+    #
     (r"/dataset/?", DatasetRegistryHandler),
     (r"/dataset/([^/]+)/?", DatasetHandler),
     (r"/view/([^/]+)/([^/]*)/?", VisualizerHandler),
     (r".*", PageNotFoundHandler)
-]
+] # + SAML_HANDLERS # TODO

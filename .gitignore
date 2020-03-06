@@ -8,6 +8,9 @@ __pycache__/
 *.so
 
 # Credentials
+discovery/web/saml/certs/*.crt
+discovery/web/saml/certs/*.key
+discovery/web/saml/*.json
 discovery/config_key.py
 config_key.py
 
