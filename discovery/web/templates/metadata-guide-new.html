@@ -160,7 +160,7 @@
     mutations: {
       saveSchema(state,payload){
         state.schema = payload['schema'];
-        console.log('schema saved',state.schema)
+        // console.log('schema saved',state.schema)
         state.output['@type'] = state.schema.label || state.schema.name
         state.output['@context'] = 'http://discovery.biothings.io/'
 
@@ -223,7 +223,7 @@
       },
       saveSettings(state,payload){
         state.settings = payload['settings']
-        console.log(state.settings)
+        // console.log(state.settings)
       },
       highlight(state,payload){
         let cat = payload['category'];
@@ -262,7 +262,7 @@
               Vue.set(obj,key,selection.value)
               let typeProp= key+'Type';
               Vue.set(obj,typeProp,'')
-              console.log(obj)
+              // console.log(obj)
               Vue.set(state.schema.validation.properties[key+"s"],'value',[obj]);
             }
             Vue.set(state.schema.validation.properties[selection.name],'value',selection.value);
@@ -364,7 +364,7 @@
             }
           }else if (prop.slice(0, -1)  in state.schema.validation.properties) {
             //plural form exists
-            console.log(prop.slice(0, -1))
+            // console.log(prop.slice(0, -1))
 
             let newProp = catprops[prop]
             Vue.set(newProp,'categories',[])
@@ -386,37 +386,8 @@
             Vue.set(state.schema.validation.properties,prop,newProp)
           }
         }
-
         // console.log("ALL DONE", state.schema.validation.properties)
-
       },
-      // removeCategory(state,payload){
-      //   let origin = payload['origin'];
-      //   let catpropsrequired = payload['catpropsrequired'];
-      //
-      //   // console.log("remove",catpropsrequired)
-      //   // console.log("remove",origin)
-      //   $.notify(origin+" removed",{ globalPosition: 'right',className:'info', showDuration: 40, });
-      //
-      //   for (prop in state.schema.validation.properties) {
-      //     // if origin matches remove prop
-      //     if (state.schema.validation.properties[prop].hasOwnProperty('origin') && state.schema.validation.properties[prop]['origin'] === origin ) {
-      //       Vue.delete(state.schema.validation.properties,prop)
-      //     }else {
-      //       // if not check categories and remove mention of origin
-      //       if (state.schema.validation.properties[prop].hasOwnProperty('categories')) {
-      //         for (var i = 0; i < state.schema.validation.properties[prop]['categories'].length; i++) {
-      //           if (state.schema.validation.properties[prop]['categories'][i]['category'] === origin) {
-      //             state.schema.validation.properties[prop]['categories'].splice(i,1)
-      //           }
-      //         }
-      //       }
-      //     }
-      //   }
-      //
-      //   // console.log("ALL DONE", state.schema.validation.properties)
-      //
-      // },
       removeCategory(state,payload){
         let origin = payload['origin'];
         let catpropsrequired = [];
@@ -446,9 +417,7 @@
             }
           }
         }
-
         // console.log("ALL DONE", state.schema.validation.properties)
-
       },
       setStartingPoint(state,payload){
         state.startingPoint= payload['startingPoint'];
@@ -1303,10 +1272,15 @@
                       content:result.value.response.docs[i]
                     });
 
+                    let label = result.value.response.docs[i]['label']
+                    if (label && label.length > 37) {
+                      label = label.substring(0,37)+"..."
+                    }
+
                     html += `<div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="`+result.value.response.docs[i]['iri']+`" id="cb`+i+`">
-                                <label class="form-check-label" for="cb`+i+`">
-                                    `+result.value.response.docs[i]['label']+`
+                                <input class="form-check-input mr-2" type="checkbox" value="`+result.value.response.docs[i]['iri']+`" id="cb`+i+`">
+                                <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
+                                    `+label+`
                                     <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
                                 </label>
                             </div>`
@@ -2273,7 +2247,7 @@
 
 
           <div class="d-flex justify-content-around align-items-center">
-            <h1 class="d-inline mr-5 bold" v-text="type" :class="type === 'REQUIRED' ?'text-danger':'text-info'"></h1>
+            <h1 class="d-inline mr-5" v-text="type" :class="type === 'REQUIRED' ?'text-danger':'text-info'"></h1>
             <div>
               <small class="text-muted">CHANGE VIEW </small> <button class="btn btn-sm themeButton text-light" v-text="!allMode ? 'ALL' : '1 BY 1'" @click="allMode = !allMode"></button>
             </div>
@@ -2352,8 +2326,8 @@
             <catcontainer class="fade-in" :cat="cat" :subcats="subcats" :key="cat+subcats"></catcontainer>
           </template>
         </div>
-        <div class="col-sm-12 text-right mt-2 rounded p-1" :class="{'bg-success':isComplete, 'bg-warning': !isComplete}">
-          <div class="bg-light p-2 rounded">
+        <div class="col-sm-12 text-right mt-2 rounded p-1" :class="{'alert-success':isComplete, 'alert-warning': !isComplete}">
+          <div class="bg-none p-2 rounded">
             <template v-if="type === 'REQUIRED' && isComplete ">
               <small class="text-success bold">Ready to proceed!</small>
               <button class="btn themeButton text-light" @click="nextStep()" :class="{'heartbeat':isComplete}" :disabled="!isComplete">NEXT</button>
@@ -2544,7 +2518,7 @@
                 text: err.response.data.reason
               });
             } catch (e) {
-              console.log(e)
+              // console.log(e)
             } finally {
 
             }
@@ -2978,119 +2952,7 @@
               }
             }
           })
-
-
         },
-        // loadData(){
-        //   var self = this;
-        //
-        //   Swal.fire({
-        //     title: 'Import Dataset Metadata',
-        //     text: "Import Metadata From:",
-        //     showCancelButton: true,
-        //     animation:false,
-        //     customClass:'scale-in-center',
-        //     confirmButtonColor:"{{color_main}}",
-        //     cancelButtonColor:"{{color_sec}}",
-        //     confirmButtonText: 'Raw GitHub URL',
-        //     cancelButtonText: 'A Registered Dataset Metadata',
-        //   }).then((result) => {
-        //     if (result.value) {
-        //       // URL
-        //       Swal.fire({
-        //         title: 'Enter the URL here',
-        //         input: 'text',
-        //         inputAttributes: {
-        //           autocapitalize: 'off'
-        //         },
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Go',
-        //         allowOutsideClick: () => !Swal.isLoading()
-        //       }).then((result) => {
-        //         if (result.value) {
-        //           let url = result.value
-        //           axios.get(url).then(res=>{
-        //             let selected = res.data;
-        //             for(key in selected){
-        //               if (!['@context','@type','_id'].includes(key)) {
-        //                 var payload = {};
-        //                 if (typeof selected[key] === 'object') {
-        //                   let value = [selected[key]]
-        //                   payload["completed"] = {'name':key,'value':value};
-        //                   store.commit('markCompleted',payload);
-        //                 }else{
-        //                   let value = selected[key]
-        //                   payload["completed"] = {'name':key,'value':value};
-        //                   store.commit('markCompleted',payload);
-        //                 }
-        //
-        //               }
-        //             }
-        //           }).catch(err=>{
-        //             Swal.fire({
-        //               type: 'error',
-        //               title: 'Oops...',
-        //               text: 'Something went wrong!',
-        //             })
-        //             throw err;
-        //           })
-        //         }
-        //       })
-        //     }else{
-        //       self.loading = true;
-        //       axios.get('/api/dataset?&user='+self.userInfo.login).then(publicres=>{
-        //         // console.log("PUBLIC",res.data)
-        //         let list = publicres.data.hits;
-        //         self.loading = false;
-        //         self.loading = true;
-        //         axios.get('/api/dataset?private=true&user='+self.userInfo.login).then(privateres=>{
-        //           self.loading = false;
-        //           list =list.concat(privateres.data.hits)
-        //           let options = {};
-        //           for (var i = 0; i < list.length; i++) {
-        //             Vue.set(options,list[i]['name'],list[i]['name'])
-        //           }
-        //           Swal.fire({
-        //             title: 'Select Metadata To Import',
-        //             input: 'select',
-        //             inputOptions: options,
-        //             animation:false,
-        //             customClass:'scale-in-center',
-        //             inputPlaceholder: 'Select an item',
-        //             showCancelButton: true,
-        //           }).then((result) => {
-        //             if (result.value) {
-        //               for (var i = 0; i < list.length; i++) {
-        //                 if (result.value === list[i]['name']) {
-        //                   let selected = list[i]
-        //                   for(key in selected){
-        //                     if (!['@context','@type','_id'].includes(key)) {
-        //                       var payload = {};
-        //                       if (typeof selected[key] === 'object') {
-        //                         let value = [selected[key]]
-        //                         payload["completed"] = {'name':key,'value':value};
-        //                         store.commit('markCompleted',payload);
-        //                       }else{
-        //                         let value = selected[key]
-        //                         payload["completed"] = {'name':key,'value':value};
-        //                         store.commit('markCompleted',payload);
-        //                       }
-        //
-        //                     }
-        //                   }
-        //                 }
-        //               }
-        //             }
-        //           })
-        //         }).catch(err=>{
-        //           throw err;
-        //         });
-        //       }).catch(err=>{
-        //         throw err;
-        //       });
-        //     }
-        //   })
-        // },
         checkAutoLoad(){
           var self = this;
           // console.log('checkAutoLoad')
@@ -3102,7 +2964,7 @@
               payload["step"] = 2;
               store.commit('changeStep',payload);
             }else{
-              console.log('3')
+              // console.log('3')
               payload["step"] = 3;
               store.commit('changeStep',payload);
               self.getFormValues();
@@ -3172,7 +3034,26 @@
             theme:'light',
             onShow(instance) {
               let info = instance.reference.dataset.tippyInfo;
-              instance.setContent("<div class='text-muted m-0 p-1'>"+info+"</div>")
+              if (info.includes('http')) {
+                info = info.replace(/['"]+/g, '')
+                // EBI API LOOKUP TIP DESCRIPTION
+                axios.get("https://www.ebi.ac.uk/ols/api/search?q="+encodeURI(info)+"&exact=1").then(res=>{
+                  if (res.data.response.hasOwnProperty('docs')&& res.data.response.docs.length >= 1) {
+                    for (var i = 0; i < res.data.response.docs.length; i++) {
+                      if (res.data.response.docs[i]['iri']===info) {
+                        instance.setContent("<div class='text-muted m-0 p-1'>"+res.data.response.docs[i]['label']+"</div>")
+                      }
+                    }
+                  }else{
+                    instance.setContent("<div class='text-muted m-0 p-1'>"+info+"</div>")
+                  }
+                }).catch(err=>{
+                  instance.setContent("<div class='text-muted m-0 p-1'>"+info+"</div>")
+                });
+              }else{
+                // REGULAR TIP DESCRIPTION
+                instance.setContent("<div class='text-muted m-0 p-1'>"+info+"</div>")
+              }
             }
           });
 			}

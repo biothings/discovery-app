@@ -7,8 +7,8 @@
 # *****************************************************************************
 
 # name also used on metadata
-SITE_NAME = "CTSA Data Discovery Engine"
-SITE_DESC = 'A <a class="mainTextLight bold" data-tippy="Learn More About CD2H" data-tippy-theme="light" href="https://ctsa.ncats.nih.gov/cd2h/" target="_blank">CD2H</a> project to prompt <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="mainTextLight bold" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR data-sharing</a> best practices<br /> &amp; maximize the research impact of CTSA hubs'
+SITE_NAME = "Data Discovery Engine"
+SITE_DESC = 'A <a class="mainTextLight bold" data-tippy="Learn More About CD2H" data-tippy-theme="light" href="https://ctsa.ncats.nih.gov/cd2h/" target="_blank">CD2H</a> project to promote <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="mainTextLight bold" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> data-sharing best practices<br /> &amp; maximize the research impact of CTSA hubs'
 
 CONTACT_REPO = "https://github.com/data2health/rdp-portal"
 CONTACT_EMAIL = "cd2h-metadata@googlegroups.com"
@@ -48,6 +48,18 @@ GUIDE_PRESETS = [
                     # 'name':'CTSADataset',
                     # 'description':'A schema describing Dataset from CTSA center'
                     # },
+                    {
+                    'namespace':'biomedical',
+                    'prefix':'bts',
+                    'name':'BioMedicalDataset',
+                    'description':'A schema describing a BioMedical Dataset'
+                    },
+                    {
+                    'namespace':'biomedical',
+                    'prefix':'bts',
+                    'name':'BioMedicalDataset',
+                    'description':'A schema describing a BioMedical Dataset'
+                    },
                     {
                     'namespace':'biomedical',
                     'prefix':'bts',

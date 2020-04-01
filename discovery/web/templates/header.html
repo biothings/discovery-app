@@ -3,22 +3,23 @@
 <header id="header">
   <title>{{site_name}}</title>
   <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
-    <a class="navbar-brand" href="#">
-      {% if site_name == "CTSA Data Discovery Engine" %}
-        <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="DDE">
-      {% endif %}
+    <a class="navbar-brand" href="/">
+
       {% if site_name == "NIAID Data Portal" %}
         <img src="/static/img/niaid/icon.svg" width="50" height="50" alt="NIAID Data Portal">
+      {% else%}
+        <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="DDE" class="d-none d-md-inline">
+        <i class="fas fa-home d-inline d-md-none mainTextDark"></i>
       {% endif %}
     </a>
-    <a id="logo" class="navbar-brand mainFont caps logoText" href="/">{{site_name}}</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <a id="logo" class="navbar-brand caps logoText d-none d-md-inline logoFont" href="/">{{site_name}}</a>
+    <button class="navbar-toggler alert-secondary" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
       <ul class="navbar-nav" id="user_link">
-        <li class="nav-item"><a class="nav-link h-link" href="/best-practices">Discovery Guide</a></li>
-        <li class="nav-item"><a class="nav-link h-link" href="/schema-playground">Schema Playground</a></li>
+        <li class="nav-item"><a class="nav-link h-link mainTextLight" href="/best-practices">Discovery Guide</a></li>
+        <li class="nav-item"><a class="nav-link h-link mainTextDark" href="/schema-playground">Schema Playground</a></li>
         <template v-if="userInfo && !userInfo.login">
           <li class='nav-item'><a class='nav-link' href='/oauth'>Login</a></li>
         </template>

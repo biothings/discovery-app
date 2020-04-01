@@ -5,7 +5,7 @@
 
 </style>
 
-<section id="editor" class="container" style="min-height: 70vh;padding-top:60px;">
+<section id="editor" class="container" style="min-height: 80vh;padding-top:60px;">
   <div>
     <div class="jumbotron bg-light text-center mt-5">
       <h1 class="logoText">Editor</h1>
@@ -113,6 +113,19 @@
       </template>
 
     </div>
+  </div>
+  <div class="alert alert-secondary" v-if="newClassAdded">
+    <p class="m-0">
+      Done editing? Easy! <i class="fas fa-arrow-right text-success"></i> Click <b>Download</b> <i class="fas fa-arrow-right text-success"></i> Host your schema file<span class="text-danger">*</span>. Eg. on <a target="_blank" rel="noreferrer" href="https://github.com/">GitHub</a>
+    </p>
+    <p class="m-0">
+      Done with that too? <i class="fas fa-arrow-right text-success"></i> Visualize, Register and share your schema here: <a href="/schema-playground">Schema Playground</a>
+    </p>
+  </div>
+  <div class="alert alert-secondary" v-if="newClassAdded">
+    <small class="m-0">
+      <span class="text-danger">*</span> Please note that embedded <a href="https://json-schema.org/">JSON Schema validation</a> is auto-generated from this editor. You may want to edit that manually to satisfy your individual needs.
+    </small>
   </div>
 </section>
 {% endblock %}
@@ -374,6 +387,29 @@ const store = new Vuex.Store({
     },
     getShowDesc:state=>{
       return state.showDescriptions
+    },
+    isDuplicateProp: (state) => (name) =>{
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i] && state.schema[i].hasOwnProperty('properties')) {
+          let props = state.schema[i]['properties']
+          for (var x = 0; x < props.length; x++) {
+            if (props[x]['label'] === name) {
+              return true
+            }
+          }
+        }
+      }
+      return false
+    },
+    isDuplicateClass: (state) => (name) =>{
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i] && state.schema[i].hasOwnProperty('label')) {
+          if (state.schema[i]['label'] === name) {
+            return true
+          }
+        }
+      }
+      return false
     }
   },
   actions:{
@@ -577,7 +613,12 @@ Vue.component('c-box', {
           inputValidator: (value) => {
             return new Promise((resolve) => {
               if (value.match(/^[a-z]+(?:[A-Z][a-z]+)*$/)) {
-                resolve()
+                // DUPLICATE CHECK
+                if (store.getters.isDuplicateProp(value)) {
+                  resolve('Property already exists in parent classes. All properties should be unique or more specific.')
+                }else {
+                  resolve()
+                }
               } else {
                 resolve('property names must be camelCased')
               }
@@ -708,7 +749,7 @@ var app = new Vue({
             $.notify(value+"  cannot contain invalid characters or spaces",{ globalPosition: 'right',className:'error', showDuration: 100, });
             self.availableNamespace= false;
           }else{
-            if (value.length) {
+            if (value.length>=3) {
               axios.head(`/api/registry/`+value).then(function (res) {
                 self.availableNamespace= false;
               }).catch(err=>{
@@ -750,7 +791,12 @@ var app = new Vue({
               inputValidator: (value) => {
                 return new Promise((resolve) => {
                   if (value.match(/^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/)) {
-                    resolve()
+                    // DUPLICATE CHECK
+                    if (store.getters.isDuplicateClass(value)) {
+                      resolve('Class already exists. Choose a diffent name')
+                    }else {
+                      resolve()
+                    }
                   } else {
                     resolve('class names must be PascalCased')
                   }

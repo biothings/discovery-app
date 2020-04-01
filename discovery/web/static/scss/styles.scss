@@ -5,6 +5,18 @@ $hierachy: rgb(62, 111, 168);
 $color: secc();
 
 //MIXINS
+#home{
+  font-size: 6vw;
+}
+
+@media only screen and (max-width: 700px) {
+  h4,h5,h6{
+    font-size: 1rem;
+  }
+  #home{
+    font-size: 18vw;
+  }
+}
 
 @mixin hor-gradient($from, $to) {
   background: $to; /* Old browsers */
@@ -51,6 +63,10 @@ $percent-color-actions:5%;
     }
     $percent-color-actions : $percent-color-actions + 4%;
   }
+}
+
+.logoFont{
+  font-family: 'Sulphur Point', sans-serif !important;
 }
 
 
@@ -117,6 +133,27 @@ p.text-muted, h1.text-muted,h2.text-muted,h3.text-muted,h4.text-muted, .navbar-l
   z-index: 1;
   top: 0;
   border-radius: 20px;
+}
+
+.shareBack{
+  background-image: url('/static/img/shareback.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.extendBack{
+  background-image: url('/static/img/extendback.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.discoveryIntroBack{
+  background-image: url('/static/img/discoverback.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* CLASSES */
@@ -1402,11 +1439,21 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c9de96', end
 }
 
 .navbar {
-  padding-top: 25px;
-  padding-bottom: 25px;
   background: #7e7e7e;
   color: white !important;
   transition: all 0.3s;
+}
+
+.navbar{
+  bottom:0;
+  top:auto;
+}
+
+@media only screen and (min-width: 992px) {
+  .navbar{
+    top:0;
+    bottom:auto;
+  }
 }
 
 .navbar.compressed {
@@ -1415,10 +1462,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c9de96', end
   background: white;
   color: red !important;
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
-}
-
-body{
-  padding-top: 40px;
 }
 
 .navbar-brand{
@@ -1568,6 +1611,7 @@ input[type="checkbox"]:checked:before {
   background: #f8f9fa;
   border: 2px solid #bdbdbd;
   border-radius: 20px;
+  overflow: hidden;
 }
 
 .msgOpen{
