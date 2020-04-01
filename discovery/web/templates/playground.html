@@ -4,7 +4,7 @@
 <style>
 
 </style>
-<div id="playground" class="container" style="min-height: 100vh;padding-top:60px;">
+<div id="playground" class="container" style="padding-top:60px;">
   <div class="bg-light text-center mt-5">
     <h1 class="logoText">SCHEMA PLAYGROUND</h1>
 		<p class="text-muted">
@@ -14,112 +14,178 @@
       <a href="/registry">Go To Registry <i class="fas fa-chevron-right"></i></a>
     </p>
   </div>
-  <div class="jumbotron bg-light row">
-    <div class="col-sm-12 p-5 message mb-4">
-      <h1 class="text-center text-muted">What is a schema?</h1>
-      <div class="p-1">
-        <p class="text-muted">
-          The term "schema" refers to the organization of data as a blueprint and can be thought of as the graphical depiction of the database structure.
-          A schema specifies the facts that can enter a database, or those of interest to the possible end-users.
-        </p>
-        <p class="text-muted">
-          A schema contains classes and properties, classes can be thought as a set of 'types', each associated with a set of properties. <i>Eg. class <a href="https://schema.org/Person" target="_blank">Person</a> has property <a href="https://schema.org/birthDate" target="_blank">birthDate</a></i>
-        </p>
-        <p class="text-muted">
-          Our <a href="/registry">registry</a> includes classes from <a target="_blank" href="https://schema.org/docs/schemas.html">Schema.org</a>'s schema. Schema.org provides an extensive collection of schema classes in addition to schema classes by the research community.'
-        </p>
+  <div class="jumbotron alert-secondary col-sm-12 m-0">
+    <div class="container d-flex justify-content-center align-content-center">
+      <div class="pt-2 pb-2 text-center">
+        <h1 class="mainTextDark text-center">GET STARTED</h1>
+        <h4 class="text-muted text-center">What would you like to do?</h4>
+        <a role="button" class="btn themeButton text-light m-2 px-3 py-3 btn-lg" href="#visualize" rel="noreferrer"><i class="fas fa-eye"></i> Visualize Schema</a>
+        <a role="button" class="btn themeButton text-light m-2 px-3 py-3 btn-lg" href="#create" rel="noreferrer"><i class="fas fa-code-branch"></i> Create Schema</a>
+        <a role="button" class="btn themeButton text-light m-2 px-3 py-3 btn-lg" href="/registry" rel="noreferrer">Search Registry</a>
       </div>
-      <div class="alert grad text-center text-light mb-0">
-        <h4>Already have a schema?</h4>
-      </div>
-      <div class="text-center alert alert-secondary" >
-
-        <h4 class="logoText">Visualize and register your schema</h4>
-        <div class="row">
-          <div class="col-sm-6">
-            <svg class="w-75 mb-3" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 370.22 227.44"><title>Untitled-10</title><path d="M377,179H191L186.51,42.12,14.78,212.21l.2,47.68A6.15,6.15,0,0,0,21.11,266l59.36.2,298.64-85ZM78,255.13A4.87,4.87,0,0,1,73.13,260H26.87A4.87,4.87,0,0,1,22,255.13V218.87A4.87,4.87,0,0,1,26.87,214H73.13A4.87,4.87,0,0,1,78,218.87Z" transform="translate(-14.78 -38.78)" style="fill:{{color_sec}}"/><path d="M376.55,38.78H193.22a8.47,8.47,0,0,0-8.45,8.45V173.14a8.47,8.47,0,0,0,8.45,8.45H376.55a8.47,8.47,0,0,0,8.45-8.45V47.23A8.47,8.47,0,0,0,376.55,38.78Zm-3.48,134.49H197V50.05h176Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/><path d="M39.88,231.35c0,4.26-.17,4.84-1.76,5.65,1.59.81,1.76,1.39,1.76,5.64v3.28c0,1.22.07,1.59.37,1.9s.81.5,2.1.5h1.79v5.14h-5a4.71,4.71,0,0,1-5-4.93v-5c0-3.07-.31-3.75-1.83-4v-5c1.52-.27,1.83-.95,1.83-4v-5a4.71,4.71,0,0,1,5-4.93h5v5.14H42.35c-1.32,0-1.83.13-2.16.57s-.31.68-.31,1.83Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/><path d="M53.64,228v6.8H46.81V228Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/><path d="M53.64,239.31v6.79H46.81v-6.79Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/><path d="M60.53,242.64c0-4.25.17-4.83,1.76-5.64-1.59-.81-1.76-1.39-1.76-5.65v-3.27c0-1.22-.07-1.59-.37-1.9s-.81-.5-2.1-.5H56.27v-5.14h5a4.71,4.71,0,0,1,5,4.93v5c0,3.07.3,3.75,1.82,4v5c-1.52.27-1.82.95-1.82,4v5a4.71,4.71,0,0,1-5,4.93h-5v-5.14h1.79c1.36,0,1.83-.13,2.17-.57s.3-.68.3-1.83Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/><path d="M216.05,58.5V74h138V58.5ZM324.48,71.17a4.93,4.93,0,1,1,4.93-4.93A4.92,4.92,0,0,1,324.48,71.17Zm16.9,0a4.93,4.93,0,1,1,4.93-4.93A4.93,4.93,0,0,1,341.38,71.17Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/><rect x="201.27" y="45.06" width="138.01" height="16.9" style="fill:{{color_main}}"/><rect x="201.27" y="85.2" width="138.01" height="16.9" style="fill:{{color_main}}"/><path d="M293.5,111H216.05a1.06,1.06,0,0,1,0-2.12H293.5a1.06,1.06,0,1,1,0,2.12Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/><path d="M293.85,118.35H216.4a1.06,1.06,0,1,1,0-2.11h77.45a1.06,1.06,0,1,1,0,2.11Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/><path d="M293.5,149.68H216.05a1.06,1.06,0,1,1,0-2.11H293.5a1.06,1.06,0,1,1,0,2.11Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/><path d="M293.85,157.08H216.4a1.06,1.06,0,0,1,0-2.12h77.45a1.06,1.06,0,0,1,0,2.12Z" transform="translate(-14.78 -38.78)" style="fill:{{color_main}}"/></svg>
-            <p class="text-muted">
-              <b class="mainTextDark">Visualize</b> your schema in a way easy to undertand.  The visualization can be registered as a homepage for your schema so you can share it.
-            </p>
-          </div>
-          <div class="col-sm-6">
-              <!-- <img class="w-75" src="/static/img/registerschema.png" alt="Register"/> -->
-              <svg class="w-75 mb-3" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 318.6 242.48"><title>Untitled-9</title><path d="M91.54,123H275V102.38H91.54Zm166.6-16.84a6.55,6.55,0,1,1-6.55,6.55A6.55,6.55,0,0,1,258.14,106.13Zm-22.46,0a6.55,6.55,0,1,1-6.56,6.55A6.55,6.55,0,0,1,235.68,106.13Z" transform="translate(-49.96 -23.52)" style="fill:{{color_sec}}"/><rect x="41.58" y="112.55" width="183.45" height="22.46" style="fill:{{color_main}}"/><rect x="41.58" y="165.9" width="183.45" height="22.46" style="fill:{{color_main}}"/><path d="M91.54,171.78h103a1.08,1.08,0,1,0,0-2.15H91.54a1.08,1.08,0,1,0,0,2.15Z" transform="translate(-49.96 -23.52)" style="fill:{{color_sec}}"/><path d="M92,179.46a1.08,1.08,0,1,0,0,2.15H195a1.08,1.08,0,1,0,0-2.15Z" transform="translate(-49.96 -23.52)" style="fill:{{color_sec}}"/><path d="M194.49,223.26a1.08,1.08,0,1,0,0-2.15H91.54a1.08,1.08,0,1,0,0,2.15Z" transform="translate(-49.96 -23.52)" style="fill:{{color_sec}}"/><path d="M195,230.93H92a1.08,1.08,0,1,0,0,2.16H195a1.08,1.08,0,1,0,0-2.16Z" transform="translate(-49.96 -23.52)" style="fill:{{color_sec}}"/><path d="M327.25,23.52a41.31,41.31,0,0,0-39.72,52.66H58.58A8.64,8.64,0,0,0,50,84.8V257.38A8.65,8.65,0,0,0,58.58,266H307.49a8.65,8.65,0,0,0,8.63-8.62V104.61a41.31,41.31,0,1,0,11.13-81.09Zm-27,231.42h-234V91.15H295.41a41.82,41.82,0,0,0,4.85,4.93ZM325.53,86.06l-21.8-16.64L310,63.68l13.79,9.18,22.95-31.55,8,5.73Z" transform="translate(-49.96 -23.52)" style="fill:{{color_main}}"/></svg>
-            <p class="text-muted">
-              <b class="mainTextDark">Register</b> your schema so others will be able to use your schema as a starting point to build their schema.
-            </p>
-          </div>
-        </div>
-        <div class="alert p-4 alert-dark">
-          <h4 class="logoText">Start Here</h4>
-          <form id="linkForm" class="col-sm-6" style="margin: 0 auto;">
-            <div class="form-group">
-              <input style="margin:auto;"  v-model="input" id="urlform" autocomplete="" required ref="my_input" class="form-control" type="url" placeholder="Paste your link here" required="">
-              <button :disabled="!input.length" @click.prevent="getFormValues()" style="margin:10px;" class="btn themeButton text-light" type="submit">Visualize</button>
+    </div>
+  </div>
+  <div class="jumbotron bg-light row m-0 d-flex justify-content-center align-items-center" id="schemas" style="min-height:40vh;">
+    <div class="col-sm-12 pt-5 pb-5">
+      <h1 class="text-center text-muted caps mb-4 mt-4">Power of Schemas</h1>
+      <div class="w-100">
+        <div class="row m-0">
+          <!-- card -->
+          <div class="col-sm-12 col-md-4 p-2">
+            <img src="/static/img/sp1-01.svg" alt="Planning" />
+            <h4 class="text-center mainTextDark caps">
+              Planning
+            </h4>
+            <div class="mt-3">
+              <p class="text-muted">
+                Organize and structure your data right from the start in a way that not only humans but computers can understand. A schema is a blueprint that graphically depicts the structure of your data.
+              </p>
             </div>
-            <div v-if=loading class="loader">
-              <img src="./static/img/ripple.svg"/>
+          </div>
+          <!-- card -->
+          <div class="col-sm-12 col-md-4 p-2">
+            <img src="/static/img/sp2-01.svg" alt="Hierachy" />
+            <h4 class="text-center mainTextDark caps">
+              Hierachy
+            </h4>
+            <div class="mt-3">
+              <p class="text-muted">
+                Schemas follow a hierarchical structure each with properties inherited to all children. For example:
+                <ul class="text-muted">
+                  <li>
+                    <i>A <a href="https://schema.org/Person" target="_blank">Person</a> has a property of <a href="https://schema.org/birthDate" target="_blank">birthDate</a></i>
+                  </li>
+                  <li>
+                    <i><a href="https://schema.org/Thing" target="_blank">Thing</a> &gt; <a href="https://schema.org/CreativeWork" target="_blank">CreativeWork</a> &gt; <a href="https://schema.org/Dataset" target="_blank">Dataset</a></i>
+                  </li>
+                </ul>
+              </p>
             </div>
-            {% if site_name == "CTSA Data Discovery Engine" %}
-              <small class="text-muted">Examples:</small>
-              <small class="badge badge-pill badge-secondary pointer mr-1"
-              @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'">
-                BioThings Schema
-              </small>
-              <small class="badge badge-pill badge-secondary pointer mr-1"
-              @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
-                CTSA Dataset Schema
-              </small>
-            {% endif %}
-          </form>
+          </div>
+          <!-- card -->
+          <div class="col-sm-12 col-md-4 p-2">
+            <img src="/static/img/sp3-01.svg" alt="Reusability" />
+            <h4 class="text-center mainTextDark caps">
+              Interoperability
+            </h4>
+            <div class="mt-3">
+              <p class="text-muted">
+                Schemas allow for data to be completely understood by different interfaces and let computers access, exchange, integrate data in a uniform manner.<br />
+                <small>- Learn about <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> principles.</small>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-sm-12 p-5 message mb-4">
-      <h1 class="text-center text-muted">Why do I need a schema?</h1>
-      <div class="p-1">
-        <p class="text-muted">
-          A schema is a way to logically group objects such as tables, views, stored procedures etc.
-          In addition to providing a structure to your database, data based on an existing schema or extended from one makes your data <a target="_blank" href="https://en.wikipedia.org/wiki/Interoperability">interopeable</a>.
-        </p>
-        <p class="text-muted">
-          Furthermore, by creating a schema derived from an existing schema, you will be contributing to the <a target="_blank" href="https://en.wikipedia.org/wiki/Reusability">data reusability</a> efforts to make data more <a target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a>.
-        </p>
-      </div>
-      <div class="alert grad text-center text-light mb-0">
-        <h4>Don't have a schema?</h4>
-      </div>
-      <div class="text-center alert alert-secondary" >
-        <h4 class="logoText">Create a schema</h4>
+    </div>
+
+    <div class="col-sm-12 mb-4 p-2 alert-secondary shareBack" id="visualize">
+      <div class="text-center alert  m-0" >
+        <h4 class="text-muted mt-5 caps">If you have a schema</h4>
         <div class="row">
-          <div class="col-sm-6 m-auto">
-            <svg class="w-100 mb-3" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 361.72 176.99"><title>Untitled-11</title><g id="SNtqvi.tif"><path d="M258.64,185.61a2.82,2.82,0,0,1-2.95,1.79q-51.57,0-103.14,0a2.83,2.83,0,0,1-3-1.79V139.39c.58-1.71,2-1.93,3.51-1.93h47.17c1.46,0,1.46,0,1.47-1.48l0-11.92h4.69l0,11.81c0,1.59,0,1.59,1.58,1.59h47.7a2.75,2.75,0,0,1,2.87,1.92ZM204,182.77h48.45c1.47,0,1.48,0,1.48-1.46V143.73c0-1.52,0-1.52-1.53-1.52H155.83c-1.53,0-1.54,0-1.54,1.52v37.48c0,1.55,0,1.56,1.59,1.56Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M149.59,196.9c1.15-3.14,2.53-4.11,5.88-4.11h18.21c3.5,0,5.54,2,5.56,5.56,0,2.38,0,4.76,0,7.13,0,1.39,0,1.39,1.44,1.39.61,0,1.21,0,1.81,0a5,5,0,0,1,5.23,5.15c.06,5.33,0,10.65,0,16a5.2,5.2,0,0,1-3.64,5.11H153.21a6,6,0,0,1-3.62-3.83Zm4.7,16c0,4.79,0,9.58,0,14.37,0,.94.27,1.31,1.28,1.31q13.08,0,26.18,0c1,0,1.27-.36,1.26-1.31,0-4.57,0-9.15,0-13.73,0-2.07.19-1.92-2-1.93-1.77,0-1.74,0-1.78,1.82a16.2,16.2,0,0,1-.19,4.23,2.17,2.17,0,0,1-2.14,1.62,2.3,2.3,0,0,1-2.23-1.65,6.34,6.34,0,0,1-.19-1.79q0-8.19,0-16.39c0-2.07,0-2-2.09-2.08-1.05,0-1.35.35-1.33,1.35.05,2.05.06,4.12-.07,6.17a2.27,2.27,0,0,1-2.44,2.37c-1.33-.08-2.17-1.08-2.19-2.66s0-3,0-4.47c0-2.77,0-2.73-2.73-2.76-.93,0-1.25.26-1.22,1.21.06,2,0,4,0,6.07a2.35,2.35,0,0,1-2.23,2.6c-1.43.06-2.38-.92-2.46-2.72s0-3.48,0-5.22c0-2.18.09-1.91-2-1.92-1.36,0-1.4,0-1.4,1.46Q154.28,205.9,154.29,212.91Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M224.14,233.11c-2.67-1-3.7-3.06-3.66-5.85.06-4.86,0-9.73,0-14.59,0-3.8,2-5.79,5.77-5.8,2.72,0,2.72,0,2.72-2.77,0-1.95,0-3.9,0-5.86,0-3.38,2.09-5.45,5.45-5.45h18.31c3.36,0,4.74,1,5.88,4.11v32.17a5.65,5.65,0,0,1-3.62,4ZM253.94,213V199.58c0-2.21,0-2.16-2.19-2.2-.94,0-1.23.31-1.22,1.23,0,2.09.06,4.19-.07,6.28a2.24,2.24,0,0,1-2.45,2.36c-1.34-.08-2.16-1.05-2.19-2.64s0-2.91,0-4.37c0-2.89,0-2.86-2.85-2.86-.84,0-1.12.28-1.1,1.11,0,2.06,0,4.12,0,6.18a2.33,2.33,0,0,1-2.25,2.59c-1.36.05-2.31-.85-2.41-2.54s0-3.47-.06-5.21c0-2.38.19-2-2.12-2.13-1,0-1.3.34-1.29,1.3,0,3.34,0,6.67,0,10,0,2.63,0,5.26,0,7.88,0,1.68-1,2.74-2.38,2.73s-2.29-1.07-2.35-2.76c0-.81,0-1.63,0-2.45,0-2.79.43-2.4-2.5-2.48-1,0-1.27.34-1.26,1.29,0,4.76,0,9.52,0,14.27,0,1.39,0,1.4,1.46,1.4h25.77c1.44,0,1.46,0,1.46-1.51Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M204.12,172.35h14.26c.32,0,.64,0,1,0a2.41,2.41,0,0,1,2.48,2.29,2.36,2.36,0,0,1-2.27,2.36,10.55,10.55,0,0,1-1.49.08H190.17a10.09,10.09,0,0,1-1.9-.16,2.29,2.29,0,0,1-1.86-2.17,2.38,2.38,0,0,1,1.75-2.28,5.27,5.27,0,0,1,1.48-.13Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M171.25,172.35c2.8,0,5.6,0,8.4,0a2.35,2.35,0,0,1,2.62,2.09,2.2,2.2,0,0,1-1.72,2.46,10,10,0,0,1-1.9.18H163.77a10.73,10.73,0,0,1-1.79-.16,2.27,2.27,0,0,1-.17-4.43,5.23,5.23,0,0,1,1.37-.14C165.87,172.34,168.56,172.35,171.25,172.35Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M237,177.09c-2.52,0-5,0-7.55,0a9,9,0,0,1-1.79-.17,2.2,2.2,0,0,1-1.73-2,2.24,2.24,0,0,1,1.49-2.33,3.71,3.71,0,0,1,1.36-.2h16.47c1.56,0,2.52.65,2.78,1.8a2.24,2.24,0,0,1-1.9,2.8,33.27,33.27,0,0,1-5.09.14C239.71,177.12,238.37,177.09,237,177.09Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M190.93,164.79c-.7,0-1.41,0-2.12,0a2.39,2.39,0,0,1-2.4-2.24,2.31,2.31,0,0,1,2.23-2.38,18.42,18.42,0,0,1,4.75,0,2.18,2.18,0,0,1,2.06,2.38,2.28,2.28,0,0,1-2.18,2.19c-.78.07-1.56,0-2.34,0Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M217.22,164.79c-.71,0-1.42,0-2.12,0a2.3,2.3,0,0,1-2.31-2.18,2.18,2.18,0,0,1,2.13-2.42,18,18,0,0,1,4.86,0,2.28,2.28,0,0,1,2,2.22,2.31,2.31,0,0,1-2.06,2.32,21.51,21.51,0,0,1-2.54,0Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M191,147.88c.7,0,1.42,0,2.12,0a2.29,2.29,0,0,1,2.3,2.19,2.21,2.21,0,0,1-2.15,2.41,18,18,0,0,1-4.86,0,2.29,2.29,0,0,1-2-2.24,2.39,2.39,0,0,1,2.08-2.32,1.65,1.65,0,0,1,.31,0H191Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M217.36,147.87c.71,0,1.42,0,2.12,0a2.39,2.39,0,0,1,2.34,2.29,2.3,2.3,0,0,1-2.17,2.32,17.58,17.58,0,0,1-4.86,0,2.27,2.27,0,0,1-.07-4.5,23.1,23.1,0,0,1,2.64-.14Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M177.74,152.6a12.41,12.41,0,0,1-2.65-.15,2.37,2.37,0,0,1-1.84-2.2,2.17,2.17,0,0,1,1.67-2.2,15.83,15.83,0,0,1,5.7,0,2.09,2.09,0,0,1,1.67,2.29,2.24,2.24,0,0,1-1.89,2.13A12.47,12.47,0,0,1,177.74,152.6Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M230.43,152.57a10.21,10.21,0,0,1-2.65-.13,2.26,2.26,0,0,1-1.84-2.18,2.11,2.11,0,0,1,1.73-2.25,17.49,17.49,0,0,1,5.5,0,2.21,2.21,0,0,1,1.81,2.31,2.36,2.36,0,0,1-1.9,2.15,2.76,2.76,0,0,1-.63.1C231.78,152.58,231.1,152.57,230.43,152.57Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M177.77,164.79c-.67,0-1.35,0-2,0a2.42,2.42,0,0,1-2.5-2.27,2.33,2.33,0,0,1,2.26-2.36,17.79,17.79,0,0,1,4.78,0,2.21,2.21,0,0,1,2,2.24,2.24,2.24,0,0,1-2.07,2.3,22.23,22.23,0,0,1-2.45,0Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M230.41,164.79c-.71,0-1.42,0-2.13,0a2.32,2.32,0,0,1-2.34-2.29,2.25,2.25,0,0,1,2.16-2.32,18.21,18.21,0,0,1,4.78,0,2.28,2.28,0,0,1,2.1,2.27,2.32,2.32,0,0,1-2.13,2.28,22,22,0,0,1-2.44,0Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M164.68,147.87c.71,0,1.42,0,2.13,0a2.37,2.37,0,0,1,2.34,2.3,2.27,2.27,0,0,1-2.19,2.3,17.34,17.34,0,0,1-4.88,0,2.2,2.2,0,0,1-2-2.17,2.29,2.29,0,0,1,1.91-2.35,1.67,1.67,0,0,1,.31-.05h2.34Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M204.16,147.87c.71,0,1.42,0,2.13,0a2.37,2.37,0,0,1,2.35,2.29,2.29,2.29,0,0,1-2.18,2.32,17.73,17.73,0,0,1-4.88,0,2.27,2.27,0,0,1-.07-4.49,21.08,21.08,0,0,1,2.65-.15Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M243.64,147.87c.71,0,1.42,0,2.13,0a2.33,2.33,0,0,1,2.35,2.28,2.25,2.25,0,0,1-2.16,2.32,17.73,17.73,0,0,1-4.88,0,2.25,2.25,0,0,1-2-2.15,2.3,2.3,0,0,1,1.8-2.33,1.43,1.43,0,0,1,.41-.09h2.34Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M164.56,164.79c-.67,0-1.35,0-2,0a2.31,2.31,0,0,1-2.41-2.2,2.24,2.24,0,0,1,2.17-2.41,18.12,18.12,0,0,1,4.88,0,2.24,2.24,0,0,1,2,2.18,2.28,2.28,0,0,1-1.72,2.28,1.45,1.45,0,0,1-.41.1c-.81,0-1.63,0-2.45,0Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M204.16,164.78c-.74,0-1.49.05-2.23,0a2.37,2.37,0,0,1-2.34-2.3,2.28,2.28,0,0,1,2.19-2.3,18.21,18.21,0,0,1,4.78,0,2.29,2.29,0,0,1,2.08,2.3,2.32,2.32,0,0,1-2.14,2.26,20.28,20.28,0,0,1-2.34,0Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/><path d="M243.63,164.79c-.71,0-1.42,0-2.12,0a2.36,2.36,0,0,1-2.42-2.23,2.28,2.28,0,0,1,2.21-2.38,18.14,18.14,0,0,1,4.77,0,2.24,2.24,0,0,1,2.05,2.32,2.27,2.27,0,0,1-2.15,2.24,22.81,22.81,0,0,1-2.34,0Z" transform="translate(-23.28 -56.12)" style="fill:{{color_sec}}"/></g><path d="M375.65,121.89l-61.52-.44a9.44,9.44,0,0,0-9.48,9.35L304.29,180a9.45,9.45,0,0,0,9.35,9.49l61.52.44a9.43,9.43,0,0,0,9.48-9.34l.36-49.24A9.45,9.45,0,0,0,375.65,121.89Zm-38.84,20.39h-2.17c-1.59,0-2.2.16-2.6.69s-.37.81-.37,2.2v4c0,5.13-.21,5.82-2.12,6.8,1.91,1,2.12,1.67,2.12,6.81v4c0,1.46.08,1.91.45,2.28s1,.61,2.52.61h2.17v6.2h-6.08a5.68,5.68,0,0,1-6.07-6v-6c0-3.71-.37-4.52-2.2-4.85v-6c1.83-.33,2.2-1.15,2.2-4.85v-6a5.67,5.67,0,0,1,6.07-5.95h6.08Zm11.45,24.63H340v-8.19h8.24Zm0-13.59H340v-8.19h8.24ZM365.79,159c-1.84.33-2.2,1.14-2.2,4.85v6a5.69,5.69,0,0,1-6.08,6h-6.07v-6.2h2.16c1.63,0,2.2-.16,2.61-.69s.36-.82.36-2.2v-4c0-5.14.21-5.83,2.12-6.81-1.91-1-2.12-1.67-2.12-6.8v-4c0-1.47-.08-1.92-.44-2.28s-1-.61-2.53-.61h-2.16v-6.2h6.07c3.63,0,6.08,2.36,6.08,5.95v6c0,3.7.36,4.52,2.2,4.85Z" transform="translate(-23.28 -56.12)" style="fill:{{color_main}}"/><path d="M307.69,118.55,298,99.25v9.65L244.68,86.48V65.59a9.5,9.5,0,0,0-9.47-9.47H173.34a9.5,9.5,0,0,0-9.47,9.47V86.41L74.81,121.75l-41.69-.3a9.44,9.44,0,0,0-9.48,9.35L23.28,180a9.45,9.45,0,0,0,9.35,9.49l61.52.44a9.43,9.43,0,0,0,9.48-9.34l.36-49.24a9.45,9.45,0,0,0-9.35-9.49l-3.3,0,72.53-29v22.25a9.5,9.5,0,0,0,9.47,9.47h61.87a9.5,9.5,0,0,0,9.47-9.47V93.76l49.74,21.17-6,4.82ZM55.8,142.28H53.64c-1.59,0-2.21.16-2.61.69s-.37.81-.37,2.2v4c0,5.13-.2,5.82-2.12,6.8,1.92,1,2.12,1.67,2.12,6.81v4c0,1.46.08,1.91.45,2.28s1,.61,2.53.61H55.8v6.2H49.72a5.68,5.68,0,0,1-6.07-6v-6c0-3.71-.37-4.52-2.2-4.85v-6c1.83-.33,2.2-1.15,2.2-4.85v-6a5.67,5.67,0,0,1,6.07-5.95H55.8Zm11.45,24.63H59v-8.19h8.23Zm0-13.59H59v-8.19h8.23ZM84.78,159c-1.84.33-2.2,1.14-2.2,4.85v6a5.69,5.69,0,0,1-6.08,6H70.43v-6.2h2.16c1.63,0,2.2-.16,2.61-.69s.37-.82.37-2.2v-4c0-5.14.2-5.83,2.11-6.81-1.91-1-2.11-1.67-2.11-6.8v-4c0-1.47-.09-1.92-.45-2.28s-1-.61-2.53-.61H70.43v-6.2H76.5c3.63,0,6.08,2.36,6.08,5.95v6c0,3.7.36,4.52,2.2,4.85Zm140.9-63h-15v15.27H198.55V96H183.28V83.84h15.27v-15h12.12v15h15Z" transform="translate(-23.28 -56.12)" style="fill:{{color_main}}"/></svg>
-            <p class="text-muted w-75 m-auto">
-              <b class="mainTextDark">Create</b> your own schema by defining a more specific version of an existing schema class and create a schema tailored to your needs.
-            </p>
+          <div class="col-sm-6 d-flex justify-content-center align-items-center" style="min-height:30vh;">
+            <div>
+              <span class="fa-stack fa-2x m-2">
+                <i class="fas fa-circle fa-stack-2x text-dark"></i>
+                <i class="fas fa-eye fa-stack-1x fa-inverse"></i>
+              </span>
+              <h4 class="text-muted caps">
+                <b class="mainTextDark">Visualize</b> your schema<br /> and browse it with ease
+              </h4>
+            </div>
+          </div>
+          <div class="col-sm-6 d-flex justify-content-center align-items-center" style="min-height:30vh;">
+            <div>
+              <span class="fa-stack fa-2x m-2">
+                <i class="fas fa-circle fa-stack-2x text-dark"></i>
+                <i class="fas fa-check fa-stack-1x fa-inverse"></i>
+              </span>
+              <h4 class="text-muted caps">
+                <b class="mainTextDark">Register</b> your schema<br /> and share it with the community
+              </h4>
+            </div>
           </div>
         </div>
-        <div class="alert p-4 alert-dark mt-3">
-          <h4 class="logoText">
-            Create from common starting points (&starf;):
-          </h4>
-
-          <div class="d-flex align-items-center justify-content-around">
-            <template v-for='item in startingPoints'>
-              <preset-box :preset='item'></preset-box>
-            </template>
+        <div class="alert p-2 d-flex justify-content-center align-items-center" style="background:#85558c;">
+          <div class="w-100 pt-3 pb-3">
+            <h4 class="mb-3 mt-3 text-light">Visualize <i class="fas fa-arrow-right mainTextLight"></i> Register Your Schema</h4>
+            <form id="linkForm" class="col-sm-6 m-auto">
+              <div class="input-group mb-3 shadow rounded">
+                <input type="text" class="form-control" v-model="input" id="urlform" autocomplete="" required ref="my_input" aria-label="Paste your link here"  placeholder="Paste your link here" aria-describedby="button-addon2">
+                <div class="input-group-append">
+                  <button :disabled="!input.length" :class="{heartbeat:input.length}" @click.prevent="getFormValues()" id="button-addon2" class="btn btn-info" type="submit">Go</button>
+                </div>
+              </div>
+              <div v-if=loading class="loader">
+                <img src="./static/img/ripple.svg"/>
+              </div>
+              {% if site_name == "Data Discovery Engine" %}
+                <small class="text-light">Examples:</small>
+                <small class="badge badge-dark pointer mr-1"
+                @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie_kevin.jsonld'">
+                  BioLink Schema
+                </small>
+                <small class="badge badge-dark pointer mr-1"
+                @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
+                  CTSA Dataset Schema
+                </small>
+              {% endif %}
+            </form>
           </div>
-          <div class="p-5">
-            <h4 class="text-muted">OR <br />Search for a different starting point in the</h4>
-            <h2 class="logoText">SCHEMA REGISTRY</h2>
-            <a role="button" class="btn themeButton text-light m-3" href="/registry">Continue</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-12 p-2 mb-4 alert-secondary extendBack" id="create">
+      <div class="text-center alert">
+        <h4 class="text-muted mt-5 caps">If you <b class="text-dark">don't</b> have a schema</h4>
+        <div>
+          <div class="row">
+            <div class="col-sm-6 m-auto d-flex justify-content-center align-items-center" style="min-height:30vh;">
+              <div>
+                <span class="fa-stack fa-2x m-2">
+                  <i class="fas fa-circle fa-stack-2x text-dark"></i>
+                  <i class="fas fa-code-branch fa-stack-1x fa-inverse"></i>
+                </span>
+                <h4 class="text-muted caps">
+                  <b class="mainTextDark">Extend</b> a schema<br /> specific to your needs
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="alert p-2 mt-3" style="background:#85558c;">
+          <div class="row m-0">
+            <div class="col-sm-12 col-md-5">
+              <h4 class="text-light caps mt-3 mb-3">
+                Common starting points:
+              </h4>
+              <div class="d-flex align-items-center justify-content-around">
+                <template v-for='item in startingPoints'>
+                  <preset-box :preset='item'></preset-box>
+                </template>
+              </div>
+            </div>
+            <div class="col-sm-12 col-md-2 d-flex justify-content-center align-items-center">
+              <h4 class="text-light caps pt-3 pb-3">
+                OR
+              </h4>
+            </div>
+            <div class="col-sm-12 col-md-5">
+              <h4 class="text-light caps mt-3 mb-3">
+                Search for starting point:
+              </h4>
+              <div class="message text-center text-muted p-4">
+                <h5 class="text-muted">Search for a Class</h5>
+                <a role="button" class="btn themeButton text-light m-3" href="/registry">To Registry</a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-
-</div>
 {% endblock %}
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
@@ -131,7 +197,6 @@ Vue.component('preset-box', {
   props: ['preset'],
   template: `<div class="message text-center text-muted p-4">
               <h4 class="m-1">
-              <span>&starf;</span>
               <span v-text='preset.name'></span></h4>
               <small><span v-text='preset.description'></span></small>
               <br />
@@ -160,6 +225,7 @@ var app = new Vue({
           input: '',
           suggestedURL:'',
           slug:'',
+          number:'',
           choice:'',
           loading:false,
           startingPoints:{{starting_points}}
@@ -293,13 +359,29 @@ var app = new Vue({
           })
         },
         makeURLandRedirect(){
-          let number = Math.floor(Math.random()*90000) + 10000;
-          window.location.href = "./view/"+this.slug+number+"/";
+          this.number = Math.floor(Math.random()*90000) + 10000;
+          this.setLastViewed();
+          window.location.href = "./view/"+this.slug+this.number+"/";
         },
+        setLastViewed(){
+          let temp = this.slug+this.number;
+          sessionStorage.clear();
+          sessionStorage.setItem(temp,localStorage.getItem('user-schema-classes'));
+          sessionStorage.setItem(temp+'-url',localStorage.getItem('user-schema-url'));
+        }
 			},
 			mounted:function(){
 			}
 		});
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
 
 </script>
 {% include "footer.html" %}

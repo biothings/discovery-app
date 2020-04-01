@@ -266,6 +266,12 @@ class GuideSpecialHandler(BaseHandler):
         self.write(guide_output)
         setEnvVars(siteconfig)
 
+class JsonSchemaHandler(BaseHandler):
+    def get(self):
+        doc_file = "json-schema-viewer.html"
+        doc_template = TEMPLATE_ENV.get_template(doc_file)
+        doc_output = doc_template.render()
+        self.write(doc_output)
 
 APP_LIST = [
     (r"/?", MainHandler),
@@ -275,6 +281,7 @@ APP_LIST = [
     (r"/faq/?", FAQHandler),
     (r"/best-practices/?", GuideIntroHandler),
     (r"/guide/niaid/?", GuideSpecialHandler),
+    (r"/json-schema-viewer/?", JsonSchemaHandler),
     (r"/guide/?", GuideHandler),
     (r"/registry/?", RegistryHandler),
     (r"/editor/?", EditorHandler),

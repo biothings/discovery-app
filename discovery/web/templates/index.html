@@ -1,25 +1,29 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<style>
-
-</style>
-<main id="index" style="min-height:70vh;">
+<main id="index">
   <div class="">
-    <div class="jumbotron bg-light text-center padding20 hero mb-0" style="margin-top: 40px;">
-      <h1 id="home" class="logoText caps mt-5">{{site_name}}</h1>
-      {% if site_name == "CTSA Data Discovery Engine" %}
-        <div id="animation_container" style="background-color:rgba(68, 68, 68, 00); width:640px; height:480px; zoom:.5;">
-          <canvas id="canvas" width="640" height="480" style="position: absolute; display: block; background-color:rgba(68, 68, 68,0);"></canvas>
-          <div id="dom_overlay_container" style="pointer-events:none; overflow:hidden; width:640px; height:480px; position: absolute; left: 0px; top: 0px; display: block;">
+    <div class="jumbotron bg-light text-center p-1 hero mb-0 d-flex justify-content-center align-items-center" style="min-height:100vh;">
+      <div>
+        {% if site_name == "Data Discovery Engine" %}
+          <h1 id="home" class="logoText mt-5 logoFont">
+            DATA<br class="d-sm-block d-md-none" /> DISCOVERY<br class="d-sm-block d-md-none" /> ENGINE
+          </h1>
+          <div id="animation_container" style="background-color:rgba(68, 68, 68, 00); width:640px; height:480px; zoom:.5;">
+            <canvas id="canvas" width="640" height="480" style="position: absolute; display: block; background-color:rgba(68, 68, 68,0);"></canvas>
+            <div id="dom_overlay_container" style="pointer-events:none; overflow:hidden; width:640px; height:480px; position: absolute; left: 0px; top: 0px; display: block;">
+            </div>
           </div>
+        {% endif %}
+        <div class="m-5">
+          <h4 class="text-muted lighter caps d-none d-md-block">
+            {{site_desc | safe}}
+          </h4>
+          <h6 class="text-muted lighter caps d-block d-md-none">
+            {{site_desc | safe}}
+          </h6>
+          <a class="text-muted" href="/about">Learn More <i class="fas fa-chevron-right"></i></a>
         </div>
-      {% endif %}
-      <div class="m-5">
-        <p class="text-muted caps">
-          {{site_desc | safe}}
-        </p>
-        <a class="text-muted" href="/about"><small>Learn More <i class="fas fa-chevron-right"></i></small></a>
       </div>
     </div>
 
@@ -28,7 +32,7 @@
         <div id="bestPractices" class="jumbotron bg-none text-center pRelative tip">
           <div class="link-wrapper">
             <a class="link hover-1 mt-5" href="./best-practices" style="z-index:2;">
-              <h3 class="text-light">BEST PRACTICES</h3>
+              <h3 class="text-light">BEST PRACTICES <i class="fas fa-chevron-right d-inline d-md-none"></i></h3>
             </a>
             <p class="m-auto w-75 text-light o-0 d-none d-md-block">
               Follow best practices to make your data more findable
@@ -43,7 +47,7 @@
         <div id="schemaPlayground" class="jumbotron bg-none text-center pRelative tip">
           <div class="link-wrapper">
             <a class="link hover-1 mt-5" href="./schema-playground" style="z-index:2;">
-              <h3 class="text-light">SCHEMA PLAYGROUND</h3>
+              <h3 class="text-light">SCHEMA PLAYGROUND <i class="fas fa-chevron-right d-inline d-md-none"></i></h3>
             </a>
             <p class="m-auto w-75 text-light o-0 d-none d-md-block">
               Build and host your own schema for better interoperability
@@ -59,6 +63,39 @@
         <p class="lighter">
           Don't know where to start? <a id="demo" href="#" class="link text-light bold" @click.prevent="showHelp()" v-text="help?'Hide Help':'Click Here'"></a>
         </p>
+      </div>
+    </div>
+
+    <div class="jumbotron bg-light">
+      <div class="container d-flex justify-content-around m-auto flex-wrap">
+        <h3 class="text-muted lighter caps w-100 text-center">Discover & Access Dataset Metadata</h3>
+        <h5 class="text-muted lighter caps mb-5 w-100 text-center">See what structured metadata can do</h5>
+        <div class="card col-sm-12 col-md-6">
+          <img src="/static/img/logofull.svg" class="card-img-top p-2" alt="Metadata Plus" height="115px">
+          <div class="card-body">
+            <h5 class="card-title mainTextDark">METADATA PLUS</h5>
+            <h5 class="card-text text-muted">
+              A service to transforms non-structured published metadata into <a href="https://schema.org/" rel="noreferrer" target="_blank">Schema.org</a>-standard structured metadata.
+            </h5>
+            <!-- <p class="card-text text-muted"><a href="https://schema.org/" rel="noreferrer" target="_blank">Schema.org</a>-Standard Structured Metadata Injector</p> -->
+            <a href="https://metadataplus.biothings.io" target="_blank">
+              Learn More <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+        </div>
+        <div class="card col-sm-12 col-md-6">
+          <img src="/static/img/crawlerfull.svg" class="card-img-top p-2" alt="Metadata Crawler" height="115px">
+          <div class="card-body">
+            <h5 class="card-title mainTextDark">METADATA CRAWLER</h5>
+            <h5 class="card-text text-muted">
+              A service that harvests biomedical <a href="https://schema.org/" rel="noreferrer" target="_blank">Schema.org</a>-standard structured dataset metadata and makes it available through an API.
+            </h5>
+            <!-- <p class="card-text text-muted">Serving structured dataset metadata in <a href="https://schema.org/" rel="noreferrer" target="_blank">Schema.org</a> standard.</p> -->
+            <a href="https://crawler.biothings.io" target="_blank">
+              Learn More <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 

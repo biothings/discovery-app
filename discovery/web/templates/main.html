@@ -34,88 +34,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css"/>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <!-- <link type="text/css" rel="stylesheet" href="/static/css/styles.css"/> -->
-    {% if site_name == "CTSA Data Discovery Engine" %}
-      <link type="text/css" rel="stylesheet" href="/static/css/styles.css"/>
-    {% endif %}
+    <link href="https://fonts.googleapis.com/css?family=Sulphur+Point&display=swap" rel="stylesheet">
     {% if site_name == "NIAID Data Portal" %}
       <link type="text/css" rel="stylesheet" href="/static/css/niaid/styles.css"/>
+      {% else %}
+        <link type="text/css" rel="stylesheet" href="/static/css/styles.css"/>
     {% endif %}
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@4/themes/light.css"/>
+
     {% block extra_head %}
     {% endblock %}
   </head>
   <body class="bg-light" id="bodymain">
-      {% block content %}
-      {% endblock %}
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-      <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
-      <script>
-      // sweetalert2 modal tippy setup
-      // must be at top most location to access modal DOM location
-      tippy( '#bodymain', {
-          target:'.modaltip',
-          content: 'Loading...',
-          placement:'right',
-          animation: 'fade',
-          interactive:true,
-          theme:'light',
-          onShow(instance) {
+  {% block content %}
+  {% endblock %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+  <script>
+  // sweetalert2 modal tippy setup
+  // must be at top most location to access modal DOM location
+  tippy( '#bodymain', {
+      target:'.modaltip',
+      content: 'Loading...',
+      placement:'right',
+      animation: 'fade',
+      interactive:true,
+      theme:'light',
+      onShow(instance) {
 
-            let info = JSON.parse(instance.reference.dataset.tippyInfo);
+        let info = JSON.parse(instance.reference.dataset.tippyInfo);
 
-            if (info) {
-              let html = `<table class='table mb-0'>
-                          <tbody>
-                            <tr>
-                              <td>
-                                <h6><b>`+info.label+"</b><span class='text-info'> ("+info.short_form+")</span>"+`</h6>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <div class="pillType d-inline">
-                                  <span class='mainBackDark' style='font-size:1em;'> Ontology</span>
-                                  <span style='font-size:1em;'>
-                                    <a href="`+info.iri+`" target="_blank">`+info.ontology_prefix+`</a>
-                                  </span>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <div class="pillType d-inline">
-                                  <span class='mainBackLight' style='font-size:1em;'> ID</span>
-                                  <span style='font-size:1em;'>
-                                    <a href="`+info.id+`" target="_blank">`+info.obo_id+`</a>
-                                  </span>
-                                </div>
-                              </td>
-                            </tr>
-                          `;
-              if (info && info.description) {
-                let str = info.description[0]
-                if (info.description[0].length >200 ) {
-                  str = info.description[0].substring(0,200)
-                }
-                html+=`<tr><td><p>
-                `+str+`...`+`
-                </p></td></tr>`
-              }
-              html += "</tbody></table>";
-              instance.setContent(html)
-            }else {
-              instance.setContent("NOT AVAILABLE")
+        if (info) {
+          let html = `<table class='table mb-0'>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h6><b>`+info.label+"</b><span class='text-info'> ("+info.short_form+")</span>"+`</h6>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="pillType d-inline">
+                              <span class='mainBackDark' style='font-size:1em;'> Ontology</span>
+                              <span style='font-size:1em;'>
+                                <a href="`+info.iri+`" target="_blank">`+info.ontology_prefix+`</a>
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="pillType d-inline">
+                              <span class='mainBackLight' style='font-size:1em;'> ID</span>
+                              <span style='font-size:1em;'>
+                                <a href="`+info.id+`" target="_blank">`+info.obo_id+`</a>
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      `;
+          if (info && info.description) {
+            let str = info.description[0]
+            if (info.description[0].length >200 ) {
+              str = info.description[0].substring(0,200)
             }
+            html+=`<tr><td><p>
+            `+str+`...`+`
+            </p></td></tr>`
           }
-        });
-      </script>
-      {% block extra_scripts %}
-      {% endblock %}
+          html += "</tbody></table>";
+          instance.setContent(html)
+        }else {
+          instance.setContent("NOT AVAILABLE")
+        }
+      }
+    });
+
+    window.onbeforeunload = clearLS;
+
+   function clearLS(){
+     let loc = window.location.href.toString()
+     console.log("LOC",loc)
+     if (loc.includes('/view/') || loc.includes("/schema-playground")) {
+       console.log("Keep LS")
+     }else{
+       console.log("Clear LS")
+       localStorage.removeItem("user-schema-classes");
+       localStorage.removeItem("user-schema-url");
+     }
+   }
+  </script>
+  {% block extra_scripts %}
+  {% endblock %}
   </body>
 </html>
