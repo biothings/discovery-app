@@ -1,0 +1,29 @@
+{
+    "@type": "NiaidDataset",
+    "@context": "http://discovery.biothings.io/",
+    "name": "Human tracheobronchial epithelial (HTBE) cell transcriptome response to influenza A virus infection",
+    "description": "Human tracheobronchial epithelial (HTBE) cells are considered to serve as a good correlate of influenza virus infection in the human respiratory tract. mRNA-Seq analysis was used to profile the cellular transcriptome of HTBE cells at multiple time points in response to infection with influenza A/California/04/09 (H1N1), A/Wyoming/03/03 (H3N2), and A/Vietnam/1203/04 (H5N1) HALo virus.",
+    "measurementTechnique": "http://edamontology.org/topic_3170",
+    "creator": {
+        "@type": "Person",
+        "name": "FluOMICS"
+    },
+    "distribution": {
+        "dateModified": "2019-05-15",
+        "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE89008"
+    },
+    "citation": {
+        "name": "Transcription Elongation Can Affect Genome 3D Structure",
+        "url": "doi.org/10.1016/j.cell.2018.07.047"
+    },
+    "funding": {
+        "@type": "Organization",
+        "name": "National Institute of Allergy and Infectious Diseases",
+        "identifier": "U19-AI106754",
+        "description": "National Institute of Allergy and Infectious Diseases",
+        "url": "http://grantome.com/grant/NIH/U19-AI106754-01",
+        "parentOrganization": "National Institutes of Health"
+    },
+    "species": "http://www.ontobee.org/ontology/NCBITaxon?iri=http://purl.obolibrary.org/obo/NCBITaxon_9606",
+    "pathogen": "http://purl.obolibrary.org/obo/NCBITaxon_11320"
+}

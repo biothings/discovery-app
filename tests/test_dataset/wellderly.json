@@ -1,0 +1,59 @@
+{
+    "@context": "http://schema.org/",
+    "@type": "Dataset",
+    "identifier": "EGAD00001003941",
+    "name": "Wellderly Dataset from Scripps CTSA center",
+    "description": "Whole genome sequences of 511 individuals of a cohort of more than 1,400 healthy elderly individuals recruited from across the United States. Ages range from 80 to 105. Participants have not developed any common chronic medical conditions or diseases. Whole genome sequences generated on the Complete Genomics platform.",
+    "keywords": [
+        "genomics",
+        "genetics",
+        "healthy",
+        "aging",
+        "elderly",
+        "longevity",
+        "cardiovascular",
+        "alzheimer's",
+        "cognition"
+    ],
+    "url": "https://www.scripps.edu/science-and-medicine/translational-institute/translational-research/genomic-medicine/wellderly/",
+    "version": "1.0",
+    "datePublished": "2016-04-16",
+    "dateModified": "2018-06-27",
+    "license": {
+        "@type": "URL",
+        "text": "Custom Data Access Agreement",
+        "url": "https://redcapstsi.scripps.edu/redcap/surveys/?s=NT4N7A3KJD"
+    },
+    "Sameas": "https://www.ebi.ac.uk/ega/datasets/EGAD00001003941",
+    "measurementTechnique": "whole-genome sequencing",
+    "publisher": {
+        "@type": "Organization",
+        "name": "Scripps Research",
+        "url": "http://scripps.edu"
+    },
+    "creator": {
+        "@type": "Person",
+        "name": "Ali Torkamani",
+        "url": "https://www.scripps.edu/faculty/torkamani/"
+    },
+    "citation": {
+        "text": "Galina A. Erikson, Dale L. Bodian, Manuel Rueda, Bhuvan Molparia, Erick R. Scott, Ashley A. Scott-Van Zeeland, Sarah E. Topol, Nathan E. Wineinger, John E. Niederhuber, Eric J. Topol, Ali Torkamani, Whole-Genome Sequencing of a Healthy Aging Cohort, Cell, Volume 165, Issue 4, 2016, Pages 1002-1011, ISSN 0092-8674.",
+        "url": "https://doi.org/10.1016/j.cell.2016.03.022",
+        "identifier": "27114037"
+    },
+    "samples": {
+        "size": 511,
+        "organism": "human",
+        "tissue": "peripheral blood"
+    },
+    "funder": {
+        "identifier": "UL1TR002550",
+        "institute": "NIH",
+        "agency": "NCATS"
+    },
+    "includedInDataCatalog": {
+        "@type": "DataCatalog",
+        "name": "CTSA Datasets",
+        "url": "https://ctsa.ncats.nih.gov/cd2h/"
+    }
+}

@@ -7,82 +7,128 @@ import logging
 import os
 
 import sass
-from biothings.web.api.helper import BaseHandler as BioThingsBaseHandler
 from jinja2 import Environment, FileSystemLoader
 from tornado.httputil import url_concat
+from tornado.web import RedirectHandler
 from torngithub import GithubMixin, json_decode, json_encode
 
-import discovery.web.siteconfig as siteconfig
-import discovery.web.siteconfigniaid as siteconfigniaid
-from discovery.api.es.doc import Schema
+import discovery.web.siteconfig.default as siteconfig
+import discovery.web.siteconfig.niaid as siteconfigniaid
+from biothings.web.handlers import BaseHandler as BioThingsBaseHandler
 
 from .saml import SAML_HANDLERS
 
 GITHUB_CALLBACK_PATH = "/oauth"
-GITHUB_SCOPE = ""
+GITHUB_SCOPES = ("read:user", "user:email")
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 TEMPLATE_LOADER = FileSystemLoader(searchpath=TEMPLATE_PATH)
-TEMPLATE_ENV = Environment(loader=TEMPLATE_LOADER, cache_size=0)
+TEMPLATE_ENV_DSC = Environment(loader=TEMPLATE_LOADER, cache_size=0)
+TEMPLATE_ENV_NIA = Environment(loader=TEMPLATE_LOADER, cache_size=0)
+TEMPLATE_ENV = TEMPLATE_ENV_DSC  # COMPATIBILITY
 
 
 def createStyles():
     # Compile site specific minified css
-    sass.compile(dirname=(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/scss'), os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/css')), output_style='compressed',custom_functions={
-        sass.SassFunction('mainC', (), lambda: siteconfig.MAIN_COLOR),
-        sass.SassFunction('secC', (),lambda: siteconfig.SEC_COLOR),
-        sass.SassFunction('dm', (), lambda: siteconfig.DARK_MODE),
-    })
+    sass.compile(
+        dirname=('static/scss', 'static/css'),
+        output_style='compressed',
+        custom_functions={
+            sass.SassFunction(
+                'mainC',
+                (),
+                lambda: siteconfig.MAIN_COLOR),
+            sass.SassFunction(
+                'secC',
+                (),
+                lambda: siteconfig.SEC_COLOR),
+            sass.SassFunction(
+                'dm',
+                (),
+                lambda: siteconfig.DARK_MODE),
+        })
     # Compile site specific minified css NIAAID
     # in main.html create matching rules and link to styles directory
-    sass.compile(dirname=(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/scss'), os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static/css/niaid')), output_style='compressed',custom_functions={
-        sass.SassFunction('mainC', (), lambda: siteconfigniaid.MAIN_COLOR),
-        sass.SassFunction('secC', (),lambda: siteconfigniaid.SEC_COLOR),
-        sass.SassFunction('dm', (), lambda: siteconfigniaid.DARK_MODE),
-    })
+    sass.compile(
+        dirname=('static/scss', 'static/css'),
+        output_style='compressed',
+        custom_functions={
+            sass.SassFunction(
+                'mainC',
+                (),
+                lambda: siteconfigniaid.MAIN_COLOR),
+            sass.SassFunction(
+                'secC',
+                (),
+                lambda: siteconfigniaid.SEC_COLOR),
+            sass.SassFunction(
+                'dm',
+                (),
+                lambda: siteconfigniaid.DARK_MODE),
+        })
 
-def setEnvVars(config):
+
+def setEnvVars(env, config):
     # Project specific globals
-    TEMPLATE_ENV.globals['site_name'] = config.SITE_NAME
-    TEMPLATE_ENV.globals['site_desc'] = config.SITE_DESC
-    TEMPLATE_ENV.globals['contact_email'] = config.CONTACT_EMAIL
-    TEMPLATE_ENV.globals['contact_repo'] = config.CONTACT_REPO
+    env.globals['site_name'] = config.SITE_NAME
+    env.globals['site_desc'] = config.SITE_DESC
+    env.globals['contact_email'] = config.CONTACT_EMAIL
+    env.globals['contact_repo'] = config.CONTACT_REPO
     # Metadata
-    TEMPLATE_ENV.globals['metadata_desc'] = config.METADATA_DESC
-    TEMPLATE_ENV.globals['metadata_featured_image'] = config.METADATA_FEATURED_IMAGE
-    TEMPLATE_ENV.globals['metadata_url'] = config.METADATA_CONTENT_URL
-    TEMPLATE_ENV.globals['metadata_main_color'] = config.METADATA_MAIN_COLOR
+    env.globals['metadata_desc'] = config.METADATA_DESC
+    env.globals['metadata_featured_image'] = config.METADATA_FEATURED_IMAGE
+    env.globals['metadata_url'] = config.METADATA_CONTENT_URL
+    env.globals['metadata_main_color'] = config.METADATA_MAIN_COLOR
     # Metadata
-    TEMPLATE_ENV.globals['guide_presets'] = config.GUIDE_PRESETS
-    TEMPLATE_ENV.globals['guide_portals'] = config.GUIDE_PORTALS
-    TEMPLATE_ENV.globals['guide_settings'] = config.GUIDE_SETTINGS
+    env.globals['guide_presets'] = config.GUIDE_PRESETS
+    env.globals['guide_portals'] = config.GUIDE_PORTALS
+    env.globals['guide_settings'] = config.GUIDE_SETTINGS
     # SCHEMA
-    TEMPLATE_ENV.globals['starting_points'] = config.STARTING_POINTS
-    TEMPLATE_ENV.globals['registry_shortcuts'] = config.REGISTRY_SHORTCUTS
+    env.globals['starting_points'] = config.STARTING_POINTS
+    env.globals['registry_shortcuts'] = config.REGISTRY_SHORTCUTS
     # IMAGES FOLDER
-    TEMPLATE_ENV.globals['static_image_folder'] = config.STATIC_IMAGE_FOLDER
+    env.globals['static_image_folder'] = config.STATIC_IMAGE_FOLDER
     # Colors used
-    TEMPLATE_ENV.globals['color_main'] = siteconfig.MAIN_COLOR
-    TEMPLATE_ENV.globals['color_sec'] = siteconfig.SEC_COLOR
+    env.globals['color_main'] = siteconfig.MAIN_COLOR
+    env.globals['color_sec'] = siteconfig.SEC_COLOR
+
 
 # Initial global settings
-setEnvVars(siteconfig)
+setEnvVars(TEMPLATE_ENV_DSC, siteconfig)
+setEnvVars(TEMPLATE_ENV_NIA, siteconfigniaid)
 createStyles()
 
-class BaseHandler(BioThingsBaseHandler):
-    def get_current_user(self):
-        user_json = self.get_secure_cookie("user")
-        if not user_json:
-            return None
-        return json_decode(user_json)
 
-    def return_404(self):
-        '''return a custom 404 page'''
-        doc_file = "404.html"
-        doc_template = TEMPLATE_ENV.get_template(doc_file)
-        doc_output = doc_template.render()
-        self.set_status(404)
-        self.write(doc_output)
+class BaseHandler(BioThingsBaseHandler):
+
+    def get_current_user(self):
+        try:
+            oauth = self.get_oauth_login_info()
+            if oauth:
+                if 'email' in oauth:
+                    return oauth['email']
+                else:
+                    return oauth['login']
+            saml = self.get_saml_login_info()
+            if saml:
+                return saml['samlNameId']
+            return None
+        except Exception:
+            return None
+
+    def get_oauth_login_info(self):
+        try:
+            user_json = self.get_secure_cookie("user")
+            return json_decode(user_json)
+        except Exception:
+            return None
+
+    def get_saml_login_info(self):
+        try:
+            session_ = self.get_secure_cookie("session")
+            return json.loads(session_)
+        except Exception:
+            return None
 
 
 class MainHandler(BaseHandler):
@@ -125,11 +171,11 @@ class GithubLoginHandler(BaseHandler, GithubMixin):
     async def get(self):
         # we can append next to the redirect uri, so the user gets the
         # correct URL on login
-        redirect_uri = url_concat(self.request.protocol +
-                                  "://" + self.request.host +
-                                  GITHUB_CALLBACK_PATH,
-                                  {"next": self.get_argument('next', '/')})
-
+        redirect_uri = url_concat(
+            self.request.protocol + "://" +
+            self.request.host + GITHUB_CALLBACK_PATH,
+            {"next": self.get_argument('next', '/')}
+        )
         # if we have a code, we have been authorized so we can log in
         if self.get_argument("code", False):
             user = await self.get_authenticated_user(
@@ -151,148 +197,76 @@ class GithubLoginHandler(BaseHandler, GithubMixin):
         await self.authorize_redirect(
             redirect_uri=redirect_uri,
             client_id=self.web_settings.GITHUB_CLIENT_ID,
-            extra_params={"scope": GITHUB_SCOPE, "foo": 1}
+            scope=GITHUB_SCOPES,
+            extra_params={"foo": 1}
         )
 
 
 class UserInfoHandler(BaseHandler):
+
     def get(self):
-        current_user = self.get_current_user() or {}
-        for key in ['access_token', 'id']:
-            if key in current_user:
-                del current_user[key]
-        self.return_json(current_user)
+
+        user_info = {}
+        try:
+            oauth = self.get_oauth_login_info()
+            saml = self.get_saml_login_info()
+            if oauth:
+                if 'email' in oauth:
+                    user_info['login'] = oauth['email']
+                else:  # alternatively use username
+                    user_info['login'] = oauth['login']
+                user_info['name'] = oauth['name']
+                user_info['avatar_url'] = oauth['avatar_url']
+            elif saml:
+                user_info['login'] = saml['samlNameId']
+                user_info['name'] = saml['samlNameId']
+        except Exception:
+            pass
+
+        self.finish(user_info)
 
 
-class GuideHandler(BaseHandler):
-    def get(self):
-        doc_file = "metadata-guide-new.html"
-        guide_template = TEMPLATE_ENV.get_template(doc_file)
-        guide_output = guide_template.render()
-        self.write(guide_output)
+class TemplateHandler(BaseHandler):
 
+    def initialize(self, filename, status_code=200, env=None):
 
-class AboutHandler(BaseHandler):
-    def get(self):
-        doc_file = "about.html"
-        about_template = TEMPLATE_ENV.get_template(doc_file)
-        about_output = about_template.render()
-        self.write(about_output)
+        self.filename = filename
+        self.status = status_code
 
-
-class FAQHandler(BaseHandler):
-    def get(self):
-        doc_file = "faq.html"
-        faq_template = TEMPLATE_ENV.get_template(doc_file)
-        faq_output = faq_template.render()
-        self.write(faq_output)
-
-
-class RegistryHandler(BaseHandler):
-    def get(self):
-        doc_file = "registry.html"
-        registry_template = TEMPLATE_ENV.get_template(doc_file)
-        registry_output = registry_template.render()
-        self.write(registry_output)
-
-
-class DashboardHandler(BaseHandler):
-    def get(self):
-        doc_file = "dashboard.html"
-        dashboard_template = TEMPLATE_ENV.get_template(doc_file)
-        dashboard_output = dashboard_template.render()
-        self.write(dashboard_output)
-
-
-class PGHandler(BaseHandler):
-    def get(self):
-        doc_file = "playground.html"
-        playground_template = TEMPLATE_ENV.get_template(doc_file)
-        playground_output = playground_template.render()
-        self.write(playground_output)
-
-
-class EditorHandler(BaseHandler):
-    def get(self):
-        doc_file = "schema-editor.html"
-        editor_template = TEMPLATE_ENV.get_template(doc_file)
-        editor_output = editor_template.render()
-        self.write(editor_output)
-
-
-class VisualizerHandler(BaseHandler):
-    def get(self, namespace=None, className=None):
-        test_file = "schema-viewer.html"
-        test_template = TEMPLATE_ENV.get_template(test_file)
-        test_output = test_template.render(Context=json.dumps(
-            {"namespace": namespace, "query": className}))
-        self.write(test_output)
-
-class DatasetHandler(BaseHandler):
-    def get(self, yourQuery=None):
-        test_file = "metadata-page.html"
-        metadata_template = TEMPLATE_ENV.get_template(test_file)
-        if yourQuery:
-            metadata_output = metadata_template.render(Context=json.dumps({"Query": yourQuery}))
+        if env == 'niaid':
+            self.template = TEMPLATE_ENV_NIA
         else:
-            metadata_output = metadata_template.render(Context=json.dumps({"Query": ''}))
-        self.write(metadata_output)
+            self.template = TEMPLATE_ENV_DSC
 
-class DatasetRegistryHandler(BaseHandler):
-    def get(self):
-        doc_file = "metadata-registry.html"
-        doc_template = TEMPLATE_ENV.get_template(doc_file)
-        doc_output = doc_template.render()
+    def get(self, **kwargs):
+
+        doc_template = self.template.get_template(self.filename)
+        doc_output = doc_template.render(Context=json.dumps(kwargs))
+
+        self.set_status(self.status)
         self.write(doc_output)
 
 
-class PageNotFoundHandler(BaseHandler):
-    def get(self):
-        self.return_404()
-
-class GuideIntroHandler(BaseHandler):
-    def get(self):
-        doc_file = "guide-intro.html"
-        doc_template = TEMPLATE_ENV.get_template(doc_file)
-        doc_output = doc_template.render()
-        self.write(doc_output)
-
-class GuideSpecialHandler(BaseHandler):
-    def get(self):
-        setEnvVars(siteconfigniaid)
-        doc_file = "metadata-guide-new.html"
-        guide_template = TEMPLATE_ENV.get_template(doc_file)
-        guide_output = guide_template.render()
-        self.write(guide_output)
-        setEnvVars(siteconfig)
-
-class JsonSchemaHandler(BaseHandler):
-    def get(self):
-        doc_file = "json-schema-viewer.html"
-        doc_template = TEMPLATE_ENV.get_template(doc_file)
-        doc_output = doc_template.render()
-        self.write(doc_output)
-
-APP_LIST = [
+WEB_HANDLERS = [
     (r"/?", MainHandler),
-    (r"/schema-playground/?", PGHandler),
-    (r"/dashboard/?", DashboardHandler),
-    (r"/about/?", AboutHandler),
-    (r"/faq/?", FAQHandler),
-    (r"/best-practices/?", GuideIntroHandler),
-    (r"/guide/niaid/?", GuideSpecialHandler),
-    (r"/json-schema-viewer/?", JsonSchemaHandler),
-    (r"/guide/?", GuideHandler),
-    (r"/registry/?", RegistryHandler),
-    (r"/editor/?", EditorHandler),
-    (r"/login/?", LoginHandler),
-    # Git Auth
+    (r"/about/?", TemplateHandler, {"filename": "about.html"}),
+    (r"/best-practices/?", TemplateHandler, {"filename": "guide-intro.html"}),
+    (r"/dashboard/?", TemplateHandler, {"filename": "dashboard.html"}),
+    (r"/dataset/?", TemplateHandler, {"filename": "metadata-registry.html"}),
+    (r"/dataset/(geo/.+)", RedirectHandler, {"url": "http://metadataplus.biothings.io/{0}"}),
+    (r"/dataset/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "metadata-page.html"}),
+    (r"/editor/?", TemplateHandler, {"filename": "schema-editor.html"}),
+    (r"/faq/?", TemplateHandler, {"filename": "faq.html"}),
+    (r"/guide/?", TemplateHandler, {"filename": "metadata-guide-new.html"}),
+    (r"/guide/niaid/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "niaid"}),
+    (r"/json-schema-viewer/?", TemplateHandler, {"filename": "json-schema-viewer.html"}),
+    (r"/registry/?", TemplateHandler, {"filename": "registry.html"}),
+    (r"/schema-playground/?", TemplateHandler, {"filename": "playground.html"}),
+    (r"/sitemap.xml", RedirectHandler, {"url": "/static/sitemap.xml"}),
+    (r"/view/(?P<namespace>[^/]+)/(?P<query>[^/]*)/?", TemplateHandler, {"filename": "schema-viewer.html"}),
+    # Auth
     (r"/user/?", UserInfoHandler),
-    (GITHUB_CALLBACK_PATH, GithubLoginHandler),
+    (r"/login/?", LoginHandler),
     (r"/logout/?", LogoutHandler),
-    #
-    (r"/dataset/?", DatasetRegistryHandler),
-    (r"/dataset/([^/]+)/?", DatasetHandler),
-    (r"/view/([^/]+)/([^/]*)/?", VisualizerHandler),
-    (r".*", PageNotFoundHandler)
-] # + SAML_HANDLERS # TODO
+    (GITHUB_CALLBACK_PATH, GithubLoginHandler),
+] + SAML_HANDLERS
