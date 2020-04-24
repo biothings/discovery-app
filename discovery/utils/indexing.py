@@ -10,13 +10,17 @@ from discovery.data.schema import Schema
 from discovery.data.schema_class import SchemaClass
 from discovery.utils.adapters import SchemaWrapper
 
+from elasticsearch_dsl import Index
+
 
 def add_dataset(doc, user, private, class_id):
 
     validate_dataset(doc, class_id)
     dataset = DatasetMetadata.load(
         doc, user, private, class_id)
-    return dataset.save()
+    result = dataset.save()
+    Index('discover_dataset').refresh()
+    return result, dataset.meta.id,
 
 
 def add_dataset_by_url(url, **kwargs):
@@ -51,6 +55,9 @@ def validate_dataset(doc, class_id):
 
 def add_schema(namespace, url, user, text, dic):
 
+    # text: request.get(url).text
+    # dic: request.get(url).json()
+
     # also add associated classes
     schema_parser = SchemaWrapper(dic)
     schema_classes = schema_parser.get_classes()
@@ -64,11 +71,13 @@ def add_schema(namespace, url, user, text, dic):
     for klass in classes:
         logging.info("Indexing %s.", klass.name)
         klass.save()
+    Index('discover_schema_class').refresh()
 
     if url:  # for schema.org items, url==None
         schema = Schema.load(namespace, url, user, schema_context, text)
         logging.debug(schema.to_dict())
         result = schema.save()
+        Index('discover_schema').refresh()
         return {
             'result': result,
             'total': len(classes),
@@ -89,6 +98,16 @@ def add_schema_by_url(namespace, url, user):
         dic = None
 
     return add_schema(namespace, url, user, text, dic)
+
+
+def delete_schema(namespace):
+
+    schema = Schema.get(id=namespace, ignore=404)
+    if schema:
+        schema.delete()
+    SchemaClass.delete_by_schema(namespace)
+    Index('discover_schema_class').refresh()
+    Index('discover_schema').refresh()
 
 
 def find_all_classes(klass):

@@ -2,6 +2,7 @@ import json
 
 from elasticsearch_dsl import Index
 from tornado.escape import json_decode
+from discovery.utils.indexing import add_dataset, validate_dataset
 from tornado.web import HTTPError, MissingArgumentError
 
 from discovery.data.dataset import DatasetMetadata
@@ -29,12 +30,21 @@ class MetadataHandler(APIBaseHandler):
         private = self.get_boolean_argument('private')
         doc = json_decode(self.request.body)
 
-        dataset = DatasetMetadata.load(doc, self.current_user, private, class_id)
+        for field in ('name', 'identifier', 'description'):
+            if field not in doc:
+                raise HTTPError(400, missing=field)
+
+        try:
+            res = add_dataset(doc, self.current_user, private, class_id)
+        except (KeyError, ValueError) as exc:
+            raise HTTPError(400, reason=str(exc))
+        except Exception:
+            raise HTTPError(500)
 
         self.finish({
             'success': True,
-            'result': dataset.save(),
-            'id': dataset.meta.id,
+            'result': res[0],
+            'id': res[1],
         })
 
     @github_authenticated
@@ -57,20 +67,28 @@ class MetadataHandler(APIBaseHandler):
                 raise HTTPError(400, missing=field)
 
         if dataset._meta.username != self.current_user:
-            raise HTTPError(401)
+            raise HTTPError(403)
 
         if dataset.identifier != doc['identifier']:
             raise HTTPError(409)
 
-        DatasetMetadata.validate(doc, dataset._meta.class_id)
+        try:
+            validate_dataset(doc, dataset._meta.class_id)
+        except ValueError as exc:
+            raise HTTPError(400, reason=str(exc))
+        except Exception:
+            raise HTTPError(500)
 
         dataset.name = doc['name']
         dataset.description = doc['description']
         dataset._raw = doc
 
+        result = dataset.save()
+        Index('discover_dataset').refresh()
+
         self.finish({
             'success': True,
-            'result': dataset.save(),
+            'result': result,
             'id': dataset.meta.id,
         })
 
@@ -84,17 +102,16 @@ class MetadataHandler(APIBaseHandler):
 
         if not _id:
 
-            if self.get_boolean_argument('private'):
+            user = self.get_query_argument('user', None)
+            private = self.get_boolean_argument('private')
+
+            if private:
                 if not self.current_user:
-                    self.send_error(401)
-                    return
-                user = self.get_query_argument('user', self.current_user)
+                    raise HTTPError(401)
+                if not user:
+                    user = self.current_user
                 if user != self.current_user:
                     raise HTTPError(403)
-                private = True
-            else:
-                user = self.get_query_argument('user', None)
-                private = False
 
             search = DatasetMetadata.search(private=private)
             search.params(rest_total_hits_as_int=True)
@@ -147,6 +164,7 @@ class MetadataHandler(APIBaseHandler):
                         doc["includedInDataCatalog"]
                     ]
 
+            self.set_header('Content-Type', 'application/javascript')
             self.write(doc)
 
         return
