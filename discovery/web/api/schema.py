@@ -1,15 +1,16 @@
 
-from .base import APIBaseHandler, github_authenticated
 import json
 
-from elasticsearch_dsl import Index
 from tornado.escape import json_decode
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import HTTPError, MissingArgumentError
 
 from discovery.data.schema import Schema
 from discovery.data.schema_class import SchemaClass
-from discovery.utils.indexing import find_all_classes, add_schema
+from discovery.utils.indexing import (add_schema, delete_schema,
+                                      find_all_classes)
+
+from .base import APIBaseHandler, github_authenticated
 
 
 class RegistryHandler(APIBaseHandler):
@@ -115,6 +116,7 @@ class RegistryHandler(APIBaseHandler):
             schema = Schema.get(id=namespace, ignore=404)
             if not schema:
                 raise HTTPError(404)
+            result['name'] = schema.meta.id
             result['url'] = schema.url
             result['source'] = schema.decode_raw()
 
@@ -165,8 +167,4 @@ class RegistryHandler(APIBaseHandler):
             self.send_error(403)
             return
 
-        sch = Schema.get(id=namespace)
-        sch.delete()
-
-        SchemaClass.delete_by_schema(namespace)
-        Index('discover_schema_class').refresh()
+        delete_schema(namespace)
