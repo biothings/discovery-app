@@ -1,0 +1,26 @@
+{
+    "@type": "NiaidDataset",
+    "@context": "http://discovery.biothings.io/",
+    "name": "Clostridium difficile infection isolates from propensity score matched patients with and without severe infection.",
+    "description": "Clostridium difficile infection isolates from propensity score matched patients with and without severe infection.",
+    "measurementTechnique": "http://purl.obolibrary.org/obo/NCIT_C101294",
+    "identifier": "systems_bio_cdiff_0001",
+    "creator": {
+        "@type": "Person",
+        "name": "Systems biology of Clostridium difficile"
+    },
+    "distribution": {
+        "dateModified": "2019-08-20",
+        "url": "https://www.ncbi.nlm.nih.gov/bioproject/561087"
+    },
+    "funding": {
+        "@type": "Organization",
+        "name": "National Institute of Allergy and Infectious Diseases",
+        "identifier": "U01-AI124255",
+        "description": "Dataset is supported by NIAID grant U01-AI124255",
+        "url": "http://grantome.com/grant/NIH/U01-AI124255-04",
+        "parentOrganization": "National Institutes of Health"
+    },
+    "species": "http://www.ontobee.org/ontology/NCBITaxon?iri=http://purl.obolibrary.org/obo/NCBITaxon_9606",
+    "pathogen": "http://www.ontobee.org/ontology/NCBITaxon?iri=http://purl.obolibrary.org/obo/NCBITaxon_1496"
+}
