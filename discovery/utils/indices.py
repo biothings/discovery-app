@@ -12,11 +12,11 @@ from discovery.utils.indexing import add_schema_by_url
 def add_core_schemas():
 
     schemas = (
-        ('schema', None),  # TODO THE TWO BELOW ARE NOT WORKING
-        # ('google', 'https://raw.githubusercontent.com/data2health/schemas/master/Google/Google.jsonld'),
-        # ('datacite', 'https://raw.githubusercontent.com/data2health/schemas/master/DataCite/DataCite.jsonld'),
-        ('biomedical', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/BioMedical/BioMedicalDataset.json')
-        # ('ctsa', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'),
+        ('schema', None),
+        ('google', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/Google/Google.json'),
+        ('datacite', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/DataCite/DataCite.json'),
+        ('biomedical', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/BioMedical/BioMedicalDataset.json'),
+        ('ctsa', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'),
     )
     logger = logging.getLogger(__name__)
 
