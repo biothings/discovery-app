@@ -2,83 +2,108 @@
     Registry Handler Tester
 '''
 
-from tornado.escape import json_encode
-from tornado.web import create_signed_value
+import pytest
+from test_base import DiscoveryTestCase
+from discovery.utils.indexing import add_schema_by_url, delete_schema
 
-from discovery.scripts.add_schema import index_schema
-from discovery.web.api.es.doc import SchemaClass
-
-from biothings.tests.web import BiothingsTestCase
-
-BTS_URL = ('https://raw.githubusercontent.com/data2health/schemas'
-           '/biothings/biothings/biothings_curie.jsonld')
+BTS_URL = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'
 
 
-class DiscoveryAPITest(BiothingsTestCase):
+@pytest.fixture(scope="module", autouse=True)
+def setup():
+    add_schema_by_url(
+        namespace='bts',
+        url=BTS_URL,
+        user='minions@example.com'
+    )
 
-    @classmethod
-    def setUpClass(cls):
 
-        def cookie_header(username):
-            cookie_name, cookie_value = 'user', {'login': username}
-            secure_cookie = create_signed_value(
-                cls.settings.COOKIE_SECRET,
-                cookie_name,
-                json_encode(cookie_value))
-            return {'Cookie': '='.join((cookie_name, secure_cookie.decode()))}
+class DiscoveryAPITest(DiscoveryTestCase):
 
-        cls.auth_user = cookie_header('tester')
-        cls.evil_user = cookie_header('villain')
-
-        index_schema('bts', BTS_URL, 'tester')
-
-    def test_00(self):
-        '''
-        [REGISTRY HEAD] /registry/<prefix>
-        '''
+    def test_00_head(self):
         self.request('registry/bts', method='HEAD')
-        self.request('registry/does_not_exist', method='HEAD', expect_status=404)
 
-    def test_10(self):
-        '''
-        [REGISTRY GET] /registry
-        '''
-        res = self.request('registry?user=tester').json()
-        assert res['hits'][0]['prefix'] == 'bts'
+    def test_01_head(self):
+        self.request('registry/does_not_exist', method='HEAD', expect=404)
 
-    def test_11(self):
-        '''
-        [REGISTRY GET] /registry/<prefix>
+    def test_10_get(self):
+        res = self.request('registry?user=minions@example.com').json()
+        for hit in res['hits']:
+            if hit['namespace'] == 'bts':
+                break
+        else:  # bts schema not found
+            assert False
+
+    def test_11_get(self):
+        ''' GET /registry/<prefix>
+        {
+            "name": "bts",
+            "url": "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld",
+            "source": {
+                "@context": { ... }, // 5 items
+                "@graph": [ ... ], // 135 items
+                "@id": "http://schema.biothings.io/#0.1"
+            },
+            "total": 70,
+            "context": {
+                "schema": "http://schema.org/",
+                "bts": "http://schema.biothings.io/",
+                "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+                "xsd": "http://www.w3.org/2001/XMLSchema#"
+            },
+            "hits": [ ... ] // 70 items
+        }
         '''
         res = self.request('registry/bts').json()
         assert res['name'] == 'bts'
         assert res['url'] == BTS_URL
+        assert res['source']
+        assert res['total']
+        assert res['context']
+        assert res['hits']
 
-    def test_12(self):
+    def test_12_get(self):
+        ''' GET /registry/<prefix>/<label>
+        {
+            "namespace": "bts",
+            "name": "bts:BiologicalEntity",
+            "uri": "http://schema.biothings.io/BiologicalEntity",
+            "prefix": "bts",
+            "label": "BiologicalEntity",
+            "parent_classes": [ "schema:Thing" ],
+            "properties": [ ... ],
+            "ref": true
+        }
         '''
-        [REGISTRY GET] /registry/<prefix>/<label>
-        '''
-        res = self.request('registry/bts/BiologicalEntity').json()
+        res = self.request('registry/bts/bts:BiologicalEntity').json()
         assert res['label'] == 'BiologicalEntity'
         assert res['prefix'] == 'bts'
 
-    def test_20(self):
-        '''
-        [REGISTRY DEL] /registry/<prefix>
-        '''
-        _id = 'bts'
-        self.request('registry/' + _id, method='DELETE', expect_status=401)
-        self.request('registry/' + _id, method='DELETE', headers=self.evil_user, expect_status=403)
-        self.request('registry/' + 'i', method='DELETE', headers=self.auth_user, expect_status=404)
-        self.request('registry/' + _id, method='DELETE', headers=self.auth_user)
-        self.query(q='BiologicalEntity', expect_hits=False)
+    def test_20_delete(self):
+        self.request('registry/bts', method='DELETE', expect=401)
 
-    def test_30(self):
-        '''
-        [REGISTRY POST] /registry/<prefix>
-        '''
-        doc = {'url': BTS_URL, 'namespace': 'bts'}
-        SchemaClass.delete_by_schema('bts')
-        self.query(q='BiologicalEntity', expect_hits=False)
-        self.request('registry', method='POST', json=doc, headers=self.auth_user, expect_status=201)
+    def test_21_delete(self):
+        self.request('registry/bts', method='DELETE', headers=self.evil_user, expect=403)
+
+    def test_22_delete(self):
+        self.request('registry/xtx', method='DELETE', headers=self.auth_user, expect=404)
+
+    def test_23_delete(self):
+        self.query(q='BiologicalEntity', hits=True)
+        self.request('registry/bts', expect=200)
+        self.request('registry/bts', method='DELETE', headers=self.auth_user)
+        self.request('registry/bts', expect=404)
+        self.query(q='BiologicalEntity', hits=False)
+
+    def test_30_post(self):
+        delete_schema('bts')
+        doc = {
+            'url': BTS_URL,
+            'namespace': 'bts'
+        }
+        self.query(q='BiologicalEntity', hits=False)
+        self.request('registry/bts', expect=404)
+        self.request('registry', method='POST', json=doc, headers=self.auth_user)
+        self.request('registry/bts', expect=200)
         self.query(q='BiologicalEntity')

@@ -7,7 +7,7 @@ from biothings.tests.web import BiothingsTestCase
 
 class DiscoveryQueryTest(BiothingsTestCase):
 
-    def test_01_biothings_default(self):
+    def test_01_default(self):
         '''
         [QUERY] Basic functionality
         '''

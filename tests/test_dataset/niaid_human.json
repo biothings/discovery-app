@@ -1,6 +1,7 @@
 {
     "@type": "NiaidDataset",
     "@context": "http://discovery.biothings.io/",
+    "identifier": "systems_bio_cdiff_0002",
     "name": "Human tracheobronchial epithelial (HTBE) cell transcriptome response to influenza A virus infection",
     "description": "Human tracheobronchial epithelial (HTBE) cells are considered to serve as a good correlate of influenza virus infection in the human respiratory tract. mRNA-Seq analysis was used to profile the cellular transcriptome of HTBE cells at multiple time points in response to infection with influenza A/California/04/09 (H1N1), A/Wyoming/03/03 (H3N2), and A/Vietnam/1203/04 (H5N1) HALo virus.",
     "measurementTechnique": "http://edamontology.org/topic_3170",
