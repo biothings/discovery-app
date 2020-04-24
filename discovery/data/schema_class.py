@@ -5,7 +5,7 @@
 
 import logging
 
-from elasticsearch_dsl import (Boolean, Document, InnerDoc, Keyword, Nested,
+from elasticsearch_dsl import (Boolean, Document, InnerDoc, Keyword,
                                Object, Text)
 
 
@@ -58,12 +58,12 @@ class SchemaClass(Document):
     namespace = Keyword(required=True)  # the _id of the schema document defining the class
     name = Keyword()  # curie
 
+    description = Text()
     prefix = Text(required=True, fields={'raw': Keyword()})
     label = Text(required=True, boost=2, fields={'raw': Keyword()})
     uri = Text(fields={'raw': Keyword()})
-    description = Text()
-    parent_classes = Text(multi=True)  # immediate ones only
-    properties = Nested(SchemaClassProp)  # immediate ones only
+    parent_classes = Text(multi=True, analyzer="simple")  # immediate ones only
+    properties = Object(SchemaClassProp)  # immediate ones only
     validation = Object(enabled=False)
     ref = Boolean()  # not defined in this schema
 
