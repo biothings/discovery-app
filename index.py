@@ -4,13 +4,13 @@
 import logging
 
 from biothings.web.index_base import main
-from discovery.web.handlers import WEB_HANDLERS
-from discovery.web.handlers import TemplateHandler
+from tornado.ioloop import IOLoop
+
 from discovery.utils.indices import setup_data
+from discovery.web.handlers import WEB_HANDLERS, TemplateHandler
 
 if __name__ == '__main__':
-    logging.captureWarnings(True)
-    setup_data()
+    IOLoop.current().add_callback(setup_data)
     main(WEB_HANDLERS, {
         "default_handler_class": TemplateHandler,
         "default_handler_args": {
