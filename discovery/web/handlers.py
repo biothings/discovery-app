@@ -36,18 +36,9 @@ def createStyles():
         dirname=('static/scss', 'static/css'),
         output_style='compressed',
         custom_functions={
-            sass.SassFunction(
-                'mainC',
-                (),
-                lambda: siteconfig.MAIN_COLOR),
-            sass.SassFunction(
-                'secC',
-                (),
-                lambda: siteconfig.SEC_COLOR),
-            sass.SassFunction(
-                'dm',
-                (),
-                lambda: siteconfig.DARK_MODE),
+            sass.SassFunction('mainC', (), lambda: siteconfig.MAIN_COLOR),
+            sass.SassFunction('secC', (), lambda: siteconfig.SEC_COLOR),
+            sass.SassFunction('dm', (), lambda: siteconfig.DARK_MODE),
         })
     # Compile site specific minified css NIAAID
     # in main.html create matching rules and link to styles directory
@@ -55,35 +46,17 @@ def createStyles():
         dirname=('static/scss', 'static/css/niaid'),
         output_style='compressed',
         custom_functions={
-            sass.SassFunction(
-                'mainC',
-                (),
-                lambda: siteconfigniaid.MAIN_COLOR),
-            sass.SassFunction(
-                'secC',
-                (),
-                lambda: siteconfigniaid.SEC_COLOR),
-            sass.SassFunction(
-                'dm',
-                (),
-                lambda: siteconfigniaid.DARK_MODE),
+            sass.SassFunction('mainC', (), lambda: siteconfigniaid.MAIN_COLOR),
+            sass.SassFunction('secC', (), lambda: siteconfigniaid.SEC_COLOR),
+            sass.SassFunction('dm', (), lambda: siteconfigniaid.DARK_MODE),
         })
     sass.compile(
         dirname=('static/scss', 'static/css/outbreak'),
         output_style='compressed',
         custom_functions={
-            sass.SassFunction(
-                'mainC',
-                (),
-                lambda: siteconfigoutbreak.MAIN_COLOR),
-            sass.SassFunction(
-                'secC',
-                (),
-                lambda: siteconfigoutbreak.SEC_COLOR),
-            sass.SassFunction(
-                'dm',
-                (),
-                lambda: siteconfigoutbreak.DARK_MODE),
+            sass.SassFunction('mainC', (), lambda: siteconfigoutbreak.MAIN_COLOR),
+            sass.SassFunction('secC', (), lambda: siteconfigoutbreak.SEC_COLOR),
+            sass.SassFunction('dm', (), lambda: siteconfigoutbreak.DARK_MODE),
         })
 
 
@@ -254,21 +227,19 @@ class TemplateHandler(BaseHandler):
         self.status = status_code
 
         if env == 'niaid':
-            self.template = TEMPLATE_ENV_NIA
+            self.env = TEMPLATE_ENV_NIA
         elif env == 'outbreak':
-            self.template = TEMPLATE_ENV_OUT
-        else:
-            self.template = TEMPLATE_ENV_DSC
+            self.env = TEMPLATE_ENV_OUT
+        else:  # discovery
+            self.env = TEMPLATE_ENV_DSC
 
     def get(self, **kwargs):
 
-        doc_template = self.template.get_template(self.filename)
-        if kwargs:
-            doc_output = doc_template.render(Context=json.dumps(kwargs))
-        else:
-            doc_output = doc_template.render()
+        template = self.env.get_template(self.filename)
+        output = template.render(Context=json.dumps(kwargs))
+
         self.set_status(self.status)
-        self.write(doc_output)
+        self.write(output)
 
 
 WEB_HANDLERS = [
@@ -294,5 +265,4 @@ WEB_HANDLERS = [
     (r"/login/?", LoginHandler),
     (r"/logout/?", LogoutHandler),
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),
-]
-+ SAML_HANDLERS
+] + SAML_HANDLERS
