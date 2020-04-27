@@ -5,17 +5,20 @@
     See configuration details: https://github.com/onelogin/python3-saml
 
 """
-
-from .handlers import *
+import os
 
 SAML_PATH = os.path.dirname(__file__)
 
-SAML_HANDLERS = [
-    (r"/saml/", SAMLUserHandler),
-    (r"/saml/login", SAMLLoginHandler),
-    (r"/saml/acs", SAMLACSHandler),
-    (r"/saml/logout", SAMLLogOutHandler),
-    (r"/saml/sls", SAMLSLSHandler),
-    (r"/saml/metadata", MetadataHandler),
-]
-
+try:
+    from .handlers import *
+except ImportError:
+    SAML_HANDLERS = []
+else:
+    SAML_HANDLERS = [
+        (r"/saml/", SAMLUserHandler),
+        (r"/saml/login", SAMLLoginHandler),
+        (r"/saml/acs", SAMLACSHandler),
+        (r"/saml/logout", SAMLLogOutHandler),
+        (r"/saml/sls", SAMLSLSHandler),
+        (r"/saml/metadata", MetadataHandler),
+    ]
