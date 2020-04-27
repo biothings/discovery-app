@@ -265,4 +265,8 @@ WEB_HANDLERS = [
     (r"/login/?", LoginHandler),
     (r"/logout/?", LogoutHandler),
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),
+<< << << < HEAD
 ] + SAML_HANDLERS
+== == == =
+] + SAML_HANDLERS
+>> >>>> > b1caaad768f2804335c6ac56417a608755219212
