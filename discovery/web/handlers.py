@@ -14,6 +14,7 @@ from torngithub import GithubMixin, json_decode, json_encode
 
 import discovery.web.siteconfig.default as siteconfig
 import discovery.web.siteconfig.niaid as siteconfigniaid
+import discovery.web.siteconfig.outbreak as siteconfigoutbreak
 from biothings.web.handlers import BaseHandler as BioThingsBaseHandler
 
 from .saml import SAML_HANDLERS
@@ -25,6 +26,7 @@ TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templa
 TEMPLATE_LOADER = FileSystemLoader(searchpath=TEMPLATE_PATH)
 TEMPLATE_ENV_DSC = Environment(loader=TEMPLATE_LOADER, cache_size=0)
 TEMPLATE_ENV_NIA = Environment(loader=TEMPLATE_LOADER, cache_size=0)
+TEMPLATE_ENV_OUT = Environment(loader=TEMPLATE_LOADER, cache_size=0)
 TEMPLATE_ENV = TEMPLATE_ENV_DSC  # COMPATIBILITY
 
 
@@ -50,7 +52,7 @@ def createStyles():
     # Compile site specific minified css NIAAID
     # in main.html create matching rules and link to styles directory
     sass.compile(
-        dirname=('static/scss', 'static/css'),
+        dirname=('static/scss', 'static/css/niaid'),
         output_style='compressed',
         custom_functions={
             sass.SassFunction(
@@ -65,6 +67,23 @@ def createStyles():
                 'dm',
                 (),
                 lambda: siteconfigniaid.DARK_MODE),
+        })
+    sass.compile(
+        dirname=('static/scss', 'static/css/outbreak'),
+        output_style='compressed',
+        custom_functions={
+            sass.SassFunction(
+                'mainC',
+                (),
+                lambda: siteconfigoutbreak.MAIN_COLOR),
+            sass.SassFunction(
+                'secC',
+                (),
+                lambda: siteconfigoutbreak.SEC_COLOR),
+            sass.SassFunction(
+                'dm',
+                (),
+                lambda: siteconfigoutbreak.DARK_MODE),
         })
 
 
@@ -96,6 +115,7 @@ def setEnvVars(env, config):
 # Initial global settings
 setEnvVars(TEMPLATE_ENV_DSC, siteconfig)
 setEnvVars(TEMPLATE_ENV_NIA, siteconfigniaid)
+setEnvVars(TEMPLATE_ENV_OUT, siteconfigoutbreak)
 createStyles()
 
 
@@ -235,14 +255,18 @@ class TemplateHandler(BaseHandler):
 
         if env == 'niaid':
             self.template = TEMPLATE_ENV_NIA
+        elif env == 'outbreak':
+            self.template = TEMPLATE_ENV_OUT
         else:
             self.template = TEMPLATE_ENV_DSC
 
     def get(self, **kwargs):
 
         doc_template = self.template.get_template(self.filename)
-        doc_output = doc_template.render(Context=json.dumps(kwargs))
-
+        if kwargs:
+            doc_output = doc_template.render(Context=json.dumps(kwargs))
+        else:
+            doc_output = doc_template.render()
         self.set_status(self.status)
         self.write(doc_output)
 
@@ -259,6 +283,7 @@ WEB_HANDLERS = [
     (r"/faq/?", TemplateHandler, {"filename": "faq.html"}),
     (r"/guide/?", TemplateHandler, {"filename": "metadata-guide-new.html"}),
     (r"/guide/niaid/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "niaid"}),
+    (r"/guide/outbreak/dataset/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "outbreak"}),
     (r"/json-schema-viewer/?", TemplateHandler, {"filename": "json-schema-viewer.html"}),
     (r"/registry/?", TemplateHandler, {"filename": "registry.html"}),
     (r"/schema-playground/?", TemplateHandler, {"filename": "playground.html"}),
@@ -269,4 +294,5 @@ WEB_HANDLERS = [
     (r"/login/?", LoginHandler),
     (r"/logout/?", LogoutHandler),
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),
-] + SAML_HANDLERS
+]
++ SAML_HANDLERS

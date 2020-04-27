@@ -1012,6 +1012,10 @@
             $('.flipcard').addClass('flipped');
           }
         },
+        getCycle(graph) {
+          // TODO detect cycles and deal with them
+          console.log(graph)
+        },
         makeHierarchyTree(){
           var self = this;
           // if (!self.query) {
@@ -1033,17 +1037,25 @@
                 }
               }
             }
-            let topoRes = jsnx.topologicalSort(self.nxG);
-            if(self.developerMode)console.log('ROOT NODE IS...', topoRes[0])
-            let rootNode = '';
-            // if (topoRes.includes('Thing')) {
-            //   rootNode ='Thing';
-            // }else{
-            //   rootNode = topoRes[0];
-            // }
-            rootNode = topoRes[0];
 
-            self.rootNode= rootNode;
+            try {
+              let topoRes = jsnx.topologicalSort(self.nxG);
+              if(self.developerMode)console.log('ROOT NODE IS...', topoRes[0])
+              let rootNode = '';
+              // if (topoRes.includes('Thing')) {
+              //   rootNode ='Thing';
+              // }else{
+              //   rootNode = topoRes[0];
+              // }
+              rootNode = topoRes[0];
+
+              self.rootNode= rootNode;
+            } catch (e) {
+              console.log('GRAPH HAS ENDLESS CYCLES')
+            } finally {
+
+            }
+
 
             // if (self.developerMode) {
             //   jsnx.draw(self.nxG, {
