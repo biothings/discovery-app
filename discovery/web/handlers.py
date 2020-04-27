@@ -263,10 +263,8 @@ class TemplateHandler(BaseHandler):
     def get(self, **kwargs):
 
         doc_template = self.template.get_template(self.filename)
-        if kwargs:
-            doc_output = doc_template.render(Context=json.dumps(kwargs))
-        else:
-            doc_output = doc_template.render()
+        doc_output = doc_template.render(Context=json.dumps(kwargs))
+
         self.set_status(self.status)
         self.write(doc_output)
 
@@ -294,5 +292,4 @@ WEB_HANDLERS = [
     (r"/login/?", LoginHandler),
     (r"/logout/?", LogoutHandler),
     (GITHUB_CALLBACK_PATH, GithubLoginHandler),
-]
-+ SAML_HANDLERS
+]+ SAML_HANDLERS
