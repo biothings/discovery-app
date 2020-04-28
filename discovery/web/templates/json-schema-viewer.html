@@ -230,6 +230,7 @@ Vue.component('defbox', {
   template:
   `<div class="col-sm-12 py-3 text-left border-bottom border-info" :id="name">
     <div class="">
+      <i class="fas fa-tiny fa-code text-muted float-right" :data-tippy-info="JSON.stringify(info,null,2)"></i>
       <a :href="'#'+name">
         <h6 v-text="name" class="font-weight-bold d-inline"></h6>
       </a>
@@ -755,10 +756,36 @@ var app = new Vue({
 
               }else if (schema && schema.hasOwnProperty('@context')) {
                 self.loadMsg=`<b class="text-danger">ATTENTION! File is JSON-LD and only visualized partially. You should visualize this here: <a href="/schema-playground">Schema Playground</a> for a complete visualization.</b>`;
-                if (schema && schema['@graph'][0].hasOwnProperty('$validation')) {
-                  payload ={};
-                  payload['schema'] = schema['@graph'][0]['$validation'];
-                  store.commit('saveSchema',payload)
+                if (schema && schema['@graph']) {
+                  options={}
+                  optionsLabels={}
+                  for (var i = 0; i < schema['@graph'].length; i++) {
+                    if (schema['@graph'][i].hasOwnProperty('$validation')) {
+                      options[schema['@graph'][i]['rdfs:label']]=schema['@graph'][i]
+                      optionsLabels[schema['@graph'][i]['rdfs:label']]=schema['@graph'][i]['rdfs:label']
+                    }
+                  }
+                  console.log("options",options)
+                  Swal.fire({
+                    title: 'Which would you like to visualize?',
+                    input: 'select',
+                    inputOptions: optionsLabels,
+                    inputPlaceholder: 'Select a Class',
+                    showCancelButton: true,
+                    inputValidator: (value) => {
+                      return new Promise((resolve) => {
+                        console.log('value',value)
+                        if (value) {
+                          payload ={};
+                          payload['schema'] = options[value]["$validation"];
+                          store.commit('saveSchema',payload)
+                          resolve()
+                        }
+                      })
+                    }
+                  })
+
+
                 }
               }else{
                 self.loadMsg=`<b class="text-danger">File is not JSON Schema Structure or JSON-LD</b>`;

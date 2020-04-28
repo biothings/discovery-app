@@ -105,11 +105,14 @@
         <!--hierarchical view -->
         <div id="hierarchical" class="text-left p-4 bg-light overflow-x-scroll">
           <h1 class="text-muted d-inline mr-2">Hierarchical</h1> <a class="bold mainTextDark pointer m-2 toggleLink" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
-          <ul class="pagination">
+          <div class="alert alert-warning" v-if="treeBuildErr">
+            <small>Hierarchical view not available. Tree could not be built due to endless cycles found on schema definition.</small>
+          </div>
+          <ul class="pagination" v-if="!treeBuildErr">
             <li v-for="n in [0,1,2,3,4,5,6,7,8,9,10]" class="d-inline hierarchicalSwatch" :class="'bg-'+n" >
             </li>
           </ul>
-          <ul class="tree">
+          <ul class="tree" v-if="!treeBuildErr">
             <li>
               <a class="text-0" :href="'/view/'+namespace+'/'+rootNode" v-text="rootNode"></a>
               <ul>
@@ -779,7 +782,8 @@
           filter:'',
           loading:false,
           queryContentParents:[],
-          checkbox:null
+          checkbox:null,
+          treeBuildErr: false
 				}
 			},
       computed:{
@@ -1051,7 +1055,8 @@
 
               self.rootNode= rootNode;
             } catch (e) {
-              console.log('GRAPH HAS ENDLESS CYCLES')
+              console.log("Oh no...",e)
+              self.treeBuildErr = true;
             } finally {
 
             }
@@ -1326,7 +1331,7 @@
                 </li>
                 <li>
                   <small>
-                    <i class="fas fa-star"></i> It's easy to registrer your schema! If everything looks good here all you have to do is choose a namespace for your schema's homepage.
+                    <i class="fas fa-star"></i> It's easy to register your schema! If everything looks good here all you have to do is choose a namespace for your schema's homepage.
                   </small>
                 </li>
                 <li>
@@ -1360,7 +1365,7 @@
                         resolve('Namespace contains invalid characters')
                       }else{
                         axios.head(`/api/registry/`+input).then(function (res) {
-                          resolve('<small>Sorry, that namespace is already taken: <a href="/'+input+'/" target="_blank">http://discovery.biothings.io/'+input+'</a></small>')
+                          resolve('<small>Sorry, that namespace is already taken: <a href="/view/'+input+'/" target="_blank">http://discovery.biothings.io/view/'+input+'</a></small>')
                         }).catch(err=>{
                           resolve()
                           throw err;
