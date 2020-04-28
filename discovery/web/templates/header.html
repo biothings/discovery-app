@@ -26,8 +26,9 @@
         <template v-if="userInfo && userInfo.login">
           <li class='nav-item'>
             <a class='nav-link pulse' id='navPhotoLink' href='/dashboard/'>
-              <span v-text='userInfo.login'></span>
-              <img id='navPhoto' class='userImage' :src='userInfo.avatar_url' alt='user photo'>
+              <small v-text='userInfo.login'></small>
+              <img v-if="!userInfo.avatar_url" id='navPhoto' class='userImage' src='/static/img/default.png' alt='user photo'>
+              <img v-else id='navPhoto' class='userImage' :src='userInfo.avatar_url' alt='user photo'>
             </a>
           </li>
           <li class='nav-item'><a class='nav-link' :href='"/logout?next="+window.location.pathname'>Logout</a></li>
@@ -38,7 +39,6 @@
 </header>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
-<script src="/static/js/lodash.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
 var app = new Vue({
