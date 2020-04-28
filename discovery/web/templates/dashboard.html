@@ -15,7 +15,8 @@
         <!-- uSER BOX -->
         <div class="col-sm-2 p-0 userInfo bg-secondary">
           <div class="pRelative">
-            <img :src="user.avatar_url" width="100%" alt="logo" style="z-index:1"/>
+            <img v-if="user.avatar_url" :src="user.avatar_url" width="100%" alt="logo" style="z-index:1"/>
+            <img v-else id='navPhoto' width="100%" alt="logo" style="z-index:1" src='/static/img/default.png' alt='user photo'>
             <div class="clip bg-secondary pAbsolute" style="z-index:2"></div>
           </div>
           <div class="bg-secondary text-light p-3 text-center">
