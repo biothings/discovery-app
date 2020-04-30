@@ -25,7 +25,7 @@ ES_CLIENT_TIMEOUT = 10
 API_PREFIX = 'api'
 API_VERSION = ''
 APP_LIST = [
-    (r"/api/query/?", "biothings.web.api.es.handlers.QueryHandler"),
+    (r"/api/query/?", "biothings.web.handlers.QueryHandler"),
     (r"/api/registry/([^/]+)/([^/]+)/?", "discovery.web.api.RegistryHandler"),
     (r"/api/registry/([^/]+)/?", "discovery.web.api.RegistryHandler"),
     (r"/api/registry/?", "discovery.web.api.RegistryHandler"),
@@ -38,5 +38,5 @@ APP_LIST = [
 # Biothings SDK Settings
 # *****************************************************************************
 ACCESS_CONTROL_ALLOW_METHODS = 'HEAD,GET,POST,DELETE,PUT,OPTIONS'
-ES_QUERY_BUILDER = "discovery.query.DiscoveryQueryBuilder"
+ES_QUERY_BUILDER = "discovery.pipeline.DiscoveryQueryBuilder"
 DISABLE_CACHING = True

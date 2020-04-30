@@ -5,7 +5,7 @@ import logging
 from tornado.httpclient import AsyncHTTPClient
 from torngithub import json_encode
 
-from biothings.web.api.handler import BaseAPIHandler
+from biothings.web.handlers import BaseAPIHandler
 from discovery.web.handlers import BaseHandler
 
 L = logging.getLogger(__name__)
