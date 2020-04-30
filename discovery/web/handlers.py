@@ -1,6 +1,3 @@
-# pylint: disable=abstract-method, arguments-differ, missing-docstring
-
-''' Discovery Web Tornado Request Handler'''
 
 import json
 import logging
@@ -156,8 +153,8 @@ class LoginHandler(BaseHandler):
 
 class LogoutHandler(BaseHandler):
     def get(self):
-        self.clear_cookie("user") # oauth
-        self.clear_cookie("session") # saml
+        self.clear_cookie("user")  # oauth
+        self.clear_cookie("session")  # saml
         self.redirect(self.get_argument("next", "/"))
 
 
