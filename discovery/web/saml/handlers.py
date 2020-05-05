@@ -18,7 +18,6 @@ from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from tornado.log import enable_pretty_logging
 
 
-
 class SAMLBaseHandler(tornado.web.RequestHandler):
 
     def get_current_user(self):
@@ -119,7 +118,7 @@ class SAMLSLSHandler(SAMLBaseHandler):
             if url is not None:
                 return self.redirect(url)
             else:
-                self.redirect(self.get_argument("next", "/saml/"))
+                self.redirect(self.get_argument("next", "/"))
         elif auth.get_settings().is_debug_active():
             error_reason = auth.get_last_error_reason()
             self.finish(error_reason)
