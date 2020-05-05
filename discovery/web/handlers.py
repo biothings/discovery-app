@@ -95,7 +95,7 @@ class BaseHandler(BioThingsBaseHandler):
         try:
             oauth = self.get_oauth_login_info()
             if oauth:
-                if 'email' in oauth:
+                if 'email' in oauth and oauth['email']:
                     return oauth['email']
                 else:
                     return oauth['login']
@@ -202,7 +202,7 @@ class UserInfoHandler(BaseHandler):
             oauth = self.get_oauth_login_info()
             saml = self.get_saml_login_info()
             if oauth:
-                if 'email' in oauth:
+                if 'email' in oauth and oauth['email']:
                     user_info['login'] = oauth['email']
                 else:  # alternatively use username
                     user_info['login'] = oauth['login']
