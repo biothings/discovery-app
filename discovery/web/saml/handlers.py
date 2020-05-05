@@ -50,7 +50,7 @@ class SAMLLoginHandler(SAMLBaseHandler):
     def get(self):
         req = prepare_tornado_request(self.request)
         auth = init_saml_auth(req)
-        return self.redirect(auth.login(self.get_argument('next', '/saml/')))
+        return self.redirect(auth.login(self.get_argument('next', '/')))
 
 
 class SAMLACSHandler(SAMLBaseHandler):
@@ -96,7 +96,7 @@ class SAMLLogOutHandler(SAMLBaseHandler):
         if 'samlSessionIndex' in session:
             session_index = session['samlSessionIndex']
         return self.redirect(auth.logout(
-            self.get_argument('next', '/saml/'),
+            self.get_argument('next', '/'),
             name_id=name_id, session_index=session_index))
 
 
