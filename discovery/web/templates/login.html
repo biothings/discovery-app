@@ -1,11 +1,31 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-
-<div class="jumbotron text-center padding20">
-    <h3 class="mainTextDark">Login</h3>
-    <hr />
-    <a href='{{ path }}' class="btn themeButton text-light">Login with Github</a>
+<style>
+.opt-bg{
+background: -moz-linear-gradient(left,  rgba(99,42,107,0) 2%, rgba(99,42,107,1) 49%, rgba(74,125,143,0.98) 50%, rgba(74,125,143,0) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(left,  rgba(99,42,107,0) 2%,rgba(99,42,107,1) 49%,rgba(74,125,143,0.98) 50%,rgba(74,125,143,0) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to right,  rgba(99,42,107,0) 2%,rgba(99,42,107,1) 49%,rgba(74,125,143,0.98) 50%,rgba(74,125,143,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00632a6b', endColorstr='#004a7d8f',GradientType=1 ); /* IE6-9 */
+}
+</style>
+<div class="jumbotron text-center d-flex justify-content-center align-items-center" style="min-height:95Vh">
+    <div class="p-2">
+      <div class="row m-0">
+        <div class="col-sm-12 text-center">
+          <img src="/static/img/dde-logo-o.svg" width="100" height="100" alt="DDE">
+          <h3 class="text-muted">Select the login method</h3>
+          <hr />
+        </div>
+        <div class="col-sm-12 row m-0 opt-bg py-5">
+          <div class="col-sm-6 p-2">
+            <a href='{{ path }}' class="btn btn-light mainTextDark">Login with Github <i class="fas fa-chevron-right"></i></a>
+          </div>
+          <div class="col-sm-6 p-2">
+            <a href="/saml/login/" class="btn btn-light mainTextLight">Login with NCATS <i class="fas fa-chevron-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
-
 {% endblock %}

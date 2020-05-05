@@ -1,10 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<style>
-
-
-</style>
 <div id="guide" class="container pt-5" style="min-height:90vh;">
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>
@@ -24,7 +20,7 @@
         </span>
       </li>
       <li class='nav-item' v-if="userInfo && !userInfo.login">
-        <a class='nav-link active text-primary' href='./oauth'>
+        <a class='nav-link active text-primary' href='/login'>
           <small><i class="fas fa-sign-in-alt"></i> Login</small>
         </a>
       </li>
