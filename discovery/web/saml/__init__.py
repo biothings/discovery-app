@@ -16,9 +16,9 @@ except ImportError:
 else:
     SAML_HANDLERS = [
         (r"/saml/", SAMLUserHandler),
-        (r"/saml/login", SAMLLoginHandler),
-        (r"/saml/acs", SAMLACSHandler),
-        (r"/saml/logout", SAMLLogOutHandler),
-        (r"/saml/sls", SAMLSLSHandler),
-        (r"/saml/metadata", MetadataHandler),
+        (r"/saml/login/?", SAMLLoginHandler),
+        (r"/saml/acs/?", SAMLACSHandler),
+        (r"/saml/logout/?", SAMLLogOutHandler),
+        (r"/saml/sls/?", SAMLSLSHandler),
+        (r"/saml/metadata/?", MetadataHandler),
     ]
