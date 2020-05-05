@@ -1027,16 +1027,18 @@
             if (self.userSchema['hits'].length > 1) {
               for (var i = 0; i < self.userSchema['hits'].length; i++) {
                 // console.log('CLASS: ',i,self.userSchema['hits'][i]["label"])
-                self.addNode(self.userSchema['hits'][i]["label"]);
+                self.addNode(self.userSchema['hits'][i]["name"]);
+                console.log("add node",self.userSchema['hits'][i]["name"])
                 if (self.userSchema['hits'][i].hasOwnProperty('parent_classes')) {
                   let parents = self.userSchema['hits'][i]["parent_classes"][0];
                   if (parents) {
                     let parentList = parents.split(", ");
                     // console.log('parent list', parentList)
-                    let parentName = self.getName(parentList[parentList.length-1])
+                    let parentName = parentList[parentList.length-1]
                     // console.log('LINKING...', parentName,self.userSchema['hits'][i]["label"])
+                    console.log("add parent",parentName)
                     self.addNode(parentName);
-                    self.addEdge(parentName,self.userSchema['hits'][i]["label"]);
+                    self.addEdge(parentName,self.userSchema['hits'][i]["name"]);
                   }
                 }
               }
@@ -1044,6 +1046,7 @@
 
             try {
               let topoRes = jsnx.topologicalSort(self.nxG);
+              console.log('ROOT NODE IS...', topoRes[0])
               if(self.developerMode)console.log('ROOT NODE IS...', topoRes[0])
               let rootNode = '';
               // if (topoRes.includes('Thing')) {
