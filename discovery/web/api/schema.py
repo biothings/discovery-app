@@ -145,12 +145,15 @@ class RegistryHandler(APIBaseHandler):
             queue = find_all_classes(klass)
             self.finish({
                 "total": len(queue),
+                "context": Schema.gather_contexts(),
                 "names": [klass.meta.id.split('::')[1] for klass in queue],
                 "hits": [klass.to_dict() for klass in queue]
             })
             return
 
-        self.finish(klass.to_dict())
+        result = {"@context": Schema.gather_contexts()}
+        result.update(klass.to_dict())
+        self.finish(result)
 
     @github_authenticated
     def delete(self, namespace):
