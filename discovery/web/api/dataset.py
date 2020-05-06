@@ -31,8 +31,8 @@ class MetadataHandler(APIBaseHandler):
         doc = json_decode(self.request.body)
 
         for field in ('name', 'identifier', 'description'):
-            if field not in doc:
-                raise HTTPError(400, missing=field)
+            if field not in doc:  # required in es data model
+                raise HTTPError(400, reason=f"missing {field}")
 
         try:
             res = add_dataset(doc, self.current_user, private, class_id)
@@ -63,8 +63,8 @@ class MetadataHandler(APIBaseHandler):
             raise HTTPError(404)
 
         for field in ('name', 'identifier', 'description'):
-            if field not in doc:
-                raise HTTPError(400, missing=field)
+            if field not in doc:  # required in es data model
+                raise HTTPError(400, reason=f"missing {field}")
 
         if dataset._meta.username != self.current_user:
             raise HTTPError(403)
