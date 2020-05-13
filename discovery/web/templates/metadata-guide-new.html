@@ -160,11 +160,20 @@
     mutations: {
       saveSchema(state,payload){
         state.schema = payload['schema'];
-        // console.log('schema saved',state.schema)
-        state.output['@type'] = state.schema.label || state.schema.name
-        state.output['@context'] = 'http://discovery.biothings.io/'
+        console.log('schema saved',state.schema)
+        state.output['@type'] = state.schema.name || state.schema.label
+        state.output['@context'] = payload['schema']["@context"]
 
         state.filter = state.schema.label || state.schema.name
+
+        // Add identifier to required if not there, it's required as an ID
+        if ('identifier' in state.schema.validation.properties && !state.schema.validation.required.includes('identifier')) {
+          state.schema.validation.required.push('identifier')
+        }else{
+          console.log('WARNING: identifier field not found and is required')
+          Vue.set(state.schema.validation.properties['identifier'],{'type':'string','description':'unique identifier for this entry'});
+          state.schema.validation.required.push('identifier')
+        }
 
         // helper func to decide right subcategory
         function getProp(propname){
@@ -310,9 +319,9 @@
       },
       formPreview(state){
         let props = state.schema.validation.properties;
-        Vue.set(state,'output',{})
-        Vue.set(state.output,'@type',state.schema.label || state.schema.name)
-        Vue.set(state.output,'@context','http://discovery.biothings.io/')
+        // Vue.set(state,'output',{})
+        // Vue.set(state.output,'@type',state.schema.label || state.schema.name)
+        // Vue.set(state.output,'@context','http://discovery.biothings.io/view/schema/')
         for (key in props) {
           if (props[key].hasOwnProperty('value') && props[key]['value']) {
             if (_.isArray(props[key]['value']) && props[key]['value'].length === 1) {
@@ -843,7 +852,7 @@
 
         let previewObj = {}
         Vue.set(previewObj,'@type',self.item.name)
-        Vue.set(previewObj,'@context','http://discovery.biothings.io/view/')
+        Vue.set(previewObj,'@context','http://discovery.biothings.io/view/schema/')
 
         // compare combined output and export only props found in this schema
         for (var key in output) {
