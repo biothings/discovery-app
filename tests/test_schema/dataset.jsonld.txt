@@ -1,0 +1,382 @@
+{
+  "@context": {
+    "outbreak": "https://discovery.biothings.io/view/outbreak/",
+    "owl": "http://www.w3.org/2002/07/owl/",
+    "rdf": "http://www.w3.org/1999/02/22/-rdf-syntax-ns/",
+    "rdfs": "http://www.w3.org/2000/01/rdf/-schema/",
+    "schema": "http://schema.org/"
+  },
+  "@id": "https://discovery.biothings.io/view/outbreak/",
+  "@graph": [{
+    "@id": "outbreak:Dataset",
+    "@type": "rdfs:Class",
+    "rdfs:label": "Dataset",
+    "rdfs:comment": "This is the schema for describing the Dataset schema used for outbreak.info.",
+    "rdfs:subClassOf": {
+      "@id": "schema:Dataset"
+    },
+    "schema:isPartOf": {
+      "@id": "https://discovery.biothings.io/view/outbreak/"
+    },
+    "$validation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Descriptive name of the dataset",
+          "type": "string"
+        },
+        "description": {
+          "description": "Longer description of what is contained in the dataset",
+          "type": "string"
+        },
+        "measurementTechnique": {
+          "description": "A technique or technology used in a Dataset, corresponding to the method used for measuring the corresponding variable(s).",
+          "oneOf": [{
+              "$ref": "#/definitions/controlledVocabulary"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/controlledVocabulary"
+              }
+            }
+          ]
+        },
+        "identifier": {
+          "description": "Longer description of what is contained in the dataset",
+          "type": "string"
+        },
+        "doi": {
+          "description": "The DOI for the dataset if available",
+          "type": "string"
+        },
+        "author": {
+          "description": "Name of the author or organization that created the dataset.  Note: schema.org/author and schema.org/organization have additional fields that can provide more information about the author/organization, if desired.",
+          "oneOf": [{
+              "$ref": "#/definitions/person"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/person"
+              }
+            },
+            {
+              "$ref": "#/definitions/organization"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/organization"
+              }
+            }
+          ]
+        },
+        "dataDownload": {
+          "description": "Available downloads of the dataset.",
+          "oneOf": [{
+              "$ref": "#/definitions/dataDownload"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/dataDownload"
+              }
+            }
+          ]
+        },
+        "funding": {
+          "description": "Funding that supports (sponsors) the collection of this dataset through some kind of financial contribution",
+          "oneOf": [{
+              "$ref": "#/definitions/funding"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/funding"
+              }
+            }
+          ]
+        },
+        "license": {
+          "description": "A license document that applies to this content, typically indicated by URL.",
+          "type": "string",
+          "format": "uri"
+        },
+        "species": {
+          "description": "Species(es) from which dataset has been collected",
+          "oneOf": [{
+              "$ref": "#/definitions/miscControlledVocabulary"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/miscControlledVocabulary"
+              }
+            }
+          ]
+        },
+        "infectiousAgent": {
+          "description": "infectious agents(s) which are the focus of the dataset",
+          "oneOf": [{
+              "$ref": "#/definitions/miscControlledVocabulary"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/miscControlledVocabulary"
+              }
+            }
+          ]
+        },
+        "topicCategory": {
+          "description": "Applicable outbreak.info category",
+          "enum": [
+            "Clinical",
+            "Diagnosis",
+            "Forecasting",
+            "Mechanism",
+            "Prevention",
+            "Transmission",
+            "Treatment",
+            "Epidemiology"
+          ]
+        },
+        "keywords": {
+          "description": "A list of keywords associated with this dataset",
+          "type": "string"
+        },
+        "isBasedOn": {
+          "description": "A citation to a resource (eg- publication, protocol, etc.) on which this dataset was derived (stored as an object, not a string)",
+          "oneOf": [{
+              "$ref": "#/definitions/citation"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/citation"
+              }
+            }
+          ]
+        },
+        "citedBy": {
+          "description": "A citation to a resource (eg- publication, protocol, etc.) which is derived from this dataset (stored as an object, not a string)",
+          "oneOf": [{
+              "$ref": "#/definitions/citation"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/citation"
+              }
+            }
+          ]
+        },
+        "relatedTo": {
+          "description": "A citation to a resource (eg- publication, protocol, etc.) which is related to the dataset but is not a derivative nor was derived from the dataset (stored as an object, not a string)",
+          "oneOf": [{
+              "$ref": "#/definitions/citation"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/citation"
+              }
+            }
+          ]
+        },
+        "curatedBy": {
+          "description": "A citation to a resource which curated this dataset enabling its review for appropriateness and/or integration into the site.",
+          "oneOf": [{
+              "$ref": "#/definitions/citation"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/citation"
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "measurementTechnique",
+        "author",
+        "dataDownload",
+        "dateModified",
+        "funding"
+      ],
+      "definitions": {
+        "person": {
+          "description": "Reusable person definition",
+          "@type": "Person",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "givenName": {
+              "type": "string"
+            },
+            "familyName": {
+              "type": "string"
+            },
+            "orcid": {
+              "type": "string"
+            },
+            "affiliation": {
+              "type": "array",
+              "oneOf": [{
+                  "$ref": "organization"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "organization"
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "name"
+          ]
+        },
+        "organization": {
+          "description": "Reusable organization definition",
+          "@type": "Organization",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "affiliation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ]
+        },
+        "controlledVocabulary": {
+          "description": "collection of vocabulary terms defined in ontologies",
+          "@type": "CreativeWork",
+          "type": "string",
+          "vocabulary": {
+            "ontology": [
+              "efo_exp",
+              "ncit_group"
+            ],
+            "children_of": [
+              "https://www.ebi.ac.uk/efo/EFO_0002694",
+              "http://purl.obolibrary.org/obo/NCIT_C20368"
+            ]
+          },
+          "strict": false
+        },
+        "miscControlledVocabulary": {
+          "description": "collection of vocabulary terms defined in ontologies",
+          "@type": "CreativeWork",
+          "type": "string",
+          "vocabulary": {
+            "ontology": [
+              "ncbi_taxon"
+            ],
+            "children_of": [
+              "http://purl.obolibrary.org/obo/NCBITaxon_10239",
+              "http://purl.obolibrary.org/obo/NCBITaxon_131567l"
+            ]
+          },
+          "strict": false
+        },
+        "funding": {
+          "type": "object",
+          "@type": "MonetaryGrant",
+          "description": "Information about funding support",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The name of the monetary grant that funded/funds the Dataset"
+            },
+            "identifier": {
+              "type": "string",
+              "description": "Unique identifier(s) for the grant(s) used to fund the Dataset"
+            },
+            "funder": {
+              "description": "name of the funding organization",
+              "type": "array",
+              "oneOf": [{
+                  "$ref": "organization"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "organization"
+                  }
+                }
+              ]
+            },
+            "url": {
+              "type": "string",
+              "description": "award URL"
+            }
+          },
+          "required": [
+            "name",
+            "identifier"
+          ]
+        },
+        "dataDownload": {
+          "description": "A dataset in downloadable form.",
+          "@type": "DataDownload",
+          "type": "object",
+          "properties": {
+            "dateModified": {
+              "type": "string",
+              "format": "date"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "dateModified",
+            "url"
+          ]
+        },
+        "citation": {
+          "description": "A citation object for a resource which is cited by the dataset (ie- is a derivative of the dataset) , related to the dataset, or from which the dataset was based on (ie- is derived from).",
+          "@type": "ScholarlyArticle",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "identifier": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "versionDate": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "name",
+            "type"
+          ]
+        }
+      }
+    }
+  }]
+}
