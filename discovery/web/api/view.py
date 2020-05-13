@@ -8,6 +8,7 @@ import json
 import logging
 
 import tornado
+from tornado.web import HTTPError
 
 from discovery.utils.adapters import SchemaWrapper
 
@@ -41,9 +42,12 @@ class SchemaViewHandler(APIBaseHandler):
         logger.info("View: %s.", url)
 
         http_client = tornado.httpclient.AsyncHTTPClient()
-        response = await http_client.fetch(url)
-        doc = json.loads(response.body)
-        schema = SchemaWrapper(doc)
+        try:  # load doc from url
+            response = await http_client.fetch(url)
+            doc = json.loads(response.body)
+            schema = SchemaWrapper(doc)
+        except Exception as exc:
+            raise HTTPError(400, reason=str(exc))
 
         classes_defs = schema.get_class_defs()
         classes_refs = schema.get_class_refs()
