@@ -1,0 +1,349 @@
+{
+  "@context": {
+    "schema": "http://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "bts": "http://discovery.biothings.io/bts/"
+  },
+  "@graph": [{
+      "@id": "bts:CTSADataset",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A schema describing Dataset from CTSA center",
+      "rdfs:label": "CTSADataset",
+      "rdfs:subClassOf": {
+        "@id": "schema:Dataset"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "name": {
+            "$comment": "the starting of inherented fields from schema:Dataset",
+            "description": "The name of the CTSA Dataset",
+            "type": "string"
+          },
+          "description": {
+            "description": "A description of the CTSA Dataset",
+            "type": "string"
+          },
+          "url": {
+            "description": "URL of the Dataset page if available.",
+            "type": "string",
+            "format": "uri"
+          },
+          "sameAs": {
+            "description": "URL of a reference Web page that unambiguously indicates the item's identity. E.g. the URL of the item's Wikipedia page, Wikidata entry, or official website.",
+            "type": "string"
+          },
+          "keywords": {
+            "description": "Keywords or tags used to describe this content. Multiple entries in a keywords list are typically delimited by commas.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "datePublished": {
+            "description": "Date of first publication of this dataset.",
+            "oneOf": [{
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "string",
+                "format": "date"
+              }
+            ]
+          },
+          "dateModified": {
+            "description": "The date on which the dataset was most recently modified.",
+            "oneOf": [{
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "string",
+                "format": "date"
+              }
+            ]
+          },
+          "version": {
+            "description": "The version of the dataset.",
+            "type": "string"
+          },
+          "identifier": {
+            "description": "The identifier of the dataset if available, e.g. ID from repositories GEO, EGA.",
+            "type": "string"
+          },
+          "measurementTechnique": {
+            "description": "The technique or method used to produce the Dataset.",
+            "enum": [
+              "whole-genome sequencing",
+              "whole-exome sequencing",
+              "mass spectrum"
+            ]
+          },
+          "creator": {
+            "description": "The creater (often the primary contact) of this dataset.",
+            "$ref": "#/definitions/person"
+          },
+          "contributor": {
+            "description": "The other contributor(s) of this dataset, besides the creator",
+            "oneOf": [{
+                "$ref": "#/definitions/person"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/person"
+                }
+              }
+            ]
+          },
+          "publisher": {
+            "description": "The organization publish this dataset, usually the host institute.",
+            "@type": "Organization",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": ["name"]
+          },
+          "license": {
+            "description": "Specify the data access license",
+            "@type": "CreativeWork",
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": ["url"]
+          },
+          "citation": {
+            "description": "The citation of this dataset.",
+            "@type": "CreativeWork",
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "identifier": {
+                "type": "string",
+                "description": "use PubMed id here"
+              }
+            },
+            "required": ["text"]
+          },
+          "samples": {
+            "description": "sample info of this dataset."
+          },
+          "funding": {
+            "description": "funding info of this dataset.",
+            "oneOf": [{
+                "@type": "MonetaryGrant",
+                "$ref": "#/definitions/funder",
+                "identifier": {
+                  "type": "string",
+                  "description": "unique grant number identifier"
+                },
+                "required": ["identifier"]
+              },
+              {
+                "type": "array",
+                "items": {
+                  "@type": "MonetaryGrant",
+                  "$ref": "#/definitions/funder",
+                  "identifier": {
+                    "type": "string",
+                    "description": "unique grant number identifier"
+                  },
+                  "required": ["identifier"]
+                }
+              }
+            ]
+          },
+          "includedInDataCatalog": {
+            "description": "This is a fixed CTSA DataCatalog.",
+            "@type": "CreativeWork",
+            "type": "object",
+            "properties": {
+              "name": {
+                "const": "CTSA Datasets"
+              },
+              "url": {
+                "const": "https://ctsa.ncats.nih.gov/cd2h/"
+              }
+            }
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "creator",
+          "publisher",
+          "identifier"
+        ],
+        "definitions": {
+          "person": {
+            "description": "Reusable person definition",
+            "@type": "Person",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": ["name"]
+          },
+          "funder": {
+            "type": "object",
+            "@type": "Organization",
+            "description": "Information about a single funder",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "name of the funder"
+              },
+              "description": {
+                "type": "string",
+                "description": "description about the funding organization"
+              },
+              "url": {
+                "type": "string",
+                "description": "award URL"
+              },
+              "parentOrganization": {
+                "type": "string",
+                "description": "name of the parent funding organization"
+              }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    },
+    {
+      "@id": "bts:samples",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sample information including size, organism, tissus, etc.",
+      "rdfs:label": "samples",
+      "schema:domainIncludes": {
+        "@id": "bts:CTSADataset"
+      },
+      "schema:rangeIncludes": {
+        "@id": "bts:DataSamples"
+      }
+    },
+    {
+      "@id": "bts:funding",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Funder information",
+      "rdfs:label": "funding",
+      "schema:domainIncludes": {
+        "@id": "bts:CTSADataset"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:MonetaryGrant"
+      }
+    },
+    {
+      "@id": "bts:DataSamples",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "Sample information including size, organism, tissue, etc.",
+      "rdfs:label": "DataSamples",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      },
+      "$validation": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "description": "the number of samples",
+            "type": "integer",
+            "minimum": 1
+          },
+          "organism": {
+            "description": "the organism of samples come from",
+            "oneOf": [{
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "tissue": {
+            "description": "the tissue of samples come from",
+            "oneOf": [{
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "@id": "bts:size",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sample size",
+      "rdfs:label": "size",
+      "schema:domainIncludes": {
+        "@id": "bts:DataSamples"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Integer"
+      }
+    },
+    {
+      "@id": "bts:organism",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sample organism",
+      "rdfs:label": "organism",
+      "schema:domainIncludes": {
+        "@id": "bts:DataSamples"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "bts:tissue",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Sample tissue",
+      "rdfs:label": "tissue",
+      "schema:domainIncludes": {
+        "@id": "bts:DataSamples"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    }
+  ]
+}
