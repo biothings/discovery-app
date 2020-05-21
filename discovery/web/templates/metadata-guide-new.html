@@ -161,6 +161,7 @@
       saveSchema(state,payload){
         state.schema = payload['schema'];
         console.log('schema saved',state.schema)
+        console.log('form properties',state.schema.validation.properties)
         state.output['@type'] = state.schema.name || state.schema.label
         state.output['@context'] = payload['schema']["@context"]
 
@@ -605,7 +606,7 @@
       saveProgress({commit, state}){
         commit('formPreview')
         let obj = state.output
-        localStorage.setItem('guideProgress',JSON.stringify(obj));
+        sessionStorage.setItem('guideProgress',JSON.stringify(obj));
       },
     }
   });
@@ -1226,13 +1227,82 @@
 
         let props = {}
 
+        console.log("propInfo",propInfo)
+
         if (propInfo.hasOwnProperty('oneOf')) {
+          console.log("HAS ONE OF")
           for (var i = 0; i < propInfo['oneOf'].length; i++) {
             if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'object') {
               props = propInfo['oneOf'][i]['properties']
             }
             if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'array') {
               self.canAcceptMultiple = true
+            }
+            //  FOR SIMPLE STRINGS
+            if (propInfo['oneOf'][i]['type'] === 'string'){
+
+              Swal({
+                title: propName,
+                input: 'text',
+                inputPlaceholder: 'Enter text here',
+                inputValidator: (value) => {
+                  if (value) {
+                    if (propName == 'keywords') {
+                      slist = value.split(",");
+                      for (var sIndex = 0; sIndex < slist.length; sIndex++) {
+                        var payload = {};
+                        payload["item"] = slist[sIndex];
+                        payload["from"] = propName;
+                        store.commit('addToArrayFrom',payload);
+
+                        store.dispatch('saveProgress');
+                      }
+                    }else{
+                      var payload = {};
+                      payload["item"] = value;
+                      payload["from"] = propName;
+                      store.commit('addToArrayFrom',payload);
+
+                      store.dispatch('saveProgress');
+                    }
+
+                  }
+                }
+
+              })
+
+
+            }
+
+            //  FOR ENUM
+            if (propInfo['oneOf'][i].hasOwnProperty('enum')) {
+
+
+              let e = propInfo['oneOf'][i]['enum']
+              let options={}
+              for (var eIndex = 0; eIndex < e.length; eIndex++) {
+                options[e[eIndex]]=e[eIndex]
+              }
+
+
+              Swal({
+                title: propName,
+                input: 'select',
+                inputOptions: options,
+                inputPlaceholder: 'Select one',
+                showCancelButton: true,
+                inputValidator: (value) => {
+                  if (value) {
+                    var payload = {};
+                    payload["item"] = value;
+                    payload["from"] = propName;
+                    store.commit('addToArrayFrom',payload);
+
+                    store.dispatch('saveProgress');
+                  }
+                }
+              })
+
             }
             //  FOR VOCABULARY FROM ONTOLOGIES
             if (propInfo['oneOf'][i].hasOwnProperty('vocabulary') && propInfo['oneOf'][i]['type'] === 'string') {
@@ -1339,6 +1409,8 @@
                         payload["item"] = result.value[i];
                         payload["from"] = propName;
                         store.commit('addToArrayFrom',payload);
+
+                        store.dispatch('saveProgress');
                       }
 
                     }
@@ -1346,10 +1418,8 @@
 
                 }
               })
-
-
-
             }
+
           }
         }else if (propInfo.hasOwnProperty('properties')){
           props = propInfo.properties
@@ -1612,10 +1682,14 @@
             if ((propInfo && propInfo.hasOwnProperty('oneOf')) && (propInfo['oneOf'][0].hasOwnProperty('vocabulary'))){
               //if its a vocab enum field do nothing. separate modal will launch
             }else {
-              var payload = {};
-              payload["item"] = obj;
-              payload["from"] = propName;
-              store.commit('addToArrayFrom',payload);
+              if(Object.keys(obj).length !== 0 && obj.constructor === Object){
+                var payload = {};
+                payload["item"] = obj;
+                payload["from"] = propName;
+                store.commit('addToArrayFrom',payload);
+
+                store.dispatch('saveProgress');
+              }
             }
 
           }
@@ -3026,7 +3100,7 @@
           store.commit('changeStep',payload);
         },
         checkProgress(){
-          let p = localStorage.getItem('guideProgress');
+          let p = sessionStorage.getItem('guideProgress');
           if (p) {
             $.notify("Progress recovered",{ globalPosition: 'right',className:'info', showDuration: 40, });
             let selected = JSON.parse(p)
