@@ -602,6 +602,11 @@
       reset ({ commit }) {
         commit('reset')
       },
+      saveProgress({commit, state}){
+        commit('formPreview')
+        let obj = state.output
+        localStorage.setItem('guideProgress',JSON.stringify(obj));
+      },
     }
   });
 
@@ -996,6 +1001,7 @@
         payload["select"] = '';
         store.commit('markSelected',payload);
         // store.commit('selectNext');
+        store.dispatch('saveProgress');
       },
       clearFieldFor:function(propname){
         var payload = {};
@@ -1846,6 +1852,8 @@
           var payload = {};
           payload["completed"] = {'name':this.name,'value':newValue};
           store.commit('markCompleted',payload);
+
+          store.dispatch('saveProgress');
         }
       },
       datePreset:function(){
@@ -2569,6 +2577,8 @@
               }
             }
           }
+          // check for saved progress
+          self.checkProgress();
         },
         assignCategories(schema){
           var self = this;
@@ -3014,6 +3024,30 @@
           let payload = {}
           payload["step"] = s;
           store.commit('changeStep',payload);
+        },
+        checkProgress(){
+          let p = localStorage.getItem('guideProgress');
+          if (p) {
+            $.notify("Progress recovered",{ globalPosition: 'right',className:'info', showDuration: 40, });
+            let selected = JSON.parse(p)
+
+            for(key in selected){
+              if (!['@context','@type','_id'].includes(key)) {
+                var payload = {};
+                if (typeof selected[key] === 'object') {
+                  let value = [selected[key]]
+                  payload["completed"] = {'name':key,'value':value};
+                  store.commit('markCompleted',payload);
+                }else{
+                  let value = selected[key]
+                  payload["completed"] = {'name':key,'value':value};
+                  store.commit('markCompleted',payload);
+                }
+
+              }
+            }
+          }
+
         }
 			},
 			mounted:function(){
