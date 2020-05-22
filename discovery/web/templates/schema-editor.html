@@ -512,6 +512,7 @@ Vue.component('c-box', {
                   </template>
                   <small class="bold"><span v-text="item.label"></span> <i class="fas fa-info-circle text-info cTip pointer" :data-tippy-description="item.description" :data-tippy-label="item.label"></i></small class="bold">
                   <small v-if="item.properties" class="mainTextDark bold float-right">(<span v-text="item.properties.length"></span> properties)</small>
+                  <small v-if="item.special && !item.properties" class="text-muted float-right">Add properties here <i class="fas fa-arrow-right text-danger"></i></small>
                   <template v-if="showDesc">
                     <small class="d-block text-muted" v-html="item.description || 'No description provided'"></small>
                   </template>
@@ -538,7 +539,7 @@ Vue.component('c-box', {
               </div>
               <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
                 <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click='addProp(item.label)'>
-                  <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                  <i class="fas fa-circle text-success fa-stack-2x"></i>
                   <i class="fas fa-plus fa-stack-1x text-light"></i>
                 </span>
                 <span class="fa-stack fa-1x pointer expand unselectable" @click='expand=!expand'>
