@@ -10,13 +10,13 @@
     <img src="/static/img/ripple.svg"/>
   </div>
   <div class="jumbotron bg-light text-center m-0">
-    <h1 class="logoText">DISCOVERY GUIDE</h1>
+    <h3 class="logoText">DISCOVERY GUIDE</h3>
     <p class="text-muted">
       Follow best practices to make your dataset metadata more findable
     </p>
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
-  <div id="widget" class="mb-5 grad">
+  <div id="widget" class="mb-5 grad rounded">
     <div>
       <div class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start">
         <span class="fa-stack fa-1x pointer desc mr-2" :data-tippy-info="'Logged in as '+userInfo.login" v-if="userInfo && userInfo.login">
@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <div v-else class="widgetContainer bg-light jumbotron whitefade text-center m-1">
+    <div v-else class="widgetContainer bg-light p-3 whitefade text-center m-1">
 
         <template v-if="step === 1 ">
           <!-- STARTING POINT -->
@@ -154,10 +154,14 @@
       startingPoint: null,
       selectedPortals:[],
       step: Number,
-      settings: Object
+      settings: Object,
+      showDescriptions:true
     },
     strict: true,
     mutations: {
+      toggleDesc(state){
+        state.showDescriptions = !state.showDescriptions
+      },
       saveSchema(state,payload){
         state.schema = payload['schema'];
         console.log('schema saved',state.schema)
@@ -443,6 +447,9 @@
       }
     },
     getters:{
+      getShowDesc:state=>{
+        return state.showDescriptions
+      },
       // exposed as store.getters.nameOfGetter
       getSchema: (state) => {
         return state.schema
@@ -759,7 +766,7 @@
     `<div class="m-1 text-center p-2 desc rounded" :data-tippy-info="cat" style="max-height:109px;outline:none !important;">
       <small  class="bold text-info d-block">
         <i v-if=" cat ==='Google'" class="fab fa-google googleText mr-1"></i>
-        <span v-text="cat"></span>
+        <span v-text="cat+' Progress'"></span>
         <i v-if="canRemove" class="fas fa-minus-square text-danger pointer desc" data-tippy-info="Remove" @click="removeCat()"></i>
       </small>
       <div class="d-flex justify-content-around">
@@ -1938,31 +1945,26 @@
         }else{
           return false;
         }
+      },
+      showDesc:function(){
+        return store.getters.getShowDesc
       }
     },
     template:
-    `<div class="m-2 inputbox fade-in" :id='name'>
+    `<div class="mb-2 inputbox fade-in" :id='name'>
       <div class="row">
         <div class="col-sm-12 text-center text-muted">
           <div class="w-75 m-auto">
             <div class="w-100 text-center">
-              <h4 v-text="name" class="text-muted bold pointer mr-1 d-inline"></h4>
+              <h6 v-text="name" class="text-muted bold pointer mr-1 d-inline"></h6>
               <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired"></i>
             </div>
-            <small>
+            <small v-if="showDesc" class="text-info">
               <span v-text='info.description || "No description provided"'></span>
             </small>
           </div>
         </div>
-        <div class="col-sm-2 categoryBox d-flex align-items-center justify-content-center flex-wrap" :class="[userInput ? 'alert-success':'alert-secondary']">
-          <div class="text-left p-1">
-            <small class="text-muted bold">Part of</small>
-            <template v-if="info && info.categories" v-for="category in info.categories">
-              <small v-text="category.category" class="d-block desc pointer" :data-tippy-info="[category.subcategory === 'Required' ? 'Required' : 'Recommended']" :class="[category.subcategory === 'Required' ? 'text-danger' : 'text-info']"></small>
-            </template>
-          </div>
-        </div>
-        <div class="col-sm-8 p-2 text-left d-flex align-items-center justify-content-center" :class="[userInput ? 'alert-success':'alert-secondary']">
+        <div class="col-sm-10 p-2 text-left d-flex align-items-center justify-content-center" :class="[userInput ? 'alert-success':'alert-secondary']">
           <div class="d-flex w-100 justify-content-center">
             <div class="w-75 p-3">
               <h6 v-show="loading" class="text-primary">Loading <i class="fas fa-spinner fa-pulse"></i></h6>
@@ -2227,6 +2229,12 @@
                 </template>
 
               </template>
+              <small>
+                <small class="text-muted bold">Part of</small>
+                <template v-if="info && info.categories" v-for="category in info.categories">
+                  <small v-text="category.category" class="desc pointer mr-2" :data-tippy-info="[category.subcategory === 'Required' ? 'Required' : 'Recommended']" :class="[category.subcategory === 'Required' ? 'text-danger' : 'text-info']"></small>
+                </template>
+              </small>
             </div>
           </div>
         </div>
@@ -2295,10 +2303,19 @@
         let payload = {}
         payload["step"] = s;
         store.commit('changeStep',payload);
-      }
+      },
+      toggleDesc(){
+        store.commit('toggleDesc');
+      },
     },
     watch:{
-
+      allMode: function(m){
+        if (m) {
+          $.notify("View All",{ globalPosition: 'right',className:'info', showDuration: 40, });
+        }else{
+          $.notify("View 1 by 1",{ globalPosition: 'right',className:'info', showDuration: 40, });
+        }
+      }
     },
     mounted: function(){
       this.checkSettings();
@@ -2329,6 +2346,9 @@
       },
       step: function(){
         return store.getters.getStep
+      },
+      showDesc: function(){
+        return store.getters.getShowDesc
       }
     },
     template:
@@ -2337,10 +2357,23 @@
         <div class="col-sm-12 col-md-8">
 
 
-          <div class="d-flex justify-content-around align-items-center">
-            <h1 class="d-inline mr-5" v-text="type" :class="type === 'REQUIRED' ?'text-danger':'text-info'"></h1>
+          <div class="text-left">
+            <h3 class="d-inline mr-5" v-text="type" :class="type === 'REQUIRED' ?'text-danger':'text-info'"></h3>
+          </div>
+
+          <div class="alert-dark d-flex justify-content-around align-items-center p-1">
+            <small class="text-muted"><i class="fas fa-cog"></i> Settings</small>
             <div>
-              <small class="text-muted">CHANGE VIEW </small> <button class="btn btn-sm themeButton text-light" v-text="!allMode ? 'ALL' : '1 BY 1'" @click="allMode = !allMode"></button>
+              <input class="form-check-input" type="checkbox" :checked="allMode"  id="customControlInline2" @click="allMode = !allMode">
+              <label class="form-check-label text-muted" for="customControlInline2" >
+                <small>Change View</small>
+              </label>
+            </div>
+            <div>
+              <input class="form-check-input" type="checkbox" :checked="showDesc"  id="customControlInline" @click="toggleDesc()">
+              <label class="form-check-label text-muted" for="customControlInline" >
+                <small>Toggle Descriptions</small>
+              </label>
             </div>
           </div>
 
