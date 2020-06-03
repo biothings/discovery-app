@@ -57,7 +57,7 @@ class DatasetMetadataHandler(APIBaseHandler):
         Does not change the privacy setting or identifier.
         '''
         if not _id:
-            raise MissingArgumentError('id')
+            raise HTTPError(405)
 
         if not DatasetController.exists(_id):
             raise HTTPError(404)

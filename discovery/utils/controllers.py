@@ -49,11 +49,16 @@ class SchemaController:
     def url(self):
         return self._schema._meta.url
 
+    @property
+    def namespace(self):
+        return self._schema.meta.id
+
     @staticmethod
     def add(namespace, doc, user):
         # this overrides existing data
         # expect exception if no success
-        logger.debug("[%s] %s (%s)", namespace, doc, user)
+        logger.info("Add [%s] (%s)", namespace, user)
+        logger.debug(doc)
 
         if isinstance(doc, str):  # url
             url = doc
@@ -76,7 +81,8 @@ class SchemaController:
         SchemaClass.delete_by_schema(namespace)
 
         # [{...}...] -> [SchemaClass(...)...]
-        classes = list(SchemaClass(namespace=namespace, **kls) for kls in schema_classes)
+        classes = list(SchemaClass(namespace=namespace, **kls)
+                       for kls in schema_classes)
 
         # save schema classes
         logger.info("Indexing %s classes.", len(classes))
@@ -193,6 +199,41 @@ class SchemaController:
         # refresh database
         Index(SchemaClass.Index.name).refresh()
         Index(Schema.Index.name).refresh()
+
+    def update(self, url, doc):
+        # this overrides existing data
+        # expect exception if no success
+        logger.info("Update [%s] (%s)", self.namespace, self.user)
+        logger.debug(url)
+        logger.debug(doc)
+
+        ans = {'id': self._schema.meta.id}
+
+        # update the schema
+        result = self._schema.update(**doc)
+        Index(Schema.Index.name).refresh()
+        ans['result'] = result
+
+        if result != 'noop':
+
+            # find associated classes
+            schema_parser = SchemaAdapter(doc)
+            schema_classes = schema_parser.get_classes()
+            classes = list(SchemaClass(namespace=self.namespace, **kls)
+                           for kls in schema_classes)
+            ans['total'] = len(classes)
+
+            # delete old classes
+            SchemaClass.delete_by_schema(self.namespace)
+            logger.info("Indexing %s classes.", len(classes))
+
+            # save schema classes
+            for klass in classes:
+                logger.info("%s::%s", self.namespace, klass.name)
+                klass.save()
+            Index(SchemaClass.Index.name).refresh()
+
+        return ans
 
     @staticmethod
     def _find_all_classes(klass):
