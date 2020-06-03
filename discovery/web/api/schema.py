@@ -38,6 +38,9 @@ class SchemaRegistryHandler(APIBaseHandler):
             'user': {'type': str},
             'field': {'type': str},
             'verbose': {'type': bool, 'default': False, 'alias': ['v']},
+        },
+        'PUT': {
+            'url': {'type': str, 'required': False},
         }
     }
 
@@ -76,8 +79,7 @@ class SchemaRegistryHandler(APIBaseHandler):
         if SchemaController.exists(url):
             raise HTTPError(409, reason="url already registered.")
 
-        # load schema json from url
-        try:
+        try:  # load schema json from url
             response = await AsyncHTTPClient().fetch(url)
 
         except Exception as exc:
@@ -122,6 +124,43 @@ class SchemaRegistryHandler(APIBaseHandler):
             raise HTTPError(404)
 
         self.finish(klass)
+
+    @github_authenticated
+    async def put(self, namespace=None):
+        '''
+        Update the schema of the specified namespace.
+        May change the url or refresh with the previous.
+        {
+            "url": <schema_url> # optional
+        }
+        '''
+        if not namespace:
+            raise HTTPError(405)
+
+        if not SchemaController.exists(namespace):
+            raise HTTPError(404)
+
+        schema = SchemaController(namespace)
+
+        # if schema.user != self.current_user:
+        #     raise HTTPError(403)
+
+        url = self.args.url or schema.url
+
+        try:  # fetch the new content
+            res = await AsyncHTTPClient().fetch(url)
+            doc = json.loads(res.body)
+
+        except Exception as exc:
+            raise HTTPError(400, reason=str(exc))
+
+        try:  # update the schema
+            ans = schema.update(url, doc)
+
+        except Exception as exc:
+            raise HTTPError(500, reason=str(exc))
+
+        self.finish(ans)
 
     @github_authenticated
     def delete(self, namespace):
