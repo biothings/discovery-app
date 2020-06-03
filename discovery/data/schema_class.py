@@ -5,8 +5,7 @@
 
 import logging
 
-from elasticsearch_dsl import (Boolean, Document, InnerDoc, Keyword,
-                               Object, Text)
+from elasticsearch_dsl import *
 
 
 class SchemaClassProp(InnerDoc):
@@ -73,6 +72,7 @@ class SchemaClass(Document):
         '''
         name = 'discover_schema_class'
         settings = {
+            "number_of_shards": 1,
             "number_of_replicas": 0
         }
 
@@ -84,8 +84,9 @@ class SchemaClass(Document):
         existing_classes = cls.search().query("match", namespace=namespace)
         existing_classes.delete()
 
-        logging.warning("Deleted %s classes from namespace %s.",
-                        existing_classes.count(), namespace)
+        if existing_classes.count():
+            logging.warning("Deleted %s classes from namespace %s.",
+                            existing_classes.count(), namespace)
 
     def save(self, **kwargs):
 

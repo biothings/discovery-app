@@ -1,13 +1,12 @@
 
 import hashlib
 
-from elasticsearch_dsl import (Boolean, Document, InnerDoc, Keyword, Object,
-                               Text)
+from elasticsearch_dsl import *
 
 
 class DocumentMeta(InnerDoc):
     '''
-    Typically used for _meta field of a document
+    _meta field.
     '''
     username = Keyword(required=True)
     class_id = Keyword(required=True)  # like ctsa::bts:CTSADataset
@@ -32,11 +31,13 @@ class DatasetMetadata(Document):
         ...
     }
     '''
-    _raw = Object(enabled=False)  # original
     _meta = Object(DocumentMeta, required=True)
-    identifier = Text(required=True)
+    identifier = Keyword(required=True)
     description = Text(required=True)
     name = Text(required=True)
+
+    class Meta:
+        dynamic = MetaField(False)
 
     class Index:
         '''
@@ -44,21 +45,24 @@ class DatasetMetadata(Document):
         '''
         name = 'discover_dataset'
         settings = {
+            "number_of_shards": 1,
             "number_of_replicas": 0
         }
 
     @classmethod
+    def exists(cls, _id):
+        '''
+        Check if a datset exists by _id.
+        '''
+        search = cls.search().query('match', _id=_id)
+        return bool(search.source(False).execute().hits)
+
+    @classmethod
     def load(cls, doc, user, private, class_id):
-
-        dataset = cls()
-        dataset.name = doc['name']
-        dataset.identifier = doc['identifier']
-        dataset.description = doc['description']
+        dataset = cls(**doc)
         dataset._meta.username = user
-        dataset._meta.class_id = class_id
         dataset._meta.private = private
-        dataset._raw = doc
-
+        dataset._meta.class_id = class_id
         return dataset
 
     @classmethod
@@ -73,11 +77,15 @@ class DatasetMetadata(Document):
             search = search.exclude("term", **{"_meta.private": "true"})
         return search
 
-    def to_json(self):
+    def to_json(self, *args, **kwargs):
+        """
+        Hide _meta field.
+        """
         assert self.meta.id
-        json = {'_id': self.meta.id}
-        json.update(self.to_dict()['_raw'])
-        return json
+        result = dict(_id=self.meta.id)
+        result.update(self.to_dict(*args, **kwargs))
+        result.pop('_meta')
+        return result
 
     def save(self, **kwargs):
         '''

@@ -4,12 +4,17 @@
     - Remove existing indexes
     - Data will be deleted
 
+    python -m scripts.reset --help
 '''
 
-from tornado.log import enable_pretty_logging
+import logging
+
+from tornado.options import parse_command_line
 
 from discovery.utils.indices import reset_data
 
+logging.getLogger('elasticsearch').setLevel('WARNING')
+
 if __name__ == "__main__":
-    enable_pretty_logging()
+    parse_command_line()
     reset_data()

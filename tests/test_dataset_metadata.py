@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from discovery.utils.indexing import add_schema_by_url
+from discovery.utils.controllers import SchemaController
 from test_base import DiscoveryTestCase
 
 NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/SuLab/niaid-data-portal/master/schema/NIAIDDataset.json"
@@ -10,7 +10,7 @@ NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/SuLab/niaid-data-portal/ma
 
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    add_schema_by_url("niaid", NIAID_SCHEMA_URL, 'minions@example.com')
+    SchemaController.add("niaid", NIAID_SCHEMA_URL, 'minions@example.com')
 
 
 class TestDatasetMetadata(DiscoveryTestCase):

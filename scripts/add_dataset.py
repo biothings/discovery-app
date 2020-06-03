@@ -1,6 +1,7 @@
 """
 Try:
-python scripts/add_dataset.py "<URL>" "<email>" 0
+
+python -m scripts.add_dataset --help
 
 Test Data:
 Git https://github.com/data2health/schemas/blob/master/Dataset/examples/wellderly/wellderly_dataset.json
@@ -8,16 +9,24 @@ Raw https://raw.githubusercontent.com/data2health/schemas/master/Dataset/example
 """
 
 import logging
-import sys
 
-from discovery.utils.indexing import add_dataset_by_url
+from tornado.options import options, parse_command_line
+
+from discovery.utils.controllers import DatasetController
+
+options.define('url')
+options.define('user', default='cwu@scripps.edu')
+options.define('private', default=False, type=bool)
+options.define('classid', default='ctsa::bts:CTSADataset')
+logging.getLogger('elasticsearch').setLevel('WARNING')
+
 
 if __name__ == "__main__":
-    assert len(sys.argv) == 4
-    logging.basicConfig(level='DEBUG')
-    print(add_dataset_by_url(
-        url=sys.argv[1],
-        user=sys.argv[2],
-        private=sys.argv[3] in ('true', '1'),
-        class_id='ctsa::bts:CTSADataset'
+    parse_command_line()
+    assert options.url
+    print(DatasetController.add(
+        doc=options.url,
+        user=options.user,
+        private=options.private,
+        class_id=options.classid
     ))

@@ -89,7 +89,7 @@ setEnvVars(TEMPLATE_ENV_OUT, siteconfigoutbreak)
 createStyles()
 
 
-class BaseHandler(BioThingsBaseHandler):
+class DiscoveryBaseHandler(BioThingsBaseHandler):
 
     def get_current_user(self):
         try:
@@ -121,7 +121,7 @@ class BaseHandler(BioThingsBaseHandler):
             return None
 
 
-class MainHandler(BaseHandler):
+class MainHandler(DiscoveryBaseHandler):
     def get(self):
         url = self.get_argument('url', None)
         if url:
@@ -138,7 +138,7 @@ class MainHandler(BaseHandler):
             self.write(index_output)
 
 
-class LoginHandler(BaseHandler):
+class LoginHandler(DiscoveryBaseHandler):
     def get(self):
         xsrf = self.xsrf_token
         login_file = "login.html"
@@ -151,14 +151,14 @@ class LoginHandler(BaseHandler):
         self.write(login_output)
 
 
-class LogoutHandler(BaseHandler):
+class LogoutHandler(DiscoveryBaseHandler):
     def get(self):
         self.clear_cookie("user")  # oauth
         self.clear_cookie("session")  # saml
         self.redirect(self.get_argument("next", "/"))
 
 
-class GithubLoginHandler(BaseHandler, GithubMixin):
+class GithubLoginHandler(DiscoveryBaseHandler, GithubMixin):
     async def get(self):
         # we can append next to the redirect uri, so the user gets the
         # correct URL on login
@@ -193,7 +193,7 @@ class GithubLoginHandler(BaseHandler, GithubMixin):
         )
 
 
-class UserInfoHandler(BaseHandler):
+class UserInfoHandler(DiscoveryBaseHandler):
 
     def get(self):
 
@@ -217,7 +217,7 @@ class UserInfoHandler(BaseHandler):
         self.finish(user_info)
 
 
-class TemplateHandler(BaseHandler):
+class TemplateHandler(DiscoveryBaseHandler):
 
     def initialize(self, filename, status_code=200, env=None):
 
@@ -257,6 +257,7 @@ WEB_HANDLERS = [
     (r"/registry/?", TemplateHandler, {"filename": "registry.html"}),
     (r"/schema-playground/?", TemplateHandler, {"filename": "playground.html"}),
     (r"/sitemap.xml", RedirectHandler, {"url": "/static/sitemap.xml"}),
+    (r"/view/(?P<namespace>[^/]+)/?", TemplateHandler, {"filename": "schema-viewer.html"}),
     (r"/view/(?P<namespace>[^/]+)/(?P<query>[^/]*)/?", TemplateHandler, {"filename": "schema-viewer.html"}),
     # Auth
     (r"/user/?", UserInfoHandler),

@@ -4,16 +4,16 @@
 
 import pytest
 from test_base import DiscoveryTestCase
-from discovery.utils.indexing import add_schema_by_url, delete_schema
+from discovery.utils.controllers import SchemaController
 
 BTS_URL = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'
 
 
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    add_schema_by_url(
+    SchemaController.add(
         namespace='bts',
-        url=BTS_URL,
+        doc=BTS_URL,
         user='minions@example.com'
     )
 
@@ -97,7 +97,8 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.query(q='BiologicalEntity', hits=False)
 
     def test_30_post(self):
-        delete_schema('bts')
+        if SchemaController.exists('bts'):
+            SchemaController('bts').delete()
         doc = {
             'url': BTS_URL,
             'namespace': 'bts'
