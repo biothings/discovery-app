@@ -6,14 +6,14 @@ from tornado.httpclient import AsyncHTTPClient
 from torngithub import json_encode
 
 from biothings.web.handlers import BaseAPIHandler
-from discovery.web.handlers import BaseHandler
+from discovery.web.handlers import DiscoveryBaseHandler
 
 L = logging.getLogger(__name__)
 
 
 def github_authenticated(func):
     '''
-        RegistryHandler Decorator
+    RegistryHandler Decorator
     '''
 
     def _(self, *args, **kwargs):
@@ -28,9 +28,11 @@ def github_authenticated(func):
     return _
 
 
-class APIBaseHandler(BaseHandler, BaseAPIHandler):
+class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
 
     async def prepare(self):
+
+        super().prepare()
 
         # Additionally support GitHub Token Login
         # Mainly for debug and admin purposes
@@ -51,11 +53,3 @@ class APIBaseHandler(BaseHandler, BaseAPIHandler):
                         logging.info('logged in user from github token: %s', user)
                         self.set_secure_cookie("user", json_encode(user))
                         self.current_user = user['login']
-
-    def get_boolean_argument(self, full_term, short_form=None, default='false'):
-
-        true_values = ['', 'true', '1']
-        if not short_form:
-            short_form = full_term
-        return self.get_query_argument(full_term, default).lower() in true_values or \
-            self.get_query_argument(short_form, default).lower() in true_values

@@ -35,6 +35,10 @@ logging.captureWarnings(True)
 
 
 class SchemaClassWrapper():
+    """
+    Wraps a biothings_schema.SchemaClass instance.
+    Wrapper to provde native type attribute access.
+    """
 
     def __init__(self, parser_class):
         self._parser_class = parser_class
@@ -62,7 +66,21 @@ class SchemaClassWrapper():
     @property
     def properties(self):
         """
-        TODO Example
+        [
+            {
+                "label": "name",
+                "curie": "outbreak:name",
+                "description": "The name of the material or reagent",
+                "uri": "https://discovery.biothings.io/view/outbreak/name"
+                "domain": [
+                    "outbreak:Product"
+                ],
+                "range": [
+                    "schema:Text"
+                ],
+            },
+            ...
+        ]
         """
         properties = self._parser_class.list_properties(
             class_specific=True,
@@ -75,57 +93,33 @@ class SchemaClassWrapper():
         return properties
 
 
-class SchemaWrapper():
+class SchemaAdapter():
+    """
+    Manage a biothings_schema.Schema instance.
+    Provide native type custom format schema class lists.
+    """
 
     def __init__(self, doc=None):
-
         contexts = ESSchemaDoc.gather_contexts()
         self._schema = SchemaParser(doc, contexts)
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
-        for kls in self._classes_defs:
-            self._classes_refs += kls.ancestor_classes
 
     def __getattr__(self, attr):
         return getattr(self._schema, attr)
 
-    @staticmethod
-    def get_class(schema_class):
-
-        ans = {}
-        schema_class = SchemaClassWrapper(schema_class)
-        for key in ('name', 'uri', 'prefix', 'label', 'description',
-                    'parent_classes', 'properties', 'validation'):
-            if hasattr(schema_class, key):
-                ans[key] = getattr(schema_class, key)
-        logging.debug(ans['name'])
-        return ans
-
-    def _get_class_defs(self):
-        ans = {}
-        for schema_class in self._classes_defs:
-            if schema_class.name not in ans:
-                _schema_class = self.get_class(schema_class)
-                _schema_class['ref'] = False
-                ans[schema_class.name] = _schema_class
-        return ans
-
     def get_class_defs(self):
+        # get only classes defined in this schema
+        # each {} will have a field ref: false
         return list(self._get_class_defs().values())
 
-    def _get_class_refs(self):
-        ans = {}
-        for schema_class in self._classes_refs:
-            if schema_class.name not in ans:
-                _schema_class = self.get_class(schema_class)
-                _schema_class['ref'] = True
-                ans[schema_class.name] = _schema_class
-        return ans
-
     def get_class_refs(self):
+        # get only classes referenced outside this schema
+        # each {} will have a field ref: true
         return list(self._get_class_refs().values())
 
     def get_classes(self):
+        # get all classes and label them if they are referenced
 
         defs = self._get_class_defs()
         refs = self._get_class_refs()
@@ -133,3 +127,34 @@ class SchemaWrapper():
         ans.update(defs)
         ans.update(refs)
         return list(ans.values())
+
+    @staticmethod
+    def _get_class_info(schema_class):
+        ans = {}  # biothings_schema.SchemaClass -> { ... }
+        schema_class = SchemaClassWrapper(schema_class)
+        for key in ('name', 'uri', 'prefix', 'label', 'description',
+                    'parent_classes', 'properties', 'validation'):
+            try:
+                ans[key] = getattr(schema_class, key)
+            except AttributeError:
+                pass
+        logging.info(ans['name'])
+        return ans
+
+    def _get_class_defs(self):
+        ans = {}
+        for schema_class in self._classes_defs:
+            if schema_class.name not in ans:
+                _schema_class = self._get_class_info(schema_class)
+                _schema_class['ref'] = False
+                ans[schema_class.name] = _schema_class
+        return ans
+
+    def _get_class_refs(self):
+        ans = {}
+        for schema_class in self._classes_refs:
+            if schema_class.name not in ans:
+                _schema_class = self._get_class_info(schema_class)
+                _schema_class['ref'] = True
+                ans[schema_class.name] = _schema_class
+        return ans

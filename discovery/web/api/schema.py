@@ -1,20 +1,23 @@
 
 import json
+import logging
 
-from tornado.escape import json_decode
 from tornado.httpclient import AsyncHTTPClient
-from tornado.web import HTTPError, MissingArgumentError
+from tornado.web import Finish, HTTPError
 
-from discovery.data.schema import Schema
-from discovery.data.schema_class import SchemaClass
-from discovery.utils.indexing import (add_schema, delete_schema,
-                                      find_all_classes)
+from discovery.utils.adapters import SchemaAdapter
+from discovery.utils.controllers import SchemaController
 
 from .base import APIBaseHandler, github_authenticated
 
+CORE_SCHEMA_NS = ('schema', 'biomedical', 'datacite', 'google')
+RESERVED_SCHEMA_NS = ('metadata')
 
-class RegistryHandler(APIBaseHandler):
-    '''
+logger = logging.getLogger(__name__)
+
+
+class SchemaRegistryHandler(APIBaseHandler):
+    """
         Registered Schema Repository
 
         Check  - HEAD ./api/registry/<namespace>
@@ -24,50 +27,66 @@ class RegistryHandler(APIBaseHandler):
         Fetch  - GET ./api/registry/<namespace>
         Fetch  - GET ./api/registry/<namespace>/<curie>
         Remove - DELETE ./api/registry/<namespace>
-    '''
+    """
+    name = 'registry'
+    kwargs = {
+        'POST': {
+            'namespace': {'type': str, 'required': True},
+            'url': {'type': str, 'required': True},
+        },
+        'GET': {
+            'user': {'type': str},
+            'field': {'type': str},
+            'verbose': {'type': bool, 'default': False, 'alias': ['v']},
+        }
+    }
 
     def head(self, namespace):
-        '''
-            Check the existance of a schema by its namespace.
-        '''
-        if namespace == 'schema':
+        """
+        Check if a schema exists.
+        """
+        if namespace in CORE_SCHEMA_NS:
             self.set_status(200)
-        elif Schema.get(id=namespace, ignore=404):
+        if SchemaController.exists(namespace):
             self.set_status(200)
         else:
             self.set_status(404)
 
     @github_authenticated
     async def post(self):
-        '''
-            Create a new schema entry in the registry.
-        '''
-        args = json_decode(self.request.body)
+        """
+        Add a schema and its classes. Request body:
+        {
+            "url": <schema_url>,
+            "namespace": <schema_name>
+        }
+        """
+        namespace = self.args.namespace
+        url = self.args.url
 
-        if 'namespace' not in args:
-            raise MissingArgumentError('namespace')
-        if 'url' not in args:
-            raise MissingArgumentError('url')
+        if namespace in CORE_SCHEMA_NS:
+            raise HTTPError(409, reason="conflict with core schemas.")
 
-        namespace = args['namespace']
-        url = args['url']
+        if namespace in RESERVED_SCHEMA_NS:
+            raise HTTPError(400, reason=f"[{namespace}] is reserved.")
 
-        if namespace in ('metadata', 'dataset', 'schema'):
-            raise HTTPError(400, conflict=namespace)
+        if SchemaController.exists(namespace):
+            raise HTTPError(409, reason="namespace already registered.")
 
-        if Schema.get(id=namespace, ignore=404):
-            raise HTTPError(409, conflict=namespace)
+        if SchemaController.exists(url):
+            raise HTTPError(409, reason="url already registered.")
 
-        if Schema.exists(url):
-            raise HTTPError(409, conflict=url)
+        # load schema json from url
+        try:
+            response = await AsyncHTTPClient().fetch(url)
 
-        # post-validation
+        except Exception as exc:
+            raise HTTPError(400, reason=str(exc))
 
-        response = await AsyncHTTPClient().fetch(url)
-        text = response.body.decode()
-        doc = json.loads(response.body)
-
-        result = add_schema(namespace, url, self.current_user, text, doc)
+        result = SchemaController.add(
+            namespace, response,
+            self.current_user,
+        )
 
         self.finish({
             'success': True,
@@ -77,97 +96,89 @@ class RegistryHandler(APIBaseHandler):
         })
 
     def get(self, namespace=None, curie=None):
-        '''
-            Access the registry.
+        """
+        Access the schema registry.
 
-            - List all schemas.
-            - List schemas by a user.
-            - List a schema by namespace.
-            - List a class by its namespace and curie.
-        '''
+        - List all schemas.
+        - List schemas by a user.
+        - List a schema by namespace (with field filtering).
+        - List a class by its namespace and curie.
+        """
 
         # /api/registry?user=<email>
         if namespace is None:
-
-            search = Schema.search()
-            search.params(rest_total_hits_as_int=True)
-
-            user = self.get_query_argument('user', None)
-            if user:
-                search = search.query("term", ** {"_meta.username": user})
-            else:
-                search = search.query("match_all")
-
-            self.finish({
-                "total": search.count(),
-                "context": Schema.gather_contexts(),
-                "hits": [{
-                    "namespace": schema.meta.id,
-                    "url": schema.url,
-                } for schema in search.scan()]
-            })
-            return
-
-        result = {}
+            raise Finish(SchemaController.get_all(self.args.user))
 
         # /api/registry/<namespace>
-        if namespace not in ('schema', 'biomedical', 'datacite', 'google'):
-
-            schema = Schema.get(id=namespace, ignore=404)
-            if not schema:
-                raise HTTPError(404)
-            result['name'] = schema.meta.id
-            result['url'] = schema.url
-            result['source'] = schema.decode_raw()
-
         if curie is None:
-
-            search = SchemaClass.search().filter(
-                "term", namespace=namespace).source(
-                self.get_query_argument('field', None))
-            search.params(rest_total_hits_as_int=True)
-
-            result['total'] = search.count()
-            result['context'] = Schema.gather_contexts()
-            result['hits'] = [klass.to_dict() for klass in search.scan()]
-
-            self.finish(result)
-            return
+            schema = SchemaController.get_schema(namespace, self.args.field)
+            if schema is None:
+                raise HTTPError(404)
+            raise Finish(schema)
 
         # /api/registry/<namespace>/<curie>
-        klass = SchemaClass.get(id=f"{namespace}::{curie}", ignore=404)
-
-        if not klass:
+        klass = SchemaController.get_class(namespace, curie, self.args.verbose)
+        if klass is None:
             raise HTTPError(404)
 
-        if self.get_boolean_argument('verbose', 'v'):
-
-            queue = find_all_classes(klass)
-            self.finish({
-                "total": len(queue),
-                "context": Schema.gather_contexts(),
-                "names": [klass.meta.id.split('::')[1] for klass in queue],
-                "hits": [klass.to_dict() for klass in queue]
-            })
-            return
-
-        result = {"@context": Schema.gather_contexts()}
-        result.update(klass.to_dict())
-        self.finish(result)
+        self.finish(klass)
 
     @github_authenticated
     def delete(self, namespace):
         '''
         Delete a schema and its classes by its prefix.
         '''
-        schema = Schema.get(id=namespace, ignore=404)
+        if not SchemaController.exists(namespace):
+            raise HTTPError(404)
 
-        if not schema:
-            self.send_error(404)
-            return
+        schema = SchemaController(namespace)
 
-        if schema['_meta'].username != self.current_user:
-            self.send_error(403)
-            return
+        if schema.user != self.current_user:
+            raise HTTPError(403)
 
-        delete_schema(namespace)
+        try:
+            SchemaController(namespace).delete()
+        except Exception as exc:
+            raise HTTPError(500, str(exc))
+
+
+class SchemaViewHandler(APIBaseHandler):
+
+    name = 'view'
+    kwargs = {'GET': {'url': {'type': str, 'required': True}}}
+
+    async def get(self):
+        """
+        {
+            "total": 6,
+            "context": {
+                "schema": "http://schema.org/",
+                "bts": "http://discovery.biothings.io/bts/",
+                ...
+            },
+            "hits": [
+                {
+                    "prefix": "bts",
+                    "label": "DataSamples",
+                    ...
+                },
+                ...
+            ]
+        }
+        """
+        try:  # load doc from url
+            response = await AsyncHTTPClient().fetch(self.args.url)
+            doc = json.loads(response.body)
+            schema = SchemaAdapter(doc)
+        except Exception as exc:
+            raise HTTPError(400, reason=str(exc))
+
+        classes = schema.get_classes()
+
+        response = {
+            "total": len(classes),
+            "context": schema.context,
+            "hits": classes
+        }
+
+        self.finish(response)

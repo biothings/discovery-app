@@ -6,62 +6,40 @@ from elasticsearch_dsl import Index
 from discovery.data.dataset import DatasetMetadata
 from discovery.data.schema import Schema
 from discovery.data.schema_class import SchemaClass
-from discovery.utils.indexing import add_schema_by_url
-
-
-def add_core_schemas():
-
-    schemas = (
-        ('schema', None),
-        ('google', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/Google/Google.json'),
-        ('datacite', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/DataCite/DataCite.json'),
-        ('biomedical', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/BioMedical/BioMedicalDataset.json'),
-        ('ctsa', 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'),
-    )
-    logger = logging.getLogger(__name__)
-
-    for namespace, url in schemas:
-
-        if SchemaClass.search().query("term", namespace=namespace).count() > 1:
-            logger.info("Found %s. Skipped indexing.", namespace)
-            continue
-        logger.info("Indexing [%s].", namespace)
-        add_schema_by_url(namespace, url, 'cwu@scripps.edu')
-
-    logger.info("Finished indexing core schemas.")
+from discovery.utils.controllers import SchemaController
 
 
 def setup_data():
 
     try:
-        if not Index('discover_schema').exists():
+        if not Index(Schema.Index.name).exists():
             Schema.init()
-        if not Index('discover_schema_class').exists():
+        if not Index(SchemaClass.Index.name).exists():
             SchemaClass.init()
-        if not Index('discover_dataset').exists():
+        if not Index(DatasetMetadata.Index.name).exists():
             DatasetMetadata.init()
-        return ThreadPoolExecutor().submit(add_core_schemas)
+        return ThreadPoolExecutor().submit(SchemaController.add_core)
     except Exception as exc:
         logging.warning(exc)
 
 
 def reset_data():
 
-    index_primary = Index('discover_schema')
-    index_secondary = Index('discover_schema_class')
-    index_tertiary = Index('discover_dataset')
+    index_1 = Index(Schema.Index.name)
+    index_2 = Index(SchemaClass.Index.name)
+    index_3 = Index(DatasetMetadata.Index.name)
 
-    # remove existing indexes
+    if index_1.exists():
+        index_1.delete()
 
-    if index_primary.exists():
-        index_primary.delete()
+    if index_2.exists():
+        index_2.delete()
 
-    if index_secondary.exists():
-        index_secondary.delete()
-
-    if index_tertiary.exists():
-        index_tertiary.delete()
+    if index_3.exists():
+        index_3.delete()
 
     Schema.init()
     SchemaClass.init()
     DatasetMetadata.init()
+
+    SchemaController.add_core(force=True)

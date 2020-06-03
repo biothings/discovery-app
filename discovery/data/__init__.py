@@ -14,6 +14,16 @@ import os
 
 from elasticsearch_dsl import connections
 
+from .dataset import DatasetMetadata
+from .schema import Schema
+from .schema_class import SchemaClass
+
+__all__ = [
+    'Schema',
+    'SchemaClass',
+    'DatasetMetadata'
+]
+
 # parse environment variables
 ES_HOST = os.getenv('ES_HOST', 'localhost:9200')
 

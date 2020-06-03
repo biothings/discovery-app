@@ -26,11 +26,11 @@ API_PREFIX = 'api'
 API_VERSION = ''
 APP_LIST = [
     (r"/api/query/?", "biothings.web.handlers.QueryHandler"),
-    (r"/api/registry/([^/]+)/([^/]+)/?", "discovery.web.api.RegistryHandler"),
-    (r"/api/registry/([^/]+)/?", "discovery.web.api.RegistryHandler"),
-    (r"/api/registry/?", "discovery.web.api.RegistryHandler"),
-    (r"/api/dataset/([^/]+)/?", "discovery.web.api.MetadataHandler"),
-    (r"/api/dataset/?", "discovery.web.api.MetadataHandler"),
+    (r"/api/registry/([^/]+)/([^/]+)/?", "discovery.web.api.SchemaRegistryHandler"),
+    (r"/api/registry/([^/]+)/?", "discovery.web.api.SchemaRegistryHandler"),
+    (r"/api/registry/?", "discovery.web.api.SchemaRegistryHandler"),
+    (r"/api/dataset/([^/]+)/?", "discovery.web.api.DatasetMetadataHandler"),
+    (r"/api/dataset/?", "discovery.web.api.DatasetMetadataHandler"),
     (r"/api/view/?", "discovery.web.api.SchemaViewHandler")
 ]
 

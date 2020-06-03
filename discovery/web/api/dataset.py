@@ -1,16 +1,12 @@
-import json
 
-from elasticsearch_dsl import Index
-from tornado.escape import json_decode
-from discovery.utils.indexing import add_dataset, validate_dataset
-from tornado.web import HTTPError, MissingArgumentError
+from tornado.web import Finish, HTTPError, MissingArgumentError
 
-from discovery.data.dataset import DatasetMetadata
+from discovery.utils.controllers import DatasetController
 
 from .base import APIBaseHandler, github_authenticated
 
 
-class MetadataHandler(APIBaseHandler):
+class DatasetMetadataHandler(APIBaseHandler):
     '''
         Registered Dataset Metadata
 
@@ -20,90 +16,89 @@ class MetadataHandler(APIBaseHandler):
         Fetch  - GET ./api/dataset/<_id>
         Remove - DELETE ./api/dataset/<_id>
     '''
+    name = 'dataset'
+    kwargs = {
+        'POST': {
+            'schema': {'type': str, 'default': 'ctsa::bts:CTSADataset'},
+            'private': {'type': bool, 'default': False},
+        },
+        'GET': {
+            'user': {'type': str},
+            'private': {'type': bool},
+        }
+    }
 
     @github_authenticated
     def post(self):
         '''
-            Create a document.
+        Add a dataset.
         '''
-        class_id = self.get_argument('schema', 'ctsa::bts:CTSADataset')
-        private = self.get_boolean_argument('private')
-        doc = json_decode(self.request.body)
-
         for field in ('name', 'identifier', 'description'):
-            if field not in doc:  # required in es data model
+            if field not in self.args_json:  # required in es model
                 raise HTTPError(400, reason=f"missing {field}")
 
         try:
-            res = add_dataset(doc, self.current_user, private, class_id)
+            res = DatasetController.add(
+                self.args_json, self.current_user,
+                self.args.private, self.args.schema)
+
         except (KeyError, ValueError) as exc:
             raise HTTPError(400, reason=str(exc))
-        except Exception:
-            raise HTTPError(500)
 
-        self.finish({
-            'success': True,
-            'result': res[0],
-            'id': res[1],
-        })
+        except Exception as exc:  # unexpected
+            raise HTTPError(500, reason=str(exc))
+
+        self.finish(res)
 
     @github_authenticated
     def put(self, _id=None):
         '''
-            Update a document of the specified id.
-            Does not change the privacy setting.
+        Update the dataset of the specified id.
+        Does not change the privacy setting or identifier.
         '''
         if not _id:
             raise MissingArgumentError('id')
 
-        dataset = DatasetMetadata.get(id=_id, ignore=404)
-        doc = json_decode(self.request.body)
-
-        if not dataset:
+        if not DatasetController.exists(_id):
             raise HTTPError(404)
 
         for field in ('name', 'identifier', 'description'):
-            if field not in doc:  # required in es data model
+            if field not in self.args_json:  # required in es model
                 raise HTTPError(400, reason=f"missing {field}")
 
-        if dataset._meta.username != self.current_user:
+        dataset = DatasetController(_id)
+
+        if dataset.user != self.current_user:
             raise HTTPError(403)
 
-        if dataset.identifier != doc['identifier']:
+        if dataset.identifier != self.args_json['identifier']:
             raise HTTPError(409)
 
         try:
-            validate_dataset(doc, dataset._meta.class_id)
+            dataset.validate_update(self.args_json)
         except ValueError as exc:
             raise HTTPError(400, reason=str(exc))
-        except Exception:
-            raise HTTPError(500)
+        except Exception as exc:
+            raise HTTPError(500, reason=str(exc))
 
-        dataset.name = doc['name']
-        dataset.description = doc['description']
-        dataset._raw = doc
+        try:
+            res = dataset.update(self.args_json)
+        except Exception as exc:
+            raise HTTPError(500, reason=str(exc))
 
-        result = dataset.save()
-        Index('discover_dataset').refresh()
-
-        self.finish({
-            'success': True,
-            'result': result,
-            'id': dataset.meta.id,
-        })
+        self.finish(res)
 
     def get(self, _id=None):
         '''
-            Access the registry.
-
-            - List all metadata documents.
-            - List metadata documents by a user.
+        Get all public or private datasets.
+        Filter results by a user.
         '''
 
+        # /api/dataset/
         if not _id:
 
-            user = self.get_query_argument('user', None)
-            private = self.get_boolean_argument('private')
+            user = self.args.user
+            private = self.args.private
 
             if private:
                 if not self.current_user:
@@ -112,79 +107,50 @@ class MetadataHandler(APIBaseHandler):
                     user = self.current_user
                 if user != self.current_user:
                     raise HTTPError(403)
+            try:
+                datasets = DatasetController.get_all(user, private)
+            except Exception as exc:
+                raise HTTPError(500, reason=str(exc))
+            else:  # success, end request
+                raise Finish(datasets)
 
-            search = DatasetMetadata.search(private=private)
-            search.params(rest_total_hits_as_int=True)
+        # /api/dataset/83dc3401f86819de
+        # /api/dataset/83dc3401f86819de.js
+        try:
 
-            if user:
-                search = search.query("match", ** {"_meta.username": user})
-            else:
-                search = search.query("match_all")
+            if not _id.endswith('.js'):
+                response = DatasetController.get_dataset(_id, self.request)
 
-            return self.finish({
-                "total": search.count(),
-                "hits": [meta.to_json()
-                         for meta in search.scan()]
-            })
+            else:  # request javascript
+                _id = _id[:-3]  # remove .js
+                self.set_header('Content-Type', 'application/javascript')
+                response = DatasetController.get_javascript(_id)
 
-        id = _id[:-3] if _id.endswith('.js') else _id
-        meta = DatasetMetadata.get(id=id, ignore=404)
+        except Exception as exc:
+            raise HTTPError(500, reason=str(exc))
 
-        if not meta:
-            self.send_error(404)
-            return
+        else:  # id not exist
+            if response is None:
+                raise HTTPError(404)
 
-        doc = meta.to_dict()["_raw"]
-
-        if _id.endswith('.js'):
-
-            js = json.dumps(doc).replace("'", r"\'")
-            self.write(
-                'var script = document.createElement("script");'
-                f"var content = document.createTextNode('{js}');"
-                'script.type = "application/ld+json";'
-                'script.appendChild(content);'
-                'document.head.appendChild(script);')
-        else:
-
-            # experiment adding proxy site info so when crawled by google bot,
-            # it wouldn't appear that our link claims to be the original site
-            # the link generated might not be as expected in docker containers
-
-            if "includedInDataCatalog" in doc:
-                if isinstance(doc["includedInDataCatalog"], dict):
-                    dataset = doc["includedInDataCatalog"].get("name", "Dataset")
-                    url_prefix = self.request.protocol + "://" + self.request.host + "/dataset/"
-                    doc["includedInDataCatalog"] = [
-                        {
-                            "@type": "DataCatalog",
-                            "name": dataset + " from Data Discovery Engine",
-                            "url": url_prefix + _id
-                        },
-                        doc["includedInDataCatalog"]
-                    ]
-
-            self.set_header('Content-Type', 'application/javascript')
-            self.write(doc)
-
-        return
+        self.finish(response)
 
     @github_authenticated
     def delete(self, _id):
         '''
-        Delete by metadata _id.
+        Delete a dataset.
         '''
-
-        meta = DatasetMetadata.get(id=_id, ignore=404)
-
-        if not meta:
+        if not DatasetController.exists(_id):
             raise HTTPError(404)
 
-        if meta['_meta'].username != self.current_user:
+        dataset = DatasetController(_id)
+
+        if dataset.user != self.current_user:
             raise HTTPError(403)
 
-        meta.delete()
-        self.finish({
-            'success': True,
-            'refresh': Index('discover_dataset').refresh(),
-        })
+        try:
+            res = dataset.delete()
+        except Exception as exc:
+            raise HTTPError(500, reason=str(exc))
+
+        self.finish(res)
