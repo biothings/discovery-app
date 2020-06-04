@@ -1381,9 +1381,14 @@
                      console.log('make it',input)
                      let data= {
                        "namespace": input,
-                       "url": self.userSchemaURL
+                       "url": encodeURI(self.userSchemaURL)
                      }
-                     return axios.post('/api/registry',data).then(res=>{
+                     let config = {
+                        headers: {
+                          'content-type': 'application/json'
+                        }
+                      }
+                     return axios.post('/api/registry',data,config).then(res=>{
                        return res.data
                      }).catch(err=>{
                        return err;
