@@ -1241,6 +1241,9 @@
           for (var i = 0; i < propInfo['oneOf'].length; i++) {
             if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'object') {
               props = propInfo['oneOf'][i]['properties']
+              // recursive approach
+              // console.log('recursive')
+              // this.addItem(propName,propInfo['oneOf'][i])
             }
             if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'array') {
               self.canAcceptMultiple = true
@@ -1252,6 +1255,7 @@
                 title: propName,
                 input: 'text',
                 inputPlaceholder: 'Enter text here',
+                footer:propName == 'keywords'? "Multiple keywords can be entered separated by commas." : " ",
                 inputValidator: (value) => {
                   if (value) {
                     if (propName == 'keywords') {
@@ -1441,6 +1445,7 @@
                 title: key,
                 input: 'number',
                 text: props[key].description,
+                footer: propInfo.hasOwnProperty('required')? "<b class='text-danger'>Required</b>" : "<b class='text-info'>Optional</b>",
                 inputValidator: (value) => {
                   return new Promise((resolve) => {
                     if (!value) {
@@ -1592,7 +1597,6 @@
             questions.push({
               title: key,
               text: props[key].description,
-              footer:`<small>If applicable: mutliple items must be separated by commmas</small>`,
               inputValidator: (value) => {
                 return new Promise((resolve) => {
 
@@ -1966,7 +1970,7 @@
         </div>
         <div class="col-sm-10 p-2 text-left d-flex align-items-center justify-content-center" :class="[userInput ? 'alert-success':'alert-secondary']">
           <div class="d-flex w-100 justify-content-center">
-            <div class="w-75 p-3">
+            <div class="w-75 p-1">
               <h6 v-show="loading" class="text-primary">Loading <i class="fas fa-spinner fa-pulse"></i></h6>
               <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
               <template v-if="info && info.type === 'string'">
@@ -2009,7 +2013,7 @@
                   </template>
                   <!-- 🌈 STRING NORMAL🌈 -->
                   <template v-else>
-                    <textarea :rows="name ==='name'?1:7" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here"></textarea>
+                    <textarea :rows="name ==='name'|| name ==='identifier' ?1:7" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here"></textarea>
                   </template>
                     <!-- 🌈 VOCAB PREVIEW🌈 -->
                   <template v-if="vocabDetails && vocab.length && vocabDetails.ontology_prefix">
@@ -2229,7 +2233,7 @@
                 </template>
 
               </template>
-              <small>
+              <small v-if="showDesc">
                 <small class="text-muted bold">Part of</small>
                 <template v-if="info && info.categories" v-for="category in info.categories">
                   <small v-text="category.category" class="desc pointer mr-2" :data-tippy-info="[category.subcategory === 'Required' ? 'Required' : 'Recommended']" :class="[category.subcategory === 'Required' ? 'text-danger' : 'text-info']"></small>
@@ -2256,7 +2260,8 @@
     data: function(){
       return{
         settings: {{guide_settings}},
-        allMode: Boolean
+        allMode: Boolean,
+        viewSettings: false,
       }
     },
     props: ['type'],
@@ -2358,18 +2363,22 @@
 
 
           <div class="text-left">
-            <h3 class="d-inline mr-5" v-text="type" :class="type === 'REQUIRED' ?'text-danger':'text-info'"></h3>
+            <h3 class="badge" v-text="type" :class="type === 'REQUIRED' ?'badge-required':'badge-info'"></h3>
           </div>
 
           <div class="alert-dark d-flex justify-content-around align-items-center p-1">
-            <small class="text-muted"><i class="fas fa-cog"></i> Settings</small>
-            <div>
+            <button class="btn btn-sm btn-outline-secondary" @click="viewSettings = ! viewSettings">
+              <small class="text-muted">View Options</small>
+              <i class="fas fa-chevron-right" v-if="!viewSettings"></i>
+              <i class="fas fa-chevron-left" v-else></i>
+            </button>
+            <div v-show="viewSettings">
               <input class="form-check-input" type="checkbox" :checked="allMode"  id="customControlInline2" @click="allMode = !allMode">
               <label class="form-check-label text-muted" for="customControlInline2" >
-                <small>Change View</small>
+                <small>Change Form Style</small>
               </label>
             </div>
-            <div>
+            <div v-show="viewSettings">
               <input class="form-check-input" type="checkbox" :checked="showDesc"  id="customControlInline" @click="toggleDesc()">
               <label class="form-check-label text-muted" for="customControlInline" >
                 <small>Toggle Descriptions</small>
@@ -2782,7 +2791,13 @@
 
                 let schema = store.getters.getSchema
 
-                axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label'],output).then(res=>{
+                let config = {
+                   headers: {
+                     'content-type': 'application/json'
+                   }
+                 }
+
+                axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label'],output,config).then(res=>{
                   self.loading = false;
                   if (res.data.success) {
                     let timerInterval
@@ -3052,23 +3067,34 @@
                   }).then((result) => {
                     if (result.value) {
 
-                      let selected = JSON.parse(result.value)
+                      try {
+                          let selected = JSON.parse(result.value)
 
-                      for(key in selected){
-                        if (!['@context','@type','_id'].includes(key)) {
-                          var payload = {};
-                          if (typeof selected[key] === 'object') {
-                            let value = [selected[key]]
-                            payload["completed"] = {'name':key,'value':value};
-                            store.commit('markCompleted',payload);
-                          }else{
-                            let value = selected[key]
-                            payload["completed"] = {'name':key,'value':value};
-                            store.commit('markCompleted',payload);
+                          for(key in selected){
+                            if (!['@context','@type','_id'].includes(key)) {
+                              var payload = {};
+                              if (typeof selected[key] === 'object') {
+                                let value = [selected[key]]
+                                payload["completed"] = {'name':key,'value':value};
+                                store.commit('markCompleted',payload);
+                              }else{
+                                let value = selected[key]
+                                payload["completed"] = {'name':key,'value':value};
+                                store.commit('markCompleted',payload);
+                              }
+
+                            }
                           }
-
-                        }
+                      } catch(e) {
+                        Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: e,
+                        footer: 'Oh no, something looks wrong...'
+                        })
                       }
+
+
 
                     }
                   });
