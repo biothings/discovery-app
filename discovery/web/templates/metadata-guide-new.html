@@ -2,15 +2,45 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-[v-cloak] > * { display:none; }
-[v-cloak]::before { content: "Please wait..."; }
+  [v-cloak] > * { display:none; }
+  [v-cloak]::before { content: "Please wait..."; }
+  .swal-form {
+    padding-top: 3%;
+    overflow: auto;
+    height: auto;
+  }
+
+  .swal-form input.nice-input  {
+    display: block;
+    margin: 0;
+    width: 96%;
+    font-family: sans-serif;
+    font-size: 18px;
+    box-shadow: none;
+    padding: 10px;
+    border: solid 1px #dcdcdc;
+    transition: box-shadow 0.3s, border 0.3s;
+    height: initial;
+  }
+  .swal-form input.nice-input:focus,
+  .swal-form input.nice-input.focus {
+    outline: none;
+    border: solid 1px #707070;
+    box-shadow: 0 0 5px 1px #969696;
+  }
+
+  .swal-form .patch-swal-styles-for-inputs {
+    width: initial !important;
+    height: initial !important;
+    display: initial !important;
+  }
 </style>
 <div id="guide" class="container pt-5" style="min-height:90vh;" v-cloak>
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>
   </div>
-  <div class="jumbotron bg-light text-center m-0">
-    <h3 class="logoText">DISCOVERY GUIDE</h3>
+  <div class="p-2 bg-light text-center mt-5">
+    <h6 class="logoText">DISCOVERY GUIDE</h5>
     <p class="text-muted">
       Follow best practices to make your dataset metadata more findable
     </p>
@@ -1227,6 +1257,170 @@
           }
         })
       },
+      handleOneOf(parentProp,childProp,childPropInfo){
+        var self = this;
+        console.log("parent ",parentProp)
+        console.log("child ",childProp)
+        console.log("handle this ",childPropInfo)
+
+        setTimeout(function(){
+          self.addItem(parentProp,childPropInfo)
+        }, 500);
+
+
+      },
+      handleVocab(propName,propInfo){
+
+        Swal.fire({
+          title: propName,
+          text: 'Search for an existing term here:',
+          input: 'text',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          animation:false,
+          customClass:'scale-in-center',
+          inputAttributes: {
+            autocapitalize: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Look up',
+          showLoaderOnConfirm: true,
+          focusConfirm: false,
+          preConfirm: (query) => {
+
+            let ontologies = propInfo['vocabulary']['ontology'].toString()
+            let children = propInfo['vocabulary']['children_of'].toString()
+
+            let url = `https://www.ebi.ac.uk/ols/api/search?q=${query}`
+            +"&ontology="+ontologies
+            +"&childrenOf="+children
+            +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+            +"&queryFields=label"
+            +"&rows=100"
+
+            return fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(response.statusText)
+                }
+                return response.json()
+              })
+              .catch(error => {
+                Swal.showValidationMessage(
+                  `Request failed: ${error}`
+                )
+              })
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            let html ="<div id='ontology' class='p-1 text-left'>";
+
+            for (var i = 0; i < result.value.response.docs.length; i++) {
+              tippy('#cb'+i,{
+                content:result.value.response.docs[i]
+              });
+
+              let label = result.value.response.docs[i]['label']
+              if (label && label.length > 37) {
+                label = label.substring(0,37)+"..."
+              }
+
+              html += `<div class="form-check">
+                          <input class="form-check-input mr-2" type="checkbox" value="`+result.value.response.docs[i]['iri']+`" id="cb`+i+`">
+                          <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
+                              `+label+`
+                              <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
+                          </label>
+                      </div>`
+            }
+            if (propInfo && !propInfo.strict) {
+              html += `<div class="alert alert-info mt-1">
+                          <h6>Didn't find what you are looking for? Enter value here:</h6>
+                          <input class="form-control" type="text" id="qTerm">
+                      </div>`
+            }
+            html += "</div>";
+
+            Swal.fire({
+              title: propName+'(s):',
+              html: html,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              animation:false,
+              customClass:'scale-in-center',
+              preConfirm: () => {
+
+                let checked=[]
+
+                  for (var i = 0; i < 100; i++) {
+                    let x = document.getElementById("cb"+i)
+                    if (x && x.checked) {
+                      checked.push(x.value)
+                    }
+                  }
+                  let y = document.getElementById("qTerm")
+                  if (y.value) {
+                    checked.push(y.value)
+                  }
+                  return checked
+              }
+            }).then((result) => {
+              if (result.value) {
+                // console.log('FINAL RES', result.value)
+                for (var i = 0; i < result.value.length; i++) {
+                  var payload = {};
+                  payload["item"] = result.value[i];
+                  payload["from"] = propName;
+                  store.commit('addToArrayFrom',payload);
+
+                  store.dispatch('saveProgress');
+                }
+
+              }
+            })
+
+          }
+        });
+
+      },
+      getQuestion(parentName,obj){
+        console.log('getting questions for',parentName)
+        console.log('using',obj)
+        return swal.withForm({
+         title: 'More complex Swal-Forms example',
+         text: 'This has different types of inputs',
+         showCancelButton: true,
+         confirmButtonColor: '#DD6B55',
+         confirmButtonText: 'Get form data!',
+         closeOnConfirm: true,
+         formFields: [
+           { id: 'name', placeholder: 'Name Field' },
+           { id: 'nickname', placeholder: 'Add a cool nickname' },
+           { id: 'password', type: 'password' },
+
+           { name: 'sex', value: 'Male', type: 'radio' },
+           { name: 'sex', value: 'Female', type: 'radio' },
+
+           { name: 'skills', value: 'JS', type: 'checkbox' },
+           { name: 'skills', value: 'Ruby', type: 'checkbox' },
+           { name: 'skills', value: 'Java', type: 'checkbox' },
+
+           { id: 'select',
+             type: 'select',
+             options: [
+               {value: 'test1', text: 'test1'},
+               {value: 'test2', text: 'test2'},
+               {value: 'test3', text: 'test3'},
+               {value: 'test4', text: 'test4'},
+               {value: 'test5', text: 'test5'}
+             ]}
+         ]
+       }, function (isConfirm) {
+         // do whatever you want with the form data
+         console.log(this.swalForm) // { name: 'user name', nickname: 'what the user sends' }
+       })
+      },
       addItem(propName,propInfo){
         var self=this;
         let progressSteps =[]
@@ -1236,265 +1430,350 @@
 
         console.log("propInfo",propInfo)
 
-        if (propInfo.hasOwnProperty('oneOf')) {
-          console.log("HAS ONE OF")
-          for (var i = 0; i < propInfo['oneOf'].length; i++) {
-            if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'object') {
-              props = propInfo['oneOf'][i]['properties']
-              // recursive approach
-              // console.log('recursive')
-              // this.addItem(propName,propInfo['oneOf'][i])
-            }
-            if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'array') {
-              self.canAcceptMultiple = true
-            }
-            //  FOR SIMPLE STRINGS
-            if (propInfo['oneOf'][i]['type'] === 'string'){
-
-              Swal({
-                title: propName,
-                input: 'text',
-                inputPlaceholder: 'Enter text here',
-                footer:propName == 'keywords'? "Multiple keywords can be entered separated by commas." : " ",
-                inputValidator: (value) => {
-                  if (value) {
-                    if (propName == 'keywords') {
-                      slist = value.split(",");
-                      for (var sIndex = 0; sIndex < slist.length; sIndex++) {
-                        var payload = {};
-                        payload["item"] = slist[sIndex];
-                        payload["from"] = propName;
-                        store.commit('addToArrayFrom',payload);
-
-                        store.dispatch('saveProgress');
-                      }
-                    }else{
-                      var payload = {};
-                      payload["item"] = value;
-                      payload["from"] = propName;
-                      store.commit('addToArrayFrom',payload);
-
-                      store.dispatch('saveProgress');
-                    }
-
-                  }
-                }
-
-              })
-
-
-            }
-
-            //  FOR ENUM
-            if (propInfo['oneOf'][i].hasOwnProperty('enum')) {
-
-
-              let e = propInfo['oneOf'][i]['enum']
-              let options={}
-              for (var eIndex = 0; eIndex < e.length; eIndex++) {
-                options[e[eIndex]]=e[eIndex]
-              }
-
-
-              Swal({
-                title: propName,
-                input: 'select',
-                inputOptions: options,
-                inputPlaceholder: 'Select one',
-                showCancelButton: true,
-                inputValidator: (value) => {
-                  if (value) {
-                    var payload = {};
-                    payload["item"] = value;
-                    payload["from"] = propName;
-                    store.commit('addToArrayFrom',payload);
-
-                    store.dispatch('saveProgress');
-                  }
-                }
-              })
-
-            }
-            //  FOR VOCABULARY FROM ONTOLOGIES
-            if (propInfo['oneOf'][i].hasOwnProperty('vocabulary') && propInfo['oneOf'][i]['type'] === 'string') {
-
-              Swal.fire({
-                title: propName,
-                text: 'Search for an existing term here:',
-                input: 'text',
-                confirmButtonColor:"{{color_main}}",
-                cancelButtonColor:"{{color_sec}}",
-                animation:false,
-                customClass:'scale-in-center',
-                inputAttributes: {
-                  autocapitalize: 'off'
-                },
-                showCancelButton: true,
-                confirmButtonText: 'Look up',
-                showLoaderOnConfirm: true,
-                focusConfirm: false,
-                preConfirm: (query) => {
-
-                  let ontologies = propInfo['oneOf'][i]['vocabulary']['ontology'].toString()
-                  let children = propInfo['oneOf'][i]['vocabulary']['children_of'].toString()
-
-                  let url = `https://www.ebi.ac.uk/ols/api/search?q=${query}`
-                  +"&ontology="+ontologies
-                  +"&childrenOf="+children
-                  +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
-                  +"&queryFields=label"
-                  +"&rows=100"
-
-                  return fetch(url)
-                    .then(response => {
-                      if (!response.ok) {
-                        throw new Error(response.statusText)
-                      }
-                      return response.json()
-                    })
-                    .catch(error => {
-                      Swal.showValidationMessage(
-                        `Request failed: ${error}`
-                      )
-                    })
-                },
-                allowOutsideClick: () => !Swal.isLoading()
-              }).then((result) => {
-                if (result.value) {
-                  let html ="<div id='ontology' class='p-1 text-left'>";
-
-                  for (var i = 0; i < result.value.response.docs.length; i++) {
-                    tippy('#cb'+i,{
-                      content:result.value.response.docs[i]
-                    });
-
-                    let label = result.value.response.docs[i]['label']
-                    if (label && label.length > 37) {
-                      label = label.substring(0,37)+"..."
-                    }
-
-                    html += `<div class="form-check">
-                                <input class="form-check-input mr-2" type="checkbox" value="`+result.value.response.docs[i]['iri']+`" id="cb`+i+`">
-                                <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
-                                    `+label+`
-                                    <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
-                                </label>
-                            </div>`
-                  }
-                  if (propInfo && !propInfo.strict) {
-                    html += `<div class="alert alert-info mt-1">
-                                <h6>Didn't find what you are looking for? Enter value here:</h6>
-                                <input class="form-control" type="text" id="qTerm">
-                            </div>`
-                  }
-                  html += "</div>";
-
-                  Swal.fire({
-                    title: propName+'(s):',
-                    html: html,
-                    confirmButtonColor:"{{color_main}}",
-                    cancelButtonColor:"{{color_sec}}",
-                    animation:false,
-                    customClass:'scale-in-center',
-                    preConfirm: () => {
-
-                      let checked=[]
-
-                        for (var i = 0; i < 100; i++) {
-                          let x = document.getElementById("cb"+i)
-                          if (x && x.checked) {
-                            checked.push(x.value)
-                          }
-                        }
-                        let y = document.getElementById("qTerm")
-                        if (y.value) {
-                          checked.push(y.value)
-                        }
-                        return checked
-                    }
-                  }).then((result) => {
-                    if (result.value) {
-                      // console.log('FINAL RES', result.value)
-                      for (var i = 0; i < result.value.length; i++) {
-                        var payload = {};
-                        payload["item"] = result.value[i];
-                        payload["from"] = propName;
-                        store.commit('addToArrayFrom',payload);
-
-                        store.dispatch('saveProgress');
-                      }
-
-                    }
-                  })
-
-                }
-              })
-            }
-
-          }
-        }else if (propInfo.hasOwnProperty('properties')){
-          props = propInfo.properties
+        if (propInfo.hasOwnProperty('vocabulary')) {
+          self.handleVocab(propName,propInfo)
         }
 
-        // Create questions
-        for (key in props) {
-          progressSteps.push(key)
-          switch (key) {
-            case 'size':
-              questions.push({
-                title: key,
-                input: 'number',
-                text: props[key].description,
-                footer: propInfo.hasOwnProperty('required')? "<b class='text-danger'>Required</b>" : "<b class='text-info'>Optional</b>",
-                inputValidator: (value) => {
-                  return new Promise((resolve) => {
-                    if (!value) {
-                      return 'You should write something meanignful'
-                    }else{
-                      return new Promise((resolve) => {
-                        function validInteger(str) {
-                          var pattern = new RegExp('^[0-9]*$');
-                          return !!pattern.test(str);
-                        }
-                        if (validInteger(value)) {
-                          resolve()
-                        } else {
-                          resolve('Input must be an integer')
+        if (propInfo.hasOwnProperty('oneOf')) {
+          console.log("newoneof")
+          options ={}
+          for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++) {
+            if (propInfo['oneOf'][oF_i].hasOwnProperty('@type')) {
+              // value : user text
+              options[oF_i] = propInfo['oneOf'][oF_i]["@type"]
+            }
+            if (propInfo['oneOf'][oF_i].hasOwnProperty('type') && propInfo['oneOf'][oF_i]['type'] == 'array' ) {
+              self.canAcceptMultiple = true
+            }
+          }
+
+          if (Object.keys(options).length == 1) {
+            // if only one option auto start
+            self.handleOneOf(propName,propInfo['oneOf'][0]['@type'],propInfo['oneOf'][0])
+          }else {
+            // if options, user chooses type
+            Swal({
+              title: "Select Type",
+              input: 'select',
+              inputOptions: options,
+              inputPlaceholder: 'Select one',
+              showCancelButton: true,
+              inputValidator: (value) => {
+                if (value) {
+                  console.log('value',value)
+                  self.handleOneOf(propName,propInfo['oneOf'][value]['@type'],propInfo['oneOf'][value])
+                }
+              }
+            });
+          }
+
+
+        }
+
+
+        // if (propInfo.hasOwnProperty('oneOf')) {
+        //   console.log("HAS ONE OF")
+        //   for (var i = 0; i < propInfo['oneOf'].length; i++) {
+        //     if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'object') {
+        //       props = propInfo['oneOf'][i]['properties']
+        //       // recursive approach
+        //       // console.log('recursive')
+        //       // this.addItem(propName,propInfo['oneOf'][i])
+        //     }
+        //     if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'array') {
+        //       self.canAcceptMultiple = true
+        //     }
+        //     //  FOR SIMPLE STRINGS
+        //     if (propInfo['oneOf'][i]['type'] === 'string'){
+        //
+        //       Swal({
+        //         title: propName,
+        //         input: 'text',
+        //         inputPlaceholder: 'Enter text here',
+        //         footer:propName == 'keywords'? "Multiple keywords can be entered separated by commas." : " ",
+        //         inputValidator: (value) => {
+        //           if (value) {
+        //             if (propName == 'keywords') {
+        //               slist = value.split(",");
+        //               for (var sIndex = 0; sIndex < slist.length; sIndex++) {
+        //                 var payload = {};
+        //                 payload["item"] = slist[sIndex];
+        //                 payload["from"] = propName;
+        //                 store.commit('addToArrayFrom',payload);
+        //
+        //                 store.dispatch('saveProgress');
+        //               }
+        //             }else{
+        //               var payload = {};
+        //               payload["item"] = value;
+        //               payload["from"] = propName;
+        //               store.commit('addToArrayFrom',payload);
+        //
+        //               store.dispatch('saveProgress');
+        //             }
+        //
+        //           }
+        //         }
+        //
+        //       })
+        //
+        //
+        //     }
+        //
+        //     //  FOR ENUM
+        //     if (propInfo['oneOf'][i].hasOwnProperty('enum')) {
+        //
+        //
+        //       let e = propInfo['oneOf'][i]['enum']
+        //       let options={}
+        //       for (var eIndex = 0; eIndex < e.length; eIndex++) {
+        //         options[e[eIndex]]=e[eIndex]
+        //       }
+        //
+        //
+        //       Swal({
+        //         title: propName,
+        //         input: 'select',
+        //         inputOptions: options,
+        //         inputPlaceholder: 'Select one',
+        //         showCancelButton: true,
+        //         inputValidator: (value) => {
+        //           if (value) {
+        //             var payload = {};
+        //             payload["item"] = value;
+        //             payload["from"] = propName;
+        //             store.commit('addToArrayFrom',payload);
+        //
+        //             store.dispatch('saveProgress');
+        //           }
+        //         }
+        //       })
+        //
+        //     }
+        //     //  FOR VOCABULARY FROM ONTOLOGIES
+        //     if (propInfo['oneOf'][i].hasOwnProperty('vocabulary') && propInfo['oneOf'][i]['type'] === 'string') {
+        //
+        //       Swal.fire({
+        //         title: propName,
+        //         text: 'Search for an existing term here:',
+        //         input: 'text',
+        //         confirmButtonColor:"{{color_main}}",
+        //         cancelButtonColor:"{{color_sec}}",
+        //         animation:false,
+        //         customClass:'scale-in-center',
+        //         inputAttributes: {
+        //           autocapitalize: 'off'
+        //         },
+        //         showCancelButton: true,
+        //         confirmButtonText: 'Look up',
+        //         showLoaderOnConfirm: true,
+        //         focusConfirm: false,
+        //         preConfirm: (query) => {
+        //
+        //           let ontologies = propInfo['oneOf'][i]['vocabulary']['ontology'].toString()
+        //           let children = propInfo['oneOf'][i]['vocabulary']['children_of'].toString()
+        //
+        //           let url = `https://www.ebi.ac.uk/ols/api/search?q=${query}`
+        //           +"&ontology="+ontologies
+        //           +"&childrenOf="+children
+        //           +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+        //           +"&queryFields=label"
+        //           +"&rows=100"
+        //
+        //           return fetch(url)
+        //             .then(response => {
+        //               if (!response.ok) {
+        //                 throw new Error(response.statusText)
+        //               }
+        //               return response.json()
+        //             })
+        //             .catch(error => {
+        //               Swal.showValidationMessage(
+        //                 `Request failed: ${error}`
+        //               )
+        //             })
+        //         },
+        //         allowOutsideClick: () => !Swal.isLoading()
+        //       }).then((result) => {
+        //         if (result.value) {
+        //           let html ="<div id='ontology' class='p-1 text-left'>";
+        //
+        //           for (var i = 0; i < result.value.response.docs.length; i++) {
+        //             tippy('#cb'+i,{
+        //               content:result.value.response.docs[i]
+        //             });
+        //
+        //             let label = result.value.response.docs[i]['label']
+        //             if (label && label.length > 37) {
+        //               label = label.substring(0,37)+"..."
+        //             }
+        //
+        //             html += `<div class="form-check">
+        //                         <input class="form-check-input mr-2" type="checkbox" value="`+result.value.response.docs[i]['iri']+`" id="cb`+i+`">
+        //                         <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
+        //                             `+label+`
+        //                             <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
+        //                         </label>
+        //                     </div>`
+        //           }
+        //           if (propInfo && !propInfo.strict) {
+        //             html += `<div class="alert alert-info mt-1">
+        //                         <h6>Didn't find what you are looking for? Enter value here:</h6>
+        //                         <input class="form-control" type="text" id="qTerm">
+        //                     </div>`
+        //           }
+        //           html += "</div>";
+        //
+        //           Swal.fire({
+        //             title: propName+'(s):',
+        //             html: html,
+        //             confirmButtonColor:"{{color_main}}",
+        //             cancelButtonColor:"{{color_sec}}",
+        //             animation:false,
+        //             customClass:'scale-in-center',
+        //             preConfirm: () => {
+        //
+        //               let checked=[]
+        //
+        //                 for (var i = 0; i < 100; i++) {
+        //                   let x = document.getElementById("cb"+i)
+        //                   if (x && x.checked) {
+        //                     checked.push(x.value)
+        //                   }
+        //                 }
+        //                 let y = document.getElementById("qTerm")
+        //                 if (y.value) {
+        //                   checked.push(y.value)
+        //                 }
+        //                 return checked
+        //             }
+        //           }).then((result) => {
+        //             if (result.value) {
+        //               // console.log('FINAL RES', result.value)
+        //               for (var i = 0; i < result.value.length; i++) {
+        //                 var payload = {};
+        //                 payload["item"] = result.value[i];
+        //                 payload["from"] = propName;
+        //                 store.commit('addToArrayFrom',payload);
+        //
+        //                 store.dispatch('saveProgress');
+        //               }
+        //
+        //             }
+        //           })
+        //
+        //         }
+        //       })
+        //     }
+        //
+        //   }
+        // }
+        else if (propInfo.hasOwnProperty('properties')){
+          props = propInfo.properties
+
+          // Create questions
+          for (key in props) {
+            progressSteps.push(key)
+            switch (props[key]['type']) {
+              case 'string':
+                console.log(key,props[key]['type'])
+                if (props[key].hasOwnProperty('format')) {
+                  switch (props[key]['format']) {
+                    case 'uri':
+                      questions.push({
+                        title: key,
+                        text: props[key].description,
+                        inputValidator: (value) => {
+                          return new Promise((resolve) => {
+
+                            function validURL(str) {
+                              var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                                '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+                                '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+                                '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                                '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+                              return !!pattern.test(str);
+                            }
+
+                            if (propInfo && propInfo.hasOwnProperty('required')) {
+
+                              let currentField = document.getElementById("swal2-title").textContent;
+                              if (propInfo['required'].includes(currentField)) {
+                                // is required needs to be validated
+                                if (value) {
+                                  if (validURL(value)) {
+                                    resolve()
+                                  } else {
+                                    resolve('Input must be a valid URL')
+                                  }
+                                }else{
+                                  resolve(currentField+' is required')
+                                }
+                              }else {
+                                // not required user can skip
+                                resolve()
+                              }
+                            }
+                            if (propInfo && propInfo.hasOwnProperty('oneOf')) {
+                              for (var i = 0; i < propInfo['oneOf'].length; i++) {
+                                if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
+
+                                  let currentField = document.getElementById("swal2-title").textContent;
+                                  if (propInfo['oneOf'][i]['required'].includes(currentField)) {
+                                    // is required needs to be validated
+                                    if (value) {
+                                      if (validURL(value)) {
+                                        resolve()
+                                      } else {
+                                        resolve('Input must be a valid URL')
+                                      }
+                                    }else{
+                                      resolve(currentField+' is required')
+                                    }
+                                  }else {
+                                    // not required user can skip
+                                    resolve()
+                                  }
+                                }
+                              }
+                            }
+
+
+                          })
                         }
                       })
-                    }
-                  })
-                }
-              });
-              break;
-            case 'name':
-              questions.push({
-                title: key,
-                text: props[key].description,
-                inputValidator: (value) => {
-                  return new Promise((resolve) => {
+                      break;
+                    case 'date':
+                      questions.push({
+                        title: key,
+                        inputAttributes: {
+                          id:'hideThis'
+                        },
+                        html: '<input type="date" id="datePicked"/>',
+                        onOpen: ()=>{
+                          document.getElementById("hideThis").classList.add('d-none');
+                        },
+                        preConfirm: () => {
+                          return document.getElementById('datePicked').value
+                        },
+                      })
+                      break;
+                    default:
+                      console.log('TYPE STRING BUT FORMAT NOT HANDLED')
+                  }
+                }else {
+                  // Simple String
+                  questions.push({
+                    title: key,
+                    text: props[key].description,
+                    inputValidator: (value) => {
+                      return new Promise((resolve) => {
 
-                    if (propInfo && propInfo.hasOwnProperty('required')) {
-
-                      let currentField = document.getElementById("swal2-title").textContent;
-                      if (propInfo['required'].includes(currentField)) {
-                        // is required needs to be validated
-                        if (value) {
-                          resolve()
-                        } else {
-                          resolve(currentField+' is required')
-                        }
-                      }else {
-                        // not required user can skip
-                        resolve()
-                      }
-                    }
-                    if (propInfo && propInfo.hasOwnProperty('oneOf')) {
-                      for (var i = 0; i < propInfo['oneOf'].length; i++) {
-                        if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
+                        if (propInfo && propInfo.hasOwnProperty('required')) {
 
                           let currentField = document.getElementById("swal2-title").textContent;
-                          if (propInfo['oneOf'][i]['required'].includes(currentField)) {
+                          if (propInfo['required'].includes(currentField)) {
                             // is required needs to be validated
                             if (value) {
                               resolve()
@@ -1506,205 +1785,298 @@
                             resolve()
                           }
                         }
-                      }
-                    }
+                        if (propInfo && propInfo.hasOwnProperty('oneOf')) {
+                          for (var i = 0; i < propInfo['oneOf'].length; i++) {
+                            if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
 
-                  })
-                }
-              });
-              break;
-            case 'url':
-              questions.push({
-                title: key,
-                text: props[key].description,
-                inputValidator: (value) => {
-                  return new Promise((resolve) => {
-
-                    function validURL(str) {
-                      var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-                        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-                        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-                      return !!pattern.test(str);
-                    }
-
-                    if (propInfo && propInfo.hasOwnProperty('required')) {
-
-                      let currentField = document.getElementById("swal2-title").textContent;
-                      if (propInfo['required'].includes(currentField)) {
-                        // is required needs to be validated
-                        if (value) {
-                          if (validURL(value)) {
-                            resolve()
-                          } else {
-                            resolve('Input must be a valid URL')
-                          }
-                        }else{
-                          resolve(currentField+' is required')
-                        }
-                      }else {
-                        // not required user can skip
-                        resolve()
-                      }
-                    }
-                    if (propInfo && propInfo.hasOwnProperty('oneOf')) {
-                      for (var i = 0; i < propInfo['oneOf'].length; i++) {
-                        if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
-
-                          let currentField = document.getElementById("swal2-title").textContent;
-                          if (propInfo['oneOf'][i]['required'].includes(currentField)) {
-                            // is required needs to be validated
-                            if (value) {
-                              if (validURL(value)) {
+                              let currentField = document.getElementById("swal2-title").textContent;
+                              if (propInfo['oneOf'][i]['required'].includes(currentField)) {
+                                // is required needs to be validated
+                                if (value) {
+                                  resolve()
+                                } else {
+                                  resolve(currentField+' is required')
+                                }
+                              }else {
+                                // not required user can skip
                                 resolve()
-                              } else {
-                                resolve('Input must be a valid URL')
                               }
-                            }else{
-                              resolve(currentField+' is required')
                             }
-                          }else {
-                            // not required user can skip
-                            resolve()
                           }
                         }
-                      }
+
+                      })
                     }
-
-
-                  })
+                  });
+                  break;
                 }
-              })
-              break;
-            case 'dateModified' || 'datePublished':
-              questions.push({
-                title: key,
-                inputAttributes: {
-                  id:'hideThis'
-                },
-                html: '<input type="date" id="datePicked"/>',
-                onOpen: ()=>{
-                  document.getElementById("hideThis").classList.add('d-none');
-                },
-                preConfirm: () => {
-                  return document.getElementById('datePicked').value
-                },
-              })
-              break;
-            default:
-            questions.push({
-              title: key,
-              text: props[key].description,
-              inputValidator: (value) => {
-                return new Promise((resolve) => {
-
-                  if (propInfo && propInfo.hasOwnProperty('required')) {
-
-                    let currentField = document.getElementById("swal2-title").textContent;
-                    if (propInfo['required'].includes(currentField)) {
-                      // is required needs to be validated
-                      if (value) {
-                        resolve()
-                      } else {
-                        resolve(currentField+' is required')
-                      }
-                    }else {
-                      // not required user can skip
-                      resolve()
-                    }
-                  }
-                  if (propInfo && propInfo.hasOwnProperty('oneOf')) {
-                    for (var i = 0; i < propInfo['oneOf'].length; i++) {
-                      if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
-
-                        let currentField = document.getElementById("swal2-title").textContent;
-                        if (propInfo['oneOf'][i]['required'].includes(currentField)) {
-                          // is required needs to be validated
-                          if (value) {
+                break;
+              case 'integer':
+                console.log('integer',key)
+                questions.push({
+                  title: key,
+                  input: 'number',
+                  text: props[key].description,
+                  inputValidator: (value) => {
+                    return new Promise((resolve) => {
+                      if (!value) {
+                        return 'You should write something meanignful'
+                      }else{
+                        return new Promise((resolve) => {
+                          function validInteger(str) {
+                            var pattern = new RegExp('^[0-9]*$');
+                            return !!pattern.test(str);
+                          }
+                          if (validInteger(value)) {
                             resolve()
                           } else {
-                            resolve(currentField+' is required')
+                            resolve('Input must be an integer')
                           }
-                        }else {
-                          // not required user can skip
-                          resolve()
+                        })
+                      }
+                    })
+                  }
+                });
+                break;
+              case 'array':
+                // console.log(key,props[key]['type'])
+                // console.log("ARRAY",key,props[key])
+                html =''
+                if (props[key].hasOwnProperty('oneOf')) {
+                  console.log("Array Has One Of")
+
+                  for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
+                    if (props[key]['oneOf'][ix]['type'] == 'object') {
+                      let obj = props[key]['oneOf'][ix]['properties'];
+                      for (var obj_key in obj) {
+                        switch (obj[obj_key]['type']) {
+                          case 'string':
+                            html += '<div class="form-group"><input type="text" class="form-control"  name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                            break;
+                          case 'url':
+                            html += '<div class="form-group"><input type="url" class="form-control" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                            break;
+                          case 'date':
+                            html += '<div class="form-group"><input class="form-control" name="'+obj_key+'" type="date"/></div>'
+                            break;
+                          default:
+                            html += '<div class="form-group"><input class="form-control" type="text" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                            break;
                         }
                       }
                     }
                   }
-                })
-              }
-            });
-          }
-        }
 
-        let arr = [] //modal header steps
-        for (var i = 0; i < progressSteps.length; i++) {
-          arr.push(i+1)
-        }
+                  html = `<div class="alert-info p-1">
+                            <form id="arrayForm">`+html+`</form>
+                          </div>`
+                  questions.push({
+                    title: key,
+                    inputAttributes: {
+                      id:'hideThis'
+                    },
+                    html: html,
+                    onOpen: ()=>{
+                      document.getElementById("hideThis").classList.add('d-none');
+                    },
+                    preConfirm: () => {
+                      let formArray = $('#arrayForm').serializeArray();
+                      console.log('arrayForm Data', arrayForm)
+                      var returnArray = {};
+                      for (var i = 0; i < formArray.length; i++){
+                        returnArray[formArray[i]['name']] = formArray[i]['value'];
+                      }
+                      console.log('arrayForm Data', returnArray)
+                      return returnArray;
+                    },
+                  })
 
-        Swal.mixin({
-          input: 'text',
-          confirmButtonText: 'Next &rarr;',
-          showCancelButton: true,
-          confirmButtonColor:"{{color_main}}",
-          cancelButtonColor:"{{color_sec}}",
-          animation:false,
-          customClass:'scale-in-center',
-          progressSteps: arr
-        }).queue(questions).then((result) => {
-          if (result.value) {
-            let obj = {}
-            switch (propName) {
-              case 'creator':
-                Vue.set(obj,'@type','Person')
+                }
                 break;
-                case 'contributor':
-                  Vue.set(obj,'@type','Person')
-                  break;
-                  case 'publisher':
-                    Vue.set(obj,'@type','Organization')
-                    break;
-                    case 'funding':
-                      Vue.set(obj,'@type','Organization')
+              case 'object':
+                console.log(key,props[key]['type'])
+                html =''
+                let obj = props[key]['properties'];
+
+                for (var obj_key in obj) {
+                  switch (obj[obj_key]['type']) {
+                    case 'string':
+                      html += '<div class="form-group"><input type="text" class="form-control"  name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
                       break;
+                    case 'url':
+                      html += '<div class="form-group"><input type="url" class="form-control" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                      break;
+                    case 'date':
+                      html += '<div class="form-group"><input class="form-control" name="'+obj_key+'" type="date"/></div>'
+                      break;
+                    default:
+                      html += '<div class="form-group"><input class="form-control" type="text" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                      break;
+                  }
+                }
+
+                html = `<div class="alert-info p-1">
+                          <form id="arrayForm">`+html+`</form>
+                        </div>`
+                questions.push({
+                  title: key,
+                  inputAttributes: {
+                    id:'hideThis'
+                  },
+                  html: html,
+                  onOpen: ()=>{
+                    document.getElementById("hideThis").classList.add('d-none');
+                  },
+                  preConfirm: () => {
+                    let formArray = $('#arrayForm').serializeArray();
+                    // console.log('arrayForm Data', arrayForm)
+                    var returnArray = {};
+                    for (var i = 0; i < formArray.length; i++){
+                      returnArray[formArray[i]['name']] = formArray[i]['value'];
+                    }
+                    // console.log('arrayForm Data', returnArray)
+                    return returnArray;
+                  },
+                })
+
+                break;
               default:
+                console.log('DEFAULT PROP HANDLER...')
+
+                // ONE OF
+                html =''
+                if (props[key].hasOwnProperty('oneOf')) {
+                  console.log("Array Has One Of")
+
+                  for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
+                    if (props[key]['oneOf'][ix]['type'] == 'object') {
+                      let obj = props[key]['oneOf'][ix]['properties'];
+                      for (var obj_key in obj) {
+                        switch (obj[obj_key]['type']) {
+                          case 'string':
+                            html += '<div class="form-group"><input type="text" class="form-control"  name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                            break;
+                          case 'url':
+                            html += '<div class="form-group"><input type="url" class="form-control" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                            break;
+                          case 'date':
+                            html += '<div class="form-group"><input class="form-control" name="'+obj_key+'" type="date"/></div>'
+                            break;
+                          default:
+                            html += '<div class="form-group"><input class="form-control" type="text" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                            break;
+                        }
+                      }
+                    }
+                  }
+
+                  html = `<div class="alert-info p-1">
+                            <form id="arrayForm">`+html+`</form>
+                          </div>`
+                  questions.push({
+                    title: key,
+                    inputAttributes: {
+                      id:'hideThis'
+                    },
+                    html: html,
+                    onOpen: ()=>{
+                      document.getElementById("hideThis").classList.add('d-none');
+                    },
+                    preConfirm: () => {
+                      let formArray = $('#arrayForm').serializeArray();
+                      console.log('arrayForm Data', arrayForm)
+                      var returnArray = {};
+                      for (var i = 0; i < formArray.length; i++){
+                        returnArray[formArray[i]['name']] = formArray[i]['value'];
+                      }
+                      console.log('arrayForm Data', returnArray)
+                      return returnArray;
+                    },
+                  })
+
+                }
             }
-            for (var i = 0; i < progressSteps.length; i++) {
-              // check if value is empty if so skip
-              if (result && result.value[i]) {
-                if (result.value[i].includes(",")) {
-                  let val = result.value[i].split(',');
-                  Vue.set(obj,progressSteps[i],val)
-                }else{
-                  if (props[progressSteps[i]].hasOwnProperty('type') && props[progressSteps[i]]['type']==='integer') {
-                    let val = parseInt(result.value[i]);
-                    Vue.set(obj,progressSteps[i],val)
+
+          }
+
+          let arr = [] //modal header steps
+          for (var i = 0; i < progressSteps.length; i++) {
+            arr.push(i+1)
+          }
+
+          Swal.mixin({
+            input: 'text',
+            confirmButtonText: 'Next &rarr;',
+            showCancelButton: true,
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            animation:false,
+            customClass:'scale-in-center',
+            progressSteps: arr
+          }).queue(questions).then((result) => {
+            if (result.value) {
+              let obj = {}
+              try {
+                Vue.set(obj,'@type',propInfo["@type"])
+              } catch (e) {
+                switch (propName) {
+                  case 'creator':
+                    Vue.set(obj,'@type','Person')
+                    break;
+                    case 'contributor':
+                      Vue.set(obj,'@type','Person')
+                      break;
+                      case 'publisher':
+                        Vue.set(obj,'@type','Organization')
+                        break;
+                        case 'funding':
+                          Vue.set(obj,'@type','Organization')
+                          break;
+                  default:
+                }
+              }
+
+              for (var i = 0; i < progressSteps.length; i++) {
+                // check if value is empty if so skip
+                if (result && result.value[i]) {
+                  if (result.value[i] == "keywords") {
+                    try {
+                      let val = result.value[i].split(',');
+                      Vue.set(obj,progressSteps[i],val)
+                    } catch (e) {
+                      let val = result.value[i]
+                      Vue.set(obj,progressSteps[i],val)
+                    }
+
                   }else{
-                    let val = result.value[i];
-                    Vue.set(obj,progressSteps[i],val)
+                    if (props[progressSteps[i]].hasOwnProperty('type') && props[progressSteps[i]]['type']==='integer') {
+                      let val = parseInt(result.value[i]);
+                      Vue.set(obj,progressSteps[i],val)
+                    }else{
+                      let val = result.value[i];
+                      Vue.set(obj,progressSteps[i],val)
+                    }
                   }
                 }
               }
-            }
 
-            if ((propInfo && propInfo.hasOwnProperty('oneOf')) && (propInfo['oneOf'][0].hasOwnProperty('vocabulary'))){
-              //if its a vocab enum field do nothing. separate modal will launch
-            }else {
-              if(Object.keys(obj).length !== 0 && obj.constructor === Object){
-                var payload = {};
-                payload["item"] = obj;
-                payload["from"] = propName;
-                store.commit('addToArrayFrom',payload);
+              if ((propInfo && propInfo.hasOwnProperty('oneOf')) && (propInfo['oneOf'][0].hasOwnProperty('vocabulary'))){
+                //if its a vocab enum field do nothing. separate modal will launch
+              }else {
+                if(Object.keys(obj).length !== 0 && obj.constructor === Object){
+                  var payload = {};
+                  payload["item"] = obj;
+                  payload["from"] = propName;
+                  store.commit('addToArrayFrom',payload);
 
-                store.dispatch('saveProgress');
+                  store.dispatch('saveProgress');
+                }
               }
-            }
 
-          }
-        })
+            }
+          });
+
+        }
       },
       checkForConstantKey(obj, keyname, parentkey) {
         var self=this;
@@ -2060,6 +2432,10 @@
                 <template v-if="info && info.format === 'uri'">
                   <input type="url" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter url here">
                 </template>
+                <!-- 🌈 STRING FORMAT DATE 🌈 -->
+                <template v-if="info && info.format === 'date'">
+                  <input type="date" v-model="userInput" class="form-control form-control-sm">
+                </template>
               </template>
               <!-- 🌈 ENUM 🌈 -->
               <template v-if="info && info.enum" v-for="(item,i) in info.enum">
@@ -2173,7 +2549,7 @@
                 <!-- 🌈  input preview for object or array🌈 -->
                   <template v-if="typeof userInput === 'object' || typeof userInput === 'array'  " v-for="(person,i) in userInput">
                     <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
-                      <i class="fas fa-circle"></i>
+                      <i class="fas fa-check"></i>
                       <span v-text="name+' '+(i+1)"></span>
                       <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
                     </span>
@@ -2197,7 +2573,7 @@
                   <!-- 🌈  input preview for object or array🌈 -->
                     <template v-if="typeof userInput === 'object' || typeof userInput === 'array'  " v-for="(person,i) in userInput">
                       <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
-                        <i class="fas fa-circle"></i>
+                        <i class="fas fa-check"></i>
                         <span v-text="name+' '+(i+1)"></span>
                         <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
                       </span>
@@ -2776,7 +3152,7 @@
             Swal.fire({
               title: 'Register this dataset?',
               html:"<small>Are you all done? Click <b>Register Now</b> to proceed.</small>",
-              footer:`<small class='text-danger'>You will leave this page after successfully registering this dataset.</small>`,
+              footer:`<small class='text-danger'>You will leave this page after successfully registering this metadata.</small>`,
               confirmButtonColor:"{{color_main}}",
               cancelButtonColor:"{{color_sec}}",
               animation:false,
@@ -2800,6 +3176,9 @@
                 axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label'],output,config).then(res=>{
                   self.loading = false;
                   if (res.data.success) {
+
+                    sessionStorage.removeItem('guideProgress');
+
                     let timerInterval
                     Swal.fire({
                       type:'success',
@@ -2833,9 +3212,7 @@
                         text: res.data.reason
                       });
                     } catch (e) {
-
-                    } finally {
-
+                      console.log(e)
                     }
                   }
                 }).catch(err=>{
