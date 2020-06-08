@@ -1,7 +1,9 @@
 
+from biothings.web.handlers.exceptions import BadRequest
 from tornado.web import Finish, HTTPError, MissingArgumentError
 
-from discovery.utils.controllers import DatasetController
+from discovery.utils.controllers import (DatasetController,
+                                         DatasetValidationError)
 
 from .base import APIBaseHandler, github_authenticated
 
@@ -44,6 +46,9 @@ class DatasetMetadataHandler(APIBaseHandler):
 
         except (KeyError, ValueError) as exc:
             raise HTTPError(400, reason=str(exc))
+
+        except DatasetValidationError as exc:
+            raise BadRequest(**exc.to_dict())
 
         except Exception as exc:  # unexpected
             raise HTTPError(500, reason=str(exc))
