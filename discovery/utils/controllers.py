@@ -418,8 +418,7 @@ class DatasetController:
 class DatasetValidationError(Exception):
 
     fields = ('message', 'path', 'schema_path', 'context',
-              'cause', 'validator', 'validator_value',
-              'instance', 'schema', 'parent')
+              'cause', 'validator', 'validator_value', 'parent')
 
     def __init__(self, error):
 
