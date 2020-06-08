@@ -8,12 +8,14 @@ Used by discovery.web.handlers
 
 import json
 import logging
+from collections import deque
 from pprint import pformat
-from tornado.httpclient import HTTPResponse
+
 import elasticsearch
 import jsonschema
 import requests
 from elasticsearch_dsl import Index
+from tornado.httpclient import HTTPResponse
 
 from discovery.data import *
 from discovery.utils.adapters import SchemaAdapter
@@ -386,7 +388,7 @@ class DatasetController:
         except elasticsearch.exceptions.NotFoundError:
             raise ValueError(f"{class_id} not found.")
         except jsonschema.exceptions.ValidationError as err:
-            raise ValueError(str(err).splitlines()[0])
+            raise DatasetValidationError(err)
 
         logger.debug('Passed Validation')
 
@@ -411,3 +413,38 @@ class DatasetController:
             'success': True,
             'refresh': Index(DatasetMetadata.Index.name).refresh(),
         }
+
+
+class DatasetValidationError(Exception):
+
+    fields = ('message', 'path', 'schema_path', 'context',
+              'cause', 'validator', 'validator_value',
+              'instance', 'schema', 'parent')
+
+    def __init__(self, error):
+
+        assert isinstance(error, jsonschema.exceptions.ValidationError)
+        self.error = error
+
+    def to_dict(self):
+        error = {
+            key: self._json_serialize(getattr(self.error, key))
+            for key in self.fields
+        }
+        error['reason'] = error.pop('message')
+        return error
+
+    def _json_serialize(self, obj):
+
+        if obj is None:
+            return obj
+        if isinstance(obj, (str, int, float)):
+            return obj
+        if isinstance(obj, dict):
+            return {key: self._json_serialize(obj[key]) for key in obj}
+        if isinstance(obj, (list, deque)):
+            return [self._json_serialize(val) for val in obj]
+        raise TypeError(str(type(obj)))
+
+    def __str__(self):
+        return self.error.message
