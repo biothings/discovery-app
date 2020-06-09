@@ -1421,6 +1421,47 @@
          console.log(this.swalForm) // { name: 'user name', nickname: 'what the user sends' }
        })
       },
+      oneOfEnum(propName,propInfo){
+        var self=this;
+
+        console.log('oneOfEnum happening')
+        console.log(propName,propInfo)
+
+        for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++){
+          if (propInfo['oneOf'][oF_i].hasOwnProperty('enum')) {
+
+            let e = propInfo['oneOf'][oF_i]['enum']
+            let optionsenum={}
+
+            for (var eIndex = 0; eIndex < e.length; eIndex++) {
+              optionsenum[e[eIndex]]=e[eIndex]
+            }
+            // console.log(e,optionsenum)
+
+
+            Swal({
+              title: propName,
+              input: 'select',
+              inputOptions: optionsenum,
+              inputPlaceholder: 'Select one',
+              showCancelButton: true,
+              inputValidator: (value) => {
+                if (value) {
+                  var payload = {};
+                  payload["item"] = value;
+                  payload["from"] = propName;
+                  store.commit('addToArrayFrom',payload);
+
+                  store.dispatch('saveProgress');
+                }
+              }
+            });
+          }
+          if (propInfo['oneOf'][oF_i].hasOwnProperty('type') && propInfo['oneOf'][oF_i]['type'] == 'array' ) {
+            self.canAcceptMultiple = true
+          }
+        }
+      },
       addItem(propName,propInfo){
         var self=this;
         let progressSteps =[]
@@ -1436,36 +1477,103 @@
 
         if (propInfo.hasOwnProperty('oneOf')) {
           console.log("ONE OF")
-          options ={}
-          for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++) {
+
+          path= ""
+
+          for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++){
+            if (propInfo['oneOf'][oF_i].hasOwnProperty('enum')) {
+              path = 'enum';
+            }
+            if (propInfo['oneOf'][oF_i].hasOwnProperty('type') && propInfo['oneOf'][oF_i]['type'] == 'string') {
+              path = 'string';
+            }
             if (propInfo['oneOf'][oF_i].hasOwnProperty('@type')) {
-              // value : user text
-              options[oF_i] = propInfo['oneOf'][oF_i]["@type"]
+              path ='types'
             }
             if (propInfo['oneOf'][oF_i].hasOwnProperty('type') && propInfo['oneOf'][oF_i]['type'] == 'array' ) {
               self.canAcceptMultiple = true
             }
           }
 
-          if (Object.keys(options).length == 1) {
-            // if only one option auto start
-            self.handleOneOf(propName,propInfo['oneOf'][0]['@type'],propInfo['oneOf'][0])
-          }else {
-            // if options, user chooses type
+          switch (path) {
+            case "string":
+            console.log("path:",path)
             Swal({
-              title: "Select Type",
-              input: 'select',
-              inputOptions: options,
-              inputPlaceholder: 'Select one',
-              showCancelButton: true,
-              inputValidator: (value) => {
-                if (value) {
-                  console.log('value',value)
-                  self.handleOneOf(propName,propInfo['oneOf'][value]['@type'],propInfo['oneOf'][value])
+                    title: propName,
+                    input: 'text',
+                    inputPlaceholder: 'Enter text here',
+                    footer:propName == 'keywords'? "Multiple keywords can be entered separated by commas." : " ",
+                    inputValidator: (value) => {
+                      if (value) {
+                        if (propName == 'keywords') {
+                          slist = value.split(",");
+                          for (var sIndex = 0; sIndex < slist.length; sIndex++) {
+                            var payload = {};
+                            payload["item"] = slist[sIndex];
+                            payload["from"] = propName;
+                            store.commit('addToArrayFrom',payload);
+
+                            store.dispatch('saveProgress');
+                          }
+                        }else{
+                          var payload = {};
+                          payload["item"] = value;
+                          payload["from"] = propName;
+                          store.commit('addToArrayFrom',payload);
+
+                          store.dispatch('saveProgress');
+                        }
+
+                      }
+                    }
+
+                  });
+              break;
+            case 'enum':
+              console.log("path:",path)
+              self.oneOfEnum(propName,propInfo);
+              break;
+            case 'types':
+              console.log("path:",path)
+              options ={}
+              for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++) {
+                if (propInfo['oneOf'][oF_i].hasOwnProperty('@type')) {
+                  // value : user text
+                  options[oF_i] = propInfo['oneOf'][oF_i]["@type"]
+                }
+                if (propInfo['oneOf'][oF_i].hasOwnProperty('type') && propInfo['oneOf'][oF_i]['type'] == 'array' ) {
+                  self.canAcceptMultiple = true
                 }
               }
-            });
+
+              if (Object.keys(options).length == 1) {
+                // if only one option auto start
+                self.handleOneOf(propName,propInfo['oneOf'][0]['@type'],propInfo['oneOf'][0])
+              }else {
+                // if options, user chooses type
+                Swal({
+                  title: "Select Type",
+                  input: 'select',
+                  inputOptions: options,
+                  inputPlaceholder: 'Select one',
+                  showCancelButton: true,
+                  inputValidator: (value) => {
+                    if (value) {
+                      console.log('value',value)
+                      self.handleOneOf(propName,propInfo['oneOf'][value]['@type'],propInfo['oneOf'][value])
+                    }
+                  }
+                });
+              }
+              break;
+            default:
+            console.log('PATH NOT HANDLED')
+
           }
+
+
+
+
         }
 
         if (propInfo.hasOwnProperty('anyOf')) {
