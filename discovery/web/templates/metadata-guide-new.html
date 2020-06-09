@@ -1435,7 +1435,7 @@
         }
 
         if (propInfo.hasOwnProperty('oneOf')) {
-          console.log("newoneof")
+          console.log("ONE OF")
           options ={}
           for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++) {
             if (propInfo['oneOf'][oF_i].hasOwnProperty('@type')) {
@@ -1466,7 +1466,40 @@
               }
             });
           }
+        }
 
+        if (propInfo.hasOwnProperty('anyOf')) {
+          console.log("ANY OF")
+          options ={}
+          for (var oF_i = 0; oF_i < propInfo['anyOf'].length; oF_i++) {
+            if (propInfo['anyOf'][oF_i].hasOwnProperty('@type')) {
+              // value : user text
+              options[oF_i] = propInfo['anyOf'][oF_i]["@type"]
+            }
+            if (propInfo['anyOf'][oF_i].hasOwnProperty('type') && propInfo['anyOf'][oF_i]['type'] == 'array' ) {
+              self.canAcceptMultiple = true
+            }
+          }
+
+          if (Object.keys(options).length == 1) {
+            // if only one option auto start
+            self.handleOneOf(propName,propInfo['anyOf'][0]['@type'],propInfo['anyOf'][0])
+          }else {
+            // if options, user chooses type
+            Swal({
+              title: "Select Type",
+              input: 'select',
+              inputOptions: options,
+              inputPlaceholder: 'Select one',
+              showCancelButton: true,
+              inputValidator: (value) => {
+                if (value) {
+                  console.log('value',value)
+                  self.handleOneOf(propName,propInfo['anyOf'][value]['@type'],propInfo['anyOf'][value])
+                }
+              }
+            });
+          }
 
         }
 
@@ -1843,7 +1876,7 @@
                 // console.log("ARRAY",key,props[key])
                 html =''
                 if (props[key].hasOwnProperty('oneOf')) {
-                  console.log("Array Has One Of")
+                  // console.log("Array Has One Of")
 
                   for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
                     if (props[key]['oneOf'][ix]['type'] == 'object') {
@@ -1881,12 +1914,12 @@
                     },
                     preConfirm: () => {
                       let formArray = $('#arrayForm').serializeArray();
-                      console.log('arrayForm Data', arrayForm)
+                      // console.log('arrayForm Data', arrayForm)
                       var returnArray = {};
                       for (var i = 0; i < formArray.length; i++){
                         returnArray[formArray[i]['name']] = formArray[i]['value'];
                       }
-                      console.log('arrayForm Data', returnArray)
+                      // console.log('arrayForm Data', returnArray)
                       return returnArray;
                     },
                   })
@@ -2561,7 +2594,7 @@
                 </div>
               </template>
               <!-- 🌈  ONE OF 🌈 -->
-              <template v-if="info.oneOf">
+              <template v-if="info.oneOf || info.anyOf">
                 <!-- 🌈  ONE OF ANYTHING🌈 -->
                 <template v-if="name !== 'datePublished' && name !== 'dateModified'">
                   <div class="form-group p-2 row">
