@@ -245,6 +245,7 @@ WEB_HANDLERS = [
     (r"/about/?", TemplateHandler, {"filename": "about.html"}),
     (r"/best-practices/?", TemplateHandler, {"filename": "guide-intro.html"}),
     (r"/dashboard/?", TemplateHandler, {"filename": "dashboard.html"}),
+    (r"/contributor/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "contributor.html"}),
     (r"/dataset/?", TemplateHandler, {"filename": "metadata-registry.html"}),
     (r"/dataset/(geo/.+)", RedirectHandler, {"url": "http://metadataplus.biothings.io/{0}"}),
     (r"/dataset/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "metadata-page.html"}),

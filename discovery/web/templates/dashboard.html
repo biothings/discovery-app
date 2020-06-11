@@ -56,6 +56,12 @@
                   </a>
                 </div>
                 <div>
+                  <span class="fa-stack fa-1x pointer tip" @click="updateSelected('schema',item.namespace)" :data-tippy-info="'Update Schema'">
+                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                    <i class="fas fa-sync-alt fa-stack-1x text-light"></i>
+                  </span>
+                </div>
+                <div>
                   <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('schema',item.namespace)" :data-tippy-info="'Delete'">
                     <i class="fas fa-circle text-muted fa-stack-2x"></i>
                     <i class="fas fa-trash fa-stack-1x text-light"></i>
@@ -329,6 +335,108 @@ var app = new Vue({
             );
           });
         },
+        updateSelected(type,namespace){
+
+          options = {
+            "Refresh URL":"Refresh URL",
+            "Change URL":"Change URL"
+          }
+
+          Swal.fire({
+            title: "What would like to do?",
+            html: "<p>Do you want to <b class='text-danger'>change the url</b> of the schema OR just <b class='text-danger'>refresh</b> the content?</p>",
+            footer:"<small>Tip: If you wanna test that there is no breaking changes first, try visualizing it on the Schema Playground!</small>",
+            input: 'select',
+            inputOptions: options,
+            showCancelButton: true,
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            animation:false,
+            customClass:'scale-in-center',
+            confirmButtonText: 'Go'
+          }).then((result) => {
+
+            if (result.value == "Refresh URL") {
+              // same url
+              axios.put("/api/registry/"+namespace).then(res=>{
+                if (res.data.result == 'updated') {
+                  Swal.fire(
+                    'Boom! Done!',
+                    'schema: '+namespace+' updated!',
+                    'success'
+                  );
+                }else if (res.data.result == 'noop') {
+                  Swal.fire(
+                    'Nothing new here',
+                    'schema: '+namespace+' is already on its latest version',
+                    'success'
+                  );
+                }else{
+                  Swal.fire(
+                    'Done!',
+                    res.data.result,
+                    'info'
+                  );
+                }
+              }).catch(err=>{
+                Swal.fire(
+                  'Oh, no!',
+                  'We had trouble updating: '+namespace,
+                  'error'
+                );
+              });
+
+            }else if(result.value == "Change URL"){
+              // new url
+              Swal.fire({
+                title: "What's the new URL?",
+                text:"Make sure it's the RAW data link! (if hosted on GitHub)",
+                input: 'text',
+                inputAttributes: {
+                  autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Go',
+                allowOutsideClick: () => !Swal.isLoading()
+              }).then((result) => {
+                if (result.value) {
+
+                  let newurl = encodeURI(result.value);
+
+                  data={
+                    'url': newurl
+                  }
+                  // let config = {
+                  //    headers: {
+                  //      'content-type': 'application/json'
+                  //    }
+                  //  }
+
+                  axios.put("/api/registry",data).then(res=>{
+                    if (res.data.result) {
+                      Swal.fire(
+                        'Ta-dah!',
+                        'Status: '+res.data.result,
+                        'success'
+                      );
+                    }
+                  }).catch(err=>{
+                    Swal.fire(
+                      'Oh, no!',
+                      'We had trouble updating: '+namespace,
+                      'error'
+                    );
+                  });
+
+                }
+              })
+
+
+            }
+          })
+
+
+        },
         deleteSelected(type,identifier){
           var self = this;
           let index = '/api/registry/';
@@ -355,11 +463,7 @@ var app = new Vue({
                       location.reload(true);
                       break;
                       case 401:
-                        Swal.fire(
-                          'Oh, no!',
-                          'You must sign-in to delete this item',
-                          'error'
-                        );
+                        v
                         self.getAll();
                         break;
                         case 403:
