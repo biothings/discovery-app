@@ -142,8 +142,8 @@ class SchemaRegistryHandler(APIBaseHandler):
 
         schema = SchemaController(namespace)
 
-        # if schema.user != self.current_user:
-        #     raise HTTPError(403)
+        if schema.user != self.current_user:
+            raise HTTPError(403)
 
         url = self.args.url or schema.url
 
