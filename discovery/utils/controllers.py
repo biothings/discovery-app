@@ -15,6 +15,7 @@ import elasticsearch
 import jsonschema
 import requests
 from elasticsearch_dsl import Index
+from jsonschema.exceptions import ValidationError
 from tornado.httpclient import HTTPResponse
 
 from discovery.data import *
@@ -417,12 +418,12 @@ class DatasetController:
 
 class DatasetValidationError(Exception):
 
-    fields = ('message', 'path', 'schema_path', 'context',
-              'cause', 'validator', 'validator_value', 'parent')
+    fields = ('message', 'path', 'schema_path', 'cause',
+              'validator', 'validator_value', 'parent')
 
     def __init__(self, error):
 
-        assert isinstance(error, jsonschema.exceptions.ValidationError)
+        assert isinstance(error, ValidationError)
         self.error = error
 
     def to_dict(self):
@@ -443,6 +444,8 @@ class DatasetValidationError(Exception):
             return {key: self._json_serialize(obj[key]) for key in obj}
         if isinstance(obj, (list, deque)):
             return [self._json_serialize(val) for val in obj]
+        if isinstance(obj, ValidationError):
+            return DatasetValidationError(obj).to_dict()
         raise TypeError(str(type(obj)))
 
     def __str__(self):
