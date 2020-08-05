@@ -3,4 +3,7 @@
   <sitemap>
     <loc>https://discovery.biothings.io/static/static-sitemap.xml</loc>
   </sitemap>
+  <sitemap>
+    <loc>https://discovery.biothings.io/sitemap/dataset.xml</loc>
+  </sitemap>
 </sitemapindex>

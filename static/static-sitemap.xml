@@ -24,12 +24,6 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://discovery.biothings.io/dataset</loc>
-  </url>
-  <url>
-    <loc>https://discovery.biothings.io/dataset/83dc3401f86819de</loc>
-  </url>
-  <url>
     <loc>https://discovery.biothings.io/faq</loc>
     <priority>0.5</priority>
     <lastmod>2019-10-06</lastmod>
