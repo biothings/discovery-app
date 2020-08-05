@@ -31,7 +31,8 @@ APP_LIST = [
     (r"/api/registry/?", "discovery.web.api.SchemaRegistryHandler"),
     (r"/api/dataset/([^/]+)/?", "discovery.web.api.DatasetMetadataHandler"),
     (r"/api/dataset/?", "discovery.web.api.DatasetMetadataHandler"),
-    (r"/api/view/?", "discovery.web.api.SchemaViewHandler")
+    (r"/api/view/?", "discovery.web.api.SchemaViewHandler"),
+    (r"/sitemap/dataset.xml", "discovery.sitemap.DatasetHandler")
 ]
 
 # *****************************************************************************

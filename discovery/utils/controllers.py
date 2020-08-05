@@ -303,7 +303,7 @@ class DatasetController:
         }
 
     @staticmethod
-    def get_all(user, private=False):
+    def get_all(user=None, private=False):
         """
         Expect exceptions if not success
         Return {} if no match
@@ -320,6 +320,18 @@ class DatasetController:
             "total": search.count(),
             "hits": [meta.to_json() for meta in search.scan()]
         }
+
+    @staticmethod
+    def get_all_ids():
+        """
+        Only public datasets.
+        Return a list.
+        """
+        search = DatasetMetadata.search().source(False)
+        ids = []
+        for hit in search.scan():
+            ids.append(hit.meta.id)
+        return ids
 
     @staticmethod
     def get_dataset(id_, request):
