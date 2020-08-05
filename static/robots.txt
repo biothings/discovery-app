@@ -1,4 +1,1 @@
 Sitemap: https://discovery.biothings.io/sitemap.xml
-
-User-agent: *
-Disallow: /api
