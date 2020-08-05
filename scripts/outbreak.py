@@ -70,6 +70,7 @@ def main():
     for doc in DatasetMetadata.search().scan():
         dic = doc.to_json()
         if dic.get('@type') == 'outbreak:Dataset':
+            dic['@type'] = 'Dataset'
             try:
                 client.index(index_name, dic, id=doc.meta.id)
             except RequestError as err:
