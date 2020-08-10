@@ -20,4 +20,5 @@ class DatasetHandler(tornado.web.RequestHandler):
                 {% end %}
             {% end %}
         </urlset>""")
+        self.set_header('Content-Type', 'text/xml')
         self.write(tpl.generate(ids=ids))
