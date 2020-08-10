@@ -1,4 +1,4 @@
-git+git://github.com/biothings/biothings_schema.py.git@6ceff7d3063996134d59a778702f68b17e8bac9e#egg=biothings_schema
+git+git://github.com/biothings/biothings_schema.py.git@e5550d3#egg=biothings_schema
 biothings==0.7.3
 elasticsearch>=7, <8
 elasticsearch-dsl>=7, <8
