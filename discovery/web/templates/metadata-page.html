@@ -2,14 +2,19 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-
+  .word-break{
+    word-break: break-word !important;
+  }
+  .alert-muted-lighter{
+    background-color: #e9ebea;
+  }
 </style>
 <div id="registry" class="jumbotron mb-0" style="min-height:80vh;">
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>
   </div>
-  <div v-if="metadata && metadata.name" class="row">
-    <div class="col-sm-12 col-md-10 col-lg-7 text-left" style="margin:auto;">
+  <div v-if="metadata && metadata.name" class="container">
+    <div class="text-left" style="margin:auto;">
       <h1 class="text-center logoText mt-5">
         <span v-text="metadata.name"></span>
       </h1>
@@ -17,7 +22,12 @@
       <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
       <div class="alert-secondary p-1 m-2">
         <div class="bg-light p-4 text-center">
-          <p class="text-muted m-auto" v-html="metadata.description"></p>
+          <div class="p-3">
+            <p class="text-muted m-auto" v-html="metadata.description"></p>
+          </div>
+          <template v-for="(content,name) in viewMetadata" :key="name">
+            <field-box :name="name" :content="content" isChild="false"></field-box>
+          </template>
           <div class="d-flex flex-wrap mt-5 justify-content-center">
             <template v-for="item in metadata.keywords">
               <small class="text-muted m-1" ><i class="fas fa-tag"></i> <span v-text='item'></span></small>
@@ -74,16 +84,27 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+<script src="/static/js/lodash.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
   const store = new Vuex.Store({
     state: {
       'metadata':{},
+      'viewMetadata':{}
     },
     strict: true,
     mutations: {
       saveMetadata (state,payload) {
         state.metadata = payload['metadata']
+        // console.log(state.metadata)
+        const ignore = ['_id','name','description','keywords']
+        Object.keys(state.metadata)
+        .forEach(function(v, i) {
+            if(!ignore.includes(v)){
+              Vue.set(state.viewMetadata,v,state.metadata[v])
+            }
+         });
+        // console.log(state.viewMetadata);
       },
     },
     getters:{
@@ -91,7 +112,125 @@
       getMetadata: state => {
         return state.metadata
       },
+      getViewMetadata: state => {
+        return state.viewMetadata
+      },
     }
+  });
+
+  Vue.component('field-box', {
+    data: function(){
+      return{
+        type: '',
+      }
+    },
+    props: ['name','content','isChild'],
+    methods:{
+      getType(content){
+        var self = this;
+        if (_.isPlainObject(content)) {
+          self.type = 'object'
+        }
+        else if (_.isArray(content)) {
+          self.type = 'array'
+        }
+        else if (_.isBoolean(content)) {
+          self.type = 'boolean'
+        }
+        else if (_.isNumber(content)) {
+          self.type = 'number'
+        }
+        else if (_.isString(content)) {
+          self.type = 'string'
+        }else {
+          self.type = 'IDK'
+        }
+      },
+      isUrl(txt){
+        if (txt.toLowerCase().includes("url") || txt.includes('http')) {
+          return true
+        }else {
+          return false
+        }
+      }
+    },
+    mounted: function(){
+      var self = this;
+      self.getType(self.content)
+      // console.log("%c "+self.name,'color:lightblue')
+      // console.log("%c "+self.type,'color:yellow')
+    },
+    computed: {
+
+    },
+    template:
+      `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted-lighter p-1 border-bottom':'alert-muted p-1 border-bottom']">
+      <!-- 🌈 Array 🌈 -->
+      <template v-if="type == 'array'">
+        <div class="row m-0">
+          <div class="col-sm-12 d-flex justify-content-center align-items-center flex-wrap">
+            <template v-for="item in content">
+              <field-box :name="name" :content="item" isChild="true"></field-box>
+            </template>
+          </div>
+        </div>
+      </template>
+        <!-- 🌈 String 🌈 -->
+        <template v-if="type == 'string'">
+          <div class="row m-0">
+            <template v-if="isUrl(content)">
+              <div class="col-sm-12 text-left">
+                <a :href="content" target="_blank" rel="nonreferrer">
+                  <i class="fas fa-external-link-alt"></i> <span v-text="name"></span>
+                </a>
+              </div>
+            </template>
+            <template v-else>
+              <div class="col-sm-12 col-md-3 d-flex justify-content-start align-items-center word-break">
+                <small :class="[name !=='@type'?'mainTextLight':'mainTextDark']" v-text="name"></small>
+              </div>
+              <div class="col-sm-12 col-md-9 d-flex justify-content-start align-items-center">
+                <a v-if="isUrl(content)" v-text="content" :href="content" target="_blank" rel="nonreferrer"></a>
+                <template v-else>
+                  <small>
+                    <i v-if="name == '@type' && content == 'Person' " class="fas fa-user text-muted"></i>
+                    <i v-if="name == '@type' && content == 'Organization' " class="fas fa-building text-muted"></i>
+                    <i v-if="name == '@type' && content == 'CreativeWork' " class="fas fa-lightbulb text-muted"></i>
+                  </small> &nbsp;
+                  <small class="text-muted" v-html="content"></small>
+                </template>
+              </div>
+            </template>
+          </div>
+        </template>
+        <!-- 🌈 Object 🌈 -->
+        <template v-if="type == 'object'">
+          <div class="row m-0">
+            <div class="col-sm-12 col-md-3 d-flex justify-content-start align-items-center word-break">
+              <small class="mainTextLight" v-text="name"></small>
+            </div>
+            <div class="col-sm-12 col-md-9">
+              <template v-for="(value,key) in content">
+                <!-- <div :key='key' class="alert-info p-1 d-block word-break">
+                  <template v-if="isUrl(key)">
+                    <a v-text="key" :href="value" target="_blank" rel="nonreferrer"></a>
+                  </template>
+                  <template v-else>
+                    <template v-if="isUrl(value)">
+                      <a v-text="key" :href="value" target="_blank" rel="nonreferrer"></a>
+                    </template>
+                    <p v-else>
+                      <b v-text="key"></b>
+                      <span v-text="value"></span>
+                    </p>
+                  </template>
+                </div>-->
+                <field-box :name="key" :content="value" isChild="true"></field-box>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>`
   });
 
   var app = new Vue({
@@ -195,6 +334,9 @@
     computed:{
       metadata:function(){
         return store.getters.getMetadata
+      },
+      viewMetadata:function(){
+        return store.getters.getViewMetadata
       }
     }
   });
