@@ -3358,13 +3358,27 @@
                   }
                 }).catch(err=>{
                   self.loading = false;
-                  throw err;
+                  console.log('err',err.response.data)
+                  let culprit = "<h6>"+err.response.data.error+"</h6>"
+                  if (err.response.data && err.response.data.path) {
+                    culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
+                  }
+                  if (err.response.data.parent && err.response.data.parent.path){
+                    if (true) {
+                      culprit += "<h5>Also check <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></h5>"
+                    }
+                    if (err.response.data.parent && err.response.data.parent.reason) {
+                      culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
+                    }
+                  }
                   Swal.fire({
                     type: 'error',
                     position: 'top center',
                     title: 'Registration failed because: ',
-                    text: err.response.data.reason
+                    html: culprit,
+                    footer:'<small>Validation Error</small>'
                   });
+                  throw err;
                 })
               },
               allowOutsideClick: () => !Swal.isLoading(),
