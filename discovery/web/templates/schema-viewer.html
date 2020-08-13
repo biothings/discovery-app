@@ -179,16 +179,14 @@
         <i class="fas fa-chevron-left fa-stack-1x text-light"></i>
       </span>
       <div>
-        <div v-show='!validationView'>
-          <input id="toggle" class="form-control text-light tip d-block" @change="showAll()" :data-tippy-info="'Show/Hide All Details'"  type="checkbox" v-model="checkbox"/>
-        </div>
+        <template v-show='!validationView'>
+          <small class="text-center text-light mb-1">Toggle Properties</small>
+          <input id="toggle" class="form-control text-light tip m-auto" @change="showAll()" :data-tippy-info="'Expand or contract all property lists'"  type="checkbox" v-model="checkbox"/>
+        </template>
       </div>
       <div>
-        <span class="fa-stack fa-1x pointer unselectable" @click='changeView()' id="showButton">
-          <i class="fas fa-circle fa-stack-2x text-muted"></i>
-          <i class="fa-stack-1x text-light" :class="[validationView?'fas fa-star':'far fa-star']"></i>
-        </span>
-        <more-info></more-info>
+        <small class="text-center text-light mb-1">Validation View</small>
+        <input id="showButton" class="form-control tip m-auto" @change="changeView()" :data-tippy-info="'Show this class only and any validation included'"  type="checkbox" v-model="validationView"/>
       </div>
     </div>
     <!-- CLASSES FOR QUERY -->
@@ -241,9 +239,11 @@
         state.userSchemaProps = payload['props'];
         // console.log('saving props 🛍 ...',state.userSchemaProps)
       },
-      savequeryStoreContent(state,payload){
+      checkIFValidationView(state,payload){
         state.queryStoreContent = payload['queryContent'];
-        if (!state.queryStoreContent.hasOwnProperty('validation')) {
+        if (!state.queryStoreContent.hasOwnProperty('validation') && !state.queryStoreContent['validation'].length) {
+          state.validationView = false;
+        }else if (state.queryStoreContent.hasOwnProperty('validation') && state.queryStoreContent['validation'] == null) {
           state.validationView = false;
         }
         // console.log('saved Query Content 🌎...',state.queryStoreContent)
@@ -404,7 +404,7 @@
     },
     computed: {
       validationView () {
-        return this.$store.state.validationView
+        return this.$store.getters.getViewMode
       },
       allProps(){
         return this.$store.state.userSchemaProps
@@ -805,7 +805,7 @@
             }
           }
           return letters.sort();
-          console.log('FILTERS COMPUTED',letters)
+          // console.log('FILTERS COMPUTED',letters)
         }
       },
       watch:{
@@ -1028,7 +1028,7 @@
               for (var i = 0; i < self.userSchema['hits'].length; i++) {
                 // console.log('CLASS: ',i,self.userSchema['hits'][i]["label"])
                 self.addNode(self.userSchema['hits'][i]["name"]);
-                console.log("add node",self.userSchema['hits'][i]["name"])
+                // console.log("add node",self.userSchema['hits'][i]["name"])
                 if (self.userSchema['hits'][i].hasOwnProperty('parent_classes')) {
                   let parents = self.userSchema['hits'][i]["parent_classes"][0];
                   if (parents) {
@@ -1036,7 +1036,7 @@
                     // console.log('parent list', parentList)
                     let parentName = parentList[parentList.length-1]
                     // console.log('LINKING...', parentName,self.userSchema['hits'][i]["label"])
-                    console.log("add parent",parentName)
+                    // console.log("add parent",parentName)
                     self.addNode(parentName);
                     self.addEdge(parentName,self.userSchema['hits'][i]["name"]);
                   }
@@ -1046,7 +1046,7 @@
 
             try {
               let topoRes = jsnx.topologicalSort(self.nxG);
-              console.log('ROOT NODE IS...', topoRes[0])
+              // console.log('ROOT NODE IS...', topoRes[0])
               if(self.developerMode)console.log('ROOT NODE IS...', topoRes[0])
               let rootNode = '';
               // if (topoRes.includes('Thing')) {
@@ -1147,7 +1147,7 @@
             // console.log('>>>>TOP CLASS', q)
             var payload = {};
             payload["queryContent"] = q;
-            store.commit('savequeryStoreContent',payload);
+            store.commit('checkIFValidationView',payload);
 
             if (self.developerMode ) {
               $.notify("CLASS MODE: "+q.label,{ globalPosition: 'right',className:'warning', showDuration: 40, });
@@ -1158,7 +1158,7 @@
             // console.log('FOUND PROP', self.topProp)
             var payload = {};
             payload["queryContent"] = prop;
-            store.commit('savequeryStoreContent',payload);
+            store.commit('checkIFValidationView',payload);
             if (self.developerMode ) {
               $.notify("PROPERTY MODE: "+prop.label,{ globalPosition: 'right',className:'warning', showDuration: 40, });
             }
@@ -1185,7 +1185,7 @@
                   self.getParentsOf(q);
                   var payload = {};
                   payload["queryContent"] = q;
-                  store.commit('savequeryStoreContent',payload);
+                  store.commit('checkIFValidationView',payload);
                 }
               }
               return false;
