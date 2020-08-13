@@ -124,7 +124,15 @@ Vue.component('registry-item', {
       }
     }
   },
-  watch:{
+  computed:{
+    text: function(){
+      if (this.item.description.length > 150) {
+        return this.item.description.substring(1, 150)+"..."
+      }else {
+        return this.item.description
+      }
+
+    }
   },
   mounted: function(){
     tippy('#'+this.item.name, {
@@ -139,7 +147,7 @@ Vue.component('registry-item', {
           <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
           <small v-if="item && item.version" class="text-muted" v-text="'Version '+item.version"></small>
           <p v-if="item && item.description" class="text-muted">
-            <small v-html="item.description"></small>
+            <small v-html="text"></small>
           </p>
         </div>
       </div>
