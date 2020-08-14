@@ -172,29 +172,31 @@
     </div>
   </div>
   <!-- QUERY MODE -->
-  <div class="container mt-5" v-if="query">
-    <div class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around p-3">
-      <span class="fa-stack fa-1x pointer unselectable tip" :data-tippy-info="'Go Back'" @click.prevent="window.location.href=RemoveLastDirectoryPartOf(window.location.href)">
-        <i class="fas fa-circle text-muted fa-stack-2x"></i>
-        <i class="fas fa-chevron-left fa-stack-1x text-light"></i>
-      </span>
-      <div>
-        <template v-show='!validationView'>
-          <small class="text-center text-light mb-1">Toggle Properties</small>
-          <input id="toggle" class="form-control text-light tip m-auto" @change="showAll()" :data-tippy-info="'Expand or contract all property lists'"  type="checkbox" v-model="checkbox"/>
+  <div id="mainCont">
+    <div class="container mt-5" v-if="query">
+      <div class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around p-3">
+        <span class="fa-stack fa-1x pointer unselectable tip" :data-tippy-info="'Go Back'" @click.prevent="window.location.href=RemoveLastDirectoryPartOf(window.location.href)">
+          <i class="fas fa-circle text-muted fa-stack-2x"></i>
+          <i class="fas fa-chevron-left fa-stack-1x text-light"></i>
+        </span>
+        <div>
+          <template v-show='!validationView'>
+            <small class="text-center text-light mb-1">Toggle Properties</small>
+            <input id="toggle" class="form-control text-light tip m-auto" @change="showAll()" :data-tippy-info="'Expand or contract all property lists'"  type="checkbox" v-model="checkbox"/>
+          </template>
+        </div>
+        <div>
+          <small class="text-center text-light mb-1">Validation View</small>
+          <input id="showButton" class="form-control tip m-auto" @change="changeView()" :data-tippy-info="'Show this class only and any validation included'"  type="checkbox" v-model="validationView"/>
+        </div>
+      </div>
+      <!-- CLASSES FOR QUERY -->
+      <div class="context">
+        <query-box v-if='queryContent && userSchemaParents' :parent="false" :q='queryContent' :userSchema='userSchema'></query-box>
+        <template  v-if='queryContent && userSchemaParents' v-for='parent in userSchemaParents'>
+          <query-box v-show='!validationView' :parent="true" :q='parent' :userSchema='userSchema'></query-box>
         </template>
       </div>
-      <div>
-        <small class="text-center text-light mb-1">Validation View</small>
-        <input id="showButton" class="form-control tip m-auto" @change="changeView()" :data-tippy-info="'Show this class only and any validation included'"  type="checkbox" v-model="validationView"/>
-      </div>
-    </div>
-    <!-- CLASSES FOR QUERY -->
-    <div class="context">
-      <query-box v-if='queryContent && userSchemaParents' :parent="false" :q='queryContent' :userSchema='userSchema'></query-box>
-      <template  v-if='queryContent && userSchemaParents' v-for='parent in userSchemaParents'>
-        <query-box v-show='!validationView' :parent="true" :q='parent' :userSchema='userSchema'></query-box>
-      </template>
     </div>
   </div>
 
@@ -233,7 +235,7 @@
       },
       saveSchema(state,payload){
         state.userSchema = payload['schema'];
-        // console.log('saved schema 🦄 ...',state.userSchema)
+        console.log('saved schema 🦄 ...',state.userSchema)
       },
       saveProps(state,payload){
         state.userSchemaProps = payload['props'];
@@ -340,39 +342,26 @@
     `<i id='showButton' class="fas fa-info-circle text-info"></i>`
   });
 
-  Vue.component('property-box', {
+  Vue.component('propbox', {
     data: function(){
       return{
-
+        userSchema:[],
+        textColor:'',
+        backColor:'',
       }
     },
     props: ['name','fullinfo','required'],
     methods:{
-      findDomainOf(propname){
-        var self = this;
-        for (var i = 0; i < self.allProps.length; i++) {
-          if (self.allProps[i].label === propname) {
-            if (self.allProps[i].domain) {
-              // return self.allProps[i].domain
-              return store.getters.removeDomainsNotIncluded(self.allProps[i].domain);
-            }else{
-              return ['No Match Found']
-            }
-          }
-        }
+      getText(ref){
+        let arr = ref.split('/');
+        return arr[arr.length-1];
       },
-      getName(string){
-        let res ='';
-        if (string.includes('http')) {
-          let arr =  string.split('/');
-          res = arr[arr.length-1];
-        }else if (string.includes(':')) {
-          let arr =  string.split(':');
-          res = arr[arr.length-1];
-        }else{
-          res = string
+      isPropRequired(name){
+        var self = this;
+        if (self.fullinfo.hasOwnProperty('required') && self.fullinfo['required'].includes(name)) {
+          return true
         }
-        return res
+        return false
       },
       isRequired(propname){
         if (this.required) {
@@ -386,116 +375,524 @@
           return false;
         }
       },
-      getLink(qName){
-        let link = [store.getters.handleLink(qName)];
-        return link;
-      }
     },
     watch:{
     },
     mounted: function(){
       var self = this;
-      tippy('#'+self.name, {
-        content: "<div class='mainTextDark'><h3>"+self.name+"</h3><pre class='text-left text-muted wraptext d-block'>"+JSON.stringify(self.fullinfo,null,2)+"</pre></div>",
-        placement: 'left',
-        theme:'light',
-        trigger:'click'
-      })
+      if (self.parent) {
+        self.textColor = 'mainTextLight'
+        self.backColor = 'mainBackLight'
+      }else{
+        self.textColor = 'mainTextDark'
+        self.backColor = 'mainBackDark'
+      }
+      // console.log(self.name,self.fullinfo)
     },
     computed: {
-      validationView () {
-        return this.$store.getters.getViewMode
+    },
+    template:
+    `<li class="list-group-item border-bottom alert">
+      <h6 class="font-weight-bold mainTextDark">
+        <i class="fas fa-tiny fa-code text-muted float-right" :data-tippy-info="JSON.stringify(fullinfo,null,2)"></i>
+        <span v-text="name"></span>
+        <span v-if="isRequired(name)" class="text-danger caps" style="zoom:.5;">is required</span>
+      </h6>
+      <small class="text-muted" v-text="fullinfo['description']"></small>
+      <div class="d-flex rounded-0">
+        <div class=" text-muted  px-5 py-3 d-flex justify-content-center align-items-center">
+          <small>
+            INPUT IS <i class="fas fa-arrow-circle-right"></i>
+          </small>
+        </div>
+        <div class="p-1 rounded-0 d-flex">
+
+          <!-- HAS TYPE -->
+          <div v-if="fullinfo && fullinfo.type" class="d-flex justify-content-center align-items-center">
+            <div class="badge badge-pill badge-dark m-1">
+              <span v-text="fullinfo['type']"></span>
+            </div>
+          </div>
+
+          <!-- ARRAY -->
+          <div v-if="fullinfo && fullinfo.items" class="d-flex justify-content-center align-items-center">
+            <div class="badge badge-pill badge-secondary m-1">
+              <span v-text="fullinfo.items.type"></span>
+            </div>
+          </div>
+
+          <template v-if="fullinfo.enum">
+            <div class="dropdown dropright">
+              <button class="btn btn-sm btn-info text-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Enumeration
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <div v-for="item in fullinfo.enum" class="dropdown-item" v-text='item'></div>
+              </div>
+            </div>
+          </template>
+
+          <template v-if="fullinfo['const']">
+            <div class="pillType d-inline">
+              <span style='background:#17a2b8' v-text="'const'"></span>
+              <span v-text="fullinfo['const']"></span>
+            </div>
+          </template>
+
+          <!-- OBJECT -->
+          <div v-if="fullinfo && fullinfo.properties" class="d-flex justify-content-center align-items-center">
+            <i class="fas fa-chevron-right m-1 text-muted"></i>
+          </div>
+          <div v-if="fullinfo && fullinfo.properties" class="d-flex justify-content-center align-items-center">
+            <div class="border-left border-info pl-3">
+              <template v-for="(value,name) in fullinfo['properties']" :key="option">
+                <div class="border-left border-primary my-4 pl-2">
+                  <small class="mainTextDark"><i class="fas fa-circle"></i> <b v-text="name"></b></small>
+                  <span v-if="isPropRequired(name)" class="text-danger caps" style="zoom:.5;">is required</span>
+
+                  <i class="fas fa-caret-right m-1 text-dark"></i>
+
+                  <small class="badge badge-pill alert-dark" v-text="fullinfo['properties'][name]['type']"></small>
+                  <small class="badge badge-pill alert-light" v-text="fullinfo['properties'][name]['format']"></small>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- ONE OF -->
+          <div v-if="fullinfo && fullinfo.oneOf" class="d-flex justify-content-center align-items-center">
+            <div class="d-flex justify-content-center align-items-center">
+              <div class="badge badge-pill badge-dark m-1">
+                ONE OR MANY OF
+              </div>
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+              <i class="fas fa-chevron-right m-1 text-muted"></i>
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+              <template v-for="(option,index) in fullinfo['oneOf']" :key="option">
+                <div v-if="option && !option['items']" class="d-flex">
+                  <field-box class="m-1" :name="name" :content="option" isChild="true"></field-box>
+                </div>
+              </template>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </li>`
+  });
+
+  Vue.component('field-box', {
+    data: function(){
+      return{
+        type: '',
+        expandArray:false,
+        perPage: 10,
+        page: 1,
+        pages: 1,
+      }
+    },
+    props: ['name','content','isChild'],
+    methods:{
+      getType(content){
+        var self = this;
+        if (_.isPlainObject(content)) {
+          self.type = 'object'
+        }
+        else if (_.isArray(content)) {
+          self.type = 'array'
+        }
+        else if (_.isBoolean(content)) {
+          self.type = 'boolean'
+        }
+        else if (_.isNumber(content)) {
+          self.type = 'number'
+        }
+        else if (_.isString(content)) {
+          self.type = 'string'
+        }else {
+          self.type = 'IDK'
+        }
       },
-      allProps(){
-        return this.$store.state.userSchemaProps
+      isUrl(txt){
+        if (txt.includes("url") || txt.includes('http')) {
+          return true
+        }else {
+          return false
+        }
+      },
+      calculatePages: function () {
+        var self= this;
+        self.pages = Math.ceil(self.content.length / self.perPage);
+      },
+      prevPage: function () {
+        var self= this;
+        if (self.page > 1)
+            self.page -= 1
+      },
+      nextPage: function () {
+        var self= this;
+        if (self.page < self.pages)
+            self.page += 1
+      },
+      testOntologyLookup(){
+        var self = this;
+
+        Swal.fire({
+          title: self.name,
+          text: 'Search for an existing term here:',
+          input: 'text',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          animation:false,
+          customClass:'scale-in-center',
+          inputAttributes: {
+            autocapitalize: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Look up',
+          showLoaderOnConfirm: true,
+          focusConfirm: false,
+          preConfirm: (query) => {
+
+            let ontologies = self.content['vocabulary']['ontology'].toString()
+            let children = self.content['vocabulary']['children_of'].toString()
+
+            let url = `https://www.ebi.ac.uk/ols/api/search?q=`+query
+            +"&ontology="+ontologies
+            +"&childrenOf="+children
+            +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+            +"&queryFields=label"
+            +"&rows=10"
+
+            return fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(response.statusText)
+                }
+                return response.json()
+              })
+              .catch(error => {
+                Swal.showValidationMessage(
+                  `Request failed: ${error}`
+                )
+              })
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            let html ="<div id='ontology' class='p-1 text-left'>";
+
+            for (var i = 0; i < result.value.response.docs.length; i++) {
+              tippy('#cb'+i,{
+                content:result.value.response.docs[i]
+              });
+
+              let label = result.value.response.docs[i]['label']
+              if (label && label.length > 37) {
+                label = label.substring(0,37)+"..."
+              }
+
+              html += `<div class="form-check">
+                        <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
+                            `+label+`
+                            <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
+                        </label>
+                      </div>`
+            }
+            html += "</div>";
+
+            Swal.fire({
+              title: "Top 10 Results",
+              html: html,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              animation:false,
+              customClass:'scale-in-center',
+            });
+
+          }
+        })
+      }
+    },
+    mounted: function(){
+      var self = this;
+      self.getType(self.content)
+      if (self.type == 'array') {
+        self.calculatePages();
+      }
+      // console.log("%c "+self.name,'color:lightblue')
+      // console.log("%c "+self.type,'color:yellow')
+    },
+    computed: {
+      arrayResults: function () {
+          var start = (this.page - 1) * this.perPage,
+              end = start + this.perPage;
+          return this.content && this.content.slice(start, end);
       }
     },
     template:
-    `<div>
-      <small v-if='name' :id='name' class='text-primary pointer float-right ml-2 unselectable'><i class="fas fa-code"></i></small>
-      <template v-if='name'>
-        <small class='badge badge-required float-right unselectable' v-if="isRequired(name)">Required</small>
-        <a class='bold d-inline' v-text='name' :href='"./"+name'></a>
-        <small class="text-muted">from </small>
-        <template v-for='item in findDomainOf(name)'>
-          <template v-for="link in getLink(item)">
-            <a class='d-inline' :href='link' :target="link[0] !== '.'?'_blank':'_self'">
-              <small >
-                <span v-html='item'></span>
-              </small>
-              <i v-if="link[0] !== '.'" class="fas small fa-external-link-alt"></i>
-            </a>
-          </template>
-        </template>
-      </template>
-      <small class="text-muted" v-if="fullinfo.description">
-        <p v-text="fullinfo.description || 'No Description Provided'"></p>
-      </small>
-      <template v-if="fullinfo.type">
-        <div class="pillType d-inline">
-          <span v-text="'type'"></span>
-          <span v-text="fullinfo.type"></span>
-        </div>
-        <i v-if="fullinfo.type !== 'string'" class="fas fa-chevron-right text-muted"></i>
-      </template>
-      <template v-if="fullinfo.format">
-        <div class="pillType d-inline">
-          <span class="mainBackDark" v-text="'format'"></span>
-          <span v-text="fullinfo.format"></span>
-        </div>
-      </template>
-      <template v-if="fullinfo['$ref']">
-        <div class="pillType d-inline">
-          <span class="mainBackLight" v-text="'$ref'"></span>
-          <span v-text="fullinfo['$ref']"></span>
-        </div>
-      </template>
-      <template v-if="fullinfo.enum">
-        <div class="dropdown dropright">
-          <button class="btn smallButton btn-info text-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Enum
-          </button>
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <div v-for="item in fullinfo.enum" class="dropdown-item" v-text='item'></div>
+      `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted p-1 border-left':'alert-muted p-1 border-bottom']">
+      <!-- 🌈 Array 🌈 -->
+      <template v-if="type == 'array'">
+        <div class="row m-0">
+          <div class="text-left">
+            <small class="pointer" @click="expandArray=!expandArray" :class="[name == 'required'?'text-danger':'mainTextDark']">
+              <span v-text="name"></span> (<span v-text="content.length"></span>) <i class="fas" :class="[expandArray?'fa-minus-square text-danger':'fa-plus-square text-primary']"></i>
+            </small>
+          </div>
+          <div class="col-sm-12" v-if="expandArray">
+            <div>
+              <template v-if="content.length > perPage">
+                <select class="form-control form-control-sm m-auto w-25" v-model="perPage" @change="calculatePages" id="perPage">
+                    <option value="" disabled selected>Shown Per Page</option>
+                    <option value="10">10 per page</option>
+                    <option value="25">25 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+                <div class="paginati flex-wrap p-1 mt-2">
+                  <div class="badge rounded-0" :class="{ 'disabled': page <= 1 }">
+                    <a class="page-link p-1" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
+                  </div>
+                  <div class="badge rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
+                    <a href="#" class="page-link p-1" @click.prevent="page = n" v-text="n"></a>
+                  </div>
+                  <div class="badge rounded-0" :class="{ 'disabled': page >= pages }">
+                    <a class="page-link p-1" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <template v-for="item in arrayResults">
+              <field-box class="m-1" name="" :content="item" isChild="true"></field-box>
+            </template>
           </div>
         </div>
       </template>
-      <template v-if="fullinfo['const']">
-        <div class="pillType d-inline">
-          <span style='background:#17a2b8' v-text="'const'"></span>
-          <span v-text="fullinfo['const']"></span>
-        </div>
-      </template>
-      <template v-if="fullinfo.items">
-        <template v-if='fullinfo.items.type ==="object"'>
-          <hr />
-          <h6 class="text-muted">Properties used:</h6>
-          <property-box v-for="(prop,index) in fullinfo.items.properties" style='background:#dcf2f7' class="alert propbox" :name='index' :fullinfo="prop" :required='fullinfo.required'></property-box>
+        <!-- 🌈 String 🌈 -->
+        <template v-if="type == 'string'">
+          <div class="d-flex">
+            <template v-if="isUrl(content)">
+              <div class="text-left">
+                <small class="mainTextDark">
+                  <span v-text="name"></span> <i v-if="!name" class="fas fa-circle"></i> <span v-else>:</span>
+                </small>
+              </div>
+              <div class="ml-1">
+                <a :href="content" target="_blank" rel="nonreferrer">
+                  <small><span v-text="content"></span> <i class="fas fa-external-link-alt"></i></small>
+                </a>
+              </div>
+            </template>
+            <template v-else>
+              <div class="d-flex">
+                <small class="mainTextDark">
+                  <span v-text="name"></span> <span class="mr-1">:</span>
+                </small>
+              </div>
+              <div class="d-flex">
+                <a class="ml-1" v-if="isUrl(content)" v-text="content" :href="content" target="_blank" rel="nonreferrer"></a>
+                <template v-else>
+                  <small>
+                    <i v-if="name == '@type' && content == 'Person' " class="fas fa-user text-muted"></i>
+                    <i v-if="name == '@type' && content == 'Organization' " class="fas fa-building text-muted"></i>
+                    <i v-if="name == '@type' && content == 'CreativeWork' " class="fas fa-lightbulb text-muted"></i>
+                  </small> &nbsp;
+                  <small class="text-muted" v-html="content"></small>
+                </template>
+              </div>
+            </template>
+          </div>
         </template>
-        <div v-else v-for="(item,index) in fullinfo.items" class="text-left">
-          <div class="pillType d-inline">
-            <span class="mainBackLight" v-text="index"></span>
-            <span v-text="item"></span>
+
+        <!-- 🌈 VOCAB 🌈 -->
+        <div v-if="content && content.vocabulary" class="d-flex justify-content-center align-items-center">
+          <div>
+            <small class="text-danger">
+              <b v-text="content.strict?'STRICT':'NON-STRICT'"></b>
+            </small>
+            <a role="button" class="btn btn-sm btn-primary text-light" @click="testOntologyLookup()">Test Search <i class="fas fa-chevron-right"></i></a>
           </div>
         </div>
-      </template>
-      <template v-if="fullinfo.oneOf">
-        <hr />
-        <h6 class="text-muted">Value can be either...</h6>
-        <div class="row">
-          <template v-for='(item,index) in fullinfo.oneOf'>
-            <property-box class='p-1 col-md-5 col-sm-12 text-center' :fullinfo="item"></property-box>
-            <div class="col-md-2 col-sm-12 text-center mainTextLight" v-if="index !== fullinfo.oneOf.length-1"><h4>OR</h4></div>
-          </template>
-        </div>
-      </template>
-      <template v-if='fullinfo.properties'>
-        <hr />
-        <h6 class="text-muted">Properties used:</h6>
-        <property-box v-for="(prop,index) in fullinfo.properties" style='background:#dcf2f7' class="alert propbox" :name='index' :fullinfo="prop" :required='fullinfo.required'></property-box>
-      </template>
-    </div>`
+
+
+        <!-- 🌈 Object 🌈 -->
+        <template v-if="type == 'object'">
+          <div class="d-flex">
+            <div class=" d-flex justify-content-start align-items-center">
+              <span class="badge badge-pill mainBackDark text-light mr-1">
+                <span v-text="name"></span>
+              </span>
+            </div>
+            <div class="">
+              <template v-for="(value,key) in content">
+                <field-box :name="key" :content="value" isChild="true"></field-box>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>`
   });
+
+  // OLD VERSION
+
+  // Vue.component('property-box', {
+  //   data: function(){
+  //     return{
+  //
+  //     }
+  //   },
+  //   props: ['name','fullinfo','required'],
+  //   methods:{
+  //     findDomainOf(propname){
+  //       var self = this;
+  //       for (var i = 0; i < self.allProps.length; i++) {
+  //         if (self.allProps[i].label === propname) {
+  //           if (self.allProps[i].domain) {
+  //             // return self.allProps[i].domain
+  //             return store.getters.removeDomainsNotIncluded(self.allProps[i].domain);
+  //           }else{
+  //             return ['No Match Found']
+  //           }
+  //         }
+  //       }
+  //     },
+  //     getName(string){
+  //       let res ='';
+  //       if (string.includes('http')) {
+  //         let arr =  string.split('/');
+  //         res = arr[arr.length-1];
+  //       }else if (string.includes(':')) {
+  //         let arr =  string.split(':');
+  //         res = arr[arr.length-1];
+  //       }else{
+  //         res = string
+  //       }
+  //       return res
+  //     },
+  //     isRequired(propname){
+  //       if (this.required) {
+  //         for (var i = 0; i < this.required.length; i++) {
+  //           if (this.required[i]===propname) {
+  //             return true;
+  //           }
+  //         }
+  //         return false;
+  //       }else{
+  //         return false;
+  //       }
+  //     },
+  //     getLink(qName){
+  //       let link = [store.getters.handleLink(qName)];
+  //       return link;
+  //     }
+  //   },
+  //   watch:{
+  //   },
+  //   mounted: function(){
+  //     var self = this;
+  //     tippy('#'+self.name, {
+  //       content: "<div class='mainTextDark'><h3>"+self.name+"</h3><pre class='text-left text-muted wraptext d-block'>"+JSON.stringify(self.fullinfo,null,2)+"</pre></div>",
+  //       placement: 'left',
+  //       theme:'light',
+  //       trigger:'click'
+  //     })
+  //   },
+  //   computed: {
+  //     validationView () {
+  //       return this.$store.getters.getViewMode
+  //     },
+  //     allProps(){
+  //       return this.$store.state.userSchemaProps
+  //     }
+  //   },
+  //   template:
+  //   `<div>
+  //     <small v-if='name' :id='name' class='text-primary pointer float-right ml-2 unselectable'><i class="fas fa-code"></i></small>
+  //     <template v-if='name'>
+  //       <small class='badge badge-required float-right unselectable' v-if="isRequired(name)">Required</small>
+  //       <a class='bold d-inline' v-text='name' :href='"./"+name'></a>
+  //       <small class="text-muted">from </small>
+  //       <template v-for='item in findDomainOf(name)'>
+  //         <template v-for="link in getLink(item)">
+  //           <a class='d-inline' :href='link' :target="link[0] !== '.'?'_blank':'_self'">
+  //             <small >
+  //               <span v-html='item'></span>
+  //             </small>
+  //             <i v-if="link[0] !== '.'" class="fas small fa-external-link-alt"></i>
+  //           </a>
+  //         </template>
+  //       </template>
+  //     </template>
+  //     <small class="text-muted" v-if="fullinfo.description">
+  //       <p v-text="fullinfo.description || 'No Description Provided'"></p>
+  //     </small>
+  //     <template v-if="fullinfo.type">
+  //       <div class="pillType d-inline">
+  //         <span v-text="'type'"></span>
+  //         <span v-text="fullinfo.type"></span>
+  //       </div>
+  //       <i v-if="fullinfo.type !== 'string'" class="fas fa-chevron-right text-muted"></i>
+  //     </template>
+  //     <template v-if="fullinfo.format">
+  //       <div class="pillType d-inline">
+  //         <span class="mainBackDark" v-text="'format'"></span>
+  //         <span v-text="fullinfo.format"></span>
+  //       </div>
+  //     </template>
+  //     <template v-if="fullinfo['$ref']">
+  //       <div class="pillType d-inline">
+  //         <span class="mainBackLight" v-text="'$ref'"></span>
+  //         <span v-text="fullinfo['$ref']"></span>
+  //       </div>
+  //     </template>
+      // <template v-if="fullinfo.enum">
+      //   <div class="dropdown dropright">
+      //     <button class="btn smallButton btn-info text-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      //       Enum
+      //     </button>
+      //     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      //       <div v-for="item in fullinfo.enum" class="dropdown-item" v-text='item'></div>
+      //     </div>
+      //   </div>
+      // </template>
+      // <template v-if="fullinfo['const']">
+      //   <div class="pillType d-inline">
+      //     <span style='background:#17a2b8' v-text="'const'"></span>
+      //     <span v-text="fullinfo['const']"></span>
+      //   </div>
+      // </template>
+  //     <template v-if="fullinfo.items">
+  //       <template v-if='fullinfo.items.type ==="object"'>
+  //         <hr />
+  //         <h6 class="text-muted">Properties used:</h6>
+  //         <property-box v-for="(prop,index) in fullinfo.items.properties" style='background:#dcf2f7' class="alert propbox" :name='index' :fullinfo="prop" :required='fullinfo.required'></property-box>
+  //       </template>
+  //       <div v-else v-for="(item,index) in fullinfo.items" class="text-left">
+  //         <div class="pillType d-inline">
+  //           <span class="mainBackLight" v-text="index"></span>
+  //           <span v-text="item"></span>
+  //         </div>
+  //       </div>
+  //     </template>
+  //     <template v-if="fullinfo.oneOf">
+  //       <hr />
+  //       <h6 class="text-muted">Value can be either...</h6>
+  //       <div class="row">
+  //         <template v-for='(item,index) in fullinfo.oneOf'>
+  //           <property-box class='p-1 col-md-5 col-sm-12 text-center' :fullinfo="item"></property-box>
+  //           <div class="col-md-2 col-sm-12 text-center mainTextLight" v-if="index !== fullinfo.oneOf.length-1"><h4>OR</h4></div>
+  //         </template>
+  //       </div>
+  //     </template>
+  //     <template v-if='fullinfo.properties'>
+  //       <hr />
+  //       <h6 class="text-muted">Properties used:</h6>
+  //       <property-box v-for="(prop,index) in fullinfo.properties" style='background:#dcf2f7' class="alert propbox" :name='index' :fullinfo="prop" :required='fullinfo.required'></property-box>
+  //     </template>
+  //   </div>`
+  // });
 
   Vue.component('validation-box', {
     data: function(){
@@ -530,10 +927,10 @@
       }
     },
     template:
-    `<div class="alert alert-dark">
+    `<div class="alert alert-secondary">
       <h5 class="mainTextDark" v-if='validation.properties' v-text="'Properties used by '+queryContent.label"> </h5>
-      <ul v-for="(prop,index) in validation.properties">
-        <property-box class="alert propbox" :name='index' :fullinfo="prop" :required='validation.required'></property-box>
+      <ul class="p-0">
+        <propbox v-for="(prop,index) in validation.properties" :name='index' :fullinfo="prop" :required='validation.required'></propbox>
       </ul>
     </div>`
   });
@@ -1511,6 +1908,20 @@
             let info = instance.reference.dataset.tippyInfo;
             instance.setContent(info)
           }});
+
+          tippy( '#mainCont', {
+            target:'*[data-tippy-info]',
+            placement:'left',
+            content: 'loading',
+            animation: 'fade',
+            interactive:true,
+            theme:'light',
+            onShow(instance) {
+              let info = instance.reference.dataset.tippyInfo;
+
+              instance.setContent("<div class='text-muted m-0 wraptext'><pre class='text-left text-muted wraptext d-block'>"+info+"</pre></div>")
+            }});
+
           tippy('#showButton', {
             content: `<div class='m-0'><table class='table'>
               <tr>
