@@ -170,7 +170,7 @@
         <div class="row m-0">
           <div class="text-left">
             <small class="mainTextDark pointer" @click="expandArray=!expandArray">
-              <span v-text="name"></span> (<span v-text="content.length"></span>) <i class="fas" :class="[expandArray?'fa-chevron-down mainTextLight':'fa-chevron-right']"></i>
+              <span v-text="name"></span> (<span v-text="content.length"></span>) <i class="fas" :class="[expandArray?'fa-minus-square mainTextLight':'fa-plus-square']"></i>
             </small>
           </div>
           <div class="col-sm-12 d-flex flex-column" v-if="expandArray">
