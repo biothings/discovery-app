@@ -227,7 +227,7 @@ var app = new Vue({
                 title: `Quick Edit`,
                 text:"Which field would you like to edit?",
                 input: 'select',
-                footer:"Making changes will change privacy to default: PUBLIC. You can change privacy settings again when you are done.",
+                footer:"<small><b class='text-danger'>Important:</b> Making changes will change privacy to default: <b>PUBLIC</b>. You can change privacy settings again when you are done.</small>",
                 inputOptions: list,
                 inputPlaceholder: 'Select a field to edit',
                 showCancelButton: true,
@@ -310,14 +310,30 @@ var app = new Vue({
                           })
                         }
                       }).catch(err=>{
-                        throw err;
+                        // console.log('err',err.response.data)
+                        let culprit = "<h6>"+err.response.data.error+"</h6>"
+                        if (err.response.data && err.response.data.path.length) {
+                          culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
+                        }
+                        if (err.response.data.parent && err.response.data.parent.path){
+                          if (true) {
+                            culprit += "<h5>Also check <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></h5>"
+                          }
+                          if (err.response.data.parent && err.response.data.parent.reason) {
+                            culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
+                          }
+                        }
+                        if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
+                          culprit += "<div class='alert alert-info'><small> Hint: "+err.response.data.validator_value+"</small></div>"
+                        }
                         Swal.fire({
                           type: 'error',
-                          toast: true,
                           position: 'top center',
-                          title: 'Registration Failed: ',
-                          text: err
+                          title: 'Oh no! It failed because: ',
+                          html: culprit,
+                          footer:'<small>Validation Error</small>'
                         });
+                        throw err;
                       })
 
                     }

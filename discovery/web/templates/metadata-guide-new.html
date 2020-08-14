@@ -3358,7 +3358,7 @@
                   }
                 }).catch(err=>{
                   self.loading = false;
-                  console.log('err',err.response.data)
+                  // console.log('err',err.response.data)
                   let culprit = "<h6>"+err.response.data.error+"</h6>"
                   if (err.response.data && err.response.data.path) {
                     culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
@@ -3370,6 +3370,9 @@
                     if (err.response.data.parent && err.response.data.parent.reason) {
                       culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
                     }
+                  }
+                  if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
+                    culprit += "<div class='alert alert-info'><small> Hint: "+err.response.data.validator_value+"</small></div>"
                   }
                   Swal.fire({
                     type: 'error',

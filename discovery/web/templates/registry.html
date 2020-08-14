@@ -8,10 +8,10 @@
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>
   </div>
-  <div class="row">
+  <div class="container">
 
-    <div class="col-sm-12 col-md-10 col-lg-7 m-auto">
-      <h1 class="text-center logoText mb-5 mt-5">REGISTRY</h1>
+    <div class="">
+      <h1 class="text-center logoText mb-1 mt-5">REGISTRY</h1>
       <div class="message p-1 rounded-0">
         <div class="m-2">
           <small class="bold text-muted">SHORTCUTS</small>
@@ -51,7 +51,7 @@
                 <i class="fas fa-circle text-muted fa-stack-2x"></i>
                 <i class="fas fa-search fa-stack-1x text-light"></i>
               </span>
-              <span class="fa-stack fa-1x pointer reset unselectable" @click.prevent="query='';registry=[]">
+              <span class="fa-stack fa-1x pointer reset unselectable" @click.prevent="query='';search()">
                 <i class="fas fa-circle fa-stack-2x text-danger"></i>
                 <i class="fas fa-undo fa-stack-1x text-light"></i>
               </span>
@@ -203,12 +203,12 @@ Vue.component('registry-item', {
       content: "<div class='text-left text-muted'>"+JSON.stringify(this.item.description,null,2)+"</div>" || "<div class='m-0'>No Description Available</div>",
     })
   },
-  template: `<li class="list-group-item p-0 pointer">
+  template: `<li class="list-group-item list-group-item-action p-0 pointer">
     <div class="d-flex">
       <div class="flex-grow-1 p-1">
         <div class="d-flex justify-content-between w-100">
           <h5 class="mb-1 mainTextDark">
-            <small v-text="item.prefix"></small>:<span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-info-circle text-info"></i></small>
+            <small class="badge alert-secondary" v-text="item.prefix"></small> <span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-info-circle text-info"></i></small>
           </h5>
         </div>
         <p class="mb-1">
@@ -337,16 +337,14 @@ var app = new Vue({
             self.registry = [];
             axios.get('/api/query?size=1000', params).then(function (response) {
               // console.log('%c SEARCH..','color:hotpink')
-              // console.log(response.data.hits)
+              // console.log(response.data)
               self.registry = response.data.hits;
-              self.registryTotal = response.data.total;
+              self.registryTotal = response.data.total.value;
               // mark results, doc must be loaded
               $( document ).ready(function() {
                 self.mark(self.query);
               });
-              if (self.registryTotal) {
-                self.calculatePages();
-              }
+              self.calculatePages();
               self.loading = false;
             });
         },
@@ -381,6 +379,7 @@ var app = new Vue({
     mounted:function(){
       var self = this;
       self.checkLoggedUser();
+      self.search();
       tippy( '.search', {
         maxWidth:'200px',
         placement:'top',

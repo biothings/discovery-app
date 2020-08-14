@@ -170,7 +170,7 @@
         <div class="row m-0">
           <div class="text-left">
             <small class="mainTextDark">
-              <span v-text="name"></span> <i class="fas fa-chevron-right"></i>
+              <span v-text="name"></span> <i class="fas fa-chevron-down"></i>
             </small>
           </div>
           <div class="col-sm-12 d-flex flex-column">
@@ -186,12 +186,12 @@
             <template v-if="isUrl(content)">
               <div class="text-left">
                 <small class="mainTextDark">
-                  <span v-text="name"></span> <i class="fas fa-chevron-right"></i>
+                  <span v-text="name"></span> <i class="fas" :class="[name?'fa-chevron-right':'fa-circle']"></i>
                 </small>
               </div>
               <div class="ml-1">
                 <a :href="content" target="_blank" rel="nonreferrer">
-                  <span v-text="content"></span> <i class="fas fa-external-link-alt"></i>
+                  <small><span v-text="content"></span> <i class="fas fa-external-link-alt"></i></small>
                 </a>
               </div>
             </template>
