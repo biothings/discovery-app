@@ -22,7 +22,7 @@
       <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
       <div class="alert-secondary p-1 m-2">
         <div class="bg-light p-4 text-center">
-          <div class="p-3">
+          <div class="p-3 text-left">
             <p class="text-muted m-auto" v-html="metadata.description"></p>
           </div>
           <template v-for="(content,name) in viewMetadata" :key="name">
@@ -97,7 +97,7 @@
       saveMetadata (state,payload) {
         state.metadata = payload['metadata']
         // console.log(state.metadata)
-        const ignore = ['_id','name','description','keywords']
+        const ignore = ['_id','@type','@context','name','description','keywords']
         Object.keys(state.metadata)
         .forEach(function(v, i) {
             if(!ignore.includes(v)){
@@ -164,33 +164,45 @@
 
     },
     template:
-      `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted-lighter p-1 border-bottom':'alert-muted p-1 border-bottom']">
+      `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted p-1 border-left':'alert-muted p-1 border-bottom']">
       <!-- 🌈 Array 🌈 -->
       <template v-if="type == 'array'">
         <div class="row m-0">
-          <div class="col-sm-12 d-flex justify-content-center align-items-center flex-wrap">
+          <div class="text-left">
+            <small class="mainTextDark">
+              <span v-text="name"></span> <i class="fas fa-chevron-right"></i>
+            </small>
+          </div>
+          <div class="col-sm-12 d-flex flex-column">
             <template v-for="item in content">
-              <field-box :name="name" :content="item" isChild="true"></field-box>
+              <field-box class="m-1" name="" :content="item" isChild="true"></field-box>
             </template>
           </div>
         </div>
       </template>
         <!-- 🌈 String 🌈 -->
         <template v-if="type == 'string'">
-          <div class="row m-0">
+          <div class="d-flex">
             <template v-if="isUrl(content)">
-              <div class="col-sm-12 text-left">
+              <div class="text-left">
+                <small class="mainTextDark">
+                  <span v-text="name"></span> <i class="fas fa-chevron-right"></i>
+                </small>
+              </div>
+              <div class="ml-1">
                 <a :href="content" target="_blank" rel="nonreferrer">
-                  <i class="fas fa-external-link-alt"></i> <span v-text="name"></span>
+                  <span v-text="content"></span> <i class="fas fa-external-link-alt"></i>
                 </a>
               </div>
             </template>
             <template v-else>
-              <div class="col-sm-12 col-md-3 d-flex justify-content-start align-items-center word-break">
-                <small :class="[name !=='@type'?'mainTextLight':'mainTextDark']" v-text="name"></small>
+              <div class="d-flex">
+                <small class="mainTextDark">
+                  <span v-text="name"></span> <i class="fas fa-chevron-right"></i>
+                </small>
               </div>
-              <div class="col-sm-12 col-md-9 d-flex justify-content-start align-items-center">
-                <a v-if="isUrl(content)" v-text="content" :href="content" target="_blank" rel="nonreferrer"></a>
+              <div class="d-flex">
+                <a class="ml-1" v-if="isUrl(content)" v-text="content" :href="content" target="_blank" rel="nonreferrer"></a>
                 <template v-else>
                   <small>
                     <i v-if="name == '@type' && content == 'Person' " class="fas fa-user text-muted"></i>
@@ -205,26 +217,14 @@
         </template>
         <!-- 🌈 Object 🌈 -->
         <template v-if="type == 'object'">
-          <div class="row m-0">
-            <div class="col-sm-12 col-md-3 d-flex justify-content-start align-items-center word-break">
-              <small class="mainTextLight" v-text="name"></small>
+          <div class="d-flex">
+            <div class=" d-flex justify-content-start align-items-center">
+              <small class="mainTextDark">
+                <span v-text="name"></span> <i class="fas fa-chevron-circle-right mr-1"></i>
+              </small>
             </div>
-            <div class="col-sm-12 col-md-9">
+            <div class="">
               <template v-for="(value,key) in content">
-                <!-- <div :key='key' class="alert-info p-1 d-block word-break">
-                  <template v-if="isUrl(key)">
-                    <a v-text="key" :href="value" target="_blank" rel="nonreferrer"></a>
-                  </template>
-                  <template v-else>
-                    <template v-if="isUrl(value)">
-                      <a v-text="key" :href="value" target="_blank" rel="nonreferrer"></a>
-                    </template>
-                    <p v-else>
-                      <b v-text="key"></b>
-                      <span v-text="value"></span>
-                    </p>
-                  </template>
-                </div>-->
                 <field-box :name="key" :content="value" isChild="true"></field-box>
               </template>
             </div>
