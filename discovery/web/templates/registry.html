@@ -81,13 +81,13 @@
           <nav class="m-auto ">
             <ul class="pagination m-2 flex-wrap p-2">
               <li class="page-item" :class="{ 'disabled': page <= 1 }">
-                <a class="page-link" @click.prevent="prevPage()">&lt;</a>
+                <a class="page-link" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
               </li>
               <li class="page-item" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
                 <a href="#" class="page-link" @click.prevent="page = n" v-text="n"></a>
               </li>
               <li class="page-item" :class="{ 'disabled': page >= pages }">
-                <a class="page-link" @click.prevent="nextPage()">&gt;</a>
+                <a class="page-link" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
               </li>
             </ul>
           </nav>

@@ -123,6 +123,9 @@
       return{
         type: '',
         expandArray:false,
+        perPage: 10,
+        page: 1,
+        pages: 1,
       }
     },
     props: ['name','content','isChild'],
@@ -148,20 +151,42 @@
         }
       },
       isUrl(txt){
-        if (txt.toLowerCase().includes("url") || txt.includes('http')) {
+        if (txt.includes("url") || txt.includes('http')) {
           return true
         }else {
           return false
         }
-      }
+      },
+      calculatePages: function () {
+        var self= this;
+        self.pages = Math.ceil(self.content.length / self.perPage);
+      },
+      prevPage: function () {
+        var self= this;
+        if (self.page > 1)
+            self.page -= 1
+      },
+      nextPage: function () {
+        var self= this;
+        if (self.page < self.pages)
+            self.page += 1
+      },
     },
     mounted: function(){
       var self = this;
       self.getType(self.content)
+      if (self.type == 'array') {
+        self.calculatePages();
+      }
       // console.log("%c "+self.name,'color:lightblue')
       // console.log("%c "+self.type,'color:yellow')
     },
-    watch: {
+    computed: {
+      arrayResults: function () {
+          var start = (this.page - 1) * this.perPage,
+              end = start + this.perPage;
+          return this.content && this.content.slice(start, end);
+      }
     },
     template:
       `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted p-1 border-left':'alert-muted p-1 border-bottom']">
@@ -173,8 +198,27 @@
               <span v-text="name"></span> (<span v-text="content.length"></span>) <i class="fas" :class="[expandArray?'fa-minus-square mainTextLight':'fa-plus-square']"></i>
             </small>
           </div>
-          <div class="col-sm-12 d-flex flex-column" v-if="expandArray">
-            <template v-for="item in content">
+          <div class="col-sm-12" v-if="expandArray">
+            <div>
+              <select class="form-control form-control-sm m-auto w-25" v-model="perPage" @change="calculatePages" id="perPage">
+                  <option value="" disabled selected>Shown Per Page</option>
+                  <option value="10">10 per page</option>
+                  <option value="25">25 per page</option>
+                  <option value="100">100 per page</option>
+              </select>
+              <div class="paginati flex-wrap p-1 mt-2">
+                <div class="badge rounded-0" :class="{ 'disabled': page <= 1 }">
+                  <a class="page-link p-1" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
+                </div>
+                <div class="badge rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
+                  <a href="#" class="page-link p-1" @click.prevent="page = n" v-text="n"></a>
+                </div>
+                <div class="badge rounded-0" :class="{ 'disabled': page >= pages }">
+                  <a class="page-link p-1" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
+                </div>
+              </div>
+            </div>
+            <template v-for="item in arrayResults">
               <field-box class="m-1" name="" :content="item" isChild="true"></field-box>
             </template>
           </div>
@@ -186,7 +230,7 @@
             <template v-if="isUrl(content)">
               <div class="text-left">
                 <small class="mainTextDark">
-                  <span v-text="name"></span> <i class="fas" :class="[name?'fa-chevron-right':'fa-circle']"></i>
+                  <span v-text="name"></span> <i v-if="!name" class="fas fa-circle"></i> <span v-else>:</span>
                 </small>
               </div>
               <div class="ml-1">
@@ -198,7 +242,7 @@
             <template v-else>
               <div class="d-flex">
                 <small class="mainTextDark">
-                  <span v-text="name"></span> <i class="fas fa-chevron-right"></i>
+                  <span v-text="name"></span> <span class="mr-1">:</span>
                 </small>
               </div>
               <div class="d-flex">
