@@ -122,6 +122,7 @@
     data: function(){
       return{
         type: '',
+        expandArray:false,
       }
     },
     props: ['name','content','isChild'],
@@ -160,8 +161,7 @@
       // console.log("%c "+self.name,'color:lightblue')
       // console.log("%c "+self.type,'color:yellow')
     },
-    computed: {
-
+    watch: {
     },
     template:
       `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted p-1 border-left':'alert-muted p-1 border-bottom']">
@@ -169,11 +169,11 @@
       <template v-if="type == 'array'">
         <div class="row m-0">
           <div class="text-left">
-            <small class="mainTextDark">
-              <span v-text="name"></span> <i class="fas fa-chevron-down"></i>
+            <small class="mainTextDark pointer" @click="expandArray=!expandArray">
+              <span v-text="name"></span> (<span v-text="content.length"></span>) <i class="fas" :class="[expandArray?'fa-chevron-down mainTextLight':'fa-chevron-right']"></i>
             </small>
           </div>
-          <div class="col-sm-12 d-flex flex-column">
+          <div class="col-sm-12 d-flex flex-column" v-if="expandArray">
             <template v-for="item in content">
               <field-box class="m-1" name="" :content="item" isChild="true"></field-box>
             </template>
