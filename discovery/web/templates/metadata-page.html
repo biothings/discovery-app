@@ -200,23 +200,25 @@
           </div>
           <div class="col-sm-12" v-if="expandArray">
             <div>
-              <select class="form-control form-control-sm m-auto w-25" v-model="perPage" @change="calculatePages" id="perPage">
-                  <option value="" disabled selected>Shown Per Page</option>
-                  <option value="10">10 per page</option>
-                  <option value="25">25 per page</option>
-                  <option value="100">100 per page</option>
-              </select>
-              <div class="paginati flex-wrap p-1 mt-2">
-                <div class="badge rounded-0" :class="{ 'disabled': page <= 1 }">
-                  <a class="page-link p-1" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
+              <template v-if="content.length > perPage">
+                <select class="form-control form-control-sm m-auto w-25" v-model="perPage" @change="calculatePages" id="perPage">
+                    <option value="" disabled selected>Shown Per Page</option>
+                    <option value="10">10 per page</option>
+                    <option value="25">25 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+                <div class="paginati flex-wrap p-1 mt-2">
+                  <div class="badge rounded-0" :class="{ 'disabled': page <= 1 }">
+                    <a class="page-link p-1" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
+                  </div>
+                  <div class="badge rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
+                    <a href="#" class="page-link p-1" @click.prevent="page = n" v-text="n"></a>
+                  </div>
+                  <div class="badge rounded-0" :class="{ 'disabled': page >= pages }">
+                    <a class="page-link p-1" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
+                  </div>
                 </div>
-                <div class="badge rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
-                  <a href="#" class="page-link p-1" @click.prevent="page = n" v-text="n"></a>
-                </div>
-                <div class="badge rounded-0" :class="{ 'disabled': page >= pages }">
-                  <a class="page-link p-1" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
-                </div>
-              </div>
+              </template>
             </div>
             <template v-for="item in arrayResults">
               <field-box class="m-1" name="" :content="item" isChild="true"></field-box>
