@@ -349,11 +349,29 @@ var app = new Vue({
             self.assignTempName(res.data.hits);
           }).catch(err=>{
             self.loading = false;
+            self.loading = false;
+            // console.log('err',err.response.data)
+            let culprit = "<h6>"+err.response.data.error+"</h6>"
+            if (err.response.data && err.response.data.path) {
+              culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
+            }
+            if (err.response.data.parent && err.response.data.parent.path){
+              if (true) {
+                culprit += "<h5>Also check <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></h5>"
+              }
+              if (err.response.data.parent && err.response.data.parent.reason) {
+                culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
+              }
+            }
+            if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
+              culprit += "<div class='alert alert-info'><small> Hint: "+err.response.data.validator_value+"</small></div>"
+            }
             Swal.fire({
               type: 'error',
-              position: 'center',
-              title: 'Failed because: ',
-              text: err.response.data.reason
+              position: 'top center',
+              title: 'Registration failed because: ',
+              html: culprit,
+              footer:'<small>Validation Error</small>'
             });
             throw err;
           })
