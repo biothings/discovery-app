@@ -151,11 +151,13 @@
         }
       },
       isUrl(txt){
-        if (txt.includes("url") || txt.includes('http')) {
-          return true
-        }else {
-          return false
-        }
+        var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+          '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+          '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+          '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+          '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+          '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+        return pattern.test(txt);
       },
       calculatePages: function () {
         var self= this;
@@ -244,7 +246,7 @@
             <template v-else>
               <div class="d-flex">
                 <small class="mainTextDark">
-                  <span v-text="name"></span> <span class="mr-1">:</span>
+                  <span v-text="name+':'" class="mr-1"></span>
                 </small>
               </div>
               <div class="d-flex">
@@ -255,7 +257,7 @@
                     <i v-if="name == '@type' && content == 'Organization' " class="fas fa-building text-muted"></i>
                     <i v-if="name == '@type' && content == 'CreativeWork' " class="fas fa-lightbulb text-muted"></i>
                   </small> &nbsp;
-                  <small class="text-muted" v-html="content"></small>
+                  <small class="text-muted text-left" v-html="content"></small>
                 </template>
               </div>
             </template>
