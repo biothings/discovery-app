@@ -369,9 +369,8 @@ var app = new Vue({
             Swal.fire({
               type: 'error',
               position: 'top center',
-              title: 'Registration failed because: ',
+              title: 'Failed because: ',
               html: culprit,
-              footer:'<small>Validation Error</small>'
             });
             throw err;
           })
