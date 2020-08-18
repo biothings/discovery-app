@@ -132,6 +132,20 @@ Vue.component('registry-item', {
         return this.item.description
       }
 
+    },
+    niaid: function(){
+      if (this.item['@type'].includes('niaid')) {
+        return true
+      }else {
+        return false
+      }
+    },
+    outbreak: function(){
+      if (this.item['@type'].includes('outbreak')) {
+        return true
+      }else {
+        return false
+      }
     }
   },
   mounted: function(){
@@ -144,6 +158,15 @@ Vue.component('registry-item', {
     <div class="d-flex">
       <div class="flex-grow-1 p-2">
         <div class="w-100">
+          <div v-if="niaid" class="d-inline mr-1">
+            <img src="/static/img/niaid/icon.svg" width="30" height="30" alt="NIAID" title="NIAID Data Portal">
+          </div>
+          <div v-if="niaid" class="d-inline mr-1">
+            <img src="/static/img/outbreak.png" width="30" height="30" alt="Outbreak.info" title="Outbreak.info">
+          </div>
+          <div v-else class="d-inline mr-1">
+            <img src="/static/dde-logo-o.svg" width="30" height="30" alt="CTSA" title="CTSA Portal">
+          </div>
           <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
           <small v-if="item && item.version" class="text-muted" v-text="'Version '+item.version"></small>
           <p v-if="item && item.description" class="text-muted">
