@@ -171,6 +171,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
 <script src="/static/js/lodash.js"></script>
 <script src="/static/js/notify.min.js"></script>
+<script src="/static/js/moment.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
   const store = new Vuex.Store({
@@ -194,7 +195,7 @@
       },
       saveSchema(state,payload){
         state.schema = payload['schema'];
-        console.log('schema saved',state.schema)
+        // console.log('schema saved',state.schema)
         console.log('form properties',state.schema.validation.properties)
         state.output['@type'] = state.schema.name || state.schema.label
         state.output['@context'] = payload['schema']["@context"]
@@ -205,7 +206,7 @@
         if ('identifier' in state.schema.validation.properties && !state.schema.validation.required.includes('identifier')) {
           state.schema.validation.required.push('identifier')
         }else{
-          console.log('WARNING: identifier field not found and is required')
+          // console.log('WARNING: identifier field not found and is required')
           Vue.set(state.schema.validation.properties['identifier'],{'type':'string','description':'unique identifier for this entry'});
           state.schema.validation.required.push('identifier')
         }
@@ -1038,7 +1039,7 @@
         var payload = {};
         payload["select"] = '';
         store.commit('markSelected',payload);
-        // store.commit('selectNext');
+        // save progress
         store.dispatch('saveProgress');
       },
       clearFieldFor:function(propname){
@@ -1114,13 +1115,13 @@
             inputValidator: (value) => {
               return new Promise((resolve) => {
                 function validURL(str) {
-                  // var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                  //   '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-                  //   '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                  //   '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-                  //   '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                  //   '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-                  var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+                  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+                    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+                    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+                  // var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
                   return !!pattern.test(str);
                 }
                 if (validURL(value)) {
@@ -1203,13 +1204,13 @@
             inputValidator: (value) => {
               return new Promise((resolve) => {
                 function validURL(str) {
-                  // var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                  //   '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-                  //   '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                  //   '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-                  //   '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                  //   '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-                  var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+                  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+                    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+                    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+                  // var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
                   return !!pattern.test(str);
                 }
                 if (validURL(value)) {
@@ -1261,9 +1262,9 @@
       },
       handleOneOf(parentProp,childProp,childPropInfo){
         var self = this;
-        console.log("parent ",parentProp)
-        console.log("child ",childProp)
-        console.log("handle this ",childPropInfo)
+        // console.log("parent ",parentProp)
+        // console.log("child ",childProp)
+        // console.log("handle this ",childPropInfo)
 
         setTimeout(function(){
           self.addItem(parentProp,childPropInfo)
@@ -1387,8 +1388,8 @@
 
       },
       getQuestion(parentName,obj){
-        console.log('getting questions for',parentName)
-        console.log('using',obj)
+        // console.log('getting questions for',parentName)
+        // console.log('using',obj)
         return swal.withForm({
          title: 'More complex Swal-Forms example',
          text: 'This has different types of inputs',
@@ -1420,14 +1421,14 @@
          ]
        }, function (isConfirm) {
          // do whatever you want with the form data
-         console.log(this.swalForm) // { name: 'user name', nickname: 'what the user sends' }
+         // console.log(this.swalForm) // { name: 'user name', nickname: 'what the user sends' }
        })
       },
       oneOfEnum(propName,propInfo){
         var self=this;
 
-        console.log('oneOfEnum happening')
-        console.log(propName,propInfo)
+        // console.log('oneOfEnum happening')
+        // console.log(propName,propInfo)
 
         for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++){
           if (propInfo['oneOf'][oF_i].hasOwnProperty('enum')) {
@@ -1471,14 +1472,14 @@
 
         let props = {}
 
-        console.log("propInfo",propInfo)
+        console.log("addItem",propInfo)
 
         if (propInfo.hasOwnProperty('vocabulary')) {
           self.handleVocab(propName,propInfo)
         }
 
         if (propInfo.hasOwnProperty('oneOf')) {
-          console.log("ONE OF")
+          // console.log("ONE OF")
 
           path= ""
 
@@ -1499,7 +1500,7 @@
 
           switch (path) {
             case "string":
-            console.log("path:",path)
+            // console.log("path:",path)
             Swal({
                     title: propName,
                     input: 'text',
@@ -1532,11 +1533,11 @@
                   });
               break;
             case 'enum':
-              console.log("path:",path)
+              // console.log("path:",path)
               self.oneOfEnum(propName,propInfo);
               break;
             case 'types':
-              console.log("path:",path)
+              // console.log("path:",path)
               options ={}
               for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++) {
                 if (propInfo['oneOf'][oF_i].hasOwnProperty('@type')) {
@@ -1561,7 +1562,7 @@
                   showCancelButton: true,
                   inputValidator: (value) => {
                     if (value) {
-                      console.log('value',value)
+                      // console.log('value',value)
                       self.handleOneOf(propName,propInfo['oneOf'][value]['@type'],propInfo['oneOf'][value])
                     }
                   }
@@ -1569,7 +1570,7 @@
               }
               break;
             default:
-            console.log('PATH NOT HANDLED')
+            console.warn('PATH NOT HANDLED',path)
 
           }
 
@@ -1579,7 +1580,7 @@
         }
 
         if (propInfo.hasOwnProperty('anyOf')) {
-          console.log("ANY OF")
+          // console.log("ANY OF")
           options ={}
           for (var oF_i = 0; oF_i < propInfo['anyOf'].length; oF_i++) {
             if (propInfo['anyOf'][oF_i].hasOwnProperty('@type')) {
@@ -1604,7 +1605,7 @@
               showCancelButton: true,
               inputValidator: (value) => {
                 if (value) {
-                  console.log('value',value)
+                  // console.log('value',value)
                   self.handleOneOf(propName,propInfo['anyOf'][value]['@type'],propInfo['anyOf'][value])
                 }
               }
@@ -1612,205 +1613,6 @@
           }
 
         }
-
-
-        // if (propInfo.hasOwnProperty('oneOf')) {
-        //   console.log("HAS ONE OF")
-        //   for (var i = 0; i < propInfo['oneOf'].length; i++) {
-        //     if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'object') {
-        //       props = propInfo['oneOf'][i]['properties']
-        //       // recursive approach
-        //       // console.log('recursive')
-        //       // this.addItem(propName,propInfo['oneOf'][i])
-        //     }
-        //     if (propInfo['oneOf'][i].hasOwnProperty('type') && propInfo['oneOf'][i]['type'] === 'array') {
-        //       self.canAcceptMultiple = true
-        //     }
-        //     //  FOR SIMPLE STRINGS
-        //     if (propInfo['oneOf'][i]['type'] === 'string'){
-        //
-        //       Swal({
-        //         title: propName,
-        //         input: 'text',
-        //         inputPlaceholder: 'Enter text here',
-        //         footer:propName == 'keywords'? "Multiple keywords can be entered separated by commas." : " ",
-        //         inputValidator: (value) => {
-        //           if (value) {
-        //             if (propName == 'keywords') {
-        //               slist = value.split(",");
-        //               for (var sIndex = 0; sIndex < slist.length; sIndex++) {
-        //                 var payload = {};
-        //                 payload["item"] = slist[sIndex];
-        //                 payload["from"] = propName;
-        //                 store.commit('addToArrayFrom',payload);
-        //
-        //                 store.dispatch('saveProgress');
-        //               }
-        //             }else{
-        //               var payload = {};
-        //               payload["item"] = value;
-        //               payload["from"] = propName;
-        //               store.commit('addToArrayFrom',payload);
-        //
-        //               store.dispatch('saveProgress');
-        //             }
-        //
-        //           }
-        //         }
-        //
-        //       })
-        //
-        //
-        //     }
-        //
-        //     //  FOR ENUM
-        //     if (propInfo['oneOf'][i].hasOwnProperty('enum')) {
-        //
-        //
-        //       let e = propInfo['oneOf'][i]['enum']
-        //       let options={}
-        //       for (var eIndex = 0; eIndex < e.length; eIndex++) {
-        //         options[e[eIndex]]=e[eIndex]
-        //       }
-        //
-        //
-        //       Swal({
-        //         title: propName,
-        //         input: 'select',
-        //         inputOptions: options,
-        //         inputPlaceholder: 'Select one',
-        //         showCancelButton: true,
-        //         inputValidator: (value) => {
-        //           if (value) {
-        //             var payload = {};
-        //             payload["item"] = value;
-        //             payload["from"] = propName;
-        //             store.commit('addToArrayFrom',payload);
-        //
-        //             store.dispatch('saveProgress');
-        //           }
-        //         }
-        //       })
-        //
-        //     }
-        //     //  FOR VOCABULARY FROM ONTOLOGIES
-        //     if (propInfo['oneOf'][i].hasOwnProperty('vocabulary') && propInfo['oneOf'][i]['type'] === 'string') {
-        //
-        //       Swal.fire({
-        //         title: propName,
-        //         text: 'Search for an existing term here:',
-        //         input: 'text',
-        //         confirmButtonColor:"{{color_main}}",
-        //         cancelButtonColor:"{{color_sec}}",
-        //         animation:false,
-        //         customClass:'scale-in-center',
-        //         inputAttributes: {
-        //           autocapitalize: 'off'
-        //         },
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Look up',
-        //         showLoaderOnConfirm: true,
-        //         focusConfirm: false,
-        //         preConfirm: (query) => {
-        //
-        //           let ontologies = propInfo['oneOf'][i]['vocabulary']['ontology'].toString()
-        //           let children = propInfo['oneOf'][i]['vocabulary']['children_of'].toString()
-        //
-        //           let url = `https://www.ebi.ac.uk/ols/api/search?q=${query}`
-        //           +"&ontology="+ontologies
-        //           +"&childrenOf="+children
-        //           +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
-        //           +"&queryFields=label"
-        //           +"&rows=100"
-        //
-        //           return fetch(url)
-        //             .then(response => {
-        //               if (!response.ok) {
-        //                 throw new Error(response.statusText)
-        //               }
-        //               return response.json()
-        //             })
-        //             .catch(error => {
-        //               Swal.showValidationMessage(
-        //                 `Request failed: ${error}`
-        //               )
-        //             })
-        //         },
-        //         allowOutsideClick: () => !Swal.isLoading()
-        //       }).then((result) => {
-        //         if (result.value) {
-        //           let html ="<div id='ontology' class='p-1 text-left'>";
-        //
-        //           for (var i = 0; i < result.value.response.docs.length; i++) {
-        //             tippy('#cb'+i,{
-        //               content:result.value.response.docs[i]
-        //             });
-        //
-        //             let label = result.value.response.docs[i]['label']
-        //             if (label && label.length > 37) {
-        //               label = label.substring(0,37)+"..."
-        //             }
-        //
-        //             html += `<div class="form-check">
-        //                         <input class="form-check-input mr-2" type="checkbox" value="`+result.value.response.docs[i]['iri']+`" id="cb`+i+`">
-        //                         <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
-        //                             `+label+`
-        //                             <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
-        //                         </label>
-        //                     </div>`
-        //           }
-        //           if (propInfo && !propInfo.strict) {
-        //             html += `<div class="alert alert-info mt-1">
-        //                         <h6>Didn't find what you are looking for? Enter value here:</h6>
-        //                         <input class="form-control" type="text" id="qTerm">
-        //                     </div>`
-        //           }
-        //           html += "</div>";
-        //
-        //           Swal.fire({
-        //             title: propName+'(s):',
-        //             html: html,
-        //             confirmButtonColor:"{{color_main}}",
-        //             cancelButtonColor:"{{color_sec}}",
-        //             animation:false,
-        //             customClass:'scale-in-center',
-        //             preConfirm: () => {
-        //
-        //               let checked=[]
-        //
-        //                 for (var i = 0; i < 100; i++) {
-        //                   let x = document.getElementById("cb"+i)
-        //                   if (x && x.checked) {
-        //                     checked.push(x.value)
-        //                   }
-        //                 }
-        //                 let y = document.getElementById("qTerm")
-        //                 if (y.value) {
-        //                   checked.push(y.value)
-        //                 }
-        //                 return checked
-        //             }
-        //           }).then((result) => {
-        //             if (result.value) {
-        //               // console.log('FINAL RES', result.value)
-        //               for (var i = 0; i < result.value.length; i++) {
-        //                 var payload = {};
-        //                 payload["item"] = result.value[i];
-        //                 payload["from"] = propName;
-        //                 store.commit('addToArrayFrom',payload);
-        //
-        //                 store.dispatch('saveProgress');
-        //               }
-        //
-        //             }
-        //           })
-        //
-        //         }
-        //       })
-        //     }
-        //
-        //   }
-        // }
         else if (propInfo.hasOwnProperty('properties')){
           props = propInfo.properties
 
@@ -1819,7 +1621,7 @@
             progressSteps.push(key)
             switch (props[key]['type']) {
               case 'string':
-                console.log(key,props[key]['type'])
+                // console.log(key,props[key]['type'])
                 if (props[key].hasOwnProperty('format')) {
                   switch (props[key]['format']) {
                     case 'uri':
@@ -1830,13 +1632,13 @@
                           return new Promise((resolve) => {
 
                             function validURL(str) {
-                              // var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                              //   '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-                              //   '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                              //   '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-                              //   '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                              //   '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-                              var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+                              var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                                '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+                                '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+                                '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                                '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+                              // var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
                               return !!pattern.test(str);
                             }
 
@@ -1899,12 +1701,13 @@
                           document.getElementById("hideThis").classList.add('d-none');
                         },
                         preConfirm: () => {
-                          return document.getElementById('datePicked').value
+                          // console.log('%c date format check','color:pink')
+                          return moment(document.getElementById('datePicked').value).format("YYYY-MM-DD");
                         },
                       })
                       break;
                     default:
-                      console.log('TYPE STRING BUT FORMAT NOT HANDLED')
+                      // console.log('TYPE STRING BUT FORMAT NOT HANDLED')
                   }
                 }else {
                   // Simple String
@@ -1956,7 +1759,7 @@
                 }
                 break;
               case 'integer':
-                console.log('integer',key)
+                // console.log('integer',key)
                 questions.push({
                   title: key,
                   input: 'number',
@@ -2028,7 +1831,12 @@
                       // console.log('arrayForm Data', arrayForm)
                       var returnArray = {};
                       for (var i = 0; i < formArray.length; i++){
-                        returnArray[formArray[i]['name']] = formArray[i]['value'];
+                        if (formArray[i]['name'].includes('date')) {
+                          // console.log('%c date format check','color:pink')
+                          returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
+                        }else {
+                          returnArray[formArray[i]['name']] = formArray[i]['value'];
+                        }
                       }
                       // console.log('arrayForm Data', returnArray)
                       return returnArray;
@@ -2038,7 +1846,7 @@
                 }
                 break;
               case 'object':
-                console.log(key,props[key]['type'])
+                // console.log(key,props[key]['type'])
                 html =''
                 let obj = props[key]['properties'];
 
@@ -2076,7 +1884,12 @@
                     // console.log('arrayForm Data', arrayForm)
                     var returnArray = {};
                     for (var i = 0; i < formArray.length; i++){
-                      returnArray[formArray[i]['name']] = formArray[i]['value'];
+                      if (formArray[i]['name'].includes('date')) {
+                        // console.log('%c date format check','color:pink')
+                        returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
+                      }else {
+                        returnArray[formArray[i]['name']] = formArray[i]['value'];
+                      }
                     }
                     // console.log('arrayForm Data', returnArray)
                     return returnArray;
@@ -2085,12 +1898,12 @@
 
                 break;
               default:
-                console.log('DEFAULT PROP HANDLER...')
+                // console.log('DEFAULT PROP HANDLER...')
 
                 // ONE OF
                 html =''
                 if (props[key].hasOwnProperty('oneOf')) {
-                  console.log("Array Has One Of")
+                  // console.log("Array Has One Of")
 
                   for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
                     if (props[key]['oneOf'][ix]['type'] == 'object') {
@@ -2128,12 +1941,17 @@
                     },
                     preConfirm: () => {
                       let formArray = $('#arrayForm').serializeArray();
-                      console.log('arrayForm Data', arrayForm)
+                      // console.log('arrayForm Data', arrayForm)
                       var returnArray = {};
                       for (var i = 0; i < formArray.length; i++){
-                        returnArray[formArray[i]['name']] = formArray[i]['value'];
+                        if (formArray[i]['name'].includes('date')) {
+                          // console.log('%c date format check','color:pink')
+                          returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
+                        }else {
+                          returnArray[formArray[i]['name']] = formArray[i]['value'];
+                        }
                       }
-                      console.log('arrayForm Data', returnArray)
+                      // console.log('arrayForm Data', returnArray)
                       return returnArray;
                     },
                   })
@@ -2451,7 +2269,13 @@
         },
         set (newValue) {
           var payload = {};
-          payload["completed"] = {'name':this.name,'value':newValue};
+          if (name.includes('date')) {
+            // console.log('%c date format check','color:pink')
+            let v = moment(newValue).format("YYYY-MM-DD")
+            payload["completed"] = {'name':this.name,'value': v };
+          }else {
+            payload["completed"] = {'name':this.name,'value':newValue};
+          }
           store.commit('markCompleted',payload);
 
           store.dispatch('saveProgress');
@@ -3257,6 +3081,7 @@
             }).then((result) => {
               if (result.value) {
                 store.dispatch('reset')
+                sessionStorage.removeItem('guideProgress');
               }
             });
           }
@@ -3356,7 +3181,7 @@
                         text: res.data.reason
                       });
                     } catch (e) {
-                      console.log(e)
+                      throw e;
                     }
                   }
                 }).catch(err=>{
