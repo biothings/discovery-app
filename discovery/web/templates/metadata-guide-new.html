@@ -3432,17 +3432,59 @@
 
                       try {
                           let selected = JSON.parse(result.value)
-
+                          console.log(selected)
                           for(key in selected){
                             if (!['@context','@type','_id'].includes(key)) {
                               var payload = {};
-                              if (typeof selected[key] === 'object') {
-                                let value = [selected[key]]
-                                payload["completed"] = {'name':key,'value':value};
+                              if ( _.isPlainObject(selected[key]) ) {
+                                //look at keys and check for dates
+                                let obj = selected[key]
+                                for (var k in obj) {
+                                  if (k.includes('date')) {
+                                    let v = moment(obj[k]).format("YYYY-MM-DD")
+                                    obj[k] = v
+                                    console.log('date checked obj',obj[k])
+                                  }
+                                }
+                                //make obj an array of obj,
+                                payload["completed"] = {'name':key,'value':[obj]};
                                 store.commit('markCompleted',payload);
-                              }else{
+
+                              }else if ( _.isArray(selected[key]) ) {
+                                let list = selected[key]
+
+                                for (var i = 0; i < list.length; i++) {
+                                  let item = list[i];
+                                  if (_.isPlainObject(item)) {
+                                    let arrObj = item
+
+                                    for (var k in arrObj) {
+                                      if (k.includes('date')) {
+                                        let v = moment(arrObj[k]).format("YYYY-MM-DD")
+                                        arrObj[k] = v
+                                        console.log('date checked obj',arrObj[k])
+                                      }
+                                    }
+
+                                  }else if (_.isString(item) && item.includes('date')) {
+                                    item = moment(item).format("YYYY-MM-DD")
+                                    console.log('date checked string',item)
+                                  }else {
+
+                                  }
+                                }
+                                payload["completed"] = {'name':key,'value':list};
+                                store.commit('markCompleted',payload);
+                              }
+                              else{
                                 let value = selected[key]
-                                payload["completed"] = {'name':key,'value':value};
+                                if (key.includes('date')) {
+                                  let v = moment(value).format("YYYY-MM-DD")
+                                  payload["completed"] = {'name':key,'value':v};
+                                }else {
+                                  payload["completed"] = {'name':key,'value':value};
+                                }
+
                                 store.commit('markCompleted',payload);
                               }
 
