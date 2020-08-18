@@ -161,11 +161,11 @@ Vue.component('registry-item', {
           <div v-if="niaid" class="d-inline mr-1">
             <img src="/static/img/niaid/icon.svg" width="30" height="30" alt="NIAID" title="NIAID Data Portal">
           </div>
-          <div v-if="niaid" class="d-inline mr-1">
+          <div v-if="outbreak" class="d-inline mr-1">
             <img src="/static/img/outbreak.png" width="30" height="30" alt="Outbreak.info" title="Outbreak.info">
           </div>
-          <div v-else class="d-inline mr-1">
-            <img src="/static/dde-logo-o.svg" width="30" height="30" alt="CTSA" title="CTSA Portal">
+          <div v-if="!outbreak && !niaid" class="d-inline mr-1">
+            <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="CTSA" title="CTSA Portal">
           </div>
           <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
           <small v-if="item && item.version" class="text-muted" v-text="'Version '+item.version"></small>
