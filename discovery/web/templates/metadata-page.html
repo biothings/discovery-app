@@ -319,6 +319,11 @@
           }
         }).catch(err=>{
           self.loading = false;
+          Swal.fire({
+          icon: 'error',
+          title: 'Page does not exist',
+          html: "<a href='/dataset'>Go To Registry</a>",
+          })
           throw err;
         });
       },
