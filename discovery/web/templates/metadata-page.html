@@ -178,10 +178,12 @@
 
         if (!self.startCapLimitReached) {
           if (self.startCap-20 > 0) {
+            self.page = self.startCap-20
             self.startCap = self.startCap-20
             self.endCap = self.endCap-20
             self.endCapLimitReached = false;
           }else {
+            self.page = 1
             self.startCap = 0
             self.endCap = 20
             self.startCapLimitReached = true;
@@ -194,16 +196,19 @@
 
         if (!self.endCapLimitReached) {
           if (self.endCap+20 < self.pages) {
+            self.page = self.startCap+20
             self.startCap = self.startCap+20
             self.endCap = self.endCap+20
             self.startCapLimitReached = false;
           }else {
+            self.page = self.startCap+20
             self.startCap = self.startCap+20
             self.endCap = self.pages
             self.endCapLimitReached = true;
             self.startCapLimitReached = false;
           }
         }
+        console.log(self.page)
       },
       prevPage: function () {
         var self= this;
@@ -233,12 +238,12 @@
       }
     },
     watch:{
-      endCapLimitReached:function(n){
-        console.log(this.endCap,n)
-      },
-      startCapLimitReached:function(n){
-        console.log(this.startCap,n)
-      }
+      // endCapLimitReached:function(n){
+      //   console.log(this.endCap,n)
+      // },
+      // startCapLimitReached:function(n){
+      //   console.log(this.startCap,n)
+      // }
     },
     template:
       `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted p-1 border-left':'alert-muted p-1 border-bottom']">
