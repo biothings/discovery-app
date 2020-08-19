@@ -208,7 +208,6 @@
             self.startCapLimitReached = false;
           }
         }
-        console.log(self.page)
       },
       prevPage: function () {
         var self= this;
@@ -238,12 +237,6 @@
       }
     },
     watch:{
-      // endCapLimitReached:function(n){
-      //   console.log(this.endCap,n)
-      // },
-      // startCapLimitReached:function(n){
-      //   console.log(this.startCap,n)
-      // }
     },
     template:
       `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted p-1 border-left':'alert-muted p-1 border-bottom']">

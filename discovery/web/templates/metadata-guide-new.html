@@ -46,6 +46,27 @@
     </p>
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
+  <!-- BULK -->
+  <div v-if="jsonItems.length" class="alert alert-dark">
+    <h6>Bulk Registration</h6>
+    <table class="m-0 table table-sm table-dark table-striped">
+      <thead>
+        <th>
+          <small>name</small>
+        </th>
+        <th>
+          <small>result details</small>
+        </th>
+        <th>
+          <small>status</small>
+        </th>
+      </thead>
+      <template v-for="item in jsonItems">
+        <json-item :item="item"></json-item>
+      </template>
+    </table>
+  </div>
+  <!-- bulk end -->
   <div id="widget" class="mb-5 grad rounded">
     <div>
       <div class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start">
@@ -70,6 +91,10 @@
         <span class="fa-stack fa-1x pointer desc mr-2" data-tippy-info="Import Metadata" @click="loadData()"  v-show="validation">
           <i class="fas fa-circle text-success fa-stack-2x"  :class="{ 'text-muted': !validation, 'mainTextDark': validation }"></i>
           <i class="fas fa-file-import fa-stack-1x fa-inverse"></i>
+        </span>
+        <span class="fa-stack fa-1x pointer desc mr-2" data-tippy-info="Bulk Registration" @click="handleBulk()"  v-show="validation">
+          <i class="fas fa-circle text-success fa-stack-2x"  :class="{ 'text-muted': !validation, 'mainTextDark': validation }"></i>
+          <i class="fas fa-registered fa-stack-1x fa-inverse"></i>
         </span>
       </div>
     </div>
@@ -160,7 +185,7 @@
             </div>
           </div>
         </template>
-
+    </div>
   </div>
 </div>
 
@@ -186,12 +211,16 @@
       selectedPortals:[],
       step: Number,
       settings: Object,
-      showDescriptions:true
+      showDescriptions:true,
+      bulkJSONItems:[]
     },
     strict: true,
     mutations: {
       toggleDesc(state){
         state.showDescriptions = !state.showDescriptions
+      },
+      saveJSONItems(state,payload){
+        state.bulkJSONItems = payload['items'];
       },
       saveSchema(state,payload){
         state.schema = payload['schema'];
@@ -478,6 +507,9 @@
       }
     },
     getters:{
+      getBulkJSONItems:state=>{
+        return state.bulkJSONItems
+      },
       getShowDesc:state=>{
         return state.showDescriptions
       },
@@ -647,6 +679,80 @@
         sessionStorage.setItem('guideProgress',JSON.stringify(obj));
       },
     }
+  });
+
+  Vue.component('json-item', {
+    data: function(){
+      return{
+        errMSG:"",
+        successMSG:"",
+        loading: false,
+      }
+    },
+    props: ['item'],
+    methods:{
+      registerJSONItem(){
+        var self = this;
+
+        let schema = store.getters.getSchema
+
+        let config = {
+           headers: {
+             'content-type': 'application/json'
+           }
+         }
+
+        axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label'],self.item,config).then(res=>{
+          self.loading = false;
+          if (res.data.success) {
+            self.successMSG = `<a href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer"><small>Registration Successful! Click here to view.</small></a>`
+          }
+        }).catch(err=>{
+          self.loading = false;
+          // console.log('err',err.response.data)
+          let culprit = "<small class='d-block'>"+err.response.data.error+"</small>"
+          if (err.response.data && err.response.data.path) {
+            culprit += "<hr/><small>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></small>"
+          }
+          if (err.response.data.parent && err.response.data.parent.path){
+            if (true) {
+              culprit += "<hr/><small>Also check <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></small>"
+            }
+            if (err.response.data.parent && err.response.data.parent.reason) {
+              culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
+            }
+          }
+          if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
+            culprit += "<div class='alert alert-info'><small> Hint: "+err.response.data.validator_value+"</small></div>"
+          }
+          self.errMSG = culprit;
+          throw err;
+        })
+      }
+    },
+    mounted: function(){
+      tippy('#'+this.item.name, {
+        theme:'light',
+        content: "<div class='text-left text-muted'>"+JSON.stringify(this.item.description,null,2)+"</div>" || "<div class='m-0'>No Description Available</div>",
+      })
+
+      this.registerJSONItem();
+    },
+    template: `<tr :class="{'alert-success':successMSG,'alert-warning':errMSG}">
+                  <th scope="col">
+                    <small v-text="item.name" :id="item.name"></small>
+                  </th>
+                  <th scope="col">
+                    <small v-if="loading" class="text-muted">Registering...</small>
+                    <small v-if="errMSG" v-html="errMSG"></small>
+                    <small v-if="successMSG" v-html="successMSG"></small>
+                  </th>
+                  <th scope="col">
+                    <i v-if="loading" class="fas fa-spinner fa-pulse mainTextDark"></i>
+                    <small class="text-danger" v-if="errMSG">ERROR <i class="fas fa-poo"></i></small>
+                    <small class="text-success" v-if="successMSG">OK <i class="fas fa-registered"></i></small>
+                  </th>
+                </tr>`
   });
 
   Vue.component('chart', {
@@ -2897,7 +3003,10 @@
             }
           }
           return n
-        }
+        },
+        jsonItems: function(){
+          return store.getters.getBulkJSONItems
+        },
       },
       watch:{
         step:function(s){
@@ -3301,6 +3410,72 @@
             imageAlt: 'Dataset Editor'
           })
         },
+        handleBulk(){
+          var self = this;
+
+          Swal.fire({
+            title: 'What type of file do you have?',
+            input: 'select',
+            inputOptions: {
+              'json': 'JSON',
+              // 'csv': 'CSV',
+            },
+            inputPlaceholder: 'Select type',
+            showCancelButton: true,
+            confirmButtonText: 'Next',
+            showLoaderOnConfirm: true,
+            preConfirm: (method) => {
+              return method
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            if (result.value) {
+              switch (result.value) {
+                case 'json':
+                  self.handleJson()
+                  break;
+                default:
+
+              }
+            }
+          })
+        },
+        async handleJson(){
+          var self = this;
+
+          const { value: file } = await Swal.fire({
+          title: 'Select JSON file',
+          input: 'file',
+          footer:`<small class="text-danger">Registration will be triggered automatically when upload finishes.</small>`,
+          inputAttributes: {
+            'accept': 'json',
+            'aria-label': 'Upload your file'
+          }
+          })
+
+          if (file) {
+            try {
+              const blob = new Blob([file], {type:"application/json"});
+
+              const fr = new FileReader();
+
+              fr.addEventListener("load", e => {
+                var payload = {};
+                payload["items"] = JSON.parse(fr.result);
+                store.commit('saveJSONItems',payload);
+              });
+
+              fr.readAsText(blob);
+            } catch (e) {
+              Swal.fire({
+              icon: 'error',
+              title: 'Something is wrong..',
+              text: e
+              })
+            }
+
+          }
+        },
         loadData(){
           var self = this;
           Swal.fire({
@@ -3309,7 +3484,7 @@
             inputOptions: {
               'giturl': 'Hosted metadata on GitHub (raw url)',
               'registered': 'Metadata by you registered here',
-              'text':'JSON metadata text'
+              'text':'JSON metadata text',
             },
             inputPlaceholder: 'Select method',
             showCancelButton: true,
