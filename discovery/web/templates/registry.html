@@ -146,7 +146,8 @@ Vue.component('preset-box', {
 Vue.component('registry-item', {
   data: function(){
     return{
-      options:false
+      options:false,
+      expand: false
     }
   },
   props: ['item'],
@@ -187,15 +188,39 @@ Vue.component('registry-item', {
         return 'This class has no subclass'
       }
     },
-    getPropTotal(){
+  },
+  computed:{
+    imgLink: function(){
+      switch (this.item['namespace']) {
+        case 'schema':
+          return "/static/img/schema.png";
+          break;
+        case 'niaid':
+          return "/static/img/niaid/icon.svg";
+          break;
+        case 'outbreak':
+          return "/static/img/outbreak.png";
+          break;
+        case 'bts':
+          return "/static/img/biothings-logo-xs.png";
+          break;
+        case 'google':
+          return "/static/img/google.png";
+          break;
+        case 'ctsa':
+          return "/static/img/dde-logo-o.svg";
+          break;
+        default:
+          return "/static/img/dde-logo-o.svg";
+      }
+    },
+    propTotal(){
       if (this.item.hasOwnProperty('properties')) {
         return this.item.properties.length
       }else{
-        return '0'
+        return 0
       }
     }
-  },
-  watch:{
   },
   mounted: function(){
     tippy('#'+this.item.label, {
@@ -203,32 +228,45 @@ Vue.component('registry-item', {
       content: "<div class='text-left text-muted'>"+JSON.stringify(this.item.description,null,2)+"</div>" || "<div class='m-0'>No Description Available</div>",
     })
   },
-  template: `<li class="list-group-item list-group-item-action p-0 pointer">
+  template: `<li class="list-group-item p-0">
     <div class="d-flex">
       <div class="flex-grow-1 p-1">
-        <div class="d-flex justify-content-between w-100">
-          <h5 class="mb-1 mainTextDark">
-            <small class="badge alert-secondary" v-text="item.prefix"></small> <span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-info-circle text-info"></i></small>
+        <div class="w-100">
+          <div class="d-inline mr-1" >
+            <img :src="imgLink" width="30" title="From" alt="img">
+          </div>
+          <h5 class="mb-1 mainTextDark d-inline">
+             <span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-info-circle text-info"></i></small>
           </h5>
         </div>
         <p class="mb-1">
-          <small>
-            <span class='mainTextLight'><span v-text="getPropTotal()"></span> Properties /</span>
-          </small>
+          <small>namespace: </small>
+          <small class="text-muted">
+            <a v-text="item.namespace" :href="'/view/'+item.namespace" target="_blank" rel="nonreferrer"></a>
+          </small> /
+          <small class="pointer" @click="expand=!expand">
+            <span :class="[propTotal>0?'text-primary':'text-muted']"><span v-text="propTotal"></span> Properties</span>
+            <i v-show="propTotal" class="fas" :class="[!expand?'fa-chevron-down':'fa-chevron-up']"></i>
+          </small> /
           <small>Subclass of:</small>
-          <span class="mb-1" v-text="getSubclass(item.parent_classes)"></span>
+          <small class="mb-1" v-text="getSubclass(item.parent_classes)"></small>
         </p>
+        <ul v-if="expand">
+          <li v-for="prop in item.properties" :key="prop.label">
+            <small v-text="prop.label"></small>
+          </li>
+        </ul>
 
       </div>
       <div class="p-1 bg-dark d-flex align-items-center justify-content-around flip-in-ver-left">
         <div>
-          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item)" :data-tippy-info="'Visualize'">
+          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item)" :data-tippy-info="'Visualize '+item.label">
             <i class="fas fa-circle text-muted fa-stack-2x"></i>
             <i class="fas fa-eye fa-stack-1x text-light"></i>
           </span>
         </div>
         <div>
-          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item,'editor')" :data-tippy-info="'Extend'">
+          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item,'editor')" :data-tippy-info="'Extend '+item.label">
             <i class="fas fa-circle text-muted fa-stack-2x"></i>
             <i class="fas fa-code-branch fa-stack-1x text-light"></i>
           </span>
