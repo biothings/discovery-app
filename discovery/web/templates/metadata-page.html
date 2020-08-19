@@ -126,6 +126,12 @@
         perPage: 10,
         page: 1,
         pages: 1,
+        startCap:0,
+        endCap:20,
+        groupPages: false,
+        pageLimit: 20,
+        startCapLimitReached: true,
+        endCapLimitReached: false,
       }
     },
     props: ['name','content','isChild'],
@@ -162,6 +168,42 @@
       calculatePages: function () {
         var self= this;
         self.pages = Math.ceil(self.content.length / self.perPage);
+
+        if (self.pages > self.pageLimit) {
+          self.groupPages =  true;
+        }
+      },
+      previousGroup: function(){
+        var self = this;
+
+        if (!self.startCapLimitReached) {
+          if (self.startCap-20 > 0) {
+            self.startCap = self.startCap-20
+            self.endCap = self.endCap-20
+            self.endCapLimitReached = false;
+          }else {
+            self.startCap = 0
+            self.endCap = 20
+            self.startCapLimitReached = true;
+            self.endCapLimitReached = false;
+          }
+        }
+      },
+      nextGroup: function(){
+        var self = this;
+
+        if (!self.endCapLimitReached) {
+          if (self.endCap+20 < self.pages) {
+            self.startCap = self.startCap+20
+            self.endCap = self.endCap+20
+            self.startCapLimitReached = false;
+          }else {
+            self.startCap = self.startCap+20
+            self.endCap = self.pages
+            self.endCapLimitReached = true;
+            self.startCapLimitReached = false;
+          }
+        }
       },
       prevPage: function () {
         var self= this;
@@ -190,6 +232,14 @@
           return this.content && this.content.slice(start, end);
       }
     },
+    watch:{
+      endCapLimitReached:function(n){
+        console.log(this.endCap,n)
+      },
+      startCapLimitReached:function(n){
+        console.log(this.startCap,n)
+      }
+    },
     template:
       `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted p-1 border-left':'alert-muted p-1 border-bottom']">
       <!-- 🌈 Array 🌈 -->
@@ -209,14 +259,26 @@
                     <option value="25">25 per page</option>
                     <option value="100">100 per page</option>
                 </select>
-                <div class="paginati flex-wrap p-1 mt-2">
+                <div class="flex-wrap p-1 mt-2">
                   <div class="badge rounded-0" :class="{ 'disabled': page <= 1 }">
                     <a class="page-link p-1" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
                   </div>
-                  <div class="badge rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
-                    <a href="#" class="page-link p-1" @click.prevent="page = n" v-text="n"></a>
-                  </div>
-                  <div class="badge rounded-0" :class="{ 'disabled': page >= pages }">
+                  <template v-if="groupPages">
+                    <div class="btn btn-sm rounded-0" v-show="!startCapLimitReached">
+                      <a href="#" class="page-link p-1" @click.prevent="previousGroup()">Previous 20</a>
+                    </div>
+                  </template>
+                  <template v-for="n in pages">
+                    <div v-if="n >= startCap && n <= endCap" class="badge rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }">
+                      <a href="#" class="page-link p-1" @click.prevent="page = n" v-text="n"></a>
+                    </div>
+                  </template>
+                  <template v-if="groupPages">
+                    <div class="badge rounded-0" v-show="!endCapLimitReached">
+                      <a href="#" class="page-link p-1" @click.prevent="nextGroup()">Next 20</a>
+                    </div>
+                  </template>
+                  <div class="btn btn-sm rounded-0" :class="{ 'disabled': page >= pages }">
                     <a class="page-link p-1" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
                   </div>
                 </div>
