@@ -49,16 +49,21 @@
   <!-- BULK -->
   <div v-if="jsonItems.length" class="alert alert-dark">
     <h6>Bulk Registration</h6>
-    <table class="m-0 table table-sm table-dark table-striped">
+    <table class="m-0 table table-sm table-dark table-striped" id="jsonTable">
+      <colgroup>
+       <col span="1" style="width: 30%;">
+       <col span="1" style="width: 60%;">
+       <col span="1" style="width: 10%;">
+      </colgroup>
       <thead>
         <th>
-          <small>name</small>
+          <small>Name</small>
         </th>
         <th>
-          <small>result details</small>
+          <small>Result/Details</small>
         </th>
         <th>
-          <small>status</small>
+          <small>Status</small>
         </th>
       </thead>
       <template v-for="item in jsonItems">
@@ -195,6 +200,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
 <script src="/static/js/lodash.js"></script>
+<script src="/static/js/renderjson.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="/static/js/moment.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
@@ -710,48 +716,75 @@
         }).catch(err=>{
           self.loading = false;
           // console.log('err',err.response.data)
-          let culprit = "<small class='d-block'>"+err.response.data.error+"</small>"
+          let culprit = "<small class='d-block text-danger'><b>ERROR: "+err.response.data.error+"</b></small>"
           if (err.response.data && err.response.data.path) {
-            culprit += "<hr/><small>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></small>"
+            culprit += "<small class='mr-2'>Culprit (index/property)<i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></small>"
           }
           if (err.response.data.parent && err.response.data.parent.path){
             if (true) {
-              culprit += "<hr/><small>Also check <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></small>"
+              culprit += "<small>Under <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></small>"
             }
             if (err.response.data.parent && err.response.data.parent.reason) {
-              culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
+              culprit += "<div class='text-danger p-1 m-0'><small> "+err.response.data.parent.reason+"</small></div>"
             }
           }
           if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
-            culprit += "<div class='alert alert-info'><small> Hint: "+err.response.data.validator_value+"</small></div>"
+            culprit += "<div class='text-info p-1 m-0'><small> Hint: "+err.response.data.validator_value+"</small></div>"
           }
           self.errMSG = culprit;
           throw err;
         })
       }
     },
+    computed:{
+      short_name:function(){
+        if (this.item.name.length > 100) {
+          return this.item.name.substring(0,100)+"..."
+        }else {
+          return this.item.name
+        }
+      },
+      tipInfo:function(){
+        return JSON.stringify(this.item,null,2)
+      }
+    },
     mounted: function(){
-      tippy('#'+this.item.name, {
+      var self = this;
+
+      tippy( '#jsonTable', {
+        target:'.tip',
+        trigger: 'click',
+        placement:'top',
         theme:'light',
-        content: "<div class='text-left text-muted'>"+JSON.stringify(this.item.description,null,2)+"</div>" || "<div class='m-0'>No Description Available</div>",
-      })
+        sticky: true,
+        content: 'loading',
+        interactive: true,
+        animation: 'fade',
+        onShow(instance) {
+          let info = instance.reference.dataset.tippyInfo;
+          instance.setContent("<div class='bg-light' style='max-height:300px; overflow:scroll;'><small class='text-left text-light'><pre id='callResults'>"+info+"</pre></small></div>");
+        }});
 
       this.registerJSONItem();
     },
     template: `<tr :class="{'alert-success':successMSG,'alert-warning':errMSG}">
-                  <th scope="col">
-                    <small v-text="item.name" :id="item.name"></small>
-                  </th>
-                  <th scope="col">
+                  <td>
+                    <small :title="item.name">
+                      <span v-text="short_name"></span> <i class="fas fa-info-circle tip pointer text-primary" :data-tippy-info="tipInfo"></i>
+                    </small>
+                  </td>
+                  <td class="align-middle">
                     <small v-if="loading" class="text-muted">Registering...</small>
                     <small v-if="errMSG" v-html="errMSG"></small>
                     <small v-if="successMSG" v-html="successMSG"></small>
-                  </th>
-                  <th scope="col">
-                    <i v-if="loading" class="fas fa-spinner fa-pulse mainTextDark"></i>
-                    <small class="text-danger" v-if="errMSG">ERROR <i class="fas fa-poo"></i></small>
-                    <small class="text-success" v-if="successMSG">OK <i class="fas fa-registered"></i></small>
-                  </th>
+                  </td>
+                  <td class="bg-dark align-middle">
+                    <span class="badge d-block" :class="{'badge-danger':errMSG,'badge-success':successMSG}">
+                      <i v-if="loading" class="fas fa-spinner fa-pulse mainTextDark"></i>
+                      <small v-if="errMSG">FAILED <i class="fas fa-poo"></i></small>
+                      <small v-if="successMSG">REGISTERED <i class="fas fa-registered"></i></small>
+                    </span>
+                  </td>
                 </tr>`
   });
 
