@@ -257,26 +257,26 @@
                     <option value="25">25 per page</option>
                     <option value="100">100 per page</option>
                 </select>
-                <div class="flex-wrap p-1 mt-2">
-                  <div class="badge rounded-0" :class="{ 'disabled': page <= 1 }">
+                <div class="d-flex flex-wrap justify-content-center p-1 mt-2">
+                  <div class="page-item rounded-0" :class="{ 'disabled': page <= 1 }">
                     <a class="page-link p-1" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
                   </div>
                   <template v-if="groupPages">
-                    <div class="btn btn-sm rounded-0" v-show="!startCapLimitReached">
+                    <div class="page-item rounded-0" v-show="!startCapLimitReached">
                       <a href="#" class="page-link p-1" @click.prevent="previousGroup()">Previous 20</a>
                     </div>
                   </template>
                   <template v-for="n in pages">
-                    <div v-if="n >= startCap && n <= endCap" class="badge rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }">
+                    <div v-if="n >= startCap && n <= endCap" class="page-item rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }">
                       <a href="#" class="page-link p-1" @click.prevent="page = n" v-text="n"></a>
                     </div>
                   </template>
                   <template v-if="groupPages">
-                    <div class="badge rounded-0" v-show="!endCapLimitReached">
+                    <div class="page-item rounded-0" v-show="!endCapLimitReached">
                       <a href="#" class="page-link p-1" @click.prevent="nextGroup()">Next 20</a>
                     </div>
                   </template>
-                  <div class="btn btn-sm rounded-0" :class="{ 'disabled': page >= pages }">
+                  <div class="page-item rounded-0" :class="{ 'disabled': page >= pages }">
                     <a class="page-link p-1" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
                   </div>
                 </div>
