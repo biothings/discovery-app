@@ -20,6 +20,9 @@
       </h1>
       <small v-if="metadata && metadata.version"  class="text-muted d-block text-center" v-text="'Version '+metadata.version"></small>
       <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
+      <div v-if="schemaLink" class="alert alert-muted text-center">
+        <small>To view schema used to structure this metadata <a :href="schemaLink" target="_blank" rel="noreferrer">click here <i class="fas fa-external-link-alt"></i></a>.</small>
+      </div>
       <div class="alert-secondary p-1 m-2">
         <div class="bg-light p-4 text-center">
           <div class="p-3 text-left">
@@ -303,10 +306,10 @@
                 </a>
               </div>
             </template>
-            <template v-else>
+            <template v-else> 
               <div class="d-flex">
                 <small class="mainTextDark">
-                  <span v-text="name+':'" class="mr-1"></span>
+                  <span v-text="name?name+' :':''" class="mr-1"></span>
                 </small>
               </div>
               <div class="d-flex">
@@ -331,7 +334,7 @@
                 <span v-text="name"></span> <i class="fas fa-chevron-circle-right mr-1"></i>
               </small>
             </div>
-            <div class="">
+            <div>
               <template v-for="(value,key) in content">
                 <field-box :name="key" :content="value" isChild="true"></field-box>
               </template>
@@ -347,7 +350,7 @@
   		return {
         query:'',
         loading:false,
-        scripttext:''
+        scripttext:'',
   	  }
     },
     methods:{
@@ -450,6 +453,14 @@
       },
       viewMetadata:function(){
         return store.getters.getViewMetadata
+      },
+      schemaLink:function(){
+        var self = this;
+        if (self.metadata.hasOwnProperty('@type') && self.metadata['@type'].includes(':')) {
+          let parts = self.metadata['@type'].split(':');
+          return "/view/"+parts[0]+"/"+parts[1]
+        }
+        return false
       }
     }
   });
