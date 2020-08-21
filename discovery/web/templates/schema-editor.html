@@ -22,7 +22,7 @@
           </span>
         </li>
         <li class='nav-item' v-if="userInfo && !userInfo.login">
-          <a class='nav-link active text-primary' href='./oauth'>
+          <a class='nav-link active text-primary' :href='"/login?next="+window.location.pathname'>
             <small><i class="fas fa-sign-in-alt"></i> Login</small>
           </a>
         </li>
