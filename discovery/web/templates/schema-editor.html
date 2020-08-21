@@ -7,7 +7,7 @@
 
 <section id="editor" class="container" style="min-height: 80vh;padding-top:60px;">
   <div>
-    <div class="jumbotron bg-light text-center mt-5">
+    <div class="jumbotron bg-light text-center m-1 py-5">
       <h1 class="logoText">Editor</h1>
       <small @click.prevent='help()' class="pointer text-muted">What's this <i class="fas fa-question" ></i></small>
     </div>
@@ -76,7 +76,7 @@
                   <button :disabled="!availableNamespace" class="btn themeButton text-light" type="submit" v-text="'Use This'"></button>
                 </div>
               </div>
-              <small class="text-muted">Warning: This cannot be edited once saved!</small>
+              <small class="text-muted">Warning: This cannot be edited after this!</small>
             </form>
           </div>
         </div>
@@ -420,14 +420,17 @@ const store = new Vuex.Store({
       }
       let uniqueParents = new Set(list)
       let pList = [...uniqueParents]
+      // console.log('pList',pList)
       for (var i = 0; i < pList.length; i++) {
         state.loading = true;
-        axios.get("api/registry/"+state.schema[0].namespace+"/"+pList[i]).then(res=>{
+        let url = "api/registry/"+state.schema[0].namespace+"/"+pList[i]
+        axios.get(url).then(res=>{
           if (res.data) {
             commit('saveParent',{'parent':res.data})
           }
         }).catch(err=>{
-          $.notify("Failed to get class "+pList[i],{ globalPosition: 'right',className:'error', showDuration: 40, });
+          console.warn("Failed query for class info "+url)
+          // $.notify("Failed to get class "+pList[i],{ globalPosition: 'right',className:'warning', showDuration: 40, });
           throw err;
         })
       }
