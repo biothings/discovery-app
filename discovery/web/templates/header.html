@@ -21,7 +21,7 @@
         <li class="nav-item"><a class="nav-link h-link mainTextLight" href="/best-practices">Discovery Guide</a></li>
         <li class="nav-item"><a class="nav-link h-link mainTextDark" href="/schema-playground">Schema Playground</a></li>
         <template v-if="userInfo && !userInfo.login">
-          <li class='nav-item'><a class='nav-link' href='/login'>Login</a></li>
+          <li class='nav-item'><a class='nav-link' :href='"/login?next="+window.location.pathname'>Login</a></li>
         </template>
         <template v-if="userInfo && userInfo.login">
           <li class='nav-item'>
