@@ -47,8 +47,8 @@
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
   <!-- BULK -->
-  <div v-if="jsonItems.length" class="alert alert-dark">
-    <h6>Bulk Registration</h6>
+  <div v-if="jsonItems.length" class="alert grad">
+    <small class="text-light">BULK REGISTRATION </small> <small class="text-info" v-text="jsonItems.length+' documents found'"></small>
     <table class="m-0 table table-sm table-dark table-striped" id="jsonTable">
       <colgroup>
        <col span="1" style="width: 30%;">
@@ -66,10 +66,16 @@
           <small>Status</small>
         </th>
       </thead>
-      <template v-for="item in jsonItems">
-        <json-item :item="item"></json-item>
-      </template>
     </table>
+    <div style="max-height:500px; overflow:scroll;">
+      <table class="m-0 table table-sm table-dark">
+        <tbody style="max-height:500px; overflow:scroll;">
+          <template v-for="item in jsonItems">
+            <json-item :item="item"></json-item>
+          </template>
+        </tbody>
+      </table>
+    </div>
   </div>
   <!-- bulk end -->
   <div id="widget" class="mb-5 grad rounded">
@@ -203,6 +209,8 @@
 <script src="/static/js/renderjson.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="/static/js/moment.js"></script>
+<script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
+<script src="/static/js/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
   const store = new Vuex.Store({
@@ -225,8 +233,26 @@
       toggleDesc(state){
         state.showDescriptions = !state.showDescriptions
       },
-      saveJSONItems(state,payload){
+      saveBulkItems(state,payload){
         state.bulkJSONItems = payload['items'];
+      },
+      updateJsonItem(state,payload){
+        let item = payload['item']
+        let change = payload['change']
+        let field = payload['field']
+
+        for (var i = 0; i < state.bulkJSONItems.length; i++) {
+          if (state.bulkJSONItems[i]['name'] == item['name'] || state.bulkJSONItems[i]['description'] == item['description']) {
+
+            Vue.set(state.bulkJSONItems[i],field,change)
+
+            Swal.fire({type:'success',
+              toast:true,
+              title: 'Updated',
+              showConfirmButton:false,
+              timer:1000})
+          }
+        }
       },
       saveSchema(state,payload){
         state.schema = payload['schema'];
@@ -697,7 +723,7 @@
     },
     props: ['item'],
     methods:{
-      registerJSONItem(){
+      registerJSONItem(isRetry){
         var self = this;
 
         let schema = store.getters.getSchema
@@ -711,10 +737,18 @@
         axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label'],self.item,config).then(res=>{
           self.loading = false;
           if (res.data.success) {
-            self.successMSG = `<a href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer"><small>Registration Successful! Click here to view.</small></a>`
+            self.successMSG = `<a href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer"><small>Registration Successful! Click here to view.</small></a>`;
+            self.errMSG = '';
           }
         }).catch(err=>{
           self.loading = false;
+          if (isRetry) {
+            Swal.fire({type:'error',
+              toast:true,
+              title: 'Failed',
+              showConfirmButton:false,
+              timer:1000})
+          }
           // console.log('err',err.response.data)
           let culprit = "<small class='d-block text-danger'><b>ERROR: "+err.response.data.error+"</b></small>"
           if (err.response.data && err.response.data.path) {
@@ -734,7 +768,92 @@
           self.errMSG = culprit;
           throw err;
         })
-      }
+      },
+      edit(isRetry){
+        var self = this;
+        let list ={}
+        let notAllowed=['@context','@type']
+        for(key in self.item){
+          if (!notAllowed.includes(key)) {
+            list[key] = key
+          }
+        }
+
+        Swal.fire({
+          title: `Quick Edit`,
+          text:"Which field would you like to edit?",
+          input: 'select',
+          footer:"<b class='text-danger'>Important:<b>Only existing fields can be edited.</b>",
+          inputOptions: list,
+          inputPlaceholder: 'Select a field to edit',
+          showCancelButton: true,
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          confirmButtonText: 'Edit',
+          inputValidator: (value) => {
+            return new Promise((resolve) => {
+              if (!value) {
+                resolve('You must select something first')
+              }else{
+                resolve()
+              }
+            })
+          }
+        }).then((keyname) => {
+          if (keyname.value) {
+            let iValue =''
+
+            if (typeof self.item[keyname.value] === 'string' ||  typeof self.item[keyname.value] === 'number' ||  typeof self.item[keyname.value] === 'boolean') {
+              iValue = self.item[keyname.value]
+            }else{
+              iValue = JSON.stringify(self.item[keyname.value],null,2)
+            }
+
+            Swal.fire({
+              title: "Edit: "+keyname.value,
+              input: 'textarea',
+              footer:`<small>Make sure to close all: {},[] and quotes</small>`,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              animation:false,
+              customClass:'scale-in-center',
+              inputPlaceholder: self.item[keyname.value],
+              inputValue: iValue,
+              inputAttributes: {
+                'aria-label': keyname.value,
+                'rows':15
+              },
+              showCancelButton: true,
+              confirmButtonText: 'Save',
+              inputValidator: (value) => {
+                return new Promise((resolve) => {
+                  if (value === self.item[keyname.value]) {
+                    resolve("You haven't changed anything yet")
+                  }else{
+                    resolve()
+                  }
+                })
+              }
+            }).then((newdata) => {
+              if (newdata.value) {
+                if (newdata.value[0]==="{" || newdata.value[0]==="[") {
+                  var payload = {};
+                  payload["item"] = self.item;
+                  payload["field"] = keyname.value;
+                  payload["change"] = JSON.parse(newdata.value);
+                  store.commit('updateJsonItem',payload);
+                }else{
+                  var payload = {};
+                  payload["item"] = self.item;
+                  payload["field"] = keyname.value;
+                  payload["change"] = newdata.value;
+                  store.commit('updateJsonItem',payload);
+                }
+              }
+            })
+          }
+        })
+      },
     },
     computed:{
       short_name:function(){
@@ -765,7 +884,7 @@
           instance.setContent("<div class='bg-light' style='max-height:300px; overflow:scroll;'><small class='text-left text-light'><pre id='callResults'>"+info+"</pre></small></div>");
         }});
 
-      this.registerJSONItem();
+      self.registerJSONItem();
     },
     template: `<tr :class="{'alert-success':successMSG,'alert-warning':errMSG}">
                   <td>
@@ -777,6 +896,8 @@
                     <small v-if="loading" class="text-muted">Registering...</small>
                     <small v-if="errMSG" v-html="errMSG"></small>
                     <small v-if="successMSG" v-html="successMSG"></small>
+                    <button role="button" v-if="errMSG" @click="edit" class="btn btn-sm mainBackDark text-light mr-1">Edit</button>
+                    <button role="button" v-if="errMSG" @click="registerJSONItem(1)" class="btn btn-sm mainBackLight text-light">Retry Registration</button>
                   </td>
                   <td class="bg-dark align-middle">
                     <span class="badge d-block" :class="{'badge-danger':errMSG,'badge-success':successMSG}">
@@ -3451,7 +3572,7 @@
             input: 'select',
             inputOptions: {
               'json': 'JSON',
-              // 'csv': 'CSV',
+              'csv': 'CSV',
             },
             inputPlaceholder: 'Select type',
             showCancelButton: true,
@@ -3465,48 +3586,130 @@
             if (result.value) {
               switch (result.value) {
                 case 'json':
-                  self.handleJson()
+                  self.getFile('json');
                   break;
+                case 'csv':
+                  self.getFile('csv');
+                break;
                 default:
-
+                  //nothing
               }
             }
           })
         },
-        async handleJson(){
+        async getFile(type){
           var self = this;
 
-          const { value: file } = await Swal.fire({
-          title: 'Select JSON file',
-          input: 'file',
-          footer:`<small class="text-danger">Registration will be triggered automatically when upload finishes.</small>`,
-          inputAttributes: {
-            'accept': 'json',
-            'aria-label': 'Upload your file'
-          }
-          })
+          if (type == 'json') {
+            const { value: file } = await Swal.fire({
+            title: 'Select file',
+            input: 'file',
+            footer:`<small class="text-danger">Registration will be triggered automatically when upload finishes.</small>`,
+            inputAttributes: {
+              'accept': 'json',
+              'aria-label': 'Upload your file'
+            }
+            })
 
-          if (file) {
-            try {
-              const blob = new Blob([file], {type:"application/json"});
+            if (file) {
+              try {
+                const blob = new Blob([file], {type:"application/json"});
 
-              const fr = new FileReader();
+                const fr = new FileReader();
 
-              fr.addEventListener("load", e => {
-                var payload = {};
-                payload["items"] = JSON.parse(fr.result);
-                store.commit('saveJSONItems',payload);
+                fr.addEventListener("load", e => {
+                  var payload = {};
+                  payload["items"] = JSON.parse(fr.result);
+                  store.commit('saveBulkItems',payload);
+                });
+
+                fr.readAsText(blob);
+              } catch (e) {
+                Swal.fire({
+                icon: 'error',
+                title: 'Something is wrong..',
+                text: e
+                })
+              }
+
+            }
+          }else if (type == 'csv') {
+            const { value: file } = await Swal.fire({
+            title: 'Select file',
+            input: 'file',
+            footer:`<small class="text-danger">Registration will be triggered automatically when upload finishes.</small>`,
+            inputAttributes: {
+              'accept': 'csv',
+              'aria-label': 'Upload your file'
+            }
+            })
+            if (file) {
+
+              Papa.parse(file,{
+              header: true,
+              delimeter:';',
+              complete: function(results) {
+                self.parseCSVData(results.data)
+              }
               });
 
-              fr.readAsText(blob);
-            } catch (e) {
-              Swal.fire({
-              icon: 'error',
-              title: 'Something is wrong..',
-              text: e
-              })
             }
+          }
+        },
+        parseCSVData(data){
+          let self = this;
+          let items = []
+          // console.log('Raw CSV data', data)
+          for (let i = 0; i < data.length; i++) {
+            let currentDoc = data[i]
+            let newDoc = {}
+            for (let key in currentDoc) {
+              if (key.includes(".")) {
+                let keyPath = self.separateByDelimeter(key,'.')
+                // console.log('%c keypath '+key,'color:orange')
+                self.createNested(newDoc, keyPath, currentDoc[key])
+              }else{
+                let v = currentDoc[key]
+                if (key && v) {
+                  // console.log('%c simple value: '+key,'color:pink')
+                  self.createNested(newDoc,[key], v)
+                }
+              }
+            }
+            items.push(newDoc)
+            // console.log("%c --------------------------------------------",'color:green')
+            // console.log('%c '+JSON.stringify(items,null,2),'color:lightgreen')
+            // console.log("%c --------------------------------------------",'color:green')
 
+            var payload = {};
+            payload["items"] = items;
+            store.commit('saveBulkItems',payload);
+          }
+        },
+        createNested(obj, keyPath, value) {
+          var self = this;
+          // console.log("obj",obj)
+          // console.log("keyPath",keyPath)
+          // console.log("value",value)
+          // console.log("%c --------------------------------------------",'color:yellow')
+
+          lastKeyIndex = keyPath.length-1;
+          for (var i = 0; i < lastKeyIndex; ++ i) {
+           key = keyPath[i];
+           // console.log("looking at key",key)
+           if (!(key in obj)){
+             obj[key] = {}
+           }
+           obj = obj[key];
+          }
+          obj[keyPath[lastKeyIndex]] = value;
+          return obj
+        },
+        separateByDelimeter(value, delimeter){
+          if (value.includes(delimeter)) {
+            return value.split(delimeter)
+          }else {
+            return value
           }
         },
         loadData(){
