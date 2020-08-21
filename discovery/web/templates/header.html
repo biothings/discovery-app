@@ -1,5 +1,12 @@
 {% block content %}
-<style></style>
+<style>
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+.dropdown-menu {
+    margin-top: 0px;
+}
+</style>
 <header id="header">
   <title>{{site_name}}</title>
   <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
@@ -18,7 +25,19 @@
     </button>
     <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
       <ul class="navbar-nav" id="user_link">
-        <li class="nav-item"><a class="nav-link h-link mainTextLight" href="/best-practices">Discovery Guide</a></li>
+        <li class="nav-item d-inline d-md-none"><a class="nav-link h-link mainTextLight" href="/best-practices">Discovery Guide</a></li>
+        <li class="nav-item dropdown d-none d-md-inline">
+          <a class="nav-link dropdown-toggle mainTextLight" href="/best-practices" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Discovery Guide
+          </a>
+          <div class="dropdown-menu alert-dark" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="/dataset">Dataset Registry</a>
+            <a class="dropdown-item" href="/guide"><img src="/static/img/dde-logo-o.svg" width="20" height="20" alt="CTSA" title="CTSA Portal"> Discovery Dataset Guide</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/guide/outbreak/dataset"><img src="/static/img/outbreak.png" width="20" height="20" alt="Outbreak.info" title="Outbreak.info"> Outbreak.info Dataset Guide</a>
+            <a class="dropdown-item" href="/guide/niaid"><img src="/static/img/niaid/icon.svg" width="20" height="20" alt="NIAID" title="NIAID Data Portal"> NIAID Dataset Guide</a>
+          </div>
+        </li>
         <li class="nav-item"><a class="nav-link h-link mainTextDark" href="/schema-playground">Schema Playground</a></li>
         <template v-if="userInfo && !userInfo.login">
           <li class='nav-item'><a class='nav-link' :href='"/login?next="+window.location.pathname'>Login</a></li>
