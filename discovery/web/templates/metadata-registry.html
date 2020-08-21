@@ -134,14 +134,14 @@ Vue.component('registry-item', {
 
     },
     niaid: function(){
-      if (this.item['@type'].includes('niaid')) {
+      if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('niaid')) {
         return true
       }else {
         return false
       }
     },
     outbreak: function(){
-      if (this.item['@type'].includes('outbreak')) {
+      if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('outbreak')) {
         return true
       }else {
         return false
