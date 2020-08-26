@@ -297,7 +297,13 @@ var app = new Vue({
                       }
 
                       Swal.showLoading();
-                      axios.post('/api/dataset',self.meta).then(res=>{
+                      let parts = self.meta['@type'].split(":");
+                      let namespace = parts[0]
+                      let prefix = parts[0]
+                      let className = parts[1]
+                      let url = '/api/dataset?schema='+namespace+'::'+prefix+':'+className;
+                      // console.log('url >>', url)
+                      axios.post(url,self.meta).then(res=>{
                         Swal.hideLoading();
                         if (res.data.success) {
                           $.notify("Field Updated",{ globalPosition: 'right',className:'success', showDuration: 40, });
