@@ -52,10 +52,15 @@
         </div>
         <input type="text" v-model='searchQuery' class="form-control" id="inlineFormInputGroup" placeholder="Search...">
       </div>
+
     </div>
 
-    <div class="p-1 grad w-100">
-
+    <div class="p-1 grad w-100 text-right">
+      <div v-if="userSchemaURL">
+        <a class="mr-5" :href="userSchemaURL" target="_blank" rel="noreferrer">
+          <small class="text-light">Source <i class="fas fa-external-link-alt"></i></small>
+        </a>
+      </div>
     </div>
 
     <div class="row w-100 alert alert-secondary m-0" v-if="searchResults.length || searchResultsProps.length">
@@ -1312,8 +1317,8 @@
               if(self.developerMode)console.log(res.data)
               self.data = res.data;
               self.loading = false;
-              this.userSchema = res.data
-              this.userSchemaURL = url
+              self.userSchema = res.data
+              self.userSchemaURL = url
 
               if (self.developerMode ) {
                 $.notify("REGISTERED SCHEMA LOADED",{ globalPosition: 'right',className:'success', showDuration: 40, });
@@ -1323,8 +1328,8 @@
               payload["schema"] = res.data;
               store.commit('saveSchema',payload);
 
-              if(self.developerMode)console.log('userSchema',this.userSchema)
-              this.orderAlphabetically();
+              if(self.developerMode)console.log('userSchema',self.userSchema)
+              self.orderAlphabetically();
 
               if (self.query) {
                 self.handleQuery();
