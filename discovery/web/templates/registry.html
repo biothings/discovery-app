@@ -242,7 +242,7 @@ Vue.component('registry-item', {
         <p class="mb-1">
           <small>namespace: </small>
           <small class="text-muted">
-            <a v-text="item.namespace" :href="'/view/'+item.namespace" target="_blank" rel="nonreferrer"></a>
+            <a v-text="item.namespace" :href="'/view/'+item.namespace"></a>
           </small> /
           <small class="pointer" @click="expand=!expand">
             <span :class="[propTotal>0?'text-primary':'text-muted']"><span v-text="propTotal"></span> Properties</span>
