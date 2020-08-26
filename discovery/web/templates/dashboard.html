@@ -581,8 +581,17 @@ var app = new Vue({
           }).then((result) => {
             if (result.value) {
               let data = item;
-              var url = () => privacyStatus === 'private' ? '/api/dataset?private=false' :'/api/dataset?private=true'
-              axios.post(url(),data).then(res=>{
+              let parts = data['@type'].split(":");
+              let namespace = parts[0]
+              let prefix = parts[0]
+              let className = parts[1]
+              let url = '/api/dataset?schema='+namespace+'::'+prefix+':'+className;
+              if (privacyStatus === 'private') {
+                url = url+'&private=false'
+              }else {
+                url = url+'&private=true'
+              }
+              axios.post(url,data).then(res=>{
                 //reload with no cache
                 setTimeout(function(){ location.reload(true); }, 1000);
               }).catch(err=>{
