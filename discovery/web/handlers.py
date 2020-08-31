@@ -251,6 +251,7 @@ WEB_HANDLERS = [
     (r"/dataset/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "metadata-page.html"}),
     (r"/editor/?", TemplateHandler, {"filename": "schema-editor.html"}),
     (r"/faq/?", TemplateHandler, {"filename": "faq.html"}),
+    (r"/guides/?", TemplateHandler, {"filename": "guides.html"}),
     (r"/guide/?", TemplateHandler, {"filename": "metadata-guide-new.html"}),
     (r"/guide/niaid/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "niaid"}),
     (r"/guide/outbreak/dataset/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "outbreak"}),
