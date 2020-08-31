@@ -11,7 +11,6 @@
   <title>{{site_name}}</title>
   <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="/">
-
       {% if site_name == "NIAID Data Portal" %}
         <img src="/static/img/niaid/icon.svg" width="50" height="50" alt="NIAID Data Portal">
       {% else%}
@@ -26,19 +25,42 @@
     <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
       <ul class="navbar-nav" id="user_link">
         <li class="nav-item d-inline d-md-none"><a class="nav-link h-link mainTextLight" href="/best-practices">Discovery Guide</a></li>
-        <li class="nav-item dropdown d-none d-md-inline">
+        <li class="nav-item dropdown d-none d-md-inline headTip" data-tippy-content="Create Discoverable Structure Metadata">
           <a class="nav-link dropdown-toggle mainTextLight" href="/best-practices" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false">
             Discovery Guide
           </a>
-          <div class="dropdown-menu alert-dark" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="/dataset">Dataset Registry</a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item mainTextLight" href="/best-practices">Get Started</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/guide"><img src="/static/img/dde-logo-o.svg" width="20" height="20" alt="CTSA" title="CTSA Portal"> Discovery Dataset Guide</a>
-            <a class="dropdown-item" href="/guide/outbreak/dataset"><img src="/static/img/outbreak.png" width="20" height="20" alt="Outbreak.info" title="Outbreak.info"> Outbreak.info Dataset Guide</a>
-            <a class="dropdown-item" href="/guide/niaid"><img src="/static/img/niaid/icon.svg" width="20" height="20" alt="NIAID" title="NIAID Data Portal"> NIAID Dataset Guide</a>
+            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">Quick Links:</a>
+            <a class="dropdown-item" href="/guide"><img src="/static/img/dde-logo-o.svg" width="20" height="20" alt="CTSA" title="CTSA Portal"> Discovery Dataset Guide <i class="fas fa-chevron-right mainTextLight"></i></a>
+            <a class="dropdown-item" href="/guide/outbreak/dataset"><img src="/static/img/outbreak.png" width="20" height="20" alt="Outbreak.info" title="Outbreak.info"> Outbreak.info Dataset Guide <i class="fas fa-chevron-right mainTextLight"></i></a>
+            <a class="dropdown-item" href="/guide/niaid"><img src="/static/img/niaid/icon.svg" width="20" height="20" alt="NIAID" title="NIAID Data Portal"> NIAID Dataset Guide <i class="fas fa-chevron-right mainTextLight"></i></a>
           </div>
         </li>
-        <li class="nav-item"><a class="nav-link h-link mainTextDark" href="/schema-playground">Schema Playground</a></li>
+        <li class="nav-item"><a class="nav-link h-link mainTextDark headTip" href="/schema-playground" data-tippy-content="Create and Visualize a Schema">Schema Playground</a></li>
+        <li class="nav-item dropdown d-none d-md-inline headTip" data-tippy-content="Search Metadata/Schemas">
+          <a class="nav-link dropdown-toggle" href="/registries" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Registry
+          </a>
+          <div class="dropdown-menu p-1" aria-labelledby="navbarDropdown" style="max-width:none;">
+            <div class="d-flex flex-wrap">
+              <div class="d-flex flex-column align-items-start">
+                <p class="text-muted">
+                  <small>Search registered dataset metadata</small>
+                </p>
+                <a class="mainTextLight text-left" href="/dataset">Dataset Registry <i class="fas fa-chevron-right"></i></a>
+              </div>
+              <hr />
+              <div class="d-flex flex-column align-items-start">
+                <p class="text-muted">
+                  <small>Search registered schemas</small>
+                </p>
+                <a class="mainTextDark text-left" href="/registry">Schema Registry <i class="fas fa-chevron-right"></i></a>
+              </div>
+            </div>
+          </div>
+        </li>
         <template v-if="userInfo && !userInfo.login">
           <li class='nav-item'><a class='nav-link' :href='"/login?next="+window.location.pathname'>Login</a></li>
         </template>
@@ -80,6 +102,11 @@ var app = new Vue({
     mounted:function(){
       var self = this;
       self.checkUser();
+      tippy( '.headTip', {
+        placement:'left',
+        theme:'light',
+        sticky: true,
+        animation: 'fade'});
     }
   })
 </script>

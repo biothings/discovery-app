@@ -1,0 +1,77 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<style>
+
+</style>
+<div id="guides" class="container-fluid" style="min-height: 100vh;padding-top:60px;">
+  <div class="bg-light text-center mt-1 p-1">
+    <h1 class="logoText">Choose a Guide</h1>
+  </div>
+  <div class="text-center mb-5">
+    <div class="col-sm-6 m-auto alert alert-light p-3 container text-left">
+      <small>
+        <p>
+          These guides provide an easy way to create discoverable structured dataset metadata with little to no <a data-tippy-theme="light" data-tippy="Learn More About Schema.org" href="https://schema.org/" target="_blank">Schema.org</a> microdata markup or <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> data-sharing best-practices knowledge.
+        </p>
+        <p>
+          Let the guided wizard do all the hard work and just fill out the fields provided and register your metadata.
+        </p>
+        <p>
+          See examples of registered dataset metadata <a href="/dataset">here</a>.
+        </p>
+      </small>
+    </div>
+    <div class="row m-0 justify-content-center align-items-stretch">
+      <div class="card m-2 list-group-item-action" style="width: 18rem;">
+        <img src="/static/img/dde-logo-o.svg" class="card-img-top" alt="CTSA">
+        <div class="card-body">
+          <p class="card-text"><b>
+            Clinical and Translational Science Awards</b> (<a href="https://ncats.nih.gov/ctsa" target="_blank" rel="nonreferrer">CTSA <i class="fas fa-external-link-alt"></i></a>) biomedical dataset metadata based on this <a href="/view/biomedical/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure. <small class="text-info" data-tippy="You can choose data portals you are interested in and add their requirements" data-tippy-theme="light">Customizable</small>
+          </p>
+          <a href="/guide" class="btn mainBackDark text-light">Continue</a>
+        </div>
+      </div>
+      <div class="card m-2 list-group-item-action" style="width: 18rem;">
+        <img src="/static/img/icon-01.svg" class="card-img-top" alt="Outbreak.info">
+        <div class="card-body">
+          <p class="card-text"><b>Outbreak.info</b> (<a href="https://outbreak.info/" target="_blank" rel="nonreferrer">Outbreak.info <i class="fas fa-external-link-alt"></i></a>) COVID-19 epidimiology dataset metadata based on this <a href="/view/outbreak/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
+          <a href="/guide/outbreak/dataset" class="btn mainBackDark text-light">Continue</a>
+        </div>
+      </div>
+      <div class="card m-2 list-group-item-action" style="width: 18rem;">
+        <img src="/static/img/niaid/icon.svg" class="card-img-top" alt="Outbreak.info">
+        <div class="card-body">
+          <p class="card-text"><b>National Institute of Allergy and Infectious Diseases</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
+          <a href="/guide/niaid" class="btn mainBackDark text-light">Continue</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
+<script>
+
+
+var app = new Vue({
+      el: '#guides',
+			data: function(){
+				return {
+
+				}
+			},
+      watch:{
+
+      },
+			methods:{
+
+			},
+			mounted:function(){
+			}
+		});
+
+</script>
+{% include "footer.html" %}
+{% endblock %}
