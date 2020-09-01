@@ -1,49 +1,112 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<style>
-
-</style>
 <div id="guides" class="container-fluid" style="min-height: 100vh;padding-top:60px;">
   <div class="bg-light text-center mt-1 p-1">
-    <h1 class="logoText">Choose a Guide</h1>
+    <h1 class="logoText">DATASET DISCOVERY BEST PRACTICES</h1>
   </div>
   <div class="text-center mb-5">
-    <div class="col-sm-6 m-auto alert alert-light p-3 container text-left">
+    <div class="col-sm-6 m-auto p-3 container text-center">
       <small>
-        <p>
-          These guides provide an easy way to create discoverable structured dataset metadata with little to no <a data-tippy-theme="light" data-tippy="Learn More About Schema.org" href="https://schema.org/" target="_blank">Schema.org</a> microdata markup or <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> data-sharing best-practices knowledge.
-        </p>
-        <p>
-          Let the guided wizard do all the hard work and just fill out the fields provided and register your metadata.
-        </p>
         <p>
           See examples of registered dataset metadata <a href="/dataset">here</a>.
         </p>
       </small>
     </div>
-    <div class="row m-0 justify-content-center align-items-stretch">
-      <div class="card m-2 list-group-item-action" style="width: 18rem;">
-        <img src="/static/img/dde-logo-o.svg" class="card-img-top" alt="CTSA">
-        <div class="card-body">
-          <p class="card-text"><b>
-            Clinical and Translational Science Awards</b> (<a href="https://ncats.nih.gov/ctsa" target="_blank" rel="nonreferrer">CTSA <i class="fas fa-external-link-alt"></i></a>) biomedical dataset metadata based on this <a href="/view/biomedical/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure. <small class="text-info" data-tippy="You can choose data portals you are interested in and add their requirements" data-tippy-theme="light">Customizable</small>
-          </p>
-          <a href="/guide" class="btn mainBackDark text-light">Continue</a>
+    <div class="text-center mb-5">
+      <div class="row m-0">
+        <div class="col-sm-12 col-md-4 align-items-stretch d-flex p-0">
+          <div class="row m-0">
+            <div class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary  text-center py-4">
+              <div>
+                <span class="fa-stack fa-1x m-2">
+                  <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
+                  <i class="fas fa-cogs fa-stack-1x fa-inverse"></i>
+                </span>
+                <h6 class="text-muted caps">
+                  Produce <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="bold" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> data<br /> right from the start.
+                </h6>
+              </div>
+            </div>
+            <div class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary  text-center py-4">
+              <div>
+                <span class="fa-stack fa-1x m-2">
+                  <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
+                  <i class="fas fa-list-ol fa-stack-1x fa-inverse"></i>
+                </span>
+                <h6 class="text-muted caps">
+                  Fast and easy to use <br />Step-by-step guide.
+                </h6>
+              </div>
+            </div>
+            <div class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4">
+              <div>
+                <span class="fa-stack fa-1x m-2">
+                  <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
+                  <i class="fas fa-tasks fa-stack-1x fa-inverse"></i>
+                </span>
+                <h6 class="text-muted caps">
+                  Customize discoverability<br /> by Data Portals.
+                </h6>
+              </div>
+            </div>
+            <div class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4">
+              <div>
+                <span class="fa-stack fa-1x m-2">
+                  <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
+                  <i class="fas fa-lightbulb fa-stack-1x fa-inverse"></i>
+                </span>
+                <h6 class="text-muted caps">
+                  Generate findable metadata<br /> by computers and humans.
+                </h6>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="card m-2 list-group-item-action" style="width: 18rem;">
-        <img src="/static/img/icon-01.svg" class="card-img-top" alt="Outbreak.info">
-        <div class="card-body">
-          <p class="card-text"><b>Outbreak.info</b> (<a href="https://outbreak.info/" target="_blank" rel="nonreferrer">Outbreak.info <i class="fas fa-external-link-alt"></i></a>) COVID-19 epidimiology dataset metadata based on this <a href="/view/outbreak/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
-          <a href="/guide/outbreak/dataset" class="btn mainBackDark text-light">Continue</a>
-        </div>
-      </div>
-      <div class="card m-2 list-group-item-action" style="width: 18rem;">
-        <img src="/static/img/niaid/icon.svg" class="card-img-top" alt="Outbreak.info">
-        <div class="card-body">
-          <p class="card-text"><b>National Institute of Allergy and Infectious Diseases</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
-          <a href="/guide/niaid" class="btn mainBackDark text-light">Continue</a>
+        <div class="jumbotron rounded-0 col-sm-12 col-md-8 m-0 d-flex justify-content-center align-items-center discoveryIntroBack" style="background-color:#0b5570;">
+          <template v-if="start">
+            <div class="col-sm-12 col-md-8">
+              <h1 class="text-light">Choose a Guide</h1>
+              <div class="d-flex justify-content-center align-items-stretch">
+                <div class="card mr-1 list-group-item-action">
+                  <img src="/static/img/dde-logo-o.svg" class="card-img-top" alt="CTSA">
+                  <div class="card-body">
+                    <p class="card-text"><b>
+                      Clinical and Translational Science Awards</b> (<a href="https://ncats.nih.gov/ctsa" target="_blank" rel="nonreferrer">CTSA <i class="fas fa-external-link-alt"></i></a>) biomedical dataset metadata based on this <a href="/view/biomedical/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure. <small class="text-info more" data-tippy-info="You can choose data portals you are interested in and add their requirements" data-tippy-theme="light">Customizable</small>
+                    </p>
+                    <a href="/guide" class="btn mainBackDark text-light">Continue</a>
+                  </div>
+                </div>
+                <div class="card mr-1 list-group-item-action">
+                  <img src="/static/img/icon-01.svg" class="card-img-top" alt="Outbreak.info">
+                  <div class="card-body">
+                    <p class="card-text"><b>Outbreak.info</b> (<a href="https://outbreak.info/" target="_blank" rel="nonreferrer">Outbreak.info <i class="fas fa-external-link-alt"></i></a>) COVID-19 epidimiology dataset metadata based on this <a href="/view/outbreak/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
+                    <a href="/guide/outbreak/dataset" class="btn mainBackDark text-light">Continue</a>
+                  </div>
+                </div>
+                <div class="card mr-1 list-group-item-action">
+                  <img src="/static/img/niaid/icon.svg" class="card-img-top" alt="Outbreak.info">
+                  <div class="card-body">
+                    <p class="card-text"><b>National Institute of Allergy and Infectious Diseases</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
+                    <a href="/guide/niaid" class="btn mainBackDark text-light">Continue</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+          <template v-if="!start">
+            <div class="col-sm-12 col-md-8">
+              <img src="/static/img/discoverable-01.png" alt="DISCOVERY" width="200"/>
+              <h1 class="text-light">DISCOVERY GUIDE</h1>
+              <p class="text-light">
+                This guide provides an easy way to create discoverable structured dataset metadata with little to no <a data-tippy-theme="light" data-tippy="Learn More About Schema.org" href="https://schema.org/" target="_blank">Schema.org</a> microdata markup or <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> data-sharing best-practices knowledge.
+              </p>
+              <p class="text-light">
+                Let the guided wizard do all the hard work and just fill out the fields provided and register your metadata.
+              </p>
+              <button type="button" class="btn btn-lg themeButton text-light m-2 px-3 py-3" @click="start=!start">GET STARTED</button>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -53,25 +116,28 @@
 {% block extra_scripts %}
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script>
-
-
 var app = new Vue({
       el: '#guides',
 			data: function(){
 				return {
-
+          start: false
 				}
 			},
-      watch:{
-
-      },
-			methods:{
-
-			},
 			mounted:function(){
+        tippy( '#guides', {
+          target:'.more',
+          placement:'top',
+          theme:'light',
+          sticky: true,
+          content: 'loading',
+          interactive: true,
+          animation: 'fade',
+          onShow(instance) {
+            let info = instance.reference.dataset.tippyInfo;
+            instance.setContent("<div class='bg-light'>"+info+"</div>");
+          }});
 			}
 		});
-
 </script>
 {% include "footer.html" %}
 {% endblock %}
