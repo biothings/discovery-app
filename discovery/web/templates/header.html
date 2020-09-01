@@ -44,21 +44,8 @@
             Registry
           </a>
           <div class="dropdown-menu p-1" aria-labelledby="navbarDropdown" style="max-width:none;">
-            <div class="d-flex flex-wrap">
-              <div class="d-flex flex-column align-items-start">
-                <p class="text-muted">
-                  <small>Search registered dataset metadata</small>
-                </p>
-                <a class="mainTextLight text-left" href="/dataset">Dataset Registry <i class="fas fa-chevron-right"></i></a>
-              </div>
-              <hr />
-              <div class="d-flex flex-column align-items-start">
-                <p class="text-muted">
-                  <small>Search registered schemas</small>
-                </p>
-                <a class="mainTextDark text-left" href="/registry">Schema Registry <i class="fas fa-chevron-right"></i></a>
-              </div>
-            </div>
+              <a class="dropdown-item mainTextLight text-left" href="/dataset">Dataset Registry <i class="fas fa-chevron-right"></i></a>
+              <a class="dropdown-item mainTextDark text-left" href="/registry">Schema Registry <i class="fas fa-chevron-right"></i></a>
           </div>
         </li>
         <template v-if="userInfo && !userInfo.login">
