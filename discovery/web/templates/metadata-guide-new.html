@@ -114,7 +114,7 @@
           <i class="fas fa-circle text-success fa-stack-2x"  :class="{ 'text-muted': !validation, 'mainTextDark': validation }"></i>
           <i class="fas fa-registered fa-stack-1x fa-inverse"></i>
         </span>
-        <div class="pillType desc" @click="viewErrors()" data-tippy-info="Click to see details">
+        <div class="pillType desc pointer" @click="viewErrors()" data-tippy-info="Issues Details" style="outline: none !important;">
           <span class="alert-muted">issues</span>
           <span class="text-light" v-text="errors.length" :class="[valid?'bg-success':'bg-danger']"></span>
         </div>
