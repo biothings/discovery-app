@@ -114,6 +114,10 @@
           <i class="fas fa-circle text-success fa-stack-2x"  :class="{ 'text-muted': !validation, 'mainTextDark': validation }"></i>
           <i class="fas fa-registered fa-stack-1x fa-inverse"></i>
         </span>
+        <div class="pillType desc" @click="viewErrors()" data-tippy-info="Click to see details">
+          <span class="alert-muted">issues</span>
+          <span class="text-light" v-text="errors.length" :class="[valid?'bg-success':'bg-danger']"></span>
+        </div>
       </div>
     </div>
 
@@ -213,6 +217,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
 <script src="/static/js/lodash.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.12.4/ajv.min.js" integrity="sha512-jT80r/QIunAH3Bng0028a3kMjhpr+ApSrAjshiM+0+6s/O01//jwogIby3WnFle7UxDas+/gf3BgI4Rjju17ww==" crossorigin="anonymous"></script>
 <script src="/static/js/renderjson.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="/static/js/moment.js"></script>
@@ -220,6 +225,11 @@
 <script src="/static/js/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
+  // json validation
+  // const env = new djv({
+  // version: 'draft-07'
+  // });
+
   const store = new Vuex.Store({
     state: {
       schema:Object,
@@ -233,7 +243,9 @@
       step: Number,
       settings: Object,
       showDescriptions:true,
-      bulkJSONItems:[]
+      bulkJSONItems:[],
+      valid: Boolean,
+      errors: []
     },
     strict: true,
     mutations: {
@@ -301,6 +313,8 @@
             state.schema.validation.properties[prop]['categories'].unshift(getProp(prop))
           }
         }
+        // console.log("add json schema", state.schema.validation)
+        // env.addSchema('discovery',state.schema.validation.properties );
       },
       filterProps(state,payload){
         state.filter = payload['cat'];
@@ -436,6 +450,24 @@
 
           }
         }
+
+        // VALIDATION ON COMPLETE
+        var ajv = new Ajv({allErrors: true, jsonPointers: true});
+        var schema = state.schema.validation
+        var data = state.output
+
+        const isValid = ajv.validate(schema, data); //schema, data
+        if(! isValid){
+          // console.log('%c ***** VALIDATION DETAILS *****','color:pink')
+          // console.log("NOT VALID ",ajv.errors);
+          state.valid = false;
+          state.errors = ajv.errors;
+        }else {
+          // console.log('%c ***** VALIDATION RESULT *****','color:limegreen')
+          // console.log(isValid)
+          state.valid = true;
+          state.errors = []
+        }
       },
       mergeCategoryProps(state,payload){
         let origin = payload['origin'];
@@ -548,6 +580,12 @@
     getters:{
       getBulkJSONItems:state=>{
         return state.bulkJSONItems
+      },
+      getValidStatus:state=>{
+        return state.valid
+      },
+      getErrors:state=>{
+        return state.errors
       },
       getShowDesc:state=>{
         return state.showDescriptions
@@ -3115,6 +3153,12 @@
         validation:function(){
           return store.getters.getValidation
         },
+        valid:function(){
+          return store.getters.getValidStatus
+        },
+        errors:function(){
+          return store.getters.getErrors
+        },
         isComplete:function(){
           let res = store.getters.isComplete
           if (res) {
@@ -3176,7 +3220,7 @@
             store.getters.getCategoryTotals
             store.getters.getTotals
           }
-        }
+        },
       },
 			methods:{
         checkUser(){
@@ -3628,7 +3672,7 @@
                 fr.addEventListener("load", e => {
                   var payload = {};
                   let json = JSON.parse(fr.result);
-                  if (json.length < 100) {
+                  if (json.length < 101) {
                     payload["items"] = json;
                     store.commit('saveBulkItems',payload);
                   }else {
@@ -4017,6 +4061,33 @@
             }
           }
 
+        },
+        viewErrors(){
+          var self = this;
+
+          if (self.errors.length) {
+            Swal.fire({
+            type: 'error',
+            title: 'Details',
+            animation:false,
+            customClass:'scale-in-center',
+            html: `<div class="text-left previewBox">
+                    <div>
+                      <small>
+  <pre>
+    `+JSON.stringify(self.errors,null,2)+`
+  </pre>
+                      </small>
+                    </div>
+                  </div>`
+            });
+          }else {
+            Swal.fire({
+            type: 'success',
+            title: 'Valid',
+            text: "All good!",
+            })
+          }
         }
 			},
 			mounted:function(){
