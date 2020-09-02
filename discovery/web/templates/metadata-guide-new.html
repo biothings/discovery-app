@@ -46,40 +46,42 @@
     </p>
     <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
   </div>
-  <!-- BULK -->
-  <div v-if="jsonItems.length" class="alert grad">
-    <small class="text-light">BULK REGISTRATION </small> <small class="text-info" v-text="jsonItems.length+' documents found'"></small>
-    <table class="m-0 table table-sm table-dark table-striped" id="jsonTable">
-      <colgroup>
-       <col span="1" style="width: 30%;">
-       <col span="1" style="width: 60%;">
-       <col span="1" style="width: 10%;">
-      </colgroup>
-      <thead>
-        <th>
-          <small>Name</small>
-        </th>
-        <th>
-          <small>Result/Details</small>
-        </th>
-        <th>
-          <small>Status</small>
-        </th>
-      </thead>
-    </table>
-    <div style="max-height:500px; overflow:scroll;">
-      <table class="m-0 table table-sm table-dark">
+  <div id="jsonTable">
+    <!-- BULK -->
+    <div v-if="jsonItems.length" class="alert grad">
+      <small class="text-light">BULK REGISTRATION </small> <small class="text-info" v-text="jsonItems.length+' documents found'"></small>
+      <table class="m-0 table table-sm table-dark table-striped">
         <colgroup>
          <col span="1" style="width: 30%;">
          <col span="1" style="width: 60%;">
          <col span="1" style="width: 10%;">
         </colgroup>
-        <tbody style="max-height:500px; overflow:scroll;">
-          <template v-for="item in jsonItems">
-            <json-item :item="item"></json-item>
-          </template>
-        </tbody>
+        <thead>
+          <th>
+            <small>Name</small>
+          </th>
+          <th>
+            <small>Result/Details</small>
+          </th>
+          <th>
+            <small>Status</small>
+          </th>
+        </thead>
       </table>
+      <div style="max-height:500px; overflow:scroll;">
+        <table class="m-0 table table-sm table-dark">
+          <colgroup>
+           <col span="1" style="width: 30%;">
+           <col span="1" style="width: 60%;">
+           <col span="1" style="width: 10%;">
+          </colgroup>
+          <tbody style="max-height:500px; overflow:scroll;">
+            <template v-for="(item,i) in jsonItems">
+              <json-item :item="item" :number="i+1"></json-item>
+            </template>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
   <!-- bulk end -->
@@ -726,7 +728,7 @@
         loading: false,
       }
     },
-    props: ['item'],
+    props: ['item', 'number'],
     methods:{
       registerJSONItem(isRetry){
         var self = this;
@@ -893,6 +895,7 @@
     },
     template: `<tr :class="{'alert-success':successMSG,'alert-warning':errMSG}">
                   <td>
+                    <b class="text-info" v-text="number+'- '"></b>
                     <small :title="item.name">
                       <span v-text="short_name"></span> <i class="fas fa-info-circle tip pointer text-primary" :data-tippy-info="tipInfo"></i>
                     </small>
@@ -3624,8 +3627,17 @@
 
                 fr.addEventListener("load", e => {
                   var payload = {};
-                  payload["items"] = JSON.parse(fr.result);
-                  store.commit('saveBulkItems',payload);
+                  let json = JSON.parse(fr.result);
+                  if (json.length < 100) {
+                    payload["items"] = json;
+                    store.commit('saveBulkItems',payload);
+                  }else {
+                    Swal.fire({
+                    icon: 'error',
+                    title: 'Over Limit',
+                    text: json.length+" items. Please submit 100 items at a time."
+                    })
+                  }
                 });
 
                 fr.readAsText(blob);
