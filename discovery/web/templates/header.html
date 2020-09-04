@@ -24,22 +24,19 @@
     </button>
     <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
       <ul class="navbar-nav" id="user_link">
-        <li class="nav-item d-inline d-md-none"><a class="nav-link h-link mainTextLight" href="/best-practices">Discovery Guide</a></li>
-        <li class="nav-item dropdown d-none d-md-inline headTip" data-tippy-content="Create Discoverable Structured Metadata">
-          <a class="nav-link dropdown-toggle mainTextLight" href="/best-practices" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            Discovery Guide
+        <li class="nav-item headTip" data-tippy-content="Create discoverable metadata"><a class="nav-link h-link mainTextLight" href="/best-practices">Discovery Guide</a></li>
+        <li class="nav-item"><a class="nav-link h-link mainTextDark headTip" href="/schema-playground" data-tippy-content="Create and Visualize a Schema">Schema Playground</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="/portal" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Data Portals
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item mainTextLight" href="/best-practices">Get Started</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true">Quick Links:</a>
-            <a class="dropdown-item" href="/guide"><img src="/static/img/dde-logo-o.svg" width="20" height="20" alt="CTSA" title="CTSA Portal"> Discovery Dataset Guide <i class="fas fa-chevron-right mainTextLight"></i></a>
-            <a class="dropdown-item" href="/guide/outbreak/dataset"><img src="/static/img/outbreak.png" width="20" height="20" alt="Outbreak.info" title="Outbreak.info"> Outbreak.info Dataset Guide <i class="fas fa-chevron-right mainTextLight"></i></a>
-            <a class="dropdown-item" href="/guide/niaid"><img src="/static/img/niaid/icon.svg" width="20" height="20" alt="NIAID" title="NIAID Data Portal"> NIAID Dataset Guide <i class="fas fa-chevron-right mainTextLight"></i></a>
+            <a class="dropdown-item" href="/portal/cd2h"><img src="/static/img/dde-logo-o.svg" width="20" height="20" alt="CTSA" title="CTSA Portal"> CD2H <i class="fas fa-chevron-right mainTextLight"></i></a>
+            <a class="dropdown-item" href="/portal/outbreak"><img src="/static/img/outbreak.png" width="20" height="20" alt="Outbreak.info" title="Outbreak.info"> Outbreak.info <i class="fas fa-chevron-right mainTextLight"></i></a>
+            <a class="dropdown-item" href="/portal/cvisb"><img src="/static/img/niaid/icon.svg" width="20" height="20" alt="NIAID" title="NIAID Data Portal"> CViSB <i class="fas fa-chevron-right mainTextLight"></i></a>
           </div>
         </li>
-        <li class="nav-item"><a class="nav-link h-link mainTextDark headTip" href="/schema-playground" data-tippy-content="Create and Visualize a Schema">Schema Playground</a></li>
-        <li class="nav-item dropdown d-none d-md-inline headTip" data-tippy-content="Search Metadata/Schemas">
+        <li class="nav-item dropdown d-none d-md-inline">
           <a class="nav-link dropdown-toggle" href="/registries" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false">
             Registry
           </a>
@@ -53,7 +50,7 @@
         </template>
         <template v-if="userInfo && userInfo.login">
           <li class='nav-item'>
-            <a class='nav-link pulse' id='navPhotoLink' href='/dashboard/'>
+            <a class='nav-link pulse headTip' id='navPhotoLink' href='/dashboard/' data-tippy-content="Manage your contributions">
               <small v-text='userInfo.login'></small>
               <img v-if="!userInfo.avatar_url" id='navPhoto' class='userImage' src='/static/img/default.png' alt='user photo'>
               <img v-else id='navPhoto' class='userImage' :src='userInfo.avatar_url' alt='user photo'>
@@ -90,7 +87,7 @@ var app = new Vue({
       var self = this;
       self.checkUser();
       tippy( '.headTip', {
-        placement:'left',
+        placement:'bottom',
         theme:'light',
         sticky: true,
         animation: 'fade'});

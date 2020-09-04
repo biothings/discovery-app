@@ -11,6 +11,9 @@
 }
 </style>
 <section id="dashboard">
+  <div v-if=loading class="loader">
+    <img src="/static/img/ripple.svg"/>
+  </div>
   <div  class="container" style="min-height: 100vh;padding-top:80px;">
     <h1 class="text-muted caps">My Dashboard</h1>
     <div class="dashboard">
@@ -192,7 +195,8 @@ var app = new Vue({
           slugInput:'',
           availableSlug: false,
           invalidChars : false,
-          meta:{}
+          meta:{},
+          loading: false
 				}
 			},
       watch:{
@@ -225,7 +229,7 @@ var app = new Vue({
             if (res.data) {
               self.meta = res.data
               let list ={}
-              let notAllowed=['@context','@type','includedInDataCatalog','identifier']
+              let notAllowed=['@context','@type','includedInDataCatalog','_id']
               for(key in self.meta){
                 if (!notAllowed.includes(key)) {
                   list[key] = key
@@ -236,7 +240,7 @@ var app = new Vue({
                 title: `Quick Edit`,
                 text:"Which field would you like to edit?",
                 input: 'select',
-                footer:"<small><b class='text-danger'>Important:</b> Making changes will change privacy to default: <b>PUBLIC</b>. You can change privacy settings again when you are done.</small>",
+                footer:"<small><b class='text-info'>Note:</b> You can only quick edit existing fields. If you wish to add more fields import this metadata via a guide and add any fields necessary. <br /><b class='text-danger'>Important:</b> Making changes will change privacy to default: <b>PUBLIC</b>. You can change privacy settings again when you are done. Changing the <code>identifier</code> field will result in creating a new entry.</small>",
                 inputOptions: list,
                 inputPlaceholder: 'Select a field to edit',
                 showCancelButton: true,
@@ -367,6 +371,7 @@ var app = new Vue({
           });
         },
         updateSelected(type,namespace){
+          var self = this;
 
           options = {
             "Refresh URL":"Refresh URL",
@@ -389,6 +394,7 @@ var app = new Vue({
 
             if (result.value == "Refresh URL") {
               // same url
+              self.loading = true;
               axios.put("/api/registry/"+namespace).then(res=>{
                 if (res.data.result == 'updated') {
                   Swal.fire(
@@ -396,18 +402,21 @@ var app = new Vue({
                     'schema: '+namespace+' updated!',
                     'success'
                   );
+                  self.loading = false;
                 }else if (res.data.result == 'noop') {
                   Swal.fire(
                     'Nothing new here',
                     'schema: '+namespace+' is already on its latest version',
                     'success'
                   );
+                  self.loading = false;
                 }else{
                   Swal.fire(
                     'Done!',
                     res.data.result,
                     'info'
                   );
+                  self.loading = false;
                 }
               }).catch(err=>{
                 Swal.fire(
@@ -442,7 +451,7 @@ var app = new Vue({
                   //      'content-type': 'application/json'
                   //    }
                   //  }
-
+                  self.loading = true;
                   axios.put("/api/registry",data).then(res=>{
                     if (res.data.result) {
                       Swal.fire(
@@ -450,6 +459,7 @@ var app = new Vue({
                         'Status: '+res.data.result,
                         'success'
                       );
+                      self.loading = false;
                     }
                   }).catch(err=>{
                     Swal.fire(
@@ -457,6 +467,7 @@ var app = new Vue({
                       'We had trouble updating: '+namespace,
                       'error'
                     );
+                    self.loading = false;
                   });
 
                 }
@@ -540,27 +551,36 @@ var app = new Vue({
           Vue.set(self.dashboard,[])
           if (this.user.login) {
             //SCHEMA NAMESPACES
+            self.loading = true;
             axios.get('/api/registry?user='+self.user.login).then(res=>{
               // console.log("SCHEMAS",res.data)
               self.dashboard = res.data.hits;
               self.dashboardTotal = res.data.total;
+              self.loading = false;
             }).catch(err=>{
+              self.loading = false;
               throw err;
             });
+            self.loading = true;
             // DATASETS PUBLIC
             axios.get('/api/dataset?&user='+self.user.login).then(res=>{
               // console.log("PUBLIC",res.data)
               self.publicDatasets = self.publicDatasets.concat(res.data.hits);
               self.datasetsTotal += res.data.total;
+              self.loading = false;
             }).catch(err=>{
+              self.loading = false;
               throw err;
             });
+            self.loading = true;
             // DATASETS PRIVATE
             axios.get('/api/dataset?private=true&user='+self.user.login).then(res=>{
               // console.log("PRIVATE",res.data)
               self.privateDatasets = self.privateDatasets.concat(res.data.hits);
               self.datasetsTotal += res.data.total;
+              self.loading = false;
             }).catch(err=>{
+              self.loading = false;
               throw err;
             });
           }

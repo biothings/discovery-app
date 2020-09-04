@@ -195,8 +195,8 @@
         </span>
         <div>
           <template v-show='!validationView'>
-            <small class="text-center text-light mb-1">Toggle Properties</small>
-            <input id="toggle" class="form-control text-light tip m-auto" @change="showAll()" :data-tippy-info="'Expand or contract all property lists'"  type="checkbox" v-model="checkbox"/>
+            <small class="text-center text-light mb-1">Expand Properties</small>
+            <input id="toggle" class="form-control text-light tip m-auto" @change="showAll()" :data-tippy-info="'Expand or contract all property lists'"  type="checkbox" checked/>
           </template>
         </div>
         <div>
@@ -237,7 +237,7 @@
       'userSchema':Object,
       'userSchemaProps':Array,
       'queryStoreContent':Object,
-      'showAll':false,
+      'showAll':true,
     },
     strict: true,
     mutations: {
@@ -955,7 +955,7 @@
         userSchema:[],
         textColor:'',
         backColor:'',
-        expand:false,
+        expand:true,
         properties:[],
       }
     },
@@ -1054,9 +1054,6 @@
     mounted: function(){
       var self = this;
 
-      if (self.validationView && !self.parent) {
-        self.expand = true;
-      }
       if (self.parent) {
         self.textColor = 'mainTextLight'
         self.backColor = 'mainBackLight'
@@ -1217,6 +1214,9 @@
           }
           return letters.sort();
           // console.log('FILTERS COMPUTED',letters)
+        },
+        expandAll () {
+          return this.$store.getters.getShowAll
         }
       },
       watch:{
@@ -1920,7 +1920,7 @@
           theme:'light',
           onShow(instance) {
             let info = instance.reference.dataset.tippyInfo;
-            instance.setContent(info)
+            instance.setContent("<div class='p-0'>"+info+"</div>")
           }});
 
           tippy( '#mainCont', {
@@ -1933,7 +1933,7 @@
             onShow(instance) {
               let info = instance.reference.dataset.tippyInfo;
 
-              instance.setContent("<div class='text-muted m-0 wraptext'><pre class='text-left text-muted wraptext d-block'>"+info+"</pre></div>")
+              instance.setContent("<div class='text-muted m-0 p-0 wraptext'><pre class='text-left text-muted wraptext d-block m-0'>"+info+"</pre></div>")
             }});
 
           tippy('#showButton', {

@@ -6,12 +6,16 @@
     <h1 class="logoText">DATASET DISCOVERY BEST PRACTICES</h1>
   </div>
   <div class="text-center mb-5">
-    <div class="col-sm-6 m-auto p-3 container text-center">
-      <small>
-        <p>
-          See examples of registered dataset metadata <a href="/dataset">here</a>.
-        </p>
-      </small>
+    <div class="col-md-8 col-sm-12 m-auto p-3 container text-center text-muted">
+      <p>
+        This guide provides an easy way to create discoverable structured dataset metadata with little to no <a data-tippy-theme="light" data-tippy="Learn More About Schema.org" href="https://schema.org/" target="_blank">Schema.org</a> microdata markup or <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> data-sharing best-practices knowledge.
+      </p>
+      <p class="text-muted">
+        Let the guided wizard do all the hard work and just fill out the fields provided and register your metadata.
+      </p>
+      <p>
+        See examples of registered dataset metadata <a href="/dataset">here</a>.
+      </p>
     </div>
     <div class="text-center mb-5">
       <div class="row m-0">
@@ -67,41 +71,178 @@
           <div class="col-sm-12 col-md-8">
             <img src="/static/img/discoverable-01.png" alt="DISCOVERY" width="200"/>
             <h1 class="text-light">DISCOVERY GUIDE</h1>
-            <p class="text-light">
-              This guide provides an easy way to create discoverable structured dataset metadata with little to no <a data-tippy-theme="light" data-tippy="Learn More About Schema.org" href="https://schema.org/" target="_blank">Schema.org</a> microdata markup or <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> data-sharing best-practices knowledge.
-            </p>
-            <p class="text-light">
-              Let the guided wizard do all the hard work and just fill out the fields provided and register your metadata.
-            </p>
+            <a class="btn btn-lg themeButton text-light m-2 px-3 py-3" href="#choose">GET STARTED</a>
+
             <!-- <button type="button" class="btn btn-lg themeButton text-light m-2 px-3 py-3" @click="start=!start">GET STARTED</button> -->
           </div>
         </div>
       </div>
     </div>
-    <div class="container px-5">
+    <div class="container px-5" id="choose">
       <h1 class="logoText">Choose a Guide</h1>
-      <div class="d-flex justify-content-center align-items-stretch">
-        <div class="card mr-1 list-group-item-action" style="width: 18rem;">
-          <img src="/static/img/dde-logo-o.svg" class="card-img-top" alt="CTSA">
-          <div class="card-body">
+      <div class="container">
+        <p class="text-muted">
+          Learn how this metadata will be available via our <a href="https://crawler.biothings.io/" target="_blank" rel="nonreferrer">API</a>.
+        </p>
+      </div>
+      <div class="d-flex justify-content-center align-items-stretch flex-wrap">
+        <div class="card text-center m-1 border border-success" style="width: 18rem;">
+          <div class="card-header">
+            Data Portal | <a href="/portal/cd2h">CD2H</a>
+          </div>
+          <img src="./static/img/cd2h-logo.png" alt="CD2H" class="w-50 m-auto" width="50px"/>
+          <div class="card-body d-flex flex-column justify-content-around">
+            <h5 class="card-title">CD2H</h5>
             <p class="card-text"><b>
-              Clinical and Translational Science Awards</b> (<a href="https://ncats.nih.gov/ctsa" target="_blank" rel="nonreferrer">CTSA <i class="fas fa-external-link-alt"></i></a>) biomedical dataset metadata based on this <a href="/view/biomedical/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure. <small class="text-info more" data-tippy-info="You can choose data portals you are interested in and add their requirements" data-tippy-theme="light">Customizable</small>
+              CTSA National Center for Data to Health </b> (<a href="https://ctsa.ncats.nih.gov/cd2h/" target="_blank" rel="nonreferrer">CD2H <i class="fas fa-external-link-alt"></i></a>) biomedical dataset metadata based on this <a href="/view/biomedical/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure. <small class="text-info more" data-tippy-info="You can choose data portals you are interested in and add their requirements" data-tippy-theme="light">Customizable</small>
             </p>
-            <a href="/guide" class="btn mainBackDark text-light">Continue</a>
+            <a href="/guide/" class="btn btn-lg themeButton text-light" role="button">
+              <i class="fas fa-plus"></i> Add Dataset Metadata
+            </a>
+          </div>
+          <div class="card-footer text-muted alert-secondary">
+            <b>About this guide:</b>
+            <table class="table table-sm table-secondary table-striped">
+              <tbody>
+                <tr>
+                  <td>
+                    <small>Intend</small>
+                  </td>
+                  <td>
+                    <small class="badge badge-dark">General Purpose</small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <small>Topics</small>
+                  </td>
+                  <td>
+                    <small class="badge badge-light">Biomedical</small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <small>Associations</small>
+                  </td>
+                  <td>
+                    <a href="/portal/cd2h"><small class="badge badge-light">CD2H</small></a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <small>Schema</small>
+                  </td>
+                  <td>
+                    <a href="/view/biomedical"><small class="badge badge-light">Dataset</small></a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <div class="card mr-1 list-group-item-action" style="width: 18rem;">
-          <img src="/static/img/icon-01.svg" class="card-img-top" alt="Outbreak.info">
-          <div class="card-body">
+        <div class="card text-center m-1" style="width: 18rem;">
+          <div class="card-header">
+            Data Portal | <a href="/portal/outbreak">outbreak.info</a>
+          </div>
+          <img src="/static/img/outbreak.svg" alt="outbreak.info" class="card-img-top p-2" width="150px"/>
+          <div class="card-body d-flex flex-column justify-content-around">
+            <h5 class="card-title">outbreak.info</h5>
             <p class="card-text"><b>Outbreak.info</b> (<a href="https://outbreak.info/" target="_blank" rel="nonreferrer">Outbreak.info <i class="fas fa-external-link-alt"></i></a>) COVID-19 epidimiology dataset metadata based on this <a href="/view/outbreak/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
-            <a href="/guide/outbreak/dataset" class="btn mainBackDark text-light">Continue</a>
+            <a href="/guide/outbreak/dataset" class="btn btn-lg themeButton text-light" role="button">
+              <i class="fas fa-plus"></i> Add Dataset Metadata
+            </a>
+          </div>
+          <div class="card-footer text-muted alert-info">
+            <b>About this guide:</b>
+            <table class="table table-sm table-info table-striped">
+              <tbody>
+                <tr>
+                  <td>
+                    <small>Intend</small>
+                  </td>
+                  <td>
+                    <small class="badge badge-info">Portal Specific</small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <small>Topics</small>
+                  </td>
+                  <td>
+                    <small class="badge badge-light">COVID-19</small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <small>Associations</small>
+                  </td>
+                  <td>
+                    <a href="/portal/outbreak"><small class="badge badge-light">outbreak.info</small></a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <small>Schema</small>
+                  </td>
+                  <td>
+                    <a href="/view/outbreak"><small class="badge badge-light">Dataset</small></a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <div class="card mr-1 list-group-item-action" style="width: 18rem;">
-          <img src="/static/img/niaid/icon.svg" class="card-img-top" alt="Outbreak.info">
-          <div class="card-body">
-            <p class="card-text"><b>National Institute of Allergy and Infectious Diseases</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
-            <a href="/guide/niaid" class="btn mainBackDark text-light">Continue</a>
+        <div class="card text-center m-1" style="width: 18rem;">
+          <div class="card-header">
+            Data Portal | <a href="/portal/cvisb">CViSB</a>
+          </div>
+          <img src="/static/img/cvisb.png" alt="CViSB" class="card-img-top p-2" width="150px"/>
+          <div class="card-body d-flex flex-column justify-content-around">
+            <h5 class="card-title">NIAID Data Portal</h5>
+            <p class="card-text"><b>Center for Viral Systems Biology (<a href="https://cvisb.org/" target="_blank" rel="nonreferrer">CViSB <i class="fas fa-external-link-alt"></i></a>)</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID Data Portal <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
+            <a href="/guide/niaid" class="btn btn-lg themeButton text-light" role="button">
+              <i class="fas fa-plus"></i> Add Dataset Metadata
+            </a>
+          </div>
+          <div class="card-footer text-muted alert-info">
+            <b>About this guide:</b>
+            <table class="table table-sm table-info table-striped">
+              <tbody>
+                <tr>
+                  <td>
+                    <small>Intend</small>
+                  </td>
+                  <td>
+                    <small class="badge badge-info">Portal Specific</small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <small>Topics</small>
+                  </td>
+                  <td>
+                    <small class="badge badge-light">Allergy</small>
+                    <small class="badge badge-light">Disease</small>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <small>Associations</small>
+                  </td>
+                  <td>
+                    <a href="/portal/cvisb"><small class="badge badge-light">CViSB</small></a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <small>Schema</small>
+                  </td>
+                  <td>
+                    <a href="/view/niaid"><small class="badge badge-light">Dataset</small></a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -132,6 +273,15 @@ var app = new Vue({
             let info = instance.reference.dataset.tippyInfo;
             instance.setContent("<div class='bg-light'>"+info+"</div>");
           }});
+          document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+              anchor.addEventListener('click', function (e) {
+                  e.preventDefault();
+
+                  document.querySelector(this.getAttribute('href')).scrollIntoView({
+                      behavior: 'smooth'
+                  });
+              });
+          });
 			}
 		});
 </script>
