@@ -5,15 +5,23 @@
 .nd{
   text-decoration: none !important;
 }
+.lines{
+  background-image: url('/static/img/lines-01.svg');
+  background-size: 120vw;
+  background-repeat: no-repeat;
+  background-position:bottom;
+}
 </style>
 <div id="portal" class="container-fluid p-0" style="min-height:80vh; margin-top:100px;">
   <template v-if="portal && portal.name">
     <div class="row m-0">
-      <div class="text-center p-5 col-sm-12 grad">
-        <a href="/portal" class="d-block"><i class="fas fa-chevron-left"></i> Back</a>
-        <img :src="portal.image" :alt="portal.name" width="300px"/>
+      <div class="text-center col-sm-12 grad p-0">
+        <div class="lines p-5">
+          <a href="/portal" class="d-block text-info"><i class="fas fa-chevron-left"></i> Back to Portals</a>
+          <img :src="portal.image" :alt="portal.name" width="300px"/>
+        </div>
       </div>
-      <div class="col-sm-12 col-md-8 d-flex justify-content-center align-items-center">
+      <div class="col-sm-12 col-md-8 py-5 d-flex justify-content-center align-items-center">
         <div>
           <div class="d-flex justify-content-start align-items-center">
             <img :src="portal.portalicon" :alt="portal.name" width="100px" class="mr-2"/>
@@ -24,38 +32,38 @@
           <div class="border-top text-center text-muted p-2">
             <h4>Contribute</h4>
             <p>
-              Follow an easy-to-follow guide to help you contribute datasets for <span v-text=portal.name></span> following this <a :href="portal.schema" target="_blank">structure</a>.
+              Follow an easy-to-follow guide to help you contribute dataset metadata for <span v-text=portal.name></span> following this <a :href="portal.schema" target="_blank">structure</a>.
             </p>
             <div class="text-center p-2 m-1 rounded p-3">
               <a role="button" class="btn themeButton text-light btn-lg" :href="portal.guide" class="nd mt-2 tip" :data-tippy-info="'Add a dtaset for '+portal.name">
-                <i class="fas fa-plus"></i> Add Dataset
+                <i class="fas fa-plus"></i> Add Dataset Metadata
               </a>
             </div>
           </div>
         </div>
       </div>
       <div class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-secondary p-5">
-        <div class="text-center p-2 m-1 rounded p-3 border border-secondary">
-          <i class="fas fa-globe d-block fa-3x logoText"></i>
-          <a :href="portal.site" target="_blank" rel="noreferrer" class="nd mt-2 tip" :data-tippy-info="'Explore the '+portal.name+' website'">
-            <h5>Website <i class="fas fa-chevron-right"></i></h5>
+        <div class="text-center p-2 m-1 rounded p-3" @mouseenter="hover('web')">
+          <object id="web" type="image/svg+xml" data="/static/img/site.svg" width="100px" alt="WEBSITE"></object>
+          <a :href="portal.site" target="_blank" rel="noreferrer" class="nd mt-2 tip text-info" :data-tippy-info="'Explore the '+portal.name+' website'">
+            <h5>Site <i class="fas fa-chevron-right"></i></h5>
           </a>
         </div>
-        <div class="text-center p-2 m-1 rounded p-3 border border-secondary">
-          <i class="fas fa-list-alt d-block fa-3x logoText"></i>
-          <a :href="portal.schema" class="nd mt-2 tip" :data-tippy-info="'Explore the schema used in '+portal.name">
+        <div class="text-center p-2 m-1 rounded p-3" @mouseenter="hover('schema')">
+          <object id="schema" type="image/svg+xml" data="/static/img/sp1-01.svg" width="100px" alt="SCHEMA"></object>
+          <a :href="portal.schema" class="nd mt-2 tip text-info" :data-tippy-info="'Explore the schema used in '+portal.name">
             <h5>Schema <i class="fas fa-chevron-right"></i></h5>
           </a>
         </div>
-        <div class="text-center p-2 m-1 rounded p-3 border border-secondary">
-          <i class="fas fa-list d-block fa-3x logoText"></i>
-          <a href="/dataset" class="nd mt-2 tip" :data-tippy-info="'Browse registered metadata in Data Discovery Engine for '+portal.name">
+        <div class="text-center p-2 m-1 rounded p-3" @mouseenter="hover('dataset')">
+          <object id="dataset" type="image/svg+xml" data="/static/img/dataset-01.svg" width="100px" alt="DATASETS"></object>
+          <a href="/dataset" class="nd mt-2 tip text-info" :data-tippy-info="'Browse registered metadata in Data Discovery Engine for '+portal.name">
             <h5>Datasets <i class="fas fa-chevron-right"></i></h5>
           </a>
         </div>
-        <div v-if="portal && portal.api" class="text-center p-2 m-1 rounded p-3 border border-secondary">
-          <i class="fas fa-cloud d-block fa-3x logoText"></i>
-          <a :href="portal.api" class="nd mt-2 tip" :data-tippy-info="'Explore API for '+portal.name">
+        <div v-if="portal && portal.api" class="text-center p-2 m-1 rounded p-3" @mouseenter="hover('api')">
+          <object id="api" type="image/svg+xml" data="/static/img/api-01.svg" width="100px" alt="API"></object>
+          <a :href="portal.api" target="_blank" rel="noreferrer" class="nd mt-2 tip text-info" :data-tippy-info="'Explore API for '+portal.name">
             <h5>API <i class="fas fa-chevron-right"></i></h5>
           </a>
         </div>
@@ -69,6 +77,7 @@
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vivus@0.4.5/dist/vivus.min.js"></script>
 <script>
   var app = new Vue({
     el: '#portal',
@@ -94,7 +103,7 @@
           },
           {
             'name':'NIAID Data Portal',
-            'header':"There's increasingly more and more biomedical data available as researchers openly share their results.",
+            'header':'AN AGGREGATOR OF OPEN DATASETS, WITH A PARTICULAR FOCUS ON ALLERGY AND INFECTIOUS DISEASES',
             'linkname':'niaid',
             'description': `<p>
             The NIAID (National Institute of Allergy and Infectious Diseases) Data Portal aggregates <b class="tip text-info" data-tippy-info="Omics DI,NCBI GEO, Zenodo, Harvard Dataverse, NYU Data Catalog, ImmPort, Data Discovery Engine">7 different data sources</b> together in a searchable platform, making it easier to find datasets.
@@ -108,6 +117,24 @@
             "site": 'https://discovery.biothings.io/niaid/',
             'schema': '/view/niaid',
             "guide": "/guide/niaid"
+          },
+          {
+            'name':'CTSA National Center for Data to Health',
+            'header':'A CD2H PROJECT TO PROMOTE FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS',
+            'linkname':'cd2h',
+            'description': `<p>
+              Informatics advancements, coupled with a shift towards open science, are in the process of fundamentally transforming how we approach translational research and clinical care. The CTSA Program is poised to help realize precision medicine by leveraging informatics tools and expertise within CTSA hubs to solve key informatics challenges across the translational spectrum.
+            </p><p>
+            The CD2H was funded in fall 2017 to coordinate and integrate informatics for the CTSA Program by promoting data reuse and interoperability, tool sharing, informatics fluency, and collaboration. We are here to serve the CTSA Program by creating additional resources, building impactful infrastructure, and further coalescing the community to develop and implement innovative solutions.
+            </p><p>
+            Towards these goals, CD2H seeks input from, and collaboration with, the CTSA Program. We convene the community through our CORES and Community Projects focused on data, software, and people; and partner with the community to iteratively develop solutions through CD2H Labs and our DREAM Challenges. The ultimate goal of the CD2H is to help CTSA Hubs thrive, accelerate advancements in informatics, and improve patient care.
+            </p>`,
+            'image':'/static/img/cd2h-logo-white.png',
+            'portalicon': "/static/img/dde-logo-o.svg",
+            "site": 'https://ctsa.ncats.nih.gov/cd2h/',
+            'schema': '/view/biomedical',
+            "guide": "/guide",
+            "api": 'https://crawler.biothings.io/',
           },
         ]
   	  }
@@ -134,6 +161,9 @@
             window.location.href='/portal/'
           }
         });
+      },
+      hover(id){
+        new Vivus(id, { duration: 100 });
       }
     },
     mounted:function(){
@@ -147,13 +177,16 @@
            case 'outbreak':
              self.portal = self.portals[0]
              break;
+           case 'cd2h':
+               self.portal = self.portals[2]
+               break;
            default:
              self.redirect()
          }
        }
        tippy( '#portal', {
          target:'.tip',
-         placement:'top',
+         placement:'bottom',
          theme:'light',
          sticky: true,
          content: 'loading',
@@ -163,6 +196,8 @@
            let info = instance.reference.dataset.tippyInfo;
            instance.setContent("<div>"+info+"</div>");
          }});
+
+
     },
     computed:{
 

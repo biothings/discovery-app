@@ -6,17 +6,17 @@
 <div id="portals" class="container-fluid" style="min-height:80vh;">
   <div class="jumbotron bg-light mb-0 text-center">
     <h1 class="logoText">Data Portals</h1>
-    <p class="w-50 m-auto">
-      Explore data portals available and learn how you can access their data.
-    </p>
+    <h4 class="w-75 m-auto text-muted">
+      Explore data portals and learn how you can contribute and access their data.
+    </h4>
   </div>
-  <div class="container">
+  <div class="container mb-5">
     <ul class="list-group">
       <template v-for="portal in portals">
         <li class="list-group-item" :key="portal.name">
           <div>
             <div class="alert-secondary p-1">
-              <img :src="portal.image" :alt="portal.name" width="200px" class="mr-2"/>
+              <img :src="portal.image" :alt="portal.name" height="50px" class="mr-2"/>
             </div>
             <div class="d-flex justify-content-start align-items-center">
               <img :src="portal.portalicon" :alt="portal.name" width="50px" class="mr-2"/>
@@ -25,7 +25,6 @@
               </a>
             </div>
             <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
-            <!-- <div class="text-muted" v-html="portal.description"></div> -->
           </div>
         </li>
       </template>
@@ -43,6 +42,23 @@
   		return {
         portals:[
           {
+            'name':'CTSA National Center for Data to Health',
+            'header':'A CD2H project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs',
+            'linkname':'cd2h',
+            'description': `<p>
+              Informatics advancements, coupled with a shift towards open science, are in the process of fundamentally transforming how we approach translational research and clinical care. The CTSA Program is poised to help realize precision medicine by leveraging informatics tools and expertise within CTSA hubs to solve key informatics challenges across the translational spectrum.
+            </p><p>
+            The CD2H was funded in fall 2017 to coordinate and integrate informatics for the CTSA Program by promoting data reuse and interoperability, tool sharing, informatics fluency, and collaboration. We are here to serve the CTSA Program by creating additional resources, building impactful infrastructure, and further coalescing the community to develop and implement innovative solutions.
+            </p><p>
+            Towards these goals, CD2H seeks input from, and collaboration with, the CTSA Program. We convene the community through our CORES and Community Projects focused on data, software, and people; and partner with the community to iteratively develop solutions through CD2H Labs and our DREAM Challenges. The ultimate goal of the CD2H is to help CTSA Hubs thrive, accelerate advancements in informatics, and improve patient care.
+            </p>`,
+            'image':'./static/img/cd2h-logo.png',
+            'portalicon': "/static/img/dde-logo-o.svg",
+            "site": 'https://ctsa.ncats.nih.gov/cd2h/',
+            'schema': '/view/biomedical',
+            "guide": "/guide"
+          },
+          {
             'name':'Outbreak.info',
             'header':"During outbreaks of emerging diseases such as COVID-19, efficiently collecting, sharing, and integrating data is critical to scientific research. Outbreak.info is a resource to aggregate all this information into a single location.",
             'linkname':'outbreak',
@@ -56,7 +72,7 @@
           },
           {
             'name':'NIAID Data Portal',
-            'header':'AN AGGREGATOR OF OPEN DATASETS, WITH A PARTICULAR FOCUS ON ALLERGY AND INFECTIOUS DISEASES',
+            'header':'An aggregator of open datasets, with a particular focus on allergy and infectious diseases.',
             'linkname':'cvisb',
             'description': `<p>
             The NIAID (National Institute of Allergy and Infectious Diseases) Data Portal aggregates <b class="tip text-info" data-tippy-info="Omics DI,NCBI GEO, Zenodo, Harvard Dataverse, NYU Data Catalog, ImmPort, Data Discovery Engine">7 different data sources</b> together in a searchable platform, making it easier to find datasets.
@@ -64,6 +80,7 @@
             'image':'/static/img/cvisb.png',
             'portalicon': "/static/img/niaid/icon.svg"
           },
+
         ]
   	  }
     },
