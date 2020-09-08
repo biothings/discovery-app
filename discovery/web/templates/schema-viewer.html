@@ -4,7 +4,28 @@
 <style>
 [v-cloak] > * { display:none; }
 [v-cloak]::before { content: "Please wait..."; }
+.brackets{
+  background-image: linear-gradient(#ffb1bb, #ffb1bb),
+                    linear-gradient(#ffb1bb, #ffb1bb),
+                    linear-gradient(#ffb1bb, #ffb1bb),
+                    linear-gradient(#ffb1bb, #ffb1bb);
 
+  background-repeat: no-repeat;
+  background-size: 8px 3px;
+  background-position: top left, bottom left;
+
+  border-left: solid #ffb1bb;
+  border-width: 0 2px;
+  border-right: 0px:
+}
+.bg-op-2{
+  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#00889a+0,00889a+50,ffffff+100&0.18+0,0.18+45,0+100 */
+  background: -moz-linear-gradient(left,  rgba(0,136,154,0.18) 0%, rgba(0,136,154,0.18) 45%, rgba(0,136,154,0.16) 50%, rgba(255,255,255,0) 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(left,  rgba(0,136,154,0.18) 0%,rgba(0,136,154,0.18) 45%,rgba(0,136,154,0.16) 50%,rgba(255,255,255,0) 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to right,  rgba(0,136,154,0.18) 0%,rgba(0,136,154,0.18) 45%,rgba(0,136,154,0.16) 50%,rgba(255,255,255,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2e00889a', endColorstr='#00ffffff',GradientType=1 ); /* IE6-9 */
+
+}
 </style>
 <div id="viewer" class="pt-5" v-cloak style="padding-top:100px;">
   <!-- Loader -->
@@ -485,7 +506,7 @@
             </div>
             <div class="d-flex justify-content-center align-items-center">
               <template v-for="(option,index) in fullinfo['oneOf']" :key="option">
-                <div v-if="option && !option['items']" class="d-flex">
+                <div v-if="option && !option['items']" class="d-flex brackets">
                   <field-box class="m-1" :name="name" :content="option" isChild="true"></field-box>
                 </div>
               </template>
@@ -507,7 +528,7 @@
         pages: 1,
       }
     },
-    props: ['name','content','isChild'],
+    props: ['name','content','isChild','isRequirement'],
     methods:{
       getType(content){
         var self = this;
@@ -638,6 +659,9 @@
       }
       // console.log("%c "+self.name,'color:lightblue')
       // console.log("%c "+self.type,'color:yellow')
+      if (self.name == 'required') {
+        self.expandArray = true;
+      }
     },
     computed: {
       arrayResults: function () {
@@ -647,14 +671,15 @@
       }
     },
     template:
-      `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted p-1 border-left':'alert-muted p-1 border-bottom']">
+      `<div class="m-0 rounded-0" :class="[isChild?'p-1 bg-op-2':'p-1 border-bottom']">
       <!-- 🌈 Array 🌈 -->
       <template v-if="type == 'array'">
         <div class="row m-0">
           <div class="text-left">
-            <small class="pointer" @click="expandArray=!expandArray" :class="[name == 'required'?'text-danger':'mainTextDark']">
-              <span v-text="name"></span> (<span v-text="content.length"></span>) <i class="fas" :class="[expandArray?'fa-minus-square text-danger':'fa-plus-square text-primary']"></i>
+            <small class="pointer" :class="[name == 'required'?'badge badge-danger':'mainTextDark']">
+              <span v-text="name"></span> (<span v-text="content.length"></span>)
             </small>
+            <i class="fas pointer" @click="expandArray=!expandArray" :class="[expandArray?'fa-caret-square-down text-danger':'fa-plus-square text-primary']"></i>
           </div>
           <div class="col-sm-12" v-if="expandArray">
             <div>
@@ -679,7 +704,7 @@
               </template>
             </div>
             <template v-for="item in arrayResults">
-              <field-box class="m-1" name="" :content="item" isChild="true"></field-box>
+              <field-box :isRequirement="name=='required'?true:false" class="m-1" name="" :content="item" isChild="false"></field-box>
             </template>
           </div>
         </div>
@@ -690,11 +715,12 @@
             <template v-if="isUrl(content)">
               <div class="text-left">
                 <small class="mainTextDark">
-                  <span v-text="name"></span> <i v-if="!name" class="fas fa-circle"></i> <span v-else>:</span>
+                  <span v-text="name"></span><i v-if="!name" class="fas fa-circle"></i> <span v-else>:</span>
                 </small>
               </div>
               <div class="ml-1">
                 <a :href="content" target="_blank" rel="nonreferrer">
+                  <i v-if="isRequirement" class="fas fa-asterisk text-danger"></i>
                   <small><span v-text="content"></span> <i class="fas fa-external-link-alt"></i></small>
                 </a>
               </div>
@@ -702,7 +728,8 @@
             <template v-else>
               <div class="d-flex">
                 <small class="mainTextDark">
-                  <span v-text="name"></span> <span class="mr-1">:</span>
+                  <span v-text="name"></span> <span v-if="name" class="mr-1">:</span>
+                  <i v-if="isRequirement" class="fas fa-asterisk text-danger"></i>
                 </small>
               </div>
               <div class="d-flex">
@@ -713,7 +740,9 @@
                     <i v-if="name == '@type' && content == 'Organization' " class="fas fa-building text-muted"></i>
                     <i v-if="name == '@type' && content == 'CreativeWork' " class="fas fa-lightbulb text-muted"></i>
                   </small> &nbsp;
-                  <small class="text-muted" v-html="content"></small>
+                  <small v-if="name == 'type'" class="badge badge-pill badge-dark" v-html="content"></small>
+                  <small v-else-if="name == 'format'" class="badge badge-pill badge-secondary" v-html="content"></small>
+                  <small v-else class="text-muted" v-html="content"></small>
                 </template>
               </div>
             </template>
@@ -723,10 +752,11 @@
         <!-- 🌈 VOCAB 🌈 -->
         <div v-if="content && content.vocabulary" class="d-flex justify-content-center align-items-center">
           <div>
-            <small class="text-danger">
-              <b v-text="content.strict?'STRICT':'NON-STRICT'"></b>
-            </small>
-            <a role="button" class="btn btn-sm btn-primary text-light" @click="testOntologyLookup()">Test Search <i class="fas fa-chevron-right"></i></a>
+            <a role="button" class="btn btn-sm btn-primary text-light m-1" @click="testOntologyLookup()">
+              <small class="badge" :class="[content.strict?'badge-danger':'badge-success']">
+                <b v-text="content.strict?'STRICT':'NON-STRICT'"></b>
+              </small> Test Term Lookup <i class="fas fa-chevron-right"></i>
+            </a>
           </div>
         </div>
 
@@ -735,11 +765,11 @@
         <template v-if="type == 'object'">
           <div class="d-flex">
             <div class=" d-flex justify-content-start align-items-center">
-              <span class="badge badge-pill mainBackDark text-light mr-1">
-                <span v-text="name"></span>
+              <span v-if="name !== 'properties'" class="badge bold text-light mr-1 mainTextDark">
+                <span v-text="name"></span> <i class="fas fa-caret-right"></i>
               </span>
             </div>
-            <div class="">
+            <div>
               <template v-for="(value,key) in content">
                 <field-box :name="key" :content="value" isChild="true"></field-box>
               </template>
@@ -1057,8 +1087,6 @@
       if (self.parent) {
         self.textColor = 'mainTextLight'
         self.backColor = 'mainBackLight'
-        console.log('Is Parent: ',self.parent)
-        console.log('Q',self.q)
       }else{
         self.textColor = 'mainTextDark'
         self.backColor = 'mainBackDark'
