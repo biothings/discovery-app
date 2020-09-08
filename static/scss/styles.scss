@@ -1,7 +1,7 @@
 
 /* COLORS and DARK MODE*/
 $darkmode: dm();
-$hierachy: rgb(62, 111, 168);
+$hierachy: #00cccc;
 $color: secc();
 
 //MIXINS
@@ -51,10 +51,10 @@ $color: secc();
 
 // Loops
 
-$percent-color-actions:5%;
+$percent-color-actions:10%;
 
 @if secC() {
-  @for $i from 0 through 20 {
+  @for $i from 0 through 5 {
     .text-#{$i} {
       color: darken( $hierachy, $percent-color-actions ) !important;
     }
