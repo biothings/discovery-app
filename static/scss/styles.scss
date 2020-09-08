@@ -54,7 +54,7 @@ $color: secc();
 $percent-color-actions:10%;
 
 @if secC() {
-  @for $i from 0 through 5 {
+  @for $i from 0 through 10 {
     .text-#{$i} {
       color: darken( $hierachy, $percent-color-actions ) !important;
     }
