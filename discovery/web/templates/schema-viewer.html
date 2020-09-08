@@ -1647,8 +1647,9 @@
           }else{
             if(self.developerMode)console.log('Looking in schema for CLASS: ',query)
             for (var i = 0; i < self.userSchema['hits'].length; i++) {
-              if (self.userSchema['hits'][i]["label"] === query ) {
-                return self.userSchema['hits'][i];
+              if (self.userSchema['hits'][i]["name"] === query || self.userSchema['hits'][i]["label"] == query ) {
+                let found = self.userSchema['hits'][i];
+                return found;
               }
             }
             return false;
