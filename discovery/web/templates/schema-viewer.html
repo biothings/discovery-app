@@ -1438,22 +1438,31 @@
             if (self.userSchema['hits'].length > 1) {
               for (var i = 0; i < self.userSchema['hits'].length; i++) {
                 // console.log('CLASS: ',i,self.userSchema['hits'][i]["label"])
-                self.addNode(self.userSchema['hits'][i]["name"]);
+                let topLevel = self.userSchema['hits'][i]["name"];
+                self.addNode(topLevel);
                 // console.log("add node",self.userSchema['hits'][i]["name"])
                 if (self.userSchema['hits'][i].hasOwnProperty('parent_classes')) {
                   let parents = self.userSchema['hits'][i]["parent_classes"][0];
                   if (parents) {
                     let parentList = parents.split(", ");
+                    parentList.push(topLevel)
                     // console.log('parent list', parentList)
-                    let parentName = parentList[parentList.length-1]
-                    // console.log('LINKING...', parentName,self.userSchema['hits'][i]["label"])
-                    // console.log("add parent",parentName)
-                    self.addNode(parentName);
-                    self.addEdge(parentName,self.userSchema['hits'][i]["name"]);
+                    // let lastParent = parentList[parentList.length-1]
+                    // self.addNode(lastParent);
+                    // self.addEdge(lastParent,self.userSchema['hits'][i]["name"]);
+                    for (var currentParent = 0; currentParent < parentList.length; currentParent++) {
+                      if (parentList[currentParent] && parentList[currentParent-1]) {
+                        self.addNode(parentList[currentParent]);
+                        self.addEdge(parentList[currentParent-1],parentList[currentParent]);
+                      }
+                    }
                   }
                 }
               }
             }
+
+            // self.addNode('schema:Intangible');
+            // self.addEdge('schema:Intangible','schema:CreativeWork');
 
             try {
               let topoRes = jsnx.topologicalSort(self.nxG);
