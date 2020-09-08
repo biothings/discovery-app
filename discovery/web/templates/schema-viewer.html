@@ -968,7 +968,7 @@
         for (var i = 0; i < classInfo["parent_classes"].length; i++) {
           if (classInfo["parent_classes"][i]) {
             let parents =classInfo["parent_classes"][i].split(', ');
-            parents.push(classInfo.label)
+            parents.push(classInfo.name)
             res.push(parents)
           }
         }
@@ -1057,10 +1057,13 @@
       if (self.parent) {
         self.textColor = 'mainTextLight'
         self.backColor = 'mainBackLight'
+        console.log('Is Parent: ',self.parent)
+        console.log('Q',self.q)
       }else{
         self.textColor = 'mainTextDark'
         self.backColor = 'mainBackDark'
       }
+
     },
     computed: {
       validationView () {
@@ -1091,7 +1094,7 @@
           <ul style="list-style:none;">
             <li v-for="path in getPaths(q)">
               <span v-for="(item,index) in path">
-                <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold" :href="'./'+getName(item)" v-text="getName(item)"></a>
+                <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold" :href="'./'+getName(item)" v-text="item"></a>
                 <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right" :class='textColor'></i>&nbsp;</span>
               </span>
             </li>
