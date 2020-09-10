@@ -63,14 +63,14 @@
           </template>
         </div>
       </div>
-      <div v-if="compareItems.length > 1" class="d-flex justify-content-around align-items-center p-2 alert alert-info mt-2">
+      <div v-if="compareItems.length" class="d-flex justify-content-around align-items-center p-1 alert grad mt-2">
         <template v-for="item in compareItems">
           <div :key="item.label" class="flip-in-ver-left badge badge-dark m-1">
             <span v-text="item.name"></span>
           </div>
         </template>
         <div>
-          <button @click="compareAll()" v-if="compareItems.length" class="btn btn-lg btn-success">Compare</button>
+          <button :disabled="compareItems.length > 1?false:true" @click="compareAll()" v-if="compareItems.length" class="btn btn-lg btn-success">Compare</button>
         </div>
       </div>
       <div class="mt-4">
@@ -98,7 +98,7 @@
         </form>
       </div>
       <div class="d-flex align-item-center justify-content-between px-3 text-muted">
-        <small>Compare (Max 3)</small>
+        <small>Compare (Max 4)</small>
         <small>Details</small>
         <small>View/Extend</small>
       </div>
@@ -154,6 +154,13 @@
       <div>
         <span id="closeBtn" class="close">&times;</span>
       </div>
+      <div>
+        <h5 class="text-center logoText">Compare Schemas</h5>
+        <span class="text-center d-block">
+          <small class="text-info mr-2"><i class="fas fa-circle"></i> SIMILARITIES</small>
+          <small><i class="fas fa-circle"></i> UNIQUE</small>
+        </span>
+      </div>
       <div class="d-flex justify-content-center align-items-start">
         <template v-for="(item,i) in results">
           <comparison-item :item="item" :key="i"></comparison-item>
@@ -177,7 +184,7 @@
 
 const store = new Vuex.Store({
   state: {
-    'maxComparisons':3,
+    'maxComparisons':4,
     'maxReached': false,
     'compareItems': [],
     'compareResults':[]
@@ -319,15 +326,17 @@ Vue.component('comparison-item', {
     }
   },
   template: `<div class="p-1 m-1">
-              <h5 class="logoText" v-text="item.name"></h5>
-              <div class="border" v-if="incommon.length">
-                <div class="text-info font-weight-bold p-1">SIMILARITIES</div>
-                <div v-for="prop in incommon" class="p-1 text-info" v-text="prop.label"></div>
+              <h5 class="text-muted" v-text="item.name"></h5>
+              <div v-if="incommon.length">
+                <div v-for="prop in incommon" class="text-info">
+                  <small v-text="prop.label"></small>
+                </div>
               </div>
               <div v-else class="text-warning p-1">NO SIMILARITIES</div>
-              <div class="border" v-if="unique.length">
-                <div class="font-weight-bold text-dark p-1">UNIQUE</div>
-                <div v-for="prop in unique" class="p-1" v-text="prop.label"></div>
+              <div class="" v-if="unique.length">
+                <div v-for="prop in unique"">
+                  <small v-text="prop.label"></small>
+                </div>
               </div>
             </div>`,
 });
@@ -402,7 +411,7 @@ Vue.component('registry-item', {
     },
     handlePick(){
       var self = this;
-      self.picked = !self.picked;
+      // self.picked = !self.picked;
     },
     getFullInfo(item){
       //add param v for verbose definition including all parents
@@ -418,7 +427,8 @@ Vue.component('registry-item', {
           }
         }
         console.log('All props for '+item.label+" are "+allProps.length)
-        Vue.set(item,'properties',allProps)
+        let sorted = _.sortBy(allProps, [function(o) { return o.label; }]);
+        Vue.set(item,'properties',sorted)
 
         let payload ={}
         payload['item'] = item;
@@ -492,7 +502,7 @@ Vue.component('registry-item', {
   template: `<li class="list-group-item p-0">
     <div class="d-flex">
       <div class="p-4 d-flex align-items-center">
-        <input @change="handlePick" class="form-control tip m-auto" :data-tippy-info="maxReached?'Max Comparison Items Reached':'Compare This Item'" type="checkbox"/>
+        <input v-model="picked" @change="handlePick" class="form-control tip m-auto" :data-tippy-info="maxReached?'Max Comparison Items Reached':'Compare This Item'" type="checkbox"/>
         <i v-if="adding" class="fas fa-spinner fa-pulse text-info ml-2"></i>
       </div>
       <div class="flex-grow-1 d-flex align-items-center">
