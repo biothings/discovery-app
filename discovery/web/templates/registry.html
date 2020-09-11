@@ -157,7 +157,7 @@
       <div>
         <h5 class="text-center logoText">Compare Schemas</h5>
         <span class="text-center d-block">
-          <small class="text-info mr-2"><i class="fas fa-circle"></i> SIMILARITIES</small>
+          <small class="text-info mr-2"><i class="fas fa-circle"></i> SIMILARITIES (To One or More)</small>
           <small><i class="fas fa-circle"></i> UNIQUE</small>
         </span>
       </div>
@@ -221,9 +221,12 @@ const store = new Vuex.Store({
       for (var i = 0; i < state.compareItems.length; i++) {
         if (state.compareItems[i]['name'] == item['name']) {
           state.compareItems.pop(item);
-          // console.log('removed item');
+          console.log('removed item',state.compareItems);
+          return true;
         }
       }
+      $.notify("Failed to remove "+item['name']+", Try again.",{ globalPosition: 'right',className:'warning', showDuration: 40, });
+
     },
     reset(state){
       Vue.set(state,'compareItems',[])
@@ -299,43 +302,82 @@ Vue.component('comparison-item', {
   data: function(){
     return {
       unique:[],
-      incommon:[]
+      incommon:[],
+      ownprops:[]
     }
   },
   props: ['item'],
   mounted:function(){
     this.parseProps();
+    tippy( '#compareResults', {
+      target:'.tip',
+      placement:'right',
+      content: 'loading',
+      interactive: true,
+      animation: 'fade',
+      theme:'light',
+      onShow(instance) {
+        let info = instance.reference.dataset.tippyInfo;
+        instance.setContent("<div style='background:white;'>"+info+"</div>")
+      }});
   },
   methods: {
     parseProps(){
       let self = this;
-      let set = new Set();
-      let set_uniq = new Set();
+      let set = [];
+      let set_uniq = [];
       if (self.item.hasOwnProperty('properties')) {
         // console.log("all props", JSON.stringify(self.item.properties,null,2))
         for (var i = 0; i < self.item.properties.length; i++) {
           if (self.item.properties[i].hasOwnProperty('foundInAll')) {
-            set.add(self.item.properties[i])
+            set.push(self.item.properties[i])
           }else {
-            set_uniq.add(self.item.properties[i])
+            set_uniq.push(self.item.properties[i])
+          }
+          if (self.item.properties[i]['domain'].includes(self.item.name)) {
+            self.ownprops.push(self.item.properties[i])
           }
         }
-        self.unique = [...set_uniq]
-        self.incommon = [...set]
+        self.unique = _.uniqBy(set_uniq, function (e) {
+                          return e.label;
+                        });
+        self.incommon = _.uniqBy(set, function (e) {
+                          return e.label;
+                        });
       }
+    },
+    isOwnProp(prop){
+      let self = this;
+      if (prop['domain'].includes(self.item.name)) {
+        return true
+      }
+      return false;
     }
   },
   template: `<div class="p-1 m-1">
               <h5 class="text-muted" v-text="item.name"></h5>
-              <div v-if="incommon.length">
+              <p class='mainTextDark'>
+              <small>Properties</small>
+              <small><span v-text="ownprops.length+' own'"></span> (<i class="fas fa-star fa-xs text-warning"></i>)</small> |
+              <small v-text="incommon.length+unique.length-ownprops.length+' inherited'"></small>
+              </p>
+              <button class="btn btn-info btn-sm w-100 rounded-0" type="button" data-toggle="collapse" data-target="#incommon" aria-expanded="false" aria-controls="incommon">
+                <span v-text="'Compare Similarities ('+incommon.length+')'"></span>
+              </button>
+              <div v-if="incommon.length" class="collapse" id="incommon">
                 <div v-for="prop in incommon" class="text-info">
-                  <small v-text="prop.label"></small>
+                  <i class="fas fa-star fa-xs text-warning" v-if='isOwnProp(prop)'></i>
+                  <small v-text="prop.label" class='tip pointer' :data-tippy-info="prop.description"></small>
                 </div>
               </div>
               <div v-else class="text-warning p-1">NO SIMILARITIES</div>
-              <div class="" v-if="unique.length">
+              <button class="btn btn-dark btn-sm w-100 rounded-0" type="button" data-toggle="collapse" data-target="#unique" aria-expanded="false" aria-controls="unique">
+                <span v-text="'Compare Unique Properties ('+unique.length+')'"></span>
+              </button>
+              <div v-if="unique.length" class="collapse" id="unique">
                 <div v-for="prop in unique"">
-                  <small v-text="prop.label"></small>
+                  <i class="fas fa-star fa-xs text-warning" v-if='isOwnProp(prop)'></i>
+                  <small v-text="prop.label" class="tip pointer" :data-tippy-info="prop.description"></small>
                 </div>
               </div>
             </div>`,
