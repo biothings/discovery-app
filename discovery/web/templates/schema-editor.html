@@ -71,7 +71,7 @@
                 <div class="input-group-prepend">
                   <div class="input-group-text">Choose a short namespace (a-z)</div>
                 </div>
-                <input type="text" pattern="[A-Za-z]{3,10}" v-model='inputNamespace' class="form-control m-auto text-center" :class="{'text-success':availableNamespace, 'text-danger': !availableNamespace}" placeholder="3-10 chars max.">
+                <input type="text" v-model='inputNamespace' class="form-control m-auto text-center" :class="{'text-success':availableNamespace, 'text-danger': !availableNamespace}" placeholder="3 chars min.">
                 <div class="input-group-append">
                   <button :disabled="!availableNamespace" class="btn themeButton text-light" type="submit" v-text="'Use This'"></button>
                 </div>
@@ -748,26 +748,23 @@ var app = new Vue({
         },
         inputNamespace:function(value,oldvalue){
           let self=this;
-          var re = /^[a-zA-Z0-9_.-]*$/;
-          if (!re.test(value) ) {
+          var re = /^[a-zA-Z0-9]*$/;
+          if (!re.test(value) && value.length > 2) {
             $.notify(value+"  cannot contain invalid characters or spaces",{ globalPosition: 'right',className:'error', showDuration: 100, });
             self.availableNamespace= false;
           }else{
-            if (value.length>=3) {
-              axios.head(`/api/registry/`+value).then(function (res) {
+            let url = "/api/registry/" + value;
+            axios.head(url).then(function (res) {
+              self.availableNamespace= false;
+            }).catch(err=>{
+              //last check for reserved names
+              if (value === 'metadata' || value === 'dataset') {
                 self.availableNamespace= false;
-              }).catch(err=>{
-                //last check for reserved names
-                if (value === 'metadata' || value === 'dataset') {
-                  self.availableNamespace= false;
-                }else{
-                  self.availableNamespace= true;
-                }
-                throw err;
-              });
-            }else{
-              self.availableNamespace=false;
-            }
+              }else{
+                self.availableNamespace= true;
+              }
+              throw err;
+            });
           }
 
         },
