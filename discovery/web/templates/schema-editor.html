@@ -748,25 +748,28 @@ var app = new Vue({
         },
         inputNamespace:function(value,oldvalue){
           let self=this;
-          var re = /^[a-zA-Z0-9]*$/;
-          if (!re.test(value) && value.length > 2) {
-            $.notify(value+"  cannot contain invalid characters or spaces",{ globalPosition: 'right',className:'error', showDuration: 100, });
+          var re = /^[a-z0-9]+$/i;
+          if (value.length < 3) {
             self.availableNamespace= false;
           }else{
-            let url = "/api/registry/" + value;
-            axios.head(url).then(function (res) {
+            if (!re.test(value)) {
+              $.notify("["+value+"] cannot contain non-alphanumeric values",{ globalPosition: 'right',className:'error', showDuration: 100, });
               self.availableNamespace= false;
-            }).catch(err=>{
-              //last check for reserved names
-              if (value === 'metadata' || value === 'dataset') {
+            }else{
+              let url = "/api/registry/" + value;
+              axios.head(url).then(function (res) {
                 self.availableNamespace= false;
-              }else{
-                self.availableNamespace= true;
-              }
-              throw err;
-            });
+              }).catch(err=>{
+                //last check for reserved names
+                if (value === 'metadata' || value === 'dataset') {
+                  self.availableNamespace= false;
+                }else{
+                  self.availableNamespace= true;
+                }
+                throw err;
+              });
+            }
           }
-
         },
       },
 			methods:{
