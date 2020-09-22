@@ -791,10 +791,10 @@ var app = new Vue({
           }).queue([
             {
               title: "Choose a name for your class",
-              html: 'Input name must be Pascal cased <b class="text-danger">eg. MyClass </b>',
+              html: 'Input name must be PascalCased <b class="text-danger">eg. MyClass </b>',
               inputValidator: (value) => {
                 return new Promise((resolve) => {
-                  if (value.match(/^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/)) {
+                  if (value.match(/^(?=.*[a-z])[A-Z]+[a-z]*(?:\d*(?:[A-Z]+[a-z]*)?)*$/)) {
                     // DUPLICATE CHECK
                     if (store.getters.isDuplicateClass(value)) {
                       resolve('Class already exists. Choose a diffent name')

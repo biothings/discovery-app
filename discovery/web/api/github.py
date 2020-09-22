@@ -1,7 +1,7 @@
-from github import Github
+from github import Github, GithubException
 
 from biothings.web.handlers.exceptions import BadRequest
-from tornado.web import Finish, HTTPError, MissingArgumentError
+from tornado.web import HTTPError, MissingArgumentError
 
 from .base import APIBaseHandler, github_authenticated
 
@@ -28,12 +28,15 @@ class GHHandler(APIBaseHandler):
             try:
                 repo = user.create_repo(repo_name)
 
-            except Exception as e:
-                raise HTTPError(400, reason=f"Cannot create repository")
-
+            except GithubException.BadCredentialsException as e:
+                raise HTTPError(400, reason=e)
+            except GithubException.UnknownObjectException as e:
+                raise HTTPError(400, reason=e)
+            except GithubException.BadUserAgentException as e:
+                raise HTTPError(400, reason=e)
             except Exception as exc:  # unexpected
                 raise HTTPError(500, reason=str(exc))
         else:
-            raise HTTPError(400, reason=f"User not found")
+            raise HTTPError(400, reason=f"Required parameter 'name' not provided")
 
         self.finish(repo)
