@@ -10,6 +10,7 @@ from tornado.web import RedirectHandler
 from torngithub import GithubMixin, json_decode, json_encode
 
 import discovery.web.siteconfig.default as siteconfig
+import discovery.web.siteconfig.n3c as siteconfign3c
 import discovery.web.siteconfig.niaid as siteconfigniaid
 import discovery.web.siteconfig.outbreak as siteconfigoutbreak
 from biothings.web.handlers import BaseHandler as BioThingsBaseHandler
@@ -17,13 +18,14 @@ from biothings.web.handlers import BaseHandler as BioThingsBaseHandler
 from .saml import SAML_HANDLERS
 
 GITHUB_CALLBACK_PATH = "/oauth"
-GITHUB_SCOPES = ("read:user", "user:email")
+GITHUB_SCOPES = ("read:user", "user:email", "repo")
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 TEMPLATE_LOADER = FileSystemLoader(searchpath=TEMPLATE_PATH)
 TEMPLATE_ENV_DSC = Environment(loader=TEMPLATE_LOADER, cache_size=0)
 TEMPLATE_ENV_NIA = Environment(loader=TEMPLATE_LOADER, cache_size=0)
 TEMPLATE_ENV_OUT = Environment(loader=TEMPLATE_LOADER, cache_size=0)
+TEMPLATE_ENV_N3C = Environment(loader=TEMPLATE_LOADER, cache_size=0)
 TEMPLATE_ENV = TEMPLATE_ENV_DSC  # COMPATIBILITY
 
 
@@ -86,6 +88,7 @@ def setEnvVars(env, config):
 setEnvVars(TEMPLATE_ENV_DSC, siteconfig)
 setEnvVars(TEMPLATE_ENV_NIA, siteconfigniaid)
 setEnvVars(TEMPLATE_ENV_OUT, siteconfigoutbreak)
+setEnvVars(TEMPLATE_ENV_N3C, siteconfign3c)
 createStyles()
 
 
@@ -228,6 +231,8 @@ class TemplateHandler(DiscoveryBaseHandler):
             self.env = TEMPLATE_ENV_NIA
         elif env == 'outbreak':
             self.env = TEMPLATE_ENV_OUT
+        elif env == 'n3c':
+            self.env = TEMPLATE_ENV_N3C
         else:  # discovery
             self.env = TEMPLATE_ENV_DSC
 
@@ -257,6 +262,7 @@ WEB_HANDLERS = [
     (r"/guide/?", TemplateHandler, {"filename": "metadata-guide-new.html"}),
     (r"/guide/niaid/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "niaid"}),
     (r"/guide/outbreak/dataset/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "outbreak"}),
+    (r"/guide/n3c/dataset/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "n3c"}),
     (r"/json-schema-viewer/?", TemplateHandler, {"filename": "json-schema-viewer.html"}),
     (r"/registry/?", TemplateHandler, {"filename": "registry.html"}),
     (r"/schema-playground/?", TemplateHandler, {"filename": "playground.html"}),

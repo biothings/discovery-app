@@ -8,17 +8,17 @@
 <section id="editor" class="container" style="min-height: 80vh;padding-top:60px;">
   <div>
     <div class="jumbotron bg-light text-center m-1 py-5">
-      <h1 class="logoText">Editor</h1>
-      <small @click.prevent='help()' class="pointer text-muted">What's this <i class="fas fa-question" ></i></small>
+      <h1 class="logoText">Schema Editor</h1>
+      <small class="text-muted">Extend an existing schema to create your own.</small>
     </div>
     <div v-if="loading" class="loader">
       <img src="/static/img/ripple.svg"/>
     </div>
     <div id="widget">
-      <ul class="nav nav-tabs">
+      <ul class="nav nav-tabs bg-secondary">
         <li class="nav-item" v-if="userInfo && userInfo.login">
-          <span class="nav-link" :class="{ 'disabled text-success': userInfo }"><small>
-            <i class="fas fa-user-check"></i> Logged in as <span v-text="userInfo.login"></span></small>
+          <span class="nav-link text-light" :class="{ 'disabled': userInfo }"><small>
+            <i class="fas fa-user-check text-success"></i> Logged in as <span v-text="userInfo.login"></span></small>
           </span>
         </li>
         <li class='nav-item' v-if="userInfo && !userInfo.login">
@@ -26,34 +26,41 @@
             <small><i class="fas fa-sign-in-alt"></i> Login</small>
           </a>
         </li>
-        <li class="nav-item" v-if="prefix">
-          <span class="nav-link text-success"><small>
-            <i class="fas fa-check"></i> Namespace <span class="bold" v-text="prefix"></span></small>
+        <li class="nav-item rounded-0" v-if="prefix">
+          <span class="nav-link disabled text-light"><small>
+            <i class="fas fa-check text-success"></i> Namespace <span class="bold" v-text="prefix"></span></small>
           </span>
         </li>
         <li class="nav-item" v-if="newClassAdded">
-          <span class="nav-link text-success"><small>
-            <i class="fas fa-check"></i> New Class Added</small>
+          <span class="nav-link text-light"><small>
+            <i class="fas fa-check text-success"></i> Extended Class Added</small>
           </span>
         </li>
-        <li class='nav-item'>
-          <a class='nav-link' :class="{ 'disabled text-muted notallowed': !prefix, 'mainBackDark text-light pointer': prefix }" @click='getPreview()'>
+        <li class='nav-item' v-show="prefix">
+          <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'mainBackDark text-light pointer': prefix }" data-tippy="Look at your work so far" @click='getPreview()'>
             <small>
               <i class="fas fa-code"></i> Preview
             </small>
           </a>
         </li>
-        <li class='nav-item'>
-          <a class='nav-link' :class="{ 'disabled text-muted notallowed': !prefix, 'bg-primary text-light pointer': prefix }" @click='downnloadSchema()'>
+        <li class='nav-item' v-show="prefix">
+          <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-primary text-light pointer': prefix }" data-tippy="Download your schema" @click='downnloadSchema()'>
             <small>
               <i class="fas fa-file-download"></i> Download
             </small>
           </a>
         </li>
-        <li class='nav-item'>
-          <a class='nav-link text-muted pointer' @click.prevent="showHelp()">
+        <li class='nav-item' v-show="prefix">
+          <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-success text-light pointer': prefix }" data-tippy="Requires Gihub Login" @click.prevent="CreateRepo">
             <small >
-              <i class="fas fa-question-circle text-info"></i> Help!
+              <i class="fab fa-github"></i> Create/Save to Repo
+            </small>
+          </a>
+        </li>
+        <li class='nav-item'>
+          <a class='nav-link rounded-0 text-light pointer' data-tippy="Learn about this editor" @click.prevent="showHelp()">
+            <small >
+              <i class="fas fa-question-circle"></i> Help!
             </small>
           </a>
         </li>
@@ -61,7 +68,7 @@
       <!-- LOGGED IN DASHBOARD -->
       <template v-if="userInfo && userInfo.login">
         <!-- NAMESPACE -->
-        <div class="jumbotron whitefade" v-if='!prefix'>
+        <div class="jumbotron alert-secondary" v-if='!prefix'>
           <p class="text-center text-muted">
             <small>Extending schema: <span class="text-info" v-text="startingPoint"></span></small>  <small class="text-muted bold"><i class="fas fa-chevron-right"></i> Choose a namespace</small>
           </p>
@@ -82,7 +89,7 @@
         </div>
 
         <!-- Custom Class -->
-        <div class="jumbotron whitefade text-center text-muted" v-if='prefix && !newClassAdded'>
+        <div class="jumbotron alert-secondary text-center text-muted" v-if='prefix && !newClassAdded'>
           <p class="text-center text-muted">
             <small>Extending schema: <span class="text-info" v-text="startingPoint"></span></small>
             <small class="text-muted"><i class="fas fa-chevron-right"></i> namespace: <span class="text-info" v-text="prefix"></span></small>
@@ -90,12 +97,12 @@
           </p>
           <hr />
           <form @submit.prevent='addClass()'>
-            <button type="submit" class="btn themeButton text-light" ><i class="fas fa-plus"></i> Class</button>
+            <button type="submit" class="btn btn-lg themeButton text-light" ><i class="fas fa-plus"></i> Class</button>
           </form>
         </div>
 
         <!-- PARENT CLASSES -->
-        <div class="jumbotron whitefade" v-if="newClassAdded" id="editorTippy">
+        <div class="jumbotron alert-secondary" v-if="newClassAdded" id="editorTippy">
           <div>
             <input type="checkbox" class="custom-control-input" id="customControlInline" @click="toggleDesc()">
             <label class="custom-control-label text-muted" for="customControlInline" >Show Descriptions</label>
@@ -894,40 +901,6 @@ var app = new Vue({
             });
           }
         },
-        help(){
-          Swal.mixin({
-            confirmButtonText: 'Next &rarr;',
-            showCancelButton: true,
-            animation:false,
-            customClass:'scale-in-center',
-            progressSteps: ['i', '1','2','3','4','5']
-          }).queue([
-            {
-              title: "Schema Editor",
-              html: "<p>With this tool you will be able to extend an existing class from a schema to a more specific class taylored to your reserach.</p><p>It's as easy as picking the things you want to re-use and enter only any new information.</p>",
-            },
-            {
-              title: "Step 1: Namespace",
-              html: "<p>The namespace will be used for both extending the prefixes in the classes and properties definitions but also as a namespace for your landing page should you register it here. We will check that your namespace is available, it's simple just enter a name that represents your schema or organization.</p>"
-            },
-            {
-              title: "Step 2: Add A New Class",
-              html: "<p>Here you will define your new class with the class from the schema you selected as a starting point as it's subclass.</p><p>Any new properties not present in any other schema class should be added here. Just click the <b class='text-info'>Add Property</b> button and follow the instructions.</p>"
-            },
-            {
-              title: "Step 3: Parent Classes",
-              html: "<p>Here you will see the classes in the schema you selected and all of their properties.</p><p>It's important to understand that all properties are inherited by default but you should only represent in your schema the properties you will actually re-use and require.</p><p>Just click the <b class='text-info'>+</b> button and that property will be added to your new class. To mark it as required, simply click the required symbol.</p>"
-            },
-            {
-              title: "Step 4: Preview",
-              html: "<p>Finally here you can see how your schema is coming along. You can view this at any time and it's always updated with your latest changes.</p>"
-            },
-            {
-              title: "Step 4: Download",
-              html: "<p>When you are happy with your schema, simply download the JSON-LD file and host it with your preferred service. Eg. GitHub. Once hosted come back and try our schema visualizer <a href='/schema-playground'>here</a></p>"
-            },
-          ]);
-        },
         savePrefix(){
           if (this.availableNamespace) {
             var payload = {};
@@ -1023,6 +996,89 @@ var app = new Vue({
             confirmButtonText:"Ready!",
             imageUrl: '/static/img/editor.png',
             imageAlt: 'Metadata Editor'
+          })
+        },
+        CreateRepo(){
+          var self = this;
+          Swal.mixin({
+            input: 'text',
+            confirmButtonText: 'Next &rarr;',
+            showCancelButton: true,
+            footer:`<small class="text-danger">Important: You need to have logged in using GitHub and given us permission to access your repositories.</small>`,
+            progressSteps: ['<i class="fab fa-github-alt"></i>A', '<i class="fab fa-github-alt"></i>B',]
+          }).queue([
+            {
+              title: 'Name your repository',
+              text: 'We will create a public repository with this name'
+            },
+            {
+              title: 'Name your schema file (without extension)',
+              text: 'We will create a JSON-LD file with this name'
+            },
+          ]).then((result) => {
+            if (result.value) {
+              const answers = result.value
+              self.handleGHRequest(answers[0],answers[1]+".jsonld");
+            }
+          })
+        },
+        handleGHRequest(repo,file){
+          var self = this;
+          Swal.fire({
+            title: '<h4>Do you give us permission to create a repository and file with these names?</h4>',
+            text: repo+"/"+file,
+            showCancelButton: true,
+            confirmButtonText: `Go Ahead`,
+            cancelButtonText: `Never Mind`,
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+
+              data ={
+                'name': repo,
+                'file': file,
+                'data': store.getters.getFinalSchema
+              }
+
+              console.log(typeof store.getters.getFinalSchema)
+              console.log(data)
+
+              let config = {
+                 headers: {
+                   'content-type': 'application/json'
+                 }
+               }
+
+              return axios.post("/api/gh", data, config).then(res=>{
+                if (res.data.success) {
+                  return "https://github.com/"+res.data.msg
+                }else{
+                  Swal.fire({
+                    type: 'error',
+                    title: 'Unsuccesful...',
+                    text: JSON.stringify(res.data, null, 2),
+                  })
+                }
+              }).catch(err=>{
+                Swal.fire({
+                  type: 'error',
+                  title: 'Oops...Something went wrong!',
+                  text: err,
+                })
+                throw err;
+              });
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            if (!result.dismiss) {
+              Swal.fire({
+                type: 'success',
+                title: 'Sucess!',
+                html: `<h2>Repository created!</h2>
+                <p>
+                  Click here to see it: <a href="`+result.value+`" target="_blank" rel="nonreferrer">`+result.value+`</a>
+                </p>`,
+              })
+            }
           })
         }
 			},

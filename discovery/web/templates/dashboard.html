@@ -42,7 +42,7 @@
           <div class="metaCont" v-if="dashboard && dashboard.length">
             <div v-for="item in dashboard" class="row m-1">
               <div class="col-sm-5 p-1 mainBackDark d-flex align-items-center justify-content-left">
-                <a target="_blank" :href="'/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
+                <a target="_blank" :href="'/view/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
               </div>
               <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
                 <div>

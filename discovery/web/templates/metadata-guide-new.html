@@ -451,23 +451,25 @@
           }
         }
 
-        // VALIDATION ON COMPLETE
-        var ajv = new Ajv({allErrors: true, jsonPointers: true});
-        var schema = state.schema.validation
-        var data = state.output
 
-        const isValid = ajv.validate(schema, data); //schema, data
-        if(! isValid){
-          // console.log('%c ***** VALIDATION DETAILS *****','color:pink')
-          // console.log("NOT VALID ",ajv.errors);
-          state.valid = false;
-          state.errors = ajv.errors;
-        }else {
-          // console.log('%c ***** VALIDATION RESULT *****','color:limegreen')
-          // console.log(isValid)
-          state.valid = true;
-          state.errors = []
-        }
+        // VALIDATION ON COMPLETE
+        // var ajv = new Ajv({allErrors: true, jsonPointers: true});
+        // // ajv.addMetaSchema()
+        // var schema = state.schema.validation
+        // var data = state.output
+        //
+        // const isValid = ajv.validate(schema, data); //schema, data
+        // if(! isValid){
+        //   // console.log('%c ***** VALIDATION DETAILS *****','color:pink')
+        //   // console.log("NOT VALID ",ajv.errors);
+        //   state.valid = false;
+        //   state.errors = ajv.errors;
+        // }else {
+        //   // console.log('%c ***** VALIDATION RESULT *****','color:limegreen')
+        //   // console.log(isValid)
+        //   state.valid = true;
+        //   state.errors = []
+        // }
       },
       mergeCategoryProps(state,payload){
         let origin = payload['origin'];
@@ -2627,6 +2629,16 @@
             <div class="w-75 p-1">
               <h6 v-show="loading" class="text-primary">Loading <i class="fas fa-spinner fa-pulse"></i></h6>
               <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
+              <!-- 🌈 BOOLEAN 🌈 -->
+              <template v-if="info && info.type === 'boolean'">
+              <div class="form-group">
+                <label for="exampleFormControlSelect1">Select One</label>
+                <select v-model="userInput" class="form-control" id="exampleFormControlSelect1">
+                  <option value='true'>Yes</option>
+                  <option value='false'>No</option>
+                </select>
+              </div>
+              </template>
               <template v-if="info && info.type === 'string'">
                 <!-- 🌈 STRING 🌈 -->
                 <template v-if="info && !info.format">
