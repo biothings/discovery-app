@@ -221,6 +221,7 @@
 <script src="/static/js/renderjson.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="/static/js/moment.js"></script>
+<script src="/static/js/djv.js"></script>
 <script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
 <script src="/static/js/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
@@ -441,7 +442,7 @@
         // Vue.set(state.output,'@type',state.schema.label || state.schema.name)
         // Vue.set(state.output,'@context','http://discovery.biothings.io/view/schema/')
         for (key in props) {
-          if (props[key].hasOwnProperty('value') && props[key]['value']) {
+          if (props[key].hasOwnProperty('value') && props[key]['value'] !== null) {
             if (_.isArray(props[key]['value']) && props[key]['value'].length === 1) {
               Vue.set(state.output,key,props[key].value[0])
             }else{
@@ -451,12 +452,24 @@
           }
         }
 
+        // const env = new djv({version: 'draft-07'});
+        // const jsonSchema = state.schema.validation
+        // var data = state.output
+        //
+        // console.log(data)
+        // env.addSchema('test', jsonSchema);
+        // let results = env.validate('test', data);
+        // console.log('%c ***** VALIDATION DETAILS *****','color:pink')
+        // console.log(results);
+
 
         // VALIDATION ON COMPLETE
         // var ajv = new Ajv({allErrors: true, jsonPointers: true});
         // // ajv.addMetaSchema()
         // var schema = state.schema.validation
         // var data = state.output
+        // console.log(schema)
+        // console.log(data)
         //
         // const isValid = ajv.validate(schema, data); //schema, data
         // if(! isValid){
@@ -2624,7 +2637,7 @@
             </small>
           </div>
         </div>
-        <div class="col-sm-10 p-2 text-left d-flex align-items-center justify-content-center" :class="[userInput ? 'alert-success':'alert-secondary']">
+        <div class="col-sm-10 p-2 text-left d-flex align-items-center justify-content-center" :class="[userInput || userInput === false ? 'alert-success':'alert-secondary']">
           <div class="d-flex w-100 justify-content-center">
             <div class="w-75 p-1">
               <h6 v-show="loading" class="text-primary">Loading <i class="fas fa-spinner fa-pulse"></i></h6>
@@ -2634,8 +2647,8 @@
               <div class="form-group">
                 <label for="exampleFormControlSelect1">Select One</label>
                 <select v-model="userInput" class="form-control" id="exampleFormControlSelect1">
-                  <option value='true'>Yes</option>
-                  <option value='false'>No</option>
+                  <option :value='true'>Yes</option>
+                  <option :value='!true'>No</option>
                 </select>
               </div>
               </template>
@@ -2913,11 +2926,11 @@
           </div>
         </div>
         <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-          <span class="fa-stack fa-1x pointer save" @click="markCompleted(name)" v-show="userInput">
+          <span class="fa-stack fa-1x pointer save" @click="markCompleted(name)" v-show="userInput || userInput === false">
             <i class="fas fa-circle text-success back fa-stack-2x"></i>
             <i class="fas fa-check fa-stack-1x text-light"></i>
           </span>
-          <span class="fa-stack fa-1x pointer delete" @click="clearFieldFor(name)" v-show="info && info.value">
+          <span class="fa-stack fa-1x pointer delete" @click="clearFieldFor(name)" v-show="info && info.value || info && info.value === false">
             <i class="fas fa-circle text-muted fa-stack-2x"></i>
             <i class="fas fa-times fa-stack-1x text-light"></i>
           </span>
