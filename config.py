@@ -32,6 +32,7 @@ APP_LIST = [
     (r"/api/dataset/([^/]+)/?", "discovery.web.api.DatasetMetadataHandler"),
     (r"/api/dataset/?", "discovery.web.api.DatasetMetadataHandler"),
     (r"/api/view/?", "discovery.web.api.SchemaViewHandler"),
+    (r"/api/gh/?", "discovery.web.api.GHHandler"),
     (r"/sitemap/dataset.xml", "discovery.sitemap.DatasetHandler")
 ]
 
