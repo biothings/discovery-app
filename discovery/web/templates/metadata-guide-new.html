@@ -221,7 +221,6 @@
 <script src="/static/js/renderjson.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="/static/js/moment.js"></script>
-<script src="/static/js/djv.js"></script>
 <script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
 <script src="/static/js/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
@@ -284,13 +283,13 @@
         state.filter = state.schema.label || state.schema.name
 
         // Add identifier to required if not there, it's required as an ID
-        if ('identifier' in state.schema.validation.properties && !state.schema.validation.required.includes('identifier')) {
-          state.schema.validation.required.push('identifier')
-        }else{
-          // console.log('WARNING: identifier field not found and is required')
-          Vue.set(state.schema.validation.properties['identifier'],{'type':'string','description':'unique identifier for this entry'});
-          state.schema.validation.required.push('identifier')
-        }
+        // if ('identifier' in state.schema.validation.properties && !state.schema.validation.required.includes('identifier')) {
+        //   state.schema.validation.required.push('identifier')
+        // }else{
+        //   // console.log('WARNING: identifier field not found and is required')
+        //   Vue.set(state.schema.validation.properties['identifier'],{'type':'string','description':'unique identifier for this entry'});
+        //   state.schema.validation.required.push('identifier')
+        // }
 
         // helper func to decide right subcategory
         function getProp(propname){
@@ -452,37 +451,20 @@
           }
         }
 
-        // const env = new djv({version: 'draft-07'});
-        // const jsonSchema = state.schema.validation
-        // var data = state.output
-        //
-        // console.log(data)
-        // env.addSchema('test', jsonSchema);
-        // let results = env.validate('test', data);
-        // console.log('%c ***** VALIDATION DETAILS *****','color:pink')
-        // console.log(results);
-
-
         // VALIDATION ON COMPLETE
-        // var ajv = new Ajv({allErrors: true, jsonPointers: true});
-        // // ajv.addMetaSchema()
-        // var schema = state.schema.validation
-        // var data = state.output
+        var ajv = new Ajv({allErrors:true, jsonPointers:true});
+        var schema = state.schema.validation
+        var data = state.output
         // console.log(schema)
         // console.log(data)
-        //
-        // const isValid = ajv.validate(schema, data); //schema, data
-        // if(! isValid){
-        //   // console.log('%c ***** VALIDATION DETAILS *****','color:pink')
-        //   // console.log("NOT VALID ",ajv.errors);
-        //   state.valid = false;
-        //   state.errors = ajv.errors;
-        // }else {
-        //   // console.log('%c ***** VALIDATION RESULT *****','color:limegreen')
-        //   // console.log(isValid)
-        //   state.valid = true;
-        //   state.errors = []
-        // }
+        const isValid = ajv.validate(schema, data); //schema, data
+        if(! isValid){
+          state.valid = false;
+          state.errors = ajv.errors;
+        }else {
+          state.valid = true;
+          state.errors = []
+        }
       },
       mergeCategoryProps(state,payload){
         let origin = payload['origin'];
@@ -718,7 +700,7 @@
         if (state.schema && state.schema.hasOwnProperty('validation') && state.schema.validation.hasOwnProperty('required')) {
           let required = state.schema.validation['required']
           for (var i = 0; i < required.length; i++) {
-            if (state.schema.validation.properties.hasOwnProperty(required[i]) && state.schema.validation.properties[required[i]].value) {
+            if (state.schema.validation.properties.hasOwnProperty(required[i]) && state.schema.validation.properties[required[i]].value || state.schema.validation.properties[required[i]].value === false) {
               complete = true
             }else{
               complete = false
