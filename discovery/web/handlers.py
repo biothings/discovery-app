@@ -18,7 +18,7 @@ from biothings.web.handlers import BaseHandler as BioThingsBaseHandler
 from .saml import SAML_HANDLERS
 
 GITHUB_CALLBACK_PATH = "/oauth"
-GITHUB_SCOPES = ("read:user", "user:email", "repo")
+GITHUB_SCOPES = ("read:user", "user:email", "public_repo")
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 TEMPLATE_LOADER = FileSystemLoader(searchpath=TEMPLATE_PATH)
