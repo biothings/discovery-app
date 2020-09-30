@@ -4,38 +4,8 @@
 <style>
   [v-cloak] > * { display:none; }
   [v-cloak]::before { content: "Please wait..."; }
-  .swal-form {
-    padding-top: 3%;
-    overflow: auto;
-    height: auto;
-  }
-
-  .swal-form input.nice-input  {
-    display: block;
-    margin: 0;
-    width: 96%;
-    font-family: sans-serif;
-    font-size: 18px;
-    box-shadow: none;
-    padding: 10px;
-    border: solid 1px #dcdcdc;
-    transition: box-shadow 0.3s, border 0.3s;
-    height: initial;
-  }
-  .swal-form input.nice-input:focus,
-  .swal-form input.nice-input.focus {
-    outline: none;
-    border: solid 1px #707070;
-    box-shadow: 0 0 5px 1px #969696;
-  }
-
-  .swal-form .patch-swal-styles-for-inputs {
-    width: initial !important;
-    height: initial !important;
-    display: initial !important;
-  }
 </style>
-<div id="guide" class="container pt-5" style="min-height:90vh;" v-cloak>
+<div id="guide" class="container-fluid pt-5" style="min-height:90vh;" v-cloak>
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>
   </div>
@@ -114,7 +84,7 @@
           <i class="fas fa-circle text-success fa-stack-2x"  :class="{ 'text-muted': !validation, 'mainTextDark': validation }"></i>
           <i class="fas fa-registered fa-stack-1x fa-inverse"></i>
         </span>
-        <div class="pillType desc pointer" @click="viewErrors()" data-tippy-info="Issues Details" style="outline: none !important;">
+        <div class="pillType desc pointer" @click="viewErrors()" data-tippy-info="Issues Details" :class="{'shake-horizontal':!valid}" style="outline: none !important;">
           <span class="alert-muted">issues</span>
           <span class="text-light" v-text="errors.length" :class="[valid?'bg-success':'bg-danger']"></span>
         </div>
@@ -128,8 +98,7 @@
       </div>
     </div>
 
-    <div v-else class="widgetContainer bg-light p-3 whitefade text-center m-1">
-
+    <div v-else class="widgetContainer bg-light text-center">
         <template v-if="step === 1 ">
           <!-- STARTING POINT -->
           <h4 class="logoText">Metadata</h4>
@@ -142,7 +111,6 @@
             </template>
           </div>
         </template>
-
         <!-- OPTIONAL PORTALS -->
         <template v-if=" step === 2 ">
           <h4 class="logoText">Discovery Portals</h4>
@@ -572,7 +540,113 @@
       },
       changeStep(state,payload){
         state.step = payload['step']
-      }
+      },
+      addValue(state,payload){
+        let name = payload['name'];
+        let info = payload['info'];
+        let value = payload['value'];
+
+        let props = state.schema.validation.properties;
+        for (key in props) {
+          if (key === name) {
+            if (info.hasOwnProperty('type') && info['type'] == 'object') {
+              console.log('OBJECT')
+              //SAVE OBJECT
+              if (props[name].value) {
+                Swal.fire({
+                  title: 'Value Already Exists',
+                  text: "Do you want to replace the value of: "+name,
+                  showCancelButton: true,
+                  confirmButtonText: 'Yes'
+                }).then((result) => {
+                  if (result.value) {
+                    Vue.set(props[name],'value',value);
+                  }
+                })
+              }else{
+                //no value yet
+                Vue.set(props[name],'value',value);
+              }
+            }else if (info.hasOwnProperty('anyOf')) {
+              console.log('ANY OF')
+              // SAVE OBJECT TO ARRAY IF AVAILABLE
+              for (var i = 0; i < info['anyOf'].length; i++) {
+                if (info['anyOf'][i].hasOwnProperty('type') && info['anyOf'][i]['type'] == 'array') {
+                  // CAN BE ARRAY
+                  if (props[name].value) {
+                    let val = props[name].value
+                    if (_.isPlainObject(val)) {
+                      // will replace
+                      Swal.fire({
+                        title: 'Value Exists',
+                        text: "Do you want to replace the value of: "+name,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes'
+                      }).then((result) => {
+                        if (result.value) {
+                          Vue.set(props[name],'value',value);
+                        }
+                      })
+                    }
+                    else if (_.isArray(val)) {
+                      //push to exisiting array
+                      props[name]['value'].push(value)
+                    }else {
+                      //no value yet
+                      Vue.set(props[name],'value',value);
+                    }
+                  }else{
+                    //no value yet
+                    Vue.set(props[name],'value',value);
+                  }
+                }else{
+                  //no ability to be array
+                  console.log('no ability to be array')
+                  Vue.set(props[name],'value',value);
+                }
+              }
+            }else if (info.hasOwnProperty('oneOf')) {
+              console.log('ONE OF')
+              // SAVE OBJECT TO ARRAY IF AVAILABLE
+              for (var i = 0; i < info['oneOf'].length; i++) {
+                if (info['oneOf'][i].hasOwnProperty('type') && info['oneOf'][i]['type'] == 'array') {
+                  // CAN BE ARRAY
+                  if (props[name].value) {
+                    let val = props[name].value
+                    if (_.isPlainObject(val)) {
+                      // will replace
+                      Swal.fire({
+                        title: 'Value Exists',
+                        text: "Do you want to replace the value of: "+name,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes'
+                      }).then((result) => {
+                        if (result.value) {
+                          Vue.set(props[name],'value',value);
+                        }
+                      })
+                    }
+                    else if (_.isArray(val)) {
+                      //push to exisiting array
+                      props[name]['value'].push(value)
+                    }else {
+                      //no value yet
+                      Vue.set(props[name],'value',value);
+                    }
+                  }else{
+                    //no value yet
+                    Vue.set(props[name],'value',value);
+                  }
+                }else{
+                  //no ability to be array
+                  console.log('no ability to be array')
+                  Vue.set(props[name],'value',value);
+                }
+              }
+            }
+          }
+        }
+      },
     },
     getters:{
       getBulkJSONItems:state=>{
@@ -1308,8 +1382,98 @@
     </div>`
   });
 
+  Vue.component('object-input', {
+    data: function(){
+      return{
+        userObj: {},
+      }
+    },
+    props: ['name','info'],
+    methods:{
+      markCompleted(propname){
+        var self = this;
 
+        payload = {'name':self.name,'info': self.info, 'value':self.userObj}
+        store.commit('addValue',payload);
+        // save progress
+        store.dispatch('saveProgress');
+      },
+      clearFieldFor:function(propname){
+        var payload = {};
+        payload["clear"] = propname;
+        store.commit('clearValueOfProp',payload);
+      },
+      handleObjectSubmit(event){
+        let self = this;
+        let fields = event.target.elements;
+        console.log(fields)
+        for (var i = 0; i < fields.length; i++) {
+          if (fields[i].localName == 'input' && fields[i].value) {
+            Vue.set(self.userObj, fields[i].dataset.field, fields[i].value)
+          }
+        }
+        console.log('final Object', self.userObj)
+        self.markCompleted();
+        document.getElementById(self.name+"-form").reset();
+      }
+    },
+    computed: {
+      isRequired:function(){
+        return store.getters.isRequired(this.name)
+      },
+      done: {
+        get () {
+          return this.$store.state.schema.validation.properties[this.name].value
+        }
+      },
+      showDesc:function(){
+        return store.getters.getShowDesc
+      }
+    },
+    mounted: function(){
 
+    },
+    template:
+    `<div>
+      <form class="brackets-grey p-1" v-if="!done" :id="name+'-form'" @submit.prevent="handleObjectSubmit($event)">
+        <template v-for="(fieldInfo, fieldName) in info.properties">
+          <template v-if="fieldInfo && fieldInfo.format == 'uri' ">
+            <div class="input-group mb-1 input-group-sm">
+              <div class="input-group-prepend">
+                <div class="input-group-text" v-text="fieldName"></div>
+              </div>
+              <input :data-field="fieldName" type="url" class="form-control" placeholder="Enter url here">
+            </div>
+          </template>
+          <template v-else-if="fieldInfo && fieldInfo.format == 'date' ">
+            <div class="input-group mb-1 input-group-sm">
+              <div class="input-group-prepend">
+                <div class="input-group-text" v-text="fieldName"></div>
+              </div>
+              <input :data-field="fieldName" type="date" class="form-control" placeholder="Enter text here">
+            </div>
+          </template>
+          <template v-else-if="fieldInfo && fieldInfo.type == 'integer' ">
+            <div class="input-group mb-1 input-group-sm">
+              <div class="input-group-prepend">
+                <div class="input-group-text" v-text="fieldName"></div>
+              </div>
+              <input :data-field="fieldName" type="" class="form-control" placeholder="Enter text here">
+            </div>
+          </template>
+          <template v-else>
+            <div class="input-group mb-1 input-group-sm">
+              <div class="input-group-prepend">
+                <div class="input-group-text" v-text="fieldName"></div>
+              </div>
+              <input :data-field="fieldName" type="text" class="form-control" placeholder="Enter text here">
+            </div>
+          </template>
+        </template>
+        <button class="btn themeButton text-light btn-sm" type="submit"><i class="fas fa-plus"></i> Add <span v-text="name"></span></button>
+      </form>
+    </div>`
+  });
 
   Vue.component('input-box', {
     data: function(){
@@ -1860,10 +2024,14 @@
               }else {
                 // if options, user chooses type
                 Swal({
-                  title: "Select Type",
+                  title: "Select type of "+propName,
                   input: 'select',
                   inputOptions: options,
                   inputPlaceholder: 'Select one',
+                  animation:false,
+                  confirmButtonColor:"{{color_main}}",
+                  cancelButtonColor:"{{color_sec}}",
+                  customClass:'scale-in-center',
                   showCancelButton: true,
                   inputValidator: (value) => {
                     if (value) {
@@ -1903,10 +2071,14 @@
           }else {
             // if options, user chooses type
             Swal({
-              title: "Select Type",
+              title: "Select type of "+propName,
               input: 'select',
               inputOptions: options,
               inputPlaceholder: 'Select one',
+              animation:false,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              customClass:'scale-in-center',
               showCancelButton: true,
               inputValidator: (value) => {
                 if (value) {
@@ -2606,256 +2778,232 @@
       }
     },
     template:
-    `<div class="mb-2 inputbox fade-in" :id='name'>
+    `<div class="m-0 inputbox fade-in" :id='name'>
       <div class="row">
-        <div class="col-sm-12 text-center text-muted">
-          <div class="w-75 m-auto">
-            <div class="w-100 text-center">
-              <h6 v-text="name" class="text-muted bold pointer mr-1 d-inline"></h6>
-              <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired"></i>
-            </div>
-            <small v-if="showDesc" class="text-info">
-              <span v-text='info.description || "No description provided"'></span>
-            </small>
-          </div>
-        </div>
-        <div class="col-sm-10 p-2 text-left d-flex align-items-center justify-content-center" :class="[userInput || userInput === false ? 'alert-success':'alert-secondary']">
+        <div class="col-sm-10 p-1 text-left d-flex align-items-center justify-content-center" :class="[userInput || userInput === false ? 'completefield':'alert-light']">
           <div class="d-flex w-100 justify-content-center">
-            <div class="w-75 p-1">
-              <h6 v-show="loading" class="text-primary">Loading <i class="fas fa-spinner fa-pulse"></i></h6>
-              <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
-              <!-- 🌈 BOOLEAN 🌈 -->
-              <template v-if="info && info.type === 'boolean'">
-              <div class="form-group">
-                <label for="exampleFormControlSelect1">Select One</label>
-                <select v-model="userInput" class="form-control" id="exampleFormControlSelect1">
-                  <option :value='true'>Yes</option>
-                  <option :value='!true'>No</option>
-                </select>
+            <div class="row m-0 w-100">
+              <div class="col-sm-2 d-flex align-items-center justify-content-center">
+                <small class="bold" :class="[userInput || userInput === false ? 'text-success':'text-muted']">
+                  <i class="fas fa-asterisk fa-xs text-danger required pointer unselectable" v-if="isRequired"></i> <span v-text="name"></span>
+                </small>
               </div>
-              </template>
-              <template v-if="info && info.type === 'string'">
-                <!-- 🌈 STRING 🌈 -->
-                <template v-if="info && !info.format">
-                  <!-- 🌈 STRING VOCABULARY🌈 -->
-                  <template v-if="info && info.vocabulary">
-                    <small>Input <b v-text="info.vocabulary && !info.vocabulary.strict ? 'CAN' : 'MUST' "></b> be from existing ontology terms.</small>
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <div class="input-group-text bg-secondary text-light"><i class="fas fa-search"></i></div>
-                      </div>
-                      <input :required="isRequired" type="text" v-model="vocabTerm" class="form-control form-control-sm mousetrap" :placeholder="userInput? userInput:'Type to begin search' " id="stringInput" list="suggestionlist">
-                    </div>
-                    <datalist id="suggestionlist">
-                      <template v-for="item in vocabSuggestions">
-                        <option :value="item.autosuggest" @click="vocabTerm=item.autosuggest;vocabSuggestions=[]">
-                      </template>
-                    </datalist>
-                    <div v-show="vocabTerm" class="alert alert-light optionBox">
-                      <small><b class="text-primary" v-text="'('+vocab.length+')'"></b> Existing results related to: <i v-text='vocabTerm'></i></small>
-                      <template v-if="vocab.length" v-for="(item,i) in vocab">
-                        <div class="form-check">
-                          <input class="form-check-input mousetrap" type="radio" name="exampleRadios" :id="i" :value="item.iri" @click='userInput=item.iri;vocabDetails=item' v-model="userInput">
-                          <label class="form-check-label" :for="i">
-                            <span v-text='item.label' ></span>
-                            <i v-if="userInput && userInput === item.iri" class="fas fa-check text-success"></i>
-                          </label>
-                        </div>
-                      </template>
-                      <template v-if="info.vocabulary && !info.vocabulary.strict ">
-                        <div class="alert alert-warning">
-                          <h6>Didn't find what you are looking for?</h6>
-                          <p class="text-muted">
-                            Just use <b class="pointer text-success" v-text="vocabTerm" @click="userInput=vocabTerm;vocabDetails={}"></b>
-                          </p>
-                        </div>
-                      </template>
-                    </div>
-                  </template>
-                  <!-- 🌈 STRING NORMAL🌈 -->
-                  <template v-else>
-                    <textarea :rows="name ==='name'|| name ==='identifier' ?1:7" type="text" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter text here"></textarea>
-                  </template>
-                    <!-- 🌈 VOCAB PREVIEW🌈 -->
-                  <template v-if="vocabDetails && vocab.length && vocabDetails.ontology_prefix">
-                    <div class="alert alert-info optionBox">
-                      <h6>
-                        <span v-text='vocabDetails.label' class="bold"></span>
-                        <template v-if="vocabDetails && vocabDetails.short_form">
-                          (<small v-text='vocabDetails.short_form' ></small>)
-                        </template>
-                      </h6>
-                      <table>
-                        <tbody>
-                          <tr>
-                            <td>
-                              <div class="pillType d-block m-1">
-                                <span class="mainBackDark" style="font-size:1em;">Ontology</span>
-                                <span style="font-size:1em;">
-                                  <a :href="vocabDetails.iri" v-text="vocabDetails.ontology_prefix" rel="nonreferrer" target="_blank"></a>
-                                </span>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <div class="pillType d-block m-1">
-                                <span class="mainBackLight" style="font-size:1em;">ID</span>
-                                <span style="font-size:1em;">
-                                  <a :href="vocabDetails.iri" v-text="vocabDetails.obo_id" rel="nonreferrer" target="_blank"></a>
-                                </span>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr v-if="vocabDetails && vocabDetails.description">
-                            <td>
-                              <small v-html="vocabDetails.description[0]"></small>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </template>
-                </template>
-                <!-- 🌈 URL 🌈 -->
-                <template v-if="info && info.format === 'uri'">
-                  <input type="url" v-model="userInput" class="form-control form-control-sm mousetrap" placeholder="enter url here">
-                </template>
-                <!-- 🌈 STRING FORMAT DATE 🌈 -->
-                <template v-if="info && info.format === 'date'">
-                  <input type="date" v-model="userInput" class="form-control form-control-sm">
-                </template>
-              </template>
-              <!-- 🌈 ENUM 🌈 -->
-              <template v-if="info && info.enum" v-for="(item,i) in info.enum">
-                <div class="form-check">
-                  <input class="form-check-input mousetrap" type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
-                  <label class="form-check-label" :for="i" v-text='item'></label>
+              <div class="col-sm-10">
+                <div v-if="showDesc"  class="col-sm-12">
+                  <small  class="text-muted">
+                    <span v-text='info.description || "No description provided"'></span>
+                  </small>
                 </div>
-              </template>
-              <!-- 🌈 LICENSE 🌈 -->
-              <template v-if="info.type=== 'object' && name === 'license'">
-                <form id="licenseForm" class="p-1" v-if="!userInput">
-                  <small class="text-muted">Allow commercial uses of your work?</small>
-                  <select @change="getLicense()" ref="license1" class="form-control form-control-sm" id="ControlSelect1">
-                    <option selected>Choose...</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                    <option value="Yes, as long as others share alike">Yes, as long as others share alike</option>
+                <h6 v-show="loading" class="text-primary">Loading <i class="fas fa-spinner fa-pulse"></i></h6>
+                <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
+                <!-- 🌈 BOOLEAN 🌈 -->
+                <template v-if="info && info.type === 'boolean'">
+                <div class="form-group w-50">
+                  <select v-model="userInput" class="form-control">
+                    <option :value='true'>Yes</option>
+                    <option :value='!true'>No</option>
                   </select>
-                  <small class="text-muted">Allow commercial uses of your work?</small>
-                  <select @change="getLicense()" ref="license2" class="form-control form-control-sm" id="ControlSelect2" required="">
-                    <option selected>Choose...</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </select>
-                  <div v-show='licenseThirdQuestion'>
-                    <small class="text-muted">Impose legal requirement for attribution?</small>
-                    <select @change="getLicense()" ref="license3" class="form-control form-control-sm" id="ControlSelect3" required="">
+                </div>
+                </template>
+                <template v-if="info && info.type === 'string'">
+                  <!-- 🌈 STRING 🌈 -->
+                  <template v-if="info && !info.format">
+                    <!-- 🌈 STRING VOCABULARY🌈 -->
+                    <template v-if="info && info.vocabulary">
+                      <small>Input <b v-text="info.vocabulary && !info.vocabulary.strict ? 'CAN' : 'MUST' "></b> be from existing ontology terms.</small>
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <div class="input-group-text bg-secondary text-light"><i class="fas fa-search"></i></div>
+                        </div>
+                        <input :required="isRequired" type="text" v-model="vocabTerm" class="form-control form-control-sm " :placeholder="userInput? userInput:'Type to begin search' " id="stringInput" list="suggestionlist">
+                      </div>
+                      <datalist id="suggestionlist">
+                        <template v-for="item in vocabSuggestions">
+                          <option :value="item.autosuggest" @click="vocabTerm=item.autosuggest;vocabSuggestions=[]">
+                        </template>
+                      </datalist>
+                      <div v-show="vocabTerm" class="alert alert-light optionBox">
+                        <small><b class="text-primary" v-text="'('+vocab.length+')'"></b> Existing results related to: <i v-text='vocabTerm'></i></small>
+                        <template v-if="vocab.length" v-for="(item,i) in vocab">
+                          <div class="form-check">
+                            <input class="form-check-input " type="radio" name="exampleRadios" :id="i" :value="item.iri" @click='userInput=item.iri;vocabDetails=item' v-model="userInput">
+                            <label class="form-check-label" :for="i">
+                              <span v-text='item.label' ></span>
+                              <i v-if="userInput && userInput === item.iri" class="fas fa-check text-success"></i>
+                            </label>
+                          </div>
+                        </template>
+                        <template v-if="info.vocabulary && !info.vocabulary.strict ">
+                          <div class="alert alert-warning">
+                            <h6>Didn't find what you are looking for?</h6>
+                            <p class="text-muted">
+                              Just use <b class="pointer text-success" v-text="vocabTerm" @click="userInput=vocabTerm;vocabDetails={}"></b>
+                            </p>
+                          </div>
+                        </template>
+                      </div>
+                    </template>
+                    <!-- 🌈 STRING NORMAL🌈 -->
+                    <template v-else>
+                      <textarea :rows="name ==='name'|| name ==='identifier' ?1:7" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
+                    </template>
+                      <!-- 🌈 VOCAB PREVIEW🌈 -->
+                    <template v-if="vocabDetails && vocab.length && vocabDetails.ontology_prefix">
+                      <div class="alert alert-info optionBox">
+                        <h6>
+                          <span v-text='vocabDetails.label' class="bold"></span>
+                          <template v-if="vocabDetails && vocabDetails.short_form">
+                            (<small v-text='vocabDetails.short_form' ></small>)
+                          </template>
+                        </h6>
+                        <table>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <div class="pillType d-block m-1">
+                                  <span class="mainBackDark" style="font-size:1em;">Ontology</span>
+                                  <span style="font-size:1em;">
+                                    <a :href="vocabDetails.iri" v-text="vocabDetails.ontology_prefix" rel="nonreferrer" target="_blank"></a>
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <div class="pillType d-block m-1">
+                                  <span class="mainBackLight" style="font-size:1em;">ID</span>
+                                  <span style="font-size:1em;">
+                                    <a :href="vocabDetails.iri" v-text="vocabDetails.obo_id" rel="nonreferrer" target="_blank"></a>
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr v-if="vocabDetails && vocabDetails.description">
+                              <td>
+                                <small v-html="vocabDetails.description[0]"></small>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </template>
+                  </template>
+                  <!-- 🌈 URL 🌈 -->
+                  <template v-if="info && info.format === 'uri'">
+                    <input type="url" v-model="userInput" class="form-control form-control-sm " placeholder="enter url here">
+                  </template>
+                  <!-- 🌈 STRING FORMAT DATE 🌈 -->
+                  <template v-if="info && info.format === 'date'">
+                    <input type="date" v-model="userInput" class="form-control form-control-sm">
+                  </template>
+                </template>
+                <!-- 🌈 ENUM 🌈 -->
+                <template v-if="info && info.enum" v-for="(item,i) in info.enum">
+                  <div class="form-check">
+                    <input class="form-check-input " type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
+                    <label class="form-check-label" :for="i" v-text='item'></label>
+                  </div>
+                </template>
+                <!-- 🌈 LICENSE 🌈 -->
+                <template v-if="info.type=== 'object' && name === 'license'">
+                  <form id="licenseForm" class="p-1" v-if="!userInput">
+                    <small class="text-muted">Allow commercial uses of your work?</small>
+                    <select @change="getLicense()" ref="license1" class="form-control form-control-sm" id="ControlSelect1">
+                      <option selected>Choose...</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                      <option value="Yes, as long as others share alike">Yes, as long as others share alike</option>
+                    </select>
+                    <small class="text-muted">Allow commercial uses of your work?</small>
+                    <select @change="getLicense()" ref="license2" class="form-control form-control-sm" id="ControlSelect2" required="">
                       <option selected>Choose...</option>
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
                     </select>
-                  </div>
-                </form>
-                <template v-if="userLicense.text && !userInput">
-                  <div class="alert alert-success text-center mt-3">
-                    <h6 v-text="userLicense.text"></h6>
-                    <p>
-                      <small v-text="userLicense.description"></small>
-                    </p>
-                    <small>
-                      <a :href="userLicense.url" target="_blank" v-text="'Learn More About '+userLicense.text"></a>
-                    </small>
+                    <div v-show='licenseThirdQuestion'>
+                      <small class="text-muted">Impose legal requirement for attribution?</small>
+                      <select @change="getLicense()" ref="license3" class="form-control form-control-sm" id="ControlSelect3" required="">
+                        <option selected>Choose...</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  </form>
+                  <template v-if="userLicense.text && !userInput">
+                    <div class="alert alert-success text-center mt-3">
+                      <h6 v-text="userLicense.text"></h6>
+                      <p>
+                        <small v-text="userLicense.description"></small>
+                      </p>
+                      <small>
+                        <a :href="userLicense.url" target="_blank" v-text="'Learn More About '+userLicense.text"></a>
+                      </small>
+                    </div>
+                  </template>
+                  <template v-if="userInput && userInput.text">
+                    <div class="alert alert-success text-center mt-3">
+                      <small><b>License Chosen:</b> </small>
+                      <h6 v-text="userInput.text"></h6>
+                      <p>
+                        <small v-text="userInput.description"></small>
+                      </p>
+                      <small>
+                        <a :href="userInput.url" target="_blank" v-text="'Learn More About '+userInput.text"></a>
+                      </small>
+                      <hr />
+                    </div>
+                  </template>
+                  <div class="text-center p-1" v-if="userLicense.text && !userInput">
+                    <button class="btn btn-success" @click="userInput=userLicense">Use This License</button>
                   </div>
                 </template>
-                <template v-if="userInput && userInput.text">
-                  <div class="alert alert-success text-center mt-3">
-                    <small><b>License Chosen:</b> </small>
-                    <h6 v-text="userInput.text"></h6>
-                    <p>
-                      <small v-text="userInput.description"></small>
-                    </p>
-                    <small>
-                      <a :href="userInput.url" target="_blank" v-text="'Learn More About '+userInput.text"></a>
-                    </small>
-                    <hr />
-                  </div>
-                </template>
-                <div class="text-center p-1" v-if="userLicense.text && !userInput">
-                  <button class="btn btn-success" @click="userInput=userLicense">Use This License</button>
-                </div>
-              </template>
 
-              <!-- 🌈  KEYWORDS 🌈 -->
-              <template v-if="info.type=== 'array' && name === 'keywords'">
-                <div class="form-group p-2 row">
-                  <div class="col-sm-12 mb-2">
-                    <form @submit.prevent="addKeyword">
-                      <small class="text-muted">Enter single or multiple keywords separated by commas</small>
-                      <input ref="keywordInput" autocomplete="off" type="text" class="form-control form-control-sm mousetrap" placeholder="Enter text here">
-                    </form>
-                  </div>
-                  <div class="col-sm-12 m-auto">
-                    <template v-for="text in userInput">
-                      <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical" title="remove">
-                        <span v-html="text"></span>
-                        <span style="opacity:0;" class="d-inline" @click.prevent="removeItem(text)"> <i class="fas fa-times"></i></span>
-                      </span>
-                    </template>
-                  </div>
-                  <div class="alert alert-success m-3 w-75" v-show="userInput">
-                    <small><b>Saved Keywords:</b> </small>
-                    <template v-for="(text,i) in userInput">
-                      <small v-html="text"></small>
-                      <small v-if="i !== userInput.length-1">, </small>
-                    </template>
-                  </div>
-                </div>
-              </template>
-
-              <!-- 🌈  CONSTANT DATA CATALOG 🌈 -->
-              <template v-if="info.type=== 'object' && name === 'includedInDataCatalog'">
-                <div class="text-center">
-                  <div class="text-center bold text-info" v-if="constFound">
-                    <small class="bold m-auto">Fixed Value, No Action Needed</small>
-                  </div>
-                  <div class='alert alert-success m-auto w-75'>
-                  <p v-for="(item,index) in userInput" class="m-0">
-                    <small class="bold" v-text='index'></small>:<small v-text='item'></small>
-                  </p>
-                  </div>
-                </div>
-              </template>
-              <!-- 🌈  OBJECT 🌈 -->
-              <template v-if="info.type=== 'object' && name !== 'license' && name !== 'includedInDataCatalog' ">
-                <div class="form-group p-2 row">
-                  <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="info.type=== 'object' && !userInput">
-                    <i class="fas fa-plus"></i> <span v-text="'Add '+name"></span>
-                  </button>
-                </div>
-                <div class="col-sm-12 m-auto">
-                <!-- 🌈  input preview for object or array🌈 -->
-                  <template v-if="typeof userInput === 'object' || typeof userInput === 'array'  " v-for="(person,i) in userInput">
-                    <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
-                      <i class="fas fa-check"></i>
-                      <span v-text="name+' '+(i+1)"></span>
-                      <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
-                    </span>
-                  </template>
-                <!-- 🌈  input preview for string🌈 -->
-                  <template v-if="typeof userInput === 'string'">
-                    <span style="overflow:hidden; max-width:100%;" class="badge badge-success text-light" v-text="userInput"></span>
-                  </template>
-                </div>
-              </template>
-              <!-- 🌈  ONE OF 🌈 -->
-              <template v-if="info.oneOf || info.anyOf">
-                <!-- 🌈  ONE OF ANYTHING🌈 -->
-                <template v-if="name !== 'datePublished' && name !== 'dateModified'">
+                <!-- 🌈  KEYWORDS 🌈 -->
+                <template v-if="info.type=== 'array' && name === 'keywords'">
                   <div class="form-group p-2 row">
-                    <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="!userInput || canAcceptMultiple">
-                      <i class="fas fa-plus"></i> <span v-text="'Add new '+name"></span>
+                    <div class="col-sm-12 mb-2">
+                      <form @submit.prevent="addKeyword">
+                        <small class="text-muted">Enter single or multiple keywords separated by commas</small>
+                        <input ref="keywordInput" autocomplete="off" type="text" class="form-control form-control-sm " placeholder="Enter text here">
+                      </form>
+                    </div>
+                    <div class="col-sm-12 m-auto">
+                      <template v-for="text in userInput">
+                        <span title="Delete"  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical" title="remove">
+                          <span v-html="text"></span>
+                          <span style="opacity:0;" class="d-inline" @click.prevent="removeItem(text)"> <i class="fas fa-times"></i></span>
+                        </span>
+                      </template>
+                    </div>
+                    <div class="alert alert-success m-3 w-75" v-show="userInput">
+                      <small><b>Saved Keywords:</b> </small>
+                      <template v-for="(text,i) in userInput">
+                        <small v-html="text"></small>
+                        <small v-if="i !== userInput.length-1">, </small>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- 🌈  CONSTANT DATA CATALOG 🌈 -->
+                <template v-if="info.type=== 'object' && name === 'includedInDataCatalog'">
+                  <div class="text-center">
+                    <div class="text-center bold text-info" v-if="constFound">
+                      <small class="bold m-auto">Fixed Value, No Action Needed</small>
+                    </div>
+                    <div class='alert alert-success m-auto w-75'>
+                    <p v-for="(item,index) in userInput" class="m-0">
+                      <small class="bold" v-text='index'></small>:<small v-text='item'></small>
+                    </p>
+                    </div>
+                  </div>
+                </template>
+                <!-- 🌈  OBJECT 🌈 -->
+                <template v-if="info.type=== 'object' && name !== 'license' && name !== 'includedInDataCatalog' ">
+                  <!-- <object-input :name="name" :info="info"></object-input> -->
+                  <div class="form-group p-2 row">
+                    <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="info.type=== 'object' && !userInput">
+                      <i class="fas fa-plus"></i> <span v-text="'Add '+name"></span>
                     </button>
                   </div>
                   <div class="col-sm-12 m-auto">
@@ -2873,41 +3021,68 @@
                     </template>
                   </div>
                 </template>
-
-                <!-- 🌈  ONE OF  VOCABULARY🌈
-                <template v-if="info.oneOf && info.oneOf[0].vocabulary">
-                  <input-box :name="name" :info="info.oneOf[0]"></input-box>
-                </template> -->
-
-                <!-- 🌈  ONE OF  DATES🌈 -->
-                <template v-if="name === 'datePublished' || name === 'dateModified'">
-                  <div v-if="datePreset && !userInput" class="p-2">
-                    <small>Dates used:</small>
-                    <small class="badge badge-info pointer m-1" v-text="'Click to use '+datePreset" @click="userInput=datePreset"></small>
-                  </div>
-                  <template v-for="(item,i) in info.oneOf">
-                    <div>
-                      <template v-if="item.format === 'date'">
-                        <input type="date" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.format">
+                <!-- 🌈  ONE OF 🌈 -->
+                <template v-if="info.oneOf || info.anyOf">
+                  <!-- 🌈  ONE OF ANYTHING🌈 -->
+                  <template v-if="name !== 'datePublished' && name !== 'dateModified'">
+                    <div class="form-group p-2 row">
+                      <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="!userInput || canAcceptMultiple">
+                        <i class="fas fa-plus"></i> <span v-text="'Add new '+name"></span>
+                      </button>
+                    </div>
+                    <div class="col-sm-12 m-auto">
+                    <!-- 🌈  input preview for object or array🌈 -->
+                      <template v-if="typeof userInput === 'object' || typeof userInput === 'array'  " v-for="(person,i) in userInput">
+                        <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
+                          <i class="fas fa-check"></i>
+                          <span v-text="name+' '+(i+1)"></span>
+                          <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
+                        </span>
                       </template>
-                      <template v-if="item.type === 'string' && !item.format">
-                        <input  type="text" v-model="userInput" class="form-control form-control-sm mousetrap" :placeholder="'enter '+item.type">
+                    <!-- 🌈  input preview for string🌈 -->
+                      <template v-if="typeof userInput === 'string'">
+                        <span style="overflow:hidden; max-width:100%;" class="badge badge-success text-light" v-text="userInput"></span>
                       </template>
                     </div>
                   </template>
-                </template>
 
-              </template>
-              <small v-if="showDesc">
-                <small class="text-muted bold">Part of</small>
-                <template v-if="info && info.categories" v-for="category in info.categories">
-                  <small v-text="category.category" class="desc pointer mr-2" :data-tippy-info="[category.subcategory === 'Required' ? 'Required' : 'Recommended']" :class="[category.subcategory === 'Required' ? 'text-danger' : 'text-info']"></small>
+                  <!-- 🌈  ONE OF  VOCABULARY🌈
+                  <template v-if="info.oneOf && info.oneOf[0].vocabulary">
+                    <input-box :name="name" :info="info.oneOf[0]"></input-box>
+                  </template> -->
+
+                  <!-- 🌈  ONE OF  DATES🌈 -->
+                  <template v-if="name === 'datePublished' || name === 'dateModified'">
+                    <div v-if="datePreset && !userInput" class="p-2">
+                      <small>Dates used:</small>
+                      <small class="badge badge-info pointer m-1" v-text="'Click to use '+datePreset" @click="userInput=datePreset"></small>
+                    </div>
+                    <template v-for="(item,i) in info.oneOf">
+                      <div>
+                        <template v-if="item.format === 'date'">
+                          <input type="date" v-model="userInput" class="form-control form-control-sm " :placeholder="'enter '+item.format">
+                        </template>
+                        <template v-if="item.type === 'string' && !item.format">
+                          <input  type="text" v-model="userInput" class="form-control form-control-sm " :placeholder="'enter '+item.type">
+                        </template>
+                      </div>
+                    </template>
+                  </template>
+
                 </template>
-              </small>
+                <small v-if="showDesc && info.categories.length > 1">
+                  <small class="text-muted bold">Part of</small>
+                  <template v-if="info && info.categories" v-for="category in info.categories">
+                    <small v-text="category.category" class="desc pointer mr-2" :data-tippy-info="[category.subcategory === 'Required' ? 'Required' : 'Recommended']" :class="[category.subcategory === 'Required' ? 'text-danger' : 'text-info']"></small>
+                  </template>
+                </small>
+              </div>
+
+
             </div>
           </div>
         </div>
-        <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+        <div class="col-sm-2 p-2 alert-dark actions d-flex align-items-center justify-content-around">
           <span class="fa-stack fa-1x pointer save" @click="markCompleted(name)" v-show="userInput || userInput === false">
             <i class="fas fa-circle text-success back fa-stack-2x"></i>
             <i class="fas fa-check fa-stack-1x text-light"></i>
@@ -3022,38 +3197,30 @@
       }
     },
     template:
-    `<div class="">
-      <div class="row">
-        <div class="col-sm-12 col-md-8">
-
-
-          <div class="text-left">
-            <h3 class="badge" v-text="type" :class="type === 'REQUIRED' ?'badge-required':'badge-info'"></h3>
+    `<div>
+      <div class="row m-0">
+        <div class="col-sm-12 grad d-flex justify-content-around align-items-center p-1">
+          <h3 class="badge d-inline m-0" v-text="type" :class="type === 'REQUIRED' ?'badge-required':'badge-info'"></h3>
+          <button class="btn btn-sm btn-outline-secondary text-light" @click="viewSettings = ! viewSettings">
+            <small><i class="fas fa-cog"></i> Display Settings</small>
+          </button>
+          <div v-show="viewSettings">
+            <input class="form-check-input" type="checkbox" :checked="allMode"  id="customControlInline2" @click="allMode = !allMode">
+            <label class="form-check-label text-light" for="customControlInline2" >
+              <small>Change Form Style</small>
+            </label>
           </div>
-
-          <div class="alert-dark d-flex justify-content-around align-items-center p-1">
-            <button class="btn btn-sm btn-outline-secondary" @click="viewSettings = ! viewSettings">
-              <small class="text-muted">View Options</small>
-              <i class="fas fa-chevron-right" v-if="!viewSettings"></i>
-              <i class="fas fa-chevron-left" v-else></i>
-            </button>
-            <div v-show="viewSettings">
-              <input class="form-check-input" type="checkbox" :checked="allMode"  id="customControlInline2" @click="allMode = !allMode">
-              <label class="form-check-label text-muted" for="customControlInline2" >
-                <small>Change Form Style</small>
-              </label>
-            </div>
-            <div v-show="viewSettings">
-              <input class="form-check-input" type="checkbox" :checked="showDesc"  id="customControlInline" @click="toggleDesc()">
-              <label class="form-check-label text-muted" for="customControlInline" >
-                <small>Toggle Descriptions</small>
-              </label>
-            </div>
+          <div v-show="viewSettings">
+            <input class="form-check-input" type="checkbox" :checked="showDesc"  id="customControlInline" @click="toggleDesc()">
+            <label class="form-check-label text-light" for="customControlInline" >
+              <small>Toggle Descriptions</small>
+            </label>
           </div>
-
+        </div>
+        <div class="col-sm-12 col-md-9 p-0">
           <template v-if="allMode && validation">
             <!-- 🌈  ALL MODE 🌈 -->
-            <div class="p-3 rounded" style="border:2px solid rgb(230, 230, 230)">
+            <div class="px-3">
               <template v-if="type === 'REQUIRED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
                   <input-box :name='index' :info="prop" :key='index'></input-box>
@@ -3119,12 +3286,15 @@
           </template>
 
         </div>
-        <div class="col-sm-12 col-md-4">
+        <div class="col-sm-12 col-md-3 p-0">
+          <div class="w-100 text-muted d-flex justify-content-around align-items-center p-1">
+            <h6>Progress Tracker</h6>
+          </div>
           <template v-if="categoryTotals" v-for="(subcats,cat) in categoryTotals">
             <catcontainer class="fade-in" :cat="cat" :subcats="subcats" :key="cat+subcats"></catcontainer>
           </template>
         </div>
-        <div class="col-sm-12 text-right mt-2 rounded p-1" :class="{'alert-success':isComplete, 'alert-warning': !isComplete}">
+        <div class="col-sm-12 text-right m-0 rounded-0 p-1" :class="{'alert-success':isComplete, 'alert-danger': !isComplete}">
           <div class="bg-none p-2 rounded">
             <template v-if="type === 'REQUIRED' && isComplete ">
               <small class="text-success bold">Ready to proceed!</small>
@@ -3146,8 +3316,6 @@
       </div>
     </div>`
   });
-
-
 
 
   var app = new Vue({
@@ -3632,8 +3800,11 @@
           var self = this;
 
           Swal.fire({
-            title: 'What type of file do you have?',
+            title: 'Bulk registration',
+            text: 'What type of file do you have?',
             input: 'select',
+            animation:false,
+            customClass:'scale-in-center',
             inputOptions: {
               'json': 'JSON',
               'csv': 'CSV',
@@ -3788,7 +3959,8 @@
         loadData(){
           var self = this;
           Swal.fire({
-            title: 'Import metadata from',
+            title: 'Import Metadata',
+            text: 'Select the source of metadata',
             input: 'select',
             inputOptions: {
               'giturl': 'Hosted metadata on GitHub (raw url)',
@@ -3797,6 +3969,8 @@
             },
             inputPlaceholder: 'Select method',
             showCancelButton: true,
+            animation:false,
+            customClass:'scale-in-center',
             confirmButtonText: 'Next',
             showLoaderOnConfirm: true,
             preConfirm: (method) => {

@@ -1,15 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<style>
-.swal2-popup .swal2-textarea {
-    height: auto !important;
-    padding: .75em;
-}
-.metaCont{
-  max-height: 500px; overflow: scroll;
-}
-</style>
 <section id="dashboard">
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>

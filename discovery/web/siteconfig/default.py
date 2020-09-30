@@ -57,10 +57,11 @@ GUIDE_PRESETS = [
 ]
 
 GUIDE_SETTINGS = {
-    "form-mode": 0,
+    "form-mode": 1,
 }
 
-GUIDE_PORTALS = [{'namespace': 'google',
+GUIDE_PORTALS = [
+                 {'namespace': 'google',
                   'prefix': 'bts',
                   'name': 'Google',
                   'displayName': 'Google Dataset Search',
@@ -72,18 +73,18 @@ GUIDE_PORTALS = [{'namespace': 'google',
                   'displayName': 'DataCite',
                   'description': 'A list of core metadata properties chosen for an accurate and consistent identification of a resource for citation and retrieval purposes by DataCite. <a target="_blank" href="https://schema.datacite.org/">Learn More<a/>',
                   'selected': 0},
-                  {'namespace': 'outbreak',
-                   'prefix': 'outbreak',
-                   'name': 'Dataset',
-                   'displayName': 'Outbreak.info',
-                   'description': 'This is the schema for describing the Dataset schema used for outbreak.info. <a target="_blank" href="https://outbreak.info/">Learn More<a/>',
-                   'selected': 0},
-                   {'namespace': 'niaid',
-                    'prefix': 'niaid',
-                    'name': 'NiaidDataset',
-                    'displayName': 'NIAID Data Portal',
-                    'description': 'A body of structured information describing some topic(s) of interest for the National Institute of Allergy and Infectious Diseases <a target="_blank" href="https://discovery.biothings.io/niaid">Learn More<a/>',
-                    'selected': 0},
+                 #  {'namespace': 'outbreak',
+                 #   'prefix': 'outbreak',
+                 #   'name': 'Dataset',
+                 #   'displayName': 'Outbreak.info',
+                 #   'description': 'This is the schema for describing the Dataset schema used for outbreak.info. <a target="_blank" href="https://outbreak.info/">Learn More<a/>',
+                 #   'selected': 0},
+                 #   {'namespace': 'niaid',
+                 #    'prefix': 'niaid',
+                 #    'name': 'NiaidDataset',
+                 #    'displayName': 'NIAID Data Portal',
+                 #    'description': 'A body of structured information describing some topic(s) of interest for the National Institute of Allergy and Infectious Diseases <a target="_blank" href="https://discovery.biothings.io/niaid">Learn More<a/>',
+                 #    'selected': 0},
                  ]
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - SCHEMA PLAYGROUND
