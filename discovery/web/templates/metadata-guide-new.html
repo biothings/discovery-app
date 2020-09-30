@@ -1405,6 +1405,7 @@
         var payload = {};
         payload["clear"] = propname;
         store.commit('clearValueOfProp',payload);
+        store.dispatch('saveProgress');
       },
       handleObjectSubmit(event){
         let self = this;
@@ -1552,6 +1553,7 @@
         var payload = {};
         payload["clear"] = propname;
         store.commit('clearValueOfProp',payload);
+        store.dispatch('saveProgress');
       },
       addKeyword(){
         let self = this;
