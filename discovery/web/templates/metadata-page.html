@@ -1,14 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<style>
-  .word-break{
-    word-break: break-word !important;
-  }
-  .alert-muted-lighter{
-    background-color: #e9ebea;
-  }
-</style>
 <div id="registry" class="jumbotron mb-0" style="min-height:80vh;">
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>

@@ -1,17 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<style>
-.nd{
-  text-decoration: none !important;
-}
-.lines{
-  background-image: url('/static/img/lines-01.svg');
-  background-size: 120vw;
-  background-repeat: no-repeat;
-  background-position:bottom;
-}
-</style>
 <div id="portal" class="container-fluid p-0" style="min-height:80vh; margin-top:100px;">
   <template v-if="portal && portal.name">
     <div class="row m-0">
