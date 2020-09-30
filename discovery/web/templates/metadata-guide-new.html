@@ -4,6 +4,10 @@
 <style>
   [v-cloak] > * { display:none; }
   [v-cloak]::before { content: "Please wait..."; }
+  .tippy-box[data-theme~='tomato'] {
+  background-color: tomato;
+  color: white;
+}
 </style>
 <div id="guide" class="container-fluid pt-5" style="min-height:90vh;" v-cloak>
   <div v-if=loading class="loader">
@@ -405,33 +409,51 @@
       },
       formPreview(state){
         let props = state.schema.validation.properties;
-        // Vue.set(state,'output',{})
-        // Vue.set(state.output,'@type',state.schema.label || state.schema.name)
-        // Vue.set(state.output,'@context','http://discovery.biothings.io/view/schema/')
-        for (key in props) {
-          if (props[key].hasOwnProperty('value') && props[key]['value'] !== null) {
-            if (_.isArray(props[key]['value']) && props[key]['value'].length === 1) {
-              Vue.set(state.output,key,props[key].value[0])
-            }else{
-              Vue.set(state.output,key,props[key].value)
-            }
 
+        for (key in props) {
+          if (props[key].hasOwnProperty('value')) {
+            if (props[key]['value'] || props[key]['value'] === false) {
+              if (_.isArray(props[key]['value']) && props[key]['value'].length === 1) {
+                Vue.set(state.output,key,props[key].value[0])
+              }else{
+                Vue.set(state.output,key,props[key].value)
+              }
+            }
           }
         }
-
         // VALIDATION ON COMPLETE
         var ajv = new Ajv({allErrors:true, jsonPointers:true});
         var schema = state.schema.validation
         var data = state.output
-        // console.log(schema)
-        // console.log(data)
-        const isValid = ajv.validate(schema, data); //schema, data
+        const isValid = ajv.validate(schema, data);
+
         if(! isValid){
           state.valid = false;
           state.errors = ajv.errors;
+          // console.log('errors', state.errors)
+          for (var key in props) {
+            Vue.delete(props[key],'hasIssue')
+          }
+          for (var i = 0; i < state.errors.length; i++) {
+            if (state.errors[i]['dataPath']) {
+              let path = state.errors[i]['dataPath'].replace('/','');
+              if (props.hasOwnProperty(path)) {
+                Vue.set(props[path],'hasIssue',state.errors[i]['message'])
+              }
+            }
+            if (state.errors[i]['params'].hasOwnProperty('missingProperty')) {
+              let missing = state.errors[i]['params']['missingProperty'];
+              if (props.hasOwnProperty(missing)) {
+                Vue.set(props[missing],'hasIssue',state.errors[i]['message'])
+              }
+            }
+          }
         }else {
           state.valid = true;
           state.errors = []
+          for (var key in props) {
+            Vue.delete(props[key],'hasIssue')
+          }
         }
       },
       mergeCategoryProps(state,payload){
@@ -2724,16 +2746,14 @@
         x[0].focus();
       }
 
-      // document.onkeydown = checkKey;
-
-      // function checkKey(e) {
-      //     e = e || window.event;
-      //     if (e.keyCode == '39') {
-      //        // right arrow
-      //        self.markCompleted(self.name);
-      //        store.commit('selectNext');
-      //     }
-      // }
+      // self.tip = tippy('#'+self.name, {
+      //   placement:'right',
+      //   appendTo: document.querySelector('#'+self.name),
+      //   content: `<i class="fas fa-exclamation-circle text-danger"></i> There's an issue`,
+      //   interactive: true,
+      //   arrow: true,});
+      //
+      // self.tip.instances[0].show()
 
       tippy( '.save', {
         placement:'top',
@@ -3112,6 +3132,12 @@
                     <small v-text="category.category" class="desc pointer mr-2" :data-tippy-info="[category.subcategory === 'Required' ? 'Required' : 'Recommended']" :class="[category.subcategory === 'Required' ? 'text-danger' : 'text-info']"></small>
                   </template>
                 </small>
+                <!-- 🌈  ISSUE 🌈 -->
+                <template v-if="info && info.hasIssue">
+                  <small class="text-danger">
+                    <i class="fas fa-exclamation-circle"></i> <span v-text="info.hasIssue"></span>
+                  </small>
+                </template>
               </div>
 
 
