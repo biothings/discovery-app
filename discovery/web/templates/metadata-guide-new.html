@@ -546,6 +546,7 @@
         let info = payload['info'];
         let value = payload['value'];
 
+
         let props = state.schema.validation.properties;
         for (key in props) {
           if (key === name) {
@@ -643,6 +644,8 @@
                   Vue.set(props[name],'value',value);
                 }
               }
+            }else{
+              Vue.set(props[name],'value',value);
             }
           }
         }
@@ -1472,6 +1475,42 @@
         </template>
         <button class="btn themeButton text-light btn-sm" type="submit"><i class="fas fa-plus"></i> Add <span v-text="name"></span></button>
       </form>
+    </div>`
+  });
+
+  Vue.component('boolean-input', {
+    data: function(){
+      return{
+        userObj: {},
+      }
+    },
+    props: ['name','info'],
+    methods:{
+      markCompletedBoolean(val){
+        var self = this;
+        payload = {'name':self.name,'info': self.info, 'value':val}
+        store.commit('addValue',payload);
+        // save progress
+        store.dispatch('saveProgress');
+      },
+    },
+    computed: {
+      done: {
+        get () {
+          return this.$store.state.schema.validation.properties[this.name].value
+        }
+      },
+    },
+    watch:{
+    },
+    template:
+    `<div class="d-flex justify-content-center align-items-center">
+      <div :class="[done===true?'text-success border-success bold':'text-muted']" @click="markCompletedBoolean(true)" class="border rounded p-1 mx-2 pointer w-25 text-center">
+        <i class="fas fa-check"></i> Yes
+      </div>
+      <div :class="[done===false?'text-danger border-danger bold':'text-muted']" @click="markCompletedBoolean(false)" class="border rounded p-1 mx-2 pointer w-25 text-center">
+        <i class="fas fa-times"></i> No
+      </div>
     </div>`
   });
 
@@ -2798,12 +2837,7 @@
                 <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
                 <!-- 🌈 BOOLEAN 🌈 -->
                 <template v-if="info && info.type === 'boolean'">
-                <div class="form-group w-50">
-                  <select v-model="userInput" class="form-control">
-                    <option :value='true'>Yes</option>
-                    <option :value='!true'>No</option>
-                  </select>
-                </div>
+                  <boolean-input :name="name" :info="info"></boolean-input>
                 </template>
                 <template v-if="info && info.type === 'string'">
                   <!-- 🌈 STRING 🌈 -->
