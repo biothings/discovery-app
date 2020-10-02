@@ -1,9 +1,9 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<section id="editor" class="container" style="min-height: 80vh;padding-top:60px;">
+<section id="editor" class="container-fluid" style="min-height: 80vh;padding-top:60px;">
   <div>
-    <div class="jumbotron bg-light text-center m-1 py-5">
+    <div class="jumbotron bg-light text-center m-1 pt-4">
       <h1 class="logoText">Schema Editor</h1>
       <small class="text-muted">Extend an existing schema to create your own.</small>
     </div>
@@ -47,9 +47,9 @@
           </a>
         </li>
         <li class='nav-item' v-show="prefix">
-          <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-success text-light pointer': prefix }" data-tippy="Requires Gihub Login" @click.prevent="CreateRepo">
+          <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-success text-light pointer': prefix }" data-tippy="Requires Gihub Login" @click.prevent="githubOptions()">
             <small >
-              <i class="fab fa-github"></i> Create/Save to Repo
+              <i class="fab fa-github"></i> Save to GitHub
             </small>
           </a>
         </li>
@@ -66,7 +66,7 @@
         <!-- NAMESPACE -->
         <div class="jumbotron alert-secondary" v-if='!prefix'>
           <p class="text-center text-muted">
-            <small>Extending schema: <span class="text-info" v-text="startingPoint"></span></small>  <small class="text-muted bold"><i class="fas fa-chevron-right"></i> Choose a namespace</small>
+            <small>Extending: <span class="text-dark" v-text="startingPoint"></span></small>  <small class="bold" :class="{'text-success':availableNamespace, 'text-danger': !availableNamespace}"><i class="fas fa-chevron-right"></i> Choose a namespace</small>
           </p>
           <div class="d-flex justify-content-center align-items-center flex-wrap">
             <form @submit.prevent="savePrefix" class="text-center">
@@ -79,7 +79,7 @@
                   <button :disabled="!availableNamespace" class="btn themeButton text-light" type="submit" v-text="'Use This'"></button>
                 </div>
               </div>
-              <small class="text-muted">Warning: This cannot be edited after this!</small>
+              <small class="text-muted">This will be the prefix used for all new definitions. eg. prefix:YourDefinition </small>
             </form>
           </div>
         </div>
@@ -93,7 +93,7 @@
           </p>
           <hr />
           <form @submit.prevent='addClass()'>
-            <button type="submit" class="btn btn-lg themeButton text-light" ><i class="fas fa-plus"></i> Class</button>
+            <button type="submit" class="btn btn-lg themeButton text-light" ><i class="fas fa-plus"></i> Add Class</button>
           </form>
         </div>
 
@@ -129,6 +129,15 @@
     <small class="m-0">
       <span class="text-danger">*</span> Please note that embedded <a href="https://json-schema.org/">JSON Schema validation</a> is auto-generated from this editor. You may want to edit that manually to satisfy your individual needs.
     </small>
+  </div>
+  <div id="ghOptions" class="modal" style="z-index:1000;">
+    <!-- Modal content -->
+    <div class="modal-content bg-light">
+      <div>
+        <span id="closeBtn" class="close">&times;</span>
+      </div>
+      <github-option></github-option>
+    </div>
   </div>
 </section>
 {% endblock %}
@@ -175,7 +184,7 @@ const store = new Vuex.Store({
     },
     savePrefix(state,payload){
       state.prefix = payload['prefix'];
-      Vue.set(state.finalschema['@context'],state.prefix,'http://discovery.biothings.io/')
+      Vue.set(state.finalschema['@context'],state.prefix,'http://discovery.biothings.io/view/')
     },
     saveParent(state,payload){
       state.schema.push(payload['parent'])
@@ -439,6 +448,465 @@ const store = new Vuex.Store({
       }
     }
   }
+});
+
+Vue.component('github-option', {
+  data: function(){
+    return{
+      repoName: '',
+      repos: [],
+      loading: false,
+      repo_selected: '',
+      name_selected: '',
+      comment: '',
+      accepts: false,
+      repo_saved: false,
+      repo_link: '',
+      existing_file: true,
+      files_available: [],
+      file_selected: '',
+      slug: '',
+      number: 0,
+      input: '',
+      data: [],
+    }
+  },
+  props: [],
+  methods:{
+    resetFields(){
+      let self = this;
+      self.loading = true;
+      setTimeout(function(){
+        self.repo_selected = '';
+        self.name_selected = '';
+        self.comment = '';
+        self.repo_saved = false;
+        self.repo_link = '';
+        self.files_available = [];
+        self.file_selected = '';
+      }, 1000);
+      self.loading = false;
+    },
+    checkRepo(){
+      let self = this;
+      self.loading = true;
+      axios.get("/api/gh/"+self.repoName).then(res=>{
+        self.loading = false;
+        if (res.data.success) {
+          return "https://github.com/"+res.data.msg
+        }else{
+          Swal.fire({
+            type: 'error',
+            title: 'Unsuccesful...',
+            text: JSON.stringify(res.data, null, 2),
+          })
+        }
+      }).catch(err=>{
+        self.loading = false;
+        Swal.fire({
+          type: 'error',
+          title: 'Oops...Something went really wrong!',
+          text: err,
+        })
+        throw err;
+      });
+    },
+    getRepos(){
+      var self = this;
+      self.loading = true;
+      axios.get("/api/gh").then(res=>{
+        self.loading = false;
+        if (res.data.success) {
+          self.repos = res.data.msg
+        }else{
+          Swal.fire({
+            type: 'error',
+            title: 'Problems getting your repos, try again later.',
+            text: JSON.stringify(res.data, null, 2),
+          })
+        }
+      }).catch(err=>{
+        self.loading = false;
+        Swal.fire({
+          type: 'error',
+          title: 'Oops...Something went really wrong!',
+          text: err,
+        })
+        throw err;
+      });
+    },
+    updateFile(){
+      let self = this;
+
+      data ={
+        'name': self.repo_selected,
+        'file': self.name_selected,
+        'data': store.getters.getFinalSchema,
+        'existing': true,
+        'comment': self.comment,
+        'existing_file': true
+      }
+
+      let config = {
+         headers: {
+           'content-type': 'application/json'
+         }
+       }
+
+      self.loading = true;
+
+      return axios.put("/api/gh", data, config).then(res=>{
+        self.loading = false;
+        if (res.data.success) {
+          self.repo_saved = true;
+          self.repo_link = "https://github.com/"+res.data.msg
+        }else{
+          self.repo_saved = false;
+          Swal.fire({
+            type: 'error',
+            title: 'Problems updating your file, please try again later.',
+            text: JSON.stringify(res.data, null, 2),
+          })
+        }
+      }).catch(err=>{
+        self.loading = false;
+        self.repo_saved = false;
+        Swal.fire({
+          type: 'error',
+          title: 'Oops...Something went wrong!',
+          text: err,
+        })
+        throw err;
+      });
+    },
+    saveWork(){
+      let self = this;
+
+      if (self.existing_file === true) {
+        console.log("updating file")
+        self.updateFile()
+      }else{
+        data ={
+          'name': self.repo_selected,
+          'file': self.name_selected+'.jsonld',
+          'data': store.getters.getFinalSchema,
+          'existing': true,
+          'comment': self.comment,
+        }
+
+        let config = {
+           headers: {
+             'content-type': 'application/json'
+           }
+         }
+
+        self.loading = true;
+
+        return axios.post("/api/gh", data, config).then(res=>{
+          self.loading = false;
+          if (res.data.success) {
+            self.repo_saved = true;
+            self.repo_link = "https://github.com/"+res.data.msg
+          }else{
+            self.repo_saved = false;
+            Swal.fire({
+              type: 'error',
+              title: 'Problems saving to GitHub, please try again later.',
+              text: JSON.stringify(res.data, null, 2),
+            })
+          }
+        }).catch(err=>{
+          self.loading = false;
+          self.repo_saved = false;
+          Swal.fire({
+            type: 'error',
+            title: 'Oops...Something went wrong!',
+            text: err,
+          })
+          throw err;
+        });
+      }
+    },
+    assignTempName(hits){
+      let self = this;
+      if (hits.length) {
+        if (hits[0].hasOwnProperty('namespace')) {
+          self.slug = hits[0]['namespace'];
+        }else if (hits[0].hasOwnProperty('name')) {
+          self.slug = hits[0]['name'].split(':')[0];
+        }
+        else{
+          self.slug = 'temp'
+        }
+        var modal = document.getElementById("ghOptions");
+        modal.style.display = "none";
+        self.makeURLandRedirect();
+      }else{
+        Swal(
+          'Error parsing schema',
+          "No classes found",
+          'error'
+        );
+      }
+    },
+    sendRequest(){
+      let self = this;
+      self.loading = true;
+      axios.get("/api/view?url="+self.input).then(res=>{
+        console.log(res.data)
+        self.data = res.data;
+        self.loading = false;
+        localStorage.setItem('user-schema-classes',JSON.stringify(self.data));
+        localStorage.setItem('user-schema-url',self.input);
+        self.assignTempName(res.data.hits);
+      }).catch(err=>{
+        self.loading = false;
+        self.loading = false;
+        // console.log('err',err.response.data)
+        let culprit = "<h6>"+err.response.data.error+"</h6>"
+        if (err.response.data && err.response.data.path) {
+          culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
+        }
+        if (err.response.data.parent && err.response.data.parent.path){
+          if (true) {
+            culprit += "<h5>Under <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></h5>"
+          }
+          if (err.response.data.parent && err.response.data.parent.reason) {
+            culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
+          }
+        }
+        if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
+          culprit += "<div class='alert alert-info'><small> Hint: "+err.response.data.validator_value+"</small></div>"
+        }
+        Swal.fire({
+          type: 'error',
+          position: 'top center',
+          title: 'Failed because: ',
+          html: culprit,
+        });
+        throw err;
+      })
+    },
+    makeURLandRedirect(){
+      this.number = Math.floor(Math.random()*90000) + 10000;
+      this.setLastViewed();
+      let timerInterval
+      Swal.fire({
+        title: `<h2 class="text-center">Success!</h2>`,
+        html:
+           "Opening your visualization on the Schema Playground in <strong></strong> seconds...",
+        timer: 3000,
+        onBeforeOpen: () => {
+          const content = Swal.getContent()
+          const $ = content.querySelector.bind(content)
+          Swal.showLoading()
+          timerInterval = setInterval(() => {
+            Swal.getContent().querySelector('strong')
+              .textContent = (Swal.getTimerLeft() / 1000)
+                .toFixed(0)
+          }, 100)
+        },
+        onClose: () => {
+          window.open(
+            "./view/"+this.slug+this.number+"/",
+            '_blank'
+          );
+        }
+      });
+    },
+    setLastViewed(){
+      let temp = this.slug+this.number;
+      sessionStorage.clear();
+      sessionStorage.setItem(temp,localStorage.getItem('user-schema-classes'));
+      sessionStorage.setItem(temp+'-url',localStorage.getItem('user-schema-url'));
+    },
+    copyToInput(value){
+      let self = this;
+      if (value.includes('blob') || value.includes('github.com')) {
+        let suggestedURL = value.replace('blob/', '')
+        .replace('github.com', 'raw.githubusercontent.com')
+        .replace('www.github.com', 'raw.githubusercontent.com');;
+
+        Swal({
+          title: 'Link Converted',
+          imageAlt: 'Warning',
+          animation:false,
+          customClass:'scale-in-center',
+          html:
+            '<p>We will need the direct link tot he raw data and have changed your url.</p> ' +
+            '<p><a target="_blank" href="'+suggestedURL+'">'+suggestedURL+'</a></p>' +
+            '<p>Proceed with this link?</p>',
+          showCancelButton: true,
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          confirmButtonText: 'Yes, use this link!'
+        }).then((result) => {
+          if (result.value) {
+            self.input = suggestedURL
+          }else{
+            self.input = value
+          }
+        });
+      }
+    }
+  },
+  computed: {
+    code:function(){
+      return store.getters.getFinalSchema
+    },
+    readyLink: function(){
+      let self = this;
+      if (self.existing_file) {
+        return self.repo_link+"/blob/main/"+self.name_selected
+      }else {
+        return self.repo_link+"/blob/main/"+self.name_selected+".jsonld"
+      }
+    }
+  },
+  watch:{
+    repo_selected:function(name,oldname){
+      let self = this;
+      self.loading = true;
+      return axios.get("/api/gh/"+name).then(res=>{
+        self.loading = false;
+        if (res.data.success) {
+          self.files_available = res.data.msg
+        }else{
+          Swal.fire({
+            type: 'error',
+            title: 'Problems saving to GitHub, please try again later.',
+            text: JSON.stringify(res.data, null, 2),
+          })
+        }
+      }).catch(err=>{
+        self.loading = false;
+        Swal.fire({
+          type: 'error',
+          title: 'Oops...Something went wrong!',
+          text: err,
+        })
+        throw err;
+      });
+    },
+  },
+  template:
+  `<div class="bg-light" style="position: relative;">
+    <h4 class="logoText text-center m-2"><i class="fab fa-github-alt"></i> Save your work to GitHub</h4>
+    <p class="text-dark w-50 m-auto mb-2">
+      <small><i class="fas fa-exclamation-circle text-info"></i> By continuing with this process you are giving us permission to access your GitHub account to create/edit <b>public</b> repos/files.
+      If you DO NOT accept this please close this window and choose the <b>Download</b> option to save manually.</small>
+    </p>
+    <div v-if="!accepts">
+      <h3 class="pointer text-center text-success m-4" @click="accepts = true">Continue</h3>
+    </div>
+    <div v-else class="row m-0 slit-in-vertical">
+      <div class="text-center col-sm-12 m-auto" v-if="loading" style="position: absolute; top:45%; z-index:2000;">
+        <i class="fab fa-github-alt fa-spin fa-5x p-2 text-info"></i>
+      </div>
+      <div class="col-sm-12 col-md-4 border p-1" :class="[repo_selected?'alert-success':'alert-light']">
+        <h6 class="logoText">1. Choose a repository</h6>
+        <small class="text-muted">Choose an existing repository to save your schema to.</small>
+        <button type="button" class="btn themeButton text-light btn-sm" @click="getRepos()"><i class="fab fa-github-alt"></i> Get Repos</button>
+        <template v-if="repos.length">
+        <h6 class="text-muted">1. Choose one:</h6>
+        <select class="custom-select w-100" v-model="repo_selected">
+          <option selected>Choose...</option>
+          <template v-for="repo in repos">
+            <option :value="repo" v-text="repo"></option>
+          </template>
+        </select>
+        </template>
+        <template v-else>
+          <p>
+            <small class="text-muted">No results yet</small>
+          </p>
+        </template>
+      </div>
+      <div class="col-sm-12 col-md-4 border p-1" :class="[name_selected?'alert-success':'alert-light']">
+        <h6 class="logoText">2. Choose file</h6>
+        <small class="text-muted">Create or update an existing file.</small>
+        <div v-if="repo_selected">
+          <small class="text-info d-block">Do not include the file extension. It will be <code>.jsonld</code>.</small>
+          <h6 class="text-muted">Create/Update File</h6>
+          <input @change="name_selected=''" v-model="existing_file" class="form-control text-light tip m-auto" type="checkbox" checked/>
+        </div>
+        <template v-if="repo_selected && !existing_file">
+          <small class="text-info bold">A. New File: Name your file</small>
+          <div class="form-group row">
+            <div class="col-sm-10">
+              <input :disabled="!repo_selected" :class="{disabled:!repo_selected}" v-model="name_selected" type="text" class="form-control form-control-sm" placeholder="enter your file name here">
+            </div>
+          </div>
+        </template>
+        <template v-if="repo_selected && existing_file">
+          <small class="text-info bold">A. Update File: Select one</small>
+          <select :disabled="!repo_selected" class="custom-select w-100" v-model="name_selected">
+            <option selected>Choose...</option>
+            <template v-for="file in files_available">
+              <option :value="file" v-text="file"></option>
+            </template>
+          </select>
+        </template>
+        <template v-if="repo_selected">
+          <small class="text-muted d-block"><span class="text-warning">B. (Optional)</span> Write a comment about this addition.</small>
+          <div class="form-group row">
+            <div class="col-sm-10">
+              <input :disabled="!repo_selected" :class="{disabled:!repo_selected}" v-model="comment" type="text" class="form-control form-control-sm" placeholder="write a comment here">
+            </div>
+          </div>
+        </template>
+        <div>
+<pre>
+<code v-text="code" style="font-size:.5em; max-height:300px;"></code>
+</pre>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-4 border p-1" :class="[repo_saved?'alert-success':'alert-light']">
+        <h6 class="logoText">3. Save to GitHub</h6>
+        <small class="text-muted">A new file will be saved to this repository.</small>
+        <div class="text-muted text-center">
+          <template v-if="name_selected && repo_selected">
+            <h5 class="my-3"><span v-text="existing_file?'Update':'Create'"></span>: <b v-text="repo_selected"></b>/<code v-text="name_selected+'.jsonld'"></code>?</h5>
+            <button type="button" class="btn btn-success text-light btn-sm" @click="saveWork()"><i class="fab fa-github-alt"></i> <span v-text="existing_file?'Update':'Save'"></span></button>
+          </template>
+          <template v-else>
+            <small class="d-block"><i class="fab fa-github-alt fa-2x"></i></small>
+          </template>
+        </div>
+        <div v-if="repo_saved && repo_link" class="text-center mt-3">
+          <h6><i class="fas fa-check"></i> Work <span v-text="existing_file?'Updated':'Saved'"></span>!</h6>
+          <small>
+            <a :href="repo_link" target="_blank" rel="nonreferrer"><b v-text="repo_link"></b> <i class="fas fa-external-link-alt"></i></a>
+          </small>
+        </div>
+      </div>
+      <div class="col-sm-12 grad border border-success p-2 text-center" v-if="repo_link">
+        <p class="text-light mt-2 text-center">
+          <template v-if="readyLink">
+            <img src="/static/img/visualize-01.png" width="100px" alt="Visualize"/>
+            <h5>Visualize and register your work</h5>
+            <small  @click="copyToInput(readyLink)" class="pointer d-block">CLICK HERE to copy to input</small>
+            <code v-text="readyLink"></code>
+            <h5><i class="fas fa-arrow-down"></i></h5>
+            <form id="linkForm" class="col-sm-6 m-auto">
+              <div v-if="!loading" class="input-group mb-3 shadow rounded">
+                <input type="text" class="form-control" v-model="input" id="urlform" autocomplete="" required ref="my_input" aria-label="Paste your link here"  placeholder="Paste your link here" aria-describedby="button-addon2">
+                <div class="input-group-append">
+                  <button :disabled="!input.length" :class="{heartbeat:input.length}" @click.prevent="sendRequest()" id="button-addon2" class="btn btn-info" type="submit">Go</button>
+                </div>
+              </div>
+              <div v-else>
+                <h3 class="text-light"><i class="fas fa-cog fa-spin"></i> Please Wait...</h3>
+              </div>
+            </form>
+          </template>
+        </p>
+      </div>
+      <div class="col-sm-12 alert-secondary border p-1 text-center">
+        <small>New changes or want to reset? <b @click="resetFields()" class="pointer text-danger">click here</b></small>
+      </div>
+    </div>
+  </div>`
 });
 
 Vue.component('c-box', {
@@ -776,6 +1244,16 @@ var app = new Vue({
         },
       },
 			methods:{
+        githubOptions(){
+          // show modal
+          store.commit('formPreview');
+          var modal = document.getElementById("ghOptions");
+          modal.style.display = "block";
+          var span = document.getElementById("closeBtn");
+          span.onclick = function() {
+            modal.style.display = "none";
+          }
+        },
         toggleDesc(){
           store.commit('toggleDesc');
         },
@@ -851,6 +1329,8 @@ var app = new Vue({
               position: 'center',
               confirmButtonColor:"{{color_main}}",
               cancelButtonColor:"{{color_sec}}",
+              animation:false,
+              customClass:'scale-in-center',
               html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><small><pre>`+JSON.stringify(store.getters.getFinalSchema,null,2)+`</pre></small></div>`
             });
           }
