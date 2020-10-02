@@ -2844,9 +2844,9 @@
         <div class="col-sm-10 p-1 text-left d-flex align-items-center justify-content-center" :class="[userInput || userInput === false ? 'completefield':'alert-light']">
           <div class="d-flex w-100 justify-content-center">
             <div class="row m-0 w-100">
-              <div class="col-sm-2 d-flex align-items-center justify-content-center">
+              <div class="col-sm-2 d-flex align-items-center justify-content-center" style="word-break: break-all;">
                 <small class="bold" :class="[userInput || userInput === false ? 'text-success':'text-muted']">
-                  <i class="fas fa-asterisk fa-xs text-danger required pointer unselectable" v-if="isRequired"></i> <span v-text="name"></span>
+                  <i class="fas fa-asterisk fa-xs text-danger required pointer unselectable" v-if="isRequired"></i>&nbsp;<span v-text="name"></span>
                 </small>
               </div>
               <div class="col-sm-10">
@@ -2901,7 +2901,7 @@
                     </template>
                     <!-- 🌈 STRING NORMAL🌈 -->
                     <template v-else>
-                      <textarea :rows="name ==='name'|| name ==='identifier' ?1:7" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
+                      <textarea :rows="name ==='description'?5:2" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
                     </template>
                       <!-- 🌈 VOCAB PREVIEW🌈 -->
                     <template v-if="vocabDetails && vocab.length && vocabDetails.ontology_prefix">
@@ -3134,7 +3134,7 @@
                 </small>
                 <!-- 🌈  ISSUE 🌈 -->
                 <template v-if="info && info.hasIssue">
-                  <small class="text-danger">
+                  <small style="color:salmon;">
                     <i class="fas fa-exclamation-circle"></i> <span v-text="info.hasIssue"></span>
                   </small>
                 </template>
@@ -4315,16 +4315,15 @@
 
           if (self.errors.length) {
             Swal.fire({
-            type: 'error',
-            title: 'Details',
+            title: 'Issues',
             animation:false,
             customClass:'scale-in-center',
             html: `<div class="text-left previewBox">
                     <div>
                       <small>
-  <pre>
-    `+JSON.stringify(self.errors,null,2)+`
-  </pre>
+<pre>
+`+JSON.stringify(self.errors,null,2)+`
+</pre>
                       </small>
                     </div>
                   </div>`
