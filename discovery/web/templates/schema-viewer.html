@@ -86,11 +86,11 @@
     </div>
 
 
-    <div class="flipcard container">
+    <div class="flipcard container my-5">
       <div class="face front">
         <!-- alpabetical view -->
         <div id="alpabetical-order" class="text-left p-4 bg-light overflow-x-scroll">
-          <h3 class="text-muted d-inline mr-2 logoText">Alphabetical</h3> <a role="button" class="btn btn-sm btn-info pointer ml-2" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
+          <h3 class="text-muted d-inline mr-2 logoText">Definitions</h3> <a role="button" class="btn btn-sm btn-info pointer ml-2" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
           <div v-show='developerMode' id="canvasTest"></div>
           <ul class="pagination overflow-x-scroll mt-3" v-show="classesGroupByLetter.length>5">
             <li class="page-link" v-for="(item,i) in classesGroupByLetter">
@@ -117,7 +117,7 @@
       <div class="face back">
         <!--hierarchical view -->
         <div id="hierarchical" class="text-left p-4 bg-light overflow-x-scroll">
-          <h3 class="text-muted d-inline mr-2 logoText">Hierarchical</h3> <a role="button" class="btn btn-sm btn-info pointer ml-2" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
+          <h3 class="text-muted d-inline mr-2 logoText">Definition Hierarchy</h3> <a role="button" class="btn btn-sm btn-info pointer ml-2" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
           <div class="alert alert-warning" v-if="treeBuildErr">
             <small>Hierarchical view not available. Tree could not be built due to endless cycles found on schema definition.</small>
           </div>
