@@ -3702,7 +3702,7 @@
                    }
                  }
 
-                axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label'],output,config).then(res=>{
+                axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label']+"&guide="+encodeURI(window.location.href),output,config).then(res=>{
                   self.loading = false;
                   if (res.data.success) {
 

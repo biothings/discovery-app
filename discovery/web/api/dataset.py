@@ -23,10 +23,12 @@ class DatasetMetadataHandler(APIBaseHandler):
         'POST': {
             'schema': {'type': str, 'default': 'ctsa::bts:CTSADataset'},
             'private': {'type': bool, 'default': False},
+            'guide': {'type': str, 'default': None},
         },
         'GET': {
             'user': {'type': str},
             'private': {'type': bool},
+            'guide': {'type': str},
         }
     }
 
@@ -42,7 +44,7 @@ class DatasetMetadataHandler(APIBaseHandler):
         try:
             res = DatasetController.add(
                 self.args_json, self.current_user,
-                self.args.private, self.args.schema)
+                self.args.private, self.args.schema, self.args.guide)
 
         except (KeyError, ValueError) as exc:
             raise HTTPError(400, reason=str(exc))
@@ -104,6 +106,7 @@ class DatasetMetadataHandler(APIBaseHandler):
 
             user = self.args.user
             private = self.args.private
+            guide = self.args.guide
 
             if private:
                 if not self.current_user:
@@ -113,7 +116,10 @@ class DatasetMetadataHandler(APIBaseHandler):
                 if user != self.current_user:
                     raise HTTPError(403)
             try:
-                datasets = DatasetController.get_all(user, private)
+                if guide:
+                    datasets = DatasetController.get_all(user, private, guide)
+                else:
+                    datasets = DatasetController.get_all(user, private)
             except Exception as exc:
                 raise HTTPError(500, reason=str(exc))
             else:  # success, end request
