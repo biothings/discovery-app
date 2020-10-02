@@ -11,7 +11,7 @@ class DocumentMeta(InnerDoc):
     username = Keyword(required=True)
     class_id = Keyword(required=True)  # like ctsa::bts:CTSADataset
     private = Boolean()  # this controls visibility
-
+    guide = Keyword()
 
 class DatasetMetadata(Document):
     '''
