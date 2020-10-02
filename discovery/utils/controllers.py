@@ -275,7 +275,7 @@ class DatasetController:
         return self._dataset.identifier
 
     @classmethod
-    def add(cls, doc, user, private, class_id):
+    def add(cls, doc, user, private, class_id, guide):
         """
         doc: {} to add
         user: owner of document
@@ -289,7 +289,7 @@ class DatasetController:
         # {} -> es model
         cls.validate(doc, class_id)
         dataset = DatasetMetadata.load(
-            doc, user, private, class_id)
+            doc, user, private, class_id, guide)
 
         # -----------------------------
         result = dataset.save()
@@ -303,7 +303,7 @@ class DatasetController:
         }
 
     @staticmethod
-    def get_all(user=None, private=False):
+    def get_all(user=None, private=False, guide=None):
         """
         Expect exceptions if not success
         Return {} if no match
@@ -313,6 +313,8 @@ class DatasetController:
 
         if user:
             search = search.query("match", ** {"_meta.username": user})
+        elif guide:
+            search = search.query("match", ** {"_meta.guide": guide})
         else:
             search = search.query("match_all")
 
