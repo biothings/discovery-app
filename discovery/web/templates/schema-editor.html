@@ -688,25 +688,17 @@ Vue.component('github-option', {
       })
     },
     makeURLandRedirect(){
-      this.number = Math.floor(Math.random()*90000) + 10000;
+
       this.setLastViewed();
-      let timerInterval
+
       Swal.fire({
-        title: `<h2 class="text-center">Success!</h2>`,
-        html:
-           "Opening your visualization on the Schema Playground in <strong></strong> seconds...",
-        timer: 3000,
-        onBeforeOpen: () => {
-          const content = Swal.getContent()
-          const $ = content.querySelector.bind(content)
-          Swal.showLoading()
-          timerInterval = setInterval(() => {
-            Swal.getContent().querySelector('strong')
-              .textContent = (Swal.getTimerLeft() / 1000)
-                .toFixed(0)
-          }, 100)
-        },
-        onClose: () => {
+        title: 'Visualization Ready',
+        text: "Do you want to see it now?",
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonText: "Let's see it!"
+      }).then((result) => {
+        if (result.isConfirmed) {
           window.open(
             "./view/"+this.slug+this.number+"/",
             '_blank'
@@ -715,6 +707,7 @@ Vue.component('github-option', {
       });
     },
     setLastViewed(){
+      this.number = Math.floor(Math.random()*90000) + 10000;
       let temp = this.slug+this.number;
       sessionStorage.clear();
       sessionStorage.setItem(temp,localStorage.getItem('user-schema-classes'));
