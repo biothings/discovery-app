@@ -1,7 +1,5 @@
 import json
 import logging
-import base64
-import time
 
 from github import Github, GithubException
 from tornado.web import HTTPError
@@ -11,24 +9,44 @@ from .base import APIBaseHandler, github_authenticated
 logger = logging.getLogger(__name__)
 
 class GHHandler(APIBaseHandler):
+    """
+    C /api/gh?guide=<guide>
+    R /api/gh/
+    U /api/gh/
+    D /api/gh
+    """
+    kwargs = {
+        'POST': {
+            'name': {'type': str, 'default': None},
+            'file': {'type': str, 'default': None},
+            'existing': {'type': bool, 'default': False},
+            'comment': {'type': str, 'default': False},
+            'data': {'type': dict, 'default': None},
+        },
+        'PUT': {
+            'name': {'type': str, 'default': None},
+            'file': {'type': str, 'default': None},
+            'existing': {'type': bool, 'default': False},
+            'existing_file': {'type': bool, 'default': False},
+            'comment': {'type': str, 'default': False},
+            'data': {'type': dict, 'default': None},
+        },
+        'DELETE': {
+            'name': {'type': str, 'default': None},
+        },
+    }
 
     @github_authenticated
     def get(self, repo_name=None):
         """
         Check repo existence
         or get all public repos
-        {
-            "name": repo name
-        }
         """
         user = json.loads(self.get_secure_cookie("user"))
         g = Github(user['access_token'])
-        # authenticated user
         auth_user = g.get_user()
-
         if not repo_name:
-            print("NO REPO NAME")
-            list = []
+            repo_list = []
             if auth_user.login:
                 try:
                     repos = auth_user.get_repos()
@@ -36,25 +54,21 @@ class GHHandler(APIBaseHandler):
                     self.finish({
                         'success': True,
                         'exists': False,
-                        'msg': list
+                        'msg': repo_list
                     })
                 except Exception as exc:  # unexpected
                     raise HTTPError(500, reason=str(exc))
                 else:
-
-                    for repo in repos:
-                        list.append(repo.name)
+                    repo_list = [repo.name for repo in repos]
                     self.finish({
                         'success': True,
                         'exists': True,
-                        'msg': list
+                        'msg': repo_list
                     })
             else:
                 raise HTTPError(400, reason=f"Unable to authenticate user")
         else:
-            print('REPO NAME', repo_name)
             if auth_user.login:
-                print(auth_user)
                 try:
                     repo = auth_user.get_repo(repo_name)
                 except GithubException.UnknownObjectException:
@@ -98,7 +112,7 @@ class GHHandler(APIBaseHandler):
         g = Github(user['access_token'])
         # authenticated user
         auth_user = g.get_user()
-        repo_name = self.args.name
+        repo_name = self.args_json.get('name','')
         if not repo_name:
             raise HTTPError(400, reason=f"Repo name not provided")
         try:
@@ -126,14 +140,13 @@ class GHHandler(APIBaseHandler):
             "data": file content- needs to be encoded
         }
         """
-        if self.request.headers['Content-Type'] == 'application/json':
-            self.args = json.loads(self.request.body)
-        repo_name = self.args.get('name', None)
-        file_name = self.args.get('file', None)
-        msg = self.args.get('comment', "added by Data Discovery Engine")
-        existing = self.args.get('existing', False)
+        print('ARGS',self.args_json)
+        repo_name = self.args_json.get('name', None)
+        file_name = self.args_json.get('file', None)
+        msg = self.args_json.get('comment', "added by Data Discovery Engine")
+        existing = self.args_json.get('existing', False)
         # data must be encoded
-        data = self.args.get('data', None)
+        data = self.args_json.get('data', None)
         if data:
             content_encoded = json.dumps(data, indent=2).encode('utf-8')
         else:
@@ -143,7 +156,6 @@ class GHHandler(APIBaseHandler):
 
         logging.info(msg="Repo name "+repo_name)
         user = json.loads(self.get_secure_cookie("user"))
-        # print('Token', user['access_token'])
         # signin with token
         g = Github(user['access_token'])
         # authenticated user
@@ -163,9 +175,7 @@ class GHHandler(APIBaseHandler):
                     raise HTTPError(500, reason=str(exc))
             else:
                 try:
-                    print('auth_user',auth_user)
                     repo = auth_user.create_repo(repo_name)
-                    # print("REPO CREATED ",repo.full_name)
                 except GithubException as e:
                     raise HTTPError(400, reason=e)
                 except Exception as exc:  # unexpected
@@ -177,8 +187,6 @@ class GHHandler(APIBaseHandler):
         if repo:
             path = file_name
             file = repo.create_file(path, msg, content_encoded)
-            # returns
-            # { ‘content’: ContentFile:, ‘commit’: Commit}
             if file:
                 self.finish({
                     'success': True,
@@ -203,16 +211,13 @@ class GHHandler(APIBaseHandler):
             'existing_file': update existing file?
         }
         """
-        if self.request.headers['Content-Type'] == 'application/json':
-            self.args = json.loads(self.request.body)
-        repo_name = self.args.get('name', None)
-        file_name = self.args.get('file', None)
-        msg = self.args.get('comment', "updated via Data Discovery Engine")
-        existing = self.args.get('existing', True)
-        existing_file = self.args.get('existing_file', True)
-
+        repo_name = self.args_json.get('name', None)
+        file_name = self.args_json.get('file', None)
+        msg = self.args_json.get('comment', "updated via Data Discovery Engine")
+        existing = self.args_json.get('existing', True)
+        existing_file = self.args_json.get('existing_file', True)
         # data must be encoded
-        data = self.args.get('data', None)
+        data = self.args_json.get('data', None)
         if data:
             content_encoded = json.dumps(data, indent=2).encode('utf-8')
         else:

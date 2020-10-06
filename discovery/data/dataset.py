@@ -58,12 +58,13 @@ class DatasetMetadata(Document):
         return bool(search.source(False).execute().hits)
 
     @classmethod
-    def load(cls, doc, user, private, class_id, guide):
+    def load(cls, doc, user, private, class_id, guide=None):
         dataset = cls(**doc)
         dataset._meta.username = user
         dataset._meta.private = private
         dataset._meta.class_id = class_id
-        dataset._meta.guide = guide
+        if guide:
+            dataset._meta.guide = guide
         return dataset
 
     @classmethod

@@ -275,7 +275,7 @@ class DatasetController:
         return self._dataset.identifier
 
     @classmethod
-    def add(cls, doc, user, private, class_id, guide):
+    def add(cls, doc, user, private, class_id, guide=None):
         """
         doc: {} to add
         user: owner of document
@@ -303,21 +303,34 @@ class DatasetController:
         }
 
     @staticmethod
-    def get_all(user=None, private=False, guide=None):
+    def get_all(user=None, private=False):
         """
         Expect exceptions if not success
         Return {} if no match
         """
         search = DatasetMetadata.search(private=private)
         search.params(rest_total_hits_as_int=True)
-
         if user:
             search = search.query("match", ** {"_meta.username": user})
-        elif guide:
+        else:
+            search = search.query("match_all")
+        return {
+            "total": search.count(),
+            "hits": [meta.to_json() for meta in search.scan()]
+        }
+
+    @staticmethod
+    def get_metadata_by_guide(guide=None):
+        """
+        Get metadata created by a guide or all
+        guide = url of guide
+        """
+        search = DatasetMetadata.search(private=private)
+        search.params(rest_total_hits_as_int=True)
+        if guide:
             search = search.query("match", ** {"_meta.guide": guide})
         else:
             search = search.query("match_all")
-
         return {
             "total": search.count(),
             "hits": [meta.to_json() for meta in search.scan()]
