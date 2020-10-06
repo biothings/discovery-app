@@ -325,7 +325,7 @@ class DatasetController:
         Get metadata created by a guide or all
         guide = url of guide
         """
-        search = DatasetMetadata.search(private=private)
+        search = DatasetMetadata.search()
         search.params(rest_total_hits_as_int=True)
         if guide:
             search = search.query("match", ** {"_meta.guide": guide})
