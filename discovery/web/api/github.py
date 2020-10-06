@@ -140,7 +140,6 @@ class GHHandler(APIBaseHandler):
             "data": file content- needs to be encoded
         }
         """
-        print('ARGS',self.args_json)
         repo_name = self.args_json.get('name', None)
         file_name = self.args_json.get('file', None)
         msg = self.args_json.get('comment', "added by Data Discovery Engine")
