@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<section id="editor" class="container-fluid" style="min-height: 80vh;padding-top:60px;">
+<section id="editor" class="container-fluid m-auto col-sm-12 col-md-8" style="min-height: 80vh;padding-top:60px;">
   <div>
     <div class="jumbotron bg-light text-center m-1 pt-4">
       <h1 class="logoText">Schema Editor</h1>
@@ -866,7 +866,7 @@ Vue.component('github-option', {
         <small class="text-muted">A new file will be saved to this repository.</small>
         <div class="text-muted text-center">
           <template v-if="name_selected && repo_selected">
-            <h5 class="my-3"><span v-text="existing_file?'Update':'Create'"></span>: <b v-text="repo_selected"></b>/<code v-text="name_selected+'.jsonld'"></code>?</h5>
+            <h5 class="my-3"><span v-text="existing_file?'Update':'Create'"></span>: <b v-text="repo_selected"></b>/<code v-text="name_selected"></code>?</h5>
             <button type="button" class="btn btn-success text-light btn-sm" @click="saveWork()"><i class="fab fa-github-alt"></i> <span v-text="existing_file?'Update':'Save'"></span></button>
           </template>
           <template v-else>

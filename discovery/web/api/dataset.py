@@ -101,12 +101,20 @@ class DatasetMetadataHandler(APIBaseHandler):
         Filter results by a user.
         '''
 
-        # /api/dataset/
+        # get all by guide used
+        guide = self.args.guide
+        if guide:
+            try:
+                datasets = DatasetController.get_metadata_by_guide(guide)
+            except Exception as exc:
+                raise HTTPError(500, reason=str(exc))
+            else:  # success, end request
+                raise Finish(datasets)
+        # /api/dataset/ get one by id or all by user
         if not _id:
 
             user = self.args.user
             private = self.args.private
-            guide = self.args.guide
 
             if private:
                 if not self.current_user:
@@ -116,10 +124,7 @@ class DatasetMetadataHandler(APIBaseHandler):
                 if user != self.current_user:
                     raise HTTPError(403)
             try:
-                if guide:
-                    datasets = DatasetController.get_all(user, private, guide)
-                else:
-                    datasets = DatasetController.get_all(user, private)
+                datasets = DatasetController.get_all(user, private)
             except Exception as exc:
                 raise HTTPError(500, reason=str(exc))
             else:  # success, end request
