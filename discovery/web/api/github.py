@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 class GHHandler(APIBaseHandler):
     """
-    C /api/gh?guide=<guide>
-    R /api/gh/
-    U /api/gh/
-    D /api/gh
+    POST /api/gh/ create file and/or repo
+    GET /api/gh/ get user public repos/files
+    UPD /api/gh/ update existing file content
+    DEL /api/gh/ delete repo and contents
     """
     kwargs = {
         'POST': {
