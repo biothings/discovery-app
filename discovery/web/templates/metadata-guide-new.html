@@ -2840,20 +2840,19 @@
     },
     template:
     `<div class="m-0 inputbox fade-in" :id='name'>
-      <div class="row">
+      <div class="row m-0">
         <div class="col-sm-10 p-1 text-left d-flex align-items-center justify-content-center" :class="[userInput || userInput === false ? 'completefield':'alert-light']">
           <div class="d-flex w-100 justify-content-center">
-            <div class="row m-0 w-100">
-              <div class="col-sm-2 d-flex align-items-center justify-content-center" style="word-break: break-all;">
-                <small class="bold" :class="[userInput || userInput === false ? 'text-success':'text-muted']">
-                  <i class="fas fa-asterisk fa-xs text-danger required pointer unselectable" v-if="isRequired"></i>&nbsp;<span v-text="name"></span>
-                </small>
-              </div>
-              <div class="col-sm-10">
-                <div v-if="showDesc"  class="col-sm-12">
-                  <small  class="text-muted">
+            <div class="w-100">
+              <div>
+                <div class="col-sm-12">
+                  <p :class="[userInput || userInput === false ? 'text-success':'text-dark']">
+                    <small v-if="isRequired && !userInput && userInput !== false"><i class="fas fa-asterisk fa-xs text-danger required pointer unselectable"></i></small>
                     <span v-text='info.description || "No description provided"'></span>
-                  </small>
+                    <small class="text-muted">
+                      (<span v-text="name"></span>)
+                    </small>
+                  </p>
                 </div>
                 <h6 v-show="loading" class="text-primary">Loading <i class="fas fa-spinner fa-pulse"></i></h6>
                 <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
@@ -2908,7 +2907,7 @@
                     </template>
                     <!-- 🌈 STRING NORMAL🌈 -->
                     <template v-else>
-                      <textarea :rows="name ==='description'?5:2" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
+                      <textarea :class="[userInput ? 'border-success':'']" :rows="name ==='description'?5:2" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
                     </template>
                       <!-- 🌈 VOCAB PREVIEW🌈 -->
                     <template v-if="vocabDetails && vocab.length && vocabDetails.ontology_prefix">
@@ -2953,7 +2952,7 @@
                   </template>
                   <!-- 🌈 URL 🌈 -->
                   <template v-if="info && info.format === 'uri'">
-                    <input type="url" v-model="userInput" class="form-control form-control-sm " placeholder="enter url here">
+                    <input :class="[userInput ? 'border-success':'']" type="url" v-model="userInput" class="form-control form-control-sm " placeholder="enter url here">
                   </template>
                   <!-- 🌈 STRING FORMAT DATE 🌈 -->
                   <template v-if="info && info.format === 'date'">
@@ -3264,17 +3263,19 @@
               <small>Change Form Style</small>
             </label>
           </div>
+          <!--
           <div v-show="viewSettings">
             <input class="form-check-input" type="checkbox" :checked="showDesc"  id="customControlInline" @click="toggleDesc()">
             <label class="form-check-label text-light" for="customControlInline" >
               <small>Toggle Descriptions</small>
             </label>
           </div>
+          -->
         </div>
         <div class="col-sm-12 col-md-9 p-0">
           <template v-if="allMode && validation">
             <!-- 🌈  ALL MODE 🌈 -->
-            <div class="px-3">
+            <div class="p-0">
               <template v-if="type === 'REQUIRED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
                   <input-box :name='index' :info="prop" :key='index'></input-box>
@@ -3297,7 +3298,7 @@
               </span>
               <template v-if="type === 'REQUIRED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
-                  <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal slit-in-vertical" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
+                  <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal slit-in-vertical" @click='selectProp(index)' v-if="prop && !prop.value && prop.value !== false" :class="{'highlight': prop.highlighted}">
                     <span v-text='index'></span>
                     <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
                   </span>
@@ -3305,7 +3306,7 @@
               </template>
               <template v-if="type === 'RECOMMENDED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="!isRequired(index)">
-                  <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal slit-in-vertical" @click='selectProp(index)' v-if="prop && !prop.value" :class="{'highlight': prop.highlighted}">
+                  <span class="badge badge-dark m-1 pointer badgeDesc font-weight-normal slit-in-vertical" @click='selectProp(index)' v-if="prop && !prop.value && prop.value !== false" :class="{'highlight': prop.highlighted}">
                     <span v-text='index'></span>
                   </span>
                 </template>
@@ -3318,7 +3319,7 @@
               </span>
               <template v-if="type === 'REQUIRED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
-                  <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
+                  <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value || prop.value === false" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
                     <i class="fas fa-check-circle text-success"></i> <span v-text='index'></span>
                     <i class="fas fa-asterisk text-danger required pointer unselectable" v-if="isRequired(index)"></i>
                   </small>
@@ -3326,15 +3327,15 @@
               </template>
               <template v-if="type === 'RECOMMENDED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="!isRequired(index)">
-                  <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
+                  <small class="m-1 text-success pointer desc" @click='selectProp(index)' v-if="prop && prop.value || prop.value === false" :class="{'highlight': prop.highlighted}" data-tippy-info="Edit">
                     <i class="fas fa-check-circle text-success"></i> <span v-text='index'></span>
                   </small>
                 </template>
               </template>
             </div>
-            <div>
+            <div class="p-1">
               <template v-if="validation.properties" v-for="(prop,index) in validation.properties">
-                <input-box v-if='prop && prop.selected' :name='index' :info="prop" :key='index'></input-box>
+                <input-box class="border border-dark" v-if='prop && prop.selected' :name='index' :info="prop" :key='index'></input-box>
               </template>
             </div>
           </template>
