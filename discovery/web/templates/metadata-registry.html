@@ -198,6 +198,28 @@
         pages: 1,
         perPage: 20,
         loading: false,
+        guide_filters:[
+          {
+            url: 'http://localhost:8000/guide/n3c/dataset',
+            active: false,
+            name: 'n3c'
+          },
+          {
+            url: 'http://localhost:8000/guide/niaid/dataset',
+            active: false,
+            name: 'niaid'
+          },
+          {
+            url: 'http://localhost:8000/guide/outbreak/dataset',
+            active: false,
+            name: 'outbreak'
+          },
+          {
+            url: 'http://localhost:8000/guide',
+            active: false,
+            name: 'cd2h'
+          },
+        ]
       }
     },
     methods: {
@@ -255,6 +277,8 @@
         var self = this;
 
         query = query || "__all__";
+
+        console.log('query',query)
 
         if (query) {
           var params = {
@@ -324,15 +348,13 @@
               }else {
                 guides = [guides]
               }
-              // for (var i = 0; i < guides.length; i++) {
-              //   for (var x = 0; x < self.guides.length; x++) {
-              //     if (self.guides[x].name === guides[i]) {
-              //       var payload = {};
-              //       payload["tag"] = self.tags[x];
-              //       store.commit('toggleTag',payload);
-              //     }
-              //   }
-              // }
+              for (var i = 0; i < guides.length; i++) {
+                for (var x = 0; x < self.guide_filters.length; x++) {
+                  if (self.guide_filters[x].url === guides[i]) {
+                    console.log("Match", self.guide_filters[x].name)
+                  }
+                }
+              }
             }
 
           },
@@ -340,7 +362,8 @@
     mounted: function() {
       var self = this;
       self.checkLoggedUser();
-      self.search();
+      // self.checkforQuery();
+      self.search(self.query);
       tippy('.search', {
         maxWidth: '200px',
         placement: 'top',
