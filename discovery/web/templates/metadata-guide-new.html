@@ -3216,15 +3216,6 @@
         store.commit('toggleDesc');
       },
     },
-    watch:{
-      allMode: function(m){
-        if (m) {
-          $.notify("View All",{ globalPosition: 'right',className:'info', showDuration: 40, });
-        }else{
-          $.notify("View 1 by 1",{ globalPosition: 'right',className:'info', showDuration: 40, });
-        }
-      }
-    },
     mounted: function(){
       this.checkSettings();
     },
@@ -4290,7 +4281,7 @@
         checkProgress(){
           let p = sessionStorage.getItem('guideProgress');
           if (p) {
-            $.notify("Progress recovered",{ globalPosition: 'right',className:'info', showDuration: 40, });
+            $.notify("Progress recovered",{ globalPosition: 'top center',className:'success', showDuration: 40, });
             let selected = JSON.parse(p)
 
             for(key in selected){
