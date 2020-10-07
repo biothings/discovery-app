@@ -3,10 +3,9 @@
 {% include "header.html" %}
 <div id="registry" class="jumbotron" style="min-height:80vh;">
   <div v-if=loading class="loader">
-    <img src="/static/img/ripple.svg"/>
+    <img src="/static/img/ripple.svg" />
   </div>
   <div class="container">
-
     <div class="">
       <h1 class="text-center logoText mb-1 mt-5">Dataset Registry</h1>
       <div class="pb-3">
@@ -14,7 +13,7 @@
           <div class="row m-1 cBox actions bg-secondary">
             <div class="col-sm-10 p-2">
               <div class="">
-                <input class="form-control col-12" id="search_query" type="text" v-model="query" name="query" placeholder="Search..." >
+                <input class="form-control col-12" id="search_query" type="text" v-model="query" name="query" placeholder="Search...">
               </div>
             </div>
             <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
@@ -31,7 +30,6 @@
         </form>
       </div>
       <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
-
       </div>
       <ul class="list-group context" style="border-top:solid 3px var(--main)" id="regTippyParent">
         <li class="list-group-item d-flex justify-content-center align-items-center text-muted p-1" style="background:#d0d0d0;">
@@ -64,10 +62,10 @@
           </nav>
           <div class="col-sm-12 right-align form-group">
             <select class="perPage form-control form-control-sm w-50 m-auto" v-model="perPage" @change="calculatePages" id="perPage">
-                <option value="" disabled selected>Shown Per Page</option>
-                <option value="20">20 per page</option>
-                <option value="50">50 per page</option>
-                <option value="100">100 per page</option>
+              <option value="" disabled selected>Shown Per Page</option>
+              <option value="20">20 per page</option>
+              <option value="50">50 per page</option>
+              <option value="100">100 per page</option>
             </select>
           </div>
         </div>
@@ -85,73 +83,72 @@
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
-
-Vue.component('registry-item', {
-  data: function(){
-    return{
-      options:false
-    }
-  },
-  props: ['item'],
-  methods:{
-    saveDataAndRedirect(item){
-      var self = this;
-      if (item) {
-        window.location.href = '/dataset/'+item._id;
-      }else{
+  Vue.component('registry-item', {
+    data: function() {
+      return {
+        options: false
+      }
+    },
+    props: ['item'],
+    methods: {
+      saveDataAndRedirect(item) {
+        var self = this;
+        if (item) {
+          window.location.href = '/dataset/' + item._id;
+        } else {
           Swal.fire(
             'Oops!',
             'Action not available for this item',
           );
+        }
+      },
+      getSubclass(parents) {
+        if (parents) {
+          let sub = parents[0].split(', ');
+          return sub[sub.length - 1]
+        } else {
+          return 'This class has no subclass'
+        }
+      },
+      getPropTotal() {
+        if (this.item.hasOwnProperty('properties')) {
+          return this.item.properties.length
+        } else {
+          return '0'
+        }
       }
     },
-    getSubclass(parents){
-      if (parents) {
-        let sub = parents[0].split(', ');
-        return sub[sub.length-1]
-      }else{
-        return 'This class has no subclass'
-      }
-    },
-    getPropTotal(){
-      if (this.item.hasOwnProperty('properties')) {
-        return this.item.properties.length
-      }else{
-        return '0'
-      }
-    }
-  },
-  computed:{
-    text: function(){
-      if (this.item.description.length > 150) {
-        return this.item.description.substring(1, 150)+"..."
-      }else {
-        return this.item.description
-      }
+    computed: {
+      text: function() {
+        if (this.item.description.length > 150) {
+          return this.item.description.substring(1, 150) + "..."
+        } else {
+          return this.item.description
+        }
 
-    },
-    niaid: function(){
-      if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('niaid')) {
-        return true
-      }else {
-        return false
+      },
+      niaid: function() {
+        if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('niaid')) {
+          return true
+        } else {
+          return false
+        }
+      },
+      outbreak: function() {
+        if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('outbreak')) {
+          return true
+        } else {
+          return false
+        }
       }
     },
-    outbreak: function(){
-      if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('outbreak')) {
-        return true
-      }else {
-        return false
-      }
-    }
-  },
-  mounted: function(){
-    tippy('#'+this.item.name, {
-      interactive:'true',
-      content: "<div class='text-muted m-0 text-left'><pre>"+JSON.stringify(this.item,null,2)+"</pre></div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
-    })
-  },
-  template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="saveDataAndRedirect(item)">
+    mounted: function() {
+      tippy('#' + this.item.name, {
+        interactive: 'true',
+        content: "<div class='text-muted m-0 text-left'><pre>" + JSON.stringify(this.item, null, 2) + "</pre></div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
+      })
+    },
+    template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="saveDataAndRedirect(item)">
     <div class="d-flex">
       <div class="flex-grow-1 p-2">
         <div class="w-100">
@@ -181,179 +178,203 @@ Vue.component('registry-item', {
       </div>
     </div>
   </li>`
-});
+  });
 
-var app = new Vue({
-      el: '#registry',
-			data: function(){
-				return {
-          alphabet : ['ALL','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
-          input:'',
-          linkPrefix:'./',
-          data: null,
-          user:{},
-          testURL:'',
-          registry:[],
-          registryTotal:'0',
-          sort:'Search Relevance',
-          query:'',
-          page: 1,
-          pages: 1,
-          perPage: 20,
-          loading:false,
-				}
-			},
-      methods:{
-
-        searchByUser(username){
-          var self = this;
-
-          $('#searching').show();
-
-          var context = document.querySelector(".context");
-          var instance = new Mark(context);
-          instance.unmark();
-
-          axios.get('/api/query?q=_meta.username:'+username+'&size=100').then(function (response) {
-            self.registry = response.data.hits;
-            self.registryTotal = response.data.total;
-            $( document ).ready(function() {
-              self.mark(username);
-            });
-            if (self.registryTotal) {
-              self.calculatePages();
-            }
-            $('#searching').hide();
-          });
-        },
-        mark: function(kw){
-          var context = document.querySelector(".context");
-          var instance = new Mark(context);
-          instance.mark(kw);
-        },
-        getQueryFilters: function(){
-            var filters = [];
-            var authorFilters = [];
-            var finalFilters = {};
-            this.tags.forEach(function(item){
-              if (item.active)
-                  filters.push(item.name);
-              });
-            if (filters.length > 0){
-              finalFilters['tags.name.raw'] = filters;
-            }
-
-            this.authors.forEach(function(item){
-              if (item.active){
-                authorFilters.push(item.name);
-              }
-              });
-            if (authorFilters.length){
-              finalFilters['info.contact.name.raw'] = authorFilters;
-            }
-
-            return finalFilters;
-        },
-        search(query){
-          var self = this;
-
-          query = query || "__all__";
-
-          if (query) {
-              var params = {
-                  "params": {
-                    "q": query,
-                    // 'fields': 'info,_meta,paths.path, paths.pathitem.get.summary,paths.pathitem.post.summary,paths.pathitem.delete.summary,paths.pathitem.patch.summary,paths.pathitem.put.summary,paths.pathitem.head.summary,paths.pathitem.put.summary,options.pathitem.head.summary,paths.pathitem.put.summary,paths.pathitem.trace.summary, tags,openapi,swagger,'
-                  }
-              };
-            }
-            // var filters = this.getQueryFilters();
-            // if (filters)
-            //     params["params"]["filters"] = filters;
-
-            self.loading = true;
-
-            var context = document.querySelector(".context");
-            var instance = new Mark(context);
-            instance.unmark();
-            //clear registry to fix mixing results info
-            self.registry = [];
-            axios.get('/api/dataset?size=1000', params).then(function (response) {
-              self.registry = response.data.hits;
-              self.registryTotal = response.data.total;
-              // mark results, doc must be loaded
-              $( document ).ready(function() {
-                self.mark(self.query);
-              });
-              if (self.registryTotal) {
-                self.calculatePages();
-              }
-              self.loading = false;
-            });
-        },
-        calculatePages: function () {
-          var self= this;
-          self.pages = Math.ceil(self.registry && self.registry.length / self.perPage);
-        },
-        prevPage: function () {
-          var self= this;
-          if (self.page > 1)
-              self.page -= 1
-        },
-        nextPage: function () {
-          var self= this;
-          if (self.page < self.pages)
-              self.page += 1
-        },
-        sortResults(e){
-          this.sort = e.target.value;
-        },
-        checkLoggedUser(){
-          var self = this;
-          axios.get('./user').then(res=>{
-            if (res.data.login) {
-              self.user = res.data;
-            }
-          }).catch(err=>{
-            throw err;
-          });
-        },
+  var app = new Vue({
+    el: '#registry',
+    data: function() {
+      return {
+        alphabet: ['ALL', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+        input: '',
+        linkPrefix: './',
+        data: null,
+        user: {},
+        testURL: '',
+        registry: [],
+        registryTotal: '0',
+        sort: 'Search Relevance',
+        query: '',
+        page: 1,
+        pages: 1,
+        perPage: 20,
+        loading: false,
+      }
     },
-    mounted:function(){
+    methods: {
+
+      searchByUser(username) {
+        var self = this;
+
+        $('#searching').show();
+
+        var context = document.querySelector(".context");
+        var instance = new Mark(context);
+        instance.unmark();
+
+        axios.get('/api/query?q=_meta.username:' + username + '&size=100').then(function(response) {
+          self.registry = response.data.hits;
+          self.registryTotal = response.data.total;
+          $(document).ready(function() {
+            self.mark(username);
+          });
+          if (self.registryTotal) {
+            self.calculatePages();
+          }
+          $('#searching').hide();
+        });
+      },
+      mark: function(kw) {
+        var context = document.querySelector(".context");
+        var instance = new Mark(context);
+        instance.mark(kw);
+      },
+      getQueryFilters: function() {
+        var filters = [];
+        var authorFilters = [];
+        var finalFilters = {};
+        this.tags.forEach(function(item) {
+          if (item.active)
+            filters.push(item.name);
+        });
+        if (filters.length > 0) {
+          finalFilters['tags.name.raw'] = filters;
+        }
+
+        this.authors.forEach(function(item) {
+          if (item.active) {
+            authorFilters.push(item.name);
+          }
+        });
+        if (authorFilters.length) {
+          finalFilters['info.contact.name.raw'] = authorFilters;
+        }
+
+        return finalFilters;
+      },
+      search(query) {
+        var self = this;
+
+        query = query || "__all__";
+
+        if (query) {
+          var params = {
+            "params": {
+              "q": query,
+            }
+          };
+        }
+        self.loading = true;
+        var context = document.querySelector(".context");
+        var instance = new Mark(context);
+        instance.unmark();
+        self.registry = [];
+        axios.get('/api/dataset?size=1000', params).then(function(response) {
+          self.registry = response.data.hits;
+          self.registryTotal = response.data.total;
+          $(document).ready(function() {
+            self.mark(self.query);
+          });
+          if (self.registryTotal) {
+            self.calculatePages();
+          }
+          self.loading = false;
+        });
+      },
+      calculatePages: function() {
+        var self = this;
+        self.pages = Math.ceil(self.registry && self.registry.length / self.perPage);
+      },
+      prevPage: function() {
+        var self = this;
+        if (self.page > 1)
+          self.page -= 1
+      },
+      nextPage: function() {
+        var self = this;
+        if (self.page < self.pages)
+          self.page += 1
+      },
+      sortResults(e) {
+        this.sort = e.target.value;
+      },
+      checkLoggedUser() {
+        var self = this;
+        axios.get('./user').then(res => {
+          if (res.data.login) {
+            self.user = res.data;
+          }
+        }).catch(err => {
+          throw err;
+        });
+      },
+      checkforQuery: function(){
+            var self = this;
+            var url_string = window.location.href
+            var url = new URL(url_string);
+
+            var q = url.searchParams.get("q");
+            if (q) {
+              this.query = q;
+            }
+
+            var guides = url.searchParams.get("guide");
+            if (guides) {
+              if (guides.includes(',')) {
+                guides = guides.split(',')
+              }else {
+                guides = [guides]
+              }
+              // for (var i = 0; i < guides.length; i++) {
+              //   for (var x = 0; x < self.guides.length; x++) {
+              //     if (self.guides[x].name === guides[i]) {
+              //       var payload = {};
+              //       payload["tag"] = self.tags[x];
+              //       store.commit('toggleTag',payload);
+              //     }
+              //   }
+              // }
+            }
+
+          },
+    },
+    mounted: function() {
       var self = this;
       self.checkLoggedUser();
       self.search();
-      tippy( '.search', {
-        maxWidth:'200px',
-        placement:'top',
+      tippy('.search', {
+        maxWidth: '200px',
+        placement: 'top',
         content: '<div class="text-muted m-0" style="border-radius:none">Search</div>',
         animation: 'fade',
-        theme:'light'});
-        tippy( '.reset', {
-          maxWidth:'200px',
-          placement:'top',
-          content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
-          animation: 'fade',
-          theme:'light'});
-      tippy( '#regTippyParent', {
-        target:'.tip',
-        placement:'top',
-        maxWidth:'200px',
+        theme: 'light'
+      });
+      tippy('.reset', {
+        maxWidth: '200px',
+        placement: 'top',
+        content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
+        animation: 'fade',
+        theme: 'light'
+      });
+      tippy('#regTippyParent', {
+        target: '.tip',
+        placement: 'top',
+        maxWidth: '200px',
         content: 'loading',
         animation: 'fade',
-        theme:'light',
+        theme: 'light',
         onShow(instance) {
           let info = instance.reference.dataset.tippyInfo;
-          instance.setContent("<div class='text-muted m-0 text-center wraptext'>"+info+"</div>")
-        }});
+          instance.setContent("<div class='text-muted m-0 text-center wraptext'>" + info + "</div>")
+        }
+      });
     },
     computed: {
-                registryResults: function () {
-                    var start = (this.page - 1) * this.perPage,
-                        end = start + this.perPage;
-                    return this.registry && this.registry.slice(start, end);
-                }
-            },
+      registryResults: function() {
+        var start = (this.page - 1) * this.perPage,
+          end = start + this.perPage;
+        return this.registry && this.registry.slice(start, end);
+      }
+    },
   })
 
   // Smooth Scroll-To
@@ -363,8 +384,7 @@ var app = new Vue({
     .not('[href="#0"]')
     .click(function(event) {
       if (
-        location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '')
-        &&
+        location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') &&
         location.hostname == this.hostname
       ) {
         var target = $(this.hash);
@@ -379,7 +399,7 @@ var app = new Vue({
             if ($target.is(":focus")) {
               return false;
             } else {
-              $target.attr('tabindex','-1');
+              $target.attr('tabindex', '-1');
               $target.focus();
             };
           });
