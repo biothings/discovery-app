@@ -328,7 +328,7 @@ class DatasetController:
         search = DatasetMetadata.search()
         search.params(rest_total_hits_as_int=True)
         if guide:
-            search = search.query("match", ** {"_meta.guide": guide})
+            search = search.query("match", _meta__guide= guide)
         else:
             search = search.query("match_all")
         return {
