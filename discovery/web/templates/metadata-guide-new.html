@@ -2899,6 +2899,13 @@
                         </template>
                       </div>
                     </template>
+                    <!-- 🌈 ENUM 🌈 -->
+                    <template v-else-if="info && info.enum" v-for="(item,i) in info.enum">
+                      <div class="form-check">
+                        <input class="form-check-input " type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
+                        <label class="form-check-label" :for="i" v-text='item'></label>
+                      </div>
+                    </template>
                     <!-- 🌈 STRING NORMAL🌈 -->
                     <template v-else>
                       <textarea :rows="name ==='description'?5:2" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
@@ -2953,13 +2960,7 @@
                     <input type="date" v-model="userInput" class="form-control form-control-sm">
                   </template>
                 </template>
-                <!-- 🌈 ENUM 🌈 -->
-                <template v-if="info && info.enum" v-for="(item,i) in info.enum">
-                  <div class="form-check">
-                    <input class="form-check-input " type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
-                    <label class="form-check-label" :for="i" v-text='item'></label>
-                  </div>
-                </template>
+
                 <!-- 🌈 LICENSE 🌈 -->
                 <template v-if="info.type=== 'object' && name === 'license'">
                   <form id="licenseForm" class="p-1" v-if="!userInput">
@@ -3552,7 +3553,7 @@
                 type: 'error',
                 position: 'center',
                 title: 'Failed because: ',
-                text: err.response.data.reason
+                text: err.response.data.error
               });
             } catch (e) {
               // console.log(e)
