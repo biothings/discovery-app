@@ -311,7 +311,7 @@ class DatasetController:
         search = DatasetMetadata.search(private=private)
         search.params(rest_total_hits_as_int=True)
         if user:
-            search = search.query("match", _meta__user=user)
+            search = search.query("match", _meta__username=user)
         else:
             search = search.query("match_all")
         return {
