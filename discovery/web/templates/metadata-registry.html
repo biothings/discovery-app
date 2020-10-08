@@ -256,8 +256,6 @@
 
         query = query || "__all__";
 
-        console.log('query',query)
-
         if (query) {
           var params = {
             "params": {
@@ -329,6 +327,7 @@
               }else {
                 guides = [guides]
               }
+              console.log(guides)
               for (var i = 0; i < guides.length; i++) {
                 let guide_url = self.getLocation(guides[i])
                 guide_paths.push(guide_url.pathname)
