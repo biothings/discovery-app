@@ -1,13 +1,13 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<div id="portal" class="container-fluid p-0" style="min-height:80vh; margin-top:100px;">
+<div id="portal" class="container-fluid p-0" style="min-height:80vh;">
   <template v-if="portal && portal.name">
     <div class="row m-0">
       <div class="text-center col-sm-12 grad p-0">
         <div class="lines p-5">
+          <img class="mt-4" :src="portal.image" :alt="portal.name" width="300px"/>
           <a href="/portal" class="d-block text-info"><i class="fas fa-chevron-left"></i> Back to Portals</a>
-          <img :src="portal.image" :alt="portal.name" width="300px"/>
         </div>
       </div>
       <div class="col-sm-12 col-md-8 py-5 d-flex justify-content-center align-items-center">
