@@ -2789,6 +2789,19 @@
     mounted: function(){
       var self = this
 
+      if (self.info.hasOwnProperty('oneOf')) {
+        if (self.info['oneOf'].hasOwnProperty('type') && self.info['oneOf'][0]['type'] == 'array' || self.info['oneOf'][1]['type'] == 'array' ) {
+          self.canAcceptMultiple = true
+        }
+      }
+
+      if (self.info.hasOwnProperty('anyOf')) {
+        if (self.info['anyOf'].hasOwnProperty('type') && self.info['anyOf'][0]['type'] == 'array' || self.info['anyOf'][1]['type'] == 'array' ) {
+          self.canAcceptMultiple = true
+        }
+      }
+
+
       self.checkForConstantKey(self.info,'const')
 
       try {
@@ -2899,7 +2912,7 @@
                   </h6>
                 </div>
                 <h6 v-show="loading" class="text-primary">Loading <i class="fas fa-spinner fa-pulse"></i></h6>
-                <div class="ml-2">
+                <div class="ml-3">
                   <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
                   <!-- 🌈 BOOLEAN 🌈 -->
                   <template v-if="info && info.type === 'boolean'">
@@ -3112,7 +3125,10 @@
                       <template v-if="typeof userInput === 'object' || typeof userInput === 'array'  " v-for="(person,i) in userInput">
                         <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
                           <i class="fas fa-check"></i>
-                          <span v-text="name+' '+(i+1)"></span>
+                          <template v-if="person && person.name">
+                            <span v-text="person.name"></span>
+                          </template>
+                          <span v-else v-text="name+' '+(i+1)"></span>
                           <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
                         </span>
                       </template>
@@ -3136,7 +3152,10 @@
                         <template v-if="typeof userInput === 'object' || typeof userInput === 'array'  " v-for="(person,i) in userInput">
                           <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
                             <i class="fas fa-check"></i>
-                            <span v-text="name+' '+(i+1)"></span>
+                            <template v-if="person && person.name">
+                              <span v-text="person.name"></span>
+                            </template>
+                            <span v-else v-text="name+' '+(i+1)"></span>
                             <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
                           </span>
                         </template>
@@ -4421,7 +4440,7 @@
                 });
               }else{
                 // REGULAR TIP DESCRIPTION
-                instance.setContent("<div class='text-muted m-0 p-1'>"+info+"</div>")
+                instance.setContent("<div class='text-info text-left m-0 p-1'>"+info+"</div>")
               }
             }
           });
