@@ -198,28 +198,6 @@
         pages: 1,
         perPage: 20,
         loading: false,
-        guide_filters:[
-          {
-            url: 'http://localhost:8000/guide/n3c/dataset',
-            active: false,
-            name: 'n3c'
-          },
-          {
-            url: 'http://localhost:8000/guide/niaid/dataset',
-            active: false,
-            name: 'niaid'
-          },
-          {
-            url: 'http://localhost:8000/guide/outbreak/dataset',
-            active: false,
-            name: 'outbreak'
-          },
-          {
-            url: 'http://localhost:8000/guide',
-            active: false,
-            name: 'cd2h'
-          },
-        ]
       }
     },
     methods: {
@@ -245,12 +223,12 @@
           $('#searching').hide();
         });
       },
-      mark: function(kw) {
+      mark(kw) {
         var context = document.querySelector(".context");
         var instance = new Mark(context);
         instance.mark(kw);
       },
-      getQueryFilters: function() {
+      getQueryFilters() {
         var filters = [];
         var authorFilters = [];
         var finalFilters = {};
@@ -301,19 +279,20 @@
           if (self.registryTotal) {
             self.calculatePages();
           }
+          self.checkforQuery();
           self.loading = false;
         });
       },
-      calculatePages: function() {
+      calculatePages() {
         var self = this;
         self.pages = Math.ceil(self.registry && self.registry.length / self.perPage);
       },
-      prevPage: function() {
+      prevPage() {
         var self = this;
         if (self.page > 1)
           self.page -= 1
       },
-      nextPage: function() {
+      nextPage() {
         var self = this;
         if (self.page < self.pages)
           self.page += 1
@@ -331,17 +310,19 @@
           throw err;
         });
       },
-      checkforQuery: function(){
-            var self = this;
-            var url_string = window.location.href
-            var url = new URL(url_string);
+      checkforQuery(){
+            let self = this;
+            let url_string = window.location.href
+            let url = new URL(url_string);
 
-            var q = url.searchParams.get("q");
+            let q = url.searchParams.get("q");
             if (q) {
               this.query = q;
             }
 
-            var guides = url.searchParams.get("guide");
+            let guides = url.searchParams.get("guide");
+            let guide_paths =[]
+
             if (guides) {
               if (guides.includes(',')) {
                 guides = guides.split(',')
@@ -349,20 +330,35 @@
                 guides = [guides]
               }
               for (var i = 0; i < guides.length; i++) {
-                for (var x = 0; x < self.guide_filters.length; x++) {
-                  if (self.guide_filters[x].url === guides[i]) {
-                    console.log("Match", self.guide_filters[x].name)
-                  }
-                }
+                let guide_url = self.getLocation(guides[i])
+                guide_paths.push(guide_url.pathname)
+              }
+              if (guide_paths.length) {
+                self.handleGuideFilter(guide_paths)
               }
             }
-
+          },
+          handleGuideFilter(guide_paths){
+            let self = this;
+            self.registry = _.filter(self.registry, function(item) {
+              if (item.hasOwnProperty('_meta') && item['_meta']['guide']) {
+                let item_path = self.getLocation(item['_meta']['guide'])
+                item_path = item_path.pathname
+                if (guide_paths.includes(item_path)) {
+                  return item
+                }
+              }
+            });
+          },
+          getLocation(href) {
+              var l = document.createElement("a");
+              l.href = href;
+              return l;
           },
     },
     mounted: function() {
       var self = this;
       self.checkLoggedUser();
-      // self.checkforQuery();
       self.search(self.query);
       tippy('.search', {
         maxWidth: '200px',

@@ -18,7 +18,7 @@
     <p class="text-muted">
       Follow best practices to make your dataset metadata more findable
     </p>
-    <a href="/dataset">Browse registered datasets <i class="fas fa-chevron-right"></i></a>
+    <a :href="'/dataset?guide='+window.location.href" target="_blank">Browse other registered dataset metadata using this guide <i class="fas fa-external-link-square-alt"></i></a>
   </div>
   <div id="jsonTable">
     <!-- BULK -->
@@ -3297,7 +3297,7 @@
     `<div>
       <div class="row m-0">
         <div class="col-sm-12 grad d-flex justify-content-around align-items-center p-1">
-          <h3 class="badge d-inline m-0" v-text="type" :class="type === 'REQUIRED' ?'badge-required':'badge-info'"></h3>
+          <h3 class="badge d-inline m-0" v-text="type" :class="type === 'REQUIRED' ?'badge-danger':'badge-info'"></h3>
           <button class="btn btn-sm btn-outline-secondary text-light" @click="viewSettings = ! viewSettings">
             <small><i class="fas fa-cog"></i> Display Settings</small>
           </button>
@@ -3739,7 +3739,7 @@
                    }
                  }
 
-                axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label']+"&guide="+encodeURI(window.location.href),output,config).then(res=>{
+                axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label']+"&guide="+encodeURI(window.location.pathname),output,config).then(res=>{
                   self.loading = false;
                   if (res.data.success) {
 
