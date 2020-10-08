@@ -4353,20 +4353,13 @@
             for(key in selected){
               if (!['@context','@type','_id'].includes(key)) {
                 var payload = {};
-                if (typeof selected[key] === 'object') {
-                  let value = [selected[key]]
-                  payload["completed"] = {'name':key,'value':value};
-                  store.commit('markCompleted',payload);
-                }else{
-                  let value = selected[key]
-                  payload["completed"] = {'name':key,'value':value};
-                  store.commit('markCompleted',payload);
-                }
+                let value = selected[key]
+                payload["completed"] = {'name':key,'value':value};
+                store.commit('markCompleted',payload);
 
               }
             }
           }
-
         },
         viewErrors(){
           var self = this;
