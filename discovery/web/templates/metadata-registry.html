@@ -292,7 +292,7 @@
         var instance = new Mark(context);
         instance.unmark();
         self.registry = [];
-        axios.get('/api/dataset?size=1000', params).then(function(response) {
+        axios.get('/api/dataset/query?size=1000', params).then(function(response) {
           self.registry = response.data.hits;
           self.registryTotal = response.data.total;
           $(document).ready(function() {
