@@ -46,7 +46,7 @@
         </div>
         <div class="text-center p-2 m-1 rounded p-3" @mouseenter="hover('dataset')">
           <object id="dataset" type="image/svg+xml" data="/static/img/dataset-01.svg" width="100px" alt="DATASETS"></object>
-          <a href="/dataset" class="nd mt-2 tip text-info" :data-tippy-info="'Browse registered metadata in Data Discovery Engine for '+portal.name">
+          <a :href="portal.datasets" class="nd mt-2 tip text-info" :data-tippy-info="'Browse registered metadata in Data Discovery Engine for '+portal.name">
             <h5>Datasets <i class="fas fa-chevron-right"></i></h5>
           </a>
         </div>
@@ -88,7 +88,8 @@
             "api": 'https://api.outbreak.info/',
             'site': "https://outbreak.info/",
             'schema': '/view/outbreak',
-            "guide": "/guide/outbreak/dataset"
+            "guide": "/guide/outbreak/dataset",
+            "datasets": "/dataset?guide=https://discovery.biothings.io/guide/outbreak/dataset"
           },
           {
             'name':'NIAID Data Portal',
@@ -105,7 +106,8 @@
             'portalicon': "/static/img/niaid/icon.svg",
             "site": 'https://discovery.biothings.io/niaid/',
             'schema': '/view/niaid',
-            "guide": "/guide/niaid"
+            "guide": "/guide/niaid",
+            "datasets": "/dataset?guide=https://discovery.biothings.io/guide/niaid"
           },
           {
             'name':'CTSA National Center for Data to Health',
@@ -124,6 +126,7 @@
             'schema': '/view/biomedical',
             "guide": "/guide",
             "api": 'https://crawler.biothings.io/',
+            "datasets": "/dataset?guide=https://discovery.biothings.io/guide"
           },
           {
             'name':'The National COVID Cohort Collaborative (N3C)',
@@ -138,7 +141,8 @@
             'portalicon': "/static/img/N3Co.png",
             "site": 'https://covid.cd2h.org/N3C',
             'schema': '/view/n3c',
-            "guide": "/guide/n3c/dataset"
+            "guide": "/guide/n3c/dataset",
+            "datasets": "/dataset?guide=https://discovery.biothings.io/guide/n3c/dataset"
           },
         ]
   	  }
