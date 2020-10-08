@@ -661,7 +661,7 @@ var app = new Vue({
             instance.unmark();
             //clear registry to fix mixing results info
             self.registry = [];
-            axios.get('/api/query?size=1000', params).then(function (response) {
+            axios.get('/api/registry/query?size=1000', params).then(function (response){
               // console.log('%c SEARCH..','color:hotpink')
               // console.log(response.data)
               self.registry = response.data.hits;

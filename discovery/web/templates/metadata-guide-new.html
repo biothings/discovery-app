@@ -2254,7 +2254,59 @@
                       // console.log('TYPE STRING BUT FORMAT NOT HANDLED')
                   }
                 }else {
+
                   // Simple String
+
+                  // REGEX WIP
+
+                  // const pattern = new RegExp(props[key]['pattern'])
+                  //
+                  // console.log('question with pattern', pattern)
+                  //
+                  // questions.push({
+                  //   title: key,
+                  //   text: props[key].description,
+                  //   inputAttributes: {
+                  //     id:'hideThis'
+                  //   },
+                  //   html: `<form class="input-group" @submit.prevent="">
+                  //           <input class="form-control" id="patternInput" type="text" pattern="`+pattern+`"/>
+                  //         </form>`,
+                  //   onOpen: ()=>{
+                  //     document.getElementById("hideThis").classList.add('d-none');
+                  //   },
+                  //   preConfirm: () => {
+                  //       let y = document.getElementById("patternInput")
+                  //       return y.value
+                  //   },
+                  //   inputValidator: (value) => {
+                  //     // value not used as it's teh default hidden input
+                  //     let input_pattern = document.getElementById("patternInput").getAttribute("pattern")
+                  //     input_pattern = input_pattern.replace('//','/')
+                  //     let input_value = document.getElementById("patternInput").value
+                  //
+                  //     return new Promise((resolve) => {
+                  //
+                  //       function regexCheck(str) {
+                  //         var pattern = new RegExp(input_pattern);
+                  //         console.log(pattern)
+                  //         console.log('testing',str)
+                  //         console.log('for',key)
+                  //         console.log(pattern.test(str))
+                  //         return !!pattern.test(str);
+                  //       }
+                  //
+                  //       if (regexCheck(input_value)) {
+                  //         resolve()
+                  //       } else {
+                  //         resolve('[Regex] Input does not match format requested: '+pattern)
+                  //       }
+                  //
+                  //     })
+                  //   }
+                  // });
+
+                  // any string value
                   questions.push({
                     title: key,
                     text: props[key].description,
@@ -2302,6 +2354,7 @@
                     }
                   });
                   break;
+
                 }
                 break;
               case 'integer':
@@ -2746,15 +2799,6 @@
         x[0].focus();
       }
 
-      // self.tip = tippy('#'+self.name, {
-      //   placement:'right',
-      //   appendTo: document.querySelector('#'+self.name),
-      //   content: `<i class="fas fa-exclamation-circle text-danger"></i> There's an issue`,
-      //   interactive: true,
-      //   arrow: true,});
-      //
-      // self.tip.instances[0].show()
-
       tippy( '.save', {
         placement:'top',
         maxWidth:'200px',
@@ -2841,9 +2885,9 @@
     template:
     `<div class="m-0 inputbox fade-in" :id='name'>
       <div class="row m-0">
-        <div class="col-sm-10 p-1 text-left d-flex align-items-center justify-content-center" :class="[userInput || userInput === false ? 'completefield':'alert-light']">
+        <div class="col-sm-10 p-1 text-left d-flex align-items-center justify-content-center" :class="[userInput || userInput === false ? '':'alert-light']">
           <div class="d-flex w-100 justify-content-center">
-            <div class="w-100">
+            <div class="w-100 p-2">
               <div>
                 <div class="col-sm-12">
                   <p :class="[userInput || userInput === false ? 'text-success':'text-dark']">
@@ -2902,7 +2946,7 @@
                     <template v-else-if="info && info.enum" v-for="(item,i) in info.enum">
                       <div class="form-check">
                         <input class="form-check-input " type="radio" name="exampleRadios" :id="i" :value="item" @click='userInput=item' v-model="userInput">
-                        <label class="form-check-label" :for="i" v-text='item'></label>
+                        <label :class="{'text-success': userInput === item}" class="form-check-label" :for="i" v-text='item'></label>
                       </div>
                     </template>
                     <!-- 🌈 STRING NORMAL🌈 -->
