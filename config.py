@@ -24,7 +24,7 @@ ES_INDICES = {
 # Tornado URL Patterns
 # *****************************************************************************
 APP_LIST = [
-    (r"/api/query/?", "biothings.web.handlers.QueryHandler"),
+    (r"/api/query/?", "biothings.web.handlers.QueryHandler", {"biothing_type": "schema"}),
     (r"/api/registry/query/?", "biothings.web.handlers.QueryHandler", {"biothing_type": "schema"}),
     (r"/api/registry/([^/]+)/([^/]+)/?", "discovery.web.api.SchemaRegistryHandler"),
     (r"/api/registry/([^/]+)/?", "discovery.web.api.SchemaRegistryHandler"),
