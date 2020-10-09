@@ -3155,7 +3155,7 @@
                             <template v-if="person && person.name">
                               <span v-text="person.name"></span>
                             </template>
-                            <span v-else v-text="name+' '+(i+1)"></span>
+                            <span v-else v-text="person"></span>
                             <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
                           </span>
                         </template>
@@ -3204,7 +3204,6 @@
                   </small>
                 </template>
               </div>
-
 
             </div>
           </div>
