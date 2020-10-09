@@ -1,14 +1,23 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
+  .registry-item-background{
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #D0D0D0;
+    clip-path: polygon(0 0, 56% 0, 100% 100%, 0% 100%);
+  }
+</style>
 <div id="registry" class="jumbotron" style="min-height:80vh;">
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg" />
   </div>
-  <div class="container">
+  <div class="col-10 m-auto">
     <div class="">
       <h1 class="text-center logoText mb-1 mt-5">Dataset Registry</h1>
-      <div class="pb-3">
+      <div>
         <form @submit.prevent="search(query)">
           <div class="row m-1 cBox actions bg-secondary">
             <div class="col-sm-10 p-2">
@@ -91,17 +100,6 @@
     },
     props: ['item'],
     methods: {
-      saveDataAndRedirect(item) {
-        var self = this;
-        if (item) {
-          window.location.href = '/dataset/' + item._id;
-        } else {
-          Swal.fire(
-            'Oops!',
-            'Action not available for this item',
-          );
-        }
-      },
       getSubclass(parents) {
         if (parents) {
           let sub = parents[0].split(', ');
@@ -116,12 +114,23 @@
         } else {
           return '0'
         }
-      }
+      },
+      goTo(item) {
+        var self = this;
+        if (item) {
+          window.location.href = '/dataset/' + item._id;
+        } else {
+          Swal.fire(
+            'Oops!',
+            'Action not available for this item',
+          );
+        }
+      },
     },
     computed: {
       text: function() {
         if (this.item.description.length > 150) {
-          return this.item.description.substring(1, 150) + "..."
+          return this.item.description.substring(0, 250) + "..."
         } else {
           return this.item.description
         }
@@ -140,45 +149,30 @@
         } else {
           return false
         }
+      },
+      detailLink: function(){
+        return '/dataset/'+this.item._id
       }
     },
     mounted: function() {
-      tippy('#' + this.item.name, {
-        interactive: 'true',
-        content: "<div class='text-muted m-0 text-left'><pre>" + JSON.stringify(this.item, null, 2) + "</pre></div>" || "<div class='alert alert-warning m-0'>No Description Available</div>",
-      })
+
     },
-    template: `<li class="list-group-item list-group-item-action p-0 pointer" @click.prevent="saveDataAndRedirect(item)">
-    <div class="d-flex">
-      <div class="flex-grow-1 p-2">
-        <div class="w-100">
-          <div v-if="niaid" class="d-inline mr-1">
-            <img src="/static/img/niaid/icon.svg" width="30" height="30" alt="NIAID" title="NIAID Data Portal">
-          </div>
-          <div v-if="outbreak" class="d-inline mr-1">
-            <img src="/static/img/outbreak.png" width="30" height="30" alt="Outbreak.info" title="Outbreak.info">
-          </div>
-          <div v-if="!outbreak && !niaid" class="d-inline mr-1">
-            <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="CTSA" title="CTSA Portal">
-          </div>
-          <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
-          <small v-if="item && item.version" class="text-muted" v-text="'Version '+item.version"></small>
-          <p v-if="item && item.description" class="text-muted">
-            <small v-html="text"></small>
-          </p>
-        </div>
-      </div>
-      <div v-if='options' class="p-1 bg-dark d-flex align-items-center justify-content-around flip-in-ver-left">
-        <div>
-          <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item)" :data-tippy-info="'View'">
-            <i class="fas fa-circle text-muted fa-stack-2x"></i>
-            <i class="fas fa-eye fa-stack-1x text-light"></i>
-          </span>
-        </div>
-      </div>
-    </div>
-  </li>`
+    template: `<li class="list-group-item list-group-item-action p-0 pointer">
+                <div class="row m-0">
+                  <div v-if="niaid" class="col-sm-1 registry-item-background" :style="{ backgroundImage: 'url(' + '/static/img/niaid/icon.svg' + ')' }"></div>
+                  <div v-if="outbreak" class="col-sm-1 registry-item-background" :style="{ backgroundImage: 'url(' + '/static/img/outbreak.png' + ')' }"></div>
+                  <div v-if="!outbreak && !niaid" class="col-sm-1 registry-item-background" :style="{ backgroundImage: 'url(' + '/static/img/dde-logo-o.svg' + ')' }"></div>
+                  <div class="col-sm-11" @click="goTo(item)">
+                    <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
+                    <p v-if="item && item.description" class="text-muted">
+                      <small v-html="text"></small>
+                    </p>
+                  </div>
+                </div>
+              </li>`
   });
+
+  //<small v-if="item && item._meta.username" class="text-muted" v-text="item._meta.username"></small>
 
   var app = new Vue({
     el: '#registry',
