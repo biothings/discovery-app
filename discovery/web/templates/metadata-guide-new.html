@@ -1959,8 +1959,8 @@
       oneOfEnum(propName,propInfo){
         var self=this;
 
-        // console.log('oneOfEnum happening')
-        // console.log(propName,propInfo)
+        console.log('oneOfEnum happening')
+        console.log(propName,propInfo)
 
         for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++){
           if (propInfo['oneOf'][oF_i].hasOwnProperty('enum')) {
@@ -2011,7 +2011,7 @@
         }
 
         if (propInfo.hasOwnProperty('oneOf')) {
-          // console.log("ONE OF")
+          console.log("ONE OF")
 
           path= ""
 
@@ -2020,7 +2020,11 @@
               path = 'enum';
             }
             if (propInfo['oneOf'][oF_i].hasOwnProperty('type') && propInfo['oneOf'][oF_i]['type'] == 'string') {
-              path = 'string';
+              if (propInfo['oneOf'][oF_i].hasOwnProperty('enum')) {
+                path = 'enum';
+              }else {
+                path = 'string';
+              }
             }
             if (propInfo['oneOf'][oF_i].hasOwnProperty('@type')) {
               path ='types'
@@ -2032,7 +2036,7 @@
 
           switch (path) {
             case "string":
-            // console.log("path:",path)
+            console.log("path:",path)
             Swal({
                     title: propName,
                     input: 'text',
@@ -2155,261 +2159,317 @@
         }
         else if (propInfo.hasOwnProperty('properties')){
           props = propInfo.properties
-
+          console.log('props for questions', props)
           // Create questions
           for (key in props) {
-            progressSteps.push(key)
-            switch (props[key]['type']) {
-              case 'string':
-                // console.log(key,props[key]['type'])
-                if (props[key].hasOwnProperty('format')) {
-                  switch (props[key]['format']) {
-                    case 'uri':
-                      questions.push({
-                        title: key,
-                        text: props[key].description,
-                        inputValidator: (value) => {
-                          return new Promise((resolve) => {
+            if (key == '@type' && props[key].hasOwnProperty('const')) {
 
-                            function validURL(str) {
-                              str = str.replace(/\(/g, '%28').replace(/\)/g, '%29');
-                              var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                                '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-                                '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-                                '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                                '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-                              // var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-                              return !!pattern.test(str);
+            }else {
+              progressSteps.push(key)
+              switch (props[key]['type']) {
+                case 'string':
+                  // console.log(key,props[key]['type'])
+                  if (props[key].hasOwnProperty('format')) {
+                    switch (props[key]['format']) {
+                      case 'uri':
+                        questions.push({
+                          title: key,
+                          text: props[key].description,
+                          inputValidator: (value) => {
+                            return new Promise((resolve) => {
+
+                              function validURL(str) {
+                                str = str.replace(/\(/g, '%28').replace(/\)/g, '%29');
+                                var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+                                  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+                                  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+                                  '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+                                  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+                                  '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+                                // var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+                                return !!pattern.test(str);
+                              }
+
+                              if (propInfo && propInfo.hasOwnProperty('required')) {
+
+                                let currentField = document.getElementById("swal2-title").textContent;
+                                if (propInfo['required'].includes(currentField)) {
+                                  // is required needs to be validated
+                                  if (value) {
+                                    if (validURL(value)) {
+                                      resolve()
+                                    } else {
+                                      resolve('Input must be a valid URL')
+                                    }
+                                  }else{
+                                    resolve(currentField+' is required')
+                                  }
+                                }else {
+                                  // not required user can skip
+                                  resolve()
+                                }
+                              }
+                              if (propInfo && propInfo.hasOwnProperty('oneOf')) {
+                                for (var i = 0; i < propInfo['oneOf'].length; i++) {
+                                  if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
+
+                                    let currentField = document.getElementById("swal2-title").textContent;
+                                    if (propInfo['oneOf'][i]['required'].includes(currentField)) {
+                                      // is required needs to be validated
+                                      if (value) {
+                                        if (validURL(value)) {
+                                          resolve()
+                                        } else {
+                                          resolve('Input must be a valid URL')
+                                        }
+                                      }else{
+                                        resolve(currentField+' is required')
+                                      }
+                                    }else {
+                                      // not required user can skip
+                                      resolve()
+                                    }
+                                  }
+                                }
+                              }
+
+                              // if not required or anthything else just resolve()
+                              resolve()
+
+
+                            })
+                          }
+                        })
+                        break;
+                      case 'date':
+                        questions.push({
+                          title: key,
+                          inputAttributes: {
+                            id:'hideThis'
+                          },
+                          html: '<input type="date" id="datePicked"/>',
+                          onOpen: ()=>{
+                            document.getElementById("hideThis").classList.add('d-none');
+                          },
+                          preConfirm: () => {
+                            // console.log('%c date format check','color:pink')
+                            return moment(document.getElementById('datePicked').value).format("YYYY-MM-DD");
+                          },
+                        })
+                        break;
+                      default:
+                        console.warning("Property not handled by guide: "+props[key])
+                    }
+                  }else {
+
+                    // Simple String
+
+                    // REGEX WIP
+
+                    // const pattern = new RegExp(props[key]['pattern'])
+                    //
+                    // console.log('question with pattern', pattern)
+                    //
+                    // questions.push({
+                    //   title: key,
+                    //   text: props[key].description,
+                    //   inputAttributes: {
+                    //     id:'hideThis'
+                    //   },
+                    //   html: `<form class="input-group" @submit.prevent="">
+                    //           <input class="form-control" id="patternInput" type="text" pattern="`+pattern+`"/>
+                    //         </form>`,
+                    //   onOpen: ()=>{
+                    //     document.getElementById("hideThis").classList.add('d-none');
+                    //   },
+                    //   preConfirm: () => {
+                    //       let y = document.getElementById("patternInput")
+                    //       return y.value
+                    //   },
+                    //   inputValidator: (value) => {
+                    //     // value not used as it's teh default hidden input
+                    //     let input_pattern = document.getElementById("patternInput").getAttribute("pattern")
+                    //     input_pattern = input_pattern.replace('//','/')
+                    //     let input_value = document.getElementById("patternInput").value
+                    //
+                    //     return new Promise((resolve) => {
+                    //
+                    //       function regexCheck(str) {
+                    //         var pattern = new RegExp(input_pattern);
+                    //         console.log(pattern)
+                    //         console.log('testing',str)
+                    //         console.log('for',key)
+                    //         console.log(pattern.test(str))
+                    //         return !!pattern.test(str);
+                    //       }
+                    //
+                    //       if (regexCheck(input_value)) {
+                    //         resolve()
+                    //       } else {
+                    //         resolve('[Regex] Input does not match format requested: '+pattern)
+                    //       }
+                    //
+                    //     })
+                    //   }
+                    // });
+
+                    // any string value
+                    questions.push({
+                      title: key,
+                      text: props[key].description,
+                      inputValidator: (value) => {
+                        return new Promise((resolve) => {
+
+                          if (propInfo && propInfo.hasOwnProperty('required')) {
+
+                            let currentField = document.getElementById("swal2-title").textContent;
+                            if (propInfo['required'].includes(currentField)) {
+                              // is required needs to be validated
+                              if (value) {
+                                resolve()
+                              } else {
+                                resolve(currentField+' is required')
+                              }
+                            }else {
+                              // not required user can skip
+                              resolve()
                             }
+                          }
+                          if (propInfo && propInfo.hasOwnProperty('oneOf')) {
+                            for (var i = 0; i < propInfo['oneOf'].length; i++) {
+                              if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
 
-                            if (propInfo && propInfo.hasOwnProperty('required')) {
-
-                              let currentField = document.getElementById("swal2-title").textContent;
-                              if (propInfo['required'].includes(currentField)) {
-                                // is required needs to be validated
-                                if (value) {
-                                  if (validURL(value)) {
+                                let currentField = document.getElementById("swal2-title").textContent;
+                                if (propInfo['oneOf'][i]['required'].includes(currentField)) {
+                                  // is required needs to be validated
+                                  if (value) {
                                     resolve()
                                   } else {
-                                    resolve('Input must be a valid URL')
+                                    resolve(currentField+' is required')
                                   }
-                                }else{
-                                  resolve(currentField+' is required')
-                                }
-                              }else {
-                                // not required user can skip
-                                resolve()
-                              }
-                            }
-                            if (propInfo && propInfo.hasOwnProperty('oneOf')) {
-                              for (var i = 0; i < propInfo['oneOf'].length; i++) {
-                                if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
-
-                                  let currentField = document.getElementById("swal2-title").textContent;
-                                  if (propInfo['oneOf'][i]['required'].includes(currentField)) {
-                                    // is required needs to be validated
-                                    if (value) {
-                                      if (validURL(value)) {
-                                        resolve()
-                                      } else {
-                                        resolve('Input must be a valid URL')
-                                      }
-                                    }else{
-                                      resolve(currentField+' is required')
-                                    }
-                                  }else {
-                                    // not required user can skip
-                                    resolve()
-                                  }
+                                }else {
+                                  // not required user can skip
+                                  resolve()
                                 }
                               }
                             }
+                          }
+                          // if not required just resolve value
+                          resolve()
 
-                            // if not required or anthything else just resolve()
-                            resolve()
+                        })
+                      }
+                    });
+                    break;
 
-
-                          })
-                        }
-                      })
-                      break;
-                    case 'date':
-                      questions.push({
-                        title: key,
-                        inputAttributes: {
-                          id:'hideThis'
-                        },
-                        html: '<input type="date" id="datePicked"/>',
-                        onOpen: ()=>{
-                          document.getElementById("hideThis").classList.add('d-none');
-                        },
-                        preConfirm: () => {
-                          // console.log('%c date format check','color:pink')
-                          return moment(document.getElementById('datePicked').value).format("YYYY-MM-DD");
-                        },
-                      })
-                      break;
-                    default:
-                      // console.log('TYPE STRING BUT FORMAT NOT HANDLED')
                   }
-                }else {
-
-                  // Simple String
-
-                  // REGEX WIP
-
-                  // const pattern = new RegExp(props[key]['pattern'])
-                  //
-                  // console.log('question with pattern', pattern)
-                  //
-                  // questions.push({
-                  //   title: key,
-                  //   text: props[key].description,
-                  //   inputAttributes: {
-                  //     id:'hideThis'
-                  //   },
-                  //   html: `<form class="input-group" @submit.prevent="">
-                  //           <input class="form-control" id="patternInput" type="text" pattern="`+pattern+`"/>
-                  //         </form>`,
-                  //   onOpen: ()=>{
-                  //     document.getElementById("hideThis").classList.add('d-none');
-                  //   },
-                  //   preConfirm: () => {
-                  //       let y = document.getElementById("patternInput")
-                  //       return y.value
-                  //   },
-                  //   inputValidator: (value) => {
-                  //     // value not used as it's teh default hidden input
-                  //     let input_pattern = document.getElementById("patternInput").getAttribute("pattern")
-                  //     input_pattern = input_pattern.replace('//','/')
-                  //     let input_value = document.getElementById("patternInput").value
-                  //
-                  //     return new Promise((resolve) => {
-                  //
-                  //       function regexCheck(str) {
-                  //         var pattern = new RegExp(input_pattern);
-                  //         console.log(pattern)
-                  //         console.log('testing',str)
-                  //         console.log('for',key)
-                  //         console.log(pattern.test(str))
-                  //         return !!pattern.test(str);
-                  //       }
-                  //
-                  //       if (regexCheck(input_value)) {
-                  //         resolve()
-                  //       } else {
-                  //         resolve('[Regex] Input does not match format requested: '+pattern)
-                  //       }
-                  //
-                  //     })
-                  //   }
-                  // });
-
-                  // any string value
+                  break;
+                case 'integer':
+                  // console.log('integer',key)
                   questions.push({
                     title: key,
+                    input: 'number',
                     text: props[key].description,
                     inputValidator: (value) => {
                       return new Promise((resolve) => {
-
-                        if (propInfo && propInfo.hasOwnProperty('required')) {
-
-                          let currentField = document.getElementById("swal2-title").textContent;
-                          if (propInfo['required'].includes(currentField)) {
-                            // is required needs to be validated
-                            if (value) {
+                        if (!value) {
+                          return 'You should write something meanignful'
+                        }else{
+                          return new Promise((resolve) => {
+                            function validInteger(str) {
+                              var pattern = new RegExp('^[0-9]*$');
+                              return !!pattern.test(str);
+                            }
+                            if (validInteger(value)) {
                               resolve()
                             } else {
-                              resolve(currentField+' is required')
+                              resolve('Input must be an integer')
                             }
-                          }else {
-                            // not required user can skip
-                            resolve()
-                          }
+                          })
                         }
-                        if (propInfo && propInfo.hasOwnProperty('oneOf')) {
-                          for (var i = 0; i < propInfo['oneOf'].length; i++) {
-                            if (propInfo['oneOf'][i] && propInfo['oneOf'][i].hasOwnProperty('required')) {
-
-                              let currentField = document.getElementById("swal2-title").textContent;
-                              if (propInfo['oneOf'][i]['required'].includes(currentField)) {
-                                // is required needs to be validated
-                                if (value) {
-                                  resolve()
-                                } else {
-                                  resolve(currentField+' is required')
-                                }
-                              }else {
-                                // not required user can skip
-                                resolve()
-                              }
-                            }
-                          }
-                        }
-                        // if not required just resolve value
-                        resolve()
-
                       })
                     }
                   });
                   break;
+                case 'array':
+                  // console.log(key,props[key]['type'])
+                  // console.log("ARRAY",key,props[key])
+                  html =''
+                  if (props[key].hasOwnProperty('oneOf')) {
+                    // console.log("Array Has One Of")
 
-                }
-                break;
-              case 'integer':
-                // console.log('integer',key)
-                questions.push({
-                  title: key,
-                  input: 'number',
-                  text: props[key].description,
-                  inputValidator: (value) => {
-                    return new Promise((resolve) => {
-                      if (!value) {
-                        return 'You should write something meanignful'
-                      }else{
-                        return new Promise((resolve) => {
-                          function validInteger(str) {
-                            var pattern = new RegExp('^[0-9]*$');
-                            return !!pattern.test(str);
+                    for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
+                      if (props[key]['oneOf'][ix]['type'] == 'object') {
+                        let obj = props[key]['oneOf'][ix]['properties'];
+                        for (var obj_key in obj) {
+                          switch (obj[obj_key]['type']) {
+                            case 'string':
+                              html += '<div class="form-group"><input type="text" class="form-control"  name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                              break;
+                            case 'url':
+                              html += '<div class="form-group"><input type="url" class="form-control" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                              break;
+                            case 'date':
+                              html += '<div class="form-group"><input class="form-control" name="'+obj_key+'" type="date"/></div>'
+                              break;
+                            default:
+                              html += '<div class="form-group"><input class="form-control" type="text" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                              break;
                           }
-                          if (validInteger(value)) {
-                            resolve()
-                          } else {
-                            resolve('Input must be an integer')
-                          }
-                        })
+                        }
                       }
+                    }
+
+                    html = `<div class="alert-info p-1">
+                              <form id="arrayForm">`+html+`</form>
+                            </div>`
+                    questions.push({
+                      title: key,
+                      inputAttributes: {
+                        id:'hideThis'
+                      },
+                      html: html,
+                      onOpen: ()=>{
+                        document.getElementById("hideThis").classList.add('d-none');
+                      },
+                      preConfirm: () => {
+                        let formArray = $('#arrayForm').serializeArray();
+                        // console.log('arrayForm Data', arrayForm)
+                        var returnArray = {};
+                        for (var i = 0; i < formArray.length; i++){
+                          if (formArray[i]['name'].includes('date')) {
+                            // console.log('%c date format check','color:pink')
+                            returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
+                          }else {
+                            returnArray[formArray[i]['name']] = formArray[i]['value'];
+                          }
+                        }
+                        // console.log('arrayForm Data', returnArray)
+                        return returnArray;
+                      },
                     })
-                  }
-                });
-                break;
-              case 'array':
-                // console.log(key,props[key]['type'])
-                // console.log("ARRAY",key,props[key])
-                html =''
-                if (props[key].hasOwnProperty('oneOf')) {
-                  // console.log("Array Has One Of")
 
-                  for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
-                    if (props[key]['oneOf'][ix]['type'] == 'object') {
-                      let obj = props[key]['oneOf'][ix]['properties'];
-                      for (var obj_key in obj) {
-                        switch (obj[obj_key]['type']) {
-                          case 'string':
-                            html += '<div class="form-group"><input type="text" class="form-control"  name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
-                            break;
-                          case 'url':
-                            html += '<div class="form-group"><input type="url" class="form-control" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
-                            break;
-                          case 'date':
-                            html += '<div class="form-group"><input class="form-control" name="'+obj_key+'" type="date"/></div>'
-                            break;
-                          default:
-                            html += '<div class="form-group"><input class="form-control" type="text" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
-                            break;
-                        }
-                      }
+                  }
+                  break;
+                case 'object':
+                  // console.log(key,props[key]['type'])
+                  html =''
+                  let obj = props[key]['properties'];
+
+                  for (var obj_key in obj) {
+                    switch (obj[obj_key]['type']) {
+                      case 'string':
+                        html += '<div class="form-group"><input type="text" class="form-control"  name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                        break;
+                      case 'url':
+                        html += '<div class="form-group"><input type="url" class="form-control" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                        break;
+                      case 'date':
+                        html += '<div class="form-group"><input class="form-control" name="'+obj_key+'" type="date"/></div>'
+                        break;
+                      default:
+                        html += '<div class="form-group"><input class="form-control" type="text" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                        break;
                     }
                   }
 
@@ -2442,121 +2502,70 @@
                     },
                   })
 
-                }
-                break;
-              case 'object':
-                // console.log(key,props[key]['type'])
-                html =''
-                let obj = props[key]['properties'];
+                  break;
+                default:
+                  // console.log('DEFAULT PROP HANDLER...')
 
-                for (var obj_key in obj) {
-                  switch (obj[obj_key]['type']) {
-                    case 'string':
-                      html += '<div class="form-group"><input type="text" class="form-control"  name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
-                      break;
-                    case 'url':
-                      html += '<div class="form-group"><input type="url" class="form-control" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
-                      break;
-                    case 'date':
-                      html += '<div class="form-group"><input class="form-control" name="'+obj_key+'" type="date"/></div>'
-                      break;
-                    default:
-                      html += '<div class="form-group"><input class="form-control" type="text" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
-                      break;
-                  }
-                }
+                  // ONE OF
+                  html =''
+                  if (props[key].hasOwnProperty('oneOf')) {
+                    // console.log("Array Has One Of")
 
-                html = `<div class="alert-info p-1">
-                          <form id="arrayForm">`+html+`</form>
-                        </div>`
-                questions.push({
-                  title: key,
-                  inputAttributes: {
-                    id:'hideThis'
-                  },
-                  html: html,
-                  onOpen: ()=>{
-                    document.getElementById("hideThis").classList.add('d-none');
-                  },
-                  preConfirm: () => {
-                    let formArray = $('#arrayForm').serializeArray();
-                    // console.log('arrayForm Data', arrayForm)
-                    var returnArray = {};
-                    for (var i = 0; i < formArray.length; i++){
-                      if (formArray[i]['name'].includes('date')) {
-                        // console.log('%c date format check','color:pink')
-                        returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
-                      }else {
-                        returnArray[formArray[i]['name']] = formArray[i]['value'];
-                      }
-                    }
-                    // console.log('arrayForm Data', returnArray)
-                    return returnArray;
-                  },
-                })
-
-                break;
-              default:
-                // console.log('DEFAULT PROP HANDLER...')
-
-                // ONE OF
-                html =''
-                if (props[key].hasOwnProperty('oneOf')) {
-                  // console.log("Array Has One Of")
-
-                  for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
-                    if (props[key]['oneOf'][ix]['type'] == 'object') {
-                      let obj = props[key]['oneOf'][ix]['properties'];
-                      for (var obj_key in obj) {
-                        switch (obj[obj_key]['type']) {
-                          case 'string':
-                            html += '<div class="form-group"><input type="text" class="form-control"  name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
-                            break;
-                          case 'url':
-                            html += '<div class="form-group"><input type="url" class="form-control" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
-                            break;
-                          case 'date':
-                            html += '<div class="form-group"><input class="form-control" name="'+obj_key+'" type="date"/></div>'
-                            break;
-                          default:
-                            html += '<div class="form-group"><input class="form-control" type="text" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
-                            break;
+                    for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
+                      if (props[key]['oneOf'][ix]['type'] == 'object') {
+                        let obj = props[key]['oneOf'][ix]['properties'];
+                        for (var obj_key in obj) {
+                          switch (obj[obj_key]['type']) {
+                            case 'string':
+                              html += '<div class="form-group"><input type="text" class="form-control"  name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                              break;
+                            case 'url':
+                              html += '<div class="form-group"><input type="url" class="form-control" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                              break;
+                            case 'date':
+                              html += '<div class="form-group"><input class="form-control" name="'+obj_key+'" type="date"/></div>'
+                              break;
+                            default:
+                              html += '<div class="form-group"><input class="form-control" type="text" name="'+obj_key+'" placeholder="'+obj_key+'"/></div>'
+                              break;
+                          }
                         }
                       }
                     }
-                  }
 
-                  html = `<div class="alert-info p-1">
-                            <form id="arrayForm">`+html+`</form>
-                          </div>`
-                  questions.push({
-                    title: key,
-                    inputAttributes: {
-                      id:'hideThis'
-                    },
-                    html: html,
-                    onOpen: ()=>{
-                      document.getElementById("hideThis").classList.add('d-none');
-                    },
-                    preConfirm: () => {
-                      let formArray = $('#arrayForm').serializeArray();
-                      // console.log('arrayForm Data', arrayForm)
-                      var returnArray = {};
-                      for (var i = 0; i < formArray.length; i++){
-                        if (formArray[i]['name'].includes('date')) {
-                          // console.log('%c date format check','color:pink')
-                          returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
-                        }else {
-                          returnArray[formArray[i]['name']] = formArray[i]['value'];
+                    html = `<div class="alert-info p-1">
+                              <form id="arrayForm">`+html+`</form>
+                            </div>`
+                    questions.push({
+                      title: key,
+                      inputAttributes: {
+                        id:'hideThis'
+                      },
+                      html: html,
+                      onOpen: ()=>{
+                        document.getElementById("hideThis").classList.add('d-none');
+                      },
+                      preConfirm: () => {
+                        let formArray = $('#arrayForm').serializeArray();
+                        // console.log('arrayForm Data', arrayForm)
+                        var returnArray = {};
+                        for (var i = 0; i < formArray.length; i++){
+                          if (formArray[i]['name'].includes('date')) {
+                            // console.log('%c date format check','color:pink')
+                            returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
+                          }else {
+                            returnArray[formArray[i]['name']] = formArray[i]['value'];
+                          }
                         }
-                      }
-                      // console.log('arrayForm Data', returnArray)
-                      return returnArray;
-                    },
-                  })
+                        // console.log('arrayForm Data', returnArray)
+                        return returnArray;
+                      },
+                    })
 
-                }
+                  }
+              }
             }
+
 
           }
 
@@ -2896,7 +2905,7 @@
       }
     },
     template:
-    `<div class="m-0 inputbox fade-in" :id='name'>
+    `<div class="m-0 inputbox fade-in" :id='name' v-if="name !== 'includedInDataCatalog'">
       <div class="row m-0">
         <div class="col-sm-10 p-1 text-left d-flex align-items-center justify-content-center" :class="[userInput || userInput === false ? '':'alert-light']">
           <div class="d-flex w-100 justify-content-center">
@@ -3101,7 +3110,7 @@
 
                   <!-- 🌈  CONSTANT DATA CATALOG 🌈 -->
                   <template v-if="info.type=== 'object' && name === 'includedInDataCatalog'">
-                    <div class="text-center">
+                    <!--<div class="text-center">
                       <div class="text-center bold text-info" v-if="constFound">
                         <small class="bold m-auto">Fixed Value, No Action Needed</small>
                       </div>
@@ -3110,7 +3119,7 @@
                         <small class="bold" v-text='index'></small>:<small v-text='item'></small>
                       </p>
                       </div>
-                    </div>
+                    </div>-->
                   </template>
                   <!-- 🌈  OBJECT 🌈 -->
                   <template v-if="info.type=== 'object' && name !== 'license' && name !== 'includedInDataCatalog' ">
@@ -3199,7 +3208,7 @@
                 </small>
                 <!-- 🌈  ISSUE 🌈 -->
                 <template v-if="info && info.hasIssue">
-                  <small style="color:salmon;">
+                  <small class="ml-3" style="color:salmon;">
                     <i class="fas fa-exclamation-circle"></i> <span v-text="info.hasIssue"></span>
                   </small>
                 </template>
