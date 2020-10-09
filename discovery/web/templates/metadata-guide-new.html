@@ -247,7 +247,7 @@
       },
       saveSchema(state,payload){
         state.schema = payload['schema'];
-        // console.log('schema saved',state.schema)
+        console.log('schema saved',state.schema)
         console.log('form properties',state.schema.validation.properties)
         state.output['@type'] = state.schema.name || state.schema.label
         state.output['@context'] = payload['schema']["@context"]
@@ -2653,7 +2653,8 @@
         _.mapKeys(obj, function(value, key) {
           if (key === keyname) {
             self.constFound = true;
-            Vue.set(self.constObj, parentkey, value)
+            //CONST ISSUE
+            // Vue.set(self.constObj, parentkey, value)
           }
           if (typeof value === 'object') {
             self.checkForConstantKey(value,keyname,key)
@@ -4310,7 +4311,6 @@
               payload["step"] = 2;
               store.commit('changeStep',payload);
             }else{
-              // console.log('3')
               payload["step"] = 3;
               store.commit('changeStep',payload);
               self.getFormValues();
