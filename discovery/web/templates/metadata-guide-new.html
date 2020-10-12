@@ -197,10 +197,64 @@
 <script src="/static/js/papaparse.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
-  // json validation
-  // const env = new djv({
-  // version: 'draft-07'
-  // });
+  $.notify.addStyle('success', {
+    html: "<div><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#28a745",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('danger', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#dc3545",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('warning', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#ffc107",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('info', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#17a2b8",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('trophy', {
+    html: `<div class="bg-dark p-1 text-light">
+        <i class="fas fa-thumbs-up text-success"></i> <span data-notify-text/>
+      </div>`,
+      classes: {
+        base: {
+          "white-space": "nowrap",
+          "background-color": "#343a40",
+          "padding": "5px",
+          "color":'white',
+          "border-radius":"5px"
+        }
+      }
+  });
 
   const store = new Vuex.Store({
     state: {
@@ -370,10 +424,10 @@
               Vue.delete(state.schema.validation.properties[selection],'value');
               Vue.set(state.schema.validation.properties[selection],'selected',false);
             }else {
-              $.notify(selection+": no value detected",{ globalPosition: 'right',className:'error', showDuration: 40, });
+              $.notify(selection+": no value detected",{ globalPosition: 'right',style:"danger", showDuration: 40, });
             }
             if (!state.schema.validation.properties[selection].hasOwnProperty('value')) {
-              $.notify(selection+" was cleared",{ globalPosition: 'right',className:'success', showDuration: 40, });
+              $.notify(selection+" was cleared",{ globalPosition: 'right',style:"success", showDuration: 40, });
             }
 
           }
@@ -390,7 +444,7 @@
             if (_.isEqual(props[field].value, item)) {
               Vue.delete(props[field],'value')
             }else{
-              $.notify("[OBJ] does not match value",{ globalPosition: 'right',className:'danger', showDuration: 40, });
+              $.notify("[OBJ] does not match value",{ globalPosition: 'right',style:"danger", showDuration: 40, });
             }
             break;
           case Array:
@@ -403,7 +457,7 @@
                   case String:
                     if (arr_item.value === item) {
                       Vue.delete(arr_item,i);
-                      $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+                      $.notify(item+" removed",{ globalPosition: 'right',style:"success", showDuration: 40, });
                     }
                     break;
                   case Object:
@@ -412,7 +466,7 @@
                     // console.log(_.isEqual(arr_item, item))
                     if (_.isEqual(arr_item, item)) {
                       Vue.delete(props[field].value,i)
-                      $.notify("Item removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+                      $.notify("Item removed",{ globalPosition: 'right',style:"success", showDuration: 40, });
                     }
                     break;
                   default:
@@ -427,17 +481,20 @@
             // console.log('STR')
             if (props[field].value === item) {
               Vue.delete(props[field].value,i);
-              $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+              $.notify(item+" removed",{ globalPosition: 'right',style:"success", showDuration: 40, });
             }else {
-              $.notify(item+" does not match value",{ globalPosition: 'right',className:'danger', showDuration: 40, });
+              $.notify(item+" does not match value",{ globalPosition: 'right',style:"danger", showDuration: 40, });
             }
             break;
           default:
             console.log("not handled")
         }
 
-        if (props[field].value.constructor === Array && props[field].value.length == 0) {
-          Vue.delete(props[field],'value')
+
+        if (props[field].hasOwnProperty('value')) {
+          if (props[field].value.constructor === Array && props[field].value.length == 0) {
+            Vue.delete(props[field],'value')
+          }
         }
 
       },
@@ -585,7 +642,7 @@
             Vue.set(state.schema.validation.properties,prop,newProp)
           }
         }
-        $.notify(origin+" added",{ globalPosition: 'right',className:'success', showDuration: 40, });
+        $.notify(origin+" added",{ globalPosition: 'right',style:"success", showDuration: 40, });
       },
       removeCategory(state,payload){
         let origin = payload['origin'];
@@ -593,7 +650,7 @@
 
         // console.log("remove",catpropsrequired)
         // console.log("remove",origin)
-        $.notify(origin+" removed",{ globalPosition: 'right',className:'info', showDuration: 40, });
+        $.notify(origin+" removed",{ globalPosition: 'right',style:"info", showDuration: 40, });
 
         for (var i = 0; i < state.selectedPortals.length; i++) {
           if (state.selectedPortals[i]['label'] === origin) {
@@ -1829,7 +1886,7 @@
               payload["from"] = self.name;
               store.commit('addToArrayFrom',payload);
             }else{
-              $.notify("A "+type+"'s name is required",{ globalPosition: 'right',className:'error', showDuration: 40, });
+              $.notify("A "+type+"'s name is required",{ globalPosition: 'right',style:"danger", showDuration: 40, });
             }
 
 
@@ -1911,7 +1968,7 @@
               payload["from"] = self.name;
               store.commit('addToArrayFrom',payload);
             }else{
-              $.notify("A "+type+"'s name is required",{ globalPosition: 'right',className:'error', showDuration: 40, });
+              $.notify("A "+type+"'s name is required",{ globalPosition: 'right',style:"danger", showDuration: 40, });
             }
 
 
@@ -3429,7 +3486,7 @@
             payload["step"] = 5;
             store.commit('changeStep',payload);
           }else{
-            $.notify("Incomplete",{ globalPosition: 'right',className:'error', showDuration: 40, });
+            $.notify("Incomplete",{ globalPosition: 'right',style:"danger", showDuration: 40, });
           }
         }
       },
@@ -3638,20 +3695,6 @@
         isComplete:function(){
           let res = store.getters.isComplete
           if (res) {
-            $.notify.addStyle('trophy', {
-              html: `<div class="bg-dark p-1 text-light">
-                  <i class="fas fa-thumbs-up text-success"></i> <span data-notify-text/>
-                </div>`,
-                classes: {
-                  base: {
-                    "white-space": "nowrap",
-                    "background-color": "#343a40",
-                    "padding": "5px",
-                    "color":'white',
-                    "border-radius":"5px"
-                  }
-                }
-            });
             // id is the id of the chart
             $("#registerReady").notify("Available Now",{style:'trophy', showDuration: 40, placement:'top'});
           }
@@ -3719,7 +3762,7 @@
 
           }).catch(err=>{
             self.loading = false;
-            $.notify("Failed to load schema",{ globalPosition: 'right',className:'error', showDuration: 40, });
+            $.notify("Failed to load schema",{ globalPosition: 'right',style:"danger", showDuration: 40, });
             throw err;
           })
         },
@@ -4523,7 +4566,7 @@
         checkProgress(){
           let p = sessionStorage.getItem('guideProgress');
           if (p) {
-            $.notify("Progress recovered",{ globalPosition: 'top center',className:'success', showDuration: 40, });
+            $.notify("Progress recovered",{ style:'success', globalPosition: 'top center',style:"success", showDuration: 40, });
             let selected = JSON.parse(p)
 
             for(key in selected){
