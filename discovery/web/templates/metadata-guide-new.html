@@ -384,18 +384,74 @@
         let item = payload['item']; //full info
         let props = state.schema.validation.properties;
 
-        if(typeof item === 'string'){
-          for (var i = 0; i < props[field].value.length; i++){
-            if (props[field].value[i] === item) {
+        switch (props[field].value.constructor) {
+          case Object:
+            console.log('OBJ',_.isEqual(props[field].value, item))
+            if (_.isEqual(props[field].value, item)) {
+              Vue.delete(props[field],'value')
+            }else{
+              $.notify("[OBJ] does not match value",{ globalPosition: 'right',className:'danger', showDuration: 40, });
+            }
+            break;
+          case Array:
+            console.log('ARR',item)
+            if (props[field] && props[field].value) {
+              console.log(props[field].value.length)
+              for (var i = 0; i < props[field].value.length; i++){
+                let arr_item = props[field].value[i];
+                switch (arr_item.constructor) {
+                  case String:
+                    if (arr_item.value === item) {
+                      Vue.delete(arr_item,i);
+                      $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+                    }
+                    break;
+                  case Object:
+                    console.log('OBJ IN ARR',item)
+                    console.log(arr_item)
+                    console.log(_.isEqual(arr_item, item))
+                    if (_.isEqual(arr_item, item)) {
+                      Vue.delete(props[field].value,i)
+                      $.notify("Item removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+                    }
+                    break;
+                  default:
+                    console.log("not handled")
+                }
+              }
+            }else{
+              console.log('NO VALUE',props[field])
+            }
+            break;
+          case String:
+            console.log('STR')
+            if (props[field].value === item) {
               Vue.delete(props[field].value,i);
               $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+            }else {
+              $.notify(item+" does not match value",{ globalPosition: 'right',className:'danger', showDuration: 40, });
             }
-          }
-        }else if (typeof item === 'object') {
-          let res = _.reject(props[field].value,item)
-          props[field].value=res
-          $.notify("Item removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+            break;
+          default:
+            console.log("not handled")
         }
+
+        if (props[field].value.constructor === Array && props[field].value.length == 0) {
+          Vue.delete(props[field],'value')
+        }
+
+        // if(typeof item === 'string'){
+        //   for (var i = 0; i < props[field].value.length; i++){
+        //     if (props[field].value[i] === item) {
+        //       Vue.delete(props[field].value,i);
+        //       $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+        //     }
+        //   }
+        // }else if (typeof item === 'object' || typeof item === 'array') {
+        //   let res = _.reject(props[field].value,item)
+        //   props[field].value=res
+        //   $.notify("Item removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
+        // }
 
       },
       addToArrayFrom(state,payload){
@@ -1565,6 +1621,59 @@
       <div :class="[done===false?'text-danger border-danger bold':'text-muted']" @click="markCompletedBoolean(false)" class="border rounded p-1 mx-2 pointer w-25 text-center">
         <i class="fas fa-times"></i> No
       </div>
+    </div>`
+  });
+
+  Vue.component('input-preview', {
+    data: function(){
+      return{
+        userObj: {},
+      }
+    },
+    props: ['userInput','removeItem','name'],
+    computed:{
+      type:function(){
+        var self = this;
+        console.log("CONST",self.userInput)
+        if (self.userInput) {
+          switch (self.userInput.constructor) {
+            case Object:
+              return 'obj'
+              break;
+            case Array:
+              return 'arr'
+              break;
+            case String:
+              return 'str'
+              break;
+            default:
+              return 'arr'
+          }
+        }
+      }
+    },
+    template:
+    `<div>
+      <template v-if=" type == 'obj' ">
+        <span :data-tippy-info='JSON.stringify(userInput,null,2)' :data-tippy-id='0'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
+          <i class="fas fa-check"></i>
+          <template v-if="userInput && userInput.name">
+            <span v-text="userInput.name"></span>
+          </template>
+          <span v-else v-text="userInput"></span>
+          <span style="opacity:0;" class="d-inline" @click="removeItem(userInput)"> <i class="fas fa-times"></i></span>
+        </span>
+      </template>
+      <template v-else-if="type == 'arr'" v-for="(person,i) in userInput">
+        <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
+          <i class="fas fa-check"></i>
+          <template v-if="person && person.name">
+            <span v-text="person.name"></span>
+          </template>
+          <span v-else v-text="name+' '+(i+1)"></span>
+          <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
+        </span>
+      </template>
     </div>`
   });
 
@@ -3222,26 +3331,7 @@
                     </div>
                     <div class="col-sm-12 m-auto">
                     <!-- 🌈  input preview for object or array🌈 -->
-                      <template v-if="userInput && userInput.constructor === Object">
-                        <span :data-tippy-info='JSON.stringify(userInput,null,2)' :data-tippy-id='0'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
-                          <i class="fas fa-check"></i>
-                          <template v-if="userInput && userInput.name">
-                            <span v-text="userInput.name"></span>
-                          </template>
-                          <span v-else v-text="userInput"></span>
-                          <span style="opacity:0;" class="d-inline" @click="removeItem(userInput)"> <i class="fas fa-times"></i></span>
-                        </span>
-                      </template>
-                      <template v-else-if="userInput && userInput.constructor === Array" v-for="(person,i) in userInput">
-                        <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
-                          <i class="fas fa-check"></i>
-                          <template v-if="person && person.name">
-                            <span v-text="person.name"></span>
-                          </template>
-                          <span v-else v-text="name+' '+(i+1)"></span>
-                          <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
-                        </span>
-                      </template>
+                      <input-preview :name="name" :userInput="userInput" :removeItem="removeItem"></input-preview>
                     <!-- 🌈  input preview for string🌈 -->
                       <template v-if="typeof userInput === 'string'">
                         <span style="overflow:hidden; max-width:100%;" class="badge badge-success text-light" v-text="userInput"></span>
@@ -3259,26 +3349,7 @@
                       </div>
                       <div class="col-sm-12 m-auto">
                       <!-- 🌈  input preview for object or array🌈 -->
-                        <template v-if="userInput && userInput.constructor === Object">
-                          <span :data-tippy-info='JSON.stringify(userInput,null,2)' :data-tippy-id='0'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
-                            <i class="fas fa-check"></i>
-                            <template v-if="userInput && userInput.name">
-                              <span v-text="userInput.name"></span>
-                            </template>
-                            <span v-else v-text="userInput"></span>
-                            <span style="opacity:0;" class="d-inline" @click="removeItem(userInput)"> <i class="fas fa-times"></i></span>
-                          </span>
-                        </template>
-                        <template v-else-if="userInput && userInput.constructor === Array" v-for="(person,i) in userInput">
-                          <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
-                            <i class="fas fa-check"></i>
-                            <template v-if="person && person.name">
-                              <span v-text="person.name"></span>
-                            </template>
-                            <span v-else v-text="person"></span>
-                            <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
-                          </span>
-                        </template>
+                        <input-preview :name="name" :userInput="userInput" :removeItem="removeItem"></input-preview>
                       <!-- 🌈  input preview for string🌈 -->
                         <template v-if="typeof userInput === 'string'">
                           <span style="overflow:hidden; max-width:100%;" class="badge badge-success text-light" v-text="userInput"></span>
