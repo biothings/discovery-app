@@ -473,13 +473,8 @@
         let origin = payload['origin'];
         let catprops = payload['catprops'];
         let catpropsrequired = payload['catpropsrequired'];
-        // console.log(catprops)
-        // console.log(catpropsrequired)
-        // console.log(origin)
-        $.notify(origin+" added",{ globalPosition: 'right',className:'success', showDuration: 40, });
 
-        // add requirements to main reqs to be able to show asterisk
-        // state.schema.validation.required = state.schema.validation.required.concat(catpropsrequired)
+        // add requirements to main reqs
         for (var i = 0; i < catpropsrequired.length; i++) {
           if (!state.schema.validation.required.includes(catpropsrequired[i])) {
             state.schema.validation.required.push(catpropsrequired[i])
@@ -535,7 +530,7 @@
             Vue.set(state.schema.validation.properties,prop,newProp)
           }
         }
-        // console.log("ALL DONE", state.schema.validation.properties)
+        $.notify(origin+" added",{ globalPosition: 'right',className:'success', showDuration: 40, });
       },
       removeCategory(state,payload){
         let origin = payload['origin'];
