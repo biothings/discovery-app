@@ -74,6 +74,7 @@ def setEnvVars(env, config):
     env.globals['guide_presets'] = config.GUIDE_PRESETS
     env.globals['guide_portals'] = config.GUIDE_PORTALS
     env.globals['guide_settings'] = config.GUIDE_SETTINGS
+    env.globals['guide_prefilled'] = config.GUIDE_PREFILLED
     # SCHEMA
     env.globals['starting_points'] = config.STARTING_POINTS
     env.globals['registry_shortcuts'] = config.REGISTRY_SHORTCUTS
