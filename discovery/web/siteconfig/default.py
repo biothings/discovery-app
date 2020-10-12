@@ -60,6 +60,10 @@ GUIDE_SETTINGS = {
     "form-mode": 1,
 }
 
+GUIDE_PREFILLED = {
+
+}
+
 GUIDE_PORTALS = [
                  {'namespace': 'google',
                   'prefix': 'bts',

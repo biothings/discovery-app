@@ -218,6 +218,7 @@
       bulkJSONItems:[],
       valid: Boolean,
       errors: [],
+      guide_prefilled: {{guide_prefilled}},
     },
     strict: true,
     mutations: {
@@ -409,6 +410,11 @@
       },
       formPreview(state){
         let props = state.schema.validation.properties;
+
+        // Add prefilled values from config
+        for (var key in state.guide_prefilled) {
+          Vue.set(state.output,key,state.guide_prefilled[key])
+        }
 
         for (key in props) {
           if (props[key].hasOwnProperty('value')) {
