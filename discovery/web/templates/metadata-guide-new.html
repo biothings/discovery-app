@@ -248,7 +248,7 @@
       },
       saveSchema(state,payload){
         state.schema = payload['schema'];
-        console.log('schema saved',state.schema)
+        // console.log('schema saved',state.schema)
         console.log('form properties',state.schema.validation.properties)
         state.output['@type'] = state.schema.name || state.schema.label
         state.output['@context'] = payload['schema']["@context"]
@@ -365,7 +365,7 @@
         for (key in state.schema.validation.properties) {
           if (key === selection) {
             if (state.schema.validation.properties[selection].hasOwnProperty('value')) {
-              console.log(key,'has value')
+              // console.log(key,'has value')
               // delete state.schema.validation.properties[selection]['value']
               Vue.delete(state.schema.validation.properties[selection],'value');
               Vue.set(state.schema.validation.properties[selection],'selected',false);
@@ -386,7 +386,7 @@
 
         switch (props[field].value.constructor) {
           case Object:
-            console.log('OBJ',_.isEqual(props[field].value, item))
+            // console.log('OBJ',_.isEqual(props[field].value, item))
             if (_.isEqual(props[field].value, item)) {
               Vue.delete(props[field],'value')
             }else{
@@ -394,9 +394,9 @@
             }
             break;
           case Array:
-            console.log('ARR',item)
+            // console.log('ARR',item)
             if (props[field] && props[field].value) {
-              console.log(props[field].value.length)
+              // console.log(props[field].value.length)
               for (var i = 0; i < props[field].value.length; i++){
                 let arr_item = props[field].value[i];
                 switch (arr_item.constructor) {
@@ -407,9 +407,9 @@
                     }
                     break;
                   case Object:
-                    console.log('OBJ IN ARR',item)
-                    console.log(arr_item)
-                    console.log(_.isEqual(arr_item, item))
+                    // console.log('OBJ IN ARR',item)
+                    // console.log(arr_item)
+                    // console.log(_.isEqual(arr_item, item))
                     if (_.isEqual(arr_item, item)) {
                       Vue.delete(props[field].value,i)
                       $.notify("Item removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
@@ -424,7 +424,7 @@
             }
             break;
           case String:
-            console.log('STR')
+            // console.log('STR')
             if (props[field].value === item) {
               Vue.delete(props[field].value,i);
               $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
@@ -439,19 +439,6 @@
         if (props[field].value.constructor === Array && props[field].value.length == 0) {
           Vue.delete(props[field],'value')
         }
-
-        // if(typeof item === 'string'){
-        //   for (var i = 0; i < props[field].value.length; i++){
-        //     if (props[field].value[i] === item) {
-        //       Vue.delete(props[field].value,i);
-        //       $.notify(item+" removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
-        //     }
-        //   }
-        // }else if (typeof item === 'object' || typeof item === 'array') {
-        //   let res = _.reject(props[field].value,item)
-        //   props[field].value=res
-        //   $.notify("Item removed",{ globalPosition: 'right',className:'success', showDuration: 40, });
-        // }
 
       },
       addToArrayFrom(state,payload){
@@ -1634,7 +1621,6 @@
     computed:{
       type:function(){
         var self = this;
-        console.log("CONST",self.userInput)
         if (self.userInput) {
           switch (self.userInput.constructor) {
             case Object:
