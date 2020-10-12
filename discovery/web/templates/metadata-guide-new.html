@@ -3270,6 +3270,10 @@
                     <template v-if="info && info.format === 'uri'">
                       <input type="url" v-model="userInput" class="form-control form-control-sm " placeholder="enter url here">
                     </template>
+                    <!-- 🌈 EMAIL 🌈 -->
+                    <template v-if="info && info.format === 'email'">
+                      <input type="email" v-model="userInput" class="form-control form-control-sm " placeholder="enter e-mail here">
+                    </template>
                     <!-- 🌈 STRING FORMAT DATE 🌈 -->
                     <template v-if="info && info.format === 'date'">
                       <input type="date" v-model="userInput" class="form-control form-control-sm">
