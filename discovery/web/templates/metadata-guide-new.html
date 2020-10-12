@@ -217,7 +217,7 @@
       showDescriptions:true,
       bulkJSONItems:[],
       valid: Boolean,
-      errors: []
+      errors: [],
     },
     strict: true,
     mutations: {
@@ -253,15 +253,6 @@
         state.output['@context'] = payload['schema']["@context"]
 
         state.filter = state.schema.label || state.schema.name
-
-        // Add identifier to required if not there, it's required as an ID
-        // if ('identifier' in state.schema.validation.properties && !state.schema.validation.required.includes('identifier')) {
-        //   state.schema.validation.required.push('identifier')
-        // }else{
-        //   // console.log('WARNING: identifier field not found and is required')
-        //   Vue.set(state.schema.validation.properties['identifier'],{'type':'string','description':'unique identifier for this entry'});
-        //   state.schema.validation.required.push('identifier')
-        // }
 
         // helper func to decide right subcategory
         function getProp(propname){
@@ -372,9 +363,18 @@
         let selection = payload['clear'];
         for (key in state.schema.validation.properties) {
           if (key === selection) {
-            Vue.delete(state.schema.validation.properties[selection],'value');
-            Vue.set(state.schema.validation.properties[selection],'selected',false);
-            $.notify(selection+" was cleared",{ globalPosition: 'right',className:'success', showDuration: 40, });
+            if (state.schema.validation.properties[selection].hasOwnProperty('value')) {
+              console.log(key,'has value')
+              // delete state.schema.validation.properties[selection]['value']
+              Vue.delete(state.schema.validation.properties[selection],'value');
+              Vue.set(state.schema.validation.properties[selection],'selected',false);
+            }else {
+              $.notify(selection+": no value detected",{ globalPosition: 'right',className:'error', showDuration: 40, });
+            }
+            if (!state.schema.validation.properties[selection].hasOwnProperty('value')) {
+              $.notify(selection+" was cleared",{ globalPosition: 'right',className:'success', showDuration: 40, });
+            }
+
           }
         }
       },
@@ -430,7 +430,7 @@
         if(! isValid){
           state.valid = false;
           state.errors = ajv.errors;
-          console.log('errors', state.errors)
+          // console.log('errors', state.errors)
           for (var key in props) {
             Vue.delete(props[key],'hasIssue')
           }
@@ -438,7 +438,7 @@
           for (var i = 0; i < state.errors.length; i++) {
             if (state.errors[i]['dataPath']) {
               let parts = state.errors[i]['dataPath'].split('/')
-              console.log('parts',parts)
+              // console.log('parts',parts)
               for (var x = 0; x < parts.length; x++) {
                 let k = parts[x]
                 if (k in props) {
@@ -1578,9 +1578,9 @@
         payload["completed"] = {'name':propname,'value':self.userInput};
         store.commit('markCompleted',payload);
         //unselect after complete
-        var payload = {};
-        payload["select"] = '';
-        store.commit('markSelected',payload);
+        var payload2 = {};
+        payload2["select"] = '';
+        store.commit('markSelected',payload2);
         // save progress
         store.dispatch('saveProgress');
       },
@@ -2010,6 +2010,66 @@
           }
         }
       },
+      checkBoxModal(propName,propInfo){
+        var self=this;
+
+        console.log('checkBoxModal')
+        let html = ''
+
+        for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++){
+          if (propInfo['oneOf'][oF_i].hasOwnProperty('enum')) {
+
+            let e = propInfo['oneOf'][oF_i]['enum']
+
+            for (var eIndex = 0; eIndex < e.length; eIndex++) {
+              let name = e[eIndex]
+              html += '<div><input type="checkbox" class="browser-default mr-1" id="cb'+eIndex+'" name="'+name+'" value="'+name+'"/><label for="cb'+name+'">'+name+'</label></div>'
+            }
+
+            html = `<div class="text-left">
+                      <form id=#cbForm">`+html+`</form>
+                    </div>`
+
+
+            Swal({
+              title: propName,
+              inputAttributes: {
+                id:'hideThis'
+              },
+              html: html,
+              onOpen: ()=>{
+                document.getElementById("hideThis").classList.add('d-none');
+              },
+              preConfirm: () => {
+
+                let checked=[]
+
+                  for (var i = 0; i < e.length; i++) {
+                    let x = document.getElementById("cb"+i)
+                    if (x && x.checked) {
+                      checked.push(x.value)
+                    }
+                  }
+                  console.log(checked)
+                  return checked
+              }
+            }).then((result) => {
+              if (result.value) {
+                for (var i = 0; i < result.value.length; i++) {
+                  var payload = {};
+                  payload["item"] = result.value[i];
+                  payload["from"] = propName;
+                  store.commit('addToArrayFrom',payload);
+
+                  store.dispatch('saveProgress');
+                }
+
+              }
+            })
+
+          }
+        }
+      },
       addItem(propName,propInfo){
         var self=this;
         let progressSteps =[]
@@ -2083,7 +2143,11 @@
               break;
             case 'enum':
               // console.log("path:",path)
-              self.oneOfEnum(propName,propInfo);
+              if (self.canAcceptMultiple) {
+                self.checkBoxModal(propName,propInfo);
+              }else {
+                self.oneOfEnum(propName,propInfo);
+              }
               break;
             case 'types':
               // console.log("path:",path)
@@ -3962,7 +4026,7 @@
             customClass:'scale-in-center',
             inputOptions: {
               'json': 'JSON',
-              'csv': 'CSV',
+              'csv': 'CSV (WIP)',
             },
             inputPlaceholder: 'Select type',
             showCancelButton: true,
