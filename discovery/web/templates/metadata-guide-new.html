@@ -2163,7 +2163,7 @@
           // Create questions
           for (key in props) {
             if (key == '@type' && props[key].hasOwnProperty('const')) {
-
+              // TODO: Handle constants found in @type if any.
             }else {
               progressSteps.push(key)
               switch (props[key]['type']) {
@@ -2650,9 +2650,12 @@
       },
       checkForConstantKey(obj, keyname, parentkey) {
         var self=this;
+
         _.mapKeys(obj, function(value, key) {
           if (key === keyname) {
             self.constFound = true;
+            // console.log('%c from '+self.name,'color:limegreen')
+            // console.log(key,value)
             //CONST ISSUE
             // Vue.set(self.constObj, parentkey, value)
           }
@@ -2812,7 +2815,7 @@
       }
 
 
-      self.checkForConstantKey(self.info,'const')
+      // self.checkForConstantKey(self.info,'const')
 
       try {
         var x = document.getElementsByClassName("form-control");
@@ -3148,7 +3151,7 @@
                       </template>
                     </div>
                   </template>
-                  <!-- 🌈  ONE OF 🌈 -->
+                  <!-- 🌈  ONE OF  OR ANY OF🌈 -->
                   <template v-if="info.oneOf || info.anyOf">
                     <!-- 🌈  ONE OF ANYTHING🌈 -->
                     <template v-if="name !== 'datePublished' && name !== 'dateModified'">
@@ -3159,7 +3162,17 @@
                       </div>
                       <div class="col-sm-12 m-auto">
                       <!-- 🌈  input preview for object or array🌈 -->
-                        <template v-if="typeof userInput === 'object' || typeof userInput === 'array'  " v-for="(person,i) in userInput">
+                        <template v-if="userInput.constructor === Object">
+                          <span :data-tippy-info='JSON.stringify(userInput,null,2)' :data-tippy-id='0'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
+                            <i class="fas fa-check"></i>
+                            <template v-if="userInput && userInput.name">
+                              <span v-text="userInput.name"></span>
+                            </template>
+                            <span v-else v-text="userInput"></span>
+                            <span style="opacity:0;" class="d-inline" @click="removeItem(userInput)"> <i class="fas fa-times"></i></span>
+                          </span>
+                        </template>
+                        <template v-else-if="userInput.constructor === Array" v-for="(person,i) in userInput">
                           <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
                             <i class="fas fa-check"></i>
                             <template v-if="person && person.name">
