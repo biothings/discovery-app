@@ -18,7 +18,7 @@
     <p class="text-muted">
       Follow best practices to make your dataset metadata more findable
     </p>
-    <a :href="'/dataset?guide='+window.location.pathname" target="_blank">Browse other registered dataset metadata using this guide <i class="fas fa-external-link-square-alt"></i></a>
+    <a :href="'/dataset?guide='+window.location.pathname">Browse other registered dataset metadata using this guide <i class="fas fa-chevron-right"></i></a>
   </div>
   <div id="jsonTable">
     <!-- BULK -->
@@ -405,8 +405,14 @@
         //Initialize array
         if (!state.schema.validation.properties[field].value) {
           Vue.set(state.schema.validation.properties[field], 'value', [])
+        }else{
+          if (state.schema.validation.properties[field]['value'].constructor === Object) {
+            state.schema.validation.properties[field]['value'] = [state.schema.validation.properties[field]['value']]
+            state.schema.validation.properties[field]['value'].push(item)
+          }else{
+            state.schema.validation.properties[field]['value'].push(item)
+          }
         }
-        state.schema.validation.properties[field]['value'].push(item)
       },
       formPreview(state){
         let props = state.schema.validation.properties;
@@ -717,6 +723,13 @@
       },
       isRequired: (state) => (propname) =>{
         if (state.schema.validation.required.includes(propname)) {
+          return true
+        }else{
+          return false
+        }
+      },
+      isInputHidden: (state) => (propname) =>{
+        if (propname in state.guide_prefilled) {
           return true
         }else{
           return false
@@ -2116,7 +2129,7 @@
 
           switch (path) {
             case "string":
-            console.log("path:",path)
+            // console.log("path:",path)
             Swal({
                     title: propName,
                     input: 'text',
@@ -2670,23 +2683,15 @@
           }).queue(questions).then((result) => {
             if (result.value) {
               let obj = {}
-              try {
+
+              //check for const @type or @type of input
+              if ("@type" in propInfo) {
+                console.log("has @type ",propInfo)
                 Vue.set(obj,'@type',propInfo["@type"])
-              } catch (e) {
-                switch (propName) {
-                  case 'creator':
-                    Vue.set(obj,'@type','Person')
-                    break;
-                    case 'contributor':
-                      Vue.set(obj,'@type','Person')
-                      break;
-                      case 'publisher':
-                        Vue.set(obj,'@type','Organization')
-                        break;
-                        case 'funding':
-                          Vue.set(obj,'@type','Organization')
-                          break;
-                  default:
+              }else if('properties' in propInfo && '@type' in propInfo['properties']){
+                if('const' in propInfo['properties']['@type']){
+                  console.log("@type COST",propInfo)
+                  Vue.set(obj,'@type',propInfo['properties']["@type"]['cost'])
                 }
               }
 
@@ -2868,7 +2873,7 @@
 
           }
         }
-      }
+      },
     },
     watch:{
       constObj:{
@@ -2901,13 +2906,6 @@
 
       // self.checkForConstantKey(self.info,'const')
 
-      try {
-        var x = document.getElementsByClassName("form-control");
-        x[0].focus();
-      } catch (e) {
-        var x = document.getElementsByClassName("btnfocus");
-        x[0].focus();
-      }
 
       tippy( '.save', {
         placement:'top',
@@ -2961,6 +2959,9 @@
       isRequired:function(){
         return store.getters.isRequired(this.name)
       },
+      isInputHidden:function(){
+        return store.getters.isInputHidden(this.name)
+      },
       userInput: {
         get () {
           return this.$store.state.schema.validation.properties[this.name].value
@@ -2993,7 +2994,7 @@
       }
     },
     template:
-    `<div class="m-0 inputbox fade-in" :id='name' v-if="name !== 'includedInDataCatalog'">
+    `<div class="m-0 inputbox fade-in" :id='name' v-if="!isInputHidden">
       <div class="row m-0">
         <div class="col-sm-10 p-1 text-left d-flex align-items-center justify-content-center" :class="[userInput || userInput === false ? '':'alert-light']">
           <div class="d-flex w-100 justify-content-center">
