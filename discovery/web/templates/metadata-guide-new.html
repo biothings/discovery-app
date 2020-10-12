@@ -479,8 +479,12 @@
         $.notify(origin+" added",{ globalPosition: 'right',className:'success', showDuration: 40, });
 
         // add requirements to main reqs to be able to show asterisk
-        state.schema.validation.required = state.schema.validation.required.concat(catpropsrequired)
-
+        // state.schema.validation.required = state.schema.validation.required.concat(catpropsrequired)
+        for (var i = 0; i < catpropsrequired.length; i++) {
+          if (!state.schema.validation.required.includes(catpropsrequired[i])) {
+            state.schema.validation.required.push(catpropsrequired[i])
+          }
+        }
         // helper func to decide right succategory
         function getProp(propname){
           let cat={
@@ -2013,7 +2017,6 @@
       checkBoxModal(propName,propInfo){
         var self=this;
 
-        console.log('checkBoxModal')
         let html = ''
 
         for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++){
@@ -2030,12 +2033,15 @@
                       <form id=#cbForm">`+html+`</form>
                     </div>`
 
-
             Swal({
               title: propName,
               inputAttributes: {
                 id:'hideThis'
               },
+              animation:false,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              customClass:'scale-in-center',
               html: html,
               onOpen: ()=>{
                 document.getElementById("hideThis").classList.add('d-none');
