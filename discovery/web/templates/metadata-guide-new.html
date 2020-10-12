@@ -430,21 +430,34 @@
         if(! isValid){
           state.valid = false;
           state.errors = ajv.errors;
-          // console.log('errors', state.errors)
+          console.log('errors', state.errors)
           for (var key in props) {
             Vue.delete(props[key],'hasIssue')
           }
+          let issues = []
           for (var i = 0; i < state.errors.length; i++) {
             if (state.errors[i]['dataPath']) {
-              let path = state.errors[i]['dataPath'].replace('/','');
-              if (props.hasOwnProperty(path)) {
-                Vue.set(props[path],'hasIssue',state.errors[i]['message'])
+              let parts = state.errors[i]['dataPath'].split('/')
+              console.log('parts',parts)
+              for (var x = 0; x < parts.length; x++) {
+                let k = parts[x]
+                if (k in props) {
+                  if ('hasIssue' in props[k]) {
+                    props[k]['hasIssue'].push(state.errors[i]['message'])
+                  }else{
+                    Vue.set(props[k],'hasIssue',[ state.errors[i]['message'] ])
+                  }
+                }
               }
             }
             if (state.errors[i]['params'].hasOwnProperty('missingProperty')) {
               let missing = state.errors[i]['params']['missingProperty'];
               if (props.hasOwnProperty(missing)) {
-                Vue.set(props[missing],'hasIssue',state.errors[i]['message'])
+                if ('hasIssue' in props[missing]) {
+                  props[missing]['hasIssue'].push(state.errors[i]['message'])
+                }else{
+                  Vue.set(props[missing],'hasIssue',[ state.errors[i]['message'] ])
+                }
               }
             }
           }
@@ -3162,7 +3175,7 @@
                       </div>
                       <div class="col-sm-12 m-auto">
                       <!-- 🌈  input preview for object or array🌈 -->
-                        <template v-if="userInput.constructor === Object">
+                        <template v-if="userInput && userInput.constructor === Object">
                           <span :data-tippy-info='JSON.stringify(userInput,null,2)' :data-tippy-id='0'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
                             <i class="fas fa-check"></i>
                             <template v-if="userInput && userInput.name">
@@ -3172,7 +3185,7 @@
                             <span style="opacity:0;" class="d-inline" @click="removeItem(userInput)"> <i class="fas fa-times"></i></span>
                           </span>
                         </template>
-                        <template v-else-if="userInput.constructor === Array" v-for="(person,i) in userInput">
+                        <template v-else-if="userInput && userInput.constructor === Array" v-for="(person,i) in userInput">
                           <span :data-tippy-info='JSON.stringify(person,null,2)' :data-tippy-id='i'  class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc" title="remove">
                             <i class="fas fa-check"></i>
                             <template v-if="person && person.name">
@@ -3221,9 +3234,9 @@
                   </template>
                 </small>
                 <!-- 🌈  ISSUE 🌈 -->
-                <template v-if="info && info.hasIssue">
-                  <small class="ml-3" style="color:salmon;">
-                    <i class="fas fa-exclamation-circle"></i> <span v-text="info.hasIssue"></span>
+                <template v-if="info && info.hasIssue" v-for="(issue,i) in info.hasIssue">
+                  <small class="ml-3 d-block" style="color:salmon;" :key="i">
+                    <i class="fas fa-exclamation-circle"></i> <span v-text="issue"></span>
                   </small>
                 </template>
               </div>
