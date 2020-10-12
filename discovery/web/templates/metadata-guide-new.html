@@ -509,7 +509,10 @@
           if (state.schema.validation.properties[field]['value'].constructor === Object) {
             state.schema.validation.properties[field]['value'] = [state.schema.validation.properties[field]['value']]
             state.schema.validation.properties[field]['value'].push(item)
+          }else if (state.schema.validation.properties[field]['value'].constructor === Array){
+            state.schema.validation.properties[field]['value'].push(item)
           }else{
+            state.schema.validation.properties[field]['value'] = [state.schema.validation.properties[field]['value']]
             state.schema.validation.properties[field]['value'].push(item)
           }
         }
@@ -1712,6 +1715,9 @@
           <i class="fas fa-check"></i>
           <template v-if="person && person.name">
             <span v-text="person.name"></span>
+          </template>
+          <template v-else-if="person && person.constructor == String">
+            <span v-text="person"></span>
           </template>
           <span v-else v-text="name+' '+(i+1)"></span>
           <span style="opacity:0;" class="d-inline" @click="removeItem(person)"> <i class="fas fa-times"></i></span>
