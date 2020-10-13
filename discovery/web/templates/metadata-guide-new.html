@@ -302,7 +302,6 @@
       },
       saveSchema(state,payload){
         state.schema = payload['schema'];
-        // console.log('schema saved',state.schema)
         console.log('form properties',state.schema.validation.properties)
         state.output['@type'] = state.schema.name || state.schema.label
         state.output['@context'] = payload['schema']["@context"]
@@ -331,8 +330,6 @@
             state.schema.validation.properties[prop]['categories'].unshift(getProp(prop))
           }
         }
-        // console.log("add json schema", state.schema.validation)
-        // env.addSchema('discovery',state.schema.validation.properties );
       },
       filterProps(state,payload){
         state.filter = payload['cat'];
@@ -368,7 +365,6 @@
       },
       saveSettings(state,payload){
         state.settings = payload['settings']
-        // console.log(state.settings)
       },
       highlight(state,payload){
         let cat = payload['category'];
@@ -380,7 +376,6 @@
           if (state.schema.validation.properties[prop].hasOwnProperty('categories')) {
             for (var i = 0; i < state.schema.validation.properties[prop]['categories'].length; i++) {
               if (state.schema.validation.properties[prop]['categories'][i]['category'] === cat && state.schema.validation.properties[prop]['categories'][i]['subcategory'] === subcat  ) {
-                //Match found
                 if (state.schema.validation.properties[prop]['highlighted']) {
                   Vue.set(state.schema.validation.properties[prop],'highlighted',false);
                 }else {
@@ -402,12 +397,10 @@
           if (key === selection.name) {
             //Check if selection has duplicates
             if (key+"s" in state.schema.validation.properties && state.schema.validation.properties[key+"s"].hasOwnProperty('duplicate') ) {
-              // console.log('HAS DUPLICATE')
               let obj ={}
               Vue.set(obj,key,selection.value)
               let typeProp= key+'Type';
               Vue.set(obj,typeProp,'')
-              // console.log(obj)
               Vue.set(state.schema.validation.properties[key+"s"],'value',[obj]);
             }
             Vue.set(state.schema.validation.properties[selection.name],'value',selection.value);
@@ -419,8 +412,6 @@
         for (key in state.schema.validation.properties) {
           if (key === selection) {
             if (state.schema.validation.properties[selection].hasOwnProperty('value')) {
-              // console.log(key,'has value')
-              // delete state.schema.validation.properties[selection]['value']
               Vue.delete(state.schema.validation.properties[selection],'value');
               Vue.set(state.schema.validation.properties[selection],'selected',false);
             }else {
@@ -439,7 +430,6 @@
         let props = state.schema.validation.properties;
         switch (props[field].value.constructor) {
           case Object:
-            // console.log('OBJ',_.isEqual(props[field].value, item))
             if (_.isEqual(props[field].value, item)) {
               Vue.delete(props[field],'value')
             }else{
@@ -447,9 +437,7 @@
             }
             break;
           case Array:
-            // console.log('ARR',item)
             if (props[field] && props[field].value) {
-              // console.log(props[field].value.length)
               for (var i = 0; i < props[field].value.length; i++){
                 let arr_item = props[field].value[i];
                 switch (arr_item.constructor) {
@@ -460,9 +448,6 @@
                     }
                     break;
                   case Object:
-                    // console.log('OBJ IN ARR',item)
-                    // console.log(arr_item)
-                    // console.log(_.isEqual(arr_item, item))
                     if (_.isEqual(arr_item, item)) {
                       Vue.delete(props[field].value,i)
                       $.notify("Item removed",{ globalPosition: 'right',style:"success", showDuration: 40, });
@@ -477,7 +462,6 @@
             }
             break;
           case String:
-            // console.log('STR')
             for (var i = 0; i < props[field].value.length; i++) {
               let prop_val = props[field].value[i];
               if (prop_val === item) {
@@ -501,7 +485,6 @@
       addToArrayFrom(state,payload){
         let field = payload['from'];
         let item = payload['item'];
-        // console.log(item)
         //Initialize array
         if (!state.schema.validation.properties[field].value) {
           Vue.set(state.schema.validation.properties[field], 'value', item)
@@ -519,12 +502,10 @@
       },
       formPreview(state){
         let props = state.schema.validation.properties;
-
         // Add prefilled values from config
         for (var key in state.guide_prefilled) {
           Vue.set(state.output,key,state.guide_prefilled[key])
         }
-
         for (key in props) {
           if (props[key].hasOwnProperty('value')) {
             if (props[key]['value'] || props[key]['value'] === false) {
@@ -545,7 +526,6 @@
         if(! isValid){
           state.valid = false;
           state.errors = ajv.errors;
-          // console.log('errors', state.errors)
           for (var key in props) {
             Vue.delete(props[key],'hasIssue')
           }
@@ -553,7 +533,6 @@
           for (var i = 0; i < state.errors.length; i++) {
             if (state.errors[i]['dataPath']) {
               let parts = state.errors[i]['dataPath'].split('/')
-              // console.log('parts',parts)
               for (var x = 0; x < parts.length; x++) {
                 let k = parts[x]
                 if (k in props) {
@@ -588,7 +567,6 @@
         let origin = payload['origin'];
         let catprops = payload['catprops'];
         let catpropsrequired = payload['catpropsrequired'];
-
         // add requirements to main reqs
         for (var i = 0; i < catpropsrequired.length; i++) {
           if (!state.schema.validation.required.includes(catpropsrequired[i])) {
@@ -623,24 +601,19 @@
             }
           }else if (prop.slice(0, -1)  in state.schema.validation.properties) {
             //plural form exists
-            // console.log(prop.slice(0, -1))
-
             let newProp = catprops[prop]
             Vue.set(newProp,'categories',[])
             // set origin to remove by origin
             Vue.set(newProp,'origin', origin)
             // is a duplicate
             Vue.set(newProp,'duplicate', true)
-
             newProp['categories'].unshift(getProp(prop))
             Vue.set(state.schema.validation.properties,prop,newProp)
-
           }else{
             let newProp = catprops[prop]
             Vue.set(newProp,'categories',[])
             // set origin to remove by origin
             Vue.set(newProp,'origin', origin)
-
             newProp['categories'].unshift(getProp(prop))
             Vue.set(state.schema.validation.properties,prop,newProp)
           }
@@ -650,17 +623,12 @@
       removeCategory(state,payload){
         let origin = payload['origin'];
         let catpropsrequired = [];
-
-        // console.log("remove",catpropsrequired)
-        // console.log("remove",origin)
         $.notify(origin+" removed",{ globalPosition: 'right',style:"info", showDuration: 40, });
-
         for (var i = 0; i < state.selectedPortals.length; i++) {
           if (state.selectedPortals[i]['label'] === origin) {
             catpropsrequired = state.selectedPortals[i]['validation']['required']
           }
         }
-
         for (prop in state.schema.validation.properties) {
           // if origin matches remove prop
           if (state.schema.validation.properties[prop].hasOwnProperty('origin') && state.schema.validation.properties[prop]['origin'] === origin ) {
@@ -676,16 +644,13 @@
             }
           }
         }
-        // console.log("ALL DONE", state.schema.validation.properties)
       },
       setStartingPoint(state,payload){
         state.startingPoint= payload['startingPoint'];
-        // console.log("startingPoint selected ",JSON.stringify(state.startingPoint,null,2))
       },
       addPortalSchema(state,payload){
         let portal = payload['portal']
         state.selectedPortals.push(portal)
-        // console.log("PORTALS SELECTED ",state.selectedPortals)
       },
       changeStep(state,payload){
         state.step = payload['step']
@@ -694,8 +659,6 @@
         let name = payload['name'];
         let info = payload['info'];
         let value = payload['value'];
-
-
         let props = state.schema.validation.properties;
         for (key in props) {
           if (key === name) {
@@ -714,7 +677,6 @@
                   }
                 })
               }else{
-                //no value yet
                 Vue.set(props[name],'value',value);
               }
             }else if (info.hasOwnProperty('anyOf')) {
@@ -813,7 +775,6 @@
       getShowDesc:state=>{
         return state.showDescriptions
       },
-      // exposed as store.getters.nameOfGetter
       getSchema: (state) => {
         return state.schema
       },
@@ -922,7 +883,6 @@
             }
           }
         }
-        // console.log('CATS',JSON.stringify(cats,null,2))
         return cats
       },
       getPreview(state){
@@ -1024,7 +984,6 @@
               showConfirmButton:false,
               timer:1000})
           }
-          // console.log('err',err.response.data)
           let culprit = "<small class='d-block text-danger'><b>ERROR: "+err.response.data.error+"</b></small>"
           if (err.response.data && err.response.data.path) {
             culprit += "<small class='mr-2'>Culprit (index/property)<i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></small>"
@@ -1311,8 +1270,6 @@
 
     },
     mounted: function(){
-      // Update chart on mount
-      // Chart.update()
       var self = this;
       let sp= store.getters.getStartingPoint
       if (sp.name == self.cat) {
@@ -1372,7 +1329,6 @@
             if (result.value) {
               axios.get('/api/registry/'+self.item.namespace+'/'+self.item.prefix+':'+self.item.name).then(res=>{
                 self.loading = false;
-                // console.log('CAT DATA', res.data)
                 //save schema
                 self.specificSchema=res.data
                 var payload = {};
@@ -1427,7 +1383,6 @@
       formPreviewSpecific(){
         var self = this;
         store.commit('formPreview')
-        // console.log(store.getters.getPreview)
         let output = store.getters.getPreview
 
         let previewObj = {}
@@ -1437,7 +1392,6 @@
         // compare combined output and export only props found in this schema
         for (var key in output) {
           if (self.specificSchema.validation.properties.hasOwnProperty(key)) {
-            // console.log('key match', key)
             Vue.set(previewObj,key,output[key])
           }
         }
@@ -1448,7 +1402,6 @@
       previewMetadata(){
         var self = this;
         let preview = self.formPreviewSpecific();
-        // console.log('preview', preview)
         Swal.fire({
           position: 'center',
           confirmButtonColor:"{{color_main}}",
@@ -1554,7 +1507,6 @@
 
         payload = {'name':self.name,'info': self.info, 'value':self.userObj}
         store.commit('addValue',payload);
-        // save progress
         store.dispatch('saveProgress');
       },
       clearFieldFor:function(propname){
@@ -1647,7 +1599,6 @@
         var self = this;
         payload = {'name':self.name,'info': self.info, 'value':val}
         store.commit('addValue',payload);
-        // save progress
         store.dispatch('saveProgress');
       },
     },
@@ -1757,7 +1708,6 @@
         var payload2 = {};
         payload2["select"] = '';
         store.commit('markSelected',payload2);
-        // save progress
         store.dispatch('saveProgress');
       },
       clearFieldFor:function(propname){
@@ -1796,202 +1746,11 @@
         payload["from"] = self.name;
         store.commit('removeArrayItemFrom',payload);
       },
-      addPerson(type){
-        let self = this;
-        switch (type) {
-          case "citation":
-            self.addCitationModal(type)
-            break;
-          default:
-            self.addPersonModal(type)
-        }
-
-      },
-      addPersonModal(type){
-        let self = this;
-        Swal.mixin({
-          input: 'text',
-          confirmButtonText: 'Next &rarr;',
-          showCancelButton: true,
-          animation:false,
-          customClass:'scale-in-center',
-          confirmButtonColor:"{{color_main}}",
-          cancelButtonColor:"{{color_sec}}",
-          progressSteps: ['1', '2',]
-        }).queue([
-          {
-            title: "Name*",
-            text: "Enter the "+type+"'s full name",
-            inputValidator: (value) => {
-              if (!value) {
-                return 'Name is a required field!'
-              }
-            }
-          },
-          {
-            title: "URL",
-            text: "Enter a URL for this "+type+"'s online profile (faculty page, GitHub page, Linkedin page, etc)",
-            inputValidator: (value) => {
-              return new Promise((resolve) => {
-                function validURL(str) {
-                  str = str.replace(/\(/g, '%28').replace(/\)/g, '%29');
-                  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-                    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-                    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-                  // var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-                  return !!pattern.test(str);
-                }
-                if (validURL(value)) {
-                  resolve()
-                } else {
-                  resolve('Input must be a valid URL')
-                }
-              })
-            }
-          }
-
-        ]).then((result) => {
-          if (result.value) {
-            let name='';
-            let url ='';
-            if (result.value[0]) {
-              name = result.value[0]
-            }
-            if (result.value[1]) {
-              url = result.value[1]
-            }else{
-              url = ''
-            }
-            if (name) {
-
-              let person = {'name':name,'url':url};
-
-              switch (type) {
-                case 'publisher':
-                  Vue.set(person,'@type','Organization')
-                  break;
-                case 'creator':
-                  Vue.set(person,'@type','Person')
-                  break;
-                case 'contributor':
-                  Vue.set(person,'@type','Person')
-                  break;
-                case 'funding':
-                  Vue.set(person,'@type','Organization')
-                  break;
-                default:
-                  Vue.set(person,'@type','Thing')
-              }
-
-              let self = this;
-              var payload = {};
-              payload["item"] = person;
-              payload["from"] = self.name;
-              store.commit('addToArrayFrom',payload);
-            }else{
-              $.notify("A "+type+"'s name is required",{ globalPosition: 'right',style:"danger", showDuration: 40, });
-            }
-
-
-          }
-        })
-      },
-      addCitationModal(type){
-        let self = this;
-        Swal.mixin({
-          input: 'text',
-          confirmButtonText: 'Next &rarr;',
-          showCancelButton: true,
-          confirmButtonColor:"{{color_main}}",
-          cancelButtonColor:"{{color_sec}}",
-          progressSteps: ['1', '2',]
-        }).queue([
-          {
-            title: "Name*",
-            text: "Enter the "+type+"'s title or name",
-            inputValidator: (value) => {
-              if (!value) {
-                return 'Name is a required field!'
-              }
-            }
-          },
-          {
-            title: "URL",
-            text: "Enter a URL for this "+type+" (web page, GitHub page, Linkedin page, etc)",
-            inputValidator: (value) => {
-              return new Promise((resolve) => {
-                function validURL(str) {
-                  str = str.replace(/\(/g, '%28').replace(/\)/g, '%29');
-                  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-                    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-                    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-                  // var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-                  return !!pattern.test(str);
-                }
-                if (validURL(value)) {
-                  resolve()
-                } else {
-                  resolve('Input must be a valid URL')
-                }
-              })
-            }
-          },
-          {
-            title: "Identifier",
-            text: "Enter this "+type+"'s PubMed id here",
-            inputValidator: (value) => {
-              if (!value) {
-                return 'You need to write something!'
-              }
-            }
-          }
-
-        ]).then((result) => {
-          if (result.value) {
-            let name='';
-            let url ='';
-            let ident = '';
-            if (result.value[0]) {
-              name = result.value[0]
-            }
-            if (result.value[1]) {
-              url = result.value[1]
-            }
-            if (result.value[2]) {
-              ident = result.value[2]
-            }
-
-            if (name) {
-              let citation = {'name':name,'url':url,'identifier':ident};
-              var payload = {};
-              payload["item"] = citation;
-              payload["from"] = self.name;
-              store.commit('addToArrayFrom',payload);
-            }else{
-              $.notify("A "+type+"'s name is required",{ globalPosition: 'right',style:"danger", showDuration: 40, });
-            }
-
-
-          }
-        })
-      },
       handleOneOf(parentProp,childProp,childPropInfo){
         var self = this;
-        // console.log("parent ",parentProp)
-        // console.log("child ",childProp)
-        // console.log("handle this ",childPropInfo)
-
         setTimeout(function(){
           self.addItem(parentProp,childPropInfo)
         }, 500);
-
-
       },
       handleVocab(propName,propInfo){
 
@@ -2011,10 +1770,8 @@
           showLoaderOnConfirm: true,
           focusConfirm: false,
           preConfirm: (query) => {
-
             let ontologies = propInfo['vocabulary']['ontology'].toString()
             let children = propInfo['vocabulary']['children_of'].toString()
-
             let url = `https://www.ebi.ac.uk/ols/api/search?q=${query}`
             +"&ontology="+ontologies
             +"&childrenOf="+children
@@ -2039,7 +1796,6 @@
         }).then((result) => {
           if (result.value) {
             let html ="<div id='ontology' class='p-1 text-left'>";
-
             for (var i = 0; i < result.value.response.docs.length; i++) {
               tippy('#cb'+i,{
                 content:result.value.response.docs[i]
@@ -2049,7 +1805,6 @@
               if (label && label.length > 37) {
                 label = label.substring(0,37)+"..."
               }
-
               html += `<div class="form-check">
                           <input class="form-check-input mr-2" type="checkbox" value="`+result.value.response.docs[i]['iri']+`" id="cb`+i+`">
                           <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
@@ -2091,65 +1846,21 @@
               }
             }).then((result) => {
               if (result.value) {
-                // console.log('FINAL RES', result.value)
                 for (var i = 0; i < result.value.length; i++) {
                   var payload = {};
                   payload["item"] = result.value[i];
                   payload["from"] = propName;
                   store.commit('addToArrayFrom',payload);
-
                   store.dispatch('saveProgress');
                 }
 
               }
             })
-
           }
         });
-
-      },
-      getQuestion(parentName,obj){
-        // console.log('getting questions for',parentName)
-        // console.log('using',obj)
-        return swal.withForm({
-         title: 'More complex Swal-Forms example',
-         text: 'This has different types of inputs',
-         showCancelButton: true,
-         confirmButtonColor: '#DD6B55',
-         confirmButtonText: 'Get form data!',
-         closeOnConfirm: true,
-         formFields: [
-           { id: 'name', placeholder: 'Name Field' },
-           { id: 'nickname', placeholder: 'Add a cool nickname' },
-           { id: 'password', type: 'password' },
-
-           { name: 'sex', value: 'Male', type: 'radio' },
-           { name: 'sex', value: 'Female', type: 'radio' },
-
-           { name: 'skills', value: 'JS', type: 'checkbox' },
-           { name: 'skills', value: 'Ruby', type: 'checkbox' },
-           { name: 'skills', value: 'Java', type: 'checkbox' },
-
-           { id: 'select',
-             type: 'select',
-             options: [
-               {value: 'test1', text: 'test1'},
-               {value: 'test2', text: 'test2'},
-               {value: 'test3', text: 'test3'},
-               {value: 'test4', text: 'test4'},
-               {value: 'test5', text: 'test5'}
-             ]}
-         ]
-       }, function (isConfirm) {
-         // do whatever you want with the form data
-         // console.log(this.swalForm) // { name: 'user name', nickname: 'what the user sends' }
-       })
       },
       oneOfEnum(propName,propInfo){
         var self=this;
-
-        console.log('oneOfEnum happening')
-        console.log(propName,propInfo)
 
         for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++){
           if (propInfo['oneOf'][oF_i].hasOwnProperty('enum')) {
@@ -2160,9 +1871,6 @@
             for (var eIndex = 0; eIndex < e.length; eIndex++) {
               optionsenum[e[eIndex]]=e[eIndex]
             }
-            // console.log(e,optionsenum)
-
-
             Swal({
               title: propName,
               input: 'select',
@@ -2287,7 +1995,6 @@
 
           switch (path) {
             case "string":
-            // console.log("path:",path)
             Swal({
                     title: propName,
                     input: 'text',
@@ -2320,7 +2027,6 @@
                   });
               break;
             case 'enum':
-              // console.log("path:",path)
               if (self.canAcceptMultiple) {
                 self.checkBoxModal(propName,propInfo);
               }else {
@@ -2328,7 +2034,6 @@
               }
               break;
             case 'types':
-              // console.log("path:",path)
               options ={}
               for (var oF_i = 0; oF_i < propInfo['oneOf'].length; oF_i++) {
                 if (propInfo['oneOf'][oF_i].hasOwnProperty('@type')) {
@@ -2357,7 +2062,6 @@
                   showCancelButton: true,
                   inputValidator: (value) => {
                     if (value) {
-                      // console.log('value',value)
                       self.handleOneOf(propName,propInfo['oneOf'][value]['@type'],propInfo['oneOf'][value])
                     }
                   }
@@ -2375,7 +2079,6 @@
         }
 
         if (propInfo.hasOwnProperty('anyOf')) {
-          // console.log("ANY OF")
           options ={}
           for (var oF_i = 0; oF_i < propInfo['anyOf'].length; oF_i++) {
             if (propInfo['anyOf'][oF_i].hasOwnProperty('@type')) {
@@ -2404,7 +2107,6 @@
               showCancelButton: true,
               inputValidator: (value) => {
                 if (value) {
-                  // console.log('value',value)
                   self.handleOneOf(propName,propInfo['anyOf'][value]['@type'],propInfo['anyOf'][value])
                 }
               }
@@ -2423,7 +2125,6 @@
               progressSteps.push(key)
               switch (props[key]['type']) {
                 case 'string':
-                  // console.log(key,props[key]['type'])
                   if (props[key].hasOwnProperty('format')) {
                     switch (props[key]['format']) {
                       case 'uri':
@@ -2507,7 +2208,6 @@
                             document.getElementById("hideThis").classList.add('d-none');
                           },
                           preConfirm: () => {
-                            // console.log('%c date format check','color:pink')
                             return moment(document.getElementById('datePicked').value).format("YYYY-MM-DD");
                           },
                         })
@@ -2516,58 +2216,6 @@
                         console.warning("Property not handled by guide: "+props[key])
                     }
                   }else {
-
-                    // Simple String
-
-                    // REGEX WIP
-
-                    // const pattern = new RegExp(props[key]['pattern'])
-                    //
-                    // console.log('question with pattern', pattern)
-                    //
-                    // questions.push({
-                    //   title: key,
-                    //   text: props[key].description,
-                    //   inputAttributes: {
-                    //     id:'hideThis'
-                    //   },
-                    //   html: `<form class="input-group" @submit.prevent="">
-                    //           <input class="form-control" id="patternInput" type="text" pattern="`+pattern+`"/>
-                    //         </form>`,
-                    //   onOpen: ()=>{
-                    //     document.getElementById("hideThis").classList.add('d-none');
-                    //   },
-                    //   preConfirm: () => {
-                    //       let y = document.getElementById("patternInput")
-                    //       return y.value
-                    //   },
-                    //   inputValidator: (value) => {
-                    //     // value not used as it's teh default hidden input
-                    //     let input_pattern = document.getElementById("patternInput").getAttribute("pattern")
-                    //     input_pattern = input_pattern.replace('//','/')
-                    //     let input_value = document.getElementById("patternInput").value
-                    //
-                    //     return new Promise((resolve) => {
-                    //
-                    //       function regexCheck(str) {
-                    //         var pattern = new RegExp(input_pattern);
-                    //         console.log(pattern)
-                    //         console.log('testing',str)
-                    //         console.log('for',key)
-                    //         console.log(pattern.test(str))
-                    //         return !!pattern.test(str);
-                    //       }
-                    //
-                    //       if (regexCheck(input_value)) {
-                    //         resolve()
-                    //       } else {
-                    //         resolve('[Regex] Input does not match format requested: '+pattern)
-                    //       }
-                    //
-                    //     })
-                    //   }
-                    // });
-
                     // any string value
                     questions.push({
                       title: key,
@@ -2616,11 +2264,9 @@
                       }
                     });
                     break;
-
                   }
                   break;
                 case 'integer':
-                  // console.log('integer',key)
                   questions.push({
                     title: key,
                     input: 'number',
@@ -2647,12 +2293,8 @@
                   });
                   break;
                 case 'array':
-                  // console.log(key,props[key]['type'])
-                  // console.log("ARRAY",key,props[key])
                   html =''
                   if (props[key].hasOwnProperty('oneOf')) {
-                    // console.log("Array Has One Of")
-
                     for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
                       if (props[key]['oneOf'][ix]['type'] == 'object') {
                         let obj = props[key]['oneOf'][ix]['properties'];
@@ -2689,17 +2331,14 @@
                       },
                       preConfirm: () => {
                         let formArray = $('#arrayForm').serializeArray();
-                        // console.log('arrayForm Data', arrayForm)
                         var returnArray = {};
                         for (var i = 0; i < formArray.length; i++){
                           if (formArray[i]['name'].includes('date')) {
-                            // console.log('%c date format check','color:pink')
                             returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
                           }else {
                             returnArray[formArray[i]['name']] = formArray[i]['value'];
                           }
                         }
-                        // console.log('arrayForm Data', returnArray)
                         return returnArray;
                       },
                     })
@@ -2707,10 +2346,8 @@
                   }
                   break;
                 case 'object':
-                  // console.log(key,props[key]['type'])
                   html =''
                   let obj = props[key]['properties'];
-
                   for (var obj_key in obj) {
                     switch (obj[obj_key]['type']) {
                       case 'string':
@@ -2742,29 +2379,24 @@
                     },
                     preConfirm: () => {
                       let formArray = $('#arrayForm').serializeArray();
-                      // console.log('arrayForm Data', arrayForm)
                       var returnArray = {};
                       for (var i = 0; i < formArray.length; i++){
                         if (formArray[i]['name'].includes('date')) {
-                          // console.log('%c date format check','color:pink')
                           returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
                         }else {
                           returnArray[formArray[i]['name']] = formArray[i]['value'];
                         }
                       }
-                      // console.log('arrayForm Data', returnArray)
                       return returnArray;
                     },
                   })
 
                   break;
                 default:
-                  // console.log('DEFAULT PROP HANDLER...')
-
+                  return false;
                   // ONE OF
                   html =''
                   if (props[key].hasOwnProperty('oneOf')) {
-                    // console.log("Array Has One Of")
 
                     for (var ix = 0; ix < props[key]['oneOf'].length; ix++) {
                       if (props[key]['oneOf'][ix]['type'] == 'object') {
@@ -2802,17 +2434,14 @@
                       },
                       preConfirm: () => {
                         let formArray = $('#arrayForm').serializeArray();
-                        // console.log('arrayForm Data', arrayForm)
                         var returnArray = {};
                         for (var i = 0; i < formArray.length; i++){
                           if (formArray[i]['name'].includes('date')) {
-                            // console.log('%c date format check','color:pink')
                             returnArray[formArray[i]['name']] = moment(formArray[i]['value']).format("YYYY-MM-DD");
                           }else {
                             returnArray[formArray[i]['name']] = formArray[i]['value'];
                           }
                         }
-                        // console.log('arrayForm Data', returnArray)
                         return returnArray;
                       },
                     })
@@ -2828,7 +2457,6 @@
           for (var i = 0; i < progressSteps.length; i++) {
             arr.push(i+1)
           }
-
           Swal.mixin({
             input: 'text',
             confirmButtonText: 'Next &rarr;',
@@ -3016,11 +2644,9 @@
             self.loading = true;
 
             axios.get(url).then(res=>{
-              // console.log('result VOCAB',res.data.response)
               if (res.data.response.hasOwnProperty('docs')&& res.data.response.docs.length >= 1) {
                 self.vocab= res.data.response.docs
                 self.loading = false;
-                // console.log('res',self.vocab.length)
               }else{
                 self.vocab= []
               }
@@ -3030,7 +2656,7 @@
               throw err;
             });
           } catch (e) {
-
+            throw e;
           }
         }
       },
@@ -3056,38 +2682,30 @@
           self.canAcceptMultiple = true
         }
       }
-
       if (self.info.hasOwnProperty('anyOf')) {
         if (self.info['anyOf'].hasOwnProperty('type') && self.info['anyOf'][0]['type'] == 'array' || self.info['anyOf'][1]['type'] == 'array' ) {
           self.canAcceptMultiple = true
         }
       }
-
-
       // self.checkForConstantKey(self.info,'const')
-
-
       tippy( '.save', {
         placement:'top',
         maxWidth:'200px',
         content: '<div class="text-success m-0" style="border-radius:none">Done</div>',
         animation: 'fade',
         theme:'light'});
-
       tippy( '.required', {
         maxWidth:'200px',
         placement:'top',
         content: '<div class="text-danger m-0" style="border-radius:none">This field is required</div>',
         animation: 'fade',
         theme:'light'});
-
       tippy( '.delete', {
         maxWidth:'200px',
         placement:'top',
         content: '<div class="text-danger m-0" style="border-radius:none">Clear</div>',
         animation: 'fade',
         theme:'light'});
-
       tippy( '#masterForm', {
           target:'.inputpreview',
           content: 'Loading...',
@@ -3100,20 +2718,18 @@
             instance.setContent("<div class='text-muted m-0 text-left wraptext'><pre>"+info+"</pre></div>")
           }
         });
-
-        tippy( '#widget', {
-            target:'.info',
-            content: 'Loading...',
-            maxWidth:'200px',
-            placement:'left',
-            animation: 'fade',
-            theme:'light',
-            onShow(instance) {
-              let info = instance.reference.dataset.tippyInfo;
-              instance.setContent("<div class='text-muted m-0'>"+info+"</div>")
-            }
-          });
-
+      tippy( '#widget', {
+          target:'.info',
+          content: 'Loading...',
+          maxWidth:'200px',
+          placement:'left',
+          animation: 'fade',
+          theme:'light',
+          onShow(instance) {
+            let info = instance.reference.dataset.tippyInfo;
+            instance.setContent("<div class='text-muted m-0'>"+info+"</div>")
+          }
+        });
     },
     computed: {
       isRequired:function(){
@@ -3129,14 +2745,12 @@
         set (newValue) {
           var payload = {};
           if (name.includes('date')) {
-            // console.log('%c date format check','color:pink')
             let v = moment(newValue).format("YYYY-MM-DD")
             payload["completed"] = {'name':this.name,'value': v };
           }else {
             payload["completed"] = {'name':this.name,'value':newValue};
           }
           store.commit('markCompleted',payload);
-
           store.dispatch('saveProgress');
         }
       },
@@ -3647,8 +3261,8 @@
               </template>
             </div>
           </template>
-
         </div>
+        <!-- 🌈  PROGRESS TRACKER 🌈 -->
         <div class="col-sm-12 col-md-3 p-0">
           <div class="w-100 text-muted d-flex justify-content-around align-items-center p-1">
             <h6>Progress Tracker</h6>
@@ -3705,7 +3319,6 @@
         isComplete:function(){
           let res = store.getters.isComplete
           if (res) {
-            // id is the id of the chart
             $("#registerReady").notify("Available Now",{style:'trophy', showDuration: 40, placement:'top'});
           }
           return res
@@ -3776,23 +3389,6 @@
             throw err;
           })
         },
-        // getStartingPointSchema(url,schemaName){
-        //   let self = this;
-        //   self.loading = true;
-        //   axios.get("/api/view?url="+url).then(res=>{
-        //
-        //     var payload = {};
-        //     payload["name"] = schemaName;
-        //     store.commit('saveSchemaName',payload);
-        //
-        //     self.parseData(res.data)
-        //
-        //     self.loading = false;
-        //   }).catch(err=>{
-        //     self.loading = false;
-        //     throw err;
-        //   })
-        // },
         getStartingPointSchema(item){
           let self = this;
           self.loading = true;
@@ -3822,10 +3418,7 @@
                       payload["catpropsrequired"] = [];
                     }
                     store.commit('mergeCategoryProps',payload);
-
-
                   }).catch(error=>{
-
             				throw error;
                   });
                 }
@@ -3842,9 +3435,7 @@
                 text: err.response.data.error
               });
             } catch (e) {
-              // console.log(e)
-            } finally {
-
+              throw e;
             }
     				throw err;
     			})
@@ -3889,13 +3480,10 @@
         },
         assignCategories(schema){
           var self = this;
-
           if (schema.hasOwnProperty('validation')) {
-
             for (prop in schema['validation']['properties']) {
               //assign if found
               Vue.set(schema['validation']['properties'][prop],'categories',[])
-
               for (category in self.categories) {
                 for (var subcategory in self.categories[category]) {
                   if (self.categories[category][subcategory].includes(prop)) {
@@ -3908,7 +3496,6 @@
                 }
               }
             }
-            // console.log('WITH CATS', schema)
             return schema
           }else{
             return schema
@@ -4033,7 +3620,6 @@
                   }
                 }).catch(err=>{
                   self.loading = false;
-                  // console.log('err',err.response.data)
                   let culprit = "<h6>"+err.response.data.error+"</h6>"
                   if (err.response.data && err.response.data.path) {
                     culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
@@ -4065,34 +3651,6 @@
             self.loading = true;
           }
 
-        },
-        downnloadSchema(){
-          var self = this;
-          if (this.isComplete){
-            store.commit('formPreview');
-            Swal.fire({
-              title: 'Name your file',
-              input: 'text',
-              inputAttributes: {
-                autocapitalize: 'off'
-              },
-              showCancelButton: true,
-              confirmButtonText: 'Download JSON-LD',
-              allowOutsideClick: () => !Swal.isLoading()
-            }).then((result) => {
-              if (result.value) {
-                self.download(JSON.stringify(store.getters.getPreview,null,2), result.value+'.jsonld', 'text/plain')
-              }
-            })
-          }
-
-        },
-        download(content, fileName, contentType) {
-          var a = document.createElement("a");
-          var file = new Blob([content], {type: contentType});
-          a.href = URL.createObjectURL(file);
-          a.download = fileName;
-          a.click();
         },
         showHelp(){
           Swal.fire({
@@ -4252,19 +3810,16 @@
         parseCSVData(data){
           let self = this;
           let items = []
-          // console.log('Raw CSV data', data)
           for (let i = 0; i < data.length; i++) {
             let currentDoc = data[i]
             let newDoc = {}
             for (let key in currentDoc) {
               if (key.includes(".")) {
                 let keyPath = self.separateByDelimeter(key,'.')
-                // console.log('%c keypath '+key,'color:orange')
                 self.createNested(newDoc, keyPath, currentDoc[key])
               }else{
                 let v = currentDoc[key]
                 if (key && v) {
-                  // console.log('%c simple value: '+key,'color:pink')
                   self.createNested(newDoc,[key], v)
                 }
               }
@@ -4281,15 +3836,9 @@
         },
         createNested(obj, keyPath, value) {
           var self = this;
-          // console.log("obj",obj)
-          // console.log("keyPath",keyPath)
-          // console.log("value",value)
-          // console.log("%c --------------------------------------------",'color:yellow')
-
           lastKeyIndex = keyPath.length-1;
           for (var i = 0; i < lastKeyIndex; ++ i) {
            key = keyPath[i];
-           // console.log("looking at key",key)
            if (!(key in obj)){
              obj[key] = {}
            }
@@ -4373,7 +3922,6 @@
                   break;
                 case 'registered':
                   axios.get('/api/dataset?&user='+self.userInfo.login).then(publicres=>{
-                    // console.log("PUBLIC",res.data)
                     let list = publicres.data.hits;
                     self.loading = false;
                     self.loading = true;
@@ -4509,21 +4057,17 @@
                         footer: 'Oh no, something looks wrong...'
                         })
                       }
-
-
-
                     }
                   });
-
                   break;
                 default:
+                return false;
               }
             }
           })
         },
         checkAutoLoad(){
           var self = this;
-          // console.log('checkAutoLoad')
           let payload = {}
           if (self.presets && self.presets.length === 1) {
             payload["startingPoint"] = self.presets[0];
@@ -4598,6 +4142,8 @@
             title: 'Issues',
             animation:false,
             customClass:'scale-in-center',
+            showConfirmButton: true,
+            confirmButtonColor:"{{color_main}}",
             html: `<div class="text-left previewBox">
                     <div>
                       <small>
@@ -4613,6 +4159,8 @@
             type: 'success',
             title: 'Valid',
             text: "All good!",
+            showConfirmButton: true,
+            confirmButtonColor:"{{color_main}}",
             })
           }
         }
@@ -4637,7 +4185,6 @@
         tippy( '#widget',{
             target:'.desc',
             content: 'Loading...',
-            // maxWidth:'200px',
             placement:'top',
             animation: 'fade',
             interactive: true,
@@ -4668,7 +4215,6 @@
           });
 			}
 		});
-
 
 </script>
 {% include "footer.html" %}
