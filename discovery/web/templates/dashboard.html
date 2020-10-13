@@ -297,7 +297,9 @@ var app = new Vue({
                       let prefix = parts[0]
                       let className = parts[1]
                       let url = '/api/dataset?schema='+namespace+'::'+prefix+':'+className;
-                      // console.log('url >>', url)
+                      if (self.meta && self.meta['_meta']['guide']) {
+                        url = url+"&guide="+self.meta['_meta']['guide']
+                      }
                       axios.post(url,self.meta).then(res=>{
                         Swal.hideLoading();
                         if (res.data.success) {
