@@ -437,7 +437,6 @@
         let field = payload['from']; //name of prop
         let item = payload['item']; //full info
         let props = state.schema.validation.properties;
-
         switch (props[field].value.constructor) {
           case Object:
             // console.log('OBJ',_.isEqual(props[field].value, item))
@@ -455,8 +454,8 @@
                 let arr_item = props[field].value[i];
                 switch (arr_item.constructor) {
                   case String:
-                    if (arr_item.value === item) {
-                      Vue.delete(arr_item,i);
+                    if (arr_item === item) {
+                      Vue.delete(props[field].value,i);
                       $.notify(item+" removed",{ globalPosition: 'right',style:"success", showDuration: 40, });
                     }
                     break;
@@ -479,11 +478,12 @@
             break;
           case String:
             // console.log('STR')
-            if (props[field].value === item) {
-              Vue.delete(props[field].value,i);
-              $.notify(item+" removed",{ globalPosition: 'right',style:"success", showDuration: 40, });
-            }else {
-              $.notify(item+" does not match value",{ globalPosition: 'right',style:"danger", showDuration: 40, });
+            for (var i = 0; i < props[field].value.length; i++) {
+              let prop_val = props[field].value[i];
+              if (prop_val === item) {
+                Vue.delete(props[field].value,i);
+                $.notify(item+" removed",{ globalPosition: 'right',style:"success", showDuration: 40, });
+              }
             }
             break;
           default:
