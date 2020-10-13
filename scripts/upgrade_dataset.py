@@ -6,7 +6,6 @@ import logging
 
 from tornado.options import options, parse_command_line
 
-from discovery.utils.controllers import DatasetController
 from discovery.data.dataset import DatasetMetadata
 
 options.define('cd2h', default='/guide')
@@ -20,25 +19,21 @@ def updateDocs():
     '''
         Update meta guide field
     '''
-    docs = DatasetController.get_all(private=False)
-    for doc in docs['hits']:
-        has_guide = doc.get("_meta", {}).get('guide', None)
+    docs = DatasetMetadata.search(private=False)
+    for doc in docs.scan():
+        has_guide = getattr( getattr(doc, "_meta", None), 'guide', None)
         if not has_guide:
             if doc['@type'] == "outbreak:Dataset":
-                metadata = DatasetMetadata.get(doc["_id"])
-                res = metadata.update(**{'_meta':{'guide':options.outbreak}})
+                res = doc.update(**{'_meta':{'guide':options.outbreak}})
                 logging.info(f'[Outbreak] Updating guide field for doc {doc["_id"]}')
             elif doc['@type'] == "niaid:NiaidDataset":
-                metadata = DatasetMetadata.get(doc["_id"])
-                res = metadata.update(**{'_meta':{'guide':options.niaid}})
+                res = doc.update(**{'_meta':{'guide':options.niaid}})
                 logging.info(f'[NIAID] Updating guide field for doc {doc["_id"]}')
             elif doc['@type'] == "n3c:Dataset":
-                metadata = DatasetMetadata.get(doc["_id"])
-                res = metadata.update(**{'_meta':{'guide':options.n3c}})
+                res = doc.update(**{'_meta':{'guide':options.n3c}})
                 logging.info(f'[N3C] Updating guide field for doc {doc["_id"]}')
             else:
-                metadata = DatasetMetadata.get(doc["_id"])
-                res = metadata.update(**{'_meta':{'guide':options.cd2h}})
+                res = doc.update(**{'_meta':{'guide':options.cd2h}})
                 logging.info(f'[Default] Updating guide field for doc {doc["_id"]}')
             logging.info(res)
         else:
