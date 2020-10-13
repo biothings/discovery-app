@@ -28,7 +28,7 @@ def get_portal_image(portal):
     else:
         return "https://discovery.biothings.io/static/img/dde-logo-o.png"
 
-def generate_slack_params(data, res, github_user, portal, webhook_dict):
+def generate_slack_params(data, res, github_user, portal):
 	"""
     Generate parameters that will be used in slack post request.
 	In this case, markdown is used to generate formatting that
@@ -42,21 +42,7 @@ def generate_slack_params(data, res, github_user, portal, webhook_dict):
 	meta_description = change_link_markdown(meta_description)
 	meta_id = res["_id"]
 	registry_url =  f"https://discovery.biothings.io/dataset/{meta_id}"
-	api_data = {
-		"meta_title": meta_title,
-		"meta_description": meta_description,
-		"registry_url": registry_url,
-		"github_user": github_user
-	}
-	# default markdown
-	default_block_markdown_template = ("*Title:* :{meta_title}\n"
-						"*Description:* {meta_description}\n"
-						"*Registered By:* <https://github.com/{github_user}|{github_user}>\n\n"
-						"<{registry_url}|View on Data Discovery Engine>")
-	# get template - use default if one not provided
-	block_markdown_tpl = webhook_dict.get("template", default_block_markdown_template)
-	# fill template with variable values
-	block_markdown = block_markdown_tpl.format(**api_data)
+
 	params = {
         "attachments": [{
         	"color": "#63296B",
@@ -73,17 +59,42 @@ def generate_slack_params(data, res, github_user, portal, webhook_dict):
 			    "type": "divider"
     		},
             {
+    			"type": "section",
+    			"text": {
+    				"type": "mrkdwn",
+    				"text": f"*<{registry_url}|{meta_title}>*"
+    			}
+    		},
+            {
 				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": block_markdown
-				},
+                "text": {
+    				"type": "mrkdwn",
+    				"text": meta_description
+    			},
                 "accessory": {
                     "type": "image",
                     "image_url": get_portal_image(portal),
                     "alt_text": "DDE",
                 }
-			}
+			},
+            {
+    			"type": "section",
+    			"text": {
+    				"type": "mrkdwn",
+    				"text": "View on Data Discovery Engine"
+    			},
+    			"accessory": {
+    				"type": "button",
+    				"text": {
+    					"type": "plain_text",
+    					"text": "Click Here",
+    					"emoji": true
+    				},
+    				"value": "click_me_123",
+    				"url": registry_url,
+    				"action_id": "button-action"
+    			}
+    		}
             ]
         }]
     }
@@ -100,7 +111,7 @@ def send_slack_msg(data, res, github_user, portal=None):
 	headers = {'content-type': 'application/json'}
 	http_client = AsyncHTTPClient()
 	for wh in SLACK_WEBHOOKS:
-		params = generate_slack_params(data, res, github_user, portal, wh)
+		params = generate_slack_params(data, res, github_user, portal)
 		req = HTTPRequest(url=wh['webhook'], method='POST', body=json.dumps(params), headers=headers)
 		http_client = AsyncHTTPClient()
 		http_client.fetch(req)
