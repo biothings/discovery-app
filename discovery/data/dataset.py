@@ -81,12 +81,12 @@ class DatasetMetadata(Document):
 
     def to_json(self, *args, **kwargs):
         """
-        Hide _meta field.
+        Keep _meta field.
         """
         assert self.meta.id
         result = dict(_id=self.meta.id)
         result.update(self.to_dict(*args, **kwargs))
-        result.pop('_meta')
+        # result.pop('_meta')
         return result
 
     def save(self, **kwargs):
