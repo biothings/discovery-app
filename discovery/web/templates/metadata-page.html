@@ -7,18 +7,22 @@
   </div>
   <div v-if="metadata && metadata.name" class="container">
     <div class="text-left" style="margin:auto;">
-      <h1 class="text-center logoText mt-5">
-        <span v-text="metadata.name"></span>
-      </h1>
-      <small v-if="metadata && metadata.version"  class="text-muted d-block text-center" v-text="'Version '+metadata.version"></small>
-      <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
-      <div v-if="schemaLink" class="alert alert-muted text-center">
-        <small>To view schema used to structure this metadata <a :href="schemaLink" target="_blank" rel="noreferrer">click here <i class="fas fa-external-link-alt"></i></a>.</small>
+      <div class="grad text-light">
+        <div class="lines p-5">
+          <h1 class="text-center mt-5">
+            <span v-text="metadata.name"></span>
+          </h1>
+          <small v-if="metadata && metadata.version"  class="text-muted d-block text-center" v-text="'Version '+metadata.version"></small>
+          <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
+        </div>
       </div>
-      <div class="alert-secondary p-1 m-2">
+      <div class="grad p-1">
         <div class="bg-light p-4 text-center">
+          <div v-if="schemaLink" class="text-muted text-center m-0">
+            <small>To view schema used to structure this metadata <a :href="schemaLink" target="_blank" rel="noreferrer">click here <i class="fas fa-external-link-alt"></i></a>.</small>
+          </div>
           <div class="p-3 text-left">
-            <p class="text-muted m-auto" v-html="metadata.description"></p>
+            <p class="text-dark m-auto" v-html="metadata.description"></p>
           </div>
           <template v-for="(content,name) in viewMetadata" :key="name">
             <field-box :name="name" :content="content" isChild="false"></field-box>
@@ -33,7 +37,7 @@
         </div>
       </div>
       <div class="alert alert-secondary text-muted mt-5 ">
-        <h5>Embed structured dataset metadata on your website</h5>
+        <h5>Embed this structured dataset metadata on your website</h5>
         <h6>Embedding options:</h6>
         <div class="row">
           <div class="col-sm-12 col-md-6 p-3">
@@ -221,8 +225,6 @@
       if (self.type == 'array') {
         self.calculatePages();
       }
-      // console.log("%c "+self.name,'color:lightblue')
-      // console.log("%c "+self.type,'color:yellow')
     },
     computed: {
       arrayResults: function () {
@@ -234,7 +236,7 @@
     watch:{
     },
     template:
-      `<div class="alert m-0 rounded-0" :class="[isChild?'alert-muted p-1 border-left':'alert-muted p-1 border-bottom']">
+      `<div v-if="name !== '_meta'" class="m-0 rounded-0" :class="[isChild?'p-1 border-left':'p-1 border-bottom']">
       <!-- 🌈 Array 🌈 -->
       <template v-if="type == 'array'">
         <div class="row m-0">
@@ -330,6 +332,33 @@
               <template v-for="(value,key) in content">
                 <field-box :name="key" :content="value" isChild="true"></field-box>
               </template>
+            </div>
+          </div>
+        </template>
+        <!-- 🌈 Boolean 🌈 -->
+        <template v-if="type == 'boolean'">
+          <div class="d-flex">
+            <div class=" d-flex justify-content-start align-items-center">
+              <small class="mainTextDark">
+                <span v-text="name"></span> :&nbsp;
+              </small>
+            </div>
+            <div>
+              <small v-if="content === true"><i class="fas fa-check text-success"></i> <span v-text="content"></span></small>
+              <small v-else><i class="fas fa-times text-danger"></i> <span v-text="content"></span></small>
+            </div>
+          </div>
+        </template>
+        <!-- 🌈 Number 🌈 -->
+        <template v-if="type == 'number'">
+          <div class="d-flex">
+            <div class=" d-flex justify-content-start align-items-center">
+              <small class="mainTextDark">
+                <span v-text="name"></span> :&nbsp;
+              </small>
+            </div>
+            <div>
+              <small><span v-text="content"></span></small>
             </div>
           </div>
         </template>
