@@ -273,6 +273,7 @@
       valid: Boolean,
       errors: [],
       guide_prefilled: {{guide_prefilled}},
+      output_default:{}
     },
     strict: true,
     mutations: {
@@ -305,6 +306,8 @@
         console.log('form properties',state.schema.validation.properties)
         state.output['@type'] = state.schema.name || state.schema.label
         state.output['@context'] = payload['schema']["@context"]
+        let obj = Object.assign({}, state.output)
+        Vue.set(state,'output_default',obj)
 
         state.filter = state.schema.label || state.schema.name
 
@@ -393,35 +396,23 @@
       },
       markCompleted(state,payload){
         let selection = payload['completed'];
-        for (key in state.schema.validation.properties) {
-          if (key === selection.name) {
-            //Check if selection has duplicates
-            if (key+"s" in state.schema.validation.properties && state.schema.validation.properties[key+"s"].hasOwnProperty('duplicate') ) {
-              let obj ={}
-              Vue.set(obj,key,selection.value)
-              let typeProp= key+'Type';
-              Vue.set(obj,typeProp,'')
-              Vue.set(state.schema.validation.properties[key+"s"],'value',[obj]);
-            }
-            Vue.set(state.schema.validation.properties[selection.name],'value',selection.value);
-          }
+        Vue.set(state.schema.validation.properties[selection.name],'value',selection.value);
+        //check for duplicate keys or plural names
+        if (selection.name+"s" in state.schema.validation.properties && state.schema.validation.properties[selection.name+"s"].hasOwnProperty('duplicate') ) {
+          $.notify(selection.name+"s < similar found and filled out",{ globalPosition: 'right',style:"info", showDuration: 40, });
+          Vue.set(state.schema.validation.properties[selection.name+"s"],'value',selection.value);
         }
       },
       clearValueOfProp(state,payload){
         let selection = payload['clear'];
-        for (key in state.schema.validation.properties) {
-          if (key === selection) {
-            if (state.schema.validation.properties[selection].hasOwnProperty('value')) {
-              Vue.delete(state.schema.validation.properties[selection],'value');
-              Vue.set(state.schema.validation.properties[selection],'selected',false);
-            }else {
-              $.notify(selection+": no value detected",{ globalPosition: 'right',style:"danger", showDuration: 40, });
-            }
-            if (!state.schema.validation.properties[selection].hasOwnProperty('value')) {
-              $.notify(selection+" was cleared",{ globalPosition: 'right',style:"success", showDuration: 40, });
-            }
-
-          }
+        if (state.schema.validation.properties[selection].hasOwnProperty('value')) {
+          Vue.delete(state.schema.validation.properties[selection],'value');
+          Vue.set(state.schema.validation.properties[selection],'selected',false);
+        }else {
+          $.notify(selection+": no value detected",{ globalPosition: 'right',style:"danger", showDuration: 40, });
+        }
+        if (!state.schema.validation.properties[selection].hasOwnProperty('value')) {
+          $.notify(selection+" was cleared",{ globalPosition: 'right',style:"success", showDuration: 40, });
         }
       },
       removeArrayItemFrom(state,payload){
@@ -503,6 +494,8 @@
       formPreview(state){
         let props = state.schema.validation.properties;
         // Add prefilled values from config
+        Vue.set(state,'output',Object.assign({}, state.output_default))
+
         for (var key in state.guide_prefilled) {
           Vue.set(state.output,key,state.guide_prefilled[key])
         }
@@ -803,7 +796,13 @@
         return state.schemaName
       },
       getValueOf: (state) => (propname) =>{
-        return state.schema.validation.properties[propname].value
+        if (state.schema.validation.properties[propname].hasOwnProperty('value')) {
+          return state.schema.validation.properties[propname].value
+        }else {
+          console.log(state.schema.validation.properties[propname])
+          console.log('return null')
+          return null
+        }
       },
       getTotals:(state) => {
         let completeCount = 0;
@@ -2738,9 +2737,9 @@
       isInputHidden:function(){
         return store.getters.isInputHidden(this.name)
       },
-      userInput: {
+      userInput:{
         get () {
-          return this.$store.state.schema.validation.properties[this.name].value
+          return store.state.schema.validation.properties[this.name].value
         },
         set (newValue) {
           var payload = {};
