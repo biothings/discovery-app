@@ -263,11 +263,9 @@
       validation:null,
       schemaName:'',
       output:{},
-      filter:String,
       startingPoint: null,
       selectedPortals:[],
       step: Number,
-      settings: Object,
       showDescriptions:true,
       bulkJSONItems:[],
       valid: Boolean,
@@ -309,8 +307,6 @@
         let obj = Object.assign({}, state.output)
         Vue.set(state,'output_default',obj)
 
-        state.filter = state.schema.label || state.schema.name
-
         // helper func to decide right subcategory
         function getProp(propname){
           let cat={
@@ -333,9 +329,6 @@
             state.schema.validation.properties[prop]['categories'].unshift(getProp(prop))
           }
         }
-      },
-      filterProps(state,payload){
-        state.filter = payload['cat'];
       },
       saveSchemaName(state,payload){
         state.schemaName = payload['name'];
@@ -365,9 +358,6 @@
             break;
           }
         }
-      },
-      saveSettings(state,payload){
-        state.settings = payload['settings']
       },
       highlight(state,payload){
         let cat = payload['category'];
@@ -905,23 +895,6 @@
       getOutput(state){
         return state.output
       },
-      getSelectedProps: (state)=>{
-        let selected = {}
-
-        for (var prop in state.schema.validation.properties) {
-          if (state.schema.validation.properties[prop].hasOwnProperty('categories')) {
-            for (var i = 0; i < state.schema.validation.properties[prop]['categories'].length; i++) {
-              if (state.schema.validation.properties[prop]['categories'][i]['category'] === state.filter) {
-                Vue.set(selected,prop,state.schema.validation.properties[prop])
-              }
-            }
-          }
-        }
-        return selected
-      },
-      getFilter: (state)=>{
-        return state.filter
-      },
       getStartingPoint:(state)=>{
         return state.startingPoint
       },
@@ -931,9 +904,6 @@
       getStep:(state)=>{
         return state.step
       },
-      getSettings:(state)=>{
-        return state.settings
-      }
     },
     actions:{
       reset ({ commit }) {
@@ -1239,11 +1209,6 @@
     },
     props: ['cat','subcats','totals'],
     methods:{
-      filterProps(cat){
-        var payload = {};
-        payload["cat"] = cat
-        store.commit('filterProps',payload);
-      },
       removeCat(){
         var self = this;
         Swal.fire({
@@ -1273,16 +1238,6 @@
       let sp= store.getters.getStartingPoint
       if (sp.name == self.cat) {
         self.canRemove = false
-      }
-    },
-    computed: {
-      currentlySelected:function(){
-        let f = store.getters.getFilter
-        if (this.cat === f) {
-          return true
-        }else {
-          return false
-        }
       }
     },
     template:
@@ -3328,12 +3283,6 @@
         categoryTotals:function(){
           let totals = store.getters.getCategoryTotals
           return totals
-        },
-        selectedProps: function(){
-          return store.getters.getSelectedProps
-        },
-        filter: function(){
-          return store.getters.getFilter
         },
         startingPoint: function(){
           return store.getters.getStartingPoint
