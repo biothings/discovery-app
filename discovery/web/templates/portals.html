@@ -1,25 +1,22 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<div id="portals" class="container-fluid" style="min-height:80vh;">
-  <div class="jumbotron bg-light mb-0 text-center">
+<div id="portals" class="container-fluid alert-secondary py-5" style="min-height:80vh;">
+  <div class="jumbotron bg-none mb-0 text-center">
     <h1 class="logoText">Data Portals</h1>
-    <h4 class="w-75 m-auto text-muted">
+    <p class="w-75 m-auto text-muted">
       Explore data portals and learn how you can contribute and access their data.
-    </h4>
+    </p>
   </div>
-  <div class="container mb-5">
+  <div class="container">
     <ul class="list-group">
       <template v-for="portal in portals">
-        <li class="list-group-item" :key="portal.name">
+        <li class="list-group-item mb-1" :key="portal.name" :style="{borderLeft: portal.colors[1].hex+' solid 10px'}">
           <div>
-            <div class="alert-secondary p-1">
-              <img :src="portal.image" :alt="portal.name" height="50px" class="mr-2"/>
-            </div>
             <div class="d-flex justify-content-start align-items-center">
               <img :src="portal.portalicon" :alt="portal.name" width="50px" class="mr-2"/>
               <a class="tip" :href="'/portal/'+portal.linkname" data-tippy-info="Learn More">
-                <h2 class="d-inline"><span v-text="portal.name"></span> <i class="fas fa-chevron-right"></i></h2>
+                <h4 class="d-inline"><span v-text="portal.name"></span> <i class="fas fa-chevron-right"></i></h4>
               </a>
             </div>
             <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
@@ -54,7 +51,8 @@
             'portalicon': "/static/img/dde-logo-o.svg",
             "site": 'https://ctsa.ncats.nih.gov/cd2h/',
             'schema': '/view/biomedical',
-            "guide": "/guide"
+            "guide": "/guide",
+            "colors": [{"hex":"#63296B"}, {"hex":"#4A7D8F"}]
           },
           {
             'name':'The National COVID Cohort Collaborative (N3C)',
@@ -69,7 +67,8 @@
             'portalicon': "/static/img/N3Co.png",
             "site": 'https://covid.cd2h.org/N3C',
             'schema': '/view/n3c',
-            "guide": "/guide/n3c/dataset"
+            "guide": "/guide/n3c/dataset",
+            "colors": [{"hex":"#4B7E8F"},{"hex":"#64296B"}]
           },
           {
             'name':'Outbreak.info',
@@ -81,17 +80,17 @@
             Outbreak.info focuses on aggregating all SARS-CoV-2 / COVID-19 information into a single site. We focus on making the metadata about these resources more standardized, on creating web interfaces to make the resources more findable, and on a few focused data integration efforts to make data more usable.
             </p>`,
             'image':'/static/img/outbreak.svg',
-            'portalicon': "/static/img/icon-01.svg"
+            'portalicon': "/static/img/icon-01.svg",
+            "colors": [{"hex":"#D13B62"}, {"hex":"#0A253D"}]
           },
           {
             'name':'NIAID Data Portal',
             'header':'An aggregator of open datasets, with a particular focus on allergy and infectious diseases.',
-            'linkname':'cvisb',
-            'description': `<p>
-            The NIAID (National Institute of Allergy and Infectious Diseases) Data Portal aggregates <b class="tip text-info" data-tippy-info="Omics DI,NCBI GEO, Zenodo, Harvard Dataverse, NYU Data Catalog, ImmPort, Data Discovery Engine">7 different data sources</b> together in a searchable platform, making it easier to find datasets.
-            </p>`,
-            'image':'/static/img/cvisb.png',
-            'portalicon': "/static/img/niaid/icon.svg"
+            'linkname':'niaid',
+            'description': `<b>National Institute of Allergy and Infectious Diseases (<a href="https://www.niaid.nih.gov/" target="_blank" rel="nonreferrer">NIAID <i class="fas fa-external-link-alt"></i></a>)</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID Data Portal <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.`,
+            'image':'/static/img/niaid/logo.svg',
+            'portalicon': "/static/img/niaid/icon.svg",
+            "colors": [{"hex":"#369AC1"},{"hex":"#113B56"}]
           },
 
         ]
