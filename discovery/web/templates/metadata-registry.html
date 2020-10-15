@@ -14,9 +14,9 @@
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg" />
   </div>
-  <div class="col-10 m-auto">
+  <div class="col-md-10 col-sm-12 m-auto">
     <div class="">
-      <h1 class="text-center logoText mb-1 mt-5">Dataset Registry</h1>
+      <h1 class="text-center logoText mb-1 mt-2">Dataset Registry</h1>
       <div>
         <form @submit.prevent="search(query)">
           <div class="row m-1 cBox actions bg-secondary">
@@ -130,24 +130,24 @@
     computed: {
       text: function() {
         if (this.item.description.length > 150) {
-          return this.item.description.substring(0, 250) + "..."
+          return this.item.description.substring(0, 150) + "..."
         } else {
           return this.item.description
         }
 
       },
-      niaid: function() {
-        if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('niaid')) {
-          return true
-        } else {
-          return false
+      imgIcon: function(){
+        if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('n3c')) {
+          return '/static/img/N3Co.png'
         }
-      },
-      outbreak: function() {
-        if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('outbreak')) {
-          return true
-        } else {
-          return false
+        else if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('outbreak')) {
+          return '/static/img/outbreak.png'
+        }
+        else if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('niaid')) {
+          return '/static/img/niaid/icon.svg'
+        }
+        else{
+          return '/static/img/dde-logo-o.svg'
         }
       },
       detailLink: function(){
@@ -155,13 +155,11 @@
       }
     },
     mounted: function() {
-
+        console.log(this.type)
     },
     template: `<li class="list-group-item list-group-item-action p-0 pointer">
                 <div class="row m-0">
-                  <div v-if="niaid" class="col-sm-1 registry-item-background" :style="{ backgroundImage: 'url(' + '/static/img/niaid/icon.svg' + ')' }"></div>
-                  <div v-if="outbreak" class="col-sm-1 registry-item-background" :style="{ backgroundImage: 'url(' + '/static/img/outbreak.png' + ')' }"></div>
-                  <div v-if="!outbreak && !niaid" class="col-sm-1 registry-item-background" :style="{ backgroundImage: 'url(' + '/static/img/dde-logo-o.svg' + ')' }"></div>
+                  <div class="col-sm-1 registry-item-background" :style="{backgroundImage: 'url(' + imgIcon + ')' }"></div>
                   <div class="col-sm-11" @click="goTo(item)">
                     <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
                     <p v-if="item && item.description" class="text-muted">
@@ -343,6 +341,7 @@
               }
             });
             self.registryTotal = {'value':self.registry.length}
+            self.calculatePages()
           },
           getLocation(href) {
               var l = document.createElement("a");
