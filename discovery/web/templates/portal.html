@@ -4,7 +4,7 @@
 <div id="portal" class="container-fluid p-0" style="min-height:80vh;">
   <template v-if="portal && portal.name">
     <div class="row m-0">
-      <div class="text-center col-sm-12 grad p-0">
+      <div class="text-center col-sm-12 p-0" :style="{background: gradient}">
         <div class="lines p-5">
           <img class="mt-4" :src="portal.image" :alt="portal.name" width="300px"/>
           <a href="/portal" class="d-block text-info"><i class="fas fa-chevron-left"></i> Back to Portals</a>
@@ -14,7 +14,7 @@
         <div>
           <div class="d-flex justify-content-start align-items-center">
             <img :src="portal.portalicon" :alt="portal.name" width="100px" class="mr-2"/>
-            <h1 class="logoText"><span v-text="portal.name"></span></h1>
+            <h1 :style="{color: portal.colors[1].hex}"><span v-text="portal.name"></span></h1>
           </div>
           <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
           <div class="text-muted" v-html="portal.description"></div>
@@ -24,7 +24,7 @@
               Follow an easy-to-follow guide to help you contribute dataset metadata for <span v-text=portal.name></span> following this <a :href="portal.schema" target="_blank">structure</a>.
             </p>
             <div class="text-center p-2 m-1 rounded p-3">
-              <a role="button" class="btn themeButton text-light btn-lg" :href="portal.guide" class="nd mt-2 tip" :data-tippy-info="'Add a dtaset for '+portal.name">
+              <a role="button" :style="{background: portal.colors[0].hex}" class="btn text-light btn-lg" :href="portal.guide" class="nd mt-2 tip" :data-tippy-info="'Add a dtaset for '+portal.name">
                 <i class="fas fa-plus"></i> Add Dataset Metadata
               </a>
             </div>
@@ -68,11 +68,13 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vivus@0.4.5/dist/vivus.min.js"></script>
 <script>
+
   var app = new Vue({
     el: '#portal',
   	data: function(){
   		return {
         portal:{},
+        colors:[],
         portals:[
           {
             'name':'Outbreak.info',
@@ -89,7 +91,8 @@
             'site': "https://outbreak.info/",
             'schema': '/view/outbreak',
             "guide": "/guide/outbreak/dataset",
-            "datasets": "/dataset?guide=/guide/outbreak/dataset"
+            "datasets": "/dataset?guide=/guide/outbreak/dataset",
+            "colors": [{"hex":"#D13B62"}, {"hex":"#0A253D"}]
           },
           {
             'name':'NIAID Data Portal',
@@ -102,12 +105,13 @@
             </p><p>
             While some dataset providers already use this format to describe their datasets, others provide structured metadata in their own format. Learn more about our efforts to encapsulate non-standard dataset metdata in schema.org's format.
             </p>`,
-            'image':'/static/img/cvisb_white.png',
+            'image':'/static/img/niaid/logo.svg',
             'portalicon': "/static/img/niaid/icon.svg",
             "site": 'https://discovery.biothings.io/niaid/',
             'schema': '/view/niaid',
             "guide": "/guide/niaid",
-            "datasets": "/dataset?guide=/guide/niaid"
+            "datasets": "/dataset?guide=/guide/niaid",
+            "colors": [{"hex":"#369AC1"},{"hex":"#113B56"}]
           },
           {
             'name':'CTSA National Center for Data to Health',
@@ -126,7 +130,8 @@
             'schema': '/view/biomedical',
             "guide": "/guide",
             "api": 'https://crawler.biothings.io/',
-            "datasets": "/dataset?guide=/guide"
+            "datasets": "/dataset?guide=/guide",
+            "colors": [{"hex":"#63296B"}, {"hex":"#4A7D8F"}]
           },
           {
             'name':'The National COVID Cohort Collaborative (N3C)',
@@ -142,7 +147,8 @@
             "site": 'https://covid.cd2h.org/N3C',
             'schema': '/view/n3c',
             "guide": "/guide/n3c/dataset",
-            "datasets": "/dataset?guide=/guide/n3c/dataset"
+            "datasets": "/dataset?guide=/guide/n3c/dataset",
+            "colors": [{"hex":"#4B7E8F"},{"hex":"#64296B"}]
           },
         ]
   	  }
@@ -172,14 +178,14 @@
       },
       hover(id){
         new Vivus(id, { duration: 100 });
-      }
+      },
     },
     mounted:function(){
       var self = this;
       let context = {{Context}}
        if ( context.Query ) {
          switch (context.Query) {
-           case 'cvisb':
+           case 'niaid':
              self.portal = self.portals[1]
              break;
            case 'outbreak':
@@ -194,6 +200,7 @@
            default:
              self.redirect()
          }
+         self.colors = self.portal['colors']
        }
        tippy( '#portal', {
          target:'.tip',
@@ -211,7 +218,15 @@
 
     },
     computed:{
-
+      gradient() {
+      let colors = "linear-gradient(45deg";
+      this.colors.forEach(function(e) {
+        colors += "," + e.hex;
+      });
+      colors += " 30%)";
+      console.log(colors)
+      return colors;
+    }
     }
   });
 </script>
