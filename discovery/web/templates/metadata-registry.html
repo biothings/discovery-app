@@ -52,7 +52,7 @@
           <small v-if="registry.length && query" v-text="'results for '+query">
           </small>
         </li>
-        <template v-if="registry.length" v-for="(item,index) in registryResults">
+        <template v-if="registry.length" v-for="(item,index) in results">
           <registry-item :item='item' :key="index"></registry-item>
         </template>
         <li v-if="!registry.length" class="text-center text-muted list-group-item">
@@ -69,7 +69,7 @@
                 <a class="page-link" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
               </li>
               <li class="page-item" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
-                <a href="#" class="page-link" @click.prevent="page = n" v-text="n"></a>
+                <a href="#" class="page-link" @click.prevent="onPage(n)" v-text="n"></a>
               </li>
               <li class="page-item" :class="{ 'disabled': page >= pages }">
                 <a class="page-link" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
@@ -159,6 +159,9 @@
       save_per_page(state, payload){
         state.perPage = payload['per_page']
       },
+      change_page(state, payload){
+        state.page = payload['page']
+      },
       prevPage(state) {
         if (state.page > 1)
           state.page -= 1
@@ -191,6 +194,9 @@
           var params = {
             "params": {
               "q": query,
+              // 'filters':{
+              //   '_meta.guide':'/guide'
+              // }
             }
           };
         }
@@ -343,7 +349,7 @@
     el: '#registry',
     data: function() {
       return {
-        perPageChange:20
+        perPageChange:20,
       }
     },
     methods: {
@@ -385,6 +391,10 @@
         store.commit('activate_filter',payload);
         self.search();
       },
+      onPage(n){
+        let payload = {'page':[n]}
+        store.commit('change_page',payload);
+      }
     },
     mounted: function() {
       var self = this;
@@ -401,7 +411,7 @@
 
     },
     computed: {
-      registryResults: function() {
+      results: function(){
         return store.state.registryResults
       },
       guide_filters: function(){
@@ -431,12 +441,19 @@
       page: function(){
         return store.state.page
       },
+      perPage: function(){
+        return store.state.perPage
+      },
     },
     watch:{
       perPageChange:function(nv){
         var payload = {'per_page':nv};
         store.commit('save_per_page',payload);
         store.commit('calculate_pages');
+      },
+      page: function(np){
+        let self = this;
+        store.commit('paginate_results');
       }
     }
   })
