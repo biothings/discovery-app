@@ -409,6 +409,11 @@
       store.dispatch('check_url_query');
       self.search();
 
+      window.onpopstate = function() {
+        store.dispatch('check_url_query');
+        self.search();
+      }
+
     },
     computed: {
       results: function(){
