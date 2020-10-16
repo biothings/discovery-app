@@ -45,7 +45,6 @@ def generate_slack_params(data, res, github_user, portal):
 
 	params = {
         "attachments": [{
-        	"color": "#63296B",
             "blocks": [
             {
     			"type": "header",
@@ -112,6 +111,6 @@ def send_slack_msg(data, res, github_user, portal=None):
 	http_client = AsyncHTTPClient()
 	for wh in SLACK_WEBHOOKS:
 		params = generate_slack_params(data, res, github_user, portal)
-		req = HTTPRequest(url=wh['webhook'], method='POST', body=json.dumps(params), headers=headers)
+		req = HTTPRequest(url=wh, method='POST', body=json.dumps(params), headers=headers)
 		http_client = AsyncHTTPClient()
 		http_client.fetch(req)
