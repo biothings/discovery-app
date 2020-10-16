@@ -220,7 +220,7 @@ var app = new Vue({
             if (res.data) {
               self.meta = res.data
               let list ={}
-              let notAllowed=['@context','@type','includedInDataCatalog','_id']
+              let notAllowed=['@context','@type','includedInDataCatalog','_id','_meta']
               for(key in self.meta){
                 if (!notAllowed.includes(key)) {
                   list[key] = key
