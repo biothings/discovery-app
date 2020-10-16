@@ -19,18 +19,18 @@
       <h1 class="text-center logoText mb-1 mt-2">Dataset Registry</h1>
       <div>
         <form @submit.prevent="search(query)">
-          <div class="row m-1 cBox actions bg-secondary">
+          <div class="row m-0 cBox actions bg-secondary">
             <div class="col-sm-10 p-2">
               <div class="">
                 <input class="form-control col-12" id="search_query" type="text" v-model="query" name="query" placeholder="Search...">
               </div>
             </div>
             <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-              <span class="fa-stack fa-1x pointer search unselectable tip" @click.prevent="search(query)">
+              <span data-tippy="search" class="fa-stack fa-1x pointer unselectable tip" @click.prevent="search(query)">
                 <i class="fas fa-circle text-muted fa-stack-2x"></i>
                 <i class="fas fa-search fa-stack-1x text-light"></i>
               </span>
-              <span class="fa-stack fa-1x pointer reset unselectable" @click.prevent="query='';registry=[]">
+              <span data-tippy="reset" class="fa-stack fa-1x pointer unselectable" @click.prevent="query='';registry=[]">
                 <i class="fas fa-circle fa-stack-2x text-muted"></i>
                 <i class="fas fa-undo fa-stack-1x text-light"></i>
               </span>
@@ -38,7 +38,14 @@
           </div>
         </form>
       </div>
-      <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal.value+' Results'">
+      <div class="alert-dark m-0 p-1">
+        <template v-for="filter in guide_filters">
+          <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter.value);" :class="[filter.active?'badge-info':'badge-secondary']" :key="filter.name">
+            <img :src="filter.icon" width="20px" :alt="filter.name"/> <span v-text="filter.name"></span>
+          </span>
+        </template>
+      </div>
+      <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
       </div>
       <ul class="list-group context" style="border-top:solid 3px var(--main)" id="regTippyParent">
         <li class="list-group-item d-flex justify-content-center align-items-center text-muted p-1" style="background:#d0d0d0;">
@@ -70,7 +77,7 @@
             </ul>
           </nav>
           <div class="col-sm-12 right-align form-group">
-            <select class="perPage form-control form-control-sm w-50 m-auto" v-model="perPage" @change="calculatePages" id="perPage">
+            <select class="perPage form-control form-control-sm w-50 m-auto" v-model="perPageChange" id="perPage">
               <option value="" disabled selected>Shown Per Page</option>
               <option value="20">20 per page</option>
               <option value="50">50 per page</option>
@@ -84,6 +91,7 @@
 </div>
 {% endblock %}
 {% block extra_scripts %}
+<script src="https://unpkg.com/vuex"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
@@ -92,6 +100,171 @@
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
+  const store = new Vuex.Store({
+    state:{
+      guide_filters:[],
+      registry:[],
+      registryTotal:0,
+      loading:false,
+      registryResults:[],
+      perPage: 20,
+      page:1,
+      pages: 1,
+      query:'',
+      active_list:[]
+    },
+    strict: true,
+    mutations:{
+      saveGuideFilters(state, payload){
+        state.guide_filters = payload['guide_filters'];
+      },
+      activate_filter(state, payload){
+        let guide_list = payload['guide_list'];
+        state.active_list = [];
+        for (var i = 0; i < state.guide_filters.length; i++) {
+          let filter = state.guide_filters[i]['value'];
+          for (var g_i = 0; g_i < guide_list.length; g_i++) {
+            let url_guide = guide_list[g_i];
+            if (url_guide == filter) {
+              state.guide_filters[i]['active'] = !state.guide_filters[i]['active'];
+            }
+          }
+          if (state.guide_filters[i]['active']) {
+            state.active_list.push(state.guide_filters[i]['value'])
+          }
+        }
+        // match url to search filters
+        var url = new URL(window.location.href)
+        url.searchParams.delete('guide');
+        url = url+'?guide='+state.active_list.toString()
+        window.history.pushState({"html":'content',"pageTitle":'DDE'},"", url);
+      },
+      paginate_results(state) {
+        var start = (state.page - 1) * state.perPage,
+          end = start + state.perPage;
+        let res = state.registry.slice(start, end);
+        Vue.set(state, 'registryResults', res)
+      },
+      calculate_pages(state){
+        let pages = Math.ceil(state.registry && state.registry.length / state.perPage);
+        Vue.set(state, 'pages', pages)
+        state.registryTotal = state.registry.length;
+      },
+      toggleLoading(state){
+        state.loading = !state.loading
+      },
+      save_query(state, payload){
+        state.query = payload['query']
+      },
+      save_per_page(state, payload){
+        state.perPage = payload['per_page']
+      },
+      prevPage(state) {
+        if (state.page > 1)
+          state.page -= 1
+      },
+      nextPage(state) {
+        if (state.page < state.pages)
+          state.page += 1
+      },
+      save_registry(state, payload){
+        state.registry = payload['res']
+      },
+      filter_registry(state){
+        let guide_paths = state.active_list;
+        state.registry = _.filter(state.registry, function(item) {
+          if (item.hasOwnProperty('_meta') && item['_meta']['guide']) {
+            let item_path = item['_meta']['guide'];
+            if (guide_paths.includes(item_path)) {
+              return item
+            }
+          }
+        });
+      },
+    },
+    actions:{
+      search_and_paginate({commit, dispatch, state}){
+
+        let query = state.query || "__all__";
+
+        if (query) {
+          var params = {
+            "params": {
+              "q": query,
+            }
+          };
+        }
+        commit('toggleLoading');
+        var context = document.querySelector(".context");
+        var instance = new Mark(context);
+        instance.unmark();
+        axios.get('/api/dataset/query?size=1000', params).then(function(response) {
+          let res = {'res': response.data.hits};
+          commit('save_registry',res);
+          if (state.active_list.length) {
+            commit('filter_registry');
+          }
+          commit('paginate_results');
+          commit('calculate_pages');
+          commit('toggleLoading');
+
+          $(document).ready(function() {
+            var context = document.querySelector(".context");
+            var instance = new Mark(context);
+            instance.mark(query);
+          });
+        });
+      },
+      check_url_query({commit, state}){
+        let url_string = window.location.href
+        let url = new URL(url_string);
+
+        let q = url.searchParams.get("q");
+        if (q) {
+          let payload = {'query':q};
+          commit('save_query',payload);
+        }
+
+        let guides = url.searchParams.get("guide");
+        let guide_paths =[]
+
+        if (guides) {
+          if (guides.includes(',')) {
+            guides = guides.split(',')
+          }else {
+            guides = [guides]
+          }
+          console.log('GUIDES FOUND',guides)
+          for (var i = 0; i < guides.length; i++) {
+            let guide_url = guides[i]
+            guide_paths.push(guide_url)
+          }
+          if (guide_paths.length) {
+            let payload = {'guide_list':guide_paths}
+            commit('activate_filter',payload);
+          }
+        }
+      }
+    },
+    getters:{
+      get_guide_filters:state=>{
+        return state.guide_filters
+      },
+      get_registry:state=>{
+        return state.registry
+      },
+      get_registry_total:state=>{
+        return state.registryTotal
+      },
+      get_loading:state=>{
+        return state.loading
+      },
+      get_registry_results:state=>{
+        return state.registryResults
+      },
+    }
+  });
+
   Vue.component('registry-item', {
     data: function() {
       return {
@@ -166,56 +339,14 @@
               </li>`
   });
 
-  //<small v-if="item && item._meta.username" class="text-muted" v-text="item._meta.username"></small>
-
   var app = new Vue({
     el: '#registry',
     data: function() {
       return {
-        alphabet: ['ALL', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
-        input: '',
-        linkPrefix: './',
-        data: null,
-        user: {},
-        testURL: '',
-        registry: [],
-        registryTotal: '0',
-        sort: 'Search Relevance',
-        query: '',
-        page: 1,
-        pages: 1,
-        perPage: 20,
-        loading: false,
+        perPageChange:20
       }
     },
     methods: {
-
-      searchByUser(username) {
-        var self = this;
-
-        $('#searching').show();
-
-        var context = document.querySelector(".context");
-        var instance = new Mark(context);
-        instance.unmark();
-
-        axios.get('/api/query?q=_meta.username:' + username + '&size=100').then(function(response) {
-          self.registry = response.data.hits;
-          self.registryTotal = response.data.total;
-          $(document).ready(function() {
-            self.mark(username);
-          });
-          if (self.registryTotal) {
-            self.calculatePages();
-          }
-          $('#searching').hide();
-        });
-      },
-      mark(kw) {
-        var context = document.querySelector(".context");
-        var instance = new Mark(context);
-        instance.mark(kw);
-      },
       getQueryFilters() {
         var filters = [];
         var authorFilters = [];
@@ -239,181 +370,76 @@
 
         return finalFilters;
       },
-      search(query) {
-        var self = this;
-
-        query = query || "__all__";
-
-        if (query) {
-          var params = {
-            "params": {
-              "q": query,
-            }
-          };
-        }
-        self.loading = true;
-        var context = document.querySelector(".context");
-        var instance = new Mark(context);
-        instance.unmark();
-        self.registry = [];
-        axios.get('/api/dataset/query?size=1000', params).then(function(response) {
-          self.registry = response.data.hits;
-          self.registryTotal = response.data.total;
-          $(document).ready(function() {
-            self.mark(self.query);
-          });
-          if (self.registryTotal) {
-            self.calculatePages();
-          }
-          self.checkforQuery();
-          self.loading = false;
-        });
-      },
-      calculatePages() {
-        var self = this;
-        self.pages = Math.ceil(self.registry && self.registry.length / self.perPage);
+      search() {
+        store.dispatch('search_and_paginate');
       },
       prevPage() {
-        var self = this;
-        if (self.page > 1)
-          self.page -= 1
+        store.commit('prevPage');
       },
       nextPage() {
-        var self = this;
-        if (self.page < self.pages)
-          self.page += 1
+        store.commit('nextPage');
       },
-      sortResults(e) {
-        this.sort = e.target.value;
+      toggleFilter(value){
+        let self = this;
+        let payload = {'guide_list':[value]}
+        store.commit('activate_filter',payload);
+        self.search();
       },
-      checkLoggedUser() {
-        var self = this;
-        axios.get('./user').then(res => {
-          if (res.data.login) {
-            self.user = res.data;
-          }
-        }).catch(err => {
-          throw err;
-        });
-      },
-      checkforQuery(){
-            let self = this;
-            let url_string = window.location.href
-            let url = new URL(url_string);
-
-            let q = url.searchParams.get("q");
-            if (q) {
-              this.query = q;
-            }
-
-            let guides = url.searchParams.get("guide");
-            let guide_paths =[]
-
-            if (guides) {
-              if (guides.includes(',')) {
-                guides = guides.split(',')
-              }else {
-                guides = [guides]
-              }
-              console.log(guides)
-              for (var i = 0; i < guides.length; i++) {
-                let guide_url = self.getLocation(guides[i])
-                guide_paths.push(guide_url.pathname)
-              }
-              if (guide_paths.length) {
-                self.handleGuideFilter(guide_paths)
-              }
-            }
-          },
-          handleGuideFilter(guide_paths){
-            let self = this;
-            self.registry = _.filter(self.registry, function(item) {
-              if (item.hasOwnProperty('_meta') && item['_meta']['guide']) {
-                let item_path = self.getLocation(item['_meta']['guide'])
-                item_path = item_path.pathname
-                if (guide_paths.includes(item_path)) {
-                  return item
-                }
-              }
-            });
-            self.registryTotal = {'value':self.registry.length}
-            self.calculatePages()
-          },
-          getLocation(href) {
-              var l = document.createElement("a");
-              l.href = href;
-              return l;
-          },
     },
     mounted: function() {
       var self = this;
-      self.checkLoggedUser();
-      self.search(self.query);
-      tippy('.search', {
-        maxWidth: '200px',
-        placement: 'top',
-        content: '<div class="text-muted m-0" style="border-radius:none">Search</div>',
-        animation: 'fade',
-        theme: 'light'
-      });
-      tippy('.reset', {
-        maxWidth: '200px',
-        placement: 'top',
-        content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
-        animation: 'fade',
-        theme: 'light'
-      });
-      tippy('#regTippyParent', {
-        target: '.tip',
-        placement: 'top',
-        maxWidth: '200px',
-        content: 'loading',
-        animation: 'fade',
-        theme: 'light',
-        onShow(instance) {
-          let info = instance.reference.dataset.tippyInfo;
-          instance.setContent("<div class='text-muted m-0 text-center wraptext'>" + info + "</div>")
-        }
-      });
+      let payload = {'guide_filters':
+        [
+        {'name':'N3C','value':'/guide/n3c/dataset','active':false,'icon':'/static/img/N3Co.png'},
+        {'name':'Outbreak.info','value':'/guide/outbreak/dataset','active':false,'icon':'/static/img/icon-01.svg'},
+        {'name':'NIAID','value':'/guide/niaid','active':false,'icon':'/static/img/niaid/icon.svg'},
+        {'name':'CD2H','value':'/guide','active':false,'icon':'/static/img/dde-logo-o.svg'}]
+      }
+      store.commit('saveGuideFilters',payload);
+      store.dispatch('check_url_query');
+      self.search();
+
     },
     computed: {
       registryResults: function() {
-        var start = (this.page - 1) * this.perPage,
-          end = start + this.perPage;
-        return this.registry && this.registry.slice(start, end);
-      }
-    },
-  })
-
-  // Smooth Scroll-To
-
-  $('a[href*="#"]')
-    .not('[href="#"]')
-    .not('[href="#0"]')
-    .click(function(event) {
-      if (
-        location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') &&
-        location.hostname == this.hostname
-      ) {
-        var target = $(this.hash);
-        target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
-        if (target.length) {
-          event.preventDefault();
-          $('html, body').animate({
-            scrollTop: target.offset().top
-          }, 1000, function() {
-            var $target = $(target);
-            $target.focus();
-            if ($target.is(":focus")) {
-              return false;
-            } else {
-              $target.attr('tabindex', '-1');
-              $target.focus();
-            };
-          });
+        return store.state.registryResults
+      },
+      guide_filters: function(){
+        return store.getters.get_guide_filters
+      },
+      registry: function(){
+        return store.getters.get_registry
+      },
+      registryTotal: function(){
+        return store.getters.get_registry_total
+      },
+      loading: function(){
+        return store.state.loading
+      },
+      query:{
+        get () {
+          return store.state.query
+        },
+        set (newValue) {
+          var payload = {'query':newValue};
+          store.commit('save_query',payload);
         }
+      },
+      pages: function(){
+        return store.state.pages
+      },
+      page: function(){
+        return store.state.page
+      },
+    },
+    watch:{
+      perPageChange:function(nv){
+        var payload = {'per_page':nv};
+        store.commit('save_per_page',payload);
+        store.commit('calculate_pages');
       }
-    });
+    }
+  })
 </script>
 
 {% include "footer.html" %}
