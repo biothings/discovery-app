@@ -136,7 +136,9 @@
         // match url to search filters
         var url = new URL(window.location.href)
         url.searchParams.delete('guide');
-        url = url+'?guide='+state.active_list.toString()
+        if (state.active_list.length) {
+          url = url+'?guide='+state.active_list.toString()
+        }
         window.history.pushState({"html":'content',"pageTitle":'DDE'},"", url);
       },
       paginate_results(state) {
@@ -240,7 +242,7 @@
           }else {
             guides = [guides]
           }
-          console.log('GUIDES FOUND',guides)
+          // console.log('GUIDES FOUND',guides)
           for (var i = 0; i < guides.length; i++) {
             let guide_url = guides[i]
             guide_paths.push(guide_url)
