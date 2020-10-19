@@ -12,7 +12,7 @@
   </div>
   <!-- HOMEPAGE MODE -->
   <div class="bg-light" v-if="!query">
-    <div class="mainBackDark d-flex justify-content-center align-items-center flex-wrap">
+    <div class="grad d-flex justify-content-center align-items-center flex-wrap">
       <div>
         <template v-if='namespaceRegistered'>
           <div class="text-center p-5">
@@ -54,7 +54,7 @@
 
     </div>
 
-    <div class="p-1 grad w-100 text-right">
+    <div class="p-1 bg-secondary w-100 text-right">
       <div v-if="userSchemaURL">
         <a class="mr-5" :href="userSchemaURL" target="_blank" rel="noreferrer">
           <small class="text-light">Source <i class="fas fa-external-link-alt"></i></small>
