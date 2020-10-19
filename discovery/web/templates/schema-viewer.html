@@ -188,19 +188,19 @@
   <div id="mainCont">
     <div class="container mt-5" v-if="query">
       <div class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around p-3">
-        <span class="fa-stack fa-1x pointer unselectable tip" :data-tippy-info="'Go Back'" @click.prevent="window.location.href=RemoveLastDirectoryPartOf(window.location.href)">
+        <span class="fa-stack fa-1x pointer unselectable" data-tippy="Go Back" @click.prevent="window.location.href=RemoveLastDirectoryPartOf(window.location.href)">
           <i class="fas fa-circle text-muted fa-stack-2x"></i>
           <i class="fas fa-chevron-left fa-stack-1x text-light"></i>
         </span>
         <div>
-          <template v-show='!validationView'>
+          <template v-if='!validationView'>
             <small class="text-center text-light mb-1">Expand Properties</small>
-            <input id="toggle" class="form-control text-light tip m-auto" @change="showAll()" :data-tippy-info="'Expand or contract all property lists'"  type="checkbox" checked/>
+            <input id="toggle" class="form-control text-light m-auto" @change="showAll()" data-tippy="Expand or contract all property lists"  type="checkbox" checked/>
           </template>
         </div>
         <div>
           <small class="text-center text-light mb-1">Validation View</small>
-          <input id="showButton" class="form-control tip m-auto" @change="changeView()" :data-tippy-info="'Show this class only and any validation included'"  type="checkbox" v-model="validationView"/>
+          <input id="showButton" class="form-control m-auto" @change="changeView()" data-tippy="Show this class only and any validation included"  type="checkbox" v-model="validationView"/>
         </div>
       </div>
       <!-- CLASSES FOR QUERY -->
@@ -248,7 +248,7 @@
       },
       saveSchema(state,payload){
         state.userSchema = payload['schema'];
-        console.log('saved schema 🦄 ...',state.userSchema)
+        // console.log('saved schema 🦄 ...',state.userSchema)
       },
       saveProps(state,payload){
         state.userSchemaProps = payload['props'];
@@ -388,7 +388,7 @@
     data: function(){
       return{
         expand: false,
-        color: ''
+        style:{}
       }
     },
     props: ['option','name','isChild'],
@@ -400,7 +400,11 @@
         for (var i = 0; i < 6; i++) {
           color += letters[Math.floor(Math.random() * 16)];
         }
-        self.color = color;
+        self.style={
+          'border-color':color,
+          'border-width': '2px',
+          'border-style': 'solid'
+        }
       },
       testOntologyLookup(){
         var self = this;
@@ -490,8 +494,8 @@
       }
     },
     template:
-      `<div class="p-1 m-1 rounded text-dark" :style={backgroundColor:color}>
-        <button v-if="!isChild" @click="expand=!expand" class="btn btn-dark btn-sm">
+      `<div class="p-1 m-1 rounded text-dark" :style="style">
+        <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm d-block">
           <small v-text="!expand?'show option':'hide option'"></small>
         </button>
         <template v-if="expand">
@@ -526,7 +530,7 @@
     data: function(){
       return{
         expand:false,
-        color:''
+        style:{}
       }
     },
     props: ['option','name',"isChild"],
@@ -538,7 +542,11 @@
         for (var i = 0; i < 6; i++) {
           color += letters[Math.floor(Math.random() * 16)];
         }
-        self.color = color;
+        self.style={
+          'border-color':color,
+          'border-width': '2px',
+          'border-style': 'solid'
+        }
       },
       testOntologyLookup(){
         var self = this;
@@ -628,8 +636,8 @@
       }
     },
     template:
-      `<div class="p-1 m-1 rounded text-dark" :style={backgroundColor:color}>
-        <button v-if="!isChild" @click="expand=!expand" class="btn btn-dark btn-sm">
+      `<div class="p-1 m-1 rounded text-dark" :style="style">
+        <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm">
           <small v-text="!expand?'show option':'hide option'"></small>
         </button>
         <template v-if="expand">
@@ -712,12 +720,12 @@
     },
     template:
     `<div class="border-bottom row m-0">
-      <div class="col-sm-12 col-md-4 bg-dark bold d-flex justify-content-center align-items-center">
+      <div class="col-sm-12 col-md-3 bg-dark bold d-flex justify-content-center align-items-center">
         <small>
           <span :class="[isRequired(name)?'text-danger font-weight-bold':'text-light']" v-text="name" :data-tippy-info="JSON.stringify(fullinfo,null,2)"></span>
         </small>
       </div>
-      <div class="col-sm-12 col-md-8 text-muted bg-light">
+      <div class="col-sm-12 col-md-9 text-muted bg-light">
         <small v-text="fullinfo['description']"></small>
         <div class="rounded-0">
           <div class="p-1 rounded-0 d-flex">
