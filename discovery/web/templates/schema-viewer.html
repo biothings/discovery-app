@@ -256,7 +256,7 @@
       },
       checkIFValidationView(state,payload){
         state.queryStoreContent = payload['queryContent'];
-        if (!state.queryStoreContent.hasOwnProperty('validation') && !state.queryStoreContent['validation'].length) {
+        if (!state.queryStoreContent.hasOwnProperty('validation')) {
           state.validationView = false;
         }else if (state.queryStoreContent.hasOwnProperty('validation') && state.queryStoreContent['validation'] == null) {
           state.validationView = false;
