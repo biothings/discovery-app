@@ -5,14 +5,14 @@
 [v-cloak] > * { display:none; }
 [v-cloak]::before { content: "Please wait..."; }
 </style>
-<div id="viewer" class="pt-5" v-cloak>
+<div id="viewer" v-cloak>
   <!-- Loader -->
   <div v-if="loading" class="loader">
     <img src="/static/img/ripple.svg"/>
   </div>
   <!-- HOMEPAGE MODE -->
   <div class="bg-light" v-if="!query">
-    <div class="grad d-flex justify-content-center align-items-center flex-wrap">
+    <div class="grad d-flex justify-content-center align-items-center flex-wrap pt-5">
       <div>
         <template v-if='namespaceRegistered'>
           <div class="text-center p-5">
