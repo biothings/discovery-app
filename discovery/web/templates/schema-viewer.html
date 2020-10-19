@@ -5,7 +5,7 @@
 [v-cloak] > * { display:none; }
 [v-cloak]::before { content: "Please wait..."; }
 </style>
-<div id="viewer" class="pt-5" v-cloak style="padding-top:100px;">
+<div id="viewer" class="pt-5" v-cloak>
   <!-- Loader -->
   <div v-if="loading" class="loader">
     <img src="/static/img/ripple.svg"/>
@@ -355,6 +355,312 @@
     `<i id='showButton' class="fas fa-info-circle text-info"></i>`
   });
 
+  Vue.component('object-box', {
+    props: ['properties'],
+    mounted: function(){
+      var self = this;
+      // console.log("%c OBJECT PROPS",'color:hotpink')
+      // console.log(self.properties)
+    },
+    template:
+      `<div class="p-1 m-1 bg-light rounded">
+        <template v-for="(propContent, propName) in properties">
+          <propbox :name="propName" :fullinfo="propContent"></propbox>
+        </template>
+      </div>`
+  });
+
+  Vue.component('enum-box', {
+    props: ['enumeration'],
+    template:
+      `<div class="p-1 m-1 bg-light rounded">
+        <div class="form-group">
+          <select multiple class="form-control" id="exampleFormControlSelect2">
+            <template v-for="option in enumeration">
+              <option :value="option" v-text="option"></option>
+            </template>
+          </select>
+        </div>
+      </div>`
+  });
+
+  Vue.component('one-of', {
+    data: function(){
+      return{
+        expand: false,
+        color: ''
+      }
+    },
+    props: ['option','name','isChild'],
+    methods:{
+      getRandomColor() {
+        let self = this;
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        self.color = color;
+      },
+      testOntologyLookup(){
+        var self = this;
+
+        Swal.fire({
+          title: self.name,
+          text: 'Search for an existing term here:',
+          input: 'text',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          animation:false,
+          customClass:'scale-in-center',
+          inputAttributes: {
+            autocapitalize: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Look up',
+          showLoaderOnConfirm: true,
+          focusConfirm: false,
+          preConfirm: (query) => {
+
+            let ontologies = self.option['vocabulary']['ontology'].toString()
+            let children = self.option['vocabulary']['children_of'].toString()
+
+            let url = `https://www.ebi.ac.uk/ols/api/search?q=`+query
+            +"&ontology="+ontologies
+            +"&childrenOf="+children
+            +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+            +"&queryFields=label"
+            +"&rows=10"
+
+            return fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(response.statusText)
+                }
+                return response.json()
+              })
+              .catch(error => {
+                Swal.showValidationMessage(
+                  `Request failed: ${error}`
+                )
+              })
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            let html ="<div id='ontology' class='p-1 text-left'>";
+
+            for (var i = 0; i < result.value.response.docs.length; i++) {
+              tippy('#cb'+i,{
+                content:result.value.response.docs[i]
+              });
+
+              let label = result.value.response.docs[i]['label']
+              if (label && label.length > 37) {
+                label = label.substring(0,37)+"..."
+              }
+
+              html += `<div class="form-check">
+                        <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
+                            `+label+`
+                            <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
+                        </label>
+                      </div>`
+            }
+            html += "</div>";
+
+            Swal.fire({
+              title: "Top 10 Results",
+              html: html,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              animation:false,
+              customClass:'scale-in-center',
+            });
+
+          }
+        })
+      }
+    },
+    mounted: function(){
+      var self = this;
+      self.getRandomColor();
+      if (self.isChild) {
+        self.expand = true;
+      }
+    },
+    template:
+      `<div class="p-1 m-1 rounded text-dark" :style={backgroundColor:color}>
+        <button v-if="!isChild" @click="expand=!expand" class="btn btn-dark btn-sm">
+          <small v-text="!expand?'show option':'hide option'"></small>
+        </button>
+        <template v-if="expand">
+          <small v-text="option.description"></small>
+          <small class="badge badge-pill badge-dark text-warning m-1" v-text="option.type == 'string'?'string':''"></small>
+          <!-- 🌈 VOCAB 🌈 -->
+          <div v-if="option && option.vocabulary" class="text-center">
+            <button type="button" class="btn btn-sm btn-success text-light" @click="testOntologyLookup()">
+              <small class="badge" :class="[option.strict?'badge-danger':'badge-info']">
+                <b v-text="option.strict?'STRICT':'NON-STRICT'"></b>
+              </small> Term Lookup <i class="fas fa-search"></i>
+            </button>
+          </div>
+          <!-- 🌈 OBJECT 🌈 -->
+          <div v-if="option && option.properties">
+            <object-box :properties="option.properties"></object-box>
+          </div>
+          <!-- 🌈 ENUM 🌈 -->
+          <div v-if="option && option.enum">
+            <enum-box :enumeration="option.enum"></objeenum>
+          </div>
+          <!-- 🌈 LIST OF 🌈 -->
+          <div v-if="option.items">
+            <small class="mainTextDark">LIST OF:</small>
+            <one-of :name="name" :option="option.items" :isChild="true"></one-of>
+          </div>
+        </template>
+      </div>`
+  });
+
+  Vue.component('any-of', {
+    data: function(){
+      return{
+        expand:false,
+        color:''
+      }
+    },
+    props: ['option','name',"isChild"],
+    methods:{
+      getRandomColor() {
+        let self = this;
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        self.color = color;
+      },
+      testOntologyLookup(){
+        var self = this;
+
+        Swal.fire({
+          title: self.name,
+          text: 'Search for an existing term here:',
+          input: 'text',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          animation:false,
+          customClass:'scale-in-center',
+          inputAttributes: {
+            autocapitalize: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Look up',
+          showLoaderOnConfirm: true,
+          focusConfirm: false,
+          preConfirm: (query) => {
+
+            let ontologies = self.option['vocabulary']['ontology'].toString()
+            let children = self.option['vocabulary']['children_of'].toString()
+
+            let url = `https://www.ebi.ac.uk/ols/api/search?q=`+query
+            +"&ontology="+ontologies
+            +"&childrenOf="+children
+            +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+            +"&queryFields=label"
+            +"&rows=10"
+
+            return fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(response.statusText)
+                }
+                return response.json()
+              })
+              .catch(error => {
+                Swal.showValidationMessage(
+                  `Request failed: ${error}`
+                )
+              })
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            let html ="<div id='ontology' class='p-1 text-left'>";
+
+            for (var i = 0; i < result.value.response.docs.length; i++) {
+              tippy('#cb'+i,{
+                content:result.value.response.docs[i]
+              });
+
+              let label = result.value.response.docs[i]['label']
+              if (label && label.length > 37) {
+                label = label.substring(0,37)+"..."
+              }
+
+              html += `<div class="form-check">
+                        <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
+                            `+label+`
+                            <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
+                        </label>
+                      </div>`
+            }
+            html += "</div>";
+
+            Swal.fire({
+              title: "Top 10 Results",
+              html: html,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              animation:false,
+              customClass:'scale-in-center',
+            });
+
+          }
+        })
+      }
+    },
+    mounted: function(){
+      var self = this;
+      self.getRandomColor();
+      if (self.isChild) {
+        self.expand = true;
+      }
+    },
+    template:
+      `<div class="p-1 m-1 rounded text-dark" :style={backgroundColor:color}>
+        <button v-if="!isChild" @click="expand=!expand" class="btn btn-dark btn-sm">
+          <small v-text="!expand?'show option':'hide option'"></small>
+        </button>
+        <template v-if="expand">
+          <small v-text="option.description"></small>
+          <small class="badge badge-pill badge-dark text-warning m-1" v-text="option.type == 'string'?'string':''"></small>
+          <!-- 🌈 VOCAB 🌈 -->
+          <div v-if="option && option.vocabulary" class="text-center">
+            <button type="button" class="btn btn-sm btn-dark text-light" @click="testOntologyLookup()">
+              <small class="badge" :class="[option.strict?'badge-danger':'badge-success']">
+                <b v-text="option.strict?'STRICT':'NON-STRICT'"></b>
+              </small> Term Lookup <i class="fas fa-search"></i>
+            </button>
+          </div>
+          <!-- 🌈 OBJECT 🌈 -->
+          <div v-if="option && option.properties">
+            <object-box :properties="option.properties"></object-box>
+          </div>
+          <!-- 🌈 ENUM 🌈 -->
+          <div v-if="option && option.enum">
+            <enum-box :enumeration="option.enum"></objeenum>
+          </div>
+          <!-- 🌈 LIST OF 🌈 -->
+          <div v-if="option.items">
+            <small class="mainTextDark">LIST OF:</small>
+            <one-of :name="name" :option="option.items" isChild="true"></one-of>
+          </div>
+        </template>
+
+      </div>`
+  });
+
   Vue.component('propbox', {
     data: function(){
       return{
@@ -405,95 +711,100 @@
     computed: {
     },
     template:
-    `<li class="list-group-item border-bottom alert">
-      <h6 class="font-weight-bold mainTextDark">
-        <i class="fas fa-tiny fa-code text-muted float-right" :data-tippy-info="JSON.stringify(fullinfo,null,2)"></i>
-        <span v-text="name"></span>
-        <span v-if="isRequired(name)" class="text-danger caps" style="zoom:.5;">is required</span>
-      </h6>
-      <small class="text-muted" v-text="fullinfo['description']"></small>
-      <div class="d-flex rounded-0">
-        <div class=" text-muted  px-5 py-3 d-flex justify-content-center align-items-center">
-          <small>
-            INPUT IS <i class="fas fa-arrow-circle-right"></i>
-          </small>
-        </div>
-        <div class="p-1 rounded-0 d-flex">
-
-          <!-- HAS TYPE -->
-          <div v-if="fullinfo && fullinfo.type" class="d-flex justify-content-center align-items-center">
-            <div class="badge badge-pill badge-dark m-1">
-              <span v-text="fullinfo['type']"></span>
-            </div>
-          </div>
-
-          <!-- ARRAY -->
-          <div v-if="fullinfo && fullinfo.items" class="d-flex justify-content-center align-items-center">
-            <div class="badge badge-pill badge-secondary m-1">
-              <span v-text="fullinfo.items.type"></span>
-            </div>
-          </div>
-
-          <template v-if="fullinfo.enum">
-            <div class="dropdown dropright">
-              <button class="btn btn-sm btn-info text-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Enumeration
-              </button>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <div v-for="item in fullinfo.enum" class="dropdown-item" v-text='item'></div>
-              </div>
-            </div>
-          </template>
-
-          <template v-if="fullinfo['const']">
-            <div class="pillType d-inline">
-              <span style='background:#17a2b8' v-text="'const'"></span>
-              <span v-text="fullinfo['const']"></span>
-            </div>
-          </template>
-
-          <!-- OBJECT -->
-          <div v-if="fullinfo && fullinfo.properties" class="d-flex justify-content-center align-items-center">
-            <i class="fas fa-chevron-right m-1 text-muted"></i>
-          </div>
-          <div v-if="fullinfo && fullinfo.properties" class="d-flex justify-content-center align-items-center">
-            <div class="border-left border-info pl-3">
-              <template v-for="(value,name) in fullinfo['properties']" :key="option">
-                <div class="border-left border-primary my-4 pl-2">
-                  <small class="mainTextDark"><i class="fas fa-circle"></i> <b v-text="name"></b></small>
-                  <span v-if="isPropRequired(name)" class="text-danger caps" style="zoom:.5;">is required</span>
-
-                  <i class="fas fa-caret-right m-1 text-dark"></i>
-
-                  <small class="badge badge-pill alert-dark" v-text="fullinfo['properties'][name]['type']"></small>
-                  <small class="badge badge-pill alert-light" v-text="fullinfo['properties'][name]['format']"></small>
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <!-- ONE OF -->
-          <div v-if="fullinfo && fullinfo.oneOf" class="d-flex justify-content-center align-items-center">
-            <div class="d-flex justify-content-center align-items-center">
+    `<div class="border-bottom row m-0">
+      <div class="col-sm-12 col-md-4 bg-dark bold d-flex justify-content-center align-items-center">
+        <small>
+          <span :class="[isRequired(name)?'text-danger font-weight-bold':'text-light']" v-text="name" :data-tippy-info="JSON.stringify(fullinfo,null,2)"></span>
+        </small>
+      </div>
+      <div class="col-sm-12 col-md-8 text-muted bg-light">
+        <small v-text="fullinfo['description']"></small>
+        <div class="rounded-0">
+          <div class="p-1 rounded-0 d-flex">
+            <!-- HAS TYPE -->
+            <div v-if="fullinfo && fullinfo.type" class="d-flex justify-content-center align-items-center">
               <div class="badge badge-pill badge-dark m-1">
-                ONE OR MANY OF
+              <small>
+                input <i class="fas fa-arrow-circle-right"></i>
+              </small>
+              <span class="text-warning" v-text="fullinfo['type']"></span>
               </div>
             </div>
-            <div class="d-flex justify-content-center align-items-center">
+
+            <!-- ARRAY -->
+            <div v-if="fullinfo && fullinfo.items" class="d-flex justify-content-center align-items-center">
+              <div class="badge badge-pill badge-secondary m-1">
+                <span v-text="fullinfo.items.type"></span>
+              </div>
+            </div>
+
+            <template v-if="fullinfo.enum">
+              <select multiple class="form-control" id="exampleFormControlSelect2">
+                <template v-for="option in fullinfo.enum">
+                  <option :value="option" v-text="option"></option>
+                </template>
+              </select>
+            </template>
+
+            <template v-if="fullinfo['const']">
+              <div class="pillType d-inline">
+                <span style='background:#17a2b8' v-text="'const'"></span>
+                <span v-text="fullinfo['const']"></span>
+              </div>
+            </template>
+
+            <!-- OBJECT -->
+            <div v-if="fullinfo && fullinfo.properties" class="d-flex justify-content-center align-items-center">
               <i class="fas fa-chevron-right m-1 text-muted"></i>
             </div>
-            <div class="d-flex justify-content-center align-items-center">
-              <template v-for="(option,index) in fullinfo['oneOf']" :key="option">
-                <div v-if="option && !option['items']" class="d-flex brackets">
-                  <field-box class="m-1" :name="name" :content="option" isChild="true"></field-box>
-                </div>
-              </template>
-            </div>
-          </div>
+            <div v-if="fullinfo && fullinfo.properties" class="d-flex justify-content-center align-items-center">
+              <div class="border-left border-info pl-3">
+                <template v-for="(value,name) in fullinfo['properties']" :key="option">
+                  <div class="border-left border-primary my-4 pl-2">
+                    <small class="mainTextDark"><i class="fas fa-circle"></i> <b v-text="name"></b></small>
+                    <span v-if="isPropRequired(name)" class="text-danger caps" style="zoom:.5;">is required</span>
 
+                    <i class="fas fa-caret-right m-1 text-dark"></i>
+
+                    <small class="badge badge-pill alert-dark" v-text="fullinfo['properties'][name]['type']"></small>
+                    <small class="badge badge-pill alert-light" v-text="fullinfo['properties'][name]['format']"></small>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- ONE OF -->
+            <div v-if="fullinfo && fullinfo.oneOf" class="row m-0">
+              <div class="col-sm-12 text-center bold mainTextDark">
+                <small>
+                  ONE OF
+                </small>
+              </div>
+              <div class="col-sm-12 d-flex justify-content-center flex-wrap">
+                <template v-for="(option,index) in fullinfo['oneOf']" :key="option">
+                  <one-of :key="index" :name="name" :option="option"></one-of>
+                </template>
+              </div>
+            </div>
+
+            <!-- ANY OF -->
+            <div v-if="fullinfo && fullinfo.anyOf" class="row m-0">
+              <div class="col-sm-12 text-center bold mainTextLight">
+                <small>
+                  ANY OF
+                </small>
+              </div>
+              <div class="col-sm-12 d-flex justify-content-center flex-wrap">
+                <template v-for="(option,index) in fullinfo['anyOf']" :key="option">
+                  <any-of :key="index" :name="name" :option="option"></any-of>
+                </template>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
-    </li>`
+    </div>`
   });
 
   Vue.component('field-box', {
@@ -757,203 +1068,21 @@
       </div>`
   });
 
-  // OLD VERSION
-
-  // Vue.component('property-box', {
-  //   data: function(){
-  //     return{
-  //
-  //     }
-  //   },
-  //   props: ['name','fullinfo','required'],
-  //   methods:{
-  //     findDomainOf(propname){
-  //       var self = this;
-  //       for (var i = 0; i < self.allProps.length; i++) {
-  //         if (self.allProps[i].label === propname) {
-  //           if (self.allProps[i].domain) {
-  //             // return self.allProps[i].domain
-  //             return store.getters.removeDomainsNotIncluded(self.allProps[i].domain);
-  //           }else{
-  //             return ['No Match Found']
-  //           }
-  //         }
-  //       }
-  //     },
-  //     getName(string){
-  //       let res ='';
-  //       if (string.includes('http')) {
-  //         let arr =  string.split('/');
-  //         res = arr[arr.length-1];
-  //       }else if (string.includes(':')) {
-  //         let arr =  string.split(':');
-  //         res = arr[arr.length-1];
-  //       }else{
-  //         res = string
-  //       }
-  //       return res
-  //     },
-  //     isRequired(propname){
-  //       if (this.required) {
-  //         for (var i = 0; i < this.required.length; i++) {
-  //           if (this.required[i]===propname) {
-  //             return true;
-  //           }
-  //         }
-  //         return false;
-  //       }else{
-  //         return false;
-  //       }
-  //     },
-  //     getLink(qName){
-  //       let link = [store.getters.handleLink(qName)];
-  //       return link;
-  //     }
-  //   },
-  //   watch:{
-  //   },
-  //   mounted: function(){
-  //     var self = this;
-  //     tippy('#'+self.name, {
-  //       content: "<div class='mainTextDark'><h3>"+self.name+"</h3><pre class='text-left text-muted wraptext d-block'>"+JSON.stringify(self.fullinfo,null,2)+"</pre></div>",
-  //       placement: 'left',
-  //       theme:'light',
-  //       trigger:'click'
-  //     })
-  //   },
-  //   computed: {
-  //     validationView () {
-  //       return this.$store.getters.getViewMode
-  //     },
-  //     allProps(){
-  //       return this.$store.state.userSchemaProps
-  //     }
-  //   },
-  //   template:
-  //   `<div>
-  //     <small v-if='name' :id='name' class='text-primary pointer float-right ml-2 unselectable'><i class="fas fa-code"></i></small>
-  //     <template v-if='name'>
-  //       <small class='badge badge-required float-right unselectable' v-if="isRequired(name)">Required</small>
-  //       <a class='bold d-inline' v-text='name' :href='"./"+name'></a>
-  //       <small class="text-muted">from </small>
-  //       <template v-for='item in findDomainOf(name)'>
-  //         <template v-for="link in getLink(item)">
-  //           <a class='d-inline' :href='link' :target="link[0] !== '.'?'_blank':'_self'">
-  //             <small >
-  //               <span v-html='item'></span>
-  //             </small>
-  //             <i v-if="link[0] !== '.'" class="fas small fa-external-link-alt"></i>
-  //           </a>
-  //         </template>
-  //       </template>
-  //     </template>
-  //     <small class="text-muted" v-if="fullinfo.description">
-  //       <p v-text="fullinfo.description || 'No Description Provided'"></p>
-  //     </small>
-  //     <template v-if="fullinfo.type">
-  //       <div class="pillType d-inline">
-  //         <span v-text="'type'"></span>
-  //         <span v-text="fullinfo.type"></span>
-  //       </div>
-  //       <i v-if="fullinfo.type !== 'string'" class="fas fa-chevron-right text-muted"></i>
-  //     </template>
-  //     <template v-if="fullinfo.format">
-  //       <div class="pillType d-inline">
-  //         <span class="mainBackDark" v-text="'format'"></span>
-  //         <span v-text="fullinfo.format"></span>
-  //       </div>
-  //     </template>
-  //     <template v-if="fullinfo['$ref']">
-  //       <div class="pillType d-inline">
-  //         <span class="mainBackLight" v-text="'$ref'"></span>
-  //         <span v-text="fullinfo['$ref']"></span>
-  //       </div>
-  //     </template>
-      // <template v-if="fullinfo.enum">
-      //   <div class="dropdown dropright">
-      //     <button class="btn smallButton btn-info text-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      //       Enum
-      //     </button>
-      //     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-      //       <div v-for="item in fullinfo.enum" class="dropdown-item" v-text='item'></div>
-      //     </div>
-      //   </div>
-      // </template>
-      // <template v-if="fullinfo['const']">
-      //   <div class="pillType d-inline">
-      //     <span style='background:#17a2b8' v-text="'const'"></span>
-      //     <span v-text="fullinfo['const']"></span>
-      //   </div>
-      // </template>
-  //     <template v-if="fullinfo.items">
-  //       <template v-if='fullinfo.items.type ==="object"'>
-  //         <hr />
-  //         <h6 class="text-muted">Properties used:</h6>
-  //         <property-box v-for="(prop,index) in fullinfo.items.properties" style='background:#dcf2f7' class="alert propbox" :name='index' :fullinfo="prop" :required='fullinfo.required'></property-box>
-  //       </template>
-  //       <div v-else v-for="(item,index) in fullinfo.items" class="text-left">
-  //         <div class="pillType d-inline">
-  //           <span class="mainBackLight" v-text="index"></span>
-  //           <span v-text="item"></span>
-  //         </div>
-  //       </div>
-  //     </template>
-  //     <template v-if="fullinfo.oneOf">
-  //       <hr />
-  //       <h6 class="text-muted">Value can be either...</h6>
-  //       <div class="row">
-  //         <template v-for='(item,index) in fullinfo.oneOf'>
-  //           <property-box class='p-1 col-md-5 col-sm-12 text-center' :fullinfo="item"></property-box>
-  //           <div class="col-md-2 col-sm-12 text-center mainTextLight" v-if="index !== fullinfo.oneOf.length-1"><h4>OR</h4></div>
-  //         </template>
-  //       </div>
-  //     </template>
-  //     <template v-if='fullinfo.properties'>
-  //       <hr />
-  //       <h6 class="text-muted">Properties used:</h6>
-  //       <property-box v-for="(prop,index) in fullinfo.properties" style='background:#dcf2f7' class="alert propbox" :name='index' :fullinfo="prop" :required='fullinfo.required'></property-box>
-  //     </template>
-  //   </div>`
-  // });
-
   Vue.component('validation-box', {
-    data: function(){
-      return{
-        userSchema:[],
-        textColor:'',
-        backColor:'',
-      }
-    },
     props: ['validation'],
-    methods:{
-
-    },
-    watch:{
-    },
-    mounted: function(){
-      var self = this;
-      if (self.parent) {
-        self.textColor = 'mainTextLight'
-        self.backColor = 'mainBackLight'
-      }else{
-        self.textColor = 'mainTextDark'
-        self.backColor = 'mainBackDark'
-      }
-    },
     computed: {
-      validationView () {
-          return this.$store.state.validationView
-        },
       queryContent(){
         return this.$store.state.queryStoreContent
       }
     },
     template:
-    `<div class="alert alert-secondary">
-      <h5 class="mainTextDark" v-if='validation.properties' v-text="'Properties used by '+queryContent.label"> </h5>
-      <ul class="p-0">
-        <propbox v-for="(prop,index) in validation.properties" :name='index' :fullinfo="prop" :required='validation.required'></propbox>
-      </ul>
+    `<div class="alert-secondary p-1">
+      <small class="text-muted"><i class="fas fa-circle text-danger"></i> = required</small>
+      <div class="p-0">
+        <template v-for="(prop,index) in validation.properties">
+          <propbox :key="index" :name='index' :fullinfo="prop" :required='validation.required'></propbox>
+        </template>
+      </div>
     </div>`
   });
 
@@ -1082,7 +1211,7 @@
     template:
     `<div class="p-3 mb-2 alert alert-light">
       <div>
-        <h3 class="bold d-inline" :class='textColor' v-if='q.label' :id='q.label' v-text='q.label'></h3>
+        <h3 class="bold d-inline" :class='textColor' :id='q.name' v-text='q.name'></h3>
         <template v-if="q && q.domain">
           <small class="text-muted">is a property of: </small>
           <template v-for='(item,index) in q.domain'>
@@ -1933,7 +2062,6 @@
         tippy( '#viewer', {
           target:'.tip',
           placement:'top',
-          maxWidth:'200px',
           content: 'loading',
           animation: 'fade',
           theme:'light',
@@ -1951,8 +2079,7 @@
             theme:'light',
             onShow(instance) {
               let info = instance.reference.dataset.tippyInfo;
-
-              instance.setContent("<div class='text-muted m-0 p-0 wraptext'><pre class='text-left text-muted wraptext d-block m-0'>"+info+"</pre></div>")
+              instance.setContent("<div class='wraptext bg-light'><pre>"+info+"</pre></div>")
             }});
 
           tippy('#showButton', {
