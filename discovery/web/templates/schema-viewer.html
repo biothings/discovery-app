@@ -494,7 +494,7 @@
       }
     },
     template:
-      `<div class="p-1 m-1 rounded text-dark" :style="style">
+      `<div class="p-1 m-1 rounded text-dark bg-light" :style="style">
         <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm d-block">
           <small v-text="!expand?'show option':'hide option'"></small>
         </button>
@@ -518,8 +518,8 @@
             <enum-box :enumeration="option.enum"></objeenum>
           </div>
           <!-- 🌈 LIST OF 🌈 -->
-          <div v-if="option.items">
-            <small class="mainTextDark">LIST OF:</small>
+          <div v-if="option.items" class="alert-info p-1">
+            <small class="text-info font-weight-bold">LIST OF:</small>
             <one-of :name="name" :option="option.items" :isChild="true"></one-of>
           </div>
         </template>
@@ -636,7 +636,7 @@
       }
     },
     template:
-      `<div class="p-1 m-1 rounded text-dark" :style="style">
+      `<div class="p-1 m-1 rounded text-dark bg-light" :style="style">
         <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm">
           <small v-text="!expand?'show option':'hide option'"></small>
         </button>
@@ -660,8 +660,8 @@
             <enum-box :enumeration="option.enum"></objeenum>
           </div>
           <!-- 🌈 LIST OF 🌈 -->
-          <div v-if="option.items">
-            <small class="mainTextDark">LIST OF:</small>
+          <div v-if="option.items" class="alert-info p-1">
+            <small class="text-info font-weight-bold">LIST OF:</small>
             <one-of :name="name" :option="option.items" isChild="true"></one-of>
           </div>
         </template>
