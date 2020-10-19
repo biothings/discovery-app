@@ -8,7 +8,7 @@
   <div class="container">
 
     <div class="">
-      <h1 class="text-center logoText mb-1 mt-5">Schema Registry</h1>
+      <h1 class="text-center logoText mb-1 mt-2">Schema Registry</h1>
       <div class="alert alert-secondary p-1 rounded">
         <div class="">
           <small class="bold text-muted">SHORTCUTS</small>
@@ -512,17 +512,17 @@ Vue.component('registry-item', {
     })
   },
   template: `<li class="list-group-item p-0">
-    <div class="d-flex">
-      <div class="p-4 d-flex align-items-center">
+    <div class="d-flex flex-wrap">
+      <div class="p-4 align-items-center d-none d-md-flex">
         <input v-model="picked" @change="handlePick" class="form-control tip m-auto" :data-tippy-info="maxReached?'Max Comparison Items Reached':'Compare This Item'" type="checkbox"/>
         <i v-if="adding" class="fas fa-spinner fa-pulse text-info ml-2"></i>
       </div>
       <div class="flex-grow-1 d-flex align-items-center">
         <div class="d-inline mr-1">
-          <div class="d-inline mr-1" >
+          <div class="mr-1 d-none d-md-inline">
             <img :src="imgLink" width="30" title="From" alt="img">
           </div>
-          <h6 class="mb-1 mainTextDark d-inline">
+          <h6 class="m-1 mainTextDark d-inline">
              </span> <span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-info-circle text-info"></i></small>
           </h6>
           <ul v-if="expand" class="mainTextLight">
@@ -531,7 +531,7 @@ Vue.component('registry-item', {
             </li>
           </ul>
         </div>
-        <p class="d-inline m-0 text-muted">
+        <p class="m-0 text-muted d-none d-md-inline">
           <small class="pointer" @click="expand=!expand">
             <span :class="[propTotal>0?'text-primary':'text-muted']"><span v-text="propTotal"></span> Properties</span>
             <i v-show="propTotal" class="fas" :class="[!expand?'fa-plus-square':'fa-minus-square']"></i>
