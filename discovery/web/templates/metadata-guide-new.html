@@ -2072,27 +2072,33 @@
         }
         else if (propInfo.hasOwnProperty('properties')){
           props = propInfo.properties
-          console.log('props for questions', props)
+          // console.log('props for questions', props)
           // Create questions
           for (key in props) {
             if (key == '@type' && props[key].hasOwnProperty('const')) {
               // TODO: Handle constants found in @type if any.
             }else {
               progressSteps.push(key)
+
+              let description =''
+              if (props[key].hasOwnProperty('description')) {
+                description = "<small class='text-muted'>"+props[key].description+"</small>";
+              }
+              let title = "<b>"+propName+"</b>"+'.'+"<b class='text-info'>"+key+"</b>"
+              if (propInfo && propInfo.required) {
+                if (propInfo.required.includes(key)) {
+                  title = title+' <i class="fas fa-asterisk text-danger"></i>'
+                }
+              }
+
               switch (props[key]['type']) {
                 case 'string':
                   if (props[key].hasOwnProperty('format')) {
                     switch (props[key]['format']) {
                       case 'uri':
-                        let title = key
-                        if (propInfo && propInfo.required) {
-                          if (propInfo.required.includes(key)) {
-                            title = title+' <i class="fas fa-asterisk text-danger"></i>'
-                          }
-                        }
                         questions.push({
                           title: title,
-                          text: props[key].description,
+                          footer: description,
                           inputValidator: (value) => {
                             return new Promise((resolve) => {
 
@@ -2160,14 +2166,9 @@
                         })
                         break;
                       case 'date':
-                        let title2 = key
-                        if (propInfo && propInfo.required) {
-                          if (propInfo.required.includes(key)) {
-                            title2 = title2+' <i class="fas fa-asterisk text-danger"></i>'
-                          }
-                        }
                         questions.push({
-                          title: title2,
+                          title: title,
+                          footer: description,
                           inputAttributes: {
                             id:'hideThis'
                           },
@@ -2185,15 +2186,9 @@
                     }
                   }else {
                     // any string value
-                    let title3 = key
-                    if (propInfo && propInfo.required) {
-                      if (propInfo.required.includes(key)) {
-                        title3 = title3+' <i class="fas fa-asterisk text-danger"></i>'
-                      }
-                    }
                     questions.push({
-                      title: title3,
-                      text: props[key].description,
+                      title: title,
+                      footer: description,
                       inputValidator: (value) => {
                         return new Promise((resolve) => {
 
@@ -2241,16 +2236,10 @@
                   }
                   break;
                 case 'integer':
-                  let title4 = key
-                  if (propInfo && propInfo.required) {
-                    if (propInfo.required.includes(key)) {
-                      title4 = title4+' <i class="fas fa-asterisk text-danger"></i>'
-                    }
-                  }
                   questions.push({
-                    title: title4,
+                    title: title,
                     input: 'number',
-                    text: props[key].description,
+                    footer: description,
                     inputValidator: (value) => {
                       return new Promise((resolve) => {
                         if (!value) {
@@ -2300,14 +2289,9 @@
                     html = `<div class="alert-light p-1">
                               <form id="arrayForm">`+html+`</form>
                             </div>`
-                    let title5 = key
-                    if (propInfo && propInfo.required) {
-                      if (propInfo.required.includes(key)) {
-                        title5 = title5+' <i class="fas fa-asterisk text-danger"></i>'
-                      }
-                    }
                     questions.push({
-                      title: title5,
+                      title: title,
+                      footer: description,
                       inputAttributes: {
                         id:'hideThis'
                       },
@@ -2354,14 +2338,9 @@
                   html = `<div class="alert-light p-1">
                             <form id="arrayForm">`+html+`</form>
                           </div>`
-                  let title6 = key
-                  if (propInfo && propInfo.required) {
-                    if (propInfo.required.includes(key)) {
-                      title6 = title6+' <i class="fas fa-asterisk text-danger"></i>'
-                    }
-                  }
                   questions.push({
-                    title: title6,
+                    title: title,
+                    footer: description,
                     inputAttributes: {
                       id:'hideThis'
                     },
@@ -2414,14 +2393,9 @@
                     html = `<div class="alert-light p-1">
                               <form id="arrayForm">`+html+`</form>
                             </div>`
-                    let titleOneOf = key
-                    if (propInfo && propInfo.required) {
-                      if (propInfo.required.includes(key)) {
-                        titleOneOf = titleOneOf+' <i class="fas fa-asterisk text-danger"></i>'
-                      }
-                    }
                     questions.push({
-                      title: titleOneOf,
+                      title: title,
+                      footer: description,
                       inputAttributes: {
                         id:'hideThis'
                       },
