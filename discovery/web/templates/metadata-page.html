@@ -18,8 +18,11 @@
       </div>
       <div class="grad p-1">
         <div class="bg-light p-4 text-center">
+          <div v-if="metadata && metadata._meta.username" class="text-muted text-center m-0">
+            <small>Registerd by <i class="fas fa-user"></i> <a :href="'/contributor/'+metadata._meta.username" v-text="metadata._meta.username"></a></small>
+          </div>
           <div v-if="schemaLink" class="text-muted text-center m-0">
-            <small>To view schema used to structure this metadata <a :href="schemaLink" target="_blank" rel="noreferrer">click here <i class="fas fa-external-link-alt"></i></a>.</small>
+            <small>Learn more about the schema used for this metadata <a :href="schemaLink">here</a>.</small>
           </div>
           <div class="p-3 text-left">
             <p class="text-dark m-auto" v-html="metadata.description"></p>
