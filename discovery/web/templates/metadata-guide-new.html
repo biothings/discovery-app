@@ -1603,6 +1603,10 @@
         }
       }
     },
+    mounted:function(){
+      console.log('input preview', this.userInput)
+      console.log(this.type)
+    },
     template:
     `<div>
       <template v-if=" type == 'obj' ">
@@ -1611,7 +1615,9 @@
           <template v-if="userInput && userInput.name">
             <span v-text="userInput.name"></span>
           </template>
-          <span v-else v-text="userInput"></span>
+          <template v-else>
+            <span v-text="name"></span> <i class="fas fa-info-circle text-info"></i>
+          </template>
           <span style="opacity:0;" class="d-inline" @click="removeItem(userInput)"> <i class="fas fa-times"></i></span>
         </span>
       </template>
