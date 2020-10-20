@@ -1603,10 +1603,6 @@
         }
       }
     },
-    mounted:function(){
-      console.log('input preview', this.userInput)
-      console.log(this.type)
-    },
     template:
     `<div>
       <template v-if=" type == 'obj' ">
@@ -1952,7 +1948,7 @@
               self.canAcceptMultiple = true
             }
           }
-
+          console.log('path',path)
           switch (path) {
             case "string":
             Swal({
@@ -2088,8 +2084,14 @@
                   if (props[key].hasOwnProperty('format')) {
                     switch (props[key]['format']) {
                       case 'uri':
+                        let title = key
+                        if (propInfo && propInfo.required) {
+                          if (propInfo.required.includes(key)) {
+                            title = title+' <i class="fas fa-asterisk text-danger"></i>'
+                          }
+                        }
                         questions.push({
-                          title: key,
+                          title: title,
                           text: props[key].description,
                           inputValidator: (value) => {
                             return new Promise((resolve) => {
@@ -2158,8 +2160,14 @@
                         })
                         break;
                       case 'date':
+                        let title2 = key
+                        if (propInfo && propInfo.required) {
+                          if (propInfo.required.includes(key)) {
+                            title2 = title2+' <i class="fas fa-asterisk text-danger"></i>'
+                          }
+                        }
                         questions.push({
-                          title: key,
+                          title: title2,
                           inputAttributes: {
                             id:'hideThis'
                           },
@@ -2177,8 +2185,14 @@
                     }
                   }else {
                     // any string value
+                    let title3 = key
+                    if (propInfo && propInfo.required) {
+                      if (propInfo.required.includes(key)) {
+                        title3 = title3+' <i class="fas fa-asterisk text-danger"></i>'
+                      }
+                    }
                     questions.push({
-                      title: key,
+                      title: title3,
                       text: props[key].description,
                       inputValidator: (value) => {
                         return new Promise((resolve) => {
@@ -2227,8 +2241,14 @@
                   }
                   break;
                 case 'integer':
+                  let title4 = key
+                  if (propInfo && propInfo.required) {
+                    if (propInfo.required.includes(key)) {
+                      title4 = title4+' <i class="fas fa-asterisk text-danger"></i>'
+                    }
+                  }
                   questions.push({
-                    title: key,
+                    title: title4,
                     input: 'number',
                     text: props[key].description,
                     inputValidator: (value) => {
@@ -2277,11 +2297,17 @@
                       }
                     }
 
-                    html = `<div class="alert-info p-1">
+                    html = `<div class="alert-light p-1">
                               <form id="arrayForm">`+html+`</form>
                             </div>`
+                    let title5 = key
+                    if (propInfo && propInfo.required) {
+                      if (propInfo.required.includes(key)) {
+                        title5 = title5+' <i class="fas fa-asterisk text-danger"></i>'
+                      }
+                    }
                     questions.push({
-                      title: key,
+                      title: title5,
                       inputAttributes: {
                         id:'hideThis'
                       },
@@ -2325,11 +2351,17 @@
                     }
                   }
 
-                  html = `<div class="alert-info p-1">
+                  html = `<div class="alert-light p-1">
                             <form id="arrayForm">`+html+`</form>
                           </div>`
+                  let title6 = key
+                  if (propInfo && propInfo.required) {
+                    if (propInfo.required.includes(key)) {
+                      title6 = title6+' <i class="fas fa-asterisk text-danger"></i>'
+                    }
+                  }
                   questions.push({
-                    title: key,
+                    title: title6,
                     inputAttributes: {
                       id:'hideThis'
                     },
@@ -2379,11 +2411,17 @@
                       }
                     }
 
-                    html = `<div class="alert-info p-1">
+                    html = `<div class="alert-light p-1">
                               <form id="arrayForm">`+html+`</form>
                             </div>`
+                    let titleOneOf = key
+                    if (propInfo && propInfo.required) {
+                      if (propInfo.required.includes(key)) {
+                        titleOneOf = titleOneOf+' <i class="fas fa-asterisk text-danger"></i>'
+                      }
+                    }
                     questions.push({
-                      title: key,
+                      title: titleOneOf,
                       inputAttributes: {
                         id:'hideThis'
                       },
@@ -2440,7 +2478,7 @@
                 }
               }
 
-              console.log('obj',obj)
+              // console.log('obj',obj)
 
               for (var i = 0; i < progressSteps.length; i++) {
                 // check if value is empty if so skip
