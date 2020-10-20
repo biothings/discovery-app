@@ -2,8 +2,8 @@
 {% block content %}
 {% include "header.html" %}
 <div id="cont-app" class="jumbotron mb-0 bg-light d-flex align-items-center justify-content-center" style="min-height:80vh;">
-    <div id="dashTippyParent">
-      <h4 class="text-muted"><span v-text="query"></span>'s contributions</h4>
+    <div id="dashTippyParent" class="col-sm-12 col-md-8">
+      <h4 class="logoText"><span v-text="query"></span>'s contributions</h4>
       <div class="mt-3 mainTextDark">
         <div class="numberCircle mainBackDark" v-text="dashboardTotal"></div> Registered Schemas
       </div>
@@ -12,14 +12,6 @@
           <a target="_blank" :href="'/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
         </div>
         <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
-          <div>
-            <a target="_blank" :href="item.url" :title="item.url" >
-              <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'source URL'">
-                <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                <i class="fas fa-code fa-stack-1x text-light"></i>
-              </span>
-            </a>
-          </div>
           <div>
             <a :href="'/view/'+item.namespace+'/'">
               <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'Visualize'">
