@@ -415,16 +415,18 @@
         });
       },
       createScript() {
+        let self = this;
         let scriptTag = document.createElement('script');
-        var str = JSON.stringify(this.metadata, null, 2);
+        var str = JSON.stringify(self.metadata, null, 2);
         scriptTag.setAttribute('type',"application/ld+json");
         scriptTag.text= str;
-        document.body.appendChild(scriptTag);
-        this.createCanonicalTag(this.metadata);
-        if (this.metadata.name)
-          document.title = 'CTSA DATA DISCOVERY ENGINE / '+this.metadata.name
-        if (this.metadata.description)
-          document.description = 'CTSA DATA DISCOVERY ENGINE / '+this.metadata.description
+        console.log('embedding json-ld',scriptTag)
+        document.head.appendChild(scriptTag);
+        self.createCanonicalTag(self.metadata);
+        if (self.metadata.name)
+          document.title = 'CTSA DATA DISCOVERY ENGINE / '+self.metadata.name
+        if (self.metadata.description)
+          document.description = 'CTSA DATA DISCOVERY ENGINE / '+self.metadata.description
       },
       createCanonicalTag(meta){
         if (meta && meta.url) {
