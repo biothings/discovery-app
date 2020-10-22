@@ -1709,6 +1709,7 @@
         }, 500);
       },
       handleVocab(propName,propInfo){
+        let self = this;
 
         Swal.fire({
           title: propName,
@@ -1751,24 +1752,9 @@
           allowOutsideClick: () => !Swal.isLoading()
         }).then((result) => {
           if (result.value) {
-            let html ="<div id='ontology' class='p-1 text-left'>";
-            for (var i = 0; i < result.value.response.docs.length; i++) {
-              tippy('#cb'+i,{
-                content:result.value.response.docs[i]
-              });
-
-              let label = result.value.response.docs[i]['label']
-              if (label && label.length > 37) {
-                label = label.substring(0,37)+"..."
-              }
-              html += `<div class="form-check">
-                          <input class="form-check-input mr-2" type="checkbox" value="`+result.value.response.docs[i]['iri']+`" id="cb`+i+`">
-                          <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
-                              `+label+`
-                              <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
-                          </label>
-                      </div>`
-            }
+            let html ="<div id='ontology' style='max-height: 500px;overflow: scroll;' class='p-1 text-left'>";
+            let docs = result.value.response.docs;
+            html += self.getVocabCheckboxHTML(html, docs);
             if (propInfo && !propInfo.strict) {
               html += `<div class="alert alert-info mt-1">
                           <h6>Didn't find what you are looking for? Enter value here:</h6>
@@ -1814,6 +1800,26 @@
             })
           }
         });
+      },
+      getVocabCheckboxHTML(html, docs){
+        for (var i = 0; i < docs.length; i++) {
+          tippy('#cb'+i,{
+            content:docs[i]
+          });
+
+          let label = docs[i]['label']
+          if (label && label.length > 37) {
+            label = label.substring(0,37)+"..."
+          }
+          html += `<div class="form-check">
+                      <input class="form-check-input mr-2" type="checkbox" value="`+docs[i]['iri']+`" id="cb`+i+`">
+                      <label class="form-check-label" for="cb`+i+`" title="`+docs[i]['label']+`">
+                          `+label+`
+                          <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(docs[i])+`'></i>
+                      </label>
+                  </div>`
+        }
+        return html;
       },
       oneOfEnum(propName,propInfo){
         var self=this;
@@ -1926,7 +1932,7 @@
         }
 
         if (propInfo.hasOwnProperty('oneOf')) {
-          console.log("ONE OF")
+          // console.log("ONE OF")
 
           path= ""
 
@@ -1948,7 +1954,7 @@
               self.canAcceptMultiple = true
             }
           }
-          console.log('path',path)
+          // console.log('path',path)
           switch (path) {
             case "string":
             Swal({
