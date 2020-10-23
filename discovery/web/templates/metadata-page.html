@@ -420,16 +420,7 @@
       createScript() {
         let self = this;
         let scriptTag = document.createElement('script');
-        let str ='';
-        if (self.metadata['@type'].includes(':')) {
-          let obj = Object.assign({},self.metadata)
-          let type = obj["@type"].split(':').pop();
-          console.log('type',type)
-          obj['@type'] = type;
-          str = JSON.stringify(obj, null, 2);
-        } else {
-          str = JSON.stringify(self.metadata, null, 2);
-        }
+        let str = JSON.stringify(self.metadata, null, 2);
         
         scriptTag.setAttribute('type',"application/ld+json");
         scriptTag.text= str;
