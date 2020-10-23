@@ -459,8 +459,15 @@
         createScript() {
           let self = this;
           let scriptTag = document.createElement('script');
-          let str = JSON.stringify(self.metadata, null, 2);
           
+          let obj = Object.assign({},self.metadata);
+          obj['@context'] = "http://schema.org/";
+          obj['@type'] = "Dataset";
+          //modify original in order to pass check on Rich Results test
+          // "@context": "http://schema.org/",
+          // "@type": "Dataset",
+          let str = JSON.stringify(obj, null, 2);
+
           scriptTag.setAttribute('type',"application/ld+json");
           scriptTag.text= str;
           console.log('embedding json-ld',scriptTag)
