@@ -18,17 +18,32 @@
           </div>
           <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
           <div class="text-muted" v-html="portal.description"></div>
-          <div class="border-top text-center text-muted p-2">
-            <h4>Contribute</h4>
-            <p>
-              Follow an easy-to-follow guide to help you contribute dataset metadata for <span v-text=portal.name></span> following this <a :href="portal.schema" target="_blank">structure</a>.
-            </p>
-            <div class="text-center p-2 m-1 rounded p-3">
-              <a role="button" :style="{background: portal.colors[0].hex}" class="btn text-light btn-lg" :href="portal.guide" class="nd mt-2 tip" :data-tippy-info="'Add a dtaset for '+portal.name">
-                <i class="fas fa-plus"></i> Add Dataset Metadata
-              </a>
+          <template v-if="window.location.pathname == '/portal/n3c' ">
+            <div class="border-top text-center text-muted p-2">
+              <h4>External Dataset Request</h4>
+              <p>
+                To enable some integrated analysis with the N3C dataset, you can request to include an external dataset in the N3C Enclave environment.
+              </p>
+              <div class="text-center p-2 m-1 rounded p-3">
+                <a role="button" :style="{background: portal.colors[0].hex}" class="btn text-light btn-lg" :href="portal.guide" class="nd mt-2 tip" :data-tippy-info="'Add a dtaset for '+portal.name">
+                  Submit Request
+                </a>
+              </div>
             </div>
-          </div>
+          </template>
+          <template v-else>
+            <div class="border-top text-center text-muted p-2">
+              <h4>Contribute</h4>
+              <p>
+                Follow an easy-to-follow guide to help you contribute dataset metadata for <span v-text=portal.name></span> following this <a :href="portal.schema" target="_blank">structure</a>.
+              </p>
+              <div class="text-center p-2 m-1 rounded p-3">
+                <a role="button" :style="{background: portal.colors[0].hex}" class="btn text-light btn-lg" :href="portal.guide" class="nd mt-2 tip" :data-tippy-info="'Add a dtaset for '+portal.name">
+                  <i class="fas fa-plus"></i> Add Dataset Metadata
+                </a>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
       <div class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-secondary p-5">
@@ -46,7 +61,7 @@
         </div>
         <div class="text-center p-2 m-1 rounded p-3" @mouseenter="hover('dataset')">
           <object id="dataset" type="image/svg+xml" data="/static/img/dataset-01.svg" width="100px" alt="DATASETS"></object>
-          <a :href="portal.datasets" class="nd mt-2 tip text-info" :data-tippy-info="'Browse registered metadata in Data Discovery Engine for '+portal.name">
+          <a :href="portal.datasets" class="nd mt-2 tip text-info" :data-tippy-info="'Browse metadata in Data Discovery Engine for '+portal.name">
             <h5>Datasets <i class="fas fa-chevron-right"></i></h5>
           </a>
         </div>

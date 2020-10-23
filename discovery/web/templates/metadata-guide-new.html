@@ -144,17 +144,33 @@
         </template>
 
         <template v-if=" step === 5">
-          <h1 class="logoText">Registration</h1>
-          <div class="p-5 text-center m-3">
-            <p class="text-muted text-center">
-              Are you all done? Click Register Now to proceed. <br />You will leave this page after successfully registering this metadata.
-            </p>
-            <a class='btn btn-lg btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
-              <small>
-                <i class="fas fa-check"></i> Register
-              </small>
-            </a>
-          </div>
+          <template v-if="window.location.pathname == '/guide/n3c/dataset' ">
+            <h1 class="logoText">N3C Dataset Request</h1>
+            <div class="p-5 text-center m-3">
+              <img src="/static/img/N3Co.png" width="150px" alt="N3C" class="text-center">
+              <p class="text-muted text-center">
+                <b>Are you all done?</b> Click <b>Submit Request</b> to proceed.
+              </p>
+              <a class='btn btn-lg btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
+                <small>
+                  <i class="fas fa-check"></i> Submit Request
+                </small>
+              </a>
+            </div>
+          </template>
+          <template v-else>
+            <h1 class="logoText">Registration</h1>
+            <div class="p-5 text-center m-3">
+              <p class="text-muted text-center">
+                <b>Are you all done?</b> Click <b>Register</b> to proceed. <br />You will leave this page after successfully registering this metadata.
+              </p>
+              <a class='btn btn-lg btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
+                <small>
+                  <i class="fas fa-check"></i> Register
+                </small>
+              </a>
+            </div>
+          </template>
           <div class="col-sm-12">
             <div class="row">
               <div class="col-sm-12 text-center p-3">
@@ -3175,6 +3191,15 @@
           <template v-if="allMode && validation">
             <!-- 🌈  ALL MODE 🌈 -->
             <div class="p-0">
+              <template v-if="window.location.pathname == '/guide/n3c/dataset' ">
+                <div class="text-info row m-0">
+                  <div class="col-sm-10 p-1 text-left">
+                    <h6>To request an external dataset accessible in the N3C Enclave, please fill out the form below</h6>
+                  </div>
+                  <div class="col-sm-2 alert-dark">
+                  </div>
+                </div>
+              </template>
               <template v-if="type === 'REQUIRED' ">
                 <template v-for="(prop,index) in validation.properties" v-if="isRequired(index)">
                   <input-box :name='index' :info="prop" :key='index'></input-box>
@@ -3523,23 +3548,7 @@
             let output = store.getters.getOutput
             self.loading = true;
 
-            Swal.fire({
-              title: 'Register this dataset?',
-              html:"<small>Are you all done? Click <b>Register Now</b> to proceed.</small>",
-              footer:`<small class='text-danger'>You will leave this page after successfully registering this metadata.</small>`,
-              confirmButtonColor:"{{color_main}}",
-              cancelButtonColor:"{{color_sec}}",
-              animation:false,
-              customClass:'scale-in-center',
-              showCancelButton: true,
-              confirmButtonText: 'Register Now',
-              showLoaderOnConfirm: true,
-              onClose:function(){
-                self.loading = false;
-              },
-              preConfirm: (input) => {
-
-                let schema = store.getters.getSchema
+            let schema = store.getters.getSchema
 
                 let config = {
                    headers: {
@@ -3553,29 +3562,68 @@
 
                     sessionStorage.removeItem('guideProgress');
 
-                    let timerInterval
-                    Swal.fire({
-                      type:'success',
-                      title: 'Registration Successful',
-                      html:
-                        'Taking you to your dataset page in <strong></strong> seconds.',
-                      timer: 3000,
-                      onBeforeOpen: () => {
-                        const content = Swal.getContent()
-                        const $ = content.querySelector.bind(content)
-                        Swal.showLoading()
-                        timerInterval = setInterval(() => {
-                          Swal.getContent().querySelector('strong')
-                            .textContent = (Swal.getTimerLeft() / 1000)
-                              .toFixed(0)
-                        }, 100)
-                      },
-                      onClose: () => {
-                        clearInterval(timerInterval)
-                        store.dispatch('reset')
-                        window.location.href='/dataset/'+res.data.id
-                      }
-                    })
+                    if (window.location.pathname == '/guide/n3c/dataset') {
+
+                      Swal.fire({
+                        type:'success',
+                        title: 'Registration Successful',
+                        position: 'center',
+                        confirmButtonColor:"{{color_main}}",
+                        cancelButtonColor:"{{color_sec}}",
+                        animation:false,
+                        customClass:'scale-in-center',
+                        html:
+                          `<div class="row m-0">
+                            <div class="col-sm-12 logoText">
+                              <h3>Your request is submitted, we will review it and get back to you soon.</h3>
+                            </div>
+                            <div class="col-sm-12">
+                              <h5>
+                                <a href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer">Click here</a> to view your submission.
+                              </h5>
+                            </div>
+                            <div class="col-sm-12">
+                              <h5>
+                                <a href="/guide/n3c/dataset">Click here</a> to submit another request.
+                              </h5>
+                            </div>
+                            <div class="col-sm-12">
+                              <h5>
+                                <a class="text-danger" href="/">I'm all done!</a>
+                              </h5>
+                            </div>
+                          </div>`,
+                        onClose: () => {
+                          store.dispatch('reset')
+                        }
+                      }); 
+                      
+                    } else {
+                      let timerInterval
+                      Swal.fire({
+                        type:'success',
+                        title: 'Registration Successful',
+                        html:
+                          'Taking you to your dataset page in <strong></strong> seconds.',
+                        timer: 3000,
+                        onBeforeOpen: () => {
+                          const content = Swal.getContent()
+                          const $ = content.querySelector.bind(content)
+                          Swal.showLoading()
+                          timerInterval = setInterval(() => {
+                            Swal.getContent().querySelector('strong')
+                              .textContent = (Swal.getTimerLeft() / 1000)
+                                .toFixed(0)
+                          }, 100)
+                        },
+                        onClose: () => {
+                          clearInterval(timerInterval)
+                          store.dispatch('reset')
+                          window.location.href='/dataset/'+res.data.id
+                        }
+                      });
+                    }
+
                   }else{
 
                     try {
@@ -3615,10 +3663,8 @@
                   });
                   throw err;
                 })
-              },
-              allowOutsideClick: () => !Swal.isLoading(),
 
-            });
+          
             self.loading = true;
           }
 
@@ -3833,7 +3879,7 @@
             input: 'select',
             inputOptions: {
               'giturl': 'Hosted metadata on GitHub (raw url)',
-              'registered': 'Metadata by you registered here',
+              'registered': 'Copy metadata from an existing dataset authored by you',
               'text':'JSON metadata text',
             },
             inputPlaceholder: 'Select method',

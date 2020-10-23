@@ -20,6 +20,7 @@
         <div class="bg-light p-4 text-center">
           <div v-if="metadata && metadata._meta.username" class="text-muted text-center m-0">
             <small>Registered by <i class="fas fa-user"></i> <a :href="'/contributor/'+metadata._meta.username" v-text="metadata._meta.username"></a></small>
+            <small class="float-right"><a :href="'/api/dataset/'+meta_id">raw json-ld</a></small>
           </div>
           <div v-if="schemaLink" class="text-muted text-center m-0">
             <small>Learn more about the schema used for this metadata <a :href="schemaLink">here</a>.</small>
@@ -375,6 +376,7 @@
         query:'',
         loading:false,
         scripttext:'',
+        meta_id:''
   	  }
     },
     methods:{
@@ -396,6 +398,7 @@
         id = id.replace('/',"");
         self.generateScriptText(id);
         self.loading = true;
+        self.meta_id = id;
         axios.get('/api/dataset/'+id).then(res=>{
           self.loading = false;
           if (res.data) {
@@ -417,11 +420,12 @@
       createScript() {
         let self = this;
         let scriptTag = document.createElement('script');
-        var str = JSON.stringify(self.metadata, null, 2);
+        let str = JSON.stringify(self.metadata, null, 2);
+        
         scriptTag.setAttribute('type',"application/ld+json");
         scriptTag.text= str;
         console.log('embedding json-ld',scriptTag)
-        document.head.appendChild(scriptTag);
+        document.body.appendChild(scriptTag);
         self.createCanonicalTag(self.metadata);
         if (self.metadata.name)
           document.title = 'CTSA DATA DISCOVERY ENGINE / '+self.metadata.name
