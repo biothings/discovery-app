@@ -124,7 +124,7 @@
           <form @submit.prevent="getFormValues()">
             <template v-for="item in portals">
               <div class="p-2 text-left w-50 m-auto">
-                <input class="form-check-input" type="checkbox" name="portal" :id="item.displayName" :value="item.name" :checked="item.selected" @click="item.selected = !item.selected">
+                <input class="form-check-input slider" type="checkbox" name="portal" :id="item.displayName" :value="item.name" :checked="item.selected" @click="item.selected = !item.selected">
                 <label class="form-check-label" :for="item.displayName">
                   <span v-text="item.displayName"></span>
                   <i class="fas fa-info-circle text-info desc" :data-tippy-info="item.description"></i>
@@ -1828,7 +1828,7 @@
             label = label.substring(0,37)+"..."
           }
           html += `<div class="form-check">
-                      <input class="form-check-input mr-2" type="checkbox" value="`+docs[i]['iri']+`" id="cb`+i+`">
+                      <input class="form-check-input mr-2 slider" type="checkbox" value="`+docs[i]['iri']+`" id="cb`+i+`">
                       <label class="form-check-label" for="cb`+i+`" title="`+docs[i]['label']+`">
                           `+label+`
                           <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(docs[i])+`'></i>
@@ -1884,7 +1884,7 @@
 
             for (var eIndex = 0; eIndex < e.length; eIndex++) {
               let name = e[eIndex]
-              html += '<div><input type="checkbox" class="browser-default mr-1" id="cb'+eIndex+'" name="'+name+'" value="'+name+'"/><label for="cb'+name+'">'+name+'</label></div>'
+              html += '<div><input type="checkbox" class="mr-1" id="cb'+eIndex+'" name="'+name+'" value="'+name+'"/><label for="cb'+name+'">'+name+'</label></div>'
             }
 
             html = `<div class="text-left">
@@ -3173,14 +3173,14 @@
             <small><i class="fas fa-cog"></i> Display Settings</small>
           </button>
           <div v-show="viewSettings">
-            <input class="form-check-input" type="checkbox" :checked="allMode"  id="customControlInline2" @click="allMode = !allMode">
+            <input class="form-check-input slider" type="checkbox" :checked="allMode"  id="customControlInline2" @click="allMode = !allMode">
             <label class="form-check-label text-light" for="customControlInline2" >
               <small>Change Form Style</small>
             </label>
           </div>
           <!--
           <div v-show="viewSettings">
-            <input class="form-check-input" type="checkbox" :checked="showDesc"  id="customControlInline" @click="toggleDesc()">
+            <input class="form-check-input slider" type="checkbox" :checked="showDesc"  id="customControlInline" @click="toggleDesc()">
             <label class="form-check-label text-light" for="customControlInline" >
               <small>Toggle Descriptions</small>
             </label>

@@ -100,7 +100,7 @@
         <!-- PARENT CLASSES -->
         <div class="jumbotron alert-secondary" v-if="newClassAdded" id="editorTippy">
           <div>
-            <input type="checkbox" class="custom-control-input" id="customControlInline" @click="toggleDesc()">
+            <input type="checkbox" class="custom-control-input slider" id="customControlInline" @click="toggleDesc()">
             <label class="custom-control-label text-muted" for="customControlInline" >Show Descriptions</label>
           </div>
           <template  v-for="(item,index) in classesAvailable">
@@ -821,7 +821,7 @@ Vue.component('github-option', {
         <div v-if="repo_selected">
           <small class="text-info d-block" v-if="!existing_file">Do not include the file extension. It will be <code>.jsonld</code>.</small>
           <h6 class="text-muted">Create/Update File</h6>
-          <input @change="name_selected=''" v-model="existing_file" class="form-control text-light tip m-auto" type="checkbox" checked/>
+          <input @change="name_selected=''" v-model="existing_file" class="form-control text-light tip m-auto slider" type="checkbox" checked/>
         </div>
         <template v-if="repo_selected && !existing_file">
           <small class="text-info bold">A. New File: Name your file (without extension)</small>

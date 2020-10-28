@@ -345,7 +345,8 @@ class DatasetController:
         search = DatasetMetadata.search().source(False)
         ids = []
         for hit in search.scan():
-            ids.append(hit.meta.id)
+            if not hit._meta.guide == '/guide/n3c/dataset':
+                ids.append(hit.meta.id)
         return ids
 
     @staticmethod

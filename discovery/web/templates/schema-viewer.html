@@ -195,12 +195,12 @@
         <div>
           <template v-if='!validationView'>
             <small class="text-center text-light mb-1">Expand Properties</small>
-            <input id="toggle" class="form-control text-light m-auto" @change="showAll()" data-tippy="Expand or contract all property lists"  type="checkbox" checked/>
+            <input id="toggle" class="form-control slider text-light m-auto" @change="showAll()" data-tippy="Expand or contract all property lists"  type="checkbox" checked/>
           </template>
         </div>
         <div>
           <small class="text-center text-light mb-1">Validation View</small>
-          <input id="showButton" class="form-control m-auto" @change="changeView()" data-tippy="Show this class only and any validation included"  type="checkbox" v-model="validationView"/>
+          <input id="showButton" class="form-control slider m-auto" @change="changeView()" data-tippy="Show this class only and any validation included"  type="checkbox" v-model="validationView"/>
         </div>
       </div>
       <!-- CLASSES FOR QUERY -->
@@ -217,7 +217,7 @@
 
 {% endblock %}
 {% block extra_scripts %}
-<script src="https://unpkg.com/vuex"></script>
+<script src="/static/js/vuex.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
