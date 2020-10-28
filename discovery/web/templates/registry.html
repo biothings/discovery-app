@@ -32,6 +32,7 @@
         <div>
           <button :disabled="compareItems.length > 1?false:true" @click="compareAll()" v-if="compareItems.length" class="btn btn-success mr-1">Complete</button>
           <button :disabled="compareItems.length > 1?false:true" @click="compareUsed()" v-if="compareItems.length" class="btn btn-success mr-1">Used Only</button>
+          <!-- <button :disabled="compareItems.length > 1?false:true" @click="resetItems()" v-if="compareItems.length" class="btn btn-success mr-1">Clear</button> -->
         </div>
       </div>
       <div class="mt-4">
@@ -119,7 +120,7 @@
         <span class="text-center d-block">
           <small class="text-danger mr-2"><i class="fas fa-dot-circle"></i> Inherited from Schema.org (Complete)</small>
           <small class="text-info mr-2"><i class="fas fa-circle"></i> Extended Definition (Complete)</small>
-          <small class="mainTextDark mr-2"><i class="fas fa-circle"></i> Used as specified in validation (Used Only)</small>
+          <small class="text-dark mr-2"><i class="fas fa-circle"></i> Only props used as specified in validation (Used Only)</small>
         </span>
       </div>
       <div id="example-table"></div>
@@ -198,6 +199,10 @@ const store = new Vuex.Store({
   },
   strict: true,
   mutations: {
+    resetItems(state,payload){
+      state.compareItems = [];
+      $.notify("Cleared",{ globalPosition: 'right', showDuration: 40, style:"success"});
+    },
     addItem(state,payload){
       let item = payload['item'];
       let dupCheck = false;
@@ -239,11 +244,7 @@ const store = new Vuex.Store({
       Vue.set(state,'compareItems',[])
     },
     compareAll(state){
-
-      //strigified results
-      let finalResutls = new Set();
-      //parsed results 
-      let ready = []
+      let finalResutls = [];
 
       function compare(main,other){
         if (main.hasOwnProperty('properties')) {
@@ -274,13 +275,16 @@ const store = new Vuex.Store({
               }
             }
             //stringify to check prop obj duplication
-            finalResutls.add(JSON.stringify(tableRow))
+            var index = finalResutls.findIndex(x => x.Property== propLabel)
+            // here you can check specific property for an object whether it exist in your array or not
+            if (index === -1){
+              finalResutls.push(tableRow)
+            }
+            else console.log("object already exists")
+
+            
           }
         }
-        //parse strigified data obj
-        let parsed = [...finalResutls].forEach(element => {
-          ready.push(JSON.parse(element))
-        });
       }
 
       //column formatting for table
@@ -298,8 +302,8 @@ const store = new Vuex.Store({
         cols.push({title:main['name'], field:main['name'], sorter:"boolean", hozAlign:"center", formatter:"tickCross"},) 
       }
 
-      console.log('RES', ready)
-      Vue.set(state,'compareResults', ready);       
+      console.log('RES', finalResutls)
+      Vue.set(state,'compareResults', finalResutls);       
       // show modal
       var modal = document.getElementById("compareResults");
       modal.style.display = "block";
@@ -324,10 +328,7 @@ const store = new Vuex.Store({
 
     },
     compareUsed(state){
-      //strigified results
-      let finalResutls = new Set();
-      //parsed results 
-      let ready = []
+      let finalResutls = [];
 
       function compare(main,other){
         if (main.hasOwnProperty('validation')) {
@@ -336,11 +337,12 @@ const store = new Vuex.Store({
             let propName =  prop
             let propLabel =  prop
             
-            let tableRow = {'Property': '<span class="mainTextDark">'+propLabel+'</span>'}
+            let tableRow = {'Property': propLabel}
             if (main.validation.required.includes(prop)) {
               //mark required todo
             }
             tableRow[main['name']] = true;
+
             for (var o = 0; o < other.length; o++) {
               if (other[o].hasOwnProperty('validation')) {
                 let other_props = other[o].validation.properties;
@@ -366,7 +368,13 @@ const store = new Vuex.Store({
               }
             }
             //stringify to check prop obj duplication
-            finalResutls.add(JSON.stringify(tableRow))
+            //stringify to check prop obj duplication
+            var index = finalResutls.findIndex(x => x.Property== propLabel)
+            // here you can check specific property for an object whether it exist in your array or not
+            if (index === -1){
+              finalResutls.push(tableRow)
+            }
+            else console.log("object already exists")
 
           }
 
@@ -399,13 +407,14 @@ const store = new Vuex.Store({
               }
             }
             //stringify to check prop obj duplication
-            finalResutls.add(JSON.stringify(tableRow))
+            var index = finalResutls.findIndex(x => x.Property== propLabel)
+            // here you can check specific property for an object whether it exist in your array or not
+            if (index === -1){
+              finalResutls.push(tableRow)
+            }
+            else console.log("object already exists")
           }
         }
-        //parse strigified data obj
-        let parsed = [...finalResutls].forEach(element => {
-          ready.push(JSON.parse(element))
-        });
       }
 
       //column formatting for table
@@ -423,8 +432,8 @@ const store = new Vuex.Store({
         cols.push({title:main['name'], field:main['name'], sorter:"boolean", hozAlign:"center", formatter:"tickCross"},) 
       }
 
-      console.log('RES', ready)
-      Vue.set(state,'compareResults', ready);       
+      console.log('RES', finalResutls)
+      Vue.set(state,'compareResults', finalResutls);       
       // show modal
       var modal = document.getElementById("compareResults");
       modal.style.display = "block";
@@ -597,6 +606,9 @@ Vue.component('registry-item', {
           break;
         case 'ctsa':
           return "/static/img/dde-logo-o.svg";
+          break;
+        case 'n3c':
+          return "/static/img/N3Co.png";
           break;
         default:
           return "/static/img/dde-logo-o.svg";
@@ -826,6 +838,9 @@ var app = new Vue({
         },
         compareUsed(){
           store.commit('compareUsed')
+        },
+        resetItems(){
+          store.commit('resetItems')
         },
     },
     mounted:function(){
