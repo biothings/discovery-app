@@ -109,7 +109,6 @@
   <!-- compareResults -->
   <div id="compareResults" class="modal">
     <!-- Modal content -->
-
     <div class="modal-content">
       <div>
         <span id="closeBtn" class="close">&times;</span>
@@ -117,22 +116,17 @@
       <div>
         <h5 class="text-center logoText">Compare Schemas</h5>
         <span class="text-center d-block">
-          <small class="text-info mr-2"><i class="fas fa-circle"></i> SIMILARITIES (To One or More)</small>
-          <small class="text-dark mr-2"><i class="fas fa-circle"></i> UNIQUE</small>
-          <small class="text-danger mr-2"><i class="fas fa-dot-circle"></i> Schema.org Defined</small>
+          <small class="text-danger mr-2"><i class="fas fa-dot-circle"></i> Inherited from Schema.org</small>
+          <small class="text-info mr-2"><i class="fas fa-circle"></i> Extended Definition</small>
         </span>
       </div>
-      <div class="d-flex justify-content-center align-items-start">
-        <template v-for="(item,i) in results">
-          <comparison-item :item="item" :key="i"></comparison-item>
-        </template>
-      </div>
+      <div id="example-table"></div>
     </div>
   </div>
 </div>
 {% endblock %}
 {% block extra_scripts %}
-<script src="https://unpkg.com/vuex"></script>
+<script src="/static/js/vuex.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
@@ -141,7 +135,54 @@
 <script src="/static/js/notify.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
+<link href="/static/css/tabulator.css" rel="stylesheet">
+<script type="text/javascript" src="/static/js/tabulator.js"></script>
 <script>
+
+$.notify.addStyle('success', {
+    html: "<div><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#28a745",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('danger', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#dc3545",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('warning', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#ffc107",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('info', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#17a2b8",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
 
 const store = new Vuex.Store({
   state: {
@@ -168,12 +209,12 @@ const store = new Vuex.Store({
           if (!dupCheck) {
             state.compareItems.push(item);
           }else{
-            $.notify("Duplicate item ignored",{ globalPosition: 'right',className:'error', showDuration: 40, });
+            $.notify("Duplicate item ignored",{ globalPosition: 'right', showDuration: 40, style:"danger"});
           }
         }
       }
       if (state.compareItems.length == state.maxComparisons) {
-        $.notify("Max items reached",{ globalPosition: 'right',className:'warning', showDuration: 40, });
+        $.notify("Max items reached",{ globalPosition: 'right',style:"warning", showDuration: 40, });
         state.maxReached = true;
       }
     },
@@ -186,57 +227,89 @@ const store = new Vuex.Store({
           return true;
         }
       }
-      $.notify("Failed to remove "+item['name']+", Try again.",{ globalPosition: 'right',className:'warning', showDuration: 40, });
+      $.notify("Failed to remove "+item['name']+", Try again.",{ globalPosition: 'right',style:"info", showDuration: 40, });
 
     },
     reset(state){
       Vue.set(state,'compareItems',[])
     },
     compareAll(state){
+
+      //strigified results
+      let finalResutls = new Set();
+      //parsed results 
+      let ready = []
+
       function compare(main,other){
         if (main.hasOwnProperty('properties')) {
           for (var i = 0; i < main.properties.length; i++) {
-            let propName =  main.properties[i]['label'];
-            // console.log('%c current PROP from MAIN '+propName,'color:yellow')
+            let propName =  main.properties[i]['curie'];
+            let propLabel =  main.properties[i]['label'];
+            if (propName.includes('schema:')) {
+              propLabel = '<i class="fas fa-dot-circle text-danger"></i> '+main.properties[i]['label']
+            }else{
+              propLabel = '<span><i class="fas fa-circle text-info"></i> '+main.properties[i]['curie']+'</span>'
+            }
             // look for prop in others
+            let tableRow = {'Property': propLabel}
+            tableRow[main['name']] = true;
+
             for (var o = 0; o < other.length; o++) {
-              // console.log('%c current OTHER '+other[o].label,'color:orange')
               if (other[o].hasOwnProperty('properties')) {
                 // iter other props
+                //set to false by default but will change to true if match found
+                tableRow[other[o]['name']] = false;
                 for (var op = 0; op < other[o].properties.length; op++) {
-                  // console.log('%c PROP from OTHER '+other[o].properties[op]['label'],'color:pink')
-                  if (other[o].properties[op]['label'] == propName) {
-                    // console.log('%c MATCH FOUND','color:limegreen');
-                    // console.log(other[o].properties[op]['label'],propName)
-                    // console.log('setting foundInAll to ', main.properties[i].label)
-                    Vue.set(main.properties[i],'foundInAll',true);
+                  // console.log('%c PROP from OTHER '+other[o].properties[op]['label'],'color:pink')               
+                  if (other[o].properties[op]['curie'] == propName) {
+                    tableRow[other[o]['name']] = true;                   
                   }
                 }
+                
               }
             }
+            //stringify to check prop obj duplication
+            finalResutls.add(JSON.stringify(tableRow))
           }
         }
-        let done = other.concat([main]);
-        return done;
+        //parse strigified data obj
+        let parsed = [...finalResutls].forEach(element => {
+          ready.push(JSON.parse(element))
+        });
       }
 
-      for (var i = 0; i < state.compareItems.length; i++) {
+      //column formatting for table
+      let cols = [
+        {title:'Property', field:'Property', sorter:"string", formatter:'html'}
+      ]
+
+      for (let i = 0; i < state.compareItems.length; i++) {
         let copy = [...state.compareItems];
         let main = copy[i];
         other = copy.splice(i,1);
-        // console.log("%c *** "+main.label,'color:hotpink')
-        // console.log("OTHER ",copy)
-        let result = compare(main,copy);
-        // console.log('RES', result)
-        Vue.set(state,'compareResults', result);
-        // show modal
-        var modal = document.getElementById("compareResults");
-        modal.style.display = "block";
-        var span = document.getElementById("closeBtn");
-        span.onclick = function() {
-          modal.style.display = "none";
-        }
+        //compare pulled item against others
+        compare(main,copy);
+        //create one formatting def per item compared
+        cols.push({title:main['name'], field:main['name'], sorter:"boolean", hozAlign:"center", formatter:"tickCross"},) 
       }
+
+      console.log('RES', ready)
+      Vue.set(state,'compareResults', ready);       
+      // show modal
+      var modal = document.getElementById("compareResults");
+      modal.style.display = "block";
+      var span = document.getElementById("closeBtn");
+      span.onclick = function() {
+        modal.style.display = "none";
+      }
+      //show table
+      var table = new Tabulator("#example-table", {
+        height:500, // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+        data:state.compareResults, //assign data to table
+        layout:"fitColumns", //fit columns to width of table (optional)
+        columns: cols,
+      });
+
     }
   },
   getters:{
@@ -250,100 +323,9 @@ const store = new Vuex.Store({
     getResults: state =>{
       return state.compareResults
     }
-  },
-  actions: {
-    // resetComparisonItems (context) {
-    //   context.commit('toggleShowAll')
-    // }
   }
 });
 
-Vue.component('comparison-item', {
-  data: function(){
-    return {
-      unique:[],
-      incommon:[],
-      ownprops:[]
-    }
-  },
-  props: ['item'],
-  mounted:function(){
-    this.parseProps();
-    tippy( '#compareResults', {
-      target:'.tip',
-      placement:'right',
-      content: 'loading',
-      interactive: true,
-      animation: 'fade',
-      theme:'light',
-      onShow(instance) {
-        let info = instance.reference.dataset.tippyInfo;
-        instance.setContent("<div style='background:white;'>"+info+"</div>")
-      }});
-  },
-  methods: {
-    parseProps(){
-      let self = this;
-      let set = [];
-      let set_uniq = [];
-      if (self.item.hasOwnProperty('properties')) {
-        // console.log("all props", JSON.stringify(self.item.properties,null,2))
-        for (var i = 0; i < self.item.properties.length; i++) {
-          if (self.item.properties[i].hasOwnProperty('foundInAll')) {
-            set.push(self.item.properties[i])
-          }else {
-            set_uniq.push(self.item.properties[i])
-          }
-          if (self.item.properties[i]['domain'].includes(self.item.name)) {
-            self.ownprops.push(self.item.properties[i])
-          }
-        }
-        self.unique = _.uniqBy(set_uniq, function (e) {
-                          return e.label;
-                        });
-        self.incommon = _.uniqBy(set, function (e) {
-                          return e.label;
-                        });
-      }
-    },
-    isOwnProp(prop){
-      let self = this;
-      if (prop['domain'].includes(self.item.name)) {
-        return true
-      }
-      return false;
-    }
-  },
-  template: `<div class="p-1 m-1">
-              <h5 class="badge badge-light" :style="'border: 3px solid'+item.color" v-text="item.name"></h5>
-              <p class='mainTextDark'>
-              <small>Properties: </small>
-              <small><span v-text="ownprops.length+' own'"></span> (<i class="fas fa-star fa-xs text-info"></i>)</small> |
-              <small v-text="incommon.length+unique.length-ownprops.length+' inherited'"></small>
-              </p>
-              <button class="btn btn-info btn-sm w-100 rounded-0" type="button" data-toggle="collapse" data-target="#incommon" aria-expanded="false" aria-controls="incommon">
-                <span v-text="'Compare Similarities ('+incommon.length+')'"></span>
-              </button>
-              <div v-if="incommon.length" class="collapse" id="incommon">
-                <div v-for="prop in incommon" class="text-info">
-                  <i class="fas fa-xs fa-dot-circle text-danger" v-if='prop.curie.includes("schema:")'></i>
-                  <i class="fas fa-star fa-xs text-info" v-if='isOwnProp(prop)'></i>
-                  <small v-text="prop.label" class='tip pointer compare-prop' :data-tippy-info="prop.description"></small>
-                </div>
-              </div>
-              <div v-else class="text-warning p-1">NO SIMILARITIES</div>
-              <button class="btn btn-dark btn-sm w-100 rounded-0" type="button" data-toggle="collapse" data-target="#unique" aria-expanded="false" aria-controls="unique">
-                <span v-text="'Compare Unique Properties ('+unique.length+')'"></span>
-              </button>
-              <div v-if="unique.length" class="collapse" id="unique">
-                <div v-for="prop in unique"">
-                  <i class="fas fa-xs fa-dot-circle text-danger" v-if='prop.curie.includes("schema:")'></i>
-                  <i class="fas fa-star fa-xs text-info" v-if='isOwnProp(prop)'></i>
-                  <small v-text="prop.label" class="tip pointer compare-prop" :data-tippy-info="prop.description"></small>
-                </div>
-              </div>
-            </div>`,
-});
 
 Vue.component('preset-box', {
   props: ['preset'],
@@ -450,7 +432,7 @@ Vue.component('registry-item', {
 
       }).catch(err=>{
         self.adding = false;
-        $.notify("Could not add item "+item.name,{ globalPosition: 'right',className:'error', showDuration: 40, });
+        $.notify("Could not add item "+item.name,{ globalPosition: 'right',style:"danger", showDuration: 40, });
         throw err;
       });
 
@@ -513,8 +495,8 @@ Vue.component('registry-item', {
   },
   template: `<li class="list-group-item p-0">
     <div class="d-flex flex-wrap">
-      <div class="p-4 align-items-center d-none d-md-flex">
-        <input v-model="picked" @change="handlePick" class="form-control tip m-auto" :data-tippy-info="maxReached?'Max Comparison Items Reached':'Compare This Item'" type="checkbox"/>
+      <div class="p-4 d-none d-md-inline">
+        <input v-model="picked" @change="handlePick" class="tip m-auto" :data-tippy-info="maxReached?'Max Comparison Items Reached':'Compare This Item'" type="checkbox"/>
         <i v-if="adding" class="fas fa-spinner fa-pulse text-info ml-2"></i>
       </div>
       <div class="flex-grow-1 d-flex align-items-center">
@@ -587,7 +569,6 @@ var app = new Vue({
 				}
 			},
       methods:{
-
         searchByUser(username){
           var self = this;
 
@@ -715,18 +696,18 @@ var app = new Vue({
         content: '<div class="text-muted m-0" style="border-radius:none">Search</div>',
         animation: 'fade',
         theme:'light'});
-        tippy( '.reset', {
-          maxWidth:'200px',
-          placement:'top',
-          content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
-          animation: 'fade',
-          theme:'light'});
-          tippy( '.reset', {
-            maxWidth:'200px',
-            placement:'top',
-            content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
-            animation: 'fade',
-            theme:'light'});
+      tippy( '.reset', {
+        maxWidth:'200px',
+        placement:'top',
+        content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
+        animation: 'fade',
+        theme:'light'});
+      tippy( '.reset', {
+        maxWidth:'200px',
+        placement:'top',
+        content: '<div class="text-muted m-0" style="border-radius:none">Reset</div>',
+        animation: 'fade',
+        theme:'light'});
       tippy( '#regTippyParent', {
         target:'.tip',
         placement:'top',
@@ -739,6 +720,18 @@ var app = new Vue({
           let info = instance.reference.dataset.tippyInfo;
           instance.setContent("<div class='text-muted m-0 text-center wraptext'>"+info+"</div>")
         }});
+
+    tippy( '#compareResults', {
+      target:'.tip',
+      placement:'right',
+      content: 'loading',
+      interactive: true,
+      animation: 'fade',
+      theme:'light',
+      onShow(instance) {
+        let info = instance.reference.dataset.tippyInfo;
+        instance.setContent("<div style='background:white;'>"+info+"</div>")
+      }});
     },
     computed: {
       registryResults: function () {

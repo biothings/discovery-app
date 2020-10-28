@@ -1566,7 +1566,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c9de96', end
   left:-13px;
 }
 
-input[type="checkbox"] {
+input[type="checkbox"].slider {
   position: relative;
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -1579,7 +1579,7 @@ input[type="checkbox"] {
   transition: background 450ms ease;
   box-shadow: 0 0 0 3px #cacaca;
 }
-input[type="checkbox"]:before, input[type="checkbox"]:after {
+input[type="checkbox"].slider:before, input[type="checkbox"]:after {
   position: absolute;
   display: block;
   content: "";
@@ -1588,12 +1588,12 @@ input[type="checkbox"]:before, input[type="checkbox"]:after {
   transition: background 450ms ease, transform 450ms ease;
   transition: background 450ms ease, transform 450ms ease, -webkit-transform 450ms ease;
 }
-input[type="checkbox"]:before {
+input[type="checkbox"].slider:before {
   width: calc( 2rem / 2 );
   height: calc( 2rem / 2 );
   background-color: #818181;
 }
-input[type="checkbox"]:checked:before {
+input[type="checkbox"].slider:checked:before {
   background-color: #43A047;
   -webkit-transform: translateX(100%);
           transform: translateX(100%);
