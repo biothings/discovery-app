@@ -877,11 +877,15 @@ var app = new Vue({
           store.commit('resetItems')
         },
         openModal(){
+          var self = this;
           var modal = document.getElementById("compareResults");
           modal.style.display = "block";
           var span = document.getElementById("closeBtn");
           span.onclick = function() {
             modal.style.display = "none";
+          }
+          if (self.compareItems.length > 1) {
+            store.commit('compareAll')
           }
         }
     },
