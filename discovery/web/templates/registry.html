@@ -23,7 +23,7 @@
           </template>
         </div>
       </div>
-      <div v-if="compareItems.length" class="d-flex justify-content-around align-items-center p-1 alert grad mt-2">
+      <!-- <div v-if="compareItems.length" class="d-flex justify-content-around align-items-center p-1 alert grad mt-2">
         <template v-for="item in compareItems">
           <div :key="item.label" class="flip-in-ver-left badge badge-light" :style="'border: 3px solid'+item.color">
             <span v-text="item.name"></span>
@@ -32,13 +32,12 @@
         <div>
           <button :disabled="compareItems.length > 1?false:true" @click="compareAll()" v-if="compareItems.length" class="btn btn-success mr-1">Complete</button>
           <button :disabled="compareItems.length > 1?false:true" @click="compareUsed()" v-if="compareItems.length" class="btn btn-success mr-1">Used Only</button>
-          <!-- <button :disabled="compareItems.length > 1?false:true" @click="resetItems()" v-if="compareItems.length" class="btn btn-success mr-1">Clear</button> -->
         </div>
-      </div>
+      </div> -->
       <div class="mt-4">
         <form @submit.prevent="search(query)">
           <div class="row m-0 cBox actions bg-secondary rounded">
-            <div class="col-sm-10 p-2">
+            <div class="col-sm-9 p-2">
               <div class="d-flex align-item-center">
                 <div v-show="registryTotal && registry.length">
                   <small class="text-light px-2" v-text="registryTotal+' Results'"></small>
@@ -46,7 +45,7 @@
                 <input class="form-control col-10" id="search_query" type="text" v-model="query" name="query" placeholder="Search..." >
               </div>
             </div>
-            <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
+            <div class="col-sm-3 p-2 bg-dark actions d-flex align-items-center justify-content-around">
               <span class="fa-stack fa-1x pointer search unselectable tip" @click.prevent="search(query)">
                 <i class="fas fa-circle text-muted fa-stack-2x"></i>
                 <i class="fas fa-search fa-stack-1x text-light"></i>
@@ -54,6 +53,10 @@
               <span class="fa-stack fa-1x pointer reset unselectable" @click.prevent="window.location.reload()">
                 <i class="fas fa-circle fa-stack-2x text-danger"></i>
                 <i class="fas fa-undo fa-stack-1x text-light"></i>
+              </span>
+              <span class="fa-stack fa-1x pointer unselectable" data-tippy="Compare schemas" @click="openModal()">
+                <i class="fas fa-circle fa-stack-2x mainTextDark"></i>
+                <i class="fas fa-not-equal fa-stack-1x text-light"></i>
               </span>
             </div>
           </div>
@@ -109,7 +112,7 @@
   </div>
 
   <!-- compareResults -->
-  <div id="compareResults" class="modal">
+  <div id="compareResults" class="modal" style="z-index: 1000;">
     <!-- Modal content -->
     <div class="modal-content">
       <div>
@@ -117,15 +120,38 @@
       </div>
       <div>
         <h5 class="text-center logoText">Compare Schemas</h5>
-        <span class="text-center d-block">
-          <small class="text-danger mr-2"><i class="fas fa-dot-circle"></i> Inherited from Schema.org (Complete)</small>
-          <small class="text-info mr-2"><i class="fas fa-circle"></i> Extended Definition (Complete)</small>
-          <small class="text-dark mr-2"><i class="fas fa-circle"></i> Only props used as specified in validation (Used Only)</small>
-        </span>
       </div>
+      <div class="d-flex justify-content-center p-2" v-if="compareItems.length > 1">
+        <div class="w-50 border-right p-1 text-muted text-center">
+          <h6 class="mainTextLight">
+            Compare All Properties (Extended and Inherited)
+          </h6>
+          <small class="d-block"><i class="fas fa-dot-circle text-danger"></i> Inherited from Schema.org</small>
+          <small class="d-block"><i class="fas fa-circle text-info"></i> Extended Definition</small>
+          <button @click="compareAll()" class="btn mainBackLight text-light m-auto">
+            <i class="fas fa-list-ul "></i> Compare All
+          </button>
+        </div>
+        <div class="w-50 border-left p-1 text-muted text-center">
+          <h6 class="mainTextDark">
+            Compare Used Properties By Schema (If Specified)
+          </h6>
+          <small class="d-block">Only properties used as specified in validation</small>
+          <small v-if="!compareUsedAvailable" class="text-danger">Not available: These items do no specify used properties.</small>
+          <small v-else class="d-block">(embedded JSON-schema validation)</small>
+          <button :disabled="!compareUsedAvailable" @click="compareUsed()" class="btn mainBackDark text-light m-auto">
+            <i class="fas fa-tasks"></i> Compare Used
+          </button>
+        </div>
+      </div>
+      <p v-else class="text-center text-muted alert alert-dark p-2 mt-2">
+        <i class="fas fa-exclamation-circle text-danger"></i> Please select at least 2 items to compare.
+      </p>
       <div id="example-table"></div>
-      <div class="p-1 alert-secondary text-center">
-        <a id="downloadCSV" href="#">Download CSV</a>
+      <div v-if="compareItems.length > 1" class="p-1 alert-secondary text-center">
+        <a id="downloadCSV" href="#" class="text-muted">
+          <small><i class="fas fa-file-download"></i> Download CSV</small>
+        </a>
       </div>
     </div>
   </div>
@@ -195,7 +221,8 @@ const store = new Vuex.Store({
     'maxComparisons':4,
     'maxReached': false,
     'compareItems': [],
-    'compareResults':[]
+    'compareResults':[],
+    'compareUsedAvailable': true
   },
   strict: true,
   mutations: {
@@ -217,6 +244,9 @@ const store = new Vuex.Store({
             }
           }
           if (!dupCheck) {
+            if (!item.hasOwnProperty('validation')) {
+              state.compareUsedAvailable = false;
+            }
             state.compareItems.push(item);
           }else{
             $.notify("Duplicate item ignored",{ globalPosition: 'right', showDuration: 40, style:"danger"});
@@ -280,8 +310,6 @@ const store = new Vuex.Store({
             if (index === -1){
               finalResutls.push(tableRow)
             }
-            else console.log("object already exists")
-
             
           }
         }
@@ -302,7 +330,7 @@ const store = new Vuex.Store({
         cols.push({title:main['name'], field:main['name'], sorter:"boolean", hozAlign:"center", formatter:"tickCross"},) 
       }
 
-      console.log('RES', finalResutls)
+      // console.log('RES', finalResutls)
       Vue.set(state,'compareResults', finalResutls);       
       // show modal
       var modal = document.getElementById("compareResults");
@@ -319,10 +347,14 @@ const store = new Vuex.Store({
         columns: cols,
       });
 
+      let elements = document.querySelectorAll(".tabulator-col");
+      for (var i = 0; i < elements.length; i++) {
+        elements[i].style.backgroundColor = "#4a7d8f";
+        elements[i].style.color = "white";
+      }
+
       var dl = document.getElementById("downloadCSV");
-      console.log(dl)
       dl.onclick = function() {
-        console.log('clicked')
         table.download("csv", "schema_comparison_complete.csv");
       }
 
@@ -374,7 +406,6 @@ const store = new Vuex.Store({
             if (index === -1){
               finalResutls.push(tableRow)
             }
-            else console.log("object already exists")
 
           }
 
@@ -412,7 +443,6 @@ const store = new Vuex.Store({
             if (index === -1){
               finalResutls.push(tableRow)
             }
-            else console.log("object already exists")
           }
         }
       }
@@ -432,7 +462,7 @@ const store = new Vuex.Store({
         cols.push({title:main['name'], field:main['name'], sorter:"boolean", hozAlign:"center", formatter:"tickCross"},) 
       }
 
-      console.log('RES', finalResutls)
+      // console.log('RES', finalResutls)
       Vue.set(state,'compareResults', finalResutls);       
       // show modal
       var modal = document.getElementById("compareResults");
@@ -449,8 +479,13 @@ const store = new Vuex.Store({
         columns: cols,
       });
 
+      let elements = document.querySelectorAll(".tabulator-col");
+      for (var i = 0; i < elements.length; i++) {
+        elements[i].style.backgroundColor = "#63296b";
+        elements[i].style.color = "white";
+      }
+
       var dl = document.getElementById("downloadCSV");
-      console.log(dl)
       dl.onclick = function() {
         table.download("csv", "schema_comparison_used.csv");
       }
@@ -467,6 +502,9 @@ const store = new Vuex.Store({
     },
     getResults: state =>{
       return state.compareResults
+    },
+    getCompareUsedAvailable: state =>{
+      return state.compareUsedAvailable
     }
   },
   actions:{
@@ -842,6 +880,14 @@ var app = new Vue({
         resetItems(){
           store.commit('resetItems')
         },
+        openModal(){
+          var modal = document.getElementById("compareResults");
+          modal.style.display = "block";
+          var span = document.getElementById("closeBtn");
+          span.onclick = function() {
+            modal.style.display = "none";
+          }
+        }
     },
     mounted:function(){
       var self = this;
@@ -902,6 +948,9 @@ var app = new Vue({
       results: function(){
         return store.getters.getResults
       },
+      compareUsedAvailable: function(){
+        return store.getters.getCompareUsedAvailable
+      }
     },
   })
 
