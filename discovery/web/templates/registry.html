@@ -39,7 +39,7 @@
           <div class="row m-0 cBox actions bg-secondary rounded">
             <div class="col-sm-9 p-2">
               <div class="d-flex align-item-center">
-                <div v-show="registryTotal && registry.length">
+                <div>
                   <small class="text-light px-2" v-text="registryTotal+' Results'"></small>
                 </div>
                 <input class="form-control col-10" id="search_query" type="text" v-model="query" name="query" placeholder="Search..." >
@@ -64,7 +64,7 @@
       </div>
       <div class="d-flex align-item-center justify-content-between px-3 text-muted">
         <small>Compare (Max 4)</small>
-        <small>Details</small>
+        <small>Details | <span class="badge badge-success mr-1 bold">V</span> validation available</small>
         <small>View/Extend</small>
       </div>
       <ul class="list-group context" id="regTippyParent">
@@ -137,7 +137,7 @@
             Compare Used Properties By Schema (If Specified)
           </h6>
           <small class="d-block">Only properties used as specified in validation</small>
-          <small v-if="!compareUsedAvailable" class="text-danger d-block">Not available: These items do no specify used properties.</small>
+          <small v-if="!compareUsedAvailable" class="text-danger d-block">Not available: These items do no specify used properties. ( <span class="badge badge-success">V</span> )</small>
           <small v-else class="d-block">(embedded JSON-schema validation)</small>
           <button :disabled="!compareUsedAvailable" @click="compareUsed()" class="btn mainBackDark text-light m-auto">
             <i class="fas fa-tasks"></i> Compare Used
@@ -145,7 +145,8 @@
         </div>
       </div>
       <p v-else class="text-center text-muted alert alert-dark p-2 mt-2">
-        <i class="fas fa-exclamation-circle text-danger"></i> Please select at least 2 items to compare.
+        <i class="fas fa-exclamation-circle text-danger"></i> Please select at least 2 items to compare. <br>Select any items to compare ALL properties or items with  validation available ( <small class="badge badge-success">V</small> )
+        to compare USED properties only.
       </p>
       <div id="example-table"></div>
       <div v-if="compareItems.length > 1" class="p-1 alert-secondary text-center">
@@ -694,7 +695,7 @@ Vue.component('registry-item', {
             <img :src="imgLink" width="30" title="From" alt="img">
           </div>
           <h6 class="m-1 mainTextDark d-inline">
-             </span> <span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-info-circle text-info"></i></small>
+            </span> <span v-text="item.label"></span> <small><i :id="item.label" class="fas fa-info-circle text-info"></i></small>
           </h6>
           <ul v-if="expand" class="mainTextLight">
             <li v-for="prop in item.properties" :key="prop.label">
@@ -715,6 +716,7 @@ Vue.component('registry-item', {
            |
           <small>Subclass of:</small>
           <small class="mb-1" v-text="getSubclass(item.parent_classes)"></small>
+          <small v-if="item && item.validation" class="badge badge-success mr-1">V</small>
         </p>
       </div>
       <div class="p-1 bg-dark d-flex align-items-center justify-content-around flip-in-ver-left">
@@ -816,13 +818,9 @@ var app = new Vue({
               var params = {
                   "params": {
                     "q": query,
-                    // 'fields': 'info,_meta,paths.path, paths.pathitem.get.summary,paths.pathitem.post.summary,paths.pathitem.delete.summary,paths.pathitem.patch.summary,paths.pathitem.put.summary,paths.pathitem.head.summary,paths.pathitem.put.summary,options.pathitem.head.summary,paths.pathitem.put.summary,paths.pathitem.trace.summary, tags,openapi,swagger,'
                   }
               };
-            }
-            // var filters = this.getQueryFilters();
-            // if (filters)
-            //     params["params"]["filters"] = filters;
+            }  params["params"]["filters"] = filters;
 
             self.loading = true;
 
@@ -834,8 +832,12 @@ var app = new Vue({
             axios.get('/api/registry/query?size=1000', params).then(function (response){
               // console.log('%c SEARCH..','color:hotpink')
               // console.log(response.data)
-              self.registry = response.data.hits;
-              self.registryTotal = response.data.total.value;
+              self.registry = response.data.hits; 
+              if (response.data.total.hasOwnProperty('value')) {
+                self.registryTotal = response.data.total.value;
+              }else{
+                self.registryTotal = response.data.total;
+              }
               // mark results, doc must be loaded
               $( document ).ready(function() {
                 self.mark(self.query);
