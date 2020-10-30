@@ -151,7 +151,7 @@
               <p class="text-muted text-center">
                 <b>Are you all done?</b> Click <b>Submit Request</b> to proceed.
               </p>
-              <a class='btn btn-lg btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
+              <a class='btn btn-lg btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()">
                 <small>
                   <i class="fas fa-check"></i> Submit Request
                 </small>
