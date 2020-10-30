@@ -137,14 +137,14 @@
             Compare Used Properties By Schema (If Specified)
           </h6>
           <small class="d-block">Only properties used as specified in validation</small>
-          <small v-if="!compareUsedAvailable" class="text-danger d-block">Not available: These items do no specify used properties. ( <span class="badge badge-success">V</span> )</small>
+          <small v-if="!compareUsedAvailable" class="text-danger d-block">Not available: One or more of these items do no specify used properties. ( <span class="badge badge-success">V</span> )</small>
           <small v-else class="d-block">(embedded JSON-schema validation)</small>
           <button :disabled="!compareUsedAvailable" @click="compareUsed()" class="btn mainBackDark text-light m-auto">
             <i class="fas fa-tasks"></i> Compare Used
           </button>
         </div>
       </div>
-      <p v-else class="text-center text-muted alert alert-dark p-2 mt-2">
+      <p v-else class="text-center text-muted alert alert-light p-2 mt-2">
         <i class="fas fa-exclamation-circle text-danger"></i> Please select at least 2 items to compare. <br>Select any items to compare ALL properties or items with  validation available ( <small class="badge badge-success">V</small> )
         to compare USED properties only.
       </p>
