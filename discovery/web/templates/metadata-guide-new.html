@@ -866,7 +866,7 @@
           }
           // UPDATE TOTALS
           for (key in state.schema.validation.properties) {
-            if (state.schema.validation.properties[key] && state.schema.validation.properties[key].value) {
+            if (state.schema.validation.properties[key] && state.schema.validation.properties[key].value || state.schema.validation.properties[key].value === false) {
               if (state.schema.validation.properties[key].hasOwnProperty('categories')) {
                 for (var i = 0; i < state.schema.validation.properties[key]['categories'].length; i++) {
 
