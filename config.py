@@ -38,6 +38,10 @@ APP_LIST = [
     (r"/sitemap/dataset.xml", "discovery.sitemap.DatasetHandler")
 ]
 
+# biothings web tester will read this
+API_VERSION = ''
+API_PREFIX = 'api'
+
 # *****************************************************************************
 # Biothings SDK Settings
 # *****************************************************************************

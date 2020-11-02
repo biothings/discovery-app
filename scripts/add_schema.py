@@ -3,12 +3,11 @@ import logging
 
 from tornado.log import enable_pretty_logging
 
-from discovery.utils.controllers import SchemaController
+from discovery.registry import schemas
 
 logging.getLogger('elasticsearch').setLevel('WARNING')
 
 KNOWN_SCHEMAS = {
-    'ctsa': 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json',
     'bts': 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'
 }
 
@@ -25,7 +24,7 @@ def main():
         url = input("Enter the url where the schema json is hosted:")
     user = input("Enter your email:") or 'cwu@scripps.edu'
 
-    print(SchemaController.add(namespace, url, user))
+    print("added " + str(schemas.add(namespace, url, user)) + " schema classes")
 
 
 if __name__ == "__main__":

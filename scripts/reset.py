@@ -11,10 +11,13 @@ import logging
 
 from tornado.options import parse_command_line
 
-from discovery.utils.indices import reset_data
+from discovery.utils import indices
+from discovery.registry import schemas
 
 logging.getLogger('elasticsearch').setLevel('WARNING')
 
 if __name__ == "__main__":
     parse_command_line()
-    reset_data()
+    indices.reset()
+    schemas.add_core()
+    schemas.add_core_extensions()

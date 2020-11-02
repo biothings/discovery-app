@@ -1,15 +1,63 @@
+"""
+    Dataset APIs
+
+    Add javascript rendering code generator.
+    Add copyright to the dataset metadata document.
+    Add authorization and private dataset permission control.
+
+"""
+import json
 
 from biothings.web.handlers.exceptions import BadRequest
+from discovery.registry import *
+from discovery.registry import datasets
 from tornado.web import Finish, HTTPError, MissingArgumentError
 
-from discovery.utils.controllers import (DatasetController,
-                                         DatasetValidationError)
+from .base import APIBaseHandler, capture_registry_error, github_authenticated
 
-from .base import APIBaseHandler, github_authenticated
+
+def add_copyright(doc, request):
+    # experiment adding proxy site info so when crawled by google bot,
+    # it wouldn't appear that our link claims to be the original site
+    # the link generated might not be as expected in docker containers
+    if "includedInDataCatalog" in doc and isinstance(doc["includedInDataCatalog"], dict):
+        dataset = doc["includedInDataCatalog"].get("name", "Dataset")
+        url_prefix = request.protocol + "://" + request.host + "/dataset/"
+        doc["includedInDataCatalog"] = [
+            {
+                "@type": "DataCatalog",
+                "name": dataset + " from Data Discovery Engine",
+                "url": url_prefix + doc['_id']
+            },
+            doc["includedInDataCatalog"]
+        ]
+    return doc
+
+
+def wrap_javascript(doc):
+    js = json.dumps(doc).replace("'", r"\'")
+    return (
+        'var script = document.createElement("script");'
+        f"var content = document.createTextNode('{js}');"
+        'script.type = "application/ld+json";'
+        'script.appendChild(content);'
+        'document.head.appendChild(script);'
+    )
+
+
+def to_api_doc_repr(regdoc, show_metadata=False, show_id=True):
+
+    if show_metadata:
+        regdoc['_meta'] = regdoc.meta
+
+    if not show_id:
+        regdoc.pop('_id')
+
+    return regdoc
 
 
 class DatasetMetadataHandler(APIBaseHandler):
-    '''
+    """
         Registered Dataset Metadata
 
         Create - POST ./api/dataset
@@ -17,7 +65,7 @@ class DatasetMetadataHandler(APIBaseHandler):
         Fetch  - GET ./api/dataset?user=<username>
         Fetch  - GET ./api/dataset/<_id>
         Remove - DELETE ./api/dataset/<_id>
-    '''
+    """
     name = 'dataset'
     kwargs = {
         'POST': {
@@ -26,147 +74,118 @@ class DatasetMetadataHandler(APIBaseHandler):
             'guide': {'type': str, 'default': None},
         },
         'GET': {
+            'start': {'type': int, 'default': 0, 'alias': ['from', 'skip']},
+            'size': {'type': int, 'default': 10, 'max': 20, 'alias': 'skip'},
+            'meta': {'type': bool, 'default': False, 'alias': ['metadata']},
             'user': {'type': str},
             'private': {'type': bool},
             'guide': {'type': str},
         }
     }
+    # TODO check if not specified args are passed through, meta visibility
 
     @github_authenticated
+    @capture_registry_error
     def post(self):
-        '''
+        """
         Add a dataset.
-        '''
-        for field in ('name', 'identifier', 'description'):
-            if field not in self.args_json:  # required in es model
-                raise HTTPError(400, reason=f"missing {field}")
+        """
+        _id = datasets.add(
+            doc=self.args_json,
+            user=self.current_user,
+            **self.args)
 
-        try:
-            res = DatasetController.add(
-                self.args_json, self.current_user,
-                self.args.private, self.args.schema, self.args.guide)
-
-        except (KeyError, ValueError) as exc:
-            raise HTTPError(400, reason=str(exc))
-
-        except DatasetValidationError as exc:
-            raise BadRequest(**exc.to_dict())
-
-        except Exception as exc:  # unexpected
-            raise HTTPError(500, reason=str(exc))
-
-        self.finish(res)
+        self.finish({
+            "success": True,
+            "result": "created",
+            "id": _id
+        })
 
     @github_authenticated
+    @capture_registry_error
     def put(self, _id=None):
-        '''
+        """
         Update the dataset of the specified id.
-        Does not change the privacy setting or identifier.
-        '''
+        Update metadata to change its privacy settings,
+        transfer the ownership of the document, etc...
+        """
         if not _id:
             raise HTTPError(405)
 
-        if not DatasetController.exists(_id):
-            raise HTTPError(404)
-
-        for field in ('name', 'identifier', 'description'):
-            if field not in self.args_json:  # required in es model
-                raise HTTPError(400, reason=f"missing {field}")
-
-        dataset = DatasetController(_id)
-
-        if dataset.user != self.current_user:
+        # pylint: disable=no-member
+        if datasets.get_meta(_id).username != self.current_user:
             raise HTTPError(403)
 
-        if dataset.identifier != self.args_json['identifier']:
-            raise HTTPError(409)
+        version = datasets.update(_id, self.args_json, **self.args)
 
-        try:
-            dataset.validate_update(self.args_json)
-        except ValueError as exc:
-            raise HTTPError(400, reason=str(exc))
-        except Exception as exc:
-            raise HTTPError(500, reason=str(exc))
+        self.finish({
+            'success': True,
+            'result': "updated",
+            'version': version
+        })
 
-        try:
-            res = dataset.update(self.args_json)
-        except Exception as exc:
-            raise HTTPError(500, reason=str(exc))
-
-        self.finish(res)
-
+    @capture_registry_error
     def get(self, _id=None):
-        '''
+        """
         Get all public or private datasets.
-        Filter results by a user.
-        '''
+        Filter results by metadata.
+        """
 
-        # get all by guide used
-        guide = self.args.guide
-        if guide:
-            try:
-                datasets = DatasetController.get_metadata_by_guide(guide)
-            except Exception as exc:
-                raise HTTPError(500, reason=str(exc))
-            else:  # success, end request
-                raise Finish(datasets)
-        # /api/dataset/ get one by id or all by user
+        # /api/dataset/
         if not _id:
 
-            user = self.args.user
-            private = self.args.private
-
-            if private:
+            if self.args.private:
                 if not self.current_user:
                     raise HTTPError(401)
-                if not user:
-                    user = self.current_user
-                if user != self.current_user:
+                if not self.args.user:  # fallback
+                    self.args.user = self.current_user
+                # cannot retrieve others' datasets
+                if self.args.user != self.current_user:
                     raise HTTPError(403)
-            try:
-                datasets = DatasetController.get_all(user, private)
-            except Exception as exc:
-                raise HTTPError(500, reason=str(exc))
-            else:  # success, end request
-                raise Finish(datasets)
+
+            show_metadata = self.args.pop('meta')
+            start = self.args.pop('start')
+            size = self.args.pop('size')
+            hits = [
+                to_api_doc_repr(dataset, show_metadata)
+                for dataset in datasets.get_all(start, size, **self.args)
+            ]
+
+            raise Finish({
+                "total": datasets.total(**self.args),
+                "hits": hits,
+            })  # TODO, add copyright?
 
         # /api/dataset/83dc3401f86819de
         # /api/dataset/83dc3401f86819de.js
-        try:
 
-            if not _id.endswith('.js'):
-                response = DatasetController.get_dataset(_id, self.request)
+        if not _id.endswith('.js'):
+            dataset = datasets.get(_id)
+        else:  # remove .js to get _id
+            dataset = datasets.get(_id[:-3])
 
-            else:  # request javascript
-                _id = _id[:-3]  # remove .js
-                self.set_header('Content-Type', 'application/javascript')
-                response = DatasetController.get_javascript(_id)
+        # add copyright field
+        dataset = add_copyright(dataset, self.request)
 
-        except Exception as exc:
-            raise HTTPError(500, reason=str(exc))
+        # javascript
+        if _id.endswith('.js'):
+            self.set_header('Content-Type', 'application/javascript')
+            dataset = wrap_javascript(dataset)
 
-        else:  # id not exist
-            if response is None:
-                raise HTTPError(404)
-
-        self.finish(response)
+        self.finish(dataset)
 
     @github_authenticated
+    @capture_registry_error
     def delete(self, _id):
-        '''
+        """
         Delete a dataset.
-        '''
-        if not DatasetController.exists(_id):
-            raise HTTPError(404)
-
-        dataset = DatasetController(_id)
-
-        if dataset.user != self.current_user:
+        """
+        # pylint: disable=no-member
+        if datasets.get_meta(_id).username != self.current_user:
             raise HTTPError(403)
 
-        try:
-            res = dataset.delete()
-        except Exception as exc:
-            raise HTTPError(500, reason=str(exc))
+        datasets.delete(_id)
 
-        self.finish(res)
+        self.finish({
+            "success": True
+        })

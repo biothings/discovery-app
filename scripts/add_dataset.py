@@ -12,21 +12,22 @@ import logging
 
 from tornado.options import options, parse_command_line
 
-from discovery.utils.controllers import DatasetController
+from discovery.registry import datasets
 
 options.define('url')
 options.define('user', default='cwu@scripps.edu')
+options.define('schema', default='ctsa::bts:CTSADataset')
 options.define('private', default=False, type=bool)
-options.define('classid', default='ctsa::bts:CTSADataset')
+
 logging.getLogger('elasticsearch').setLevel('WARNING')
 
 
 if __name__ == "__main__":
     parse_command_line()
     assert options.url
-    print(DatasetController.add(
+    print(datasets.add(
         doc=options.url,
         user=options.user,
-        private=options.private,
-        class_id=options.classid
+        schema=options.schema,
+        private=options.private
     ))
