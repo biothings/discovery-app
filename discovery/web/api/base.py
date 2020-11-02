@@ -2,11 +2,14 @@
 import json
 import logging
 
-from tornado.httpclient import AsyncHTTPClient
-from torngithub import json_encode
-
+import certifi
 from biothings.web.handlers import BaseAPIHandler
+from biothings.web.handlers.exceptions import BadRequest
+from discovery.registry import *
 from discovery.web.handlers import DiscoveryBaseHandler
+from tornado.httpclient import AsyncHTTPClient
+from tornado.web import Finish, HTTPError, MissingArgumentError
+from torngithub import json_encode
 
 L = logging.getLogger(__name__)
 
@@ -28,6 +31,29 @@ def github_authenticated(func):
     return _
 
 
+def capture_registry_error(func):
+
+    def _(self, *args, **kwargs):
+
+        try:
+            return func(self, *args, **kwargs)
+        except (HTTPError, Finish):
+            raise  # already tornado exceptions
+        except DatasetValidationError as err:
+            raise BadRequest(**err.to_dict())
+        except NoEntityError:
+            raise HTTPError(404)
+        except ConflictError:
+            raise HTTPError(409)
+        except RegistryError as err:
+            raise BadRequest(reason=str(err))
+        except Exception as exc:
+            logging.exception(exc)
+            raise HTTPError(500, reason=str(exc))
+
+    return _
+
+
 class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
 
     async def prepare(self):
@@ -43,10 +69,10 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                 http_client = AsyncHTTPClient()
                 try:
                     response = await http_client.fetch(
-                        "https://api.github.com/user", request_timeout=3,
-                        headers={'Authorization': 'token ' + token})
+                        "https://api.github.com/user", request_timeout=10,
+                        headers={'Authorization': 'token ' + token}, ca_certs=certifi.where())
                     user = json.loads(response.body)
-                except Exception as e:
+                except Exception as e:  # TODO
                     logging.warning(e)
                 else:
                     if 'login' in user:

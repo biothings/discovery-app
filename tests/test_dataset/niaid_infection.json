@@ -1,26 +1,49 @@
 {
-    "@type": "NiaidDataset",
-    "@context": "http://discovery.biothings.io/",
-    "name": "Clostridium difficile infection isolates from propensity score matched patients with and without severe infection.",
-    "description": "Clostridium difficile infection isolates from propensity score matched patients with and without severe infection.",
-    "measurementTechnique": "http://purl.obolibrary.org/obo/NCIT_C101294",
+    "@type": "niaid:NiaidDataset",
+    "@context": {
+        "schema": "http://schema.org/",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "bts": "http://discovery.biothings.io/bts/",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "owl": "http://www.w3.org/2002/07/owl/",
+        "niaid": "https://discovery.biothings.io/view/niaid/",
+        "outbreak": "https://discovery.biothings.io/view/outbreak/",
+        "n3c": "http://discovery.biothings.io/view/n3c/"
+    },
+    "name": "Human monocyte-derived macrophage (MDM) transcriptome response to influenza A virus infection",
+    "description": "Human monocyte-derived macrophages (MDM) serve as a model for resident alveolar macrophages (AM) in the human respiratory tract. mRNA-Seq analysis was used to profile the cellular transcriptome of HTBE cells at multiple time points in response to infection with influenza A/California/04/09 (H1N1), A/Wyoming/03/03 (H3N2), and A/Vietnam/1203/04 (H5N1) HALo virus.",
+    "measurementTechnique": "http://edamontology.org/topic_3170",
     "identifier": "systems_bio_cdiff_0001",
     "creator": {
         "@type": "Person",
-        "name": "Systems biology of Clostridium difficile"
+        "name": "FluOMICS"
     },
     "distribution": {
-        "dateModified": "2019-08-20",
-        "url": "https://www.ncbi.nlm.nih.gov/bioproject/561087"
+        "@type": "DataDownload",
+        "dateModified": "2017-05-05",
+        "contentUrl": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE97672"
+    },
+    "citation": {
+        "@type": "ScholarlyArticle",
+        "name": "Transcription Elongation Can Affect Genome 3D Structure",
+        "url": "https://www.cell.com/cell/fulltext/S0092-8674(18)30975-9"
     },
     "funding": {
-        "@type": "Organization",
-        "name": "National Institute of Allergy and Infectious Diseases",
-        "identifier": "U01-AI124255",
-        "description": "Dataset is supported by NIAID grant U01-AI124255",
-        "url": "http://grantome.com/grant/NIH/U01-AI124255-04",
-        "parentOrganization": "National Institutes of Health"
+        "@type": "MonetaryGrant",
+        "funder": {
+            "name": "NIAID",
+            "parentOrganization": "NIH"
+        },
+        "description": "Influenza A virus is a major human respiratory pathogen, and available vaccines and antivirals are of limited efficacy, especially in the elderly and during pandemic years. Influenza virus pathogenesis has two driving forces, virus replication and host responses. In order to identify novel targets for therapeutic intervention during influenza virus infection, we have assembled an interdisciplinary team that uses a highly integrated systems biology approach to identify and validate key early genes/networks involved in virus pathogenesis. Our overall underlying hypothesis is that host genes and networks involved in viral replication and in host response represent targets for therapeutic intervention. In order to identify these networks we propose to integrate into predictive and comprehensive models OMICS responses during influenza virus infection in ex vivo relevant human cells (Project 1) and in an animal model of influenza virus infection (Project 2). Our proposed research will compare systematically three clinically relevant influenza virus strains that differ n virulence both in mice and in humans. Core E will construct models by the integration of functional genomics, epigenomics, transcriptomics (Core B), proteomics (including post-translational modifications, Core C) and metabolomics (Core D) that will result in the identification of key genes, networks and subnetworks likely to be involved in virus replication and host responses. We propose an innovate modeling approach (Core E) based on acquisition of global OMICS data followed by model refinement using focused targeted-OMICS approaches, which allows for an extensive experimental interrogation of the generated models. The identified network nodes and subnetworks by these models will be validated and interrogated using targeted -OMICS in Projects 1 and 2 by conducting perturbations including: use of specific virus mutants that disrupt key host-virus interactions, use of host gene inhibitors and use of mouse k.o. and antisense targeting of key host genes in a mouse model. The results of these perturbations will be incorporated into the model for refinement and increase of predictive values. In addition, humans will be screened in Project 3 for polymorphisms in key genes predicted to be involved in pathogenesis by our models, and cells from rare variants will be tested ex vivo for their response to influenza infection. By using an established well characterized human cohort for these studies we will investigate clinical outcomes associated with the variants. We hypothesize that our approach will result in the identification of novel host targets for therapeutic intervention during influenza virus infection. RELEVANCE: We propose a systematic approach (FLUOMICS) to generate predictive models of influenza virus pathogenesis which will a) allow us to identify biomarkers for predicting pathogenic potential of new influenza viruses, b) give us the ability to predict which populations may be more susceptible to disease based on genetic variability, and c) provide avenues to explore for new, host-directed, therapeutic interventions. Project 1: Ex Vivo Interrogation of the Genetic and Biochemical Networks Controlling Influenza Virus Infection Project Leader: Megan Shaw DESCRIPTION: The underlying hypothesis of this application is that critical molecular features of host-pathogen interactions and responses dictate the pathogenic outcome of viral infection. Thus, a comprehensive understanding of viral-host interactions, innate responses to viral infection, and viral evasion strategies is pivotal for predictive modeling of viral pathogenesis. Here, we will provide a comprehensive overview of the genetic, chemical, and biochemical networks that play a role in controlling influenza virus infection by investigating host-virus interactions in an ex vivo setting using primary human cells. The impact of influenza virus replication on the host will be studied using next generation sequencing technologies to interrogate cellular RNA populations to define transcriptome-level changes (RNA-Seq), conduct genome-wide survey of promoters engaged by RNA polymerase (GRO-Seq), as well as evaluate epigenetic alterations in the chromosomal landscape (CHiP-Seq). Furthermore, global alterations in intracellular and extracellular metabolite levels, protein abundance, as well as post-translational modifications induced upon viral infection will be measured. Combining these approaches with genome-wide functional genomic screening and high-throughput protein interactome analysis will enable the generation of high-resolution networks that accurately depict the hierarchies of interactions between influenza virus and the host. By conducting these analyses simultaneously with three viruses that drive varying pathogenic outcomes, computational modeling of these data will enable us to identify critical nodes of the viral-host network that are predictive of viral pathogenesis. The in vivo and clinical impact of these nodes will be evaluated in Projects 2 and 3, respectively. RELEVANCE: Developing novel therapies for influenza requires a systems-level understanding of the virus-host interactions. Predictive modeling of these networks will enable the identificatio of disease-relevant therapeutic targets that can be pharmacologically manipulated for clinical efficacy. Towards this end, in this project, we will conduct a series of global and targeted analyses of influenza host-pathogen interactions, and follow these with focused validation studies.",
+        "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8563979&icde=0",
+        "identifier": "U19 AI106754"
     },
-    "species": "http://www.ontobee.org/ontology/NCBITaxon?iri=http://purl.obolibrary.org/obo/NCBITaxon_9606",
-    "pathogen": "http://www.ontobee.org/ontology/NCBITaxon?iri=http://purl.obolibrary.org/obo/NCBITaxon_1496"
+    "species": "http://purl.obolibrary.org/obo/NCBITaxon_9606",
+    "infectiousAgent": [
+        "http://purl.obolibrary.org/obo/NCBITaxon_641501",
+        "http://purl.obolibrary.org/obo/NCBITaxon_480024",
+        "http://purl.obolibrary.org/obo/NCBITaxon_284218"
+    ],
+    "infectiousDisease": "http://purl.obolibrary.org/obo/MONDO_0005812"
 }

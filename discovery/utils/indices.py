@@ -1,33 +1,35 @@
-import logging
-from concurrent.futures import ThreadPoolExecutor
+
 
 from elasticsearch_dsl import Index
 
-from discovery.data.dataset import DatasetMetadata
-from discovery.data.schema import Schema
-from discovery.data.schema_class import SchemaClass
-from discovery.utils.controllers import SchemaController
+from discovery.data.dataset import Dataset
+from discovery.data.schema import Schema, SchemaClass
 
 
-def setup_data():
+def setup():
 
-    try:
-        if not Index(Schema.Index.name).exists():
-            Schema.init()
-        if not Index(SchemaClass.Index.name).exists():
-            SchemaClass.init()
-        if not Index(DatasetMetadata.Index.name).exists():
-            DatasetMetadata.init()
-        return ThreadPoolExecutor().submit(SchemaController.add_core)
-    except Exception as exc:
-        logging.warning(exc)
+    if not Index(Schema.Index.name).exists():
+        Schema.init()
+
+    if not Index(SchemaClass.Index.name).exists():
+        SchemaClass.init()
+
+    if not Index(Dataset.Index.name).exists():
+        Dataset.init()
 
 
-def reset_data():
+def refresh():
+
+    Index(Schema.Index.name).refresh()
+    Index(SchemaClass.Index.name).refresh()
+    Index(Dataset.Index.name).refresh()
+
+
+def reset():
 
     index_1 = Index(Schema.Index.name)
     index_2 = Index(SchemaClass.Index.name)
-    index_3 = Index(DatasetMetadata.Index.name)
+    index_3 = Index(Dataset.Index.name)
 
     if index_1.exists():
         index_1.delete()
@@ -40,6 +42,4 @@ def reset_data():
 
     Schema.init()
     SchemaClass.init()
-    DatasetMetadata.init()
-
-    SchemaController.add_core(force=True)
+    Dataset.init()

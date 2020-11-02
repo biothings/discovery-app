@@ -3,22 +3,27 @@
 '''
 
 import pytest
-from test_base import DiscoveryTestCase
-from discovery.utils.controllers import SchemaController
+from discovery.registry import schemas
+from discovery.utils import indices
+from .test_base import DiscoveryTestCase
 
 BTS_URL = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld'
 
 
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    SchemaController.add(
-        namespace='bts',
-        doc=BTS_URL,
-        user='minions@example.com'
-    )
+    if not schemas.exists('bts'):
+        schemas.add(
+            namespace='bts',
+            url=BTS_URL,
+            user='minions@example.com'
+        )
 
 
 class DiscoveryAPITest(DiscoveryTestCase):
+
+    def refresh(self):
+        indices.refresh()
 
     def test_00_head(self):
         self.request('registry/bts', method='HEAD')
@@ -60,7 +65,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
         assert res['url'] == BTS_URL
         assert res['source']
         assert res['total']
-        assert res['context']
+        # assert res['context'] # TODO
         assert res['hits']
 
     def test_12_get(self):
@@ -94,11 +99,12 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.request('registry/bts', expect=200)
         self.request('registry/bts', method='DELETE', headers=self.auth_user)
         self.request('registry/bts', expect=404)
+        self.refresh()
         self.query(q='BiologicalEntity', hits=False)
 
     def test_30_post(self):
-        if SchemaController.exists('bts'):
-            SchemaController('bts').delete()
+        if schemas.exists('bts'):
+            schemas.delete('bts')
         doc = {
             'url': BTS_URL,
             'namespace': 'bts'
@@ -107,4 +113,5 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.request('registry/bts', expect=404)
         self.request('registry', method='POST', json=doc, headers=self.auth_user)
         self.request('registry/bts', expect=200)
+        self.refresh()
         self.query(q='BiologicalEntity')

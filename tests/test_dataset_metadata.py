@@ -1,16 +1,21 @@
 import json
 
 import pytest
+from discovery.registry import schemas, datasets
 
-from discovery.utils.controllers import SchemaController
-from test_base import DiscoveryTestCase
+from .test_base import DiscoveryTestCase
 
 NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/SuLab/niaid-data-portal/master/schema/NIAIDDataset.json"
 
 
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    SchemaController.add("niaid", NIAID_SCHEMA_URL, 'minions@example.com')
+    if not schemas.exists("niaid"):
+        schemas.add("niaid", NIAID_SCHEMA_URL, 'minions@example.com')
+    if datasets.exists("e87b433020414bad"):  # systems_bio_cdiff_0002
+        datasets.delete("e87b433020414bad")
+    if datasets.exists("ecf3767159a74988"):  # systems_bio_cdiff_0001
+        datasets.delete("ecf3767159a74988")
 
 
 class TestDatasetMetadata(DiscoveryTestCase):

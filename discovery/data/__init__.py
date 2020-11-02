@@ -14,14 +14,13 @@ import os
 
 from elasticsearch_dsl import connections
 
-from .dataset import DatasetMetadata
-from .schema import Schema
-from .schema_class import SchemaClass
+from .dataset import Dataset
+from .schema import Schema, SchemaClass
 
 __all__ = [
     'Schema',
     'SchemaClass',
-    'DatasetMetadata'
+    'Dataset'
 ]
 
 # parse environment variables

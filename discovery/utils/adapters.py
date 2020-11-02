@@ -27,8 +27,7 @@
 import logging
 
 from biothings_schema import Schema as SchemaParser
-
-from discovery.data.schema import Schema as ESSchemaDoc
+from discovery.data import Schema as ESSchema
 
 # the underlying package uses warnings
 logging.captureWarnings(True)
@@ -100,7 +99,7 @@ class SchemaAdapter():
     """
 
     def __init__(self, doc=None):
-        contexts = ESSchemaDoc.gather_contexts()
+        contexts = ESSchema.gather_field('@context')
         self._schema = SchemaParser(doc, contexts)
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
