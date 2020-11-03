@@ -1,12 +1,12 @@
 import tornado.web
 import tornado.template
-from discovery.utils.controllers import DatasetController
+from discovery.registry import datasets
 
 
 class DatasetHandler(tornado.web.RequestHandler):
 
     def get(self):
-        ids = DatasetController.get_all_ids()
+        ids = datasets.get_ids()
         tpl = tornado.template.Template("""
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
             <url>
