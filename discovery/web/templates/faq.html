@@ -2,8 +2,8 @@
 {% block content %}
 {% include "header.html" %}
 {% raw %}
-<main id="faq-app" class="bg-light" style="min-height: 100vh;padding-top:60px;">
-  <div class="jumbotron bg-light text-center" style="margin-top: 40px;">
+<main id="faq-app" class="bg-light" style="min-height: 100vh;">
+  <div class="jumbotron bg-light text-center pt-5" style="margin-top: 40px;">
     <h1 class="logoText">FAQ</h1>
     <small class="text-muted">
       Jump To:
@@ -11,18 +11,27 @@
         <a class="badge badge-secondary mr-2" v-text='section.sectionName' :href='"#"+section.sectionName'></a>
       </template>
     </small>
-
   </div>
-  <div class="container" style="margin-bottom:10vh;">
+  <div class="jumbotron container">
+    <template v-for="section in faq">
+      <h6 class="text-dark my-1" v-text='section.sectionName'></h6>
+      <template v-for="item in section.questions">
+        <div>
+          <a :href="'#'+item.anchor"><span v-text='item.question'></span> <i class="fas fa-chevron-right"></i></a>
+        </div>
+      </template>
+    </template>
+  </div>
+  <div class="container p-0" style="margin-bottom:10vh;">
     <template v-for="section in faq">
       <div class="card">
-        <h4 class="mainTextLight card-header pt-5 pb-5" v-text='section.sectionName' :id='section.sectionName'></h4>
+        <h4 class="text-light card-header pt-5 pb-5 grad" v-text='section.sectionName' :id='section.sectionName'></h4>
         <div class="card-body">
           <ul class="list-group card-text">
             <template v-for="item in section.questions">
               <li class="list-group-item">
                 <div class="mainTextDark bold" :id="item.anchor" :value="window.location+item.anchor">
-                  <span v-text="item.question"></span> <a :href="'#'+item.anchor" class="secondary-content"><i class="fas fa-link"></i></a>
+                  <span v-text="item.question"></span> <a :href="'#'+item.anchor" data-tipy="Copy link" class="secondary-content" @click="copyClipboard(window.location.href+'#'+item.anchor)"><i class="fas fa-link"></i></a>
                 </div>
                 <div class="text-muted p-2" v-html="item.answer"></div>
               </li>
@@ -35,6 +44,7 @@
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script type="text/javascript">
     var app = new Vue({
         el: '#faq-app',
@@ -46,10 +56,18 @@
                   'questions':[
                     {
                       'anchor':'what-is-dde',
-                      'question':'What is the CTSA Data Discovery Engine?',
+                      'question':'What is the Data Discovery Engine?',
                       'answer':`<p>
-                      The CTSA Data Discovery Engine is a website that provides guidance for reserachers on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole.
-                      </p>`
+                                The Data Discovery Engine is a website that provides guidance for researchers on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole.
+                              </p>
+                              <p class="text-center">
+                                <img class="w-100" src="/static/img/diagram.png" alt="Project Diagram"/>
+                              </p>
+                              <p class="alert alert-secondary">
+                                  <small>
+                                  Through it's three main components the Data Discovery Engine can support: the extension and reusability of schemas, structured metadata tools that utilize those schemas and making the resulting metadata accessible through our API and Data Portals supported. 
+                                  </small>
+                                </p>`
                     },
                     {
                       'anchor':'what-is-schema',
@@ -60,6 +78,9 @@
                                 <p class="alert alert-info">
                                   An example of a type's hierarchy can be seen here: <a href='https://schema.org/Thing' target="_blank">Thing</a> > <a href='https://schema.org/Person' target="_blank">Person</a> > <a href='https://schema.org/Patient' target="_blank">Patient</a>
                                 </p>
+                                <p class="text-center">
+                                  <img class="m-2 w-75" src="/static/img/schemagraph.png" alt="schema"/>
+                                </p>
                                 <p>
                                   We use <a href="https://schema.org/" target="_blank">Schema.org</a>'s schemas as the base vocabulary due to it's very generic nature. From that collection of schemas you can easily find a starting point, extend that schema and define more specific schemas related to your reserach.
                                 </p>
@@ -68,14 +89,14 @@
                                 </p>`
                     },
                     {
-                      'anchor':'what-is-dashboard',
-                      'question':'What is a dashboard and how do I access it?',
+                      'anchor':'dashboard',
+                      'question':'How do I access my dashboard?',
                       'answer':`<p>
-                                  Your user <a href="/dashboard">dashboard</a> is place where you can easily manage and quickly access your registered schemas and registered datasets. To view your dashboard you must log in using a valid <a href='https://github.com/' target="_blank">GitHub</a> account.
+                                  Your user <a href="/dashboard">dashboard</a> is place where you can easily manage and quickly access your registered schemas and registered metadata. To view your dashboard you must log in using a valid <a href='https://github.com/' target="_blank">GitHub</a> account then click on your user image on the menu.
                                 </p>
                                 <p class="alert alert-info text-center">
-                                  <img class="m-2 w-75" src="./static/img/dashhelp.png" alt="dashboard"/><br />
-                                  <small>From your dashboard you can edit a registered namespace, or view and delete any registered item.</small>
+                                  <img class="m-2 w-75" src="/static/img/dashhelp.png" alt="dashboard"/><br />
+                                  <small>Options include: view, quick edit, make private/public, and delete.</small>
                                 </p>`
                     },
                     {
@@ -85,8 +106,8 @@
                                   Your user <a href="/dashboard">dashboard</a> is the place to do that. If you are the user that registered that item you will see it listed in your dashboard.
                                 </p>
                                 <p class="alert alert-danger text-center">
-                                  <img class="m-2 w-75" src="./static/img/deletehelp.png" alt="dashboard"/><br />
-                                  <small>Click on the <i class="fas fa-trash"></i> icon and it will be deleted. Caution: This action cannot be reversed!</small>
+                                  <img class="m-2 w-75" src="/static/img/deletehelp.png" alt="dashboard"/><br />
+                                  <small>Click on the <i class="fas fa-trash"></i> icon and it will be deleted. Warning: This action cannot be reverted!</small>
                                 </p>`
                     },
 
@@ -99,98 +120,86 @@
                       'anchor':'what-is-schema-playground',
                       'question':'What is the Schema Playground?',
                       'answer':`<p>
-                                  The schema playground is a tool that lets you browse and visualize <a href="https://schema.org/" target="_blank">Schema.org</a> and community schemas and pick one to start your own.
+                                  The <a href="/schema-playground">Schema Playground</a> is a place where you can find a large number of existing bio-medical and general purpose schemas.
+                                  It is also a place where you can extend an existing schema to create your own, visualize and register* it to share with the community.
                                   <ul>
                                     <li>
-                                      <i class="text-danger">If you DON'T have a schema</i> > Search for existing schemas and create your own from there.
+                                      <i class="text-danger">If you DON'T have a schema</i> > Search for existing schemas to re-use or extend an existing one.
                                     </li>
                                     <li>
-                                      <i class="text-success">If you DO have a schema</i> > Visualize it and register it so others can use it and in turn helping our efforts to make data re-usable.
+                                      <i class="text-success">If you DO have a schema</i> > Visualize your schema and register it so others can re-use it and in turn helping our efforts to make data re-usable.
                                     </li>
                                   </ul>
                                 </p>
-                                <p class="alert alert-warning">
-                                  <i class="fas fa-asterisk"></i> You will need a valid <a href='https://github.com/' target="_blank">GitHub</a> account to register new schemas. Sign up for one, it's easy and free!
+                                <p class="alert alert-secondary">
+                                  <small>
+                                  <i class="fas fa-asterisk"></i> You will need a valid <a href='https://github.com/' target="_blank">GitHub</a> account or an approved organization account to register new schemas. Sign up for one, it's easy and free!
+                                  </small>
                                 </p>`
                     },
                     {
                       'anchor':'choosing-schema',
                       'question':'How do I choose a schema to author my own?',
                       'answer':`<p>
-                                  Our <a href="/schema-playground">Schema Playground</a> features <b>common starting points</b> (Dataset, CreativeWork, etc) and also a <a href="/registry">registry</a> of classes from reputable schemas to help you decide the right starting point.
+                                  Our <a href="/schema-playground">Schema Playground</a> features <b>common starting points</b> (Dataset, Protocols, etc) and also a <a href="/registry">registry</a> of classes from reputable sources to help you decide the right starting point.
                                 </p>
                                 <p>
                                   You can browse existing schemas from the community and <a href="https://schema.org/" target="_blank">Schema.org</a> schemas in our <a href="/registry">registry</a>.
-                                </p>
-                                <p class="alert alert-warning">
-                                  <i class="fas fa-asterisk"></i> You will need a valid <a href='https://github.com/' target="_blank">GitHub</a> account to extend and register new schemas. Sign up for one, it's easy and free!
                                 </p>`
                     },
                     {
                       'anchor':'how-to-use-editor',
                       'question':'How do I use the schema editor?',
                       'answer':`<p class="text-center">
-                                <img class="m-2 w-75" src="./static/img/editor.png" alt="editor"/>
+                                <img class="m-2 w-75" src="/static/img/editor.png" alt="editor"/>
                               </p>
                             <p>
-                              After choosing a namespace and creating your class you will be able to edit the schema you decided to extend. It's really easy and fast! Here's a quick introduction to the layout:
+                              Once you find a Class you wish to extend, you will be asked to choose a unique namespace that hasn't been registered before.  This will be the prefix attached to each new definition you provide.
+                              Since you are extending a Class, you will be asked to create a new Class that is more specific to your needs but follows the same hierarchy as its parent Class.  Once that is done, you can begin picking
+                              the properties from its parents that you want to use to define your metadata and finally add any new properties (8) not included with a proper unique name. 
                             </p>
-                            <small>
-                              <ul class="text-left">
+                            <p>
+                              Once you are happy with your schema definition you have an option to download (5) your work or if you logged in with GitHub, you may choose to use the built-in
+                              GitHub tool to save your work directly to an existing or new public repository. Your saved work can then be visualized and registered via our Schema Playground, and you can easily manage your contributions 
+                              via your own user dashboard.
+                            </p>
+                              <ol class="text-left">
                                 <li>
-                                  1. Log-in status
+                                  Log-in status.
                                 </li>
                                 <li>
-                                  2. Namespace chosen
+                                  Preview your work.
                                 </li>
                                 <li>
-                                  3. New class added
+                                  Download your work.
                                 </li>
                                 <li>
-                                  4. Preview your progress
+                                  Save to GitHub directly* Requires GitHub login and permission.
                                 </li>
                                 <li>
-                                  5. Download your progress (Once you are happy with your schema, download and host on your preferred service.  After hosting it view it in our <a href="/schema-playground">Schema Viewer</a>)
+                                  Add a new property to your class.
                                 </li>
                                 <li>
-                                  6. Show/Hide all descriptions
+                                  The extended Class you created.
                                 </li>
                                 <li>
-                                  7. Your new top-level class (blue) and actions. All parent class will appear under it.
+                                  Parent properties available to choose from.
                                 </li>
                                 <li>
-                                  8. Add a new property to your class
+                                  Show/Hide all properties of this class.
                                 </li>
-                                <li>
-                                  9. Show/Hide all properties of this class
-                                </li>
-                                <li>
-                                  10. Property description and actions
-                                </li>
-                                <li>
-                                  10. Property description and actions
-                                </li>
-                                <li>
-                                  11. Click to mark it as selected to be used by your schema. (All properties are inherited but you should select only those that will actually be used by your schema.)
-                                </li>
-                                <li>
-                                  12. Click to mark this property as a required field by your schema (Only selected properties can be marked as required)
-                                </li>
-                              </ul>
-                            </small>`
+                              </ol>`
                     },
                     {
                       'anchor':'register-namespace',
                       'question':'What is a namespace and how do I register a custom namespace for my schema?',
                       'answer':`<p>
-                                  A namespace is a part of a URL which identifies a particular page on a website in a form readable by users.
+                                  During the process of extending an existing schema via the <a href="/schema-playground">Schema Playground</a>
+                                  you are asked to choose a short name for new Class/property definitions. This name is also used to suggest the namespace registered with us when you visualize then register your schema.
+                                  The namespace will be the new homepage for your schema. E.g. <span class="text-info">http://discovery.biothings.io/view/<b>&lt;namespace&gt;</b></span>.
                                 </p>
-                                <p>
-                                  To register a schema with us and set a custom namespace you must be logged in and have successfully viewed your schema in our <a href="/schema-playground">Schema Playground</a>.
-                                  The namespace will be the new homepage for your schema. E.g. http://discovery.biothings.io/<b>&lt;namespace&gt;</b>.
-                                </p>
-                                <p class="alert alert-info">
-                                  Your namespace must be unique and it can only contain lower-case web-safe characters.
+                                <p class="alert alert-secondary">
+                                  <small>Your namespace must be unique and it can only contain lower-case web-safe characters.</small>
                                 </p>`
                     },
                     {
@@ -199,8 +208,10 @@
                       'answer':`<p>
                                   After you log in the registration option will be available to you when you view your schema using it's url in the <a href="/schema-playground">Schema Playground</a>. Registration is simple and it only requires you to choose a <a href="#namespace">namespace</a>
                                 </p>
-                                <p class="alert alert-warning">
-                                  <i class="fas fa-asterisk"></i> You will need a valid <a href='https://github.com/' target="_blank">GitHub</a> account to log in to our website. Sign up for one, it's easy and free!
+                                <p class="alert alert-secondary">
+                                  <small>
+                                  <i class="fas fa-asterisk"></i> You will need a valid <a href='https://github.com/' target="_blank">GitHub</a> account or an approved organization account to register new schemas. Sign up for one, it's easy and free!
+                                  </small>
                                 </p>`
                     },
                     {
@@ -208,24 +219,16 @@
                       'question':'Why should I register my schema?',
                       'answer':`<ul class="text-muted text-left">
                                   <li>
-                                    <small>
-                                      <i class="fas fa-star"></i> Share your work with other members of the community. Your schema definition could be helpful to many others in the community as a starting point for their reserach.
-                                    </small>
+                                    <i class="fas fa-check"></i> Share your work with other members of the community. Your schema definition could be helpful to many others in the community as a starting point for their reserach.
                                   </li>
                                   <li>
-                                    <small>
-                                      <i class="fas fa-star"></i> By registering a schema derived from an existing schema you are helping to maintain the <a href="https://www.go-fair.org/fair-principles/" target="_blank">FAIR</a> (Findable, Accessible, Interoperable, Reusable) principles by making data more <b>Reusable</b>.
-                                    </small>
+                                    <i class="fas fa-check"></i> By registering a schema derived from an existing schema you are helping to maintain the <a href="https://www.go-fair.org/fair-principles/" target="_blank">FAIR</a> (Findable, Accessible, Interoperable, Reusable) principles by making data more <b>Reusable</b>.
                                   </li>
                                   <li>
-                                    <small>
-                                      <i class="fas fa-star"></i> It's easy to registrer your schema! If everything looks good here all you have to do is choose a namespace for your schema's homepage.
-                                    </small>
+                                    <i class="fas fa-check"></i> It's easy to register your schema! If everything looks good here all you have to do is choose a namespace for your schema's homepage.
                                   </li>
                                   <li>
-                                    <small>
-                                      <i class="fas fa-star"></i> You'll be able to easily share your schema and visualize it in a way that it's easy to undertand.
-                                    </small>
+                                    <i class="fas fa-check"></i> You'll be able to easily share your schema and visualize it in a way that it's easy to understand.
                                   </li>
                                 </ul>`
                     },
@@ -235,68 +238,71 @@
                   'sectionName': 'Discovery Guide',
                   'questions':[
                     {
-                      'anchor':'why-use-discovery-guide',
-                      'question':"Why should I use this guide?",
-                      'answer':`<p>
-                                  This guide is not only easy to use but also helps you structure the data corretly in the case that you are not familiar with json-ld schemas.  In addition, by guiding users and making sure every person uses a set standard we are in turn making our data more reusable and findable.
-                                </p>`
+                      'anchor':'what-is-a-guide',
+                      'question':"What is a guide?",
+                      'answer':`<p class="text-center">
+                                  <img class="m-2 w-75" src="/static/img/guides.png" alt="editor"/>
+                                </p>
+                                <p>
+                                  Guides allow you to contribute metadata to particular Data Portal. The generated metadata will be structured to that Data Portal's schema meaning that your metadata will be able to be integrated into that Data Portal.
+                                </p>
+                                <p>
+                                  Each Data Portal provides a guide based on a schema and that guide is dynamically generated based on that particular schema's validation rules to ensure that your input is valid and your contribution is ready to be integrated into that Portal.
+                                </p>
+                                `
                     },
                     {
                       'anchor':'how-to-use-guide',
                       'question':"How do I use the discovery guide?",
                       'answer':`<p class="text-center">
-                                  <img class="m-2 w-75" src="./static/img/metadata.png" alt="metadata"/><br />
+                                  <img class="m-2 w-75" src="/static/img/metadata.png" alt="metadata"/><br />
                                   <p>
-                                    After selecting a starting point you will be able complete a series of fields. It's really easy and fast! Here's a quick introduction to the layout:
+                                    Select the portal you wish to contribute based on your interests and click on it's Add Dataset Metadata button. You will be taken to a form that will guide you through required and recommended fields by that portal.
                                   </p>
-                                  <small>
-                                    <ul class="text-left">
+                                  <p>
+                                    It's really easy and fast! Here's a quick introduction to the layout:
+                                  </p>
+                                    <ol class="text-left">
                                       <li>
-                                        1. Log-in status
+                                        (Login Status, Start Over, Preview Progress, Import Metadata, Bulk Registration, Issue Details)
                                       </li>
                                       <li>
-                                        2. Start over from scratch
+                                        Current category.
                                       </li>
                                       <li>
-                                        3. Preview your progress
+                                        Change display settings.
                                       </li>
                                       <li>
-                                        4. Download your progress (Available after completing all required fields)
+                                        Clear/Complete (if viewing one item at a time) option.
                                       </li>
                                       <li>
-                                        5. Register your dataset (Available after completing all required fields)
+                                        Track progress across categories.
                                       </li>
                                       <li>
-                                        6. All fields availble to complete (* Required)
+                                        Issue details for that field.
                                       </li>
                                       <li>
-                                        7. Progress bar
+                                        Continue to next page. (Available when requirements are met)
                                       </li>
-                                      <li>
-                                        8. Complete fields
-                                      </li>
-                                      <li>
-                                        9. Current field clicked
-                                      </li>
-                                      <li>
-                                        10. Actions: Save & Close and Clear Field
-                                      </li>
-                                    </ul>
-                                  </small>
+                                    </ol>
                                </p>`
                     },
                     {
-                      'anchor':'access-dataset',
-                      'question':"How do I access my registered dataset?",
+                      'anchor':'access-contributions',
+                      'question':"How do I access my contributions?",
                       'answer':`<p>
-                                  After successfully registering a dataset you will be prompted to a link to it but you can also log in to your <a href="/dashboard">dashboard</a>. From here you will be able to quickly access your registered dataset. To view your dashboard you must log in using a valid <a href='https://github.com/' target="_blank">GitHub</a> account.
+                                  After successfully contributing an item whether it is a schema or metadata you will be able to manage it via your <a href="/dashboard">dashboard</a>. To view your dashboard you must log in using a valid <a href='https://github.com/' target="_blank">GitHub</a> account or approved organization.
                                 </p>
                                 <p>
-                                  All registered datasets are also available via our <a href="/dataset">dataset registry</a>. Feel free to browse it for existing examples.
+                                  You can manage your registered schemas and metadata on your dashboard and each provides their own set of options. Take a look below: 
                                 </p>
                                 <p class="alert alert-info text-center">
-                                  <img class="m-2 w-75" src="./static/img/metahelp.png" alt="metadata-dashboard"/><br />
-                                  <small>From your dashboard you can view and delete any registered item.</small>
+                                  <img class="m-2 w-75" src="/static/img/metahelp.png" alt="metadata-dashboard"/><br />
+                                  <small>From your dashboard you can view, update and delete any registered item.</small>
+                                </p>
+                                <p class="alert alert-info text-center">
+                                  <img class="m-2 w-75" src="/static/img/dashhelp.png" alt="dashboard"/><br />
+                                  <small>Options include: view, quick edit, make private/public, and delete.</small>
                                 </p>`
                     },
                     {
@@ -306,24 +312,24 @@
                                   All new entries are set to <b>PUBLIC</b> as default. You can change this anytime in your <a href="/dashboard">dashboard</a>.  Note: Making any changes to the metadata will revert its status to PUBLIC but you can change the setting once your are done.
                                 </p>
                                 <p class="alert alert-info text-center">
-                                  <img class="m-2 w-75" src="./static/img/privacy.png" alt="dashboard"/><br />
+                                  <img class="m-2 w-75" src="/static/img/privacy.png" alt="dashboard"/><br />
                                   <small>Simply click on the <b>Edit Privacy</b> button and confirm the new status.</small>
                                 </p>`
                     },
                     {
-                      'anchor':'edit-dataset',
-                      'question':'How do I edit registered datasets?',
+                      'anchor':'edit-metadata',
+                      'question':'How do I edit registered metadata?',
                       'answer':`<p>
-                                  Head over to the <a href="/guide">Discovery Guide</a>. After choosing a starting point click on the <b>Load Existing Data</b> option to choose loading from a <b>URL</b> or <b>Registered</b> items. Choose an option and simply enter the direct URL or choose by name if choosing items registered to your name.
+                                  Each metadata entry is generated via a guide, so to properly edit an already registered item you will need to load it back into it's guide.
                                 </p>
                                 <p>
-                                  All available matching fields will be populated with your data. Note: If you change the <b>identifier</b> field it will result in creating a new registry item.
+                                  Choose the guide you previously used and choose <b>Import Metadata</b> from the guide menu and choose the item you want to edit. All available matching fields will be populated with your data. Note: If you change the <b>identifier</b> field it will result in creating a new registry item.
                                 </p>
                                 <p class="text-danger">
                                   Note: Making any changes to the data will revert its privacy status to PUBLIC but you can change the setting once your are done in your dashboard.
                                 </p>
                                 <p class="alert alert-info text-center">
-                                  <img class="m-2 w-75" src="./static/img/editmeta.jpg" alt="dashboard"/><br />
+                                  <img class="m-2 w-75" src="/static/img/editmeta.png" alt="dashboard"/><br />
                                   <small>Click on the <b>Load Existing Data</b> edit existing data.</small>
                                 </p>`
                     },
@@ -332,49 +338,20 @@
               ]
           }
         },
-        methods: {
-
-        },
-        mounted: function(){
+        methods:{
+          copyClipboard(link){
+            navigator.clipboard.writeText(link).then(function() {
+              Swal.fire({type:'success',
+                toast:true,
+                title: 'Link Copied',
+                showConfirmButton:false,
+                timer:1000})
+            }, function(err) {
+              console.error('Async: Could not copy text: ', err);
+            });
+          }
         }
     });
-    // Smooth Scrolling to Anchors
-      // Select all links with hashes
-      $('a[href*="#"]')
-        // Remove links that don't actually link to anything
-        .not('[href="#"]')
-        .not('[href="#0"]')
-        .click(function(event) {
-          // On-page links
-          if (
-            location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '')
-            &&
-            location.hostname == this.hostname
-          ) {
-            // Figure out element to scroll to
-            var target = $(this.hash);
-            target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
-            // Does a scroll target exist?
-            if (target.length) {
-              // Only prevent default if animation is actually gonna happen
-              event.preventDefault();
-              $('html, body').animate({
-                scrollTop: target.offset().top
-              }, 1000, function() {
-                // Callback after animation
-                // Must change focus!
-                var $target = $(target);
-                $target.focus();
-                if ($target.is(":focus")) { // Checking if the target was focused
-                  return false;
-                } else {
-                  $target.attr('tabindex','-1'); // Adding tabindex for elements not focusable
-                  $target.focus(); // Set focus again
-                };
-              });
-            }
-          }
-        });
 </script>
 {% endraw %}
 {% include "footer.html" %}

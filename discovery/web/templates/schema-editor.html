@@ -32,27 +32,29 @@
             <i class="fas fa-check text-success"></i> Extended Class Added</small>
           </span>
         </li>
-        <li class='nav-item' v-show="prefix">
-          <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'mainBackDark text-light pointer': prefix }" data-tippy="Look at your work so far" @click='getPreview()'>
-            <small>
-              <i class="fas fa-code"></i> Preview
-            </small>
-          </a>
-        </li>
-        <li class='nav-item' v-show="prefix">
-          <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-primary text-light pointer': prefix }" data-tippy="Download your schema" @click='downnloadSchema()'>
-            <small>
-              <i class="fas fa-file-download"></i> Download
-            </small>
-          </a>
-        </li>
-        <li class='nav-item' v-show="prefix">
-          <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-success text-light pointer': prefix }" data-tippy="Requires Gihub Login" @click.prevent="githubOptions()">
-            <small >
-              <i class="fab fa-github"></i> Save to GitHub
-            </small>
-          </a>
-        </li>
+        <template v-if='newClassAdded'>
+          <li class='nav-item' v-show="prefix">
+            <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'mainBackDark text-light pointer': prefix }" data-tippy="Look at your work so far" @click='getPreview()'>
+              <small>
+                <i class="fas fa-code"></i> Preview
+              </small>
+            </a>
+          </li>
+          <li class='nav-item' v-show="prefix">
+            <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-primary text-light pointer': prefix }" data-tippy="Download your schema" @click='downnloadSchema()'>
+              <small>
+                <i class="fas fa-file-download"></i> Download
+              </small>
+            </a>
+          </li>
+          <li class='nav-item' v-show="prefix">
+            <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-success text-light pointer': prefix }" data-tippy="Requires Gihub Login" @click.prevent="githubOptions()">
+              <small >
+                <i class="fab fa-github"></i> Save to GitHub
+              </small>
+            </a>
+          </li>
+        </template>
         <li class='nav-item'>
           <a class='nav-link rounded-0 text-light pointer' data-tippy="Learn about this editor" @click.prevent="showHelp()">
             <small >
@@ -100,8 +102,8 @@
         <!-- PARENT CLASSES -->
         <div class="jumbotron alert-secondary" v-if="newClassAdded" id="editorTippy">
           <div>
-            <input type="checkbox" class="custom-control-input slider" id="customControlInline" @click="toggleDesc()">
-            <label class="custom-control-label text-muted" for="customControlInline" >Show Descriptions</label>
+            <input type="checkbox" class="form-control slider" id="customControlInline" @click="toggleDesc()">
+            <small class="text-muted" for="customControlInline" >Show Descriptions</small>
           </div>
           <template  v-for="(item,index) in classesAvailable">
             <c-box :item="item" :key="index"></c-box>
