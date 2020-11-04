@@ -153,8 +153,11 @@ class DatasetMetadataHandler(APIBaseHandler):
 
             raise Finish({
                 "total": datasets.total(**self.args),
-                "hits": hits,
-            })  # TODO, add copyright?
+                "hits": [
+                    to_api_doc_repr(dataset, show_metadata)
+                    for dataset in datasets.get_all(start, size, **self.args)
+                ],
+            })
 
         # /api/dataset/83dc3401f86819de
         # /api/dataset/83dc3401f86819de.js
@@ -164,6 +167,8 @@ class DatasetMetadataHandler(APIBaseHandler):
         else:  # remove .js to get _id
             dataset = datasets.get(_id[:-3])
 
+        # add metadata field
+        dataset = to_api_doc_repr(dataset, self.args.pop('meta'))
         # add copyright field
         dataset = add_copyright(dataset, self.request)
 
