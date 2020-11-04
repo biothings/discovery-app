@@ -63,10 +63,10 @@
           </div>
           <div class="grad p-1">
             <div class="bg-light p-4 text-center">
-              <div v-if="metadata && metadata._meta.username" class="text-muted text-center m-0">
+              <!-- <div v-if="metadata && metadata._meta.username" class="text-muted text-center m-0">
                 <small>Registered by <i class="fas fa-user"></i> <a :href="'/contributor/'+metadata._meta.username" v-text="metadata._meta.username"></a></small>
                 <small class="float-right"><a :href="'/api/dataset/'+meta_id" rel="noopener">raw json-ld</a></small>
-              </div>
+              </div> -->
               <div v-if="schemaLink" class="text-muted text-center m-0">
                 <small>Learn more about the <a :href="schemaLink" rel="noopener">schema used</a> to structure this metadata.</small>
               </div>
@@ -438,7 +438,7 @@
           self.generateScriptText(id);
           self.loading = true;
           self.meta_id = id;
-          axios.get('/api/dataset/'+id).then(res=>{
+          axios.get('/api/dataset/'+id+"?meta=true").then(res=>{
             self.loading = false;
             if (res.data) {
               let payload = {}
