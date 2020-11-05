@@ -486,17 +486,35 @@
         })
       }
     },
+    computed:{
+      optionName: function(){
+        let self = this;
+        if(self.option.hasOwnProperty('items') && self.option['items'].hasOwnProperty('@type') ){
+          return "List of "+self.option['items']['@type']+"(s)"
+        }else if(self.option.hasOwnProperty('items') && self.option['items'].hasOwnProperty('type') ){
+          return "List of "+self.option['items']['type']+"(s)"
+        }else if(self.option.hasOwnProperty('@type') || self.option.hasOwnProperty('type')){
+          return self.option['@type'] || self.option['type']
+        }else if(self.option.hasOwnProperty('enum')){
+          return 'enum item'
+        }else{
+          return 'item'
+        }
+      }
+    },
     mounted: function(){
       var self = this;
+      // console.log(self.name, self.option)
       self.getRandomColor();
       if (self.isChild) {
         self.expand = true;
       }
     },
     template:
-      `<div class="p-1 m-1 rounded text-dark bg-light" :style="style">
+      `<div class="m-1 rounded text-dark bg-light" :style="style">
         <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm d-block">
-          <small v-text="!expand?'show option':'hide option'"></small>
+          <b v-text="optionName"></b>
+          <small class="text-warning" v-text="!expand?'show':'hide'"></small>
         </button>
         <template v-if="expand">
           <small v-text="option.description"></small>
@@ -628,6 +646,20 @@
         })
       }
     },
+    computed:{
+      optionName: function(){
+        let self = this;
+        if(self.option.hasOwnProperty('items') && self.option['items'].hasOwnProperty('@type') ){
+          return "List of "+self.option['items']['@type']+"(s)"
+        }else if(self.option.hasOwnProperty('items') && self.option['items'].hasOwnProperty('type') ){
+          return "List of "+self.option['items']['type']+"(s)"
+        }else if(self.option.hasOwnProperty('@type') || self.option.hasOwnProperty('type')){
+          return self.option['@type'] || self.option['type']
+        }else{
+          return 'Option'
+        }
+      }
+    },
     mounted: function(){
       var self = this;
       self.getRandomColor();
@@ -636,9 +668,10 @@
       }
     },
     template:
-      `<div class="p-1 m-1 rounded text-dark bg-light" :style="style">
+      `<div class="m-1 rounded text-dark bg-light" :style="style">
         <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm">
-          <small v-text="!expand?'show option':'hide option'"></small>
+          <b v-text="optionName"></b>
+          <small class="text-warning" v-text="!expand?'show':'hide'"></small>
         </button>
         <template v-if="expand">
           <small v-text="option.description"></small>
@@ -782,8 +815,8 @@
             </div>
 
             <!-- ONE OF -->
-            <div v-if="fullinfo && fullinfo.oneOf" class="row m-0">
-              <div class="col-sm-12 text-center bold mainTextDark">
+            <div v-if="fullinfo && fullinfo.oneOf" class="row m-0 w-100 p-0">
+              <div class="col-sm-12 text-center bold mainTextDark alert-dark">
                 <small>
                   ONE OF
                 </small>
@@ -796,8 +829,8 @@
             </div>
 
             <!-- ANY OF -->
-            <div v-if="fullinfo && fullinfo.anyOf" class="row m-0">
-              <div class="col-sm-12 text-center bold mainTextLight">
+            <div v-if="fullinfo && fullinfo.anyOf" class="row m-0 p-0 w-100">
+              <div class="col-sm-12 text-center bold mainTextLight alert-dark">
                 <small>
                   ANY OF
                 </small>
