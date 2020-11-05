@@ -39,10 +39,12 @@
   <header id="header">
     <title>{{site_name}}</title>
     <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
-      <a class="navbar-brand" href="/">
+      <a class="navbar-brand m-0" href="/">
         <img src="/static/img/dde-logo-o.svg" width="30" height="30" alt="DDE" class="d-none d-md-inline">
       </a>
-      <a id="logo" class="navbar-brand caps logoText d-none d-md-inline logoFont" style="color: #63296B;" href="/">{{site_name}}</a>
+      <a id="logo" class="navbar-brand caps d-none d-md-inline" style="color: #63296B;font-weight: lighter;text-transform: uppercase;" href="/">
+        <small>{{site_name}}</small>
+      </a>
     </nav>
   </header>
   <body class="bg-light" id="bodymain">
@@ -57,19 +59,25 @@
               <h1 class="text-center mt-5">
                 <span v-text="metadata.name"></span>
               </h1>
-              <small v-if="metadata && metadata.version"  class="text-muted d-block text-center" v-text="'Version '+metadata.version"></small>
-              <small v-if="metadata && metadata.dateModified"  class="text-muted d-block text-center" v-text="'Date Modified '+metadata.dateModified"></small>
+              <small v-if="metadata && metadata.version"  class="text-light d-block text-center" v-text="'Version '+metadata.version"></small>
+              <small v-if="last_updated"  class="text-light d-block text-center" v-text="'Last updated '+last_updated"></small>
+              <div class="text-center">
+                <template v-if="metadata && metadata._meta.username">
+                  <small><a :href="'/contributor/'+metadata._meta.username">more by user</a></small>
+                  |
+                  <small><a :href="'/api/dataset/'+meta_id" rel="noopener">raw json-ld</a></small>
+                  |
+                  <tempalte v-if="schemaLink">
+                    <small><a :href="schemaLink" rel="noopener">schema</a></small>
+                  </template>
+                </template>
+              </div>
             </div>
           </div>
           <div class="grad p-1">
             <div class="bg-light p-4 text-center">
-              <!-- <div v-if="metadata && metadata._meta.username" class="text-muted text-center m-0">
-                <small>Registered by <i class="fas fa-user"></i> <a :href="'/contributor/'+metadata._meta.username" v-text="metadata._meta.username"></a></small>
-                <small class="float-right"><a :href="'/api/dataset/'+meta_id" rel="noopener">raw json-ld</a></small>
-              </div> -->
-              <div v-if="schemaLink" class="text-muted text-center m-0">
-                <small>Learn more about the <a :href="schemaLink" rel="noopener">schema used</a> to structure this metadata.</small>
-              </div>
+              
+              
               <div class="p-3 text-left">
                 <p class="text-dark m-auto" v-html="metadata.description"></p>
               </div>
@@ -126,6 +134,7 @@
     </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
   <script src="/static/js/vuex.js"></script>
+  <script src="/static/js/moment.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
   <script>
@@ -284,8 +293,10 @@
         <template v-if="type == 'array'">
           <div class="row m-0">
             <div class="text-left">
-              <small class="mainTextDark pointer" @click="expandArray=!expandArray">
-                <span v-text="name"></span> (<span v-text="content.length"></span>) <i class="fas" :class="[expandArray?'fa-minus-square mainTextLight':'fa-plus-square']"></i>
+              <small class="text-primary" @click="expandArray=!expandArray" style="cursor:pointer;">
+                <span v-text="name"></span> (<span v-text="content.length"></span>) 
+                <b v-if="!expandArray">+</b>
+                <b v-if="expandArray">-</b>
               </small>
             </div>
             <div class="col-sm-12" v-if="expandArray">
@@ -470,7 +481,7 @@
 
           scriptTag.setAttribute('type',"application/ld+json");
           scriptTag.text= str;
-          console.log('embedding json-ld',scriptTag)
+          // console.log('embedding json-ld',scriptTag)
           document.body.appendChild(scriptTag);
           self.createCanonicalTag(self.metadata);
           if (self.metadata.name)
@@ -537,6 +548,13 @@
             return "/view/"+parts[0]+"/"+parts[1]
           }
           return false
+        },
+        last_updated: function(){
+          if (this.metadata.hasOwnProperty('_meta') && this.metadata['_meta'].hasOwnProperty('last_updated')) {
+            return moment(this.metadata['_meta']['last_updated']).format("MMM Do YYYY"); 
+          }else{
+            return false
+          }
         }
       }
     });

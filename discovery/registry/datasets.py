@@ -27,6 +27,7 @@
 
 import json
 import logging
+import datetime
 
 import elasticsearch
 import elasticsearch_dsl
@@ -249,6 +250,9 @@ def add(doc, **metadata):
     Default type is a CTSA dataset. Schema type must be in database.
     Validate against schema before index. Raise on conflict.
     """
+    # initially the same until doc is updated
+    metadata['date_created'] = datetime.datetime.utcnow()
+    metadata['last_updated'] = datetime.datetime.utcnow()
     metadata = _clean(metadata, defdict={'schema': 'ctsa::bts:CTSADataset'})
     doc = validate(doc, metadata['schema'])
     dataset = _index(doc, metadata, 'create')
@@ -347,6 +351,7 @@ def update(_id, new_doc, **metadata):
         raise ConflictError("cannot change identifier field.")
 
     _meta = dataset['_meta'].to_dict()
+    _meta['last_updated'] = datetime.datetime.utcnow()
     _meta.update(_clean(new_doc.pop('_meta', {})))
     _meta.update(_clean(metadata))
     _meta = _clean(_meta)

@@ -77,9 +77,12 @@
             <template v-if="privateDatasets && privateDatasets.length">
               <div v-for="item in privateDatasets" class="row m-1">
                 <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
-                  <a target="_blank" :href="'/api/dataset/'+item._id" class="d-inline m-2 text-light" :title="item.name">
+                  <a :href="'/dataset/'+item._id" class="d-inline m-2 text-light" :title="item.name">
                     <small v-text="trunc(item.name)"></small>
                   </a>
+                  <small class="badge badge-dark">
+                    <span v-html="formatDate(item['_meta'])"></span>
+                  </small>
                 </div>
                 <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
                   <div>
@@ -115,9 +118,12 @@
             <template v-if="publicDatasets && publicDatasets.length">
               <div v-for="item in publicDatasets" class="row m-1">
                 <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
-                  <a target="_blank" :href="'/api/dataset/'+item._id" class="d-inline m-2 text-light" :title="item.name">
+                  <a :href="'/dataset/'+item._id" class="d-inline m-2 text-light" :title="item.name">
                     <small v-text="trunc(item.name)"></small>
                   </a>
+                  <small class="badge badge-dark">
+                    <span v-html="formatDate(item['_meta'])"></span>
+                  </small>
                 </div>
                 <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
                   <div>
@@ -169,6 +175,7 @@
 {% block extra_scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="/static/js/lodash.js"></script>
+<script src="/static/js/moment.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
@@ -296,11 +303,12 @@ var app = new Vue({
                       let namespace = parts[0]
                       let prefix = parts[0]
                       let className = parts[1]
-                      let url = '/api/dataset?schema='+namespace+'::'+prefix+':'+className;
-                      if (self.meta && self.meta['_meta']['guide']) {
-                        url = url+"&guide="+self.meta['_meta']['guide']
-                      }
-                      axios.post(url,self.meta).then(res=>{
+                      // let url = '/api/dataset?schema='+namespace+'::'+prefix+':'+className;
+                      let url = '/api/dataset/'+self.meta['_id']
+                      // if (self.meta && self.meta['_meta']['guide']) {
+                      //   url = url+"&guide="+self.meta['_meta']['guide']
+                      // }
+                      axios.put(url,self.meta).then(res=>{
                         Swal.hideLoading();
                         if (res.data.success) {
                           $.notify("Field Updated",{ globalPosition: 'right',className:'success', showDuration: 40, });
@@ -324,8 +332,10 @@ var app = new Vue({
                       }).catch(err=>{
                         // console.log('err',err.response.data)
                         let culprit = "<h6>"+err.response.data.error+"</h6>"
-                        if (err.response.data && err.response.data.path.length) {
-                          culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
+                        if (err.response.data.hasOwnProperty('path')) {
+                          if (err.response.data.path.length) {
+                            culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
+                          }
                         }
                         if (err.response.data.parent && err.response.data.parent.path){
                           if (true) {
@@ -556,7 +566,7 @@ var app = new Vue({
             });
             self.loading = true;
             // DATASETS PUBLIC
-            axios.get('/api/dataset?&user='+self.user.login).then(res=>{
+            axios.get('/api/dataset?&user='+self.user.login+"&meta=true").then(res=>{
               // console.log("PUBLIC",res.data)
               self.publicDatasets = self.publicDatasets.concat(res.data.hits);
               self.datasetsTotal += res.data.total;
@@ -567,7 +577,7 @@ var app = new Vue({
             });
             self.loading = true;
             // DATASETS PRIVATE
-            axios.get('/api/dataset?private=true&user='+self.user.login).then(res=>{
+            axios.get('/api/dataset?private=true&user='+self.user.login+"&meta=true").then(res=>{
               // console.log("PRIVATE",res.data)
               self.privateDatasets = self.privateDatasets.concat(res.data.hits);
               self.datasetsTotal += res.data.total;
@@ -630,6 +640,14 @@ var app = new Vue({
           }else {
             return item
           }
+        },
+        formatDate(meta){
+          let date =""
+          if (meta.hasOwnProperty('last_updated')) {
+            date = meta['last_updated']
+            return '<i class="far fa-clock"></i> last updated '+moment(date).format('MMM Do YYYY, h:mm:ss a');
+          }
+          return 'N/A'
         }
 			},
 			mounted:function(){

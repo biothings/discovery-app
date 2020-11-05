@@ -17,6 +17,8 @@ class DatasetMeta(DiscoveryMeta):
     class_id = Keyword(required=True)  # like ctsa::bts:CTSADataset
     private = Boolean()  # this controls visibility
     guide = Keyword()
+    date_created = Date(default_timezone='UTC')
+    last_updated = Date(default_timezone='UTC')
 
 
 class Dataset(DiscoveryUserDoc):

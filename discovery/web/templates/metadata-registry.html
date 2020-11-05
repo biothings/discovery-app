@@ -14,7 +14,7 @@
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg" />
   </div>
-  <div class="col-md-10 col-sm-12 m-auto">
+  <div class="col-md-10 col-sm-12 m-auto p-0">
     <div class="">
       <h1 class="text-center logoText mb-1 mt-2">Dataset Registry</h1>
       <div>
@@ -45,7 +45,15 @@
           </span>
         </template>
       </div>
-      <div class="resultsTab mt-3 p-1 bg-secondary text-light" v-text="registryTotal+' Results'">
+      <div class="text-right d-none d-md-block">
+        <select class="form-control form-control-sm w-25 float-right" id="exampleFormControlSelect1" @change="sort()" v-model="sortType">
+          <option>Choose one</option>
+          <option value="A-Z">Alphabetically A-Z</option>
+          <option value="Z-A">Alphabetically Z-A</option>
+          <option value="recent">Recently updated</option>
+        </select>
+      </div>
+      <div class="mt-3 p-1 bg-secondary text-light text-center col-sm-12 col-md-3" v-text="registryTotal+' Results'">
       </div>
       <ul class="list-group context" style="border-top:solid 3px var(--main)" id="regTippyParent">
         <li class="list-group-item d-flex justify-content-center align-items-center text-muted p-1" style="background:#d0d0d0;">
@@ -97,6 +105,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 <script src="/static/js/lodash.js"></script>
+<script src="/static/js/moment.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
@@ -185,6 +194,26 @@
             }
           }
         });
+      },
+      sort(state, payload){
+        let type = payload['type']
+        let copy = [...state.registry];
+        let res = []
+        switch (type) {
+          case 'recent':
+             res = _.sortBy(copy,'._meta.last_updated').reverse();
+            break;
+          case 'A-Z':
+            res = _.sortBy(copy, [function(o) { return o.name; }]);
+            break;
+          case 'Z-A':
+            res = _.sortBy(copy, [function(o) { return o.name; }]).reverse();
+            break;
+          default:
+            res = state.registry
+            break;
+        }
+        Vue.set(state, 'registry', res);
       },
     },
     actions:{
@@ -330,6 +359,13 @@
       },
       detailLink: function(){
         return '/dataset/'+this.item._id
+      },
+      last_updated: function(){
+        if (this.item.hasOwnProperty('_meta') && this.item['_meta'].hasOwnProperty('last_updated')) {
+          return moment(this.item['_meta']['last_updated']).format("MMM Do YYYY"); 
+        }else{
+          return false
+        }
       }
     },
     template: `<li class="list-group-item list-group-item-action p-0 pointer">
@@ -337,6 +373,9 @@
                   <div class="col-sm-1 registry-item-background" :style="{backgroundImage: 'url(' + imgIcon + ')' }"></div>
                   <div class="col-sm-11" @click="goTo(item)">
                     <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
+                    <small class="text-muted float-right" v-if="last_updated">
+                      <span v-text="last_updated"></span>
+                    </small>
                     <p v-if="item && item.description" class="text-muted">
                       <small v-html="text"></small>
                     </p>
@@ -350,6 +389,7 @@
     data: function() {
       return {
         perPageChange:20,
+        sortType: ''
       }
     },
     methods: {
@@ -378,6 +418,12 @@
       },
       search() {
         store.dispatch('search_and_paginate');
+      },
+      sort() {
+        let payload = {'type': this.sortType}
+        store.commit('sort',payload);
+        store.commit('paginate_results');
+        store.commit('calculate_pages');
       },
       prevPage() {
         store.commit('prevPage');
@@ -459,7 +505,7 @@
       page: function(np){
         let self = this;
         store.commit('paginate_results');
-      }
+      },
     }
   })
 </script>
