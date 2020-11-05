@@ -77,10 +77,10 @@
             <template v-if="privateDatasets && privateDatasets.length">
               <div v-for="item in privateDatasets" class="row m-1">
                 <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
-                  <a :href="'/dataset/'+item._id" class="d-inline m-2 text-light" :title="item.name">
+                  <a :href="'/dataset/'+item._id" class="d-block m-2 text-light" :title="item.name">
                     <small v-text="trunc(item.name)"></small>
                   </a>
-                  <small class="badge badge-dark">
+                  <small class="badge badge-info">
                     <span v-html="formatDate(item['_meta'])"></span>
                   </small>
                 </div>
@@ -118,10 +118,10 @@
             <template v-if="publicDatasets && publicDatasets.length">
               <div v-for="item in publicDatasets" class="row m-1">
                 <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
-                  <a :href="'/dataset/'+item._id" class="d-inline m-2 text-light" :title="item.name">
+                  <a :href="'/dataset/'+item._id" class="m-2 text-light d-block" :title="item.name">
                     <small v-text="trunc(item.name)"></small>
                   </a>
-                  <small class="badge badge-dark">
+                  <small class="badge badge-info">
                     <span v-html="formatDate(item['_meta'])"></span>
                   </small>
                 </div>
@@ -647,7 +647,7 @@ var app = new Vue({
             date = meta['last_updated']
             return '<i class="far fa-clock"></i> last updated '+moment(date).format('MMM Do YYYY, h:mm:ss a');
           }
-          return 'N/A'
+          return 'No recent updates'
         }
 			},
 			mounted:function(){

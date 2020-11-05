@@ -148,6 +148,11 @@
         <i class="fas fa-exclamation-circle text-danger"></i> Please select at least 2 items to compare. <br>Select any items to compare ALL properties or items with  validation available ( <small class="badge badge-success">V</small> )
         to compare USED properties only.
       </p>
+      <div>
+        <small class="text-muted">
+          <b v-text="results.length"></b> properties were compared
+        </small>
+      </div>
       <div id="example-table"></div>
       <div v-if="compareItems.length > 1" class="p-1 alert-secondary text-center">
         <a id="downloadCSV" href="#" class="text-muted">
@@ -956,7 +961,7 @@ var app = new Vue({
       },
       compareUsedAvailable: function(){
         return store.getters.getCompareUsedAvailable
-      }
+      },
     },
   })
 
