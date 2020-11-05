@@ -2,7 +2,7 @@
 ''' Discovery App Configuration '''
 
 
-from config_key import COOKIE_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
+from config_key import *
 
 # *****************************************************************************
 # Credentials

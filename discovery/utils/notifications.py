@@ -1,21 +1,108 @@
 import json
-from tornado.httpclient import HTTPRequest, AsyncHTTPClient
+import logging
 import re
-import requests
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from pprint import pformat
 
-import config
+import requests
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
-import logging
+
+class Message(dict):
+
+    def __getattr__(self, attr):
+        # virtual attributes
+        if attr in ('title', 'summary', 'body', 'url', 'url_text', 'image', 'image_altext'):
+            if attr in self:
+                return self[attr]
+            return ""
+        raise AttributeError()
 
 
-def send_mail(sendfrom, sendto, subject, message, host, port, user, password, alt_text=""):
-    """A utility function to send an html email.
-       message should be a HTML string, alt_text can be provided
-       as a text-only version.
+# -------------
+#   helpers
+# -------------
+
+
+def change_link_markdown(description):
     """
+        Change markdown styling of links to match fit Slack Markdown styling
+        Description text links formatted as [link name](URL), we want <URL|link name>
+    """
+    return re.sub(r'\[(?P<label>[^\[\]]+)\]\((?P<url>[^()]+)\)', r'<\g<url>|\g<label>>', description)
+
+
+def generate_ADF(message):
+    """ https://developer.atlassian.com/cloud/jira/platform/apis/document/playground/ """
+    assert isinstance(message, Message)
+    return {
+        "version": 1,
+        "type": "doc",
+        "content": [
+            {
+                "type": "heading",
+                "attrs": {"level": 2},
+                "content": [{"type": "text", "text": message.title}]
+            },
+            {
+                "type": "paragraph",
+                "content": [{"type": "text", "text": message.body}]
+            },
+            {
+                "type": "paragraph",
+                "content": [{"type": "text", "text": message.url_text,
+                             "marks": [{"type": "link", "attrs": {"href": message.url}}]}]
+            }
+        ]
+    }
+
+
+def generate_slack_params(message):
+    """
+    Generate parameters that will be used in slack post request.
+    In this case, markdown is used to generate formatting that
+    will show in Slack message
+    """
+    assert isinstance(message, Message)
+
+    return {
+        "attachments": [{
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {"type": "plain_text", "text": ":sparkles: " + message.title, "emoji": True}
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": f"*<{message.url}|{message.url_text}>*"}
+                },
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": message.body},
+                    "accessory": {"type": "image", "image_url": message.url, "alt_text": message.url_alt}
+                },
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": message.url_text},
+                    "accessory": {
+                        "type": "button",
+                        "text": {"type": "plain_text", "text": message.url_text, "emoji": True},
+                        "value": message.url_text,
+                        "url": message.url,
+                        "action_id": "button-action"
+                    }
+                }
+            ]
+        }]
+    }
+
+
+def generate_mail(sendfrom, sendto, subject, message, alt_text=""):
     # Ref: https://docs.aws.amazon.com/ses/latest/DeveloperGuide/examples-send-using-smtp.html
 
     # Create message container - the correct MIME type is multipart/alternative.
@@ -37,6 +124,19 @@ def send_mail(sendfrom, sendto, subject, message, host, port, user, password, al
     msg.attach(part1)
     msg.attach(part2)
 
+    return msg
+
+# -------------
+#   senders
+# -------------
+
+
+def send_mail(sendfrom, sendto, subject, message, host, port, user, password, alt_text=""):
+    """A utility function to send an html email.
+       message should be a HTML string, alt_text can be provided
+       as a text-only version.
+    """
+    msg = generate_mail(sendfrom, sendto, subject, message, alt_text)
     # Try to send the message.
     try:
         server = smtplib.SMTP(host, port)
@@ -54,107 +154,7 @@ def send_mail(sendfrom, sendto, subject, message, host, port, user, password, al
         logging.info("email sent.")
 
 
-try:
-    from config import SLACK_WEBHOOKS
-except ImportError:
-    SLACK_WEBHOOKS = []
-
-
-def change_link_markdown(description):
-    """
-        Change markdown styling of links to match fit Slack Markdown styling
-    Description text links formatted as [link name](URL), we want <URL|link name>
-    """
-    return re.sub(r'\[(?P<label>[^\[\]]+)\]\((?P<url>[^()]+)\)', r'<\g<url>|\g<label>>', description)
-
-
-def get_portal_image(portal):
-    if portal:
-        if 'outbreak' in portal:
-            return "https://discovery.biothings.io/static/img/outbreak.png"
-        elif 'niaid' in portal:
-            return "https://discovery.biothings.io/static/img/niaid.png"
-        elif 'n3c' in portal:
-            return "https://discovery.biothings.io/static/img/N3Co.png"
-        else:
-            return "https://discovery.biothings.io/static/img/dde-logo-o.png"
-    else:
-        return "https://discovery.biothings.io/static/img/dde-logo-o.png"
-
-
-def generate_slack_params(data, res, github_user, portal):
-    """
-    Generate parameters that will be used in slack post request.
-    In this case, markdown is used to generate formatting that
-    will show in Slack message
-    """
-    meta_title = data["name"]
-    # limit API description to 120 characters
-    meta_description = ((data["description"][:120] + '...')
-                        if len(data["description"]) > 120
-                        else data["description"])
-    meta_description = change_link_markdown(meta_description)
-    meta_id = res["_id"]
-    registry_url = f"https://discovery.biothings.io/dataset/{meta_id}"
-
-    params = {
-        "attachments": [{
-            "blocks": [
-                {
-                    "type": "header",
-                    "text": {
-                        "type": "plain_text",
-                        "text": ":sparkles: New metadata has been registered on Data Discovery Engine",
-                            "emoji": True
-                    }
-                },
-                {
-                    "type": "divider"
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"*<{registry_url}|{meta_title}>*"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": meta_description
-                    },
-                    "accessory": {
-                        "type": "image",
-                        "image_url": get_portal_image(portal),
-                        "alt_text": "DDE",
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "View on Data Discovery Engine"
-                    },
-                    "accessory": {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Click Here",
-                                    "emoji": True
-                        },
-                        "value": "click_me_123",
-                        "url": registry_url,
-                        "action_id": "button-action"
-                    }
-                }
-            ]
-        }]
-    }
-    return params
-
-
-def send_slack_msg(data, res, github_user, portal=None):
+def send_slack_msg(web_hooks, data, res, github_user, portal=None):
     """
     Make requests to slack to post information about newly registered API.
     Notifications will be sent to every
@@ -162,10 +162,10 @@ def send_slack_msg(data, res, github_user, portal=None):
     slack if the registered API contains a tag that is also specific
     a channel/webhook.
     """
-    headers = {'content-type': 'application/json'}
-    http_client = AsyncHTTPClient()
-    for wh in SLACK_WEBHOOKS:
-        params = generate_slack_params(data, res, github_user, portal)
-        req = HTTPRequest(url=wh, method='POST', body=json.dumps(params), headers=headers)
-        http_client = AsyncHTTPClient()
-        http_client.fetch(req)
+    # headers = {'content-type': 'application/json'}
+    # http_client = AsyncHTTPClient()
+    # for wh in web_hooks:
+    #     params = generate_slack_params(data, res, github_user, portal)
+    #     req = HTTPRequest(url=wh, method='POST', body=json.dumps(params), headers=headers)
+    #     http_client = AsyncHTTPClient()
+    #     http_client.fetch(req)

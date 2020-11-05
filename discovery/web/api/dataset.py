@@ -7,10 +7,13 @@
 
 """
 import json
+import logging
 
 from biothings.web.handlers.exceptions import BadRequest
 from discovery.registry import *
 from discovery.registry import datasets
+from discovery.web import notify
+from tornado.httpclient import AsyncHTTPClient
 from tornado.web import Finish, HTTPError, MissingArgumentError
 
 from .base import APIBaseHandler, capture_registry_error, github_authenticated
@@ -47,6 +50,8 @@ def wrap_javascript(doc):
 
 def to_api_doc_repr(regdoc, show_metadata=False, show_id=True):
 
+    # TODO
+
     if show_metadata:
         regdoc['_meta'] = regdoc.meta
 
@@ -54,6 +59,8 @@ def to_api_doc_repr(regdoc, show_metadata=False, show_id=True):
         regdoc.pop('_id')
 
     return regdoc
+
+    # return
 
 
 class DatasetMetadataHandler(APIBaseHandler):
@@ -82,7 +89,15 @@ class DatasetMetadataHandler(APIBaseHandler):
             'guide': {'type': str},
         }
     }
-    # TODO check if not specified args are passed through, meta visibility
+
+    def _report(self, action, **details):
+        client = AsyncHTTPClient()
+        if hasattr(notify.dataset, action):
+            for request in getattr(notify.dataset, action)(**details):
+                try:  # TODO is this necessary?
+                    client.fetch(request)
+                except Exception:
+                    logging.exception("error reporting actions.")
 
     @github_authenticated
     @capture_registry_error
@@ -100,6 +115,13 @@ class DatasetMetadataHandler(APIBaseHandler):
             "result": "created",
             "id": _id
         })
+
+        # self._report(
+        #     'add', _id=_id,
+        #     doc=self.args_json,
+        #     user=self.current_user,
+        #     **self.args
+        # )
 
     @github_authenticated
     @capture_registry_error
@@ -146,10 +168,6 @@ class DatasetMetadataHandler(APIBaseHandler):
             show_metadata = self.args.pop('meta')
             start = self.args.pop('start')
             size = self.args.pop('size')
-            hits = [
-                to_api_doc_repr(dataset, show_metadata)
-                for dataset in datasets.get_all(start, size, **self.args)
-            ]
 
             raise Finish({
                 "total": datasets.total(**self.args),
