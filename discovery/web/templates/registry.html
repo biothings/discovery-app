@@ -713,7 +713,7 @@ Vue.component('registry-item', {
           <small v-if="item && item.validation" class="badge badge-success mr-1">V</small>
         </p>
       </div>
-      <div class="p-1 bg-dark d-flex align-items-center justify-content-around flip-in-ver-left">
+      <div class="p-1 bg-dark d-flex align-items-center justify-content-around">
         <div>
           <span class="fa-stack fa-1x pointer tip mr-2 ml-2" @click.prevent="saveDataAndRedirect(item)" :data-tippy-info="'Visualize '+item.label">
             <i class="fas fa-circle text-muted fa-stack-2x"></i>
