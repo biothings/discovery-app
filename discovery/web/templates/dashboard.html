@@ -32,10 +32,10 @@
           </div>
           <div class="metaCont" v-if="dashboard && dashboard.length">
             <div v-for="item in dashboard" class="row m-1">
-              <div class="col-sm-5 p-1 mainBackDark d-flex align-items-center justify-content-left">
+              <div class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-between">
                 <a target="_blank" :href="'/view/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
               </div>
-              <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
+              <div class="col-sm-4 p-1 bg-dark actions d-flex align-items-center justify-content-around">
                 <div>
                   <a target="_blank" :href="item.url" :title="item.url" >
                     <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'source URL'">
@@ -76,15 +76,15 @@
           <div class="metaCont">
             <template v-if="privateDatasets && privateDatasets.length">
               <div v-for="item in privateDatasets" class="row m-1">
-                <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
+                <div class="col-sm-12 col-md-8 p-1 mainBackLight d-flex align-items-center justify-content-between">
                   <a :href="'/dataset/'+item._id" class="d-block m-2 text-light" :title="item.name">
                     <small v-text="trunc(item.name)"></small>
                   </a>
-                  <small class="badge badge-info">
+                  <small class="text-light">
                     <span v-html="formatDate(item['_meta'])"></span>
                   </small>
                 </div>
-                <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
+                <div class="col-sm-12 col-md-4 p-1 bg-dark actions d-flex align-items-center justify-content-around">
                   <div>
                     <a :href="'/dataset/'+item._id">
                       <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'View Dataset'">
@@ -100,11 +100,10 @@
                     </span>
                   </div>
                   <div>
-                    <span class="fa-stack fa-1x pointer tip" @click="handlePrivacy(item,'private')" :data-tippy-info="'Edit Privacy'">
+                    <span class="fa-stack fa-1x pointer tip" @click="handlePrivacy(item,'private')" :data-tippy-info="'Item is PRIVATE - Edit Privacy'">
                       <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                      <i class="fas fa-lock fa-stack-1x text-light"></i>
+                      <i class="fas fa-lock fa-stack-1x text-warning"></i>
                     </span>
-                    <small class="text-warning tip bold" :data-tippy-info="'Only YOU can see this entry'">PRIVATE</small>
                   </div>
                   <div>
                     <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('metadata',item._id)" :data-tippy-info="'Delete'">
@@ -117,15 +116,15 @@
             </template>
             <template v-if="publicDatasets && publicDatasets.length">
               <div v-for="item in publicDatasets" class="row m-1">
-                <div class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left">
+                <div class="col-sm-12 col-md-8 p-1 mainBackLight d-flex align-items-center justify-content-between">
                   <a :href="'/dataset/'+item._id" class="m-2 text-light d-block" :title="item.name">
                     <small v-text="trunc(item.name)"></small>
                   </a>
-                  <small class="badge badge-info">
+                  <small class="text-light">
                     <span v-html="formatDate(item['_meta'])"></span>
                   </small>
                 </div>
-                <div class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around">
+                <div class="col-sm-12 col-md-4 p-1 bg-dark actions d-flex align-items-center justify-content-around">
                   <div>
                     <a :href="'/dataset/'+item._id">
                       <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'View Dataset'">
@@ -141,11 +140,10 @@
                     </span>
                   </div>
                   <div>
-                    <span class="fa-stack fa-1x pointer tip" @click="handlePrivacy(item,'public')" :data-tippy-info="'Edit Privacy'">
+                    <span class="fa-stack fa-1x pointer tip" @click="handlePrivacy(item,'public')" :data-tippy-info="'Item is PUBLIC - Edit Privacy'">
                       <i class="fas fa-circle text-muted fa-stack-2x"></i>
                       <i class="fas fa-lock-open fa-stack-1x text-light"></i>
                     </span>
-                    <small class="text-info tip bold" :data-tippy-info="'Anybody can see this entry'">PUBLIC</small>
                   </div>
                   <div>
                     <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('metadata',item._id)" :data-tippy-info="'Delete'">
@@ -179,6 +177,17 @@
 <script src="/static/js/notify.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
+$.notify.addStyle('success', {
+  html: "<div><span data-notify-text/></div>",
+  classes: {
+    base: {
+      "white-space": "nowrap",
+      "background-color": "#28a745",
+      "padding": "5px",
+      "color":'white',
+    }
+  }
+});
 var app = new Vue({
       el: '#dashboard',
 			data: function(){
@@ -311,7 +320,7 @@ var app = new Vue({
                       axios.put(url,self.meta).then(res=>{
                         Swal.hideLoading();
                         if (res.data.success) {
-                          $.notify("Field Updated",{ globalPosition: 'right',className:'success', showDuration: 40, });
+                          $.notify("Field Updated",{ globalPosition: 'right', style:'success', showDuration: 40, });
                           Swal.fire({
                             title: 'Make other changes?',
                             confirmButtonColor:"{{color_main}}",
@@ -555,7 +564,7 @@ var app = new Vue({
           if (this.user.login) {
             //SCHEMA NAMESPACES
             self.loading = true;
-            axios.get('/api/registry?user='+self.user.login).then(res=>{
+            axios.get('/api/registry?user='+self.user.login+"&meta=true").then(res=>{
               // console.log("SCHEMAS",res.data)
               self.dashboard = res.data.hits;
               self.dashboardTotal = res.data.total;
@@ -645,7 +654,7 @@ var app = new Vue({
           let date =""
           if (meta.hasOwnProperty('last_updated')) {
             date = meta['last_updated']
-            return '<i class="far fa-clock"></i> last updated '+moment(date).format('MMM Do YYYY, h:mm:ss a');
+            return '<i class="far fa-clock"></i> last updated '+moment(date).format('MMM Do YYYY, h:mm a');
           }
           return 'No recent updates'
         }
