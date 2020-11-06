@@ -402,7 +402,7 @@
         }
         self.style={
           'border-color':color,
-          'border-width': '2px',
+          'border-width': '3px',
           'border-style': 'solid'
         }
       },
@@ -512,12 +512,15 @@
     },
     template:
       `<div class="m-1 rounded text-dark bg-light" :style="style">
-        <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm d-block">
+        <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm d-block w-100 rounded-0">
           <b v-text="optionName"></b>
           <small class="text-warning" v-text="!expand?'show':'hide'"></small>
         </button>
         <template v-if="expand">
-          <small v-text="option.description"></small>
+          <div class="alert alert-light">
+            <h6 class="m-0" v-if="option && option['@type']" v-text="option['@type']"></h6>
+            <small v-text="option.description"></small>
+          </div>
           <small class="badge badge-pill badge-dark text-warning m-1" v-text="option.type == 'string'?'string':''"></small>
           <!-- 🌈 VOCAB 🌈 -->
           <div v-if="option && option.vocabulary" class="text-center">
@@ -536,8 +539,8 @@
             <enum-box :enumeration="option.enum"></objeenum>
           </div>
           <!-- 🌈 LIST OF 🌈 -->
-          <div v-if="option.items" class="alert-info p-1">
-            <small class="text-info font-weight-bold">LIST OF:</small>
+          <div v-if="option.items" class="bg-dark p-1">
+            <b class="text-warning font-weight-bold">LIST OF:</b>
             <one-of :name="name" :option="option.items" :isChild="true"></one-of>
           </div>
         </template>
@@ -562,7 +565,7 @@
         }
         self.style={
           'border-color':color,
-          'border-width': '2px',
+          'border-width': '3px',
           'border-style': 'solid'
         }
       },
@@ -669,12 +672,15 @@
     },
     template:
       `<div class="m-1 rounded text-dark bg-light" :style="style">
-        <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm">
+        <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm w-100 rounded-0">
           <b v-text="optionName"></b>
           <small class="text-warning" v-text="!expand?'show':'hide'"></small>
         </button>
         <template v-if="expand">
-          <small v-text="option.description"></small>
+          <div class="alert alert-light">
+            <h6 class="m-0" v-if="option && option['@type']" v-text="option['@type']"></h6>
+            <small v-text="option.description"></small>
+          </div>
           <small class="badge badge-pill badge-dark text-warning m-1" v-text="option.type == 'string'?'string':''"></small>
           <!-- 🌈 VOCAB 🌈 -->
           <div v-if="option && option.vocabulary" class="text-center">
@@ -693,8 +699,8 @@
             <enum-box :enumeration="option.enum"></objeenum>
           </div>
           <!-- 🌈 LIST OF 🌈 -->
-          <div v-if="option.items" class="alert-info p-1">
-            <small class="text-info font-weight-bold">LIST OF:</small>
+          <div v-if="option.items" class="bg-dark p-1">
+            <b class="text-warning font-weight-bold">LIST OF:</b>
             <one-of :name="name" :option="option.items" isChild="true"></one-of>
           </div>
         </template>
