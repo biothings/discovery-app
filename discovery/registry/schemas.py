@@ -221,6 +221,7 @@ def delete(namespace):
     """
     Delete the schema file and its associated classes.
     Use delete_classes to change the class index only.
+    Return the number of classes in this schema deleted.
     """
     schema = ESSchemaFile.get(id=namespace, ignore=404)
 
@@ -228,7 +229,9 @@ def delete(namespace):
         raise NoEntityError(f"schema {namespace} does not exist.")
 
     schema.delete()
-    delete_classes(schema.meta.id)
+    count = delete_classes(schema.meta.id)
+
+    return count
 
 
 # ----------------
@@ -318,6 +321,8 @@ def delete_classes(namespace):
     search.delete()
 
     logging.info("Deleted %s classes from namespace %s.", search.count(), namespace)
+
+    return search.count()
 
 
 def get_all_contexts():

@@ -371,6 +371,7 @@ def delete(_id):
     Delete a dataset metadata document.
     If you only have the identifier, use get function
     to lookup the _id and then delete with _id.
+    Return the name of the metadata to confirm.
     """
     dataset = ESDataset.get(id=_id, ignore=404)
 
@@ -378,3 +379,5 @@ def delete(_id):
         raise NoEntityError(f"dataset {_id} does not exist.")
 
     dataset.delete()
+
+    return dataset.name
