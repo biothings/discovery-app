@@ -89,6 +89,33 @@
                                 </p>`
                     },
                     {
+                      'anchor':'data-portals',
+                      'question':'What data portals are integrated into this project?',
+                      'answer':`<p>
+                                  The Data Discovery Engine is built with a very extensible infrastructure based on reusability and thus it can easily integrate multi-purpose portals. 
+                                </p>
+                                <p>
+                                  The core of this project is based on <a href="https://schema.org/" target="_blank">Schema.org</a> and re-using and extending an existing microdata markup format to boost the discoverabilty of and findability of 
+                                  biomedical research. 
+                                </p>
+                                <p>
+                                  Currently it provides support for biomedical and COVID-19 focused portals.
+                                </p>`
+                    },
+                    {
+                      'anchor':'add-portal',
+                      'question':'Can we request to add our portal to the Discovery Data Engine?',
+                      'answer':`<p>
+                                  If your data portal currently uses structured metadata or you believe it could benefit from ingesting structured metadata. You can use the tools we provide to author/covert your own schema and create custom validation rules.
+                                </p>
+                                <p>
+                                  With a customized schema and validation you can generate a dynamically generated form custom to your specifications and use it to format data to your schema structure.
+                                </p>
+                                <p>
+                                  If you believe the Discovery Data Engine could benefit from the addition of your portal based on the area of focus please <a href="https://github.com/biothings/discovery-app/issues/new">contact us</a>.
+                                </p>`
+                    },
+                    {
                       'anchor':'dashboard',
                       'question':'How do I access my dashboard?',
                       'answer':`<p>
@@ -100,14 +127,10 @@
                                 </p>`
                     },
                     {
-                      'anchor':'delete-item',
-                      'question':'How do I delete a registered schema or dataset?',
+                      'anchor':'issue-report',
+                      'question':'How can I report an issue or make a suggestion?',
                       'answer':`<p>
-                                  Your user <a href="/dashboard">dashboard</a> is the place to do that. If you are the user that registered that item you will see it listed in your dashboard.
-                                </p>
-                                <p class="alert alert-danger text-center">
-                                  <img class="m-2 w-75" src="/static/img/deletehelp.png" alt="dashboard"/><br />
-                                  <small>Click on the <i class="fas fa-trash"></i> icon and it will be deleted. Warning: This action cannot be reverted!</small>
+                                  If you believe you have a great idea for a new feature or if you found an issue while using any of our tools please <a href="https://github.com/biothings/discovery-app/issues/new">create an issue</a> via GitHub and let us know what happened and how we can reproduce the issue.
                                 </p>`
                     },
 
@@ -145,6 +168,16 @@
                                 </p>
                                 <p>
                                   You can browse existing schemas from the community and <a href="https://schema.org/" target="_blank">Schema.org</a> schemas in our <a href="/registry">registry</a>.
+                                </p>`
+                    },
+                    {
+                      'anchor':'reuse-schema',
+                      'question':'I found a schema that is perfect for me, how do I re-use it?',
+                      'answer':`<p>
+                                  If you do not need to extend a schema and would like to use it as is, you can download it by clicking the <b>source</b> link in that schema's home page.
+                                </p>
+                                <p>
+                                  For example, here is the homepage of an extended Dataset schema you may want to re-use: <a target="_blank" href="/view/outbreak">https://discovery.biothings.io/view/outbreak</a>.
                                 </p>`
                     },
                     {
@@ -303,6 +336,17 @@
                                 <p class="alert alert-info text-center">
                                   <img class="m-2 w-75" src="/static/img/dashhelp.png" alt="dashboard"/><br />
                                   <small>Options include: view, quick edit, make private/public, and delete.</small>
+                                </p>`
+                    },
+                    {
+                      'anchor':'delete-item',
+                      'question':'How do I delete a registered schema or dataset?',
+                      'answer':`<p>
+                                  Your user <a href="/dashboard">dashboard</a> is the place to do that. If you are the user that registered that item you will see it listed in your dashboard.
+                                </p>
+                                <p class="alert alert-danger text-center">
+                                  <img class="m-2 w-75" src="/static/img/deletehelp.png" alt="dashboard"/><br />
+                                  <small>Click on the <i class="fas fa-trash"></i> icon and it will be deleted. Warning: This action cannot be reverted!</small>
                                 </p>`
                     },
                     {
