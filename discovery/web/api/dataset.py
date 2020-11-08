@@ -80,6 +80,11 @@ class DatasetMetadataHandler(APIBaseHandler):
             'private': {'type': bool, 'default': False},
             'guide': {'type': str, 'default': None},
         },
+        'PUT': {
+            'schema': {'type': str},
+            'private': {'type': bool},
+            'guide': {'type': str}
+        },
         'GET': {
             'start': {'type': int, 'default': 0, 'alias': ['from', 'skip']},
             'size': {'type': int, 'default': 10, 'max': 20, 'alias': 'skip'},
