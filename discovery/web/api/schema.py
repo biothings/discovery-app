@@ -17,13 +17,13 @@
 import json
 import logging
 
+from discovery.registry import schemas
+from discovery.utils.adapters import SchemaAdapter
+from discovery.web import notify
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import Finish, HTTPError
 
-from discovery.utils.adapters import SchemaAdapter
-from discovery.registry import schemas
-
-from .base import APIBaseHandler, github_authenticated, capture_registry_error
+from .base import APIBaseHandler, capture_registry_error, github_authenticated
 
 CORE_SCHEMA_NS = ('schema', 'biomedical', 'datacite', 'google')
 RESERVED_SCHEMA_NS = ('metadata')
@@ -176,6 +176,12 @@ class SchemaRegistryHandler(APIBaseHandler):
             'url': self.request.full_url() + '/' + namespace,
         })
 
+        self.report(
+            notify.schema, "add",
+            namespace=namespace,
+            num_classes=count
+        )
+
     @capture_registry_error
     def get(self, namespace=None, curie=None):  # TODO PAGINATION
         """
@@ -288,6 +294,12 @@ class SchemaRegistryHandler(APIBaseHandler):
             'url': self.request.full_url() + '/' + namespace,
         })
 
+        self.report(
+            notify.schema, "update",
+            namespace=namespace,
+            num_classes=count
+        )
+
     @github_authenticated
     @capture_registry_error
     def delete(self, namespace):
@@ -301,7 +313,13 @@ class SchemaRegistryHandler(APIBaseHandler):
         if schemas.get_meta(namespace).username != self.current_user:
             raise HTTPError(403)
 
-        schemas.delete(namespace)
+        count = schemas.delete(namespace)
+
+        self.report(
+            notify.schema, "delete",
+            namespace=namespace,
+            num_classes=count
+        )
 
 
 class SchemaViewHandler(APIBaseHandler):

@@ -90,15 +90,6 @@ class DatasetMetadataHandler(APIBaseHandler):
         }
     }
 
-    def _report(self, action, **details):
-        client = AsyncHTTPClient()
-        if hasattr(notify.dataset, action):
-            for request in getattr(notify.dataset, action)(**details):
-                try:  # TODO is this necessary?
-                    client.fetch(request)
-                except Exception:
-                    logging.exception("error reporting actions.")
-
     @github_authenticated
     @capture_registry_error
     def post(self):
@@ -116,12 +107,13 @@ class DatasetMetadataHandler(APIBaseHandler):
             "id": _id
         })
 
-        # self._report(
-        #     'add', _id=_id,
-        #     doc=self.args_json,
-        #     user=self.current_user,
-        #     **self.args
-        # )
+        self.report(
+            notify.dataset,
+            'add', _id=_id,
+            doc=self.args_json,
+            user=self.current_user,
+            **self.args
+        )
 
     @github_authenticated
     @capture_registry_error
@@ -145,6 +137,13 @@ class DatasetMetadataHandler(APIBaseHandler):
             'result': "updated",
             'version': version
         })
+
+        self.report(
+            notify.dataset, 'update',
+            _id=_id, version=version,
+            name=self.args_json.get('name'),
+            user=self.current_user,
+        )
 
     @capture_registry_error
     def get(self, _id=None):
@@ -207,8 +206,14 @@ class DatasetMetadataHandler(APIBaseHandler):
         if datasets.get_meta(_id).username != self.current_user:
             raise HTTPError(403)
 
-        datasets.delete(_id)
+        name = datasets.delete(_id)
 
         self.finish({
             "success": True
         })
+
+        self.report(
+            notify.dataset, 'delete',
+            _id=_id, name=name,
+            user=self.current_user,
+        )
