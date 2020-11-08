@@ -99,6 +99,8 @@ class TestDatasetMetadata(DiscoveryTestCase):
         doc = self.get_dataset('wellderly.json')
         self.request('dataset/83dc3401f86819de', method='PUT', json=doc, headers=self.auth_user)
 
+    # TODO add tests that update dataset _meta in different ways
+
     # read only
 
     def test_020_get_public(self):
