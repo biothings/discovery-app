@@ -6,6 +6,7 @@ import certifi
 from biothings.web.handlers import BaseAPIHandler
 from biothings.web.handlers.exceptions import BadRequest
 from discovery.registry import *
+from discovery.web import notify
 from discovery.web.handlers import DiscoveryBaseHandler
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import Finish, HTTPError, MissingArgumentError
@@ -60,6 +61,10 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
 
         super().prepare()
 
+        # configure notifiers
+        notify.schema.configure(self.web_settings)
+        notify.dataset.configure(self.web_settings)
+
         # Additionally support GitHub Token Login
         # Mainly for debug and admin purposes
 
@@ -79,3 +84,14 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                         logging.info('logged in user from github token: %s', user)
                         self.set_secure_cookie("user", json_encode(user))
                         self.current_user = user['login']
+
+    def report(self, notifier, action, **details):
+        # postulation TODO
+        # not triggered in testing because
+        # event loop closes after receiveing initial response
+        client = AsyncHTTPClient()
+        if not self.settings.get('debug') and hasattr(notifier, action):
+            for request in getattr(notifier, action)(**details):
+                # may not be sufficient to surpress all error depending on
+                # tornado versions, left this way for development
+                client.fetch(request, raise_error=False)
