@@ -105,9 +105,6 @@
                   <a  :href="'/view/'+namespace+'/'+def">
                     <span v-text="def"></span> <i class="fas fa-chevron-right"></i>
                   </a>
-                  <!-- <a v-show='namespaceRegistered' class="pointer tip text-muted" :data-tippy-info="'Extend '+def" @click="extend(def)">
-                    <i class="fas fa-code-branch"></i>
-                  </a> -->
                 </li>
               </ul>
             </li>
@@ -402,7 +399,7 @@
         }
         self.style={
           'border-color':color,
-          'border-width': '2px',
+          'border-width': '3px',
           'border-style': 'solid'
         }
       },
@@ -512,12 +509,15 @@
     },
     template:
       `<div class="m-1 rounded text-dark bg-light" :style="style">
-        <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm d-block">
+        <button v-if="!isChild" @click="expand=!expand" :class="[expand?'btn-primary':'btn-dark']" class="btn btn-sm d-block w-100 rounded-0">
           <b v-text="optionName"></b>
           <small class="text-warning" v-text="!expand?'show':'hide'"></small>
         </button>
         <template v-if="expand">
-          <small v-text="option.description"></small>
+          <div class="alert alert-light" v-if="!option.items">
+            <h6 class="m-0" v-if="option && option['@type']" v-text="option['@type']"></h6>
+            <small v-text="option.description"></small>
+          </div>
           <small class="badge badge-pill badge-dark text-warning m-1" v-text="option.type == 'string'?'string':''"></small>
           <!-- 🌈 VOCAB 🌈 -->
           <div v-if="option && option.vocabulary" class="text-center">
@@ -536,8 +536,8 @@
             <enum-box :enumeration="option.enum"></objeenum>
           </div>
           <!-- 🌈 LIST OF 🌈 -->
-          <div v-if="option.items" class="alert-info p-1">
-            <small class="text-info font-weight-bold">LIST OF:</small>
+          <div v-if="option.items" class="bg-dark p-1">
+            <b class="text-warning font-weight-bold">LIST OF:</b>
             <one-of :name="name" :option="option.items" :isChild="true"></one-of>
           </div>
         </template>
@@ -562,7 +562,7 @@
         }
         self.style={
           'border-color':color,
-          'border-width': '2px',
+          'border-width': '3px',
           'border-style': 'solid'
         }
       },
@@ -669,12 +669,15 @@
     },
     template:
       `<div class="m-1 rounded text-dark bg-light" :style="style">
-        <button v-if="!isChild" @click="expand=!expand" class="btn btn-secondary btn-sm">
+        <button v-if="!isChild" @click="expand=!expand" :class="[expand?'btn-primary':'btn-dark']" class="btn btn-sm w-100 rounded-0">
           <b v-text="optionName"></b>
           <small class="text-warning" v-text="!expand?'show':'hide'"></small>
         </button>
         <template v-if="expand">
-          <small v-text="option.description"></small>
+          <div class="alert alert-light" v-if="!option.items">
+            <h6 class="m-0" v-if="option && option['@type']" v-text="option['@type']"></h6>
+            <small v-text="option.description"></small>
+          </div>
           <small class="badge badge-pill badge-dark text-warning m-1" v-text="option.type == 'string'?'string':''"></small>
           <!-- 🌈 VOCAB 🌈 -->
           <div v-if="option && option.vocabulary" class="text-center">
@@ -693,8 +696,8 @@
             <enum-box :enumeration="option.enum"></objeenum>
           </div>
           <!-- 🌈 LIST OF 🌈 -->
-          <div v-if="option.items" class="alert-info p-1">
-            <small class="text-info font-weight-bold">LIST OF:</small>
+          <div v-if="option.items" class="bg-dark p-1">
+            <b class="text-warning font-weight-bold">LIST OF:</b>
             <one-of :name="name" :option="option.items" isChild="true"></one-of>
           </div>
         </template>
@@ -747,16 +750,15 @@
         self.textColor = 'mainTextDark'
         self.backColor = 'mainBackDark'
       }
-      // console.log(self.name,self.fullinfo)
     },
     computed: {
     },
     template:
     `<div class="border-bottom row m-0">
       <div class="col-sm-12 col-md-3 bg-dark bold d-flex justify-content-center align-items-center">
-        <small>
+        <h6 class="m-0">
           <span :class="[isRequired(name)?'text-danger font-weight-bold':'text-light']" v-text="name" :data-tippy-info="JSON.stringify(fullinfo,null,2)"></span>
-        </small>
+        </h6>
       </div>
       <div class="col-sm-12 col-md-9 text-muted bg-light">
         <small v-text="fullinfo['description']"></small>
