@@ -1,7 +1,37 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
+  .drag-el{
+    color: white;
+    transition: all .3s;
+    background-image: url("/static/img/cube.svg");
+    background-position: left;
+    background-repeat: no-repeat;
+    outline: none !important;
+    padding: 10px 10px 10px 40px !important;
+  }
+  .drag-el:hover{
+    cursor: grab;
+  }
+  .v-container{
+    position: relative;
+    transform-style: preserve-3d;
+  }
+  .drop-zone {
+    background-color: honeydew;
+    border: grey dotted 2px;
+    max-height: 200px;
+    overflow: scroll;
+  }
+  .drop-zone[drop-active=true] {
+    background-color: #d2ff8f;
+    border: #caff37 dotted 2px;
+  }
+</style>
+<link rel="stylesheet" href="/static/css/codemirror.css">
 <section id="editor" class="container-fluid m-auto col-sm-12 col-md-10 col-lg-10 col-xl-8" style="min-height: 80vh;padding-top:60px;">
+  <audio id="dropsound" src="/static/img/tinybutton.wav"></audio>
   <div>
     <div class="jumbotron bg-light text-center m-1 pt-4">
       <h1 class="logoText">Schema Editor</h1>
@@ -40,6 +70,13 @@
               </small>
             </a>
           </li>
+          <li class='nav-item'>
+            <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-info text-light pointer': prefix }" data-tippy="Edit Validation" @click='editValidation()'>
+              <small>
+                <i class="fas fa-file-download"></i> <span v-text="validationView ? 'Close Validation Editor':'Open Validation Editor'"></span>
+              </small>
+            </a>
+          </li>
           <li class='nav-item' v-show="prefix">
             <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-primary text-light pointer': prefix }" data-tippy="Download your schema" @click='downnloadSchema()'>
               <small>
@@ -63,6 +100,33 @@
           </a>
         </li>
       </ul>
+      <!-- Validation -->
+      <div v-if="validationView" class="v-container p-0 bg-dark justify-content-center d-flex align-items-center">
+        <div class="w-100 row m-0">
+          <div class="col-sm-12 col-md-6 bg-secondary border-right">
+            <h5 class="text-light text-center m-0">Properties | Validation</h5>
+            <template v-for="(val,propname) in validation_props">
+              <validation-dropzone :propname="propname" :key="propname" :validation_options="validation_options" :val="val"></validation-dropzone>
+            </template>
+          </div>
+          <div class="col-sm-12 col-md-6 bg-dark border-left">
+            <h5 class="text-light text-center m-0">Common Options</h5>
+            <small class="text-info text-center d-block">Edit, Drag and Drop</small>
+            <div class="border rounded p-2 bg-light mb-2">
+              <template v-for='item in validation_options'>
+                <div class='badge drag-el m-1' :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" :key='item.title' draggable @dragstart='startDrag($event, item)'>
+                  <span v-text="item.title"></span>
+                  <span data-tippy="EDIT" class="badge badge-light pointer" @click="editValidationOption(item)"><i class="fas fa-pen-square"></i></span>
+                </div>
+              </template>
+              <div @click="addValidationOption()" data-tippy="ADD NEW" class="badge m-1 badge-secondary text-light pointer"><i class="fas fa-plus"></i></div>
+            </div>
+          </div>
+          <div class="col-sm-12 bg-dark p-1" v-if="item">
+            <editor></editor>
+          </div>
+        </div>
+      </div>
       <!-- LOGGED IN DASHBOARD -->
       <template v-if="userInfo && userInfo.login">
         <!-- NAMESPACE -->
@@ -78,7 +142,7 @@
                 </div>
                 <input type="text" v-model='inputNamespace' class="form-control m-auto text-center" :class="{'text-success':availableNamespace, 'text-danger': !availableNamespace}" placeholder="3 chars min.">
                 <div class="input-group-append">
-                  <button :disabled="!availableNamespace" class="btn themeButton text-light" type="submit" v-text="'Use This'"></button>
+                  <button :disabled="!availableNamespace" class="btn text-light" :class="{'btn-success':availableNamespace, 'btn-danger': !availableNamespace}" type="submit">Continue</button>
                 </div>
               </div>
               <small class="text-muted">This will be the prefix used for all new definitions. eg. prefix:YourDefinition </small>
@@ -100,7 +164,7 @@
         </div>
 
         <!-- PARENT CLASSES -->
-        <div class="jumbotron alert-secondary" v-if="newClassAdded" id="editorTippy">
+        <div class="jumbotron alert-secondary" v-if="newClassAdded && !validationView" id="editorTippy">
           <div>
             <input type="checkbox" class="form-control slider" id="customControlInline" @click="toggleDesc()">
             <small class="text-muted" for="customControlInline" >Show Descriptions</small>
@@ -145,8 +209,9 @@
 {% endblock %}
 {% block extra_scripts %}
 <script src="https://unpkg.com/vuex"></script>
-<script src="./static/js/lodash.js"></script>
-<script src="./static/js/notify.min.js"></script>
+<script src="/static/js/lodash.js"></script>
+<script src="/static/js/notify.min.js"></script>
+<script src="/static/js/codemirror.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
@@ -172,7 +237,110 @@ const store = new Vuex.Store({
       "properties": {},
       'required':[]
     },
-    'showDescriptions':false
+    'showDescriptions':false,
+    'editThis':null,
+    'previousPreviewProps': {},
+    'validation_options': [
+            {
+              id: 0,
+              title: 'string',
+              color: '#0263fd',
+              validation:{
+                "type": "string"
+              }
+            },
+            {
+              id: 1,
+              title: 'boolean',
+              color: '#d62979',
+              validation:{
+                "type": "boolean"
+              }
+            },
+            {
+              id: 3,
+              title: 'integer',
+              color: '#6e3ac5',
+              validation:{
+                "type": "integer"
+              }
+            },
+            {
+              id: 4,
+              title: 'url',
+              color: '#fc6903',
+              validation:{
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            {
+              id: 5,
+              title: 'keywords',
+              color: '#28908c',
+              validation:{
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              id: 6,
+              title: 'date',
+              color: '#9bbf06',
+              validation:{
+                "format": "date",
+                "type": "string"
+              }
+            },
+            {
+              id: 7,
+              title: 'enumeration',
+              color: '#5a71a5',
+              validation:{
+                "type": "string",
+                "enum": ["red", "green", "yellow"]
+              }
+            },
+            {
+              id: 8,
+              title: 'constant',
+              color: '#d8272a',
+              validation:{
+                "const": "Edit const value"
+              }
+            },
+            {
+              id: 9,
+              title: 'object',
+              color: '#49414b',
+              validation:{
+                "properties": {
+                  "number":      { "type": "number" },
+                  "street_name": { "type": "string" },
+                  "street_type": { "type": "string",
+                                  "enum": ["Street", "Avenue", "Boulevard"]
+                                }
+                }
+              }
+            },
+          ],
+    'val_test': {
+            'name':{},
+            'contains_phi':{},
+            'description':{},
+            'size':{},
+            'author':{}
+          }
+    
   },
   strict: true,
   mutations: {
@@ -183,6 +351,53 @@ const store = new Vuex.Store({
       state.schema.push(payload['schema']);
       state.startingPoint=payload['start'];
       // console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
+    },
+    setValidation(state,payload){
+      console.log(state.finalschema)
+      let item = payload['validation']
+      let name = payload['name']
+      let newval = Object.assign({}, state.finalschema['@graph'][0]['$validation']['properties'][name], item['validation'])
+      console.log('merged', newval)
+      Vue.set(state.finalschema['@graph'][0]['$validation']['properties'], name, newval)
+
+      // let item = payload['validation']
+      // let name = payload['name']
+      // Vue.set(state['val_test'], name, item['validation'])
+    },
+    resetValidationFor (state,payload){
+      let name = payload['name']
+      Vue.set(state.finalschema['@graph'][0]['$validation']['properties'], name, {})
+      // Vue.set(state['val_test'], name, {})
+    },
+    addValidationOption(state,payload){
+      let item = payload['validation']
+      state.validation_options.push(item)
+      Swal.fire({type:'success',
+                toast:true,
+                title: 'Option Added',
+                showConfirmButton:false,
+                timer:1000})
+    },
+    editValidationItem(state,payload){
+      let itemID = payload['item']['id']
+      let newitem = payload['item']
+      for (let i = 0; i < state.validation_options.length; i++) {
+        let item = state.validation_options[i];
+        if (item.id == itemID) {
+          Vue.set(state.validation_options, i, newitem)
+          state.editThis = null
+          Swal.fire({type:'success',
+                toast:true,
+                title: 'Updated',
+                showConfirmButton:false,
+                timer:1000})
+        }
+      }
+      console.log(state.validation_options.length)
+    },
+    editThis (state,payload){
+      let item = payload['item']
+      state.editThis = item;
     },
     savePrefix(state,payload){
       state.prefix = payload['prefix'];
@@ -276,6 +491,15 @@ const store = new Vuex.Store({
     },
     formPreview(state){
 
+      try {
+        state.previousPreviewProps = state.finalschema['@graph'][0]['$validation']['properties'];
+      } catch (error) {
+        console.log('NO previousPreviewProps', state.previousPreviewProps)
+      }
+      if (_.size(state.previousPreviewProps)) {
+        console.log('previousPreviewProps found', state.previousPreviewProps)
+      }
+
       Vue.set(state.finalschema,'@graph',[]);
       Vue.set(state.validation,'properties',{});
       Vue.set(state.validation,'required',[]);
@@ -313,7 +537,7 @@ const store = new Vuex.Store({
               if (state.schema[i].properties[x].selected) {
                 let propValue={};
                 Vue.set(propValue,'description',state.schema[i].properties[x].description)
-                Vue.set(propValue,'type','string')
+                // Vue.set(propValue,'type','string')
                 Vue.set(state.validation['properties'],state.schema[i].properties[x].label,propValue)
               }
               if (state.schema[i].properties[x].isRequired) {
@@ -325,52 +549,20 @@ const store = new Vuex.Store({
           }
         }else{
           //Handle Parent Classes
-          if (state.schema[i].properties) {
+          if (state.schema[i].hasOwnProperty('properties')) {
             let myLabel = "";
-            for (var y = 0; y < state.schema[i].properties.length; y++) {
+            for (let y = 0; y < state.schema[i].properties.length; y++){
               if (state.schema[i].properties[y].selected) {
                 let propValue={};
-                Vue.set(propValue,'description',state.schema[i].properties[y].description)
-                //Assign type
-                myLabel = state.schema[i].properties[y].label;
-
-                if (['name','description','version','identifier'].includes(myLabel)) {
-                  Vue.set(propValue,'type','string')
-                }else if (['url','sameAs',].includes(myLabel)) {
-                  Vue.set(propValue,'type','string')
-                  Vue.set(propValue,'format','uri')
-                }else if (['keywords',].includes(myLabel)) {
-                  Vue.set(propValue,'type','array')
-                  Vue.set(propValue,'items',{'type':'string'})
-                }else if (['datePublished','dateModified',].includes(myLabel)) {
-                  Vue.set(propValue,'oneOf',[{
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    {
-                      "type": "string",
-                      "format": "date"
-                    }
-                  ]);
-                }else if (['creator','publisher','license','citation','samples','funder','contributor'].includes(myLabel)) {
-                  Vue.set(propValue,'type','object')
-                }else if (['measurementTechnique'].includes(myLabel)) {
-                  Vue.set(propValue,'enum',[])
-                }else if (['includedInDataCatalog'].includes(myLabel)) {
-                  Vue.set(propValue,'type','object')
-                  Vue.set(propValue,'properties',{
-                    "name": {
-                      "const": "CTSA Datasets"
-                    },
-                    "url": {
-                      "const": "https://ctsa.ncats.nih.gov/cd2h/"
-                    }
-                  })
+                let prop_label = state.schema[i].properties[y]['label'];
+                if (state.previousPreviewProps.hasOwnProperty(prop_label)) {
+                  // keep existing validation if any
+                  propValue = Object.assign({}, state.previousPreviewProps[prop_label])
                 }else{
-                  //FOR ALL ELSE ASSIGN STRING FOR NOW...
-                  Vue.set(propValue,'type','string')
+                  //for first time add description
+                  Vue.set(propValue,'description',state.schema[i].properties[y].description)
                 }
-                //Add to temp validation
+                myLabel = state.schema[i].properties[y].label;
                 Vue.set(state.validation['properties'],myLabel,propValue)
               }
               if (state.schema[i].properties[y].isRequired) {
@@ -389,6 +581,16 @@ const store = new Vuex.Store({
   getters:{
     getSchema:state=>{
       return state.schema
+    },
+    getEditItem:state=>{
+      return state.editThis
+    },
+    getValidationProps:state=>{
+      return state.validation['properties']
+      // return state.val_test
+    },
+    getValidationOptions:state=>{
+      return state.validation_options
     },
     getStartingPoint:state=>{
       return state.startingPoint
@@ -451,6 +653,121 @@ const store = new Vuex.Store({
     }
   }
 });
+
+Vue.component('editor', {
+    data: function(){
+      return{
+        editor : null
+      }
+    },
+    computed:{
+      item(){
+        return store.getters.getEditItem
+      }
+    },
+    methods:{
+      SaveDefinition(){
+        let self = this;
+        let value = self.editor.getValue();
+        console.log("V",value)
+        let copy = Object.assign({}, self.item);
+        copy.validation = JSON.parse(value)
+          let payload = {
+            'item': copy
+          }
+        store.commit('editValidationItem', payload)
+      }
+    },
+    watch: {
+      item: function(v){
+        let self = this;
+        if (v) {
+          self.editor.setValue(JSON.stringify(self.item.validation,null,2));
+        }
+      }
+    },
+    mounted: function(){
+      let self = this;
+      self.editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+          mode: "json",
+          lineNumbers: true,
+      });
+    },
+    template:`<div>
+                <textarea id="code" name="code"></textarea>
+                <div>
+                  <button type="button" class="btn btn-success w-100" @click="SaveDefinition()">Save</button>
+                </div>
+              </div>`
+  });
+
+Vue.component('validation-dropzone', {
+    props: ['propname', 'val', 'validation_options'],
+    data: function(){
+      return{
+        matches : []
+      }
+    },
+    methods:{
+      allowDrop(ev) {
+        $(ev.target).attr("drop-active", true);
+        ev.preventDefault();
+      },
+      startDrag: (evt, item) => {
+        let img = new Image(); 
+        img.src = '/static/img/cubeplus.svg'; 
+        evt.dataTransfer.setDragImage(img, 10, 10);
+
+        evt.dataTransfer.dropEffect = 'move'
+        evt.dataTransfer.effectAllowed = 'move'
+        evt.dataTransfer.setData('itemID', item.id)
+      },
+      onDrop (evt, name) {
+        let self = this;
+        self.matches = [];
+        const itemID = evt.dataTransfer.getData('itemID')
+        const item = this.validation_options.find(item => item.id == itemID)
+        self.matches.push(item)
+        let payload = {
+          'validation':item,
+          'name':name
+          }
+        let audio = document.getElementById("dropsound");
+        audio.play();
+        store.commit('setValidation', payload);
+      },
+      allowDrop(ev) {
+        $(ev.target).attr("drop-active", true);
+        ev.preventDefault();
+      },
+      leaveDrag(ev) {
+        $(ev.target).removeAttr("drop-active");
+        ev.preventDefault();
+      },
+      resetValidation(){
+        let self = this;
+        let payload = {
+          'name': self.propname
+        }
+        store.commit('resetValidationFor', payload);
+      }
+    },
+    watch:{
+    },
+    template:
+      `<div class="row m-0 valBox bg-dark m-1">
+        <div class="col-sm-12 col-md-5">
+          <small class="text-light" v-text="propname"></small>
+          <i class="far fa-times-circle pointer text-warning" @click="resetValidation()"></i>
+        </div>
+        <div class="col-sm-12 col-md-7 p-1 text-success drop-zone" @drop='onDrop($event, propname)' @dragleave="leaveDrag($event)" @dragover="allowDrop($event);" @dragenter.prevent>
+          <small v-text="JSON.stringify(val,null,2)"></small>
+          <template v-for='item in matches'>
+            <div v-if="val.type === item.validation.type" :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" class='badge drag-el m-1' :key='item.title' draggable @dragstart='startDrag($event, item)' v-text="item.title"></div>
+          </template>
+        </div>
+      </div>`
+  });
 
 Vue.component('github-option', {
   data: function(){
@@ -1186,9 +1503,16 @@ var app = new Vue({
           inputNamespace:'',
           availableNamespace:false,
           userInfo:null,
+          validationView:false,        
 				}
 			},
       computed:{
+        validation_props: function(){
+          return store.getters.getValidationProps
+        },
+        validation_options (){
+          return store.getters.getValidationOptions
+        },
         startingPoint:function(){
           return store.getters.getStartingPoint
         },
@@ -1205,6 +1529,9 @@ var app = new Vue({
             }
           }
           return false
+        },
+        item(){
+          return store.getters.getEditItem
         }
       },
       watch:{
@@ -1240,6 +1567,64 @@ var app = new Vue({
         },
       },
 			methods:{
+        editValidation(){
+          let self = this;
+          self.validationView = !self.validationView ;
+          store.commit('formPreview');
+        },
+        getRandomColor() {
+          let self = this;
+          var letters = '0123456789ABCDEF';
+          var color = '#';
+          for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+          }
+          return color
+        },
+        editValidationOption(item){
+          let copy = Object.assign({}, item);
+          let self = this;
+          store.commit('editThis',{'item':copy});   
+        },
+        makeid(length) {
+          var result           = '';
+          var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+          var charactersLength = characters.length;
+          for ( var i = 0; i < length; i++ ) {
+              result += characters.charAt(Math.floor(Math.random() * charactersLength));
+          }
+          return result;
+        },
+        async addValidationOption(){
+          let self = this;
+          const { value: name } = await Swal.fire({
+            title: "Name of new validation option",
+            input: 'text',
+            inputPlaceholder: 'Name this option'
+          })
+
+          if (name) {
+            let payload = {
+                  'validation': {
+                    id: self.makeid(4),
+                    title: name,
+                    color: self.getRandomColor(),
+                    list: 2,
+                    validation: {'description':'EDIT to define'}
+                  }
+                }
+                store.commit('addValidationOption', payload)
+          }         
+        },
+        startDrag: (evt, item) => {
+          let img = new Image(); 
+          img.src = '/static/img/cubeplus.svg'; 
+          evt.dataTransfer.setDragImage(img, 10, 10);
+
+          evt.dataTransfer.dropEffect = 'move'
+          evt.dataTransfer.effectAllowed = 'move'
+          evt.dataTransfer.setData('itemID', item.id)
+        },
         githubOptions(){
           // show modal
           store.commit('formPreview');
@@ -1419,47 +1804,32 @@ var app = new Vue({
                     After choosing a namespace and creating your class you will be able to edit the schema you decided to extend. It's really easy and fast! Here's a quick introduction to the layout:
                   </p>
                   <small>
-                    <ul class="text-left">
+                    <ol class="text-left">
                       <li>
-                        1. Log-in status
+                        Log-in status.
                       </li>
                       <li>
-                        2. Namespace chosen
+                        Preview your work.
                       </li>
                       <li>
-                        3. New class added
+                        Download your work.
                       </li>
                       <li>
-                        4. Preview your progress
+                        Save to GitHub directly* Requires GitHub login and permission.
                       </li>
                       <li>
-                        5. Download your progress (Once you are happy with your schema, download and host on your preferred service.  After hosting it view it in our <a href="/schema-playground">Schema Viewer</a>)
+                        Add a new property to your class.
                       </li>
                       <li>
-                        6. Show/Hide all descriptions
+                        The extended Class you created.
                       </li>
                       <li>
-                        7. Your new top-level class (blue) and actions. All parent class will appear under it.
+                        Parent properties available to choose from.
                       </li>
                       <li>
-                        8. Add a new property to your class
+                        Show/Hide all properties of this class.
                       </li>
-                      <li>
-                        9. Show/Hide all properties of this class
-                      </li>
-                      <li>
-                        10. Property description and actions
-                      </li>
-                      <li>
-                        10. Property description and actions
-                      </li>
-                      <li>
-                        11. Click to mark it as selected to be used by your schema. (All properties are inherited but you should select only those that will actually be used by your schema.)
-                      </li>
-                      <li>
-                        12. Click to mark this property as a required field by your schema (Only selected properties can be marked as required)
-                      </li>
-                    </ul>
+                    </ol>
                   </small>`,
             footer:'',
             width:'52em',
@@ -1558,6 +1928,16 @@ var app = new Vue({
         var self = this;
         self.checkUser();
         self.checkForData();
+        tippy( '#editor', {
+          target:'*[data-tippy-info]',
+          placement:'bottom',
+          content: 'loading',
+          animation: 'fade',
+          theme:'light',
+          onShow(instance) {
+            let info = instance.reference.dataset.tippyInfo;
+            instance.setContent("<div class='m-0 text-left bg-light'><pre>"+info+"</pre></div>")
+          }});
 			}
 		});
 

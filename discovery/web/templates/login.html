@@ -9,7 +9,7 @@ background: linear-gradient(to right,  rgba(99,42,107,0) 2%,rgba(99,42,107,1) 49
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00632a6b', endColorstr='#004a7d8f',GradientType=1 ); /* IE6-9 */
 }
 </style>
-<div class="jumbotron text-center d-flex justify-content-center align-items-center" style="min-height:95Vh">
+<div id="login" class="jumbotron text-center d-flex justify-content-center align-items-center" style="min-height:95Vh">
     <div class="p-2">
       <div class="row m-0">
         <div class="col-sm-12 text-center">
@@ -22,10 +22,14 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00632a6b', e
             <a href='{{ path }}' class="btn btn-light mainTextDark">Login with Github <i class="fas fa-chevron-right"></i></a>
           </div>
           <div class="col-sm-6 p-2">
-            <a href="/saml/login/" class="btn btn-light mainTextLight">Login with NCATS UNA<i class="fas fa-chevron-right"></i></a>
+            <a id="samlLink" class="btn btn-light mainTextLight">Login with NCATS UNA<i class="fas fa-chevron-right"></i></a>
           </div>
         </div>
       </div>
     </div>
 </div>
+<script>
+var link = document.getElementById("samlLink");
+link.setAttribute('href', "/saml/login/"+window.location.search);
+</script>
 {% endblock %}
