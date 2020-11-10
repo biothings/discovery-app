@@ -73,7 +73,7 @@
           <li class='nav-item'>
             <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-info text-light pointer': prefix }" data-tippy="Edit Validation" @click='editValidation()'>
               <small>
-                <i class="fas fa-file-download"></i> <span v-text="validationView ? 'Close Validation Editor':'Open Validation Editor'"></span>
+                <i class="fas fa-pen-square"></i> <span v-text="validationView ? 'Close Validation Editor':'Open Validation Editor'"></span>
               </small>
             </a>
           </li>
@@ -104,27 +104,28 @@
       <div v-if="validationView" class="v-container p-0 bg-dark justify-content-center d-flex align-items-center">
         <div class="w-100 row m-0">
           <div class="col-sm-12 col-md-6 bg-secondary border-right">
-            <h5 class="text-light text-center m-0">Properties | Validation</h5>
+            <h5 class="text-light text-center m-0 text-dark pt-2">Your Validation</h5>
             <template v-for="(val,propname) in validation_props">
               <validation-dropzone :propname="propname" :key="propname" :validation_options="validation_options" :val="val"></validation-dropzone>
             </template>
           </div>
           <div class="col-sm-12 col-md-6 bg-dark border-left">
-            <h5 class="text-light text-center m-0">Common Options</h5>
-            <small class="text-info text-center d-block">Edit, Drag and Drop</small>
+            <h5 class="text-light text-center m-0 text-muted pt-2">Common Validation Options</h5>
+            <small class="text-info text-center d-block">Drag & drop to merge validation</small>
             <div class="border rounded p-2 bg-light mb-2">
               <template v-for='item in validation_options'>
                 <div class='badge drag-el m-1' :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" :key='item.title' draggable @dragstart='startDrag($event, item)'>
                   <span v-text="item.title"></span>
-                  <span data-tippy="EDIT" class="badge badge-light pointer" @click="editValidationOption(item)"><i class="fas fa-pen-square"></i></span>
+                  <span data-tippy-info="EDIT" class="badge badge-light pointer" @click="editValidationOption(item)"><i class="fas fa-pen-square"></i></span>
                 </div>
               </template>
               <div @click="addValidationOption()" data-tippy="ADD NEW" class="badge m-1 badge-secondary text-light pointer"><i class="fas fa-plus"></i></div>
             </div>
+            <div class="bg-dark p-1" v-if="item">
+              <editor></editor>
+            </div>
           </div>
-          <div class="col-sm-12 bg-dark p-1" v-if="item">
-            <editor></editor>
-          </div>
+          
         </div>
       </div>
       <!-- LOGGED IN DASHBOARD -->
@@ -366,7 +367,18 @@ const store = new Vuex.Store({
     },
     resetValidationFor (state,payload){
       let name = payload['name']
-      Vue.set(state.finalschema['@graph'][0]['$validation']['properties'], name, {})
+      let obj = {}
+      try {
+        obj.description = state.finalschema['@graph'][0]['$validation']['properties'][name]['description']
+      } catch (error) {
+        obj = {}
+      }
+      Vue.set(state.finalschema['@graph'][0]['$validation']['properties'], name, obj)
+      Swal.fire({type:'success',
+                toast:true,
+                title: 'Validation Cleared',
+                showConfirmButton:false,
+                timer:1000})
       // Vue.set(state['val_test'], name, {})
     },
     addValidationOption(state,payload){
@@ -388,7 +400,7 @@ const store = new Vuex.Store({
           state.editThis = null
           Swal.fire({type:'success',
                 toast:true,
-                title: 'Updated',
+                title: 'Edits Saved',
                 showConfirmButton:false,
                 timer:1000})
         }
@@ -669,7 +681,6 @@ Vue.component('editor', {
       SaveDefinition(){
         let self = this;
         let value = self.editor.getValue();
-        console.log("V",value)
         let copy = Object.assign({}, self.item);
         copy.validation = JSON.parse(value)
           let payload = {
@@ -758,13 +769,15 @@ Vue.component('validation-dropzone', {
       `<div class="row m-0 valBox bg-dark m-1">
         <div class="col-sm-12 col-md-5">
           <small class="text-light" v-text="propname"></small>
-          <i class="far fa-times-circle pointer text-warning" @click="resetValidation()"></i>
+          <i class="far fa-times-circle pointer text-warning" @click="resetValidation()" data-tippy-info="Clear Validation"></i>
         </div>
         <div class="col-sm-12 col-md-7 p-1 text-success drop-zone" @drop='onDrop($event, propname)' @dragleave="leaveDrag($event)" @dragover="allowDrop($event);" @dragenter.prevent>
-          <small v-text="JSON.stringify(val,null,2)"></small>
           <template v-for='item in matches'>
             <div v-if="val.type === item.validation.type" :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" class='badge drag-el m-1' :key='item.title' draggable @dragstart='startDrag($event, item)' v-text="item.title"></div>
           </template>
+          <small>
+          <pre v-text="JSON.stringify(val,null,2)"></pre>
+          </small>
         </div>
       </div>`
   });
@@ -1933,10 +1946,10 @@ var app = new Vue({
           placement:'bottom',
           content: 'loading',
           animation: 'fade',
-          theme:'light',
+          theme:'light bg-light',
           onShow(instance) {
             let info = instance.reference.dataset.tippyInfo;
-            instance.setContent("<div class='m-0 text-left bg-light'><pre>"+info+"</pre></div>")
+            instance.setContent("<pre class='text-left' style='margin:0px !important;'>"+info+"</pre>")
           }});
 			}
 		});
