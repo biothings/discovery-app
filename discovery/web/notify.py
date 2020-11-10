@@ -162,7 +162,7 @@ class DatasetNotifier(Notifier):
         for channel in self.channels:
 
             if isinstance(channel, N3CChannel):
-                if meta.get('schema') != 'n3c:Dataset':
+                if meta.get('schema') != 'n3c::n3c:Dataset':
                     continue
 
             for request in channel.send(message):
@@ -251,7 +251,7 @@ def test_dataset():
         "name": "lorem ipsum",
         "url": "http://example.com/"
     }, "wethepeople", **{
-        "schema": "n3c:Dataset",
+        "schema": "n3c::n3c:Dataset",
     }))
     test_on(dataset.update("0x0000", "lorem ipsum", "v2", "wethepeople"))
     test_on(dataset.delete("0x0000", "lorem ipsum", "wethepeople"))
