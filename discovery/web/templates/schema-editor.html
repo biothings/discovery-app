@@ -307,8 +307,19 @@ const store = new Vuex.Store({
               title: 'enumeration',
               color: '#5a71a5',
               validation:{
-                "type": "string",
-                "enum": ["red", "green", "yellow"]
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "enum": ["option1", "option2", "option3"]
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": ["option1", "option2", "option3"]
+                    }
+                  }
+                ]
               }
             },
             {
@@ -321,18 +332,40 @@ const store = new Vuex.Store({
             },
             {
               id: 9,
-              title: 'object',
+              title: 'object|Person',
               color: '#49414b',
               validation:{
+                "@type": "Person",
+                "type": "object",
                 "properties": {
-                  "number":      { "type": "number" },
-                  "street_name": { "type": "string" },
-                  "street_type": { "type": "string",
-                                  "enum": ["Street", "Avenue", "Boulevard"]
-                                }
-                }
+                  "name":      { "type": "string" },
+                  "url": { "type": "string", "format": "uri" },
+                },
+                "required": [
+                  "name"
+                ]
               }
             },
+            {
+              id: 10,
+              title: 'ontology',
+              color: '#a37d00',
+              validation:{
+                "@type": "CreativeWork",
+                "type": "string",
+                "vocabulary": {
+                "ontology": [
+                  "[For example:]",
+                  "ncbitaxon"
+                  ],
+                "children_of": [
+                  "[For example:]",
+                  "http://purl.obolibrary.org/obo/NCBITaxon_10239"
+                ]
+                },
+                "strict": false
+              },
+            }
           ],
     'val_test': {
             'name':{},
