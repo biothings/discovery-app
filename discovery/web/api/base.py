@@ -86,9 +86,7 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                         self.current_user = user['login']
 
     def report(self, notifier, action, **details):
-        # postulation TODO
-        # not triggered in testing because
-        # event loop closes after receiveing initial response
+
         client = AsyncHTTPClient()
         if not self.settings.get('debug') and hasattr(notifier, action):
             for request in getattr(notifier, action)(**details):
