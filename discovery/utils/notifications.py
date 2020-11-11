@@ -113,7 +113,8 @@ class Message(dict):
         return {
             "fields": {
                 "project": {"id": profile.project_id},
-                "summary": self.title,
+                # appending dataset name to the title, capped at max 50-chars
+                "summary": f'{self.title} - {self.get("doc", {}).get("name", "")[:50]}',
                 "issuetype": {"id": profile.issuetype_id},
                 "assignee": {"id": profile.assignee_id},
                 "reporter": {"id": profile.reporter_id},
