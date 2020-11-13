@@ -218,6 +218,65 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 
+$.notify.addStyle('success', {
+    html: "<div><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#28a745",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('danger', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#dc3545",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('warning', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#ffc107",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('info', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#17a2b8",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('trophy', {
+    html: `<div class="bg-dark p-1 text-light">
+        <i class="fas fa-thumbs-up text-success"></i> <span data-notify-text/>
+      </div>`,
+      classes: {
+        base: {
+          "white-space": "nowrap",
+          "background-color": "#343a40",
+          "padding": "5px",
+          "color":'white',
+          "border-radius":"5px"
+        }
+      }
+  });
+
 const store = new Vuex.Store({
   state: {
     'schema':[],
@@ -248,6 +307,24 @@ const store = new Vuex.Store({
               color: '#0263fd',
               validation:{
                 "type": "string"
+              }
+            },
+            {
+              id: 01,
+              title: 'string(s)',
+              color: '#2717a1',
+              validation:{
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
               }
             },
             {
@@ -387,18 +464,23 @@ const store = new Vuex.Store({
       // console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
     },
     setValidation(state,payload){
-      console.log(state.finalschema)
+      // console.log(state.finalschema)
       let item = payload['validation']
       let name = payload['name']
       let newval = Object.assign({}, state.finalschema['@graph'][0]['$validation']['properties'][name], item['validation'])
-      console.log('merged', newval)
+      // console.log('merged', newval)
       Vue.set(state.finalschema['@graph'][0]['$validation']['properties'], name, newval)
 
       // let item = payload['validation']
       // let name = payload['name']
       // Vue.set(state['val_test'], name, item['validation'])
     },
-    resetValidationFor (state,payload){
+    updateValidationOptions(state,payload){
+      let v = payload['validation']
+      Vue.set(state, 'validation_options', v)
+      console.log('validation updated from localStorage')
+    },
+    resetValidationFor(state,payload){
       let name = payload['name']
       let obj = {}
       try {
@@ -417,6 +499,8 @@ const store = new Vuex.Store({
     addValidationOption(state,payload){
       let item = payload['validation']
       state.validation_options.push(item)
+      localStorage.setItem('custom_validation', JSON.stringify(state.validation_options) );
+
       Swal.fire({type:'success',
                 toast:true,
                 title: 'Option Added',
@@ -438,7 +522,7 @@ const store = new Vuex.Store({
                 timer:1000})
         }
       }
-      console.log(state.validation_options.length)
+      localStorage.setItem('custom_validation', JSON.stringify(state.validation_options) );
     },
     editThis (state,payload){
       let item = payload['item']
@@ -528,14 +612,13 @@ const store = new Vuex.Store({
           for (var x = 0; x < state.schema[i].properties.length; x++) {
             if (state.schema[i].properties[x].label === label) {
               state.schema[i].properties.pop(x)
-              $.notify(label+" deleted",{ globalPosition: 'right',className:'info', showDuration: 200, });
+              $.notify(label+" deleted",{ globalPosition: 'right',style:'info', showDuration: 200, });
             }
           }
         }
       }
     },
     formPreview(state){
-
       try {
         state.previousPreviewProps = state.finalschema['@graph'][0]['$validation']['properties'];
       } catch (error) {
@@ -544,7 +627,6 @@ const store = new Vuex.Store({
       if (_.size(state.previousPreviewProps)) {
         console.log('previousPreviewProps found', state.previousPreviewProps)
       }
-
       Vue.set(state.finalschema,'@graph',[]);
       Vue.set(state.validation,'properties',{});
       Vue.set(state.validation,'required',[]);
@@ -691,7 +773,6 @@ const store = new Vuex.Store({
           }
         }).catch(err=>{
           console.warn("Failed query for class info "+url)
-          // $.notify("Failed to get class "+pList[i],{ globalPosition: 'right',className:'warning', showDuration: 40, });
           throw err;
         })
       }
@@ -793,6 +874,7 @@ Vue.component('validation-dropzone', {
         let payload = {
           'name': self.propname
         }
+        self.matches = [];
         store.commit('resetValidationFor', payload);
       }
     },
@@ -1272,7 +1354,13 @@ Vue.component('c-box', {
   props: ['item'],
   data: function(){
     return{
-      expand: false
+      expand: false,
+      addPropMode: false,
+      newPropName:'',
+      newPropDescription:'',
+      newPropDomain:'',
+      newPropRange:[],
+      rangeOptions: []
     }
   },
   watch:{
@@ -1281,9 +1369,16 @@ Vue.component('c-box', {
   computed:{
     showDesc:function(){
       return store.getters.getShowDesc
+    },
+    addNewPropReady: function(){
+      return this.newPropName && this.newPropDescription ? this.newPropDomain && this.newPropRange.length ? true : false : false;
     }
   },
   mounted:function(){
+
+    if (this.item.special) {
+      this.getRangeOptions();
+    }
 
     tippy( '#editorTippy', {
         target:'.cTip',
@@ -1371,7 +1466,7 @@ Vue.component('c-box', {
                 </div>
               </div>
               <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-                <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click='addProp(item.label)'>
+                <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click='addPropMode = !addPropMode; newPropDomain = item.label'>
                   <i class="fas fa-circle text-success fa-stack-2x"></i>
                   <i class="fas fa-plus fa-stack-1x text-light"></i>
                 </span>
@@ -1379,6 +1474,33 @@ Vue.component('c-box', {
                   <i class="fas fa-circle fa-stack-2x" :class="{'text-muted':!expand,'text-success':expand}"></i>
                   <i class="fas fa-list-ul fa-stack-1x text-light"></i>
                 </span>
+              </div>
+              <div v-if="addPropMode" class="col-sm-12 p-2 bg-dark d-flex align-items-center justify-content-center text-light">
+                <div class="col-sm-12 col-md-6">
+                  <h3>New Property</h3>
+                  <form>
+                    <div class="form-group">
+                      <label for="name">Name <i class="fas fa-asterisk text-danger"></i></label>
+                      <input v-model="newPropName" type="text" class="form-control" id="name" placeholder="name of new property">
+                    </div>
+                    <div class="form-group">
+                      <label for="desc">Description <i class="fas fa-asterisk text-danger"></i></label>
+                      <input v-model="newPropDescription" type="text" class="form-control" id="desc" placeholder="description of new property">
+                    </div>
+                    <div class="form-group">
+                      <label for="domain">Domain <i class="fas fa-asterisk text-danger"></i></label>
+                      <input disabled v-model="newPropDomain" type="text" class="form-control bg-dark text-light" id="domain">
+                    </div>
+                    <div class="form-group">
+                      <label for="input">Input Type(s) <i class="fas fa-asterisk text-danger"></i></label>
+                      <input disabled v-model="newPropRange" type="text" class="form-control bg-dark text-light" id="input">
+                      <button type="button" class="btn btn-sm text-light themeButton m-1" @click.prevent="addInputType()">Search Types & Add</button>
+                    </div>
+                    <div class="w-100 p-1">
+                      <button :disabled="!addNewPropReady" :class="[addNewPropReady?'btn-success':'btn-secondary']" type="submit" class="btn btn-lg w-100" @click.prevent="submitNewProp()">Submit</button>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>`,
   methods: {
@@ -1424,13 +1546,91 @@ Vue.component('c-box', {
           payload["label"] = propLabel
           store.commit('requireProp',payload);
         }else if (self.item.properties[i].label === propLabel && !self.item.properties[i].selected){
-          $.notify("Can't require an unselected property",{ globalPosition: 'right',className:'error', showDuration: 40, });
+          $.notify("Can't require an unselected property",{ globalPosition: 'right',style:'error', showDuration: 40, });
         }
       }
     },
-    addProp(domain){
+    resetAddPropForm(){
       var self = this;
-
+      self.newPropName = '';
+      self.newPropDomain = '';
+      self.newPropDescription = '';
+      self.newPropRange = [];
+      $.notify("New property added",{ globalPosition: 'right',style:'success', showDuration: 200, });
+    },
+    getRangeOptions(){
+      var self = this;
+      let options =[]
+      axios.get('/api/registry/schema?field=name'). then(res=>{
+        if (res.data.hits) {
+          for(var i = 0; i < res.data.hits.length; i++){
+            options.push(res.data.hits[i].name)
+          }
+        }
+        self.rangeOptions = options;
+      }).catch(err=>{
+        throw err;
+      });
+    },
+    submitNewProp(){
+      var self = this;
+      let payload = {}
+      payload['name'] = self.newPropName;
+      payload['range'] = self.newPropRange.toString();
+      payload['description'] = self.newPropDescription;
+      payload['domain'] = self.newPropDomain;
+      if (self.item.special) {
+        payload['special'] = true;
+      }else {
+        payload['special'] = false;
+      }
+      store.commit('addProperty',payload);
+      self.resetAddPropForm();
+    },
+    addInputType(){
+      var self = this;
+      Swal.fire({
+            title: "What is this property's expected type(s)?",
+            footer:"Start typing to check for existing classes. If none found specify it's context prefix and name. eg. prefix:Name (Multiple separated by commas)",
+            html: '<datalist id="myCustomList"></datalist>',
+            input: 'text',
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            confirmButtonText: 'Add',
+            animation:false,
+            customClass:'scale-in-center',
+            inputAttributes: {
+              list: 'myCustomList'
+            },
+            onOpen:function(){
+               Swal.isLoading();
+               var options = '';
+               options += '<option value="schema:Text" />';
+               options += '<option value="schema:URL" />';
+               options += '<option value="schema:Integer" />';
+               options += '<option value="schema:Number" />';
+               options += '<option value="schema:Date" />';
+               options += '<option value="schema:Float" />';
+               options += '<option value="schema:Boolean" />';
+               options += '<option value="schema:DateTime" />';
+               options += '<option value="schema:Time" />';
+               if (self.rangeOptions && self.rangeOptions.length) {
+                for (let i = 0; i < self.rangeOptions.length; i++) {
+                  let element = self.rangeOptions[i];
+                  options += '<option value="'+element+'" />';
+                }
+               }
+               document.getElementById('myCustomList').innerHTML = options;
+               Swal.hideLoading();
+             }
+          }).then((res) => {
+            if (res.value) {
+              self.newPropRange.push(res.value);
+            }
+          });
+    },
+    addProp(domain){
+        var self = this;
         Swal.mixin({
         input: 'text',
         confirmButtonText: 'Next &rarr;',
@@ -1517,7 +1717,7 @@ Vue.component('c-box', {
             customClass:'scale-in-center',
           }).then((res) => {
             if (res.value) {
-              $.notify(result.value[0]+" added",{ globalPosition: 'right',className:'success', showDuration: 200, });
+              $.notify(result.value[0]+" added",{ globalPosition: 'right',style:'success', showDuration: 200, });
               let payload = {}
               payload['name'] = result.value[0];
               payload['range'] = result.value[1];
@@ -1531,7 +1731,7 @@ Vue.component('c-box', {
               store.commit('addProperty',payload);
               self.expand = true;
             }
-          })
+          });
         }
       });
 
@@ -1593,7 +1793,7 @@ var app = new Vue({
             self.availableNamespace= false;
           }else{
             if (!re.test(value)) {
-              $.notify("["+value+"] cannot contain non-alphanumeric values",{ globalPosition: 'right',className:'error', showDuration: 100, });
+              $.notify("["+value+"] cannot contain non-alphanumeric values",{ globalPosition: 'right',style:'error', showDuration: 100, });
               self.availableNamespace= false;
             }else{
               let url = "/api/registry/" + value;
@@ -1736,7 +1936,7 @@ var app = new Vue({
                 confirmButtonText: 'Yes, Add It!'
               }).then((res) => {
                 if (res.value) {
-                  $.notify(result.value[0]+" added",{ globalPosition: 'right',className:'success', showDuration: 200, });
+                  $.notify(result.value[0]+" added",{ globalPosition: 'right',style:'success', showDuration: 200, });
                   let payload = {}
                   payload['name'] = result.value[0];
                   payload['description'] = result.value[1];
@@ -1968,12 +2168,41 @@ var app = new Vue({
               })
             }
           })
+        },
+        checkCustomValidation(){
+          let v = localStorage.getItem('custom_validation');
+          if (v) {
+            store.commit('updateValidationOptions', {'validation': JSON.parse(v) });
+          }
+        },
+        clearCustomValidation(){
+          
+          Swal.fire({
+            title: 'Are you sure?',
+            text: result.value[1],
+            showCancelButton: true,
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            animation:false,
+            customClass:'scale-in-center',
+            confirmButtonText: 'Reset it all!'
+          }).then((res) => {
+            if (res.value) {
+              localStorage.removeItem('custom_validation');
+              Swal.fire({type:'success',
+                toast:true,
+                title: 'Validation Reset',
+                showConfirmButton:false,
+                timer:1000})
+            }
+          })
         }
 			},
 			mounted:function(){
         var self = this;
         self.checkUser();
         self.checkForData();
+        self.checkCustomValidation();
         tippy( '#editor', {
           target:'*[data-tippy-info]',
           placement:'bottom',
