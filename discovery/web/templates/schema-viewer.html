@@ -518,10 +518,10 @@
             <h6 class="m-0" v-if="option && option['@type']" v-text="option['@type']"></h6>
             <small v-text="option.description"></small>
           </div>
-          <small class="badge badge-pill badge-dark text-warning m-1" v-text="option.type == 'string'?'string':''"></small>
+          <small class="badge badge-pill badge-dark text-warning m-2" v-text="option.type == 'string'?'string':''"></small>
           <!-- 🌈 VOCAB 🌈 -->
           <div v-if="option && option.vocabulary" class="text-center">
-            <button type="button" class="btn btn-sm btn-success text-light" @click="testOntologyLookup()">
+            <button type="button" class="btn btn-sm btn-success text-light m-1" @click="testOntologyLookup()">
               <small class="badge" :class="[option.strict?'badge-danger':'badge-info']">
                 <b v-text="option.strict?'STRICT':'NON-STRICT'"></b>
               </small> Term Lookup <i class="fas fa-search"></i>
@@ -823,7 +823,7 @@
                   ONE OF
                 </small>
               </div>
-              <div class="col-sm-12 d-flex justify-content-center flex-wrap">
+              <div class="col-sm-12 d-flex justify-content-center align-items-center flex-wrap">
                 <template v-for="(option,index) in fullinfo['oneOf']" :key="option">
                   <one-of :key="index" :name="name" :option="option"></one-of>
                 </template>
@@ -837,7 +837,7 @@
                   ANY OF
                 </small>
               </div>
-              <div class="col-sm-12 d-flex justify-content-center flex-wrap">
+              <div class="col-sm-12 d-flex justify-content-center align-items-center flex-wrap">
                 <template v-for="(option,index) in fullinfo['anyOf']" :key="option">
                   <any-of :key="index" :name="name" :option="option"></any-of>
                 </template>
