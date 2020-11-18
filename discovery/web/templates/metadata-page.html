@@ -4,21 +4,8 @@
     <meta name="HandheldFriendly" content="True" />
 		<meta property="og:locale" content="en_US" />
 		<!-- METADATA -->
-    <meta property="og:url" content="{{metadata_url}}">
-    <meta property="og:site_name" content="{{metadata_url}}">
-    <meta property="og:title" content="{{site_name}}" />
-    <meta name="description" content="{{metadata_desc}}" />
     <meta property="og:image" content="{{metadata_featured_image}}">
-    <meta property="og:image:type" content="image/jpg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:type" content="website">
-    <meta property="og:description" content="{{metadata_desc}}">
-    <meta property="fb:app_id" content="" />
-    <meta name="twitter:title" content="{{site_name}}" />
     <meta name="twitter:image" content="{{metadata_featured_image}}" />
-    <meta name="twitter:url" content="{{metadata_url}}" />
-    <meta name="twitter:card" content="summary" />
     <!-- ICONS -->
     <link rel="apple-touch-icon" sizes="180x180" href="static/img/{{static_image_folder}}/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/img/{{static_image_folder}}/favicon-32x32.png">
@@ -54,24 +41,24 @@
       </div>
       <div v-if="metadata && metadata.name" class="container">
         <div class="text-left" style="margin:auto;">
-          <div class="text-light" style="background-color: #63296B;">
-            <div class="lines p-5">
+          <div class="text-light" style="background-color: #0B566F;">
+            <div class="p-5">
               <h1 class="text-center mt-5">
                 <span v-text="metadata.name"></span>
               </h1>
               <small v-if="metadata && metadata.version"  class="text-light d-block text-center" v-text="'Version '+metadata.version"></small>
               <small v-if="last_updated"  class="text-light d-block text-center" v-text="'Last updated '+last_updated"></small>
-              <div class="text-center">
-                <template v-if="metadata && metadata._meta.username">
-                  <small><a :href="'/contributor/'+metadata._meta.username">more by user</a></small>
-                  |
-                  <small><a :href="'/api/dataset/'+meta_id" rel="noopener">raw json-ld</a></small>
-                  |
-                  <tempalte v-if="schemaLink">
-                    <small><a :href="schemaLink" rel="noopener">schema</a></small>
-                  </template>
+            </div>
+            <div class="text-center alert-dark p-2">
+              <template v-if="metadata && metadata._meta.username">
+                <small><a :href="'/contributor/'+metadata._meta.username">more by user</a></small>
+                |
+                <small><a :href="'/api/dataset/'+meta_id" rel="noopener">raw json-ld</a></small>
+                |
+                <tempalte v-if="schemaLink">
+                  <small><a :href="schemaLink" rel="noopener">schema</a></small>
                 </template>
-              </div>
+              </template>
             </div>
           </div>
           <div class="grad p-1">
@@ -345,7 +332,7 @@
               <template v-if="isUrl(content)">
                 <div class="text-left">
                   <small class="mainTextDark">
-                    <span v-text="name"></span> <i v-if="!name" class="fas fa-circle"></i> <span v-else>:</span>
+                    <b v-text="name"></b> <i v-if="!name" class="fas fa-circle"></i> <span v-else>:</span>
                   </small>
                 </div>
                 <div class="ml-1">
@@ -357,7 +344,7 @@
               <template v-else> 
                 <div class="d-flex">
                   <small class="mainTextDark">
-                    <span v-text="name?name+' :':''" class="mr-1"></span>
+                    <b v-text="name?name+' :':''" class="mr-1"></b>
                   </small>
                 </div>
                 <div class="d-flex">
@@ -379,7 +366,7 @@
             <div class="d-flex">
               <div class=" d-flex justify-content-start align-items-center">
                 <small class="mainTextDark">
-                  <span v-text="name"></span> <i class="fas fa-chevron-circle-right mr-1"></i>
+                  <b v-text="name"></b> <i class="fas fa-chevron-circle-right mr-1"></i>
                 </small>
               </div>
               <div>
@@ -394,7 +381,7 @@
             <div class="d-flex">
               <div class=" d-flex justify-content-start align-items-center">
                 <small class="mainTextDark">
-                  <span v-text="name"></span> :&nbsp;
+                  <b v-text="name"></b> :&nbsp;
                 </small>
               </div>
               <div>
@@ -408,7 +395,7 @@
             <div class="d-flex">
               <div class=" d-flex justify-content-start align-items-center">
                 <small class="mainTextDark">
-                  <span v-text="name"></span> :&nbsp;
+                  <b v-text="name"></b> :&nbsp;
                 </small>
               </div>
               <div>
@@ -456,6 +443,7 @@
               payload['metadata']= res.data
               store.commit('saveMetadata',payload)
               self.createScript();
+              self.updateMetaTags(res.data);
             }
           }).catch(err=>{
             self.loading = false;
@@ -466,6 +454,53 @@
             })
             throw err;
           });
+        },
+        updateMetaTags(data){
+          if (data.hasOwnProperty('name') && data.hasOwnProperty('description')) {
+              let meta = null;
+              // Open graph and Meta
+              meta = document.createElement('meta');
+              meta.setAttribute('property',"og:title");
+              meta.setAttribute('content',"Data Discovery Engine | "+data.name);
+              document.getElementsByTagName('head')[0].appendChild(meta);
+
+              meta = document.createElement('meta');
+              meta.setAttribute('name',"description");
+              meta.setAttribute('content',data.description);
+              document.getElementsByTagName('head')[0].appendChild(meta);
+
+              meta = document.createElement('meta');
+              meta.setAttribute('property',"og:description");
+              meta.setAttribute('content',data.description);
+              document.getElementsByTagName('head')[0].appendChild(meta);
+
+              meta = document.createElement('meta');
+              meta.setAttribute('property',"og:url");
+              meta.setAttribute('content',window.location.href);
+              document.getElementsByTagName('head')[0].appendChild(meta);
+
+              meta = document.createElement('meta');
+              meta.setAttribute('property',"og:locale");
+              meta.setAttribute('content',"en_US");
+              document.getElementsByTagName('head')[0].appendChild(meta);
+
+              // Twitter
+              meta = document.createElement('meta');
+              meta.setAttribute('name',"twitter:title");
+              meta.setAttribute('content',"Data Discovery Engine | "+data.name);
+              document.getElementsByTagName('head')[0].appendChild(meta);
+
+              meta = document.createElement('meta');
+              meta.setAttribute('name',"twitter:url");
+              meta.setAttribute('content',window.location.href);
+              document.getElementsByTagName('head')[0].appendChild(meta);
+
+              meta = document.createElement('meta');
+              meta.setAttribute('name',"twitter:description");
+              meta.setAttribute('content',data.description);
+              document.getElementsByTagName('head')[0].appendChild(meta);
+
+            }
         },
         createScript() {
           let self = this;
