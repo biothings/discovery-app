@@ -663,8 +663,14 @@ const store = new Vuex.Store({
               }
               if (state.schema[i].properties[x].selected) {
                 let propValue={};
-                Vue.set(propValue,'description',state.schema[i].properties[x].description)
-                // Vue.set(propValue,'type','string')
+
+                if (state.previousPreviewProps.hasOwnProperty(state.schema[i].properties[x].label)) {
+                  // keep existing validation if any
+                  propValue = Object.assign({}, state.previousPreviewProps[state.schema[i].properties[x].label])
+                }else{
+                  //for first time add description
+                  Vue.set(propValue,'description',state.schema[i].properties[x].description)
+                }
                 Vue.set(state.validation['properties'],state.schema[i].properties[x].label,propValue)
               }
               if (state.schema[i].properties[x].isRequired) {
@@ -1553,7 +1559,7 @@ Vue.component('c-box', {
     resetAddPropForm(){
       var self = this;
       self.newPropName = '';
-      self.newPropDomain = '';
+      // self.newPropDomain = '';
       self.newPropDescription = '';
       self.newPropRange = [];
       $.notify("New property added",{ globalPosition: 'right',style:'success', showDuration: 200, });
