@@ -19,7 +19,7 @@ CONTACT_EMAIL = "cd2h-metadata@googlegroups.com"
 
 METADATA_CONTENT_URL = "http://discovery.biothings.io/"
 METADATA_DESC = 'A CD2H PROJECT TO PROMPT FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS'
-METADATA_FEATURED_IMAGE = "https://i.postimg.cc/zvRMbPSs/featured.jpg"
+METADATA_FEATURED_IMAGE = "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg"
 METADATA_MAIN_COLOR = "#63296b"
 
 # *****************************************************************************
@@ -42,12 +42,6 @@ STATIC_IMAGE_FOLDER = 'dde'
 # *****************************************************************************
 
 GUIDE_PRESETS = [
-    # {
-    # 'namespace':'ctsa',
-    # 'prefix':'bts',
-    # 'name':'CTSADataset',
-    # 'description':'A schema describing Dataset from CTSA center'
-    # },
     {
         'namespace': 'biomedical',
         'prefix': 'bts',
@@ -77,18 +71,6 @@ GUIDE_PORTALS = [
                   'displayName': 'DataCite',
                   'description': 'A list of core metadata properties chosen for an accurate and consistent identification of a resource for citation and retrieval purposes by DataCite. <a target="_blank" href="https://schema.datacite.org/">Learn More<a/>',
                   'selected': 0},
-                 #  {'namespace': 'outbreak',
-                 #   'prefix': 'outbreak',
-                 #   'name': 'Dataset',
-                 #   'displayName': 'Outbreak.info',
-                 #   'description': 'This is the schema for describing the Dataset schema used for outbreak.info. <a target="_blank" href="https://outbreak.info/">Learn More<a/>',
-                 #   'selected': 0},
-                 #   {'namespace': 'niaid',
-                 #    'prefix': 'niaid',
-                 #    'name': 'NiaidDataset',
-                 #    'displayName': 'NIAID Data Portal',
-                 #    'description': 'A body of structured information describing some topic(s) of interest for the National Institute of Allergy and Infectious Diseases <a target="_blank" href="https://discovery.biothings.io/niaid">Learn More<a/>',
-                 #    'selected': 0},
                  ]
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - SCHEMA PLAYGROUND
