@@ -127,8 +127,8 @@ class DatasetNotifier(Notifier):
                 profile = SimpleNamespace()
                 profile.project_id = "10001"
                 profile.issuetype_id = "10014"
-                profile.assignee_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"
-                profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"
+                profile.assignee_id = "5c708335e1bcdf6294d0c85e"    # Liz
+                profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"   # cwu
                 profile.label = "DATASET"
                 self.channels.append(N3CChannel(
                     getattr(settings, 'N3C_AUTH_USER'),
