@@ -133,15 +133,17 @@ class DatasetMessage(notifications.Message):
         """
         Flattened JSON dictionay list items, like this:
 
-        • includedInDataCatalog.name: N3C Datasets
-        • includedInDataCatalog.url: https://ncats.nih.gov/n3c/
         • name: Wellderly Blood Genetics
         • description: Wellderly Blood Genetics
+        • author.name: amikaili@uiowa.edu
+        • author.orcid: https://orcid.org/0000-0001-9779-1512
 
         """
         doc = ADF().bullet_list()
         for path, val in traverse(self["doc"], True):
             if path and str(val) and '@' not in path:  # skip meta keys
+                if path.startswith("includedInDataCatalog"):
+                    continue  # these fields are not from user's input
                 paragraph = ADF().paragraph().text(path + ': ')
                 paragraph.content[-1].add_mark(Strong())
                 paragraph.text(str(val))
