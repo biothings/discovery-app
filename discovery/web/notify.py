@@ -141,7 +141,7 @@ class DatasetMessage(notifications.Message):
         """
         doc = ADF().bullet_list()
         for path, val in traverse(self["doc"], True):
-            if path and val and '@' not in path:  # skip meta keys
+            if path and str(val) and '@' not in path:  # skip meta keys
                 paragraph = ADF().paragraph().text(path + ': ')
                 paragraph.content[-1].add_mark(Strong())
                 paragraph.text(str(val))
