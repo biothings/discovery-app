@@ -1,5 +1,5 @@
 git+git://github.com/biothings/biothings_schema.py.git@e5550d3#egg=biothings_schema
-biothings==0.7.3
+biothings==0.8.4
 elasticsearch>=7, <8
 elasticsearch-dsl>=7, <8
 PyLD>=0.7.1

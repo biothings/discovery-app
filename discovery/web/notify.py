@@ -1,11 +1,11 @@
 import json
-import logging
-import re
 from types import SimpleNamespace
-from pyadf.document import Document as ADF
 
+from biothings.utils.common import traverse
 from discovery.utils import notifications
-from tornado.httpclient import HTTPRequest, HTTPClient
+from pyadf.document import Document as ADF
+from pyadf.inline_nodes.marks.mark import Mark
+from tornado.httpclient import HTTPClient, HTTPRequest
 
 
 class Channel:
@@ -87,12 +87,68 @@ class Notifier:
                 yield request
 
 
+class Strong(Mark):
+    """
+    PyADF Text Marking
+    """
+    type = 'strong'
+
+
 class DatasetMessage(notifications.Message):
     """
     Dataset Registry Notifications
     Additionally aware of _id, doc, and meta field.
     """
 
+    def _doc_to_codeblock(self):
+        """
+        Pretty printed JSON codeblock, like this:
+        {
+            "@type": "n3c:Dataset",
+            "@context": { ... },
+            "includedInDataCatalog": {
+                "name": "N3C Datasets",
+                "url": "https://ncats.nih.gov/n3c/"
+            },
+            "name": "Wellderly Blood Genetics",
+            ...
+        }
+        """
+        return ADF().codeblock("json").text(json.dumps(self["doc"], indent=4))
+
+    def _doc_to_summary(self):
+        """
+        Basic summary of name and url fields, like this:
+
+        • Name: Wellderly Blood Genetics
+        • URL: https://www.scripps.edu/science-and-medicine/...
+
+        """
+        doc = ADF().bullet_list()
+        doc.add_item(ADF().paragraph().text("Name: ").text(self["doc"].get("name")))
+        doc.add_item(ADF().paragraph().text("URL: ").text(self["doc"].get("url")).link(self["doc"].get("url")))
+        return doc
+
+    def _doc_to_flattened(self):
+        """
+        Flattened JSON dictionay list items, like this:
+
+        • includedInDataCatalog.name: N3C Datasets
+        • includedInDataCatalog.url: https://ncats.nih.gov/n3c/
+        • name: Wellderly Blood Genetics
+        • description: Wellderly Blood Genetics
+
+        """
+        doc = ADF().bullet_list()
+        for path, val in traverse(self["doc"], True):
+            if path and val and '@' not in path:  # skip meta keys
+                paragraph = ADF().paragraph().text(path + ': ')
+                paragraph.content[-1].add_mark(Strong())
+                paragraph.text(str(val))
+                doc.add_item(paragraph)
+        return doc
+
+    # override
     def to_ADF(self):
         """
         Attach dataset metadata details at the end of the message.
@@ -101,14 +157,18 @@ class DatasetMessage(notifications.Message):
         """
         adf = super().to_ADF()
         if 'doc' in self:
-            adf["content"].append(ADF().heading(3).text("Overview").to_doc())
-            doc = ADF().bullet_list()
-            doc.add_item(ADF().paragraph().text("Name: ").text(self["doc"].get("name")))
-            doc.add_item(ADF().paragraph().text("URL: ").text(self["doc"].get("url")).link(self["doc"].get("url")))
-            adf["content"].append(doc.to_doc())
-            adf["content"].append(ADF().heading(3).text("Raw").to_doc())
-            adf["content"].append(ADF().codeblock("json").text(json.dumps(self["doc"], indent=4)).to_doc())
+            adf["content"].append(ADF().heading(4).text("Overview").to_doc())
+            adf["content"].append(self._doc_to_flattened().to_doc())
         return adf
+
+    # override
+    def to_jira_payload(self, profile):
+        payload = super().to_jira_payload(profile)
+        # appending dataset name to the title, capped at max 50-chars
+        _name = self.get("doc", {}).get("name", "Untitled")
+        _summary = f'{self.title} - {_name[:50]}'
+        payload["fields"]["summary"] = _summary
+        return payload
 
 
 class DatasetNotifier(Notifier):
@@ -257,6 +317,23 @@ def test_dataset():
     test_on(dataset.delete("0x0000", "lorem ipsum", "wethepeople"))
 
 
+def test_flatlist():
+    message = DatasetMessage({
+        "doc": {
+            "@type": "n3c:Dataset",
+            "includedInDataCatalog": {
+                "name": "N3C Datasets",
+                "url": "https://ncats.nih.gov/n3c/"
+            },
+            "name": "Wellderly Blood Genetics",
+            "description": "Wellderly Blood Genetics",
+            "justification": ""  # Test empty field
+        }
+    })
+    print(json.dumps(message.to_ADF()))
+
+
 if __name__ == '__main__':
     test_schema()
     test_dataset()
+    test_flatlist()
