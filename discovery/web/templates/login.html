@@ -17,12 +17,17 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00632a6b', e
           <h3 class="text-muted">Select the login method</h3>
           <hr />
         </div>
+        <div class="col-sm-12 d-none" id="n3c">
+          <p class="m-0 text-info">
+            N3C members please use NCATS UNA to log in. Login with GitHub is disabled.
+          </p>
+        </div>
         <div class="col-sm-12 row m-0 opt-bg py-5">
           <div class="col-sm-6 p-2">
-            <a href='{{ path }}' class="btn btn-light mainTextDark">Login with Github <i class="fas fa-chevron-right"></i></a>
+            <a href='{{ path }}' role="button" class="btn btn-light mainTextDark" id="ghButton">Login with Github <i class="fas fa-chevron-right"></i></a>
           </div>
           <div class="col-sm-6 p-2">
-            <a id="samlLink" class="btn btn-light mainTextLight">Login with NCATS UNA<i class="fas fa-chevron-right"></i></a>
+            <a id="samlLink" role="button" class="btn btn-light mainTextLight">Login with NCATS UNA<i class="fas fa-chevron-right"></i></a>
           </div>
         </div>
       </div>
@@ -31,5 +36,15 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00632a6b', e
 <script>
 var link = document.getElementById("samlLink");
 link.setAttribute('href', "/saml/login/"+window.location.search);
+
+var n3c = window.location.href.includes('n3c') ? true : false;
+if(n3c){
+  var btn = document.getElementById('ghButton');
+  btn.href = "#"
+  btn.classList.remove('btn-light')
+  btn.classList.add('alert-dark')
+  document.querySelector('#n3c').classList.remove('d-none')
+  document.querySelector('#n3c').classList.add('d-block')
+}
 </script>
 {% endblock %}

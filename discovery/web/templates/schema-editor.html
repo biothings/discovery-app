@@ -48,19 +48,9 @@
           </span>
         </li>
         <li class='nav-item' v-if="userInfo && !userInfo.login">
-          <a class='nav-link active text-primary' :href='"/login?next="+window.location.pathname'>
+          <a class='nav-link bg-light rounded-0' :href='"/login?next="+window.location.pathname'>
             <small><i class="fas fa-sign-in-alt"></i> Login</small>
           </a>
-        </li>
-        <li class="nav-item rounded-0" v-if="prefix">
-          <span class="nav-link disabled text-light"><small>
-            <i class="fas fa-check text-success"></i> Namespace <span class="bold" v-text="prefix"></span></small>
-          </span>
-        </li>
-        <li class="nav-item" v-if="newClassAdded">
-          <span class="nav-link text-light"><small>
-            <i class="fas fa-check text-success"></i> Extended Class Added</small>
-          </span>
         </li>
         <template v-if='newClassAdded'>
           <li class='nav-item' v-show="prefix">
@@ -73,7 +63,7 @@
           <li class='nav-item'>
             <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-info text-light pointer': prefix }" data-tippy="Edit Validation" @click='editValidation()'>
               <small>
-                <i class="fas fa-pen-square"></i> <span v-text="validationView ? 'Close Validation Editor':'Open Validation Editor'"></span>
+                <i class="fas fa-pen-square"></i> Validation
               </small>
             </a>
           </li>
@@ -95,15 +85,21 @@
         <li class='nav-item'>
           <a class='nav-link rounded-0 text-light pointer' data-tippy="Learn about this editor" @click.prevent="showHelp()">
             <small >
-              <i class="fas fa-question-circle"></i> Help!
+              <i class="fas fa-question-circle"></i> Help
             </small>
           </a>
         </li>
       </ul>
       <!-- Validation -->
       <div v-if="validationView" class="v-container p-0 bg-dark justify-content-center d-flex align-items-center">
+        
         <div class="w-100 row m-0">
-          <div class="col-sm-12 col-md-6 bg-secondary border-right">
+          <div class="bg-info p-1 col-sm-12">
+            <p class="text-center text-light m-0">
+              <small class="text-light"><i class="fas fa-info-circle text-light"></i> Define how the input for each property should be validated, drag and drop common rules or create your own.</small>
+            </p>
+          </div>
+          <div class="col-sm-12 col-md-6 bg-secondary border-right" style="max-height: 800px; overflow-y: scroll;">
             <h5 class="text-light text-center m-0 text-dark pt-2">Your Validation</h5>
             <template v-for="(val,propname) in validation_props">
               <validation-dropzone :propname="propname" :key="propname" :validation_options="validation_options" :val="val"></validation-dropzone>
@@ -135,18 +131,19 @@
           <p class="text-center text-muted">
             <small>Extending: <span class="text-dark" v-text="startingPoint"></span></small>  <small class="bold" :class="{'text-success':availableNamespace, 'text-danger': !availableNamespace}"><i class="fas fa-chevron-right"></i> Choose a namespace</small>
           </p>
+          <h4 class="text-info text-center">Choose a short name used to identify new definitions</h4>
+          <p class="text-center text-muted">
+            <small class="text-muted"><i class="fas fa-info-circle text-info"></i> For example: <b>myname</b>:ClassName </small>
+          </p>
           <div class="d-flex justify-content-center align-items-center flex-wrap">
             <form @submit.prevent="savePrefix" class="text-center">
               <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Choose a short namespace (a-z)</div>
-                </div>
-                <input type="text" v-model='inputNamespace' class="form-control m-auto text-center" :class="{'text-success':availableNamespace, 'text-danger': !availableNamespace}" placeholder="3 chars min.">
-                <div class="input-group-append">
+                <input type="text" v-model='inputNamespace' class="form-control m-auto text-center" :class="{'text-success':availableNamespace, 'text-danger': !availableNamespace}" placeholder="">
+                <div>
                   <button :disabled="!availableNamespace" class="btn text-light" :class="{'btn-success':availableNamespace, 'btn-danger': !availableNamespace}" type="submit">Continue</button>
                 </div>
               </div>
-              <small class="text-muted">This will be the prefix used for all new definitions. eg. prefix:YourDefinition </small>
+              <small class="text-muted">Choose a short namespace (a-z) 3 chars minimum recommended.</small>
             </form>
           </div>
         </div>
@@ -159,16 +156,45 @@
             <small class="text-muted bold"><i class="fas fa-chevron-right"></i> Create a new class</small>
           </p>
           <hr />
-          <form @submit.prevent='addClass()'>
-            <button type="submit" class="btn btn-lg themeButton text-light" ><i class="fas fa-plus"></i> Add Class</button>
+          <form class="m-auto col-sm-12 col-md-9 py-2 bg-light rounded fade-in text-left" @submit.prevent='addClass()'>
+            <h4 class="text-info">Create a new class</h4>
+            <small>
+              <p><i class="fas fa-info-circle text-info"></i> You are extending <span class="text-info" v-text="startingPoint"></span>, consider naming your class something more specific or relevant to the class' hierarchy.</p>
+              <p>Description can be a short paragraph about how this class is more specific from the class you are extending, need to extend this hierarchy, or use case.</p>
+            </small>
+            <div class="form-group">
+              <h5 for="exampleInputEmail1" class="text-dark"><i class="fas fa-asterisk text-danger"></i> Name of the new extended class:</h5>
+              <input type="text" ref="clsName" class="form-control" id="exampleInputEmail1" placeholder="Name should be PascalCased eg. MyClass">
+            </div>
+            <div class="form-group">
+              <h5 for="exampleInputPassword1" class="text-dark"><i class="fas fa-asterisk text-danger"></i> Brief description about this class:</h5>
+              <textarea type="password" minlength="20" rows="6" ref="clsDesc" class="form-control" placeholder="Enter your Class description here"></textarea>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-success">Continue</button>
+            </div>
           </form>
         </div>
 
         <!-- PARENT CLASSES -->
         <div class="jumbotron alert-secondary" v-if="newClassAdded && !validationView" id="editorTippy">
           <div>
-            <input type="checkbox" class="form-control slider" id="customControlInline" @click="toggleDesc()">
-            <small class="text-muted" for="customControlInline" >Show Descriptions</small>
+            <h4 class="text-info text-left">Select and create properties for your schema</h4>
+            <p class="text-center text-muted">
+              <small class="text-muted">Reuse properties from parents</small>
+              <i class="fas fa-arrow-circle-right mx-1"></i>
+              <small class="text-muted">Add new properties</small>
+              <i class="fas fa-arrow-circle-right mx-1"></i>
+              <small class="text-muted">Add validation</small>
+              <i class="fas fa-arrow-circle-right mx-1"></i>
+              <small class="text-muted">Save schema</small>
+              </ol>
+            </p>
+          </div>
+          <!-- <ngx-graph></ngx-graph> -->
+          <div class="mt-2">
+            <input type="checkbox" class="slider mr-2" id="customControlInline" @click="toggleDesc()">
+            <label for="customControlInline"><small class="text-muted">Show Descriptions</small></label>
           </div>
           <template  v-for="(item,index) in classesAvailable">
             <c-box :item="item" :key="index"></c-box>
@@ -192,11 +218,6 @@
       Done with that too? <i class="fas fa-arrow-right text-success"></i> Visualize, Register and share your schema here: <a href="/schema-playground">Schema Playground</a>
     </p>
   </div>
-  <div class="alert alert-secondary" v-if="newClassAdded">
-    <small class="m-0">
-      <span class="text-danger">*</span> Please note that embedded <a href="https://json-schema.org/">JSON Schema validation</a> is auto-generated from this editor. You may want to edit that manually to satisfy your individual needs.
-    </small>
-  </div>
   <div id="ghOptions" class="modal" style="z-index:1000;">
     <!-- Modal content -->
     <div class="modal-content bg-light">
@@ -213,6 +234,8 @@
 <script src="/static/js/lodash.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="/static/js/codemirror.js"></script>
+<script src="https://d3js.org/d3.v3.js"></script>
+<script src="/static/js/networkx.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
@@ -478,7 +501,7 @@ const store = new Vuex.Store({
     updateValidationOptions(state,payload){
       let v = payload['validation']
       Vue.set(state, 'validation_options', v)
-      console.log('validation updated from localStorage')
+      // console.log('validation updated from localStorage')
     },
     resetValidationFor(state,payload){
       let name = payload['name']
@@ -533,8 +556,12 @@ const store = new Vuex.Store({
       Vue.set(state.finalschema['@context'],state.prefix,'http://discovery.biothings.io/view/')
     },
     saveParent(state,payload){
-      state.schema.push(payload['parent'])
-      // console.log(state.schema)
+      let parent = payload['parent']
+      // sort props alphabetically
+      if (parent.hasOwnProperty('properties')) {
+        parent.properties = _.orderBy(parent.properties, ['label'], ['asc']);
+      }
+      state.schema.push(parent)
     },
     addClass(state,payload){
       let newClass = {};
@@ -674,7 +701,10 @@ const store = new Vuex.Store({
                 Vue.set(state.validation['properties'],state.schema[i].properties[x].label,propValue)
               }
               if (state.schema[i].properties[x].isRequired) {
-                state.validation['required'].push(state.schema[i].properties[x].label)
+                let p = state.schema[i].properties[x].label;
+                if (!state.validation['required'].includes(p)) {
+                  state.validation['required'].push(p)
+                }
               }
               //Add New Prop
               state.finalschema['@graph'].push(mainProp)
@@ -699,7 +729,9 @@ const store = new Vuex.Store({
                 Vue.set(state.validation['properties'],myLabel,propValue)
               }
               if (state.schema[i].properties[y].isRequired) {
-                state.validation['required'].push(myLabel)
+                if (!state.validation['required'].includes(myLabel)) {
+                  state.validation['required'].push(myLabel)
+                }
               }
               //Once done add temp validation to finalschema
               if (state.finalschema['@graph'].length) {
@@ -765,7 +797,7 @@ const store = new Vuex.Store({
     getParents ({commit,state}) {
       let list =[];
       for (var i = 0; i < state.schema[0].parent_classes.length; i++) {
-        list = list.concat(state.schema[0].parent_classes[i].split(", "))
+        list = list.concat(state.schema[0].parent_classes[i].split(", ").reverse())
       }
       let uniqueParents = new Set(list)
       let pList = [...uniqueParents]
@@ -785,6 +817,80 @@ const store = new Vuex.Store({
     }
   }
 });
+
+Vue.component('ngx-graph', {
+    data: function(){
+      return{
+        nxG: null, 
+        edgeGraph:[],
+      }
+    },
+    computed:{
+      classesAvailable:function(){
+        return store.getters.getSchema
+      },
+    },
+    methods:{
+      makeGraph(){
+        var self = this;
+
+        self.nxG = new jsnx.DiGraph();
+
+        self.classesAvailable.forEach( cls => {
+          self.addNode(cls.name);
+          if (cls.hasOwnProperty('parent_classes')) {
+            let parents = cls.parent_classes[0].split(',');
+            self.addEdge(cls.name, parents[parents.length - 1]);
+          }
+        });
+
+        self.drawGraph();
+      },
+      addEdge(class1,class2){
+        // console.log('%c addEdge','color:hotpink')
+        // console.log(class1,class2)
+        this.nxG.addEdge(class1,class2);
+      },
+      addNode(className){
+        console.log('%c add Node','color:limegreen')
+        console.log(className)
+        this.nxG.addNode(className,{'label':className});
+      },
+      drawGraph(){
+        var self = this;
+        console.log('draw', self.nxG)
+        jsnx.draw(self.nxG, {
+            element: '#classGraph',
+            weighted: true,
+            edgeStyle: {
+                'stroke-width': 10,
+                'fill': '#b4b4b4'
+            },
+            layoutAttr: {
+                charge: -800,
+                linkDistance: 100
+            },
+            height:200,
+            labelStyle: {fill: '#5C3069'},
+            withLabels: true,
+            nodeLabels: 'label',
+            nodeStyle: {
+                'stroke': '#8feddc',
+                'fill': '#84dcdf',
+                'cursor': 'pointer',
+                'nodeShape':'s'
+            }
+        });
+      },
+    },
+    watch: {
+      
+    },
+    mounted: function(){
+      this.makeGraph()
+    },
+    template:`<div id="classGraph" class="border border-secondary rounded"></div>`
+  });
 
 Vue.component('editor', {
     data: function(){
@@ -1363,14 +1469,26 @@ Vue.component('c-box', {
       expand: false,
       addPropMode: false,
       newPropName:'',
+      propExists: false,
       newPropDescription:'',
       newPropDomain:'',
       newPropRange:[],
-      rangeOptions: []
+      rangeOptions: [],
+      query:'',
+      filtered: [],
+      // pagination
+      perPage: 20,
+      page: 1,
+      pages: 1,
+      startCap:0,
+      endCap:20,
+      groupPages: false,
+      pageLimit: 20,
+      startCapLimitReached: true,
+      endCapLimitReached: false,
+      // prop totals
+      totals:{}
     }
-  },
-  watch:{
-
   },
   computed:{
     showDesc:function(){
@@ -1378,13 +1496,35 @@ Vue.component('c-box', {
     },
     addNewPropReady: function(){
       return this.newPropName && this.newPropDescription ? this.newPropDomain && this.newPropRange.length ? true : false : false;
+    },
+    paginatedResults: function () {
+        var start = (this.page - 1) * this.perPage,
+            end = start + this.perPage;
+        return this.item.properties && this.item.properties.slice(start, end);
+    },
+  },
+  watch:{
+    newPropName: function(v){
+      this.propExists = store.getters.isDuplicateProp(v);
+    },
+    query: function(q){
+      if (q) {
+        this.filtered = this.item.properties.filter( prop => prop['label'].includes(q))
+      }else{
+        this.filtered = []
+      }
     }
   },
   mounted:function(){
 
     if (this.item.special) {
       this.getRangeOptions();
+      this.expand = true;
+    }else{
+      this.calculatePages();
     }
+
+    this.updateTotals();
 
     tippy( '#editorTippy', {
         target:'.cTip',
@@ -1434,10 +1574,10 @@ Vue.component('c-box', {
           animation: 'fade',
           theme:'light'});
   },
-  template: `<div class="row m-1 cBox actions" :class="{'alert-info':item.special,'alert-light':!item.special}">
+  template: `<div class="row m-1 cBox actions" :class="{'alert-info mb-3':item.special,'alert-light':!item.special}">
               <div class="col-sm-10 p-2">
                 <div>
-                  <small v-if="item.special" class="badge badge-info mr-1">YOUR CLASS</small>
+                  <i v-if="item.special" class="fas fa-star text-warning"></i>
                   <template v-if="item.parent_classes.length" v-for="tree in item.parent_classes">
                     <template v-for="(name,i) in getSubclass(tree)">
                       <small v-text="name"></small>
@@ -1445,18 +1585,68 @@ Vue.component('c-box', {
                     </template>
                   </template>
                   <small class="bold"><span v-text="item.label"></span> <i class="fas fa-info-circle text-info cTip pointer" :data-tippy-description="item.description" :data-tippy-label="item.label"></i></small class="bold">
-                  <small v-if="item.properties" class="mainTextDark bold float-right">(<span v-text="item.properties.length"></span> properties)</small>
+                  <!-- 🌈 prop totals 🌈 -->
+                  <div v-if="totals" class="float-right">
+                    <table>
+                    <tr>
+                      <td v-for="(val, name) in totals" class="px-1"> 
+                        <small>
+                          <i v-if="name == 'required'" class="fas fa-asterisk text-danger"></i>
+                          <i v-else-if="name == 'selected'" class="fas fa-check-circle text-success"></i> 
+                          <i v-else v-text="name"></i> : <b v-text="val" :class="[val?'text-primary':'text-muted']"></b> 
+                        </small>
+                      </td>
+                    </tr>
+                    </table>
+                  </div>
                   <small v-if="item.special && !item.properties" class="text-muted float-right">Add properties here <i class="fas fa-arrow-right text-danger"></i></small>
                   <template v-if="showDesc">
                     <small class="d-block text-muted" v-html="item.description || 'No description provided'"></small>
                   </template>
                 </div>
+
+                <!-- 🌈 selected list 🌈 -->
+                <div v-if="!item.special" class="">
+                  <template v-if="item && item.properties" v-for="prop in item.properties">
+                    <small v-if="prop.selected" class="badge badge-success m-1">
+                      <i v-if="prop && prop.isRequired" class="fas fa-asterisk text-danger"></i> <span v-text="prop.label"></span>
+                    </small>
+                  </template>
+                </div>
+
                 <div v-show='expand' class="mt-1">
-                  <template v-for="prop in sortedList()">
+                  <div class="p-1 bg-secondary" v-if="!item.special && item.properties.length > perPage">
+                    <!-- 🌈 filter by name 🌈 -->
+                    <div>
+                      <input type="text" class="form-control form-control-sm col-sm-6" placeholder="search properties" v-model="query">
+                    </div>
+
+                    <!-- 🌈 filtered 🌈 -->
+                    <template v-for="prop in filtered">
+                      <div class="row m-1 alert-secondary pBox actions">
+                        <div class="col-sm-9">
+                          <small class="text-dark">
+                            <span v-text="prop.label"></span> <i class="fas fa-info-circle cTip pointer text-info" :data-tippy-description="prop.description" :data-tippy-label="prop.label"></i>
+                            <template v-if="showDesc">
+                              <small class="d-block text-muted" v-html="prop.description || 'No description provided'"></small>
+                            </template>
+                          </small>
+                        </div>
+                        <div class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around">
+                          <i v-show="item.special" class="fas fa-minus-circle pointer text-muted unselectable remove" @click="removeProp(prop.label)"></i>
+                          <i class="fas fa-check-circle pointer unselectable select" @click="markSelected(prop.label)" :class="{'text-muted':!prop.selected,'text-success':prop.selected}"></i>
+                          <i class="fas fa-asterisk required pointer unselectable" @click="markRequired(prop.label)" :class="{'text-muted':!prop.isRequired,'text-danger':prop.isRequired}"></i>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+
+                  <!-- 🌈 results 🌈 -->
+                  <template v-for="prop in paginatedResults">
                     <div class="row m-1 alert-secondary pBox actions">
                       <div class="col-sm-9">
                         <small class="mainTextDark">
-                          <span v-text="prop.label"></span> <i class="fas fa-info-circle cTip pointer" :data-tippy-description="prop.description" :data-tippy-label="prop.label"></i>
+                          <span v-text="prop.label"></span> <i class="fas fa-info-circle cTip pointer text-info" :data-tippy-description="prop.description" :data-tippy-label="prop.label"></i>
                           <template v-if="showDesc">
                             <small class="d-block text-muted" v-html="prop.description || 'No description provided'"></small>
                           </template>
@@ -1469,16 +1659,45 @@ Vue.component('c-box', {
                       </div>
                     </div>
                   </template>
+
+                  <!-- 🌈 pagination 🌈 -->
+                  <template v-if="!item.special && item.properties.length > perPage">
+                    <div class="d-flex flex-wrap justify-content-center p-1 mt-2">
+                      <div class="page-item rounded-0" :class="{ 'disabled': page <= 1 }">
+                        <a class="page-link p-1" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
+                      </div>
+                      <template v-if="groupPages">
+                        <div class="page-item rounded-0" v-show="!startCapLimitReached">
+                          <a href="#" class="page-link p-1" @click.prevent="previousGroup()">Previous 20</a>
+                        </div>
+                      </template>
+                      <template v-for="n in pages">
+                        <div v-if="n >= startCap && n <= endCap" class="page-item rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }">
+                          <a href="#" class="page-link p-1" @click.prevent="page = n" v-text="n"></a>
+                        </div>
+                      </template>
+                      <template v-if="groupPages">
+                        <div class="page-item rounded-0" v-show="!endCapLimitReached">
+                          <a href="#" class="page-link p-1" @click.prevent="nextGroup()">Next 20</a>
+                        </div>
+                      </template>
+                      <div class="page-item rounded-0" :class="{ 'disabled': page >= pages }">
+                        <a class="page-link p-1" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
+                      </div>
+                    </div>
+                  </template>
+
+
                 </div>
               </div>
               <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
                 <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click='addPropMode = !addPropMode; newPropDomain = item.label'>
-                  <i class="fas fa-circle text-success fa-stack-2x"></i>
-                  <i class="fas fa-plus fa-stack-1x text-light"></i>
+                  <i class="fas fa-circle fa-stack-2x" :class="[ addPropMode ? 'text-success':'mainTextLight']"></i>
+                  <i class="fas fa-stack-1x text-light" :class="[ addPropMode ? 'fa-minus':'fa-plus']"></i>
                 </span>
-                <span class="fa-stack fa-1x pointer expand unselectable" @click='expand=!expand'>
+                <span class="fa-stack fa-1x pointer expand unselectable" @click='expand=!expand' v-if="item && item.properties">
                   <i class="fas fa-circle fa-stack-2x" :class="{'text-muted':!expand,'text-success':expand}"></i>
-                  <i class="fas fa-list-ul fa-stack-1x text-light"></i>
+                  <i class="fas fa-stack-1x text-light" :class="[ expand ? 'fa-list-ul':'fa-ellipsis-h']"></i>
                 </span>
               </div>
               <div v-if="addPropMode" class="col-sm-12 p-2 bg-dark d-flex align-items-center justify-content-center text-light">
@@ -1488,6 +1707,7 @@ Vue.component('c-box', {
                     <div class="form-group">
                       <label for="name">Name <i class="fas fa-asterisk text-danger"></i></label>
                       <input v-model="newPropName" type="text" class="form-control" id="name" placeholder="name of new property">
+                      <small v-if="propExists" class="text-danger">A property with this name already exists</small>
                     </div>
                     <div class="form-group">
                       <label for="desc">Description <i class="fas fa-asterisk text-danger"></i></label>
@@ -1503,13 +1723,32 @@ Vue.component('c-box', {
                       <button type="button" class="btn btn-sm text-light themeButton m-1" @click.prevent="addInputType()">Search Types & Add</button>
                     </div>
                     <div class="w-100 p-1">
-                      <button :disabled="!addNewPropReady" :class="[addNewPropReady?'btn-success':'btn-secondary']" type="submit" class="btn btn-lg w-100" @click.prevent="submitNewProp()">Submit</button>
+                      <button :disabled="!addNewPropReady && !propExists" :class="[addNewPropReady && !propExists ?'btn-success':'btn-secondary']" type="submit" class="btn btn-lg w-100" @click.prevent="submitNewProp()">Submit</button>
                     </div>
                   </form>
                 </div>
               </div>
             </div>`,
   methods: {
+    updateTotals(){
+      let totals ={
+        properties: 0,
+        selected: 0,
+        required: 0
+      }
+      if (this.item.hasOwnProperty('properties')) {
+        this.item.properties.forEach( prop => {
+          totals.properties ++;
+          if (prop && prop.selected) {
+            totals.selected ++;
+          }
+          if (prop && prop.isRequired) {
+            totals.required ++;
+          }
+        })
+      }
+      this.totals = totals
+    },
     removeProp(propLabel){
       Swal.fire({
         title: 'Are you sure you want to delete '+propLabel+'?',
@@ -1533,8 +1772,62 @@ Vue.component('c-box', {
       try {
         return _.orderBy(self.item.properties, ['label'], ['asc']);
       } catch (e) {
-        self.item.properties
+        return self.item.properties
       }
+    },
+    calculatePages: function () {
+      var self= this;
+      self.pages = Math.ceil(self.item.properties.length / self.perPage);
+
+      if (self.pages > self.pageLimit) {
+        self.groupPages =  true;
+      }
+    },
+    previousGroup: function(){
+      var self = this;
+
+      if (!self.startCapLimitReached) {
+        if (self.startCap-20 > 0) {
+          self.page = self.startCap-20
+          self.startCap = self.startCap-20
+          self.endCap = self.endCap-20
+          self.endCapLimitReached = false;
+        }else {
+          self.page = 1
+          self.startCap = 0
+          self.endCap = 20
+          self.startCapLimitReached = true;
+          self.endCapLimitReached = false;
+        }
+      }
+    },
+    nextGroup: function(){
+      var self = this;
+
+      if (!self.endCapLimitReached) {
+        if (self.endCap+20 < self.pages) {
+          self.page = self.startCap+20
+          self.startCap = self.startCap+20
+          self.endCap = self.endCap+20
+          self.startCapLimitReached = false;
+        }else {
+          self.page = self.startCap+20
+          self.startCap = self.startCap+20
+          self.endCap = self.pages
+          self.endCapLimitReached = true;
+          self.startCapLimitReached = false;
+        }
+      }
+    },
+    prevPage: function () {
+      var self= this;
+      if (self.page > 1)
+          self.page -= 1
+    },
+    nextPage: function () {
+      var self= this;
+      if (self.page < self.pages)
+          self.page += 1
     },
     getSubclass(item){
       return item.split(", ")
@@ -1543,6 +1836,7 @@ Vue.component('c-box', {
       var payload = {};
       payload["label"] = propLabel
       store.commit('selectProp',payload);
+      this.updateTotals();
     },
     markRequired(propLabel){
       var self = this;
@@ -1555,6 +1849,7 @@ Vue.component('c-box', {
           $.notify("Can't require an unselected property",{ globalPosition: 'right',style:'error', showDuration: 40, });
         }
       }
+      this.updateTotals();
     },
     resetAddPropForm(){
       var self = this;
@@ -1591,6 +1886,7 @@ Vue.component('c-box', {
         payload['special'] = false;
       }
       store.commit('addProperty',payload);
+      self.addPropMode = false;
       self.resetAddPropForm();
     },
     addInputType(){
@@ -1755,7 +2051,7 @@ var app = new Vue({
           inputNamespace:'',
           availableNamespace:false,
           userInfo:null,
-          validationView:false,        
+          validationView:false,       
 				}
 			},
       computed:{
@@ -1805,6 +2101,7 @@ var app = new Vue({
               let url = "/api/registry/" + value;
               axios.head(url).then(function (res) {
                 self.availableNamespace= false;
+                console.log('%c Namespace "'+value+'" is NOT available', 'color:coral')
               }).catch(err=>{
                 //last check for reserved names
                 if (value === 'metadata' || value === 'dataset') {
@@ -1812,7 +2109,8 @@ var app = new Vue({
                 }else{
                   self.availableNamespace= true;
                 }
-                throw err;
+                console.log('%c Namespace "'+value+'" is available', 'color:limegreen')
+                // throw err;
               });
             }
           }
@@ -1890,68 +2188,34 @@ var app = new Vue({
         toggleDesc(){
           store.commit('toggleDesc');
         },
-        addClass:function(){
-          var self = this;
+        addClass(){
+          let self = this;
+          let name = this.$refs.clsName.value;
+          let desc = this.$refs.clsDesc.value;
 
-            Swal.mixin({
-            input: 'text',
-            confirmButtonText: 'Next &rarr;',
-            showCancelButton: true,
-            animation:false,
-            customClass:'scale-in-center',
-            confirmButtonColor:"{{color_main}}",
-            cancelButtonColor:"{{color_sec}}",
-            progressSteps: ['1', '2']
-          }).queue([
-            {
-              title: "Choose a name for your class",
-              html: 'Input name must be PascalCased <b class="text-danger">eg. MyClass </b>',
-              inputValidator: (value) => {
-                return new Promise((resolve) => {
-                  if (value.match(/^(?=.*[a-z])[A-Z]+[a-z]*(?:\d*(?:[A-Z]+[a-z]*)?)*$/)) {
-                    // DUPLICATE CHECK
-                    if (store.getters.isDuplicateClass(value)) {
-                      resolve('Class already exists. Choose a diffent name')
-                    }else {
-                      resolve()
-                    }
-                  } else {
-                    resolve('class names must be PascalCased')
-                  }
-                })
-              }
-            },
-            {
-              title: "Write a comment about this class",
-              html: 'Write a short summary about this class',
-              input:'textarea',
-              inputValidator: (value) => {
-                return value.length < 10 && 'Description is too short! You should write something meaningful.'
-              }
-            },
-          ]).then((result) => {
-            if (result.value) {
-              Swal.fire({
-                title: 'Add Class '+result.value[0]+'?',
-                text: result.value[1],
-                showCancelButton: true,
-                confirmButtonColor:"{{color_main}}",
-                cancelButtonColor:"{{color_sec}}",
-                animation:false,
-                customClass:'scale-in-center',
-                confirmButtonText: 'Yes, Add It!'
-              }).then((res) => {
-                if (res.value) {
-                  $.notify(result.value[0]+" added",{ globalPosition: 'right',style:'success', showDuration: 200, });
-                  let payload = {}
-                  payload['name'] = result.value[0];
-                  payload['description'] = result.value[1];
-                  store.commit('addClass',payload);
-                }
-              })
+          // if (value.match(/^(?=.*[a-z])[A-Z]+[a-z]*(?:\d*(?:[A-Z]+[a-z]*)?)*$/)) {
+
+          if (name && desc) {
+            // DUPLICATE CHECK
+            if (store.getters.isDuplicateClass(name)) {
+              Swal.fire({type:'error',
+                toast:true,
+                title: 'Class already exists. Choose a different name',
+                showConfirmButton:false,
+                timer:1000})
+            }else {
+                let payload = {}
+                payload['name'] = name;
+                payload['description'] = desc;
+                store.commit('addClass',payload);
             }
-          });
-
+          } else {
+            Swal.fire({type:'error',
+                toast:true,
+                title: 'You forgot something!',
+                showConfirmButton:false,
+                timer:1000})
+          }
 
         },
         getPreview(){
