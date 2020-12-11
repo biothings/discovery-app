@@ -353,16 +353,19 @@
   });
 
   Vue.component('object-box', {
-    props: ['properties'],
+    data: function(){
+      return{
+        // required: []
+      }
+    },
+    props: ['properties', 'required'],
     mounted: function(){
       var self = this;
-      // console.log("%c OBJECT PROPS",'color:hotpink')
-      // console.log(self.properties)
     },
     template:
       `<div class="p-1 m-1 bg-light rounded">
         <template v-for="(propContent, propName) in properties">
-          <propbox :name="propName" :fullinfo="propContent"></propbox>
+          <propbox :name="propName" :fullinfo="propContent" :required="required"></propbox>
         </template>
       </div>`
   });
@@ -529,7 +532,7 @@
           </div>
           <!-- 🌈 OBJECT 🌈 -->
           <div v-if="option && option.properties">
-            <object-box :properties="option.properties"></object-box>
+            <object-box :properties="option.properties" :required="option.required"></object-box>
           </div>
           <!-- 🌈 ENUM 🌈 -->
           <div v-if="option && option.enum">
@@ -689,7 +692,7 @@
           </div>
           <!-- 🌈 OBJECT 🌈 -->
           <div v-if="option && option.properties">
-            <object-box :properties="option.properties"></object-box>
+            <object-box :properties="option.properties" :required="option.required"></object-box>
           </div>
           <!-- 🌈 ENUM 🌈 -->
           <div v-if="option && option.enum">
@@ -756,9 +759,9 @@
     template:
     `<div class="border-bottom row m-0">
       <div class="col-sm-12 col-md-3 bg-dark bold d-flex justify-content-center align-items-center">
-        <h6 class="m-0">
+        <small class="m-0">
           <span :class="[isRequired(name)?'text-danger font-weight-bold':'text-light']" v-text="name" :data-tippy-info="JSON.stringify(fullinfo,null,2)"></span>
-        </h6>
+        </small>
       </div>
       <div class="col-sm-12 col-md-9 text-muted bg-light">
         <small v-text="fullinfo['description']"></small>
