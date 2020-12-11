@@ -1,5 +1,6 @@
 import json
 from types import SimpleNamespace
+from urllib.parse import urlparse
 
 from biothings.utils.common import traverse
 from discovery.utils import notifications
@@ -147,6 +148,8 @@ class DatasetMessage(notifications.Message):
                 paragraph = ADF().paragraph().text(path + ': ')
                 paragraph.content[-1].add_mark(Strong())
                 paragraph.text(str(val))
+                if urlparse(str(val)).scheme:
+                    paragraph.link(str(val))
                 doc.add_item(paragraph)
         return doc
 
@@ -211,21 +214,34 @@ class DatasetNotifier(Notifier):
 
     def add(self, _id, doc, user, **meta):
 
-        message = DatasetMessage({
-            "title": "External Dataset Request",
+        # Separate messages by channels
+
+        general = DatasetMessage({
+            "title": "New Dataset Registered",
             "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
             "url": f"http://discovery.biothings.io/dataset/{_id}",
             "url_text": "View details about this dataset",
             "image": DatasetNotifier.get_portal_image(meta.get('guide', '')),
             "image_altext": "DDE_PORTAL_IMG",
+        })
+
+        n3c = DatasetMessage({
+            "title": "External Dataset Request",  # customized title
+            "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+            "url": f"http://discovery.biothings.io/dataset/{_id}",
+            "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
             "doc": doc  # produce additional jira ticket content
         })
 
         for channel in self.channels:
 
+            # for default channels
+            message = general
+
             if isinstance(channel, N3CChannel):
                 if meta.get('schema') != 'n3c::n3c:Dataset':
-                    continue
+                    continue  # skip this channel for non-N3c dataset
+                message = n3c
 
             for request in channel.send(message):
                 yield request
