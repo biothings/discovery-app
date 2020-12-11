@@ -191,7 +191,6 @@
               </ol>
             </p>
           </div>
-          <!-- <ngx-graph></ngx-graph> -->
           <div class="mt-2">
             <input type="checkbox" class="slider mr-2" id="customControlInline" @click="toggleDesc()">
             <label for="customControlInline"><small class="text-muted">Show Descriptions</small></label>
@@ -199,6 +198,9 @@
           <template  v-for="(item,index) in classesAvailable">
             <c-box :item="item" :key="index"></c-box>
           </template>
+          <div class="w-100 p-1">
+            <ngx-graph></ngx-graph>
+          </div>
         </div>
 
       </template>
@@ -241,7 +243,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
 
-$.notify.addStyle('success', {
+  $.notify.addStyle('success', {
     html: "<div><span data-notify-text/></div>",
     classes: {
       base: {
@@ -833,44 +835,41 @@ Vue.component('ngx-graph', {
     methods:{
       makeGraph(){
         var self = this;
-
         self.nxG = new jsnx.DiGraph();
+        let edges = []
+        let nodes = []
 
-        self.classesAvailable.forEach( cls => {
-          self.addNode(cls.name);
-          if (cls.hasOwnProperty('parent_classes')) {
-            let parents = cls.parent_classes[0].split(',');
-            self.addEdge(cls.name, parents[parents.length - 1]);
+        for(i=0; i< self.classesAvailable.length; i++){
+          nodes.push(self.classesAvailable[i].name)
+          if(self.classesAvailable[i].hasOwnProperty('parent_classes')){
+            let parents = self.classesAvailable[i]['parent_classes']
+            for(p=0; p< parents.length; p++){
+              let branch_parents = parents[p].split(',');
+              let parent = branch_parents[branch_parents.length-1].trim()
+              edges.push([parent, self.classesAvailable[i].name])
+            }
           }
-        });
-
+        }
+        // console.log(nodes,edges)
+        self.nxG.addNodesFrom(nodes)
+        self.nxG.addEdgesFrom(edges)
         self.drawGraph();
-      },
-      addEdge(class1,class2){
-        // console.log('%c addEdge','color:hotpink')
-        // console.log(class1,class2)
-        this.nxG.addEdge(class1,class2);
-      },
-      addNode(className){
-        console.log('%c add Node','color:limegreen')
-        console.log(className)
-        this.nxG.addNode(className,{'label':className});
       },
       drawGraph(){
         var self = this;
-        console.log('draw', self.nxG)
         jsnx.draw(self.nxG, {
             element: '#classGraph',
             weighted: true,
+            stickyDrag: true,
             edgeStyle: {
                 'stroke-width': 10,
                 'fill': '#b4b4b4'
             },
             layoutAttr: {
-                charge: -800,
-                linkDistance: 100
+                charge: -1500,
+                linkDistance: 120
             },
-            height:200,
+            height:400,
             labelStyle: {fill: '#5C3069'},
             withLabels: true,
             nodeLabels: 'label',
@@ -882,9 +881,6 @@ Vue.component('ngx-graph', {
             }
         });
       },
-    },
-    watch: {
-      
     },
     mounted: function(){
       this.makeGraph()
@@ -1487,7 +1483,10 @@ Vue.component('c-box', {
       startCapLimitReached: true,
       endCapLimitReached: false,
       // prop totals
-      totals:{}
+      totals:{},
+      // add prop input
+      range_options:[],
+      range_query:''
     }
   },
   computed:{
@@ -1513,72 +1512,81 @@ Vue.component('c-box', {
       }else{
         this.filtered = []
       }
-    }
+    },
+    range_query: function (q) {
+      var self = this;
+      if (q && self.range_options.includes(q)) {
+        self.handlePillSubmit();
+      }
+    },
   },
   mounted:function(){
 
     if (this.item.special) {
       this.getRangeOptions();
       this.expand = true;
-    }else{
+    }else if(this.item && this.item.properties){
       this.calculatePages();
+    }else{
+      this.item.properties = []
     }
 
     this.updateTotals();
 
     tippy( '#editorTippy', {
-        target:'.cTip',
-        interactive:'true',
-        content: 'Loading...',
-        placement:'right',
-        animation: 'fade',
-        trigger:'click',
-        theme:'light',
-        onShow(instance) {
-          let desc = instance.reference.dataset.tippyDescription;
-          instance.setContent("<div class='text-muted m-0 text-left wraptext'>"+desc+"</div>")
-        }
-      });
-      tippy( '.expand', {
+      target:'.cTip',
+      interactive:'true',
+      content: 'Loading...',
+      placement:'right',
+      animation: 'fade',
+      trigger:'click',
+      theme:'light',
+      onShow(instance) {
+        let desc = instance.reference.dataset.tippyDescription;
+        instance.setContent("<div class='text-muted m-0 text-left wraptext'>"+desc+"</div>")
+      }
+    });
+    
+    tippy( '.expand', {
+      maxWidth:'200px',
+      placement:'top',
+      content: '<div class="text-muted m-0" style="border-radius:none">Show/Hide Properties</div>',
+      animation: 'fade',
+      theme:'light'});
+
+    tippy( '.addprop', {
+      maxWidth:'200px',
+      placement:'top',
+      content: '<div class="text-muted m-0" style="border-radius:none">Add New Property</div>',
+      animation: 'fade',
+      theme:'light'});
+
+    tippy( '.required', {
+      maxWidth:'200px',
+      placement:'top',
+      content: '<div class="text-danger m-0" style="border-radius:none">Mark As Required</div>',
+      animation: 'fade',
+      theme:'light'});
+
+    tippy( '.select', {
+      maxWidth:'200px',
+      placement:'top',
+      content: '<div class="text-muted m-0" style="border-radius:none">Re-Use This Property</div>',
+      animation: 'fade',
+      theme:'light'});
+
+    tippy( '.remove', {
         maxWidth:'200px',
         placement:'top',
-        content: '<div class="text-muted m-0" style="border-radius:none">Show/Hide Properties</div>',
+        content: '<div class="text-danger m-0" style="border-radius:none">Delete Property</div>',
         animation: 'fade',
         theme:'light'});
-
-        tippy( '.addprop', {
-          maxWidth:'200px',
-          placement:'top',
-          content: '<div class="text-muted m-0" style="border-radius:none">Add New Property</div>',
-          animation: 'fade',
-          theme:'light'});
-
-      tippy( '.required', {
-        maxWidth:'200px',
-        placement:'top',
-        content: '<div class="text-danger m-0" style="border-radius:none">Mark As Required</div>',
-        animation: 'fade',
-        theme:'light'});
-
-      tippy( '.select', {
-        maxWidth:'200px',
-        placement:'top',
-        content: '<div class="text-muted m-0" style="border-radius:none">Re-Use This Property</div>',
-        animation: 'fade',
-        theme:'light'});
-
-        tippy( '.remove', {
-          maxWidth:'200px',
-          placement:'top',
-          content: '<div class="text-danger m-0" style="border-radius:none">Delete Property</div>',
-          animation: 'fade',
-          theme:'light'});
   },
   template: `<div class="row m-1 cBox actions" :class="{'alert-info mb-3':item.special,'alert-light':!item.special}">
               <div class="col-sm-10 p-2">
                 <div>
                   <i v-if="item.special" class="fas fa-star text-warning"></i>
-                  <template v-if="item.parent_classes.length" v-for="tree in item.parent_classes">
+                  <template v-if="item && item.parent_classes.length" v-for="tree in item.parent_classes">
                     <template v-for="(name,i) in getSubclass(tree)">
                       <small v-text="name"></small>
                       <small><i class="fas fa-chevron-right"></i></small>
@@ -1588,18 +1596,18 @@ Vue.component('c-box', {
                   <!-- 🌈 prop totals 🌈 -->
                   <div v-if="totals" class="float-right">
                     <table>
-                    <tr>
-                      <td v-for="(val, name) in totals" class="px-1"> 
-                        <small>
-                          <i v-if="name == 'required'" class="fas fa-asterisk text-danger"></i>
-                          <i v-else-if="name == 'selected'" class="fas fa-check-circle text-success"></i> 
-                          <i v-else v-text="name"></i> : <b v-text="val" :class="[val?'text-primary':'text-muted']"></b> 
-                        </small>
-                      </td>
-                    </tr>
+                      <tr>
+                        <td v-for="(val, name) in totals" class="px-1"> 
+                          <small>
+                            <i v-if="name == 'required'" class="fas fa-asterisk text-danger"></i>
+                            <i v-else-if="name == 'selected'" class="fas fa-check-circle text-success"></i> 
+                            <i v-else v-text="name"></i> : <b v-text="val" :class="[val?'text-primary':'text-muted']"></b> 
+                          </small>
+                        </td>
+                      </tr>
                     </table>
                   </div>
-                  <small v-if="item.special && !item.properties" class="text-muted float-right">Add properties here <i class="fas fa-arrow-right text-danger"></i></small>
+                  <small style="clear:both;" v-if="item.special && !item.properties" class="text-muted float-right">Add properties here <i class="fas fa-arrow-right text-danger"></i></small>
                   <template v-if="showDesc">
                     <small class="d-block text-muted" v-html="item.description || 'No description provided'"></small>
                   </template>
@@ -1687,11 +1695,11 @@ Vue.component('c-box', {
                     </div>
                   </template>
 
-
                 </div>
               </div>
+
               <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-                <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click='addPropMode = !addPropMode; newPropDomain = item.label'>
+                <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click='addPropMode = !addPropMode; newPropDomain = item.label, populateInputOptions()'>
                   <i class="fas fa-circle fa-stack-2x" :class="[ addPropMode ? 'text-success':'mainTextLight']"></i>
                   <i class="fas fa-stack-1x text-light" :class="[ addPropMode ? 'fa-minus':'fa-plus']"></i>
                 </span>
@@ -1700,9 +1708,10 @@ Vue.component('c-box', {
                   <i class="fas fa-stack-1x text-light" :class="[ expand ? 'fa-list-ul':'fa-ellipsis-h']"></i>
                 </span>
               </div>
+
               <div v-if="addPropMode" class="col-sm-12 p-2 bg-dark d-flex align-items-center justify-content-center text-light">
-                <div class="col-sm-12 col-md-6">
-                  <h3>New Property</h3>
+                <div class="col-sm-10 m-auto p-3 bg-light text-muted rounded">
+                  <h5>New Property</h5>
                   <form>
                     <div class="form-group">
                       <label for="name">Name <i class="fas fa-asterisk text-danger"></i></label>
@@ -1715,12 +1724,20 @@ Vue.component('c-box', {
                     </div>
                     <div class="form-group">
                       <label for="domain">Domain <i class="fas fa-asterisk text-danger"></i></label>
-                      <input disabled v-model="newPropDomain" type="text" class="form-control bg-dark text-light" id="domain">
+                      <input disabled v-model="newPropDomain" type="text" class="form-control alert-secondary text-success" id="domain">
                     </div>
                     <div class="form-group">
                       <label for="input">Input Type(s) <i class="fas fa-asterisk text-danger"></i></label>
-                      <input disabled v-model="newPropRange" type="text" class="form-control bg-dark text-light" id="input">
-                      <button type="button" class="btn btn-sm text-light themeButton m-1" @click.prevent="addInputType()">Search Types & Add</button>
+                      <div class="border p-1 rounded border-secondary mb-2" v-if="newPropRange && newPropRange.length">
+                        <span class="badge badge-success m-1" v-for="selection in newPropRange" @click="removeRangePill(selection)"><b v-text="selection"></b> &times;</span>
+                      </div>
+                      <div class="input-group mb-1">
+                        <input v-model="range_query" type="text" class="form-control" id="input" list="myCustomList" placeholder="Look up range options">
+                        <datalist id="myCustomList"></datalist>
+                        <div class="input-group-append" @click.prevent="handlePillSubmit()">
+                          <button type="button" class="input-group-text btn btn-success">ADD</button>
+                        </div>
+                      </div>
                     </div>
                     <div class="w-100 p-1">
                       <button :disabled="!addNewPropReady && !propExists" :class="[addNewPropReady && !propExists ?'btn-success':'btn-secondary']" type="submit" class="btn btn-lg w-100" @click.prevent="submitNewProp()">Submit</button>
@@ -1728,8 +1745,54 @@ Vue.component('c-box', {
                   </form>
                 </div>
               </div>
+
             </div>`,
   methods: {
+    handlePillSubmit(){
+      var self = this;
+      if(!self.newPropRange.includes(self.range_query)){
+        self.newPropRange.push(self.range_query)
+        self.range_query = ''
+      }else{
+        Swal.fire({type:'error',
+                toast:true,
+                title: "Option already added",
+                showConfirmButton:false,
+                timer:2000})
+      }
+    },
+    removeRangePill(value){
+      var self = this;
+      const index = self.newPropRange.indexOf(value);
+      if (index > -1) {
+        self.newPropRange.splice(index, 1);
+      }
+    },
+    populateInputOptions(){
+      var self = this;
+      var options = '';
+      options += '<option value="schema:Text" />';
+      options += '<option value="schema:URL" />';
+      options += '<option value="schema:Integer" />';
+      options += '<option value="schema:Number" />';
+      options += '<option value="schema:Date" />';
+      options += '<option value="schema:Float" />';
+      options += '<option value="schema:Boolean" />';
+      options += '<option value="schema:DateTime" />';
+      options += '<option value="schema:Time" />';
+      axios.get('/api/registry/schema?field=name').then(res=>{
+        Swal.hideLoading();
+        if (res.data.hits) {
+          for(var i = 0; i < res.data.hits.length; i++){
+            options += '<option value="'+res.data.hits[i].name+'" />';
+            self.range_options.push(res.data.hits[i].name)
+          }
+          document.getElementById('myCustomList').innerHTML = options;
+        }
+      }).catch(err=>{
+        throw err;
+      });
+    },
     updateTotals(){
       let totals ={
         properties: 0,
@@ -1778,7 +1841,6 @@ Vue.component('c-box', {
     calculatePages: function () {
       var self= this;
       self.pages = Math.ceil(self.item.properties.length / self.perPage);
-
       if (self.pages > self.pageLimit) {
         self.groupPages =  true;
       }
