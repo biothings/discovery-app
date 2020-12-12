@@ -1,4 +1,6 @@
 import json
+from collections import defaultdict
+from functools import reduce
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
@@ -140,17 +142,41 @@ class DatasetMessage(notifications.Message):
         • author.orcid: https://orcid.org/0000-0001-9779-1512
 
         """
+        def keep(item):
+            (path, val) = item
+            if not path or not str(val):
+                return False
+            if path.startswith("includedInDataCatalog"):
+                return False
+            if "@" in path or path.startswith("_"):
+                return False
+            return True
+
+        def combine(dic, item):
+            (key, val) = item
+            val = str(val).strip()
+            dic[key].append(val)
+            return dic
+
+        def adfy(item):
+            (key, strs) = item
+            paragraph = ADF().paragraph()
+            paragraph.text(key + ': ')
+            paragraph.content[-1].add_mark(Strong())
+            text = ', '.join(strs)
+            paragraph.text(text)
+            if ' ' not in text and urlparse(text).scheme:
+                paragraph.link(text)
+            return paragraph
+
+        entries = filter(keep, traverse(self["doc"], True))
+        dotdict = reduce(combine, entries, defaultdict(list))
+        paragraphs = map(adfy, dotdict.items())
+
         doc = ADF().bullet_list()
-        for path, val in traverse(self["doc"], True):
-            if path and str(val) and '@' not in path:  # skip meta keys
-                if path.startswith("includedInDataCatalog"):
-                    continue  # these fields are not from user's input
-                paragraph = ADF().paragraph().text(path + ': ')
-                paragraph.content[-1].add_mark(Strong())
-                paragraph.text(str(val))
-                if urlparse(str(val)).scheme:
-                    paragraph.link(str(val))
-                doc.add_item(paragraph)
+        for paragraph in paragraphs:
+            doc.add_item(paragraph)
+
         return doc
 
     # override
