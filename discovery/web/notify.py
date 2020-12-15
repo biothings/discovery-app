@@ -216,7 +216,7 @@ class DatasetNotifier(Notifier):
             if hasattr(settings, 'N3C_AUTH_USER') and \
                     hasattr(settings, 'N3C_AUTH_PASSWORD'):
                 profile = SimpleNamespace()
-                profile.project_id = "10001"
+                profile.project_id = "10016"
                 profile.issuetype_id = "10014"
                 profile.assignee_id = "5c708335e1bcdf6294d0c85e"    # Liz
                 profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"   # cwu
