@@ -3510,6 +3510,10 @@
                       </template>
                       <!-- 🌈 STRING NORMAL🌈 -->
                       <template v-else>
+                        <small class="text-info" v-if="name ==='description'">
+                          This field is recommended to be between 50 and 5000 characters long ( <b v-text="userInput && userInput.length"></b> characters). 
+                          <a href="https://developers.google.com/search/docs/data-types/dataset#dataset" target="_blank">Learn more</a>.
+                        </small>
                         <textarea :rows="name ==='description'?5:2" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
                       </template>
                         <!-- 🌈 VOCAB PREVIEW🌈 -->
