@@ -409,7 +409,6 @@
           .then(data => {
             self.loading = false;
             self.metadata = data
-            console.log('metadata', self.metadata)
             self.createScript();
             self.updateMetaTags(data);
           }).catch((err) => {
