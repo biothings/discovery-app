@@ -202,7 +202,9 @@
         let res = []
         switch (type) {
           case 'recent':
-             res = _.sortBy(copy,'._meta.last_updated').reverse();
+             res = _.orderBy(copy, (o) => {
+                      return moment(o['_meta']['last_updated']).format('YYYYMMDD')
+                    }, ['desc'] );
             break;
           case 'A-Z':
             res = _.sortBy(copy, [function(o) { return o.name; }]);

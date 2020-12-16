@@ -102,7 +102,7 @@
           <div class="col-sm-12 col-md-6 bg-secondary border-right" style="max-height: 800px; overflow-y: scroll;">
             <h5 class="text-light text-center m-0 text-dark pt-2">Your Validation</h5>
             <template v-for="(val,propname) in validation_props">
-              <validation-dropzone :propname="propname" :key="propname" :validation_options="validation_options" :val="val"></validation-dropzone>
+              <validation-dropzone :propname="propname" :key="propname" :val="val"></validation-dropzone>
             </template>
           </div>
           <div class="col-sm-12 col-md-6 bg-dark border-left">
@@ -327,7 +327,7 @@ const store = new Vuex.Store({
     'previousPreviewProps': {},
     'validation_options': [
             {
-              id: 0,
+              _id: '01233',
               title: 'string',
               color: '#0263fd',
               validation:{
@@ -335,7 +335,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 01,
+              _id: '01432',
               title: 'string(s)',
               color: '#2717a1',
               validation:{
@@ -353,7 +353,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 1,
+              _id: '14325',
               title: 'boolean',
               color: '#d62979',
               validation:{
@@ -361,7 +361,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 3,
+              _id: '3543',
               title: 'integer',
               color: '#6e3ac5',
               validation:{
@@ -369,7 +369,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 4,
+              _id: '4654',
               title: 'url',
               color: '#fc6903',
               validation:{
@@ -378,7 +378,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 5,
+              _id: '5867',
               title: 'keywords',
               color: '#28908c',
               validation:{
@@ -396,7 +396,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 6,
+              _id: '6876',
               title: 'date',
               color: '#9bbf06',
               validation:{
@@ -405,7 +405,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 7,
+              _id: '7645',
               title: 'enumeration',
               color: '#5a71a5',
               validation:{
@@ -425,7 +425,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 8,
+              _id: '8567',
               title: 'constant',
               color: '#d8272a',
               validation:{
@@ -433,7 +433,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 9,
+              _id: '9654',
               title: 'object|Person',
               color: '#49414b',
               validation:{
@@ -449,7 +449,7 @@ const store = new Vuex.Store({
               }
             },
             {
-              id: 10,
+              _id: '1065',
               title: 'ontology',
               color: '#a37d00',
               validation:{
@@ -489,16 +489,10 @@ const store = new Vuex.Store({
       // console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
     },
     setValidation(state,payload){
-      // console.log(state.finalschema)
       let item = payload['validation']
       let name = payload['name']
       let newval = Object.assign({}, state.finalschema['@graph'][0]['$validation']['properties'][name], item['validation'])
-      // console.log('merged', newval)
       Vue.set(state.finalschema['@graph'][0]['$validation']['properties'], name, newval)
-
-      // let item = payload['validation']
-      // let name = payload['name']
-      // Vue.set(state['val_test'], name, item['validation'])
     },
     updateValidationOptions(state,payload){
       let v = payload['validation']
@@ -638,9 +632,10 @@ const store = new Vuex.Store({
       let label = payload['label']
       for (var i = 0; i < state.schema.length; i++) {
         if (state.schema[i].special) {
+          $.notify(label+" deleted",{ globalPosition: 'right',style:'info', showDuration: 200, });
           for (var x = 0; x < state.schema[i].properties.length; x++) {
             if (state.schema[i].properties[x].label === label) {
-              state.schema[i].properties.pop(x)
+              state.schema[i].properties.splice(x,1);
               $.notify(label+" deleted",{ globalPosition: 'right',style:'info', showDuration: 200, });
             }
           }
@@ -935,7 +930,7 @@ Vue.component('editor', {
   });
 
 Vue.component('validation-dropzone', {
-    props: ['propname', 'val', 'validation_options'],
+    props: ['propname', 'val'],
     data: function(){
       return{
         matches : []
@@ -953,21 +948,28 @@ Vue.component('validation-dropzone', {
 
         evt.dataTransfer.dropEffect = 'move'
         evt.dataTransfer.effectAllowed = 'move'
-        evt.dataTransfer.setData('itemID', item.id)
+        evt.dataTransfer.setData('itemID', item._id)
       },
       onDrop (evt, name) {
         let self = this;
         self.matches = [];
         const itemID = evt.dataTransfer.getData('itemID')
-        const item = this.validation_options.find(item => item.id == itemID)
-        self.matches.push(item)
-        let payload = {
-          'validation':item,
-          'name':name
+        // const item = this.validation_options.find(item => item.id == itemID)
+        this.validation_options.forEach(item => {
+          console.log('item', item)
+          if(item._id == itemID){
+            console.log(itemID, item)
+            self.matches.push(item)
+            let payload = {
+              'validation':item,
+              'name':name
+              }
+            let audio = document.getElementById("dropsound");
+            audio.play();
+            store.commit('setValidation', payload);
           }
-        let audio = document.getElementById("dropsound");
-        audio.play();
-        store.commit('setValidation', payload);
+        })
+        
       },
       allowDrop(ev) {
         $(ev.target).attr("drop-active", true);
@@ -986,7 +988,10 @@ Vue.component('validation-dropzone', {
         store.commit('resetValidationFor', payload);
       }
     },
-    watch:{
+    computed:{
+      validation_options (){
+        return store.getters.getValidationOptions
+      },
     },
     template:
       `<div class="row m-0 valBox bg-dark m-1">
@@ -2222,7 +2227,7 @@ var app = new Vue({
                     title: name,
                     color: self.getRandomColor(),
                     list: 2,
-                    validation: {'description':'EDIT to define'}
+                    validation: {'type':'EDIT to define'}
                   }
                 }
                 store.commit('addValidationOption', payload)
@@ -2235,7 +2240,7 @@ var app = new Vue({
 
           evt.dataTransfer.dropEffect = 'move'
           evt.dataTransfer.effectAllowed = 'move'
-          evt.dataTransfer.setData('itemID', item.id)
+          evt.dataTransfer.setData('itemID', item._id)
         },
         githubOptions(){
           // show modal
