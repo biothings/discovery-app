@@ -403,7 +403,6 @@
     data: function() {
       return {
         perPageChange:20,
-        sortChange: ''
       }
     },
     methods: {
@@ -504,9 +503,14 @@
       perPage: function(){
         return store.state.perPage
       },
-      sortType: function(){
-        return store.getters.get_sortType
-      }
+      sortChange:{
+        get () {
+          return store.getters.get_sortType
+        },
+        set (newValue) {
+          store.commit('change_sort',{'type': newValue});
+        }
+      },
     },
     watch:{
       perPageChange:function(nv){
@@ -517,9 +521,6 @@
       page: function(np){
         let self = this;
         store.commit('paginate_results');
-      },
-      sortChange: function(v){
-        store.commit('change_sort',{'type': v});
       }
     }
   })
