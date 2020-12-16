@@ -458,8 +458,11 @@
       store.dispatch('check_url_query');
       // initial search
       self.search();
-      self.sortType = "recent"
-      self.sort();
+      setTimeout(function(){
+        self.sortType = "recent"
+        self.sort();
+      }, 500);
+      
 
       window.onpopstate = function() {
         store.dispatch('check_url_query');
