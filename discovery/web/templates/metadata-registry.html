@@ -47,7 +47,7 @@
       </div>
       <div class="text-right d-none d-md-block">
         <label class="text-muted mr-2" for="exampleFormControlSelect1"><small>Order</small></label>
-        <select class="form-control form-control-sm w-25 float-right" id="exampleFormControlSelect1" @change="sort()" v-model="sortType">
+        <select class="form-control form-control-sm w-25 float-right" id="exampleFormControlSelect1" @change="search()" v-model="sortChange">
           <option>Choose one</option>
           <option value="A-Z">Alphabetically A-Z</option>
           <option value="Z-A">Alphabetically Z-A</option>
@@ -121,10 +121,14 @@
       page:1,
       pages: 1,
       query:'',
-      active_list:[]
+      active_list:[],
+      sortType:'recent'
     },
     strict: true,
     mutations:{
+      change_sort(state, payload){
+        state.sortType = payload['type'];
+      },
       saveGuideFilters(state, payload){
         state.guide_filters = payload['guide_filters'];
       },
@@ -197,9 +201,10 @@
         });
       },
       sort(state, payload){
-        let type = payload['type']
+        let type = state.sortType
         let copy = [...state.registry];
         let res = []
+        console.log('sorting by', type)
         switch (type) {
           case 'recent':
              res = _.orderBy(copy, (o) => {
@@ -241,6 +246,9 @@
           commit('save_registry',res);
           if (state.active_list.length) {
             commit('filter_registry');
+          }
+          if (state.sortType) {
+            commit('sort');
           }
           commit('paginate_results');
           commit('calculate_pages');
@@ -299,6 +307,9 @@
       },
       get_registry_results:state=>{
         return state.registryResults
+      },
+      get_sortType:state=>{
+        return state.sortType
       },
     }
   });
@@ -392,7 +403,7 @@
     data: function() {
       return {
         perPageChange:20,
-        sortType: ''
+        sortChange: ''
       }
     },
     methods: {
@@ -421,12 +432,6 @@
       },
       search() {
         store.dispatch('search_and_paginate');
-      },
-      sort() {
-        let payload = {'type': this.sortType}
-        store.commit('sort',payload);
-        store.commit('paginate_results');
-        store.commit('calculate_pages');
       },
       prevPage() {
         store.commit('prevPage');
@@ -458,11 +463,6 @@
       store.dispatch('check_url_query');
       // initial search
       self.search();
-      setTimeout(function(){
-        self.sortType = "recent"
-        self.sort();
-      }, 500);
-      
 
       window.onpopstate = function() {
         store.dispatch('check_url_query');
@@ -504,6 +504,9 @@
       perPage: function(){
         return store.state.perPage
       },
+      sortType: function(){
+        return store.getters.get_sortType
+      }
     },
     watch:{
       perPageChange:function(nv){
@@ -515,6 +518,9 @@
         let self = this;
         store.commit('paginate_results');
       },
+      sortChange: function(v){
+        store.commit('change_sort',{'type': v});
+      }
     }
   })
 </script>
