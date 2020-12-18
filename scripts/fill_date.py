@@ -5,7 +5,7 @@ import logging
 
 from tornado.options import options
 
-from discovery.data.dataset import DatasetMetadata
+from discovery.data.dataset import Dataset
 
 options.define('doc_last_updated', default='2020-11-13T18:12:12.664592+00:00')
 options.define('doc_created', default='2020-01-01T18:12:12.664592+00:00')
@@ -14,7 +14,7 @@ def updateDocs():
     '''
         Update meta guide field
     '''
-    docs = DatasetMetadata.search(private=False)
+    docs = Dataset.search()
     for doc in docs.scan():
         has_date = getattr( getattr(doc, "_meta", None), 'last_updated', None)
         if not has_date:
