@@ -17,6 +17,7 @@
 import json
 import logging
 
+import certifi
 from discovery.registry import schemas
 from discovery.utils.adapters import SchemaAdapter
 from discovery.web import notify
@@ -347,7 +348,8 @@ class SchemaViewHandler(APIBaseHandler):
         }
         """
         try:  # load doc from url
-            response = await AsyncHTTPClient().fetch(self.args.url)
+            response = await AsyncHTTPClient().fetch(
+                self.args.url, ca_certs=certifi.where())
             doc = json.loads(response.body)
             schema = SchemaAdapter(doc)
         except Exception as exc:  # TODO
