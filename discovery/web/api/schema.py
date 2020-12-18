@@ -118,7 +118,8 @@ class SchemaRegistryHandler(APIBaseHandler):
             'verbose': {'type': bool, 'default': False, 'alias': ['v']},
             'start': {'type': int, 'default': 0, 'alias': ['from', 'skip']},
             'size': {'type': int, 'default': 10, 'max': 20, 'alias': 'skip'},
-            'context': {'type': bool, 'default': True}  # consider not default in future
+            'context': {'type': bool, 'default': True},  # consider not default in future
+            'source': {'type': bool, 'default': True}
         }
     }
 
@@ -184,18 +185,19 @@ class SchemaRegistryHandler(APIBaseHandler):
         )
 
     @capture_registry_error
-    def get(self, namespace=None, curie=None):  # TODO PAGINATION
+    def get(self, namespace=None, curie=None):
         """
         Access the schema registry.
 
         - List all schemas.
             ::user filter by owner of schema
             ::field only return certain fields, for example: "@graph.$validation".
-
-        - List a schema by specifying its namespace
             ::start slicing index beginning number, inclusive.
             ::size slicing length, default is 10.
+
+        - List a schema by specifying its namespace
             ::field only return certain fields of the schema class, like "label".
+            ::source provide the source schema definition, default true.
 
         - List a class by specifying its namespace and curie.
             ::verbose add all dependent classes to build this schema class.
@@ -230,7 +232,7 @@ class SchemaRegistryHandler(APIBaseHandler):
             raise Finish({
                 "name": schema.pop('_id'),
                 "url": schema.meta.url,  # pylint: disable=no-member
-                "source": schema,
+                "source": schema if self.args.source else None,
                 "total": len(classes),
                 "hits": classes
             })
