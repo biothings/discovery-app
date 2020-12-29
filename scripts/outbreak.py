@@ -13,7 +13,7 @@ import requests
 from elasticsearch import Elasticsearch, RequestError
 from tornado.options import options, parse_command_line
 
-from discovery.data.dataset import DatasetMetadata
+from discovery.data.dataset import Dataset
 
 options.define('target_host', default='api.outbreak.info')
 
@@ -67,7 +67,7 @@ def main():
     })
     logging.debug(_)
 
-    for doc in DatasetMetadata.search().scan():
+    for doc in Dataset.search().scan():
         dic = doc.to_json()
         if dic.get('@type') == 'outbreak:Dataset':
             dic['@type'] = 'Dataset'
