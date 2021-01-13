@@ -573,6 +573,7 @@ const store = new Vuex.Store({
     addProperty(state,payload){
       let newProp = {};
       newProp['label'] = payload['name']
+      newProp['curie'] = state.prefix+":"+payload['name']
       newProp['description'] = payload['description']
       newProp['name'] = state.prefix+":"+payload['name']
       newProp['range'] = payload['range']
@@ -788,6 +789,23 @@ const store = new Vuex.Store({
         }
       }
       return false
+    },
+    getPropsSelected: state =>{
+      let props = []
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].hasOwnProperty('properties')) {
+          for (var x = 0; x < state.schema[i]['properties'].length; x++) {
+            if (state.schema[i]['properties'][x].hasOwnProperty('selected') && state.schema[i]['properties'][x]['selected']) {
+              if(state.schema[i].hasOwnProperty('special') && state.schema[i].special){
+                props.push({from: state.schema[i]['name'], name: state.schema[i]['properties'][x]['curie'], special:true})
+              }else{
+                props.push({from: state.schema[i]['name'], name: state.schema[i]['properties'][x]['curie'], special:false})
+              } 
+            }
+          }
+        }
+      }
+      return props
     }
   },
   actions:{
@@ -826,6 +844,15 @@ Vue.component('ngx-graph', {
       classesAvailable:function(){
         return store.getters.getSchema
       },
+      propsSelected: function(){
+        return store.getters.getPropsSelected
+      }
+    },
+    watch:{
+      propsSelected: function(v){
+        // console.log('propsSelected', v)
+        this.makeGraph()
+      }
     },
     methods:{
       makeGraph(){
@@ -833,9 +860,18 @@ Vue.component('ngx-graph', {
         self.nxG = new jsnx.DiGraph();
         let edges = []
         let nodes = []
+        let prop_nodes = []
+        let prop_edges = []
+        let prop_nodes_special = []
+        let prop_edges_special = []
 
         for(i=0; i< self.classesAvailable.length; i++){
-          nodes.push(self.classesAvailable[i].name)
+          
+          if(self.classesAvailable[i].hasOwnProperty('special') && self.classesAvailable[i].special){
+            nodes.push([self.classesAvailable[i].name, {color: '#D1EBF1'}])
+          }else{
+            nodes.push(self.classesAvailable[i].name)
+          }
           if(self.classesAvailable[i].hasOwnProperty('parent_classes')){
             let parents = self.classesAvailable[i]['parent_classes']
             for(p=0; p< parents.length; p++){
@@ -845,42 +881,73 @@ Vue.component('ngx-graph', {
             }
           }
         }
+        if (self.propsSelected.length){
+          for(i=0; i< self.propsSelected.length; i++){
+            if(self.propsSelected[i]['special']){
+              prop_nodes_special.push(self.propsSelected[i]['name'])
+              prop_edges_special.push([self.propsSelected[i]['from'], self.propsSelected[i]['name']])
+            }else{
+              prop_nodes.push(self.propsSelected[i]['name'])
+              prop_edges.push([self.propsSelected[i]['from'], self.propsSelected[i]['name']])
+            }
+            
+          }
+        }
+        
         // console.log(nodes,edges)
-        self.nxG.addNodesFrom(nodes)
-        self.nxG.addEdgesFrom(edges)
+        self.nxG.addNodesFrom(nodes, {color: '#b4b4b4'})
+        self.nxG.addEdgesFrom(edges, {color: '#d6d6d6'})
+
+        self.nxG.addEdgesFrom(prop_edges_special, {color: '#15A2B8'})
+        self.nxG.addNodesFrom(prop_nodes_special, {color: '#69eaff'})
+
+        self.nxG.addEdgesFrom(prop_edges, {color: '#74e38d'})
+        self.nxG.addNodesFrom(prop_nodes, {color: '#74e38d'})
+
         self.drawGraph();
       },
       drawGraph(){
         var self = this;
+
         jsnx.draw(self.nxG, {
             element: '#classGraph',
             weighted: true,
             stickyDrag: true,
             edgeStyle: {
                 'stroke-width': 10,
-                'fill': '#b4b4b4'
+                'fill': function(d) { 
+                    return d.data.color
+                }
             },
             layoutAttr: {
                 charge: -1500,
-                linkDistance: 120
+                linkDistance: 200
+            },
+            nodeAttr: {
+              r: 22,
+              title: function(d) {
+                return d.label;
+              }
             },
             height:400,
-            labelStyle: {fill: '#5C3069'},
+            labelStyle: {
+              'fill': '#343A3F'
+            },
             withLabels: true,
             nodeLabels: 'label',
             nodeStyle: {
-                'stroke': '#8feddc',
-                'fill': '#84dcdf',
-                'cursor': 'pointer',
-                'nodeShape':'s'
-            }
-        });
+              'fill': function(d) { 
+                  return d.data.color
+              },
+              'stroke': 'none'
+            }, 
+        },true);
       },
     },
     mounted: function(){
       this.makeGraph()
     },
-    template:`<div id="classGraph" class="border border-secondary rounded"></div>`
+    template:`<div id="classGraph" class="bg-light rounded"></div>`
   });
 
 Vue.component('editor', {
@@ -956,7 +1023,6 @@ Vue.component('validation-dropzone', {
         const itemID = evt.dataTransfer.getData('itemID')
         // const item = this.validation_options.find(item => item.id == itemID)
         this.validation_options.forEach(item => {
-          console.log('item', item)
           if(item._id == itemID){
             console.log(itemID, item)
             self.matches.push(item)
@@ -1913,7 +1979,7 @@ Vue.component('c-box', {
           payload["label"] = propLabel
           store.commit('requireProp',payload);
         }else if (self.item.properties[i].label === propLabel && !self.item.properties[i].selected){
-          $.notify("Can't require an unselected property",{ globalPosition: 'right',style:'error', showDuration: 40, });
+          $.notify("Can't require an unselected property",{ globalPosition: 'right',style:'danger', showDuration: 40, });
         }
       }
       this.updateTotals();
@@ -2328,16 +2394,6 @@ var app = new Vue({
               showCancelButton: false,
               confirmButtonColor:"{{color_main}}",
               cancelButtonColor:"{{color_sec}}",
-            });
-          }
-        },
-        handleSubmit(){
-          var self = this;
-          if (self.url) {
-            axios.get(self.url).then(res=>{
-              // console.log(res.data)
-            }).catch(err=>{
-              throw err;
             });
           }
         },

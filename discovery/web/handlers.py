@@ -259,6 +259,7 @@ WEB_HANDLERS = [
     (r"/portal/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "portal.html"}),
     (r"/editor/?", TemplateHandler, {"filename": "schema-editor.html"}),
     (r"/faq/?", TemplateHandler, {"filename": "faq.html"}),
+    (r"/compatibility/?", TemplateHandler, {"filename": "flowchart.html"}),
     (r"/registries/?", TemplateHandler, {"filename": "registries.html"}),
     (r"/guide/?", TemplateHandler, {"filename": "metadata-guide-new.html"}),
     (r"/guide/niaid/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "niaid"}),

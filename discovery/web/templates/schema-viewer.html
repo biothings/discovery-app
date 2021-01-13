@@ -1202,8 +1202,20 @@
         }
         return res
       },
+      getBreadcrumbLink(string){
+        let res ='';
+        let arr = []
+        if (string.includes(':')) {
+          arr =  string.split(':');
+          let name = arr[arr.length-1];
+          arr['0'] == 'schema' ? res+='/view/schema/'+name : res+='./'+name;
+        }else{
+          res = string
+        }
+        return res
+      },
       getLink(qName){
-
+        console.log('getLink', qName)
         try {
           let link = [store.getters.handleLink(qName)];
           return link;
@@ -1275,7 +1287,7 @@
           <ul style="list-style:none;">
             <li v-for="path in getPaths(q)">
               <span v-for="(item,index) in path">
-                <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold" :href="'./'+getName(item)" v-text="item"></a>
+                <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold" :href="getBreadcrumbLink(item)" v-text="item"></a>
                 <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right" :class='textColor'></i>&nbsp;</span>
               </span>
             </li>
