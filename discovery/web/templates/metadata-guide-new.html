@@ -1094,6 +1094,261 @@
     }
   });
 
+  Vue.component('vocab-box', {
+    data: function(){
+      return{
+        query: "",
+        loading: false,
+        selected:[],
+        results:[],
+        vocabInfo:{},
+        filter:''
+      }
+    },
+    props: ['main_name', 'info'],
+    methods:{
+      lookup(query, vocabInfo){
+        let self = this;
+
+        query = query.includes(" ") ? query.replace(' ', ' AND ') : query
+
+        let ontologies = vocabInfo['vocabulary']['ontology'].toString()
+        let children = vocabInfo['vocabulary']['children_of'].toString()
+        let url = `https://www.ebi.ac.uk/ols/api/search?q=${query}`
+        +"&ontology="+ontologies
+        +"&childrenOf="+children
+        +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+        +"&queryFields=label"
+        +"&rows=100"
+
+        self.results = [];
+        self.loading = true;
+
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          self.results = data.response.docs
+          self.loading = false;
+        })
+        .catch(err=>{
+          self.loading = false;
+          Swal.showValidationMessage(
+            `Request failed: ${err}`
+          )
+        });
+
+      },
+      addResult(r){
+        let self = this;
+        self.selected.push(r)
+      },
+      removeResult(r){
+        let self = this;
+        let res = []
+        res = _.filter(self.selected, function(o) { 
+          return o.label !== r.label; 
+        });
+        self.selected = res
+      },
+      filterResults(f){
+        let self = this;
+        let res = []
+        f = f.toLowerCase();
+        res = _.filter(self.results, function(o) { 
+          return o.label.toLowerCase().includes(f); 
+        });
+        if(res.length){
+          self.results = res;
+        }
+      },
+      submitVocab(){
+        let self = this;
+        if(self.selected.length){
+          self.selected.forEach(item=>{
+            var payload = {};
+            payload["item"] = self.getItem(item);
+            payload["from"] = self.main_name;
+            store.commit('addToArrayFrom',payload);
+            store.dispatch('saveProgress');
+          });
+          self.selected = [];
+          self.results = [];
+          self.query = '';
+          self.filter = '';
+        }
+      },
+      getItem(item){
+        let self = this;
+        if(item.constructor === String){
+          return item
+        }
+        else if(item.constructor === Object){
+          switch(self.vocabInfo.type){
+            case 'string':
+              return item.iri
+              break;
+            case 'object':
+              return self.formObject(self.vocabInfo.properties, item);
+              break;
+            default:
+            return item.iri
+              break;
+          }
+        }
+      },
+      formObject(props, data){
+        for(key in props){
+          switch(key){
+            case 'identifier':
+              item[key] = item.iri || item.label
+              break;
+            case 'name':
+              item[key] = item.label
+              break;
+            case 'url':
+              item[key] = item.iri || item.label
+              break;
+            default:
+              item[key] = item.iri || item.label
+              break;
+          }
+        }
+        return item;
+      },
+      addCustomVocab(){
+        this.selected.push(this.query);
+      }
+    },
+    watch:{
+      query:function(q){
+        this.lookup(q, this.vocabInfo);
+      },
+      filter:function(f){
+        if(f){
+          this.filterResults(f);
+        }else{
+          this.lookup(this.query, this.vocabInfo);
+        }
+      }
+    },
+    mounted: function(){
+      let self = this;
+      
+      tippy( '.vocab-box', {
+            target:'.vocabTip',
+            placement:'right-end',
+            animation: 'fade',
+            theme:'light',
+            onShow(instance) {
+              let info = instance.reference.dataset.tippyInfo;
+
+              function getContent(value){
+                return value.constructor === String ? value : JSON.stringify(value, null, 2);
+              }
+              // REGULAR TIP DESCRIPTION
+              try{
+                let json = JSON.parse(info)
+                let html = ''
+                for(key in json){
+                  html += `<tr>
+                            <td><small><b>`+key+`</b></small></td>
+                            <td style="word-break:break-all;"><small>`+getContent(json[key])+`</small></td>
+                          </tr>`
+                }
+                instance.setContent("<table class='table table-sm table-striped'>"+html+"</table>")
+
+              }
+              catch(err){
+                instance.setContent("<div class='text-info text-left m-0 p-1 bg-white'><pre style='margin:0px !important;word-break:break-all;'>"+info+"</pre></div>")
+              }
+            }
+          });
+
+      if(self.info.hasOwnProperty('vocabulary')){
+        Vue.set(self,'vocabInfo', self.info)
+      }
+      if(self.info.hasOwnProperty('oneOf')){
+        self.info['oneOf'].forEach(op=>{
+          if(op.hasOwnProperty('vocabulary')){
+            Vue.set(self,'vocabInfo', op)
+          }
+        })
+      }
+      if(self.info.hasOwnProperty('anyOf')){
+        self.info['anyOf'].forEach(op=>{
+          if(op.hasOwnProperty('vocabulary')){
+            Vue.set(self,'vocabInfo', op)
+          }
+        })
+      }
+    },
+    template:
+    `<div class="row m-0 w-100 vocab-box">
+      <div class="col-sm-12 mainBackLight text-light p-1 text-center classTab">
+        <h5 class="m-0" v-text="main_name"></h5>
+      </div>
+      <div v-if="loading" class="loader">
+          <img src="/static/img/ripple.svg"/>
+        </div>
+      <!-- 🍏 SEARCH 🍏-->
+      <div class="col-sm-12 p-1 bg-dark">
+        <input type="text" class="form-control w-100" v-model="query" :placeholder="'Search '+main_name+'(s)'">
+      </div>
+      <!-- 🍏 RESULTS 🍏-->
+      <div class="col-sm-12 p-1">
+        <div class="row" v-if="results.length">
+          <div class="col-sm-6">
+            <small class="text-secondary m-1 d-block">(<b v-text="results.length"></b>) Results:</small>
+          </div>
+          <div class="col-sm-6">
+            <input type="text" class="form-control form-control-sm w-100" v-model="filter" placeholder="Filter Results">
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-12 p-2 mb-1 alert-secondary" style="max-height:450px;overflow-y:scroll; word-break:break-all;">
+        <table class="table table-sm table-hover">
+          <tbody>
+            <template v-for="result in results">
+                <tr @click="addResult(result)" class="alert alert-light border-bottom p-1 m-0 rounded-0 pointer">
+                  <th><i class="fas fa-plus text-success"></i></th>
+                  <td><small v-text="result.label"></small></td>
+                  <td><i class="fas fa-info-circle text-info vocabTip" :data-tippy-info="JSON.stringify(result,null,2)"></i></td>
+                </tr>
+            </template>
+          </tbody>
+        </table>
+        <template v-if="!results.length">
+          <h1 class="text-center"><i class="fas fa-search text-muted"></i></h1>
+          <div v-if="query" class="text-center alert alert-light">
+            <!-- 🍏 CUSTOM NON STRICT 🍏-->
+            <template v-if="vocabInfo && !vocabInfo.strict">
+              <small class="text-muted d-block">No results</small>
+              <small @click="addCustomVocab()" class="text-primary pointer d-block">Add <b class="text-danger" v-text="query"></b> anyway</small>
+            </template>
+          </div>
+        </template>
+      </div>
+      <!-- 🍏 SELECTED 🍏-->
+      <div class="col-sm-12 m-0 bg-light rounded-0 p-2" v-if="selected.length">
+        <small class="text-success m-1 d-block">(<b v-text="selected.length"></b>) Selected:</small>
+        <div class="row m-0">
+          <div class="col-sm-12 rounded border border-secondary alert-success p-1">
+            <template v-for="item in selected">
+              <span class="badge badge-success m-1 vocabTip" @click="removeResult(item)" :data-tippy-info="JSON.stringify(item,null,2)">
+                <span v-text="item.label || item.name || item"></span> <b class="text-danger">&times;</b>
+              </span>
+            </template>
+          </div>
+          <div class="col-sm-12 pt-1">
+            <button :disabled="!selected.length" @click="submitVocab" type="button" class="btn w-100" :class="[selected.length?'btn-success':'btn-secondary']">
+              <span v-text="'Add '+main_name+'(s)'"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`
+  });
+
   Vue.component('type-selector', {
     data: function(){
       return{
@@ -1410,9 +1665,6 @@
       }
     },
     watch:{
-      // type_selected: v =>{
-      //   console.log('type_selected', v)
-      // },
       userObject: {
         handler(val){
           let keys = Object.keys(val).length
@@ -1466,9 +1718,10 @@
 
             <!-- 🐸 VOCABULARY TOP LEVEL 🐸-->
             <div v-if="value && value.vocabulary" class="bg-light p-4 text-light d-flex justify-content-start align-items-center" :class="[isChild?'col-sm-12':'col-sm-12']">
-              <button class="btn btn-danger m-auto" @click.prevent="handleVocab(main_name, value)">
+              <vocab-box :main_name="main_name" :info="info"></vocab-box>
+              <!--<button class="btn btn-danger m-auto" @click.prevent="handleVocab(main_name, value)">
                 <i class="fas fa-plus"></i> <span v-text="main_name+'(s)'"></span>
-              </button>
+              </button> -->
             </div>
             <!-- 🍒 ENUMERATION TOP LEVEL 🍒-->
             <div v-else-if="value && value.enum" class="bg-light p-4 text-light d-flex justify-content-start align-items-center" :class="[isChild?'col-sm-12':'col-sm-12']">
@@ -2312,6 +2565,115 @@
           <span style="opacity:0;" class="d-inline" @click="removeItem($event, person)"> <i class="fas fa-times"></i></span>
         </span>
       </template>
+    </div>`
+  });
+
+  Vue.component('name-special', {
+    data: function(){
+      return{
+        hits: [],
+        hitResults: false
+      }
+    },
+    props: ['info','name'],
+    computed:{
+      userInput:{
+        get () {
+          return store.state.schema.validation.properties[this.name].value
+        },
+        set (newValue) {
+          var payload = {};
+          if (name.includes('date')) {
+            let v = moment(newValue).format("YYYY-MM-DD")
+            payload["completed"] = {'name':this.name,'value': v };
+          }else {
+            payload["completed"] = {'name':this.name,'value':newValue};
+          }
+          store.commit('markCompleted',payload);
+          store.dispatch('saveProgress');
+        }
+      },
+    },
+    watch:{
+      userInput: function(v){
+        v ? this.look_existing(v) : this.hits = []
+      }
+    },
+    methods:{
+      look_existing(q){
+        let self = this;
+        axios.get(`/api/dataset/query?size=1000&q=${q}&meta=true`).then(res=>{
+          self.hits = res.data.hits
+          self.hits.length ? self.hitResults = true : self.hitResults = false
+        }).catch(err=>{
+          self.hitResults = false
+          throw err;
+        })
+      },
+      loadSelected(selected){
+        Swal.fire({
+          title: 'Load item into form?',
+          text: 'You are about to edit an existing record, please make sure to revise your contributions before submitting.',
+          footer: "[Warning] Data structure is not guaranteed to match that of this form which may result in formatting errors. For such cases clearing that field might be required.",
+          animation:false,
+          customClass:'scale-in-center',
+          showCancelButton: true,
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          confirmButtonText: 'Yes'
+        }).then((result) => {
+          if (result.value) {
+            for(key in selected){
+              if (!['@context','@type','_id'].includes(key)) {
+                var payload = {};
+                if (typeof selected[key] === 'object') {
+                  let value = [selected[key]]
+                  payload["completed"] = {'name':key,'value':value};
+                  store.commit('markCompleted',payload);
+                }else{
+                  let value = selected[key]
+                  payload["completed"] = {'name':key,'value':value};
+                  store.commit('markCompleted',payload);
+                }
+
+              }
+            }
+          }
+        });
+      },
+      isFromDataPortal(hit){
+        if(hit['_meta'].hasOwnProperty('guide')){
+          return window.location.pathname == hit['_meta']['guide'] ? '<i title="Registered in this Data Portal" class="fas fa-star text-warning"></i>' : ''
+        }else{
+          return ''
+        }
+      }
+    },
+    template:
+    `<div>
+      <input type="text" v-model="userInput" class="form-control" placeholder="enter text here">
+      <div v-if="hitResults" class="row m-0 alert-warning">
+        <div class="col-sm-12">
+          <small @click.prevent="hitResults = false" class="float-right pointer m-1 text-danger">dismiss</small>
+        <div>
+        <div class="col-sm-12" style="max-height:200px; overflow-y:scroll;">
+          <h6 v-if="window.location.href.includes('n3c')" class="text-muted mt-2">Similar Dataset(s) found. Avoid submitting duplicate dataset requests.</h6>
+          <h6 v-else class="text-muted mt-2">Similar Dataset(s) found:</h6>
+          <table class="table table-sm table-striped">
+            <tbody>
+              <template v-for="hit in hits">
+                <tr class="m-1">
+                  <b class="d-block">
+                    <small>
+                      <b v-html="isFromDataPortal(hit)"></b> <span class="text-dark" v-text="hit.name"></span>. <a :href="'/dataset/'+hit['_id']" target="_blank">learn more</a>
+                    </small>
+                  </b>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        <div>
+      <div>
     </div>`
   });
 
@@ -3514,7 +3876,12 @@
                           This field is recommended to be between 50 and 5000 characters long ( <b v-text="userInput && userInput.length || '0'"></b> characters). 
                           <a href="https://developers.google.com/search/docs/data-types/dataset#dataset" target="_blank">Learn more</a>.
                         </small>
-                        <textarea :rows="name ==='description'?5:2" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
+                        <!-- 🌈 NAME FIELD🌈 -->
+                        <template v-if="name == 'name'">
+                          <name-special :info="info" :name="name"></name-special>
+                        </template>
+                        <!-- 🌈 TEXTAREA 🌈 -->
+                        <textarea v-else :rows="name ==='description'?5:2" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
                       </template>
                         <!-- 🌈 VOCAB PREVIEW🌈 -->
                       <template v-if="vocabDetails && vocab.length && vocabDetails.ontology_prefix">
@@ -4964,8 +5331,27 @@
                   instance.setContent("<div class='text-muted m-0 p-1'><pre>"+info+"</pre></div>")
                 });
               }else{
+
+                function getContent(value){
+                  return value.constructor === String ? value : JSON.stringify(value, null, 2);
+                }
+
                 // REGULAR TIP DESCRIPTION
-                instance.setContent("<div class='text-info text-left m-0 p-1 bg-white'><pre style='margin:0px !important;'>"+info+"</pre></div>")
+                try{
+                  let json = JSON.parse(info)
+                  let html = ''
+                  for(key in json){
+                    html += `<tr>
+                              <td><small><b>`+key+`</b></small></td>
+                              <td style="word-break:break-all;"><small>`+getContent(json[key])+`</small></td>
+                            </tr>`
+                  }
+                  instance.setContent("<table class='table table-sm table-striped'>"+html+"</table>")
+
+                }
+                catch(err){
+                  instance.setContent("<div class='text-info text-left m-0 p-1 bg-white'><pre style='margin:0px !important;word-break:break-all;'>"+info+"</pre></div>")
+                }
               }
             }
           });
