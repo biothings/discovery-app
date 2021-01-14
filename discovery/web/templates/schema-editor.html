@@ -857,7 +857,7 @@ Vue.component('ngx-graph', {
     methods:{
       makeGraph(){
         var self = this;
-        self.nxG = new jsnx.DiGraph();
+        
         let edges = []
         let nodes = []
         let prop_nodes = []
@@ -868,9 +868,9 @@ Vue.component('ngx-graph', {
         for(i=0; i< self.classesAvailable.length; i++){
           
           if(self.classesAvailable[i].hasOwnProperty('special') && self.classesAvailable[i].special){
-            nodes.push([self.classesAvailable[i].name, {color: '#D1EBF1'}])
+            nodes.push([self.classesAvailable[i].name, {color: '#D1EBF1', r: 30, link: '/static/img/star.ico'}])
           }else{
-            nodes.push(self.classesAvailable[i].name)
+            nodes.push([self.classesAvailable[i].name, {r: 20, link: '/static/img/circle.ico'}])
           }
           if(self.classesAvailable[i].hasOwnProperty('parent_classes')){
             let parents = self.classesAvailable[i]['parent_classes']
@@ -884,10 +884,10 @@ Vue.component('ngx-graph', {
         if (self.propsSelected.length){
           for(i=0; i< self.propsSelected.length; i++){
             if(self.propsSelected[i]['special']){
-              prop_nodes_special.push(self.propsSelected[i]['name'])
+              prop_nodes_special.push([self.propsSelected[i]['name'], {link: '/static/img/add_circle.ico'}])
               prop_edges_special.push([self.propsSelected[i]['from'], self.propsSelected[i]['name']])
             }else{
-              prop_nodes.push(self.propsSelected[i]['name'])
+              prop_nodes.push([self.propsSelected[i]['name'], {link: '/static/img/circle_add.ico'}])
               prop_edges.push([self.propsSelected[i]['from'], self.propsSelected[i]['name']])
             }
             
@@ -899,10 +899,10 @@ Vue.component('ngx-graph', {
         self.nxG.addEdgesFrom(edges, {color: '#d6d6d6'})
 
         self.nxG.addEdgesFrom(prop_edges_special, {color: '#15A2B8'})
-        self.nxG.addNodesFrom(prop_nodes_special, {color: '#69eaff'})
+        self.nxG.addNodesFrom(prop_nodes_special, {color: '#69eaff', r: 10})
 
         self.nxG.addEdgesFrom(prop_edges, {color: '#74e38d'})
-        self.nxG.addNodesFrom(prop_nodes, {color: '#74e38d'})
+        self.nxG.addNodesFrom(prop_nodes, {color: '#74e38d', r: 10})
 
         self.drawGraph();
       },
@@ -923,11 +923,21 @@ Vue.component('ngx-graph', {
                 charge: -1500,
                 linkDistance: 200
             },
+            nodeShape: "image",
             nodeAttr: {
-              r: 22,
+              r: function(d) { 
+                  return d.data.r
+              },
               title: function(d) {
                 return d.label;
-              }
+              },
+              "xlink:href": function(d) { 
+                  return d.data.link
+              },
+              x: -15,
+              y: -15,
+              width: 36,
+              height: 36,
             },
             height:400,
             labelStyle: {
@@ -941,11 +951,13 @@ Vue.component('ngx-graph', {
               },
               'stroke': 'none'
             }, 
-        },true);
+        }, true);
       },
     },
     mounted: function(){
-      this.makeGraph()
+      var self = this;
+      self.nxG = new jsnx.DiGraph();
+      self.makeGraph()
     },
     template:`<div id="classGraph" class="bg-light rounded"></div>`
   });
