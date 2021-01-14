@@ -2603,7 +2603,14 @@
       look_existing(q){
         let self = this;
         axios.get(`/api/dataset/query?size=1000&q=${q}&meta=true`).then(res=>{
-          self.hits = res.data.hits
+          let portal_hits = []
+          res.data.hits.forEach((hit) => {
+            if(hit['_meta'].hasOwnProperty('guide') && hit['_meta']['guide'] == window.location.pathname){
+              portal_hits.push(hit)
+            }
+          })
+          console.log('portal', portal_hits)
+          self.hits = portal_hits
           self.hits.length ? self.hitResults = true : self.hitResults = false
         }).catch(err=>{
           self.hitResults = false
