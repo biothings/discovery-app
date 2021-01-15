@@ -87,7 +87,6 @@ class SchemaClassWrapper():
 
         for property_ in properties:
             property_.pop('object')
-            property_ = {key: value for key, value in property_.items() if value} #FIXME
 
         return properties
 
