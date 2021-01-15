@@ -86,8 +86,7 @@ class Notifier:
         send the message to all channels
         """
         for channel in self.channels:
-            for request in channel.send(message):
-                yield request
+            yield from channel.send(message)
 
 
 class Strong(Mark):
@@ -269,8 +268,7 @@ class DatasetNotifier(Notifier):
                     continue  # skip this channel for non-N3c dataset
                 message = n3c
 
-            for request in channel.send(message):
-                yield request
+            yield from channel.send(message)
 
     def delete(self, _id, name, user):
 
@@ -294,8 +292,7 @@ class DatasetNotifier(Notifier):
         for channel in self.channels:
             if isinstance(channel, N3CChannel):
                 continue  # skip N3C by default
-            for request in channel.send(message):
-                yield request
+            yield from channel.send(message)
 
 
 class SchemaNotifier(Notifier):
@@ -330,7 +327,7 @@ schema = SchemaNotifier()
 def test_on(requests):
     client = HTTPClient()
     for request in requests:
-        response = client.fetch(request)
+        response = client.fetch(request, raise_error=False)
         print(response.body)
 
 
