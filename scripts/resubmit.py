@@ -9,13 +9,6 @@ spec = importlib.util.spec_from_file_location("config_key", path)
 conf = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(conf)
 
-_id = input("Discovery App Dataset ID: ")
-_url = "https://discovery.biothings.io/api/dataset/{}?metadata"
-dataset = requests.get(_url.format(_id)).json()
-dataset_meta = dataset.pop("_meta")
-dataset_username = dataset_meta.pop("username")
-del dataset["_id"]
-
 
 class DatasetTestNotifier(notify.DatasetNotifier):
 
@@ -53,7 +46,25 @@ class DatasetTestNotifier(notify.DatasetNotifier):
             yield from channel.send(message)
 
 
-if __name__ == "__main__":
-    notifider = DatasetTestNotifier()
-    notifider.configure(conf)
+notifider = DatasetTestNotifier()
+notifider.configure(conf)
+
+
+def resubmit(_id=None):
+    _id = _id or input("Discovery App Dataset ID: ")
+    _url = "https://discovery.biothings.io/api/dataset/{}?metadata"
+    dataset = requests.get(_url.format(_id)).json()
+    del dataset["_id"]
+    dataset_meta = dataset.pop("_meta")
+    dataset_username = dataset_meta.pop("username")
     notify.test_on(notifider.add(_id, dataset, dataset_username, **dataset_meta))
+
+
+if __name__ == "__main__":
+
+    # bulk resubmit:
+    # for _id in ():
+    #     resubmit(_id)
+
+    # interactive resubmit:
+    resubmit()
