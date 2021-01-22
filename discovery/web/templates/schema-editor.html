@@ -674,7 +674,7 @@ const store = new Vuex.Store({
 
               let mainProp = {};
               Vue.set(mainProp,'@id',state.schema[i].properties[x]['name'])
-              Vue.set(mainProp,'@type','rdfs:Property')
+              Vue.set(mainProp,'@type','rdf:Property')
               Vue.set(mainProp,'rdfs:comment',state.schema[i].properties[x]['description'])
               Vue.set(mainProp,'rdfs:label',state.schema[i].properties[x]['label'])
               Vue.set(mainProp,'schema:domainIncludes',{'@id':state.schema[i]['name']})
