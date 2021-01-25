@@ -2,6 +2,8 @@
 {% block content %}
 {% include "header.html" %}
 <style>
+  [v-cloak] > * { display:none; }
+  [v-cloak]::before { content: "Please wait..."; }
   .drag-el{
     color: white;
     transition: all .3s;
@@ -30,7 +32,7 @@
   }
 </style>
 <link rel="stylesheet" href="/static/css/codemirror.css">
-<section id="editor" class="container-fluid m-auto col-sm-12 col-md-10 col-lg-10 col-xl-8" style="min-height: 80vh;padding-top:60px;">
+<section id="editor" class="container-fluid m-auto col-sm-12 col-md-10 col-lg-10 col-xl-8" style="min-height: 80vh;padding-top:60px;" v-cloak>
   <audio id="dropsound" src="/static/img/tinybutton.wav"></audio>
   <div>
     <div class="jumbotron bg-light text-center m-1 pt-4">
@@ -41,55 +43,42 @@
       <img src="/static/img/ripple.svg"/>
     </div>
     <div id="widget">
-      <ul class="nav nav-tabs bg-secondary">
-        <li class="nav-item" v-if="userInfo && userInfo.login">
-          <span class="nav-link text-light" :class="{ 'disabled': userInfo }"><small>
-            <i class="fas fa-user-check text-success"></i> Logged in as <span v-text="userInfo.login"></span></small>
+      <div class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start rounded-0">
+        <span class="fa-stack fa-1x pointer tip mr-2" :data-tippy-info="'Logged in as '+userInfo.login" v-if="userInfo && userInfo.login">
+          <i class="fas fa-circle text-success fa-stack-2x"></i>
+          <i class="fas fa-user-check fa-stack-1x fa-inverse"></i>
+        </span>
+        <a class='nav-link active text-primary mr-2' :href='"/login?next="+window.location.pathname' v-if="userInfo && !userInfo.login">
+          <span class="fa-stack fa-1x pointer tip" data-tippy-info="Click to log in">
+            <i class="fas fa-circle text-primary fa-stack-2x"></i>
+            <i class="fas fa-sign-in-alt fa-stack-1x fa-inverse"></i>
           </span>
-        </li>
-        <li class='nav-item' v-if="userInfo && !userInfo.login">
-          <a class='nav-link bg-light rounded-0' :href='"/login?next="+window.location.pathname'>
-            <small><i class="fas fa-sign-in-alt"></i> Login</small>
-          </a>
-        </li>
+        </a>
         <template v-if='newClassAdded'>
-          <li class='nav-item' v-show="prefix">
-            <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'mainBackDark text-light pointer': prefix }" data-tippy="Look at your work so far" @click='getPreview()'>
-              <small>
-                <i class="fas fa-code"></i> Preview
-              </small>
-            </a>
-          </li>
-          <li class='nav-item'>
-            <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-info text-light pointer': prefix }" data-tippy="Edit Validation" @click='editValidation()'>
-              <small>
-                <i class="fas fa-pen-square"></i> Validation
-              </small>
-            </a>
-          </li>
-          <li class='nav-item' v-show="prefix">
-            <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-primary text-light pointer': prefix }" data-tippy="Download your schema" @click='downnloadSchema()'>
-              <small>
-                <i class="fas fa-file-download"></i> Download
-              </small>
-            </a>
-          </li>
-          <li class='nav-item' v-show="prefix">
-            <a class='nav-link rounded-0' :class="{ 'disabled text-muted notallowed text-light': !prefix, 'bg-success text-light pointer': prefix }" data-tippy="Requires Gihub Login" @click.prevent="githubOptions()">
-              <small >
-                <i class="fab fa-github"></i> Save to GitHub
-              </small>
-            </a>
-          </li>
+          <span class="fa-stack fa-1x pointer tip mr-2" data-tippy-info="Preview" @click="getPreview()">
+            <i class="fas fa-circle fa-stack-2x mainTextDark"></i>
+            <i class="fas fa-code fa-stack-1x fa-inverse"></i>
+          </span>
+          <span class="fa-stack fa-1x pointer tip mr-2" data-tippy-info="Download your schema" @click='downloadSchema()'>
+            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+            <i class="fas fa-stack-1x fa-file-download fa-inverse"></i>
+          </span>
+          <span class="fa-stack fa-1x pointer tip mr-2" data-tippy-info="Save (Requires GitHub Login)" @click.prevent="githubOptions()">
+            <i class="fas fa-circle fa-stack-2x text-success"></i>
+            <i class="fab fa-stack-1x fa-github fa-inverse"></i>
+          </span>
+          <span class="fa-stack fa-1x pointer tip mr-2" data-tippy-info="Learn about this editor" @click.prevent="showHelp()">
+            <i class="fas fa-circle fa-stack-2x text-muted"></i>
+            <i class="fas fa-stack-1x fa-question-circle fa-inverse"></i>
+          </span>
+          <div class="mr-2">
+            <small class="text-light"><img src='/static/img/cube.svg' width="30px"> Validation Editor</small>
+          </div>
+          <div>
+            <input class="form-control slider m-auto tip" @click="editValidation()" data-tippy-info="Edit Schema Validation" type="checkbox"/>
+          </div>
         </template>
-        <li class='nav-item'>
-          <a class='nav-link rounded-0 text-light pointer' data-tippy="Learn about this editor" @click.prevent="showHelp()">
-            <small >
-              <i class="fas fa-question-circle"></i> Help
-            </small>
-          </a>
-        </li>
-      </ul>
+      </div>
       <!-- Validation -->
       <div v-if="validationView" class="v-container p-0 bg-dark justify-content-center d-flex align-items-center">
         
@@ -180,15 +169,11 @@
         <div class="jumbotron alert-secondary" v-if="newClassAdded && !validationView" id="editorTippy">
           <div>
             <h4 class="text-info text-left">Select and create properties for your schema</h4>
-            <p class="text-center text-muted">
-              <small class="text-muted">Reuse properties from parents</small>
-              <i class="fas fa-arrow-circle-right mx-1"></i>
-              <small class="text-muted">Add new properties</small>
-              <i class="fas fa-arrow-circle-right mx-1"></i>
-              <small class="text-muted">Add validation</small>
-              <i class="fas fa-arrow-circle-right mx-1"></i>
-              <small class="text-muted">Save schema</small>
-              </ol>
+            <p class="text-left">
+              <small class="text-muted d-block">1. <i class="fas fa-circle text-primary"></i> Reuse properties from parents <i class="text-danger">Required</i></small>
+              <small class="text-muted d-block">2. <i class="fas fa-star text-warning"></i> Add new properties <i class="text-danger">Required</i></small>
+              <small class="text-muted d-block">3. <img src='/static/img/cube.svg' width="15px"> Edit validation <i class="text-danger">Required</i></small>
+              <small class="text-muted d-block">4. <i class="fab fa-github text-success"></i> Save/Download schema</small>
             </p>
           </div>
           <div class="mt-2">
@@ -665,7 +650,7 @@ const store = new Vuex.Store({
           Vue.set(mainClass,'rdfs:comment',state.schema[i]['description'])
           Vue.set(mainClass,'rdfs:label',state.schema[i]['label'])
           Vue.set(mainClass,'rdfs:subClassOf',{"@id": state.startingPoint})
-          Vue.set(mainClass,'$validation',state.startingPoint)
+          Vue.set(mainClass,'$validation', {})
           //Add New Class
           state.finalschema['@graph'].push(mainClass)
           //Handle main Class Properties
@@ -737,6 +722,20 @@ const store = new Vuex.Store({
               }
             }
           }
+        }
+      }
+      // Check validation is complete
+      let incomplete = 0
+      if(state.validation.hasOwnProperty('properties')){
+        for(key in state.validation['properties']){
+          let keys = Object.keys(state.validation['properties'][key]).length
+          console.log(key, keys)
+          if(keys <= 1){
+            incomplete += 1;
+          }
+        }
+        if (incomplete){
+          $.notify(incomplete+" properties still need validation rules",{ globalPosition: 'right',style:'warning', showDuration: 200, });
         }
       }
     }
@@ -1095,6 +1094,7 @@ Vue.component('github-option', {
       repos: [],
       loading: false,
       repo_selected: '',
+      filter: '',
       name_selected: '',
       comment: '',
       accepts: false,
@@ -1287,42 +1287,45 @@ Vue.component('github-option', {
         );
       }
     },
-    sendRequest(){
+    sendRequest(url, backupURL=""){
       let self = this;
       self.loading = true;
-      axios.get("/api/view?url="+self.input).then(res=>{
+      axios.get("/api/view?url="+url).then(res=>{
         console.log(res.data)
         self.data = res.data;
         self.loading = false;
         localStorage.setItem('user-schema-classes',JSON.stringify(self.data));
-        localStorage.setItem('user-schema-url',self.input);
+        localStorage.setItem('user-schema-url',url);
         self.assignTempName(res.data.hits);
       }).catch(err=>{
         self.loading = false;
-        self.loading = false;
-        // console.log('err',err.response.data)
-        let culprit = "<h6>"+err.response.data.error+"</h6>"
-        if (err.response.data && err.response.data.path) {
-          culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
-        }
-        if (err.response.data.parent && err.response.data.parent.path){
-          if (true) {
-            culprit += "<h5>Under <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></h5>"
+        if (backupURL){
+          self.sendRequest(backupURL)
+        }else{
+          // console.log('err',err.response.data)
+          let culprit = "<h6>"+err.response.data.error+"</h6>"
+          if (err.response.data && err.response.data.path) {
+            culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
           }
-          if (err.response.data.parent && err.response.data.parent.reason) {
-            culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
+          if (err.response.data.parent && err.response.data.parent.path){
+            if (true) {
+              culprit += "<h5>Under <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></h5>"
+            }
+            if (err.response.data.parent && err.response.data.parent.reason) {
+              culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
+            }
           }
+          if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
+            culprit += "<div class='alert alert-info'><small> Hint: "+err.response.data.validator_value+"</small></div>"
+          }
+          Swal.fire({
+            type: 'error',
+            position: 'top center',
+            title: 'Failed because: ',
+            html: culprit,
+          });
+          throw err;
         }
-        if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
-          culprit += "<div class='alert alert-info'><small> Hint: "+err.response.data.validator_value+"</small></div>"
-        }
-        Swal.fire({
-          type: 'error',
-          position: 'top center',
-          title: 'Failed because: ',
-          html: culprit,
-        });
-        throw err;
       })
     },
     makeURLandRedirect(){
@@ -1354,30 +1357,37 @@ Vue.component('github-option', {
     copyToInput(value){
       let self = this;
       if (value.includes('blob') || value.includes('github.com')) {
-        let suggestedURL = value.replace('blob/', '')
+        let master_url = value.replace('blob/', '')
         .replace('github.com', 'raw.githubusercontent.com')
-        .replace('www.github.com', 'raw.githubusercontent.com');;
+        .replace('www.github.com', 'raw.githubusercontent.com');
 
-        Swal({
-          title: 'Link Converted',
-          imageAlt: 'Warning',
-          animation:false,
-          customClass:'scale-in-center',
-          html:
-            '<p>We will need the direct link tot he raw data and have changed your url.</p> ' +
-            '<p><a target="_blank" href="'+suggestedURL+'">'+suggestedURL+'</a></p>' +
-            '<p>Proceed with this link?</p>',
-          showCancelButton: true,
-          confirmButtonColor:"{{color_main}}",
-          cancelButtonColor:"{{color_sec}}",
-          confirmButtonText: 'Yes, use this link!'
-        }).then((result) => {
-          if (result.value) {
-            self.input = suggestedURL
-          }else{
-            self.input = value
-          }
-        });
+        self.input = master_url;
+
+        let main_url = master.replace("/master/", "/main/");
+
+        self.sendRequest(master_url, main_url);
+
+
+        // Swal({
+        //   title: 'Link Converted',
+        //   imageAlt: 'Warning',
+        //   animation:false,
+        //   customClass:'scale-in-center',
+        //   html:
+        //     '<p>We will need the direct link tot he raw data and have changed your url.</p> ' +
+        //     '<p><a target="_blank" href="'+suggestedURL+'">'+suggestedURL+'</a></p>' +
+        //     '<p>Proceed with this link?</p>',
+        //   showCancelButton: true,
+        //   confirmButtonColor:"{{color_main}}",
+        //   cancelButtonColor:"{{color_sec}}",
+        //   confirmButtonText: 'Yes, use this link!'
+        // }).then((result) => {
+        //   if (result.value) {
+        //     self.input = suggestedURL
+        //   }else{
+        //     self.input = value
+        //   }
+        // });
       }
     }
   },
@@ -1397,28 +1407,36 @@ Vue.component('github-option', {
   watch:{
     repo_selected:function(name,oldname){
       let self = this;
-      self.loading = true;
-      return axios.get("/api/gh/"+name).then(res=>{
-        self.loading = false;
-        if (res.data.success) {
-          self.files_available = res.data.msg
-        }else{
+      if(self.repos.length && self.repos.includes(name)){
+        self.loading = true;
+        return axios.get("/api/gh/"+name).then(res=>{
+          self.loading = false;
+          if (res.data.success) {
+            self.files_available = res.data.msg
+          }else{
+            Swal.fire({
+              type: 'error',
+              title: 'Problems saving to GitHub, please try again later.',
+              text: JSON.stringify(res.data, null, 2),
+            })
+          }
+        }).catch(err=>{
+          self.loading = false;
           Swal.fire({
             type: 'error',
-            title: 'Problems saving to GitHub, please try again later.',
-            text: JSON.stringify(res.data, null, 2),
+            title: 'Oops...Something went wrong!',
+            text: err,
           })
-        }
-      }).catch(err=>{
-        self.loading = false;
-        Swal.fire({
-          type: 'error',
-          title: 'Oops...Something went wrong!',
-          text: err,
-        })
-        throw err;
-      });
+          throw err;
+        });
+      }
     },
+    filter:function(f){
+      let self = this;
+      if(self.repos.length && self.repos.includes(f)){
+        self.repo_selected = f
+      }
+    }
   },
   template:
   `<div class="bg-light" style="position: relative;">
@@ -1439,13 +1457,20 @@ Vue.component('github-option', {
         <small class="text-muted">Choose an existing repository to save your work to.</small>
         <button type="button" class="btn themeButton text-light btn-sm" @click="getRepos()"><i class="fab fa-github-alt"></i> Get Repos</button>
         <template v-if="repos.length">
-        <h6 class="text-muted">1. Choose one:</h6>
-        <select class="custom-select w-100" v-model="repo_selected">
-          <option selected>Choose...</option>
-          <template v-for="repo in repos">
-            <option :value="repo" v-text="repo"></option>
-          </template>
-        </select>
+          <h6 class="text-muted">1. Choose one (All available):</h6>
+          <select class="custom-select w-100" v-model="repo_selected">
+            <option selected>Choose...</option>
+            <template v-for="repo in repos">
+              <option :value="repo" v-text="repo"></option>
+            </template>
+          </select>
+          <h6 class="text-muted mt-4">Search by name:</h6>
+          <input class="form-control form-control-sm" list="repo_options" name="browser" id="browser" v-model="filter">
+          <datalist id="repo_options">
+            <template v-for="repo in repos">
+              <option :value="repo"></option>
+            </template>
+          </datalist>
         </template>
         <template v-else>
           <p>
@@ -1458,8 +1483,15 @@ Vue.component('github-option', {
         <small class="text-muted">Create or update an existing file.</small>
         <div v-if="repo_selected">
           <small class="text-info d-block" v-if="!existing_file">Do not include the file extension. It will be <code>.jsonld</code>.</small>
-          <h6 class="text-muted">Create/Update File</h6>
-          <input @change="name_selected=''" v-model="existing_file" class="form-control text-light tip m-auto slider" type="checkbox" checked/>
+          <div class="alert alert-dark text-center">
+            <template v-if="repo_selected && existing_file">
+              <h6 class="text-muted"><i class="fas fa-sync-alt text-success"></i> Update File</h6>
+            </template>
+            <template v-if="repo_selected && !existing_file">
+              <h6 class="text-muted"><i class="fas fa-file-medical text-success"></i> Create File</h6>
+            </template>
+            <input @change="name_selected=''" v-model="existing_file" class="form-control text-light tip m-auto slider" type="checkbox" checked/>
+          </div>
         </div>
         <template v-if="repo_selected && !existing_file">
           <small class="text-info bold">A. New File: Name your file (without extension)</small>
@@ -1481,8 +1513,9 @@ Vue.component('github-option', {
         <template v-if="repo_selected">
           <small class="text-muted d-block"><span class="text-info">B. (Optional)</span> Write a comment about this addition.</small>
           <div class="form-group row">
-            <div class="col-sm-10">
-              <input :disabled="!repo_selected" :class="{disabled:!repo_selected}" v-model="comment" type="text" class="form-control form-control-sm" placeholder="write a comment here">
+            <div class="col-sm-12">
+              <textarea rows="4" :disabled="!repo_selected" :class="{disabled:!repo_selected}" v-model="comment" type="text" class="form-control form-control-sm w-100" placeholder="write a comment here">
+              </textarea>
             </div>
           </div>
         </template>
@@ -1517,20 +1550,13 @@ Vue.component('github-option', {
           <template v-if="readyLink">
             <img src="/static/img/visualize-01.png" width="100px" alt="Visualize"/>
             <h5>Visualize and register your work</h5>
-            <small  @click="copyToInput(readyLink)" class="pointer d-block">CLICK HERE to copy to input</small>
-            <code v-text="readyLink"></code>
-            <h5><i class="fas fa-arrow-down"></i></h5>
-            <form id="linkForm" class="col-sm-6 m-auto">
-              <div v-if="!loading" class="input-group mb-3 shadow rounded">
-                <input type="text" class="form-control" v-model="input" id="urlform" autocomplete="" required ref="my_input" aria-label="Paste your link here"  placeholder="Paste your link here" aria-describedby="button-addon2">
-                <div class="input-group-append">
-                  <button :disabled="!input.length" :class="{heartbeat:input.length}" @click.prevent="sendRequest()" id="button-addon2" class="btn btn-info" type="submit">Go</button>
-                </div>
-              </div>
-              <div v-else>
-                <h3 class="text-light"><i class="fas fa-cog fa-spin"></i> Please Wait...</h3>
-              </div>
-            </form>
+            <div>
+              <code v-text="readyLink"></code>
+            </div>
+            <button type='button' class="btn btn-lg btn-success m-3" @click="copyToInput(readyLink)">Visualize Schema</button>
+            <div v-if="loading">
+              <h3 class="text-light"><i class="fas fa-cog fa-spin"></i> Please Wait...</h3>
+            </div>
           </template>
         </p>
       </div>
@@ -1665,10 +1691,11 @@ Vue.component('c-box', {
         animation: 'fade',
         theme:'light'});
   },
-  template: `<div class="row m-1 cBox actions" :class="{'alert-info mb-3':item.special,'alert-light':!item.special}">
+  template: `<div class="row m-1 cBox actions" :class="{'alert-warning mb-3':item.special,'alert-primary':!item.special}">
               <div class="col-sm-10 p-2">
                 <div>
                   <i v-if="item.special" class="fas fa-star text-warning"></i>
+                  <i v-else class="fas fa-circle text-primary"></i>
                   <template v-if="item && item.parent_classes.length" v-for="tree in item.parent_classes">
                     <template v-for="(name,i) in getSubclass(tree)">
                       <small v-text="name"></small>
@@ -1734,7 +1761,7 @@ Vue.component('c-box', {
 
                   <!-- 🌈 results 🌈 -->
                   <template v-for="prop in paginatedResults">
-                    <div class="row m-1 alert-secondary pBox actions">
+                    <div class="row m-1 alert-light pBox actions">
                       <div class="col-sm-9">
                         <small class="mainTextDark">
                           <span v-text="prop.label"></span> <i class="fas fa-info-circle cTip pointer text-info" :data-tippy-description="prop.description" :data-tippy-label="prop.label"></i>
@@ -2022,17 +2049,21 @@ Vue.component('c-box', {
       var self = this;
       let payload = {}
       payload['name'] = self.newPropName;
-      payload['range'] = self.newPropRange.toString();
-      payload['description'] = self.newPropDescription;
-      payload['domain'] = self.newPropDomain;
-      if (self.item.special) {
-        payload['special'] = true;
-      }else {
-        payload['special'] = false;
+      if (!self.newPropName.match(/^[a-z]+(?:[A-Z][a-z]+)*$/)) {
+        $.notify("Property name should be camelCased",{ globalPosition: 'right',style:'danger', showDuration: 200, });
+      }else{
+        payload['range'] = self.newPropRange.toString();
+        payload['description'] = self.newPropDescription;
+        payload['domain'] = self.newPropDomain;
+        if (self.item.special) {
+          payload['special'] = true;
+        }else {
+          payload['special'] = false;
+        }
+        store.commit('addProperty',payload);
+        self.addPropMode = false;
+        self.resetAddPropForm();
       }
-      store.commit('addProperty',payload);
-      self.addPropMode = false;
-      self.resetAddPropForm();
     },
     addInputType(){
       var self = this;
@@ -2338,30 +2369,31 @@ var app = new Vue({
           let name = this.$refs.clsName.value;
           let desc = this.$refs.clsDesc.value;
 
-          // if (value.match(/^(?=.*[a-z])[A-Z]+[a-z]*(?:\d*(?:[A-Z]+[a-z]*)?)*$/)) {
-
-          if (name && desc) {
-            // DUPLICATE CHECK
-            if (store.getters.isDuplicateClass(name)) {
+          if (!name.match(/^(?=.*[a-z])[A-Z]+[a-z]*(?:\d*(?:[A-Z]+[a-z]*)?)*$/)){
+            $.notify("Class name should be PascalCased",{ globalPosition: 'right',style:'danger', showDuration: 200, });
+          }else{
+            if (name && desc) {
+              // DUPLICATE CHECK
+              if (store.getters.isDuplicateClass(name)) {
+                Swal.fire({type:'error',
+                  toast:true,
+                  title: 'Class already exists. Choose a different name',
+                  showConfirmButton:false,
+                  timer:1000})
+              }else {
+                  let payload = {}
+                  payload['name'] = name;
+                  payload['description'] = desc;
+                  store.commit('addClass',payload);
+              }
+            } else {
               Swal.fire({type:'error',
-                toast:true,
-                title: 'Class already exists. Choose a different name',
-                showConfirmButton:false,
-                timer:1000})
-            }else {
-                let payload = {}
-                payload['name'] = name;
-                payload['description'] = desc;
-                store.commit('addClass',payload);
+                  toast:true,
+                  title: 'You forgot something!',
+                  showConfirmButton:false,
+                  timer:1000})
             }
-          } else {
-            Swal.fire({type:'error',
-                toast:true,
-                title: 'You forgot something!',
-                showConfirmButton:false,
-                timer:1000})
           }
-
         },
         getPreview(){
           let self = this;
@@ -2416,7 +2448,7 @@ var app = new Vue({
             store.commit('savePrefix',payload);
           }
         },
-        downnloadSchema(){
+        downloadSchema(){
           var self = this;
           if (self.prefix) {
             store.commit('formPreview');
