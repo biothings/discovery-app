@@ -30,6 +30,10 @@
     background-color: #d2ff8f;
     border: #caff37 dotted 2px;
   }
+  #classGraph{
+    width: 100%;
+    height: 400px;
+  }
 </style>
 <link rel="stylesheet" href="/static/css/codemirror.css">
 <section id="editor" class="container-fluid m-auto col-sm-12 col-md-10 col-lg-10 col-xl-8" style="min-height: 80vh;padding-top:60px;" v-cloak>
@@ -221,11 +225,13 @@
 <script src="/static/js/lodash.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="/static/js/codemirror.js"></script>
-<script src="https://d3js.org/d3.v3.js"></script>
-<script src="/static/js/networkx.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.15.1/cytoscape.min.js"
+  integrity="sha256-oYPiLQ2sL4jlYuCJE3rDZFD0OUy8t1fL6U0wIWyqUf8=" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
+<script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
 <script>
 
   $.notify.addStyle('success', {
@@ -834,8 +840,8 @@ const store = new Vuex.Store({
 Vue.component('ngx-graph', {
     data: function(){
       return{
-        nxG: null, 
-        edgeGraph:[],
+        cyto_data:[],
+        cy: null
       }
     },
     computed:{
@@ -848,113 +854,183 @@ Vue.component('ngx-graph', {
     },
     watch:{
       propsSelected: function(v){
-        // console.log('propsSelected', v)
         this.makeGraph()
       }
     },
     methods:{
+      drawGraph() {
+        // const t0 = performance.now();
+        var self = this;
+
+        var cy = window.cy = cytoscape({
+          container: document.getElementById('classGraph'),
+          boxSelectionEnabled: false,
+          autounselectify: true,
+          layout: {
+            name: 'dagre',
+            padding: 5
+          },
+          style: [
+            {
+              selector: 'node',
+              style: {
+                'label': 'data(id)',
+                'shape': 'data(type)',
+                'text-valign': 'bottom',
+                'text-halign': 'center',
+                'height': '100px',
+                'width': '100px',
+                'border-color': 'white',
+                'height': 20,
+                'width': 20,
+                'background-color': 'data(color)',
+                'font-size': 'data(size)',
+              }
+            },
+
+            {
+              selector: 'edge',
+              style: {
+                'curve-style': 'haystack',
+                'haystack-radius': 0,
+                'width': 5,
+                'opacity': 0.5,
+                'line-color': 'data(color)',
+                'target-arrow-shape': 'triangle',
+                'target-arrow-color': '#257FC5',
+              }
+            },
+            {
+              selector: ':selected',
+              css: {
+                'background-color': 'black',
+                'line-color': 'black',
+                'target-arrow-color': 'red',
+                'source-arrow-color': 'black'
+              }
+            }
+          ],
+
+          elements: self.cyto_data
+        });
+
+        cy.maxZoom(2)
+
+        // const t1 = performance.now();
+        // var seconds = (((t1 - t0) % 60000) / 1000).toFixed(0);
+        // console.log(`%c Rendering graph took ${seconds} seconds.`, 'color:yellow');
+
+      },
       makeGraph(){
         var self = this;
         
         let edges = []
         let nodes = []
-        let prop_nodes = []
-        let prop_edges = []
-        let prop_nodes_special = []
-        let prop_edges_special = []
+
+        let blue = "#057BFE"
+        let green = "#28A745"
+        let yellow = "#FFC007"
 
         for(i=0; i< self.classesAvailable.length; i++){
           
           if(self.classesAvailable[i].hasOwnProperty('special') && self.classesAvailable[i].special){
-            nodes.push([self.classesAvailable[i].name, {color: '#D1EBF1', r: 30, link: '/static/img/star.ico'}])
+            let node = { 
+              group: 'nodes',          
+              data: {
+                id: self.classesAvailable[i].name,
+                type: "star",
+                color: yellow,
+                size: '1em',
+                
+              }
+            }
+            nodes.push(node)
           }else{
-            nodes.push([self.classesAvailable[i].name, {r: 20, link: '/static/img/circle.ico'}])
+            let node = { 
+              group: 'nodes',          
+              data: {
+                id: self.classesAvailable[i].name,
+                type: "ellipse",
+                color: blue,
+                size: '1em',
+              }
+            }
+            nodes.push(node)
           }
           if(self.classesAvailable[i].hasOwnProperty('parent_classes')){
             let parents = self.classesAvailable[i]['parent_classes']
             for(p=0; p< parents.length; p++){
               let branch_parents = parents[p].split(',');
               let parent = branch_parents[branch_parents.length-1].trim()
-              edges.push([parent, self.classesAvailable[i].name])
+              let edge = { // edge ab
+                group: 'edges',
+                data: {
+                  source: parent,
+                  target: self.classesAvailable[i].name,
+                  color: 'grey'
+                }
+              };
+              edges.push(edge)
             }
           }
         }
         if (self.propsSelected.length){
           for(i=0; i< self.propsSelected.length; i++){
             if(self.propsSelected[i]['special']){
-              prop_nodes_special.push([self.propsSelected[i]['name'], {link: '/static/img/add_circle.ico'}])
-              prop_edges_special.push([self.propsSelected[i]['from'], self.propsSelected[i]['name']])
+              let node = { 
+                group: 'nodes',          
+                data: {
+                  id: self.propsSelected[i]['name'],
+                  color: green,
+                  type: "diamond",
+                  size: '.5em'
+                }
+              }
+              nodes.push(node)
+
+              let edge = { // edge ab
+                group: 'edges',
+                data: {
+                  source: self.propsSelected[i]['from'],
+                  target: self.propsSelected[i]['name'],
+                  color: yellow
+                }
+              };
+              edges.push(edge)
             }else{
-              prop_nodes.push([self.propsSelected[i]['name'], {link: '/static/img/circle_add.ico'}])
-              prop_edges.push([self.propsSelected[i]['from'], self.propsSelected[i]['name']])
+              let node = { 
+                group: 'nodes',          
+                data: {
+                  id: self.propsSelected[i]['name'],
+                  color: green,
+                  type: "diamond",
+                  size: '.5em'
+                }
+              }
+              nodes.push(node)
+
+              let edge = { // edge ab
+                group: 'edges',
+                data: {
+                  source: self.propsSelected[i]['from'],
+                  target: self.propsSelected[i]['name'],
+                  color: blue
+                }
+              };
+              edges.push(edge)
             }
             
           }
         }
-        
-        // console.log(nodes,edges)
-        self.nxG.addNodesFrom(nodes, {color: '#b4b4b4'})
-        self.nxG.addEdgesFrom(edges, {color: '#d6d6d6'})
 
-        self.nxG.addEdgesFrom(prop_edges_special, {color: '#15A2B8'})
-        self.nxG.addNodesFrom(prop_nodes_special, {color: '#69eaff', r: 10})
-
-        self.nxG.addEdgesFrom(prop_edges, {color: '#74e38d'})
-        self.nxG.addNodesFrom(prop_nodes, {color: '#74e38d', r: 10})
+        self.cyto_data = [].concat(nodes).concat(edges)
+        // console.log('DATA', self.cyto_data)
 
         self.drawGraph();
-      },
-      drawGraph(){
-        var self = this;
-
-        jsnx.draw(self.nxG, {
-            element: '#classGraph',
-            weighted: true,
-            stickyDrag: true,
-            edgeStyle: {
-                'stroke-width': 10,
-                'fill': function(d) { 
-                    return d.data.color
-                }
-            },
-            layoutAttr: {
-                charge: -1500,
-                linkDistance: 200
-            },
-            nodeShape: "image",
-            nodeAttr: {
-              r: function(d) { 
-                  return d.data.r
-              },
-              title: function(d) {
-                return d.label;
-              },
-              "xlink:href": function(d) { 
-                  return d.data.link
-              },
-              x: -15,
-              y: -15,
-              width: 36,
-              height: 36,
-            },
-            height:400,
-            labelStyle: {
-              'fill': '#343A3F'
-            },
-            withLabels: true,
-            nodeLabels: 'label',
-            nodeStyle: {
-              'fill': function(d) { 
-                  return d.data.color
-              },
-              'stroke': 'none'
-            }, 
-        }, true);
-      },
+      }
     },
     mounted: function(){
       var self = this;
-      self.nxG = new jsnx.DiGraph();
       self.makeGraph()
     },
     template:`<div id="classGraph" class="bg-light rounded"></div>`
