@@ -634,9 +634,9 @@ const store = new Vuex.Store({
       } catch (error) {
         console.log('NO previousPreviewProps', state.previousPreviewProps)
       }
-      if (_.size(state.previousPreviewProps)) {
-        console.log('previousPreviewProps found', state.previousPreviewProps)
-      }
+      // if (_.size(state.previousPreviewProps)) {
+      //   console.log('previousPreviewProps found', state.previousPreviewProps)
+      // }
       Vue.set(state.finalschema,'@graph',[]);
       Vue.set(state.validation,'properties',{});
       Vue.set(state.validation,'required',[]);
@@ -729,7 +729,6 @@ const store = new Vuex.Store({
       if(state.validation.hasOwnProperty('properties')){
         for(key in state.validation['properties']){
           let keys = Object.keys(state.validation['properties'][key]).length
-          console.log(key, keys)
           if(keys <= 1){
             incomplete += 1;
           }
@@ -1035,7 +1034,7 @@ Vue.component('validation-dropzone', {
         // const item = this.validation_options.find(item => item.id == itemID)
         this.validation_options.forEach(item => {
           if(item._id == itemID){
-            console.log(itemID, item)
+            // console.log(itemID, item)
             self.matches.push(item)
             let payload = {
               'validation':item,
