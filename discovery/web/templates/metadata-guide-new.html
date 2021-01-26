@@ -2596,13 +2596,13 @@
     },
     watch:{
       userInput: function(v){
-        v ? this.look_existing(v) : this.hits = []
+        v && v.length > 10 ? this.look_existing(v) : this.hits = []
       }
     },
     methods:{
       look_existing(q){
         let self = this;
-        axios.get(`/api/dataset/query?size=1000&q=${q}&meta=true`).then(res=>{
+        axios.get(`/api/dataset/query?size=100&q=name:${q}&meta=true`).then(res=>{
           let portal_hits = []
           res.data.hits.forEach((hit) => {
             if(hit['_meta'].hasOwnProperty('guide') && hit['_meta']['guide'] == window.location.pathname){
@@ -2646,13 +2646,108 @@
             }
           }
         });
-      },
-      isFromDataPortal(hit){
-        if(hit['_meta'].hasOwnProperty('guide')){
-          return window.location.pathname == hit['_meta']['guide'] ? '<i title="Registered in this Data Portal" class="fas fa-star text-warning"></i>' : ''
-        }else{
-          return ''
+      }
+    },
+    template:
+    `<div>
+      <input type="text" v-model="userInput" class="form-control" placeholder="enter text here">
+      <div v-if="hitResults" class="row m-0 alert-dark">
+        <div class="col-sm-12">
+          <small @click.prevent="hitResults = false" class="float-right pointer m-1 text-danger">dismiss</small>
+        <div>
+        <div class="col-sm-12" style="max-height:200px; overflow-y:scroll;">
+          <h6 v-if="window.location.href.includes('n3c')" class="text-muted mt-2"><i class="fas fa-exclamation-circle text-info"></i> Similar Dataset(s) found. Avoid submitting duplicate dataset requests.</h6>
+          <h6 v-else class="text-muted mt-2"><i class="fas fa-exclamation-circle text-info"></i> Similar Dataset(s) found:</h6>
+          <table class="table table-sm table-striped">
+            <tbody>
+              <template v-for="hit in hits">
+                <tr class="m-1">
+                  <b class="d-block">
+                    <small>
+                      <span class="text-dark" v-text="hit.name"></span>. <a :href="'/dataset/'+hit['_id']" target="_blank">Show me this dataset <i class="fas fa-chevron-right"></i></a>
+                    </small>
+                  </b>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        <div>
+      <div>
+    </div>`
+  });
+
+  Vue.component('identifier-special', {
+    data: function(){
+      return{
+        hits: [],
+        hitResults: false
+      }
+    },
+    props: ['info','name'],
+    computed:{
+      userInput:{
+        get () {
+          return store.state.schema.validation.properties[this.name].value
+        },
+        set (newValue) {
+          var payload = {};
+          if (name.includes('date')) {
+            let v = moment(newValue).format("YYYY-MM-DD")
+            payload["completed"] = {'name':this.name,'value': v };
+          }else {
+            payload["completed"] = {'name':this.name,'value':newValue};
+          }
+          store.commit('markCompleted',payload);
+          store.dispatch('saveProgress');
         }
+      },
+    },
+    watch:{
+      userInput: function(v){
+        v ? this.look_existing(v) : this.hits = []
+      }
+    },
+    methods:{
+      look_existing(q){
+        let self = this;
+        axios.get(`/api/dataset/query?size=100&q=identifier:"${encodeURIComponent(q)}"&meta=true`).then(res=>{
+          self.hits = res.data.hits
+          self.hits.length ? self.hitResults = true : self.hitResults = false
+        }).catch(err=>{
+          self.hitResults = false
+          throw err;
+        })
+      },
+      loadSelected(selected){
+        Swal.fire({
+          title: 'Load item into form?',
+          text: 'You are about to edit an existing record, please make sure to revise your contributions before submitting.',
+          footer: "[Warning] Data structure is not guaranteed to match that of this form which may result in formatting errors. For such cases clearing that field might be required.",
+          animation:false,
+          customClass:'scale-in-center',
+          showCancelButton: true,
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          confirmButtonText: 'Yes'
+        }).then((result) => {
+          if (result.value) {
+            for(key in selected){
+              if (!['@context','@type','_id'].includes(key)) {
+                var payload = {};
+                if (typeof selected[key] === 'object') {
+                  let value = [selected[key]]
+                  payload["completed"] = {'name':key,'value':value};
+                  store.commit('markCompleted',payload);
+                }else{
+                  let value = selected[key]
+                  payload["completed"] = {'name':key,'value':value};
+                  store.commit('markCompleted',payload);
+                }
+
+              }
+            }
+          }
+        });
       }
     },
     template:
@@ -2663,21 +2758,21 @@
           <small @click.prevent="hitResults = false" class="float-right pointer m-1 text-danger">dismiss</small>
         <div>
         <div class="col-sm-12" style="max-height:200px; overflow-y:scroll;">
-          <h6 v-if="window.location.href.includes('n3c')" class="text-muted mt-2">Similar Dataset(s) found. Avoid submitting duplicate dataset requests.</h6>
-          <h6 v-else class="text-muted mt-2">Similar Dataset(s) found:</h6>
+          <h6 class="text-muted mt-2"><i class="fas fa-exclamation-circle text-danger"></i> Looks like a dataset with this identifier already exists:</h6>
           <table class="table table-sm table-striped">
             <tbody>
               <template v-for="hit in hits">
                 <tr class="m-1">
                   <b class="d-block">
                     <small>
-                      <b v-html="isFromDataPortal(hit)"></b> <span class="text-dark" v-text="hit.name"></span>. <a :href="'/dataset/'+hit['_id']" target="_blank">learn more</a>
+                      <span class="text-dark" v-text="hit.name"></span>. <a :href="'/dataset/'+hit['_id']" target="_blank">Show me this dataset <i class="fas fa-chevron-right"></i></a>
                     </small>
                   </b>
                 </tr>
               </template>
             </tbody>
           </table>
+          <h6 class="text-dark mt-1"><small>If you are the owner of this entry this operation will result in an overwrite, for all others this submission will be rejected.</small></h6>
         <div>
       <div>
     </div>`
@@ -3885,6 +3980,10 @@
                         <!-- 🌈 NAME FIELD🌈 -->
                         <template v-if="name == 'name'">
                           <name-special :info="info" :name="name"></name-special>
+                        </template>
+                        <!-- 🌈 IDENTIFIER FIELD🌈 -->
+                        <template v-else-if="name == 'identifier'">
+                          <identifier-special :info="info" :name="name"></identifier-special>
                         </template>
                         <!-- 🌈 TEXTAREA 🌈 -->
                         <textarea v-else :rows="name ==='description'?5:2" type="text" v-model="userInput" class="form-control form-control-sm " placeholder="enter text here"></textarea>
