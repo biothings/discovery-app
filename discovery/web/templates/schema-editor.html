@@ -1846,7 +1846,8 @@ Vue.component('c-box', {
                         </small>
                       </div>
                       <div class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around">
-                        <i v-show="item.special" class="fas fa-minus-circle pointer text-muted unselectable remove" @click="removeProp(prop.label)"></i>
+                        <i v-show="item.special" class="fas fa-minus-circle pointer text-muted unselectable tip" data-tippy-info="Delete" @click="removeProp(prop.label)"></i>
+                        <i v-show="item.special" class="fas fa-pen-square pointer text-info unselectable tip" data-tippy-info="Edit" @click="editCustomProp(prop)"></i>
                         <i class="fas fa-check-circle pointer unselectable select" @click="markSelected(prop.label)" :class="{'text-muted':!prop.selected,'text-success':prop.selected}"></i>
                         <i class="fas fa-asterisk required pointer unselectable" @click="markRequired(prop.label)" :class="{'text-muted':!prop.isRequired,'text-danger':prop.isRequired}"></i>
                       </div>
@@ -1933,6 +1934,33 @@ Vue.component('c-box', {
 
             </div>`,
   methods: {
+    editCustomProp(prop){
+      let self = this;
+      self.getRangeOptions();
+      self.populateInputOptions();
+
+      self.addPropMode = true;
+      self.newPropDescription = prop['description'] || '';
+      self.newPropName = prop['label'] || '';
+      self.newPropDomain = prop['domain'] || '';
+      
+      if(prop && prop['range']){
+        if(prop['range'].constructor == Array){
+          prop['range'].forEach((value) => {
+            self.range_query = value
+            self.handlePillSubmit()
+          })
+        }else{
+          prop['range'].split(',').forEach((value) => {
+            self.range_query = value
+            self.handlePillSubmit()
+          })
+        }
+      }
+      let payload = {}
+      payload['label'] = prop['label'];
+      store.commit('removeProperty',payload);
+    },
     handlePillSubmit(){
       var self = this;
       if(!self.newPropRange.includes(self.range_query)){
@@ -2100,11 +2128,10 @@ Vue.component('c-box', {
     },
     resetAddPropForm(){
       var self = this;
+      $.notify("New property added: "+self.newPropName,{ globalPosition: 'right',style:'success', showDuration: 200});
       self.newPropName = '';
-      // self.newPropDomain = '';
       self.newPropDescription = '';
       self.newPropRange = [];
-      $.notify("New property added",{ globalPosition: 'right',style:'success', showDuration: 200, });
     },
     getRangeOptions(){
       var self = this;
