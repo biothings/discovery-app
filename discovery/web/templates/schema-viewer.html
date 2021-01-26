@@ -1893,8 +1893,9 @@
           let res = [];
           for (var i = 0; i < list.length; i++) {
             for (var x = 0; x < self.userSchema['hits'].length; x++) {
-              let parentName = self.getName(list[i]);
-              if (self.userSchema['hits'][x].label === parentName) {
+              let parentName = list[i];
+              // compare name not label as there might be duplicates
+              if (self.userSchema['hits'][x].name=== parentName) {
                 // console.log("GOT PARENT FULL INFO...",self.userSchema['hits'][x].label,parentName)
                 res.push(self.userSchema['hits'][x])
               }
