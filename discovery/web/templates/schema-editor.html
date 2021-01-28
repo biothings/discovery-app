@@ -521,13 +521,13 @@ const store = new Vuex.Store({
                 timer:1000})
     },
     editValidationItem(state,payload){
-      let itemID = payload['item']['id']
-      let newitem = payload['item']
+      let itemID = payload['item']['_id']
+      let newItem = payload['item']
       for (let i = 0; i < state.validation_options.length; i++) {
         let item = state.validation_options[i];
-        if (item.id == itemID) {
-          Vue.set(state.validation_options, i, newitem)
-          state.editThis = null
+        if (item['_id'] == itemID) {
+          Vue.set(state.validation_options, i, newItem)
+          state.editThis = ''
           Swal.fire({type:'success',
                 toast:true,
                 title: 'Edits Saved',
