@@ -157,6 +157,7 @@
             </small>
             <div class="form-group">
               <h5 for="exampleInputEmail1" class="text-dark"><i class="fas fa-asterisk text-danger"></i> Name of the new extended class:</h5>
+              <small class="d-block my-1 text-info">Learn about naming conventions <a href="https://schema.org/docs/styleguide.html" target="_blank" rel="nonreferrer">here</a></small>
               <input type="text" ref="clsName" class="form-control" id="exampleInputEmail1" placeholder="Name should be PascalCased eg. MyClass">
             </div>
             <div class="form-group">
@@ -171,14 +172,16 @@
 
         <!-- PARENT CLASSES -->
         <div class="jumbotron alert-secondary" v-if="newClassAdded && !validationView" id="editorTippy">
-          <div>
-            <h4 class="text-info text-left">Select and create properties for your schema</h4>
-            <p class="text-left">
-              <small class="text-muted d-block">1. <i class="fas fa-circle text-primary"></i> Reuse properties from parents <i class="text-danger">Required</i></small>
-              <small class="text-muted d-block">2. <i class="fas fa-star text-warning"></i> Add new properties <i class="text-danger">Required</i></small>
-              <small class="text-muted d-block">3. <img src='/static/img/cube.svg' width="15px"> Edit validation <i class="text-danger">Required</i></small>
-              <small class="text-muted d-block">4. <i class="fab fa-github text-success"></i> Save/Download schema</small>
-            </p>
+          <div class="row m-0">
+            <div class="col-sm-12">
+              <h6 class="text-info text-left">Select and create properties for your schema</h6>
+              <p class="text-left">
+                <small class="text-muted d-block">1. <i class="fas fa-circle text-primary"></i> Reuse properties from parents <i class="text-danger">Required</i></small>
+                <small class="text-muted d-block">2. <i class="fas fa-star text-warning"></i> Add new properties <i class="text-danger">Required</i></small>
+                <small class="text-muted d-block">3. <img src='/static/img/cube.svg' width="15px"> Edit validation <i class="text-danger">Required</i></small>
+                <small class="text-muted d-block">4. <i class="fab fa-github text-success"></i> Save/Download schema</small>
+              </p>
+            </div>
           </div>
           <div class="mt-2">
             <input type="checkbox" class="slider mr-2" id="customControlInline" @click="toggleDesc()">
@@ -1901,7 +1904,8 @@ Vue.component('c-box', {
                   <form>
                     <div class="form-group">
                       <label for="name">Name <i class="fas fa-asterisk text-danger"></i></label>
-                      <input v-model="newPropName" type="text" class="form-control" id="name" placeholder="name of new property">
+                      <input v-model="newPropName" type="text" class="form-control" id="name" placeholder="name of new property eg. myProperty">
+                      <small class="d-block my-1 text-info">Learn about naming conventions <a href="https://schema.org/docs/styleguide.html" target="_blank" rel="nonreferrer">here</a></small>
                       <small v-if="propExists" class="text-danger">A property with this name already exists</small>
                     </div>
                     <div class="form-group">
@@ -2151,21 +2155,21 @@ Vue.component('c-box', {
       var self = this;
       let payload = {}
       payload['name'] = self.newPropName;
-      if (!self.newPropName.match(/^[a-z]+(?:[A-Z][a-z]+)*$/)) {
-        $.notify("Property name should be camelCased",{ globalPosition: 'right',style:'danger', showDuration: 200, });
-      }else{
-        payload['range'] = self.newPropRange.toString();
-        payload['description'] = self.newPropDescription;
-        payload['domain'] = self.newPropDomain;
-        if (self.item.special) {
-          payload['special'] = true;
-        }else {
-          payload['special'] = false;
-        }
-        store.commit('addProperty',payload);
-        self.addPropMode = false;
-        self.resetAddPropForm();
+      payload['range'] = self.newPropRange.toString();
+      payload['description'] = self.newPropDescription;
+      payload['domain'] = self.newPropDomain;
+      if (self.item.special) {
+        payload['special'] = true;
+      }else {
+        payload['special'] = false;
       }
+      store.commit('addProperty',payload);
+      self.addPropMode = false;
+      self.resetAddPropForm();
+
+      // if (!self.newPropName.match(/^[a-z]+(?:[A-Z][a-z]+)*$/)) {
+      //   $.notify("name does not follow naming conventions",{ globalPosition: 'right',style:'warning', showDuration: 200, });
+      // }
     },
     addInputType(){
       var self = this;
@@ -2603,6 +2607,9 @@ var app = new Vue({
                         Save to GitHub directly* Requires GitHub login and permission.
                       </li>
                       <li>
+                        Edit validation rules for each property you have chosen.
+                      </li>
+                      <li>
                         Add a new property to your class.
                       </li>
                       <li>
@@ -2610,9 +2617,6 @@ var app = new Vue({
                       </li>
                       <li>
                         Parent properties available to choose from.
-                      </li>
-                      <li>
-                        Show/Hide all properties of this class.
                       </li>
                     </ol>
                   </small>`,
