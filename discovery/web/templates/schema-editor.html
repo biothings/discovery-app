@@ -540,7 +540,7 @@ const store = new Vuex.Store({
     },
     savePrefix(state,payload){
       state.prefix = payload['prefix'];
-      Vue.set(state.finalschema['@context'],state.prefix,'http://discovery.biothings.io/view/')
+      Vue.set(state.finalschema['@context'],state.prefix,'http://discovery.biothings.io/view/'+state.prefix+'/')
     },
     saveParent(state,payload){
       let parent = payload['parent']
