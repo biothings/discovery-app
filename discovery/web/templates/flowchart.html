@@ -23,7 +23,9 @@
         <img src="/static/img/ripple.svg"/>
     </div>
     <div class="row m-0 w-100 mt-5">
-        <flowchart class="col-sm-12 col-md-8 m-auto"></flowchart>
+        <div class="mt-3 col-sm-12">
+            <flowchart class="col-sm-12 col-md-8 m-auto border"></flowchart>
+        </div>
         <div class="col-sm-12">
             <form class="row m-0">
                 <div class="col-sm-12 bg-dark p-3 mt-5 text-light">
@@ -308,14 +310,20 @@ Vue.component('flowchart', {
                 'text-valign': 'center',
                 'text-halign': 'center',
                 'height': '100px',
+                'padding': 10,
                 "text-wrap": "wrap",
-                "text-max-width": function(data){
-                    return data.hasOwnProperty('mw') ? data['mw'] : 200 
+                "text-max-width": function(ele){
+                    return ele.data.hasOwnProperty('mw') ? ele.data['mw'] : 200 
                 },
+                'background-image': 'data(image)',
+                'background-image-opacity': 1,
+                'background-width': '100%',
+                'background-height': 'data(nsize)',
+                'border-width': 0,
                 'width': '100px',
                 'border-color': 'white',
-                'height': 40,
-                'width': 40,
+                'height': 'data(nsize)',
+                'width': 'data(nsize)',
                 'background-color': 'data(color)',
                 'font-size': 'data(size)',
                 'border-color': 'black',
@@ -324,27 +332,23 @@ Vue.component('flowchart', {
                 "text-background-color": "white"
               }
             },
-
             {
               selector: 'edge',
               style: {
-                'curve-style': 'haystack',
                 'label': 'data(name)',
-                'haystack-radius': 0,
-                'width': 5,
-                'opacity': 0.5,
                 'line-color': 'data(color)',
-                'target-arrow-color': '#257FC5',
-                "text-background-opacity": 1,
-                "text-background-color": "white"
+                'width': 7,
+                'opacity': 0.7,
+                'target-arrow-shape': 'triangle',
+                'target-arrow-color': 'data(color)',
+                'curve-style': 'bezier'
               }
-            }
+            },
           ],
-
           elements: self.cyto_data
         });
 
-        cy.maxZoom(2)
+        cy.zoomingEnabled( false );
 
       },
       makeGraph(){
@@ -360,55 +364,57 @@ Vue.component('flowchart', {
             { 
                 group: 'nodes',          
                 data: {
-                id: 0, name:"I have data...", type: "diamond", color: yellow, size: '1.5em', mw: 600
+                id: 0, name:"I have data...", type: "diamond", color: yellow, size: '1.5em', mw: 600, image: false, nsize: 60
                 }
             },
             { 
                 group: 'nodes',          
                 data: {
-                id: 1, name:"Does a relevant domain-specific repository exist?", type: "ellipse", color: gray, size: '1em'
+                id: 1, name:"Does a relevant domain-specific repository exist?", type: "ellipse", color: gray, size: '1em', image: false, nsize: 40
                 }
             },
             { 
                 group: 'nodes',          
                 data: {
-                id: 3, name:"Is your data within scope of a generalist repository?", type: "ellipse", color: gray, size: '1em'
+                id: 3, name:"Is your data within scope of a generalist repository?", type: "ellipse", color: gray, size: '1em', image: false, nsize: 40
                 }
             },
             { 
                 group: 'nodes',          
                 data: {
-                id: 5, name:"Can I self host the dataset?", type: "ellipse", color: gray, size: '1em'
+                id: 5, name:"Can I self host the dataset?", type: "ellipse", color: gray, size: '1em', image: false, nsize: 40
                 }
             },
             { 
                 group: 'nodes',          
                 data: {
-                id: 6, name:"Does this repository expose schema.org compliant metadata?", type: "ellipse", color: gray, size: '1em'
+                id: 6, name:"Does this repository expose schema.org compliant metadata?", type: "ellipse", color: gray, size: '1em', image: false, nsize: 40
                 }
             },
             { 
                 group: 'nodes',          
                 data: {
-                id: 7, name:"Register your metadata on that repository", type: "ellipse", color: gray, size: '1em'
+                id: 7, name:"Register your metadata on that repository", type: "ellipse", color: 'lightblue', size: '1em', image: false, nsize: 40
                 }
             },
             { 
                 group: 'nodes',          
                 data: {
-                id: 8, name:"Update on DDE", type: "ellipse", color: gray, size: '1em'
+                id: 8, name:"Update on DDE", type: "ellipse", color: gray, size: '1em', image: false, nsize: 40
                 }
             },
             { 
                 group: 'nodes',          
                 data: {
-                id: 9, name:"Contact NIH PO", type: "ellipse", color: gray, size: '1em'
+                id: 9, name:"Contact NIH PO", type: "ellipse", color: 'lightblue', size: '1em',
+                image: false, nsize: 40
                 }
             },
             { 
                 group: 'nodes',          
                 data: {
-                id: 10, name:"Register on Data Discovery Engine", type: "star", color: green, size: '1em'
+                id: 10, name:"Register on Data Discovery Engine", type: "ellipse", color: 'white', size: '1em',
+                image: '/static/img/dde-logo-o.png', nsize: 100
                 }
             },
             {
