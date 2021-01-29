@@ -1,6 +1,35 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
+  .box {
+  margin: 30px;
+  width: 200px;
+  padding: 5px;
+  font-size: .7em;
+  display:inline-block;
+  border-radius: 15px;
+  background:white;
+  position: relative;
+}
+
+.box::before {
+  content: "";
+  position: absolute;
+  height: var(--h,20px);
+  width: var(--w,20px);
+  background: inherit;
+  transform:scale(var(--x,1),var(--y,1));
+}
+
+.box.p-top::before{
+  bottom: 100%;
+  clip-path: polygon(0 100%, 100% 100%, 50% 0);
+}
+.box.left::before {
+  left:var(--p,20px);
+}
+</style>
 <div id="playground" class="container-fluid" style="padding-top:60px;">
   <div class="bg-light text-center mt-5">
     <h1 class="logoText">SCHEMA PLAYGROUND</h1>
@@ -11,20 +40,21 @@
       <a href="/registry">Go To Registry <i class="fas fa-chevron-right"></i></a>
     </p>
   </div>
-  <div class="jumbotron mainBackDark col-sm-12 m-0">
+  <div class="jumbotron bg-light col-sm-12 m-0">
     <div class="container d-flex justify-content-center align-content-center">
       <div class="pt-2 pb-2 text-center">
-        <h1 class="text-light text-center">GET STARTED</h1>
-        <h4 class="text-light text-center">What would you like to do?</h4>
-          <a role="button" class="btn themeButton text-light m-2 px-3 py-3 btn-lg" href="#visualize" rel="noreferrer"><i class="fas fa-eye text-light"></i> Visualize Schema</a>
-          <a role="button" class="btn themeButton text-light m-2 px-3 py-3 btn-lg" href="#create" rel="noreferrer"><i class="fas fa-code-branch text-light"></i> Create Schema</a>
-          <a role="button" class="btn themeButton text-light m-2 px-3 py-3 btn-lg" href="/registry" rel="noreferrer">Search Registry</a>
+        <h1 class="mainTextDark text-center">GET STARTED</h1>
+        <h4 class="text-muted text-center">What would you like to do?</h4>
+          <button type="button" class="btn themeButton text-light m-2 px-3 py-3 btn-lg" :class="[choice == 'visualize'? 'bg-dark':'']" @click.prevent="choice = 'visualize'"><i class="fas fa-eye text-light"></i> Register Schema</button>
+          <button type="button" class="btn themeButton text-light m-2 px-3 py-3 btn-lg" :class="[choice == 'create'? 'bg-dark':'']" @click.prevent="choice = 'create'"><i class="fas fa-code-branch text-light"></i> Create Schema</button>
+          <button type="button" class="btn themeButton text-light m-2 px-3 py-3 btn-lg" :class="[choice == 'search'? 'bg-dark':'']" @click.prevent="choice = 'search'"><i class="fas fa-search text-light"></i> Search Existing</button>
       </div>
     </div>
   </div>
-  <div class="jumbotron container bg-light row m-auto d-flex justify-content-center align-items-center" id="schemas" style="min-height:40vh;">
+
+  <div v-if="!choice" class="jumbotron container bg-light row m-auto d-flex justify-content-center align-items-center" style="min-height:40vh;">
     <div class="col-sm-12 pt-5 pb-5">
-      <h1 class="text-center text-muted caps mb-4 mt-4">Power of Schemas</h1>
+      <h1 class="text-center text-muted caps mb-4 mt-4">Why do we need schemas?</h1>
       <div class="w-100">
         <div class="row m-0">
           <!-- card -->
@@ -39,7 +69,6 @@
               </p>
             </div>
           </div>
-          <!-- card -->
           <div class="col-sm-12 col-md-4 p-2">
             <img src="/static/img/sp2-01.svg" alt="Hierachy" />
             <h4 class="text-center mainTextDark caps">
@@ -77,116 +106,167 @@
         </div>
       </div>
     </div>
-    </div>
+  </div>
 
-    <div class="container mb-4 p-2 alert-secondary shareBack" id="visualize">
-      <div class="text-center alert  m-0" >
-        <h4 class="text-muted mt-5 caps">If you have a schema</h4>
-        <div class="row">
-          <div class="col-sm-6 d-flex justify-content-center align-items-center" style="min-height:30vh;">
-            <div>
-              <span class="fa-stack fa-2x m-2">
-                <i class="fas fa-circle fa-stack-2x text-dark"></i>
-                <i class="fas fa-eye fa-stack-1x fa-inverse"></i>
-              </span>
-              <h4 class="text-muted caps">
-                <b class="mainTextDark">Visualize</b> your schema<br /> and browse it with ease
-              </h4>
-            </div>
-          </div>
-          <div class="col-sm-6 d-flex justify-content-center align-items-center" style="min-height:30vh;">
-            <div>
-              <span class="fa-stack fa-2x m-2">
-                <i class="fas fa-circle fa-stack-2x text-dark"></i>
-                <i class="fas fa-check fa-stack-1x fa-inverse"></i>
-              </span>
-              <h4 class="text-muted caps">
-                <b class="mainTextDark">Register</b> your schema<br /> and share it with the community
-              </h4>
-            </div>
+  <div v-if="choice == 'visualize'" class="m-0 p-2 alert-secondary row fade-in"  style="min-height:50vh;">
+    <div class="col-sm-12 col-md-4 align-items-stretch d-flex p-0 alert-secondary">
+      <div class="row m-0 shareBack">
+        <div class="col-sm-12 d-flex justify-content-center align-items-center text-center py-4">
+          <div>
+            <img src="/static/img/paper.gif" alt="visualize" width="200px" style="border-radius: 50%;">
+            <h4 class="text-muted caps">
+              <div class="box p-top left">
+                <b class="text-muted">what can I do here?</b>
+              </div>
+            </h4>
           </div>
         </div>
-        <div class="alert p-2 d-flex justify-content-center align-items-center" style="background:#85558c;">
-          <div class="w-100 pt-3 pb-3">
-            <h4 class="mb-3 mt-3 text-light">Visualize <i class="fas fa-arrow-right mainTextLight"></i> Register Your Schema</h4>
-            <form id="linkForm" class="col-sm-6 m-auto">
-              <div v-if="!loading" class="input-group mb-3 shadow rounded">
-                <input type="text" class="form-control" v-model="input" id="urlform" autocomplete="" required ref="my_input" aria-label="Paste your link here"  placeholder="Paste your link here" aria-describedby="button-addon2">
-                <div class="input-group-append">
-                  <button :disabled="!input.length" :class="{heartbeat:input.length}" @click.prevent="getFormValues()" id="button-addon2" class="btn btn-info" type="submit">Go</button>
-                </div>
-              </div>
-              <div v-else>
-                <h3 class="text-light"><i class="fas fa-cog fa-spin"></i> Please Wait...</h3>
-              </div>
-              <!-- <div v-if=loading class="loader">
-                <img src="./static/img/ripple.svg"/>
-              </div> -->
-              {% if site_name == "Data Discovery Engine" %}
-                <small class="text-light">Examples:</small>
-                <small class="badge badge-dark pointer mr-1"
-                @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie_kevin.jsonld'">
-                  BioLink Schema
-                </small>
-                <small class="badge badge-dark pointer mr-1"
-                @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
-                  CTSA Dataset Schema
-                </small>
-              {% endif %}
-            </form>
+        <div class="col-sm-12 d-flex justify-content-center align-items-center text-center py-4">
+          <div>
+            <span class="fa-stack fa-2x m-2 scale-in-center">
+              <i class="fas fa-circle fa-stack-2x text-success"></i>
+              <i class="fas fa-eye fa-stack-1x fa-inverse"></i>
+            </span>
+            <h6 class="text-muted caps">
+              <b class="mainTextDark">Visualize</b> your schema<br /> and browse it with ease
+            </h6>
+          </div>
+        </div>
+        <div class="col-sm-12 d-flex justify-content-center align-items-center text-center py-4">
+          <div>
+            <span class="fa-stack fa-2x m-2 scale-in-center">
+              <i class="fas fa-circle fa-stack-2x text-success"></i>
+              <i class="fas fa-check fa-stack-1x fa-inverse"></i>
+            </span>
+            <h6 class="text-muted caps">
+              <b class="mainTextDark">Register</b> your schema<br /> and share it with the community
+            </h6>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="container p-2 mb-4 alert-secondary extendBack" id="create">
-      <div class="text-center alert">
-        <h4 class="text-muted mt-5 caps">If you <b class="text-dark">don't</b> have a schema</h4>
-        <div>
-          <div class="row">
-            <div class="col-sm-6 m-auto d-flex justify-content-center align-items-center" style="min-height:30vh;">
-              <div>
-                <span class="fa-stack fa-2x m-2">
-                  <i class="fas fa-circle fa-stack-2x text-dark"></i>
-                  <i class="fas fa-code-branch fa-stack-1x fa-inverse"></i>
-                </span>
-                <h4 class="text-muted caps">
-                  <b class="mainTextDark">Extend</b> an existing schema<br /> and tailor it to your needs
-                </h4>
+    <div class="jumbotron rounded-0 col-sm-12 col-md-8 m-0 d-flex justify-content-center align-items-center grad">
+      <div class="col-sm-12 col-md-8">
+        <h4 class="mb-3 mt-3 text-light">Visualize <i class="fas fa-arrow-right text-info"></i> Register Your Schema</h4>
+          <form id="linkForm" class="w-100 m-auto">
+            <div v-if="!loading" class="input-group mb-3 shadow rounded">
+              <input type="text" class="form-control" v-model="input" id="urlform" autocomplete="" required ref="my_input" aria-label="Paste your link here"  placeholder="Paste your link here" aria-describedby="button-addon2">
+              <div class="input-group-append">
+                <button :disabled="!input.length" :class="{heartbeat:input.length}" @click.prevent="getFormValues()" id="button-addon2" class="btn btn-info" type="submit">Let's Go!</button>
               </div>
             </div>
+            <div v-else>
+              <h3 class="text-light"><i class="fas fa-cog fa-spin text-success"></i> Please Wait...</h3>
+            </div>
+            {% if site_name == "Data Discovery Engine" %}
+              <small class="text-light">Examples:</small>
+              <small class="badge badge-dark pointer mr-1"
+              @click="input = 'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie_kevin.jsonld'">
+                BioLink Schema
+              </small>
+              <small class="badge badge-dark pointer mr-1"
+              @click="input = 'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'">
+                CTSA Dataset Schema
+              </small>
+            {% endif %}
+          </form>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="choice == 'create'" class="p-2 m-0 row alert-secondary fade-in" style="min-height:50vh;">
+    <div class="col-sm-12 col-md-4 align-items-stretch d-flex p-0 alert-secondary">
+      <div class="row m-0 extendBack">
+        <div class="col-sm-12 d-flex justify-content-center align-items-center text-center py-4">
+          <div>
+            <img src="/static/img/computer.gif" alt="create" width="200px" style="border-radius: 50%;">
+            <h4 class="text-muted caps">
+              <div class="box p-top left">
+                <b class="text-muted">what can I do here?</b>
+              </div>
+            </h4>
           </div>
         </div>
-        <div class="alert p-2 mt-3" style="background:#85558c;">
-          <div class="row m-0">
-            <div class="col-sm-12 col-md-5">
-              <h4 class="text-light caps mt-3 mb-3">
-                Common starting points:
-              </h4>
-              <div class="d-flex align-items-center justify-content-around">
-                <template v-for='item in startingPoints'>
-                  <preset-box :preset='item'></preset-box>
-                </template>
-              </div>
+        <div class="col-sm-12 d-flex justify-content-center align-items-center text-center py-4">
+          <div>
+            <span class="fa-stack fa-2x m-2 scale-in-center">
+              <i class="fas fa-circle fa-stack-2x text-success"></i>
+              <i class="fas fa-code-branch fa-stack-1x fa-inverse"></i>
+            </span>
+            <h6 class="text-muted caps">
+              <b class="mainTextDark">Extend</b> an existing schema<br /> and tailor it to your needs
+            </h6>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="jumbotron rounded-0 col-sm-12 col-md-8 m-0 d-flex justify-content-center align-items-center grad">
+      <div class="col-sm-12 col-md-8">
+        <div class="row m-0">
+          <div class="col-sm-12">
+            <h4 class="text-light mt-3 mb-3">
+              Common starting points:
+            </h4>
+            <div class="d-flex align-items-center justify-content-around">
+              <template v-for='item in startingPoints'>
+                <preset-box :preset='item'></preset-box>
+              </template>
             </div>
-            <div class="col-sm-12 col-md-2 d-flex justify-content-center align-items-center">
-              <h4 class="text-light caps pt-3 pb-3">
-                OR
-              </h4>
-            </div>
-            <div class="col-sm-12 col-md-5">
-              <h4 class="text-light caps mt-3 mb-3">
-                Search for starting point:
-              </h4>
-              <div class="message text-center text-muted p-4">
-                <h5 class="text-muted">Search for a Class</h5>
-                <a role="button" class="btn themeButton text-light m-3" href="/registry">To Registry</a>
-              </div>
+          </div>
+          <div class="col-sm-12 d-flex justify-content-center align-items-center">
+            <h4 class="text-light caps pt-3 pb-3">
+              OR
+            </h4>
+          </div>
+          <div class="col-sm-12">
+            <h4 class="text-light mt-3 mb-3">
+              Search for starting point:
+            </h4>
+            <div class="message text-center text-muted p-4">
+              <h5 class="text-muted">Search for a Class</h5>
+              <a role="button" class="btn btn-lg themeButton text-light m-3" href="/registry">To Registry</a>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <div v-if="choice == 'search'" class="p-2 m-0 alert-secondary fade-in row" style="min-height:50vh;">
+    <div class="col-sm-12 col-md-4 align-items-stretch d-flex p-0 alert-secondary">
+      <div class="row m-0 extendBack">
+        <div class="col-sm-12 d-flex justify-content-center align-items-center text-center py-4">
+          <div>
+            <img src="/static/img/wave.gif" alt="search" width="200px" style="border-radius: 50%;">
+            <h4 class="text-muted caps">
+              <div class="box p-top left">
+                <b class="text-muted">what can I do here?</b>
+              </div>
+            </h4>
+          </div>
+        </div>
+        <div class="col-sm-12 d-flex justify-content-center align-items-center text-center py-4">
+          <div>
+            <span class="fa-stack fa-2x m-2 scale-in-center">
+              <i class="fas fa-circle fa-stack-2x text-success"></i>
+              <i class="fas fa-search fa-stack-1x fa-inverse"></i>
+            </span>
+            <h6 class="text-muted caps">
+              <b class="text-muted">Search schemas and classes available</b>
+            </h6>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="jumbotron rounded-0 col-sm-12 col-md-8 m-0 d-flex justify-content-center align-items-center grad">
+      <div class="alert bg-light text-center text-light p-4 rounded col-sm-12">
+        <h5 class="text-muted">Search schemas and classes available</h5>
+        <h6 class="text-muted">Find and compare existing classes you can extend to create your own.</h6>
+        <a role="button" class="btn btn-lg themeButton text-light m-3" href="/registry">To Registry</a>
+      </div>
+    </div>
+  </div>
+
   </div>
 {% endblock %}
 {% block extra_scripts %}
@@ -199,10 +279,11 @@ Vue.component('preset-box', {
   props: ['preset'],
   template: `<div class="message text-center text-muted p-4">
               <h4 class="m-1">
+              <i class="fas fa-circle text-info"></i>
               <span v-text='preset.name'></span></h4>
               <small><span v-text='preset.description'></span></small>
               <br />
-              <a role="button" @click='handleClick(preset.name,preset.url)' class="btn themeButton text-light pulse m-1" href="#"><i class="fas fa-code-branch"></i> Extend</a>
+              <a role="button" @click='handleClick(preset.name,preset.url)' class="btn btn-lg themeButton text-light pulse m-1" href="#"><i class="fas fa-code-branch"></i> Extend</a>
             </div>`,
   methods: {
     handleClick(name,url){
@@ -223,6 +304,7 @@ var app = new Vue({
       el: '#playground',
 			data: function(){
 				return {
+          choice: '',
           input: '',
           suggestedURL:'',
           slug:'',
