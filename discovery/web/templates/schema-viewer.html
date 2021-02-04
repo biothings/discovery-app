@@ -54,14 +54,6 @@
 
     </div>
 
-    <div class="p-1 bg-secondary w-100 text-right">
-      <div v-if="userSchemaURL">
-        <a class="mr-5" :href="userSchemaURL" target="_blank" rel="noreferrer">
-          <small class="text-light">Source <i class="fas fa-external-link-alt"></i></small>
-        </a>
-      </div>
-    </div>
-
     <div class="row w-100 alert alert-secondary m-0" v-if="searchResults.length || searchResultsProps.length">
       <div class="col-sm-12 col-md-6 p-4">
         <ul>
@@ -88,9 +80,14 @@
 
     <div class="flipcard container my-5">
       <div class="face front">
-        <!-- alpabetical view -->
+        <!-- alphabetical view -->
         <div id="alpabetical-order" class="text-left p-4 bg-light overflow-x-scroll">
           <h3 class="text-muted d-inline mr-2 logoText">Definitions</h3> <a role="button" class="btn btn-sm btn-info pointer ml-2" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
+          <div v-if="userSchemaURL" class="w-100 text-right">
+            <a class="mr-2 text-primary" :href="userSchemaURL" target="_blank" rel="noreferrer">
+              <small>View Source <i class="fas fa-external-link-alt"></i></small>
+            </a>
+          </div>
           <div v-show='developerMode' id="canvasTest"></div>
           <ul class="pagination overflow-x-scroll mt-3" v-show="classesGroupByLetter.length>5">
             <li class="page-link" v-for="(item,i) in classesGroupByLetter">
@@ -199,7 +196,13 @@
           <small class="text-center text-light mb-1">Validation View</small>
           <input id="showButton" class="form-control slider m-auto" @change="changeView()" data-tippy="Show this class only and any validation included"  type="checkbox" v-model="validationView"/>
         </div>
+        <div v-if="userSchemaURL">
+          <a class="text-center text-light mb-1" :href="userSchemaURL" target="_blank" rel="noreferrer">
+            <small>View Source <i class="fas fa-external-link-alt"></i></small>
+          </a>
+        </div>
       </div>
+      
       <!-- CLASSES FOR QUERY -->
       <div class="context">
         <query-box v-if='queryContent && userSchemaParents' :parent="false" :q='queryContent' :userSchema='userSchema'></query-box>
