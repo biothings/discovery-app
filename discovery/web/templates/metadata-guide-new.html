@@ -1140,7 +1140,22 @@
       },
       addResult(r){
         let self = this;
-        self.selected.push(r)
+        if(r.hasOwnProperty('label')){
+          var exists = self.selected.filter(obj => {
+            return obj['label'] === r['label']
+          })
+          if(!exists.length){
+            self.selected.push(r)
+          }else{
+            Swal.fire({type:'error',
+                toast:true,
+                title: `Already added`,
+                showConfirmButton:false,
+                timer:2000})
+          }
+        }else{
+          self.selected.push(r)
+        }
       },
       removeResult(r){
         let self = this;
