@@ -230,6 +230,7 @@
         let query = state.query || "__all__";
 
         if (query) {
+          gtag('event','click',{'event_category':'dataset_search','event_label':query,'event_value':1})
           var params = {
             "params": {
               "q": query,
@@ -340,6 +341,7 @@
       goTo(item) {
         var self = this;
         if (item) {
+          gtag('event','click',{'event_category':'dataset_viewed','event_label':item._id,'event_value':1})
           window.location.href = '/dataset/' + item._id;
         } else {
           Swal.fire(
@@ -440,6 +442,7 @@
       },
       toggleFilter(value){
         let self = this;
+        gtag('event','click',{'event_category':'dataset_portal_filter','event_label':value,'event_value':1})
         let payload = {'guide_list':[value]}
         store.commit('activate_filter',payload);
         self.search();

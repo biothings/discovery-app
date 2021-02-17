@@ -547,10 +547,10 @@ Vue.component('registry-item', {
   methods:{
     saveDataAndRedirect(item,goesToEditor){
       var self = this;
-      // console.log("ITEM",item)
       if (goesToEditor) {
-        // console.log("TO EDITOR")
+        // Extend and send analytics
         if (item && item.namespace && item.label && item.prefix) {
+          gtag('event','click',{'event_category':'class_extended','event_label':item.label,'event_value':1})
           let obj = JSON.stringify(item)
           localStorage.setItem('EditorData',obj);
           localStorage.setItem('EditorStartingPoint',item.prefix+':'+item.label);
@@ -562,8 +562,9 @@ Vue.component('registry-item', {
           );
         }
       }else{
-        // console.log("TO VIEWER")
+        // View and send analytics
         if (item && item.namespace && item.label) {
+          gtag('event','click',{'event_category':'class_viewed','event_label':item.label,'event_value':1})
           window.location.href = '/view/'+item.namespace+'/'+item.label;
         }else{
             Swal.fire(
@@ -814,6 +815,9 @@ var app = new Vue({
           query = query || "__all__";
 
           if (query) {
+
+              gtag('event','click',{'event_category':'class_search','event_label':query,'event_value':1})
+
               var params = {
                   "params": {
                     "q": query,
