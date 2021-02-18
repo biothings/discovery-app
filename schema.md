@@ -3,17 +3,17 @@
 ## What is a schema and why do we need one?
 The term *schema* refers to the organization of data as a blueprint of how the database is constructed.
 Schemas allow for data to be completely understood by different interfaces and let computers access, exchange, integrate data in a uniform manner. 
-We use schema.org as a stable source for generic definitions we can build from. 
+We use [Schema.org](https://schema.org/) as a stable source for generic definitions we can build from. 
 
 ## Schema.org
-Schema.org is a collaborative, community activity with a mission to create, maintain, and promote schemas for structured data on the Internet, on web pages, in email messages, and beyond.
+[Schema.org](https://schema.org/) is a collaborative, community activity with a mission to create, maintain, and promote schemas for structured data on the Internet, on web pages, in email messages, and beyond.
 If we apply this standard to biomedical data we believe we can speed up the processing and discovery of new biomedical data within the research community.
 
 # How to extend an existing schema definition step-by-step
 
 
 ## 1 - Find a Structure
-From schema.org you can find anything from the most generic type (Thing) to more specific types (Dataset). From any of those types you can branch off to create a more specific version of that particular type. Each type is represented by a **Class** and each class has **properties** associated with it.
+From [Schema.org](https://schema.org/) you can find anything from the most generic type (Thing) to more specific types (Dataset, Patient, Organization, etc). From any of those types you can branch off to create a more specific version of that particular type. Each type is represented by a **Class** and each class has **properties** associated with it.
 
 Example:
 **A** (Thing[**name, description...**]) --> **B** (CreativeWork) --> **C** (Dataset) --> **D** [**YourDataset**]
@@ -22,7 +22,7 @@ Here we have a Class Thing that has properties name and description. Any Class d
 
 ## 2-  Schema Set Up
 
-A schema is represented in JSON-LD and these are the fields that make it up:
+A schema is represented in [JSON-LD](https://json-ld.org/) and these are the fields that make it up:
 
  1. **@context** - contains all the prefixes used in the schema, and the values that replace such prefixes when the schema is compacted. 
  2. **@id** - unique identifier/location of this schema.
@@ -124,10 +124,11 @@ Validation is defined as [json schema validation](https://json-schema.org/draft/
 Now that we know what our new Class is (**MyDataset**), its inherited properties (**eg. name, description**), and its custom properties (**contain_phi**) we can define some validation rules for our schema:
 
 
-A new key **$validation** will be added to our custom Class and this is how a property should be structured:
- 1. **$schema** - json schema validation to be used. See  [json schema validation](https://json-schema.org/draft/2019-09/json-schema-validation.html).
+A new key **$validation** will be added to our custom Class and this is how the validation should be structured:
+ 1. **$schema** - json schema validation version to be used. See  [json schema validation](https://json-schema.org/draft/2019-09/json-schema-validation.html).
  2. **type** - Overall data type structure, since it's an object > **object**.
  3. **properties** - object of all properties that you want to represent your MyDataset data, including inherited and custom properties. Each with its [validation rules](https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.6). Each key represents a property defined in our schema.
+ 4.  **required** - A list of properties that you want to enforce as required.
 
 ```
     {
@@ -156,11 +157,12 @@ A new key **$validation** will be added to our custom Class and this is how a pr
 							 "description": "Description of what is contained in the dataset",
 							 "type": "string"
 						},
-						"description": {
+						"contain_phi": {
 							 "description": "Contains PHI?",
 							 "type": "boolean"
-						},
-				    }
+						}
+				    },
+				    "required": ['contain_phi', 'name']
 			    }
 		    },
 		    {
@@ -175,7 +177,7 @@ A new key **$validation** will be added to our custom Class and this is how a pr
     }
 ```
 
-Now we have a schema even more powerful than the original schema.org version since it's tailored to your needs and it includes custom validation to make sure the data ingested by your system is compliant by your own custom rules.
+Now we have a schema even more applicable than the original schema.org version since it's tailored to your needs and it includes custom validation to make sure the data ingested by your system is compliant by your own custom rules.
 
 
 Given this schema, valid data will look like this:
@@ -188,7 +190,8 @@ Given this schema, valid data will look like this:
 }
 ```
 
-This is just a very simple example of what you can do!
+This is just a very simple example of what you can do! With json schema you can define rules for:
+format, length, lists,  custom definitions, nested structures, enumerations, constants, max, min, reuse definitions, etc. [Learn more](https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.6).
 
 ## For more documentation on how to write validation rules in json schema [click here](https://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.6).
 
@@ -201,6 +204,10 @@ Still have questions or issues? Create an issue [here](https://github.com/biothi
 
 |Question        |Answer                         |
 |----------------|-------------------------------|
-|Q| TBA            |
+|Can I define multiple Classes at once?|Yes, but you must maintain the schema hierarchy. Meaning each Class must be a subClass of an existing Class in your schema.           |
+|What is a prefix?         |In the context of a schema it is a short name used to replace a reused part of a URL.  Eg. All schemas in [Schema.org](https://schema.org/) follow the same pattern --> "http://schema.org/"+**ClassName**/**propName** so we can create a prefix "**schema**" in our context --> ```{"schema": "http://schema.org/"}``` that when compacted resolves to the full URL. Ideally the prefix you choose and its value will resolve to a working URI. [Learn more](https://www.w3.org/ns/json-ld).       |
+|Is the validation required?          |Validation is not required in terms of being compatible with schema.org, that's why it is annotated with a "**$**" (Used internally only by DDE, you'll benefit from additional functionality). However, including this makes your schema more robust and ensures the data your system ingests is consistent and follows your structure. Both schema and validation are based on reliable and stable markup languages so you can rest assured they work. |
+|A property exists but it's not exactly what I need, do I need to redefine it?          |Properties, much like Classes can also be expanded. Maybe the range (input) it takes is not enough or it's too generic.  In such case you can define a new property with a different name that indicates its meaning, see [style guides](https://schema.org/docs/styleguide.html)  for more info on naming conventions.|
+|What are the benefits of defining my schema in this format?          | [FAIR](https://www.go-fair.org/fair-principles/) data-sharing principles recommend using Findable, Accessible, Interoperable and Reusable methods to generate data.  We use [Schema.org](https://schema.org/) which is founded by Google, Microsoft, Yahoo and Yandex. You are using a format already in use and widely accepted. We can reuse this structure to tailor it to our needs and inject additional [json-schema validation](https://json-schema.org/draft/2019-09/json-schema-validation.html) to make it even more applicable. The result is validated data that can be understood by different interfaces and computers can access, exchange, integrate in a uniform manner.   Additionally, if you register your schema on the [Data Discovery Engine](https://discovery.biothings.io/) you will benefit from additional web documentation automatically generated from your schema and validation and the ability to share your schema so others can reuse your custom schema as well.|
 
 
