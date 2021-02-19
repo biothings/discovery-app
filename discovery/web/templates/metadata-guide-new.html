@@ -4736,6 +4736,8 @@
 
                     sessionStorage.removeItem('guideProgress');
 
+                    gtag('event','click',{'event_category':'dataset_added','event_label': window.location.pathname,'event_value':1})
+
                     if (window.location.pathname == '/guide/n3c/dataset') {
 
                       Swal.fire({
