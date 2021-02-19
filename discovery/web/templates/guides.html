@@ -96,7 +96,7 @@
             <p class="card-text"><b>
               CTSA National Center for Data to Health </b> (<a href="https://ctsa.ncats.nih.gov/cd2h/" target="_blank" rel="nonreferrer">CD2H <i class="fas fa-external-link-alt"></i></a>) biomedical dataset metadata based on this <a href="/view/biomedical/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure. <small class="text-info more" data-tippy-info="You can choose data portals you are interested in and add their requirements" data-tippy-theme="light">Customizable</small>
             </p>
-            <a href="/guide/" class="btn btn-lg themeButton text-light" role="button">
+            <a href="/guide/" @click="gtag('event','click',{'event_category':'portal_guide','event_label':'/guide','event_value':1})" class="btn btn-lg themeButton text-light" role="button">
               <i class="fas fa-plus"></i> Add Dataset Metadata
             </a>
           </div>
@@ -150,7 +150,7 @@
             <p class="card-text"><b>
               The National COVID Cohort Collaborative </b> (<a href="https://covid.cd2h.org/N3C" target="_blank" rel="nonreferrer">N3C <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/n3c/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.
             </p>
-            <a href="/guide/n3c/dataset" class="btn btn-lg themeButton text-light" role="button">
+            <a href="/guide/n3c/dataset" @click="gtag('event','click',{'event_category':'portal_guide','event_label':'/guide/n3c/dataset','event_value':1})" class="btn btn-lg themeButton text-light" role="button">
               <i class="fas fa-plus"></i> Submit Request
             </a>
           </div>
@@ -202,7 +202,7 @@
           <div class="card-body d-flex flex-column justify-content-around">
             <h5 class="card-title">outbreak.info</h5>
             <p class="card-text"><b>Outbreak.info</b> (<a href="https://outbreak.info/" target="_blank" rel="nonreferrer">Outbreak.info <i class="fas fa-external-link-alt"></i></a>) COVID-19 epidimiology dataset metadata based on this <a href="/view/outbreak/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
-            <a href="/guide/outbreak/dataset" class="btn btn-lg themeButton text-light" role="button">
+            <a href="/guide/outbreak/dataset" @click="gtag('event','click',{'event_category':'portal_guide','event_label':'/guide/outbreak/dataset','event_value':1})" class="btn btn-lg themeButton text-light" role="button">
               <i class="fas fa-plus"></i> Add Dataset Metadata
             </a>
           </div>
@@ -256,7 +256,7 @@
             <p class="card-text">
               <b>National Institute of Allergy and Infectious Diseases (<a href="https://www.niaid.nih.gov/" target="_blank" rel="nonreferrer">NIAID <i class="fas fa-external-link-alt"></i></a>)</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID Data Portal <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.
             </p>
-            <a href="/guide/niaid" class="btn btn-lg themeButton text-light" role="button">
+            <a href="/guide/niaid" @click="gtag('event','click',{'event_category':'portal_guide','event_label':'/guide/niaid','event_value':1})" class="btn btn-lg themeButton text-light" role="button">
               <i class="fas fa-plus"></i> Add Dataset Metadata
             </a>
           </div>

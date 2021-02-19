@@ -38,7 +38,7 @@
                 Follow an easy-to-follow guide to help you contribute dataset metadata for <span v-text=portal.name></span> following this <a :href="portal.schema" target="_blank">structure</a>.
               </p>
               <div class="text-center p-2 m-1 rounded p-3">
-                <a role="button" :style="{background: portal.colors[0].hex}" class="btn text-light btn-lg" :href="portal.guide" class="nd mt-2 tip" :data-tippy-info="'Add a dtaset for '+portal.name">
+                <a role="button" :style="{background: portal.colors[0].hex}" @click="gtag('event','click',{'event_category':'portal_guide','event_label':portal.guide,'event_value':1})" class="btn text-light btn-lg" :href="portal.guide" class="nd mt-2 tip" :data-tippy-info="'Add a dtaset for '+portal.name">
                   <i class="fas fa-plus"></i> Add Dataset Metadata
                 </a>
               </div>
