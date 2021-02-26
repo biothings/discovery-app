@@ -12,13 +12,27 @@ from .common import *
 
 
 class DatasetMeta(DiscoveryMeta):
+    """ Modifiable Metadata Fields """
 
     # username also required through inheritance
     class_id = Keyword(required=True)  # like ctsa::bts:CTSADataset
     private = Boolean()  # this controls visibility
     guide = Keyword()
+
+
+class TimestampMeta(InnerDoc):
+
+    # recorded by registry module
+    # not modifiable elsewhere
     date_created = Date(default_timezone='UTC')
     last_updated = Date(default_timezone='UTC')
+
+
+class N3CMeta(InnerDoc):
+
+    url = Keyword()  # "https://n3c-help.atlassian.net/rest/api/3/issue/10668"
+    status = Keyword()  # "Backlog", "In Progress", "Done", "Done/Rejected" # TODO CONFIRM THIS
+    timestamp = Date(default_timezone='UTC')  # corresponds to "status"
 
 
 class Dataset(DiscoveryUserDoc):
@@ -36,6 +50,8 @@ class Dataset(DiscoveryUserDoc):
     }
     """
     _meta = Object(DatasetMeta, required=True)
+    _n3c = Object(N3CMeta)
+    _ts = Object(TimestampMeta)
     identifier = Keyword(required=True)
     description = Text(required=True)
     name = Text(required=True)
