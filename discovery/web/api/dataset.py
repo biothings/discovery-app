@@ -48,9 +48,22 @@ def wrap_javascript(doc):
     )
 
 
-def to_api_doc_repr(regdoc, show_metadata=False, show_id=True):
-
-    # TODO
+def repr_regdoc(regdoc, show_metadata=False, show_id=True):
+    """
+        Represent discovery.registry.common.RegistryDocument
+        in web-annotation-endpoint-style dictionary structure.
+        >> regdoc
+        {
+            "_id": <_id>
+            ...
+        }
+        >> regdoc.meta
+        {
+            "username": ...,
+            "private": ...,
+            ...
+        }
+    """
 
     if show_metadata:
         regdoc['_meta'] = regdoc.meta
@@ -59,8 +72,6 @@ def to_api_doc_repr(regdoc, show_metadata=False, show_id=True):
         regdoc.pop('_id')
 
     return regdoc
-
-    # return
 
 
 class DatasetMetadataHandler(APIBaseHandler):
@@ -176,7 +187,7 @@ class DatasetMetadataHandler(APIBaseHandler):
             raise Finish({
                 "total": datasets.total(**self.args),
                 "hits": [
-                    to_api_doc_repr(dataset, show_metadata)
+                    repr_regdoc(dataset, show_metadata)
                     for dataset in datasets.get_all(start, size, **self.args)
                 ],
             })
@@ -190,7 +201,7 @@ class DatasetMetadataHandler(APIBaseHandler):
             dataset = datasets.get(_id[:-3])
 
         # add metadata field
-        dataset = to_api_doc_repr(dataset, self.args.pop('meta'))
+        dataset = repr_regdoc(dataset, self.args.pop('meta'))
         # add copyright field
         dataset = add_copyright(dataset, self.request)
 
