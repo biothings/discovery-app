@@ -27,7 +27,8 @@
 
 import json
 import logging
-import datetime
+from datetime import datetime, timezone
+from types import MappingProxyType
 
 import elasticsearch
 import elasticsearch_dsl
@@ -75,7 +76,7 @@ def ensure_schema(schemalike, must_have_constraints=True):
         try:
             schema = ESSchemaClass.get(id=schemalike).validation.to_dict()
         except elasticsearch.exceptions.NotFoundError:
-            raise ValueError(f"cannot find schema class: '{schemalike}''.")
+            raise ValueError(f"cannot find schema class: {schemalike}.")
     else:
         raise TypeError("the json schema should be a dict or an id to locate it.")
 
@@ -207,13 +208,23 @@ def _clean(metadict, defdict=None):
     return AliasDict(_metadata)
 
 
-def _index(doc, metadata, op_type='index'):
+def _index(doc, metadata, op_type='index', _addon=MappingProxyType({})):
 
     assert isinstance(doc, ValidatedDict)
     assert isinstance(metadata, ValidatedDict)
 
+    _now = datetime.now(timezone.utc)
+
     dataset = ESDataset(**doc)
     dataset['_meta'] = metadata
+    dataset['_n3c'] = {
+        "url": _addon.get("n3c_url"),
+        "status": _addon.get("n3c_status"),
+        "timestamp": _addon.get("n3c_timestamp")}
+    dataset['_ts'] = {
+        "date_created": _addon.get("date_created") or _now,
+        "last_updated": _now
+    }
 
     try:
         dataset.save(op_type=op_type)
@@ -250,11 +261,6 @@ def add(doc, **metadata):
     Default type is a CTSA dataset. Schema type must be in database.
     Validate against schema before index. Raise on conflict.
     """
-    # FIXME NONCOMPLIANT
-    # initially the same until doc is updated
-    metadata['date_created'] = datetime.datetime.utcnow()
-    metadata['last_updated'] = datetime.datetime.utcnow()
-    # END FIXME
     metadata = _clean(metadata, defdict={'schema': 'ctsa::bts:CTSADataset'})
     doc = validate(doc, metadata['schema'])
     dataset = _index(doc, metadata, 'create')
@@ -338,30 +344,39 @@ def update(_id, new_doc, **metadata):
     """
     Update a dataset metadata document.
     Return the version after update. (1, 2, ...)
-    Replace and revalidate the updated document.
-    Combine and patch document metadata. **important**
-    Cannot change the identifier field, because it would result
-    in changing the document _id. Delete and add again instead.
     """
+    # NOTE
+    # Internally, the update is performed by
+    # Revalidating and replacing the original document.
+
     new_doc = ensure_document(new_doc)
     dataset = ESDataset.get(id=_id, ignore=404)
 
     if not dataset:
         raise NoEntityError(f"dataset {_id} does not exist.")
 
+    # Cannot change the identifier field, because it would result
+    # in changing the document _id. Delete and add again instead.
     if new_doc.get('identifier') != dataset.identifier:
         raise ConflictError("cannot change identifier field.")
 
+    # NOTE **important**
+    # Patch the original document metadata with the partial update.
     _meta = dataset['_meta'].to_dict()
-    # FIXME NONCOMPLIANT
-    _meta['last_updated'] = datetime.datetime.utcnow()
-    # END FIXME
     _meta.update(_clean(new_doc.pop('_meta', {})))
     _meta.update(_clean(metadata))
     _meta = _clean(_meta)
 
     new_doc = validate(new_doc, _meta['schema'])
-    dataset = _index(new_doc, _meta)
+
+    dataset = _index(new_doc, _meta, _addon={
+        # Carry over our internal metadata like
+        # N3C ticket info and creation timestamp.
+        "date_created": dataset._ts.date_created,
+        "n3c_url": dataset._n3c.url,
+        "n3c_status": dataset._n3c.status,
+        "n3c_timestamp": dataset._n3c.timestamp
+    })
 
     return dataset.meta.version
 
