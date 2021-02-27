@@ -1,6 +1,7 @@
 
 import json
 import logging
+from functools import partial
 
 import certifi
 from biothings.web.handlers import BaseAPIHandler
@@ -90,6 +91,13 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
         client = AsyncHTTPClient()
         if not self.settings.get('debug') and hasattr(notifier, action):
             for request in getattr(notifier, action)(**details):
-                # may not be sufficient to surpress all error depending on
-                # tornado versions, left this way for development
-                client.fetch(request, raise_error=False)
+                if isinstance(request, notify.N3CChannel.N3CHTTPRequest):
+                    client.fetch(
+                        request, raise_error=False,
+                        callback=partial(notify.log_N3C_response, details.get('_id'))
+                    )
+                else:  # standard tornado HTTP request
+                    client.fetch(
+                        request, raise_error=False,
+                        callback=notify.log_response
+                    )

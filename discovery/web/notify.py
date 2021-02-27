@@ -1,11 +1,14 @@
 import json
+import logging
 from collections import defaultdict
 from functools import reduce
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
+import certifi
 from biothings.utils.common import traverse
-from discovery.utils import notifications
+from discovery.data.dataset import Dataset as ESDataset
+from discovery.utils import notifications, indices
 from pyadf.document import Document as ADF
 from pyadf.inline_nodes.marks.mark import Mark
 from tornado.httpclient import HTTPClient, HTTPRequest
@@ -25,19 +28,23 @@ class EmailChannel(Channel):
 
 class N3CChannel(Channel):
 
+    class N3CHTTPRequest(HTTPRequest):
+        pass
+
     def __init__(self, user, password, profile):
         self.user = user
         self.password = password
         self.profile = profile  # project related info
 
     def send(self, message):
-        yield HTTPRequest(
+        yield self.N3CHTTPRequest(
             url="https://n3c-help.atlassian.net/rest/api/3/issue",
             method="POST",
             headers={"Content-Type": "application/json"},
             auth_username=self.user,
             auth_password=self.password,
-            body=json.dumps(message.to_jira_payload(self.profile))
+            body=json.dumps(message.to_jira_payload(self.profile)),
+            ca_certs=certifi.where()  # for Windows compatibility
         )
 
 
@@ -52,7 +59,8 @@ class SlackChannel(Channel):
                 url=url,
                 method='POST',
                 headers={'content-type': 'application/json'},
-                body=json.dumps(message.to_slack_payload())
+                body=json.dumps(message.to_slack_payload()),
+                ca_certs=certifi.where()  # for Windows compatibility
             )
 
 
@@ -324,11 +332,34 @@ dataset = DatasetNotifier()
 schema = SchemaNotifier()
 
 
+def log_response(http_response):
+    logger = logging.getLogger(__name__)
+    logger.info(http_response.request.url)
+    logger.info(http_response.body)
+
+
+def log_N3C_response(_id, http_response):
+    log_response(http_response)
+    if http_response.code == 201:
+        try:
+            url = json.loads(http_response.body)["self"]
+            # {
+            #   "id":"10668",
+            #   "key":"EXTDATASET-33",
+            #   "self":"https://n3c-help.atlassian.net/rest/api/3/issue/10668"
+            # }
+            indices.refresh()
+            dataset = ESDataset.get(_id)
+            dataset.update(_n3c={"url": url})
+        except Exception as exc:
+            logging.error(str(exc))
+
+
 def test_on(requests):
     client = HTTPClient()
     for request in requests:
         response = client.fetch(request, raise_error=False)
-        print(response.body)
+        log_response(response)
 
 
 def test_schema():
@@ -341,10 +372,11 @@ def test_schema():
 
 
 def test_dataset():
-    settings = SimpleNamespace()
-    settings.SLACK_WEBHOOKS = [input("slack webhook url: ")]
-    settings.N3C_AUTH_USER = input("n3c user: ")
-    settings.N3C_AUTH_PASSWORD = input("n3c password: ")
+    # settings = SimpleNamespace()
+    # settings.SLACK_WEBHOOKS = [input("slack webhook url: ")]
+    # settings.N3C_AUTH_USER = input("n3c user: ")
+    # settings.N3C_AUTH_PASSWORD = input("n3c password: ")
+    import config_key as settings
     dataset.configure(settings)
     test_on(dataset.add("0x0000", {
         "identifier": "grandtest",
