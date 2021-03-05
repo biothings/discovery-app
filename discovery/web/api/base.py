@@ -109,7 +109,7 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                     requests.send(response)
                     notify.log_response(response)
 
-                if isinstance(request, notify.N3CChannel.N3CHTTPRequest):
+                elif isinstance(request, notify.N3CChannel.N3CHTTPRequest):
                     response = await client.fetch(request, raise_error=False)
                     notify.log_N3C_response(details.get('_id'), response)
 
