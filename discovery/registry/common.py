@@ -32,7 +32,8 @@ class RegistryDocument(dict):
         doc.update(esdic.to_dict())
         doc.meta.update(doc.pop('_meta', {}))
         doc.meta.update(doc.pop('_ts', {}))
-        doc.meta.update(dict(n3c=doc.pop('_n3c', {})))
+        _n3c = doc.pop('_n3c', {})  # only on n3c datasets
+        doc.meta.update(dict(n3c=_n3c) if _n3c else {})
         return doc
 
 
