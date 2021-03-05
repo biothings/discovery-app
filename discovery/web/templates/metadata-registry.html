@@ -9,6 +9,9 @@
     background-color: #D0D0D0;
     clip-path: polygon(0 0, 56% 0, 100% 100%, 0% 100%);
   }
+  .badge-purple{
+    background-color: rgb(100, 45, 136);
+  }
 </style>
 <div id="registry" class="jumbotron" style="min-height:80vh;">
   <div v-if=loading class="loader">
@@ -61,8 +64,8 @@
           <small v-if="registry.length && query" v-text="'results for '+query">
           </small>
         </li>
-        <template v-if="registry.length" v-for="(item,index) in results">
-          <registry-item :item='item' :key="index"></registry-item>
+        <template v-if="registry.length" v-for="item in results">
+          <registry-item :item='item' :key="item.name"></registry-item>
         </template>
         <li v-if="!registry.length" class="text-center text-muted list-group-item">
           <div class="jumbotron">
@@ -234,7 +237,6 @@
           var params = {
             "params": {
               "q": query,
-              'meta': true
             }
           };
         }
@@ -318,7 +320,11 @@
   Vue.component('registry-item', {
     data: function() {
       return {
-        options: false
+        options: false,
+        isN3C: false,
+        n3c_status:'',
+        n3c_url: '',
+        color: 'badge-light',
       }
     },
     props: ['item'],
@@ -360,17 +366,19 @@
         }
       },
       imgIcon: function(){
-        if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('n3c')) {
-          return '/static/img/N3Co.png'
-        }
-        else if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('outbreak')) {
-          return '/static/img/outbreak.png'
-        }
-        else if (this.item.hasOwnProperty("@type") && this.item['@type'].includes('niaid')) {
-          return '/static/img/niaid/icon.svg'
-        }
-        else{
-          return '/static/img/dde-logo-o.svg'
+        let self = this;
+        let guide = Object.prototype.hasOwnProperty.call(self.item['_meta'], 'guide') ? self.item['_meta']['guide'] : '';
+        switch (guide) {
+          case '/guide/n3c/dataset':
+            return '/static/img/N3Co.png'
+          case '/guide/outbreak/dataset':
+            return '/static/img/outbreak.png'
+          case '/guide/niaid':
+            return '/static/img/niaid/icon.svg'
+          case '/guide':
+            return '/static/img/dde-logo-o.svg'
+          default:
+            return '/static/img/dde-logo-o.svg'
         }
       },
       detailLink: function(){
@@ -382,19 +390,52 @@
         }else{
           return false
         }
-      }
+      },
     },
-    template: `<li class="list-group-item list-group-item-action p-0 pointer">
+    mounted:function(){
+      let self = this;
+      if( Object.prototype.hasOwnProperty.call(self.item, '_n3c') && Object.keys(self.item['_n3c']).length){
+          self.isN3C = true;
+          self.n3c_status = Object.prototype.hasOwnProperty.call(self.item['_n3c'], 'status') ? self.item['_n3c']['status'] : 'n/a';
+          self.n3c_url = Object.prototype.hasOwnProperty.call(self.item['_n3c'], 'url') ? self.item['_n3c']['url'] : '';
+          switch (self.n3c_status) {
+            case "Done":
+              self.color = 'badge-success'
+              break;
+            case "Done/Rejected":
+              self.color = 'badge-danger'
+              break;
+            case "Selected for Development":
+              self.n3c_status = 'For Dev'
+              self.color = 'badge-purple'
+              break;
+            case "In Progress":
+              self.color = 'badge-info'
+              break;
+            default:
+              self.color = 'badge-secondary'
+              break;
+          }
+        }
+    },
+    template: `<li class="list-group-item list-group-item-action p-0">
                 <div class="row m-0">
                   <div class="col-sm-1 registry-item-background" :style="{backgroundImage: 'url(' + imgIcon + ')' }"></div>
-                  <div class="col-sm-11" @click="goTo(item)">
-                    <h5 class="mb-1 mainTextDark d-inline" v-text="item.name"></h5>
-                    <small class="text-muted float-right" v-if="last_updated">
-                      Last updated <span v-text="last_updated"></span>
-                    </small>
+                  <div class="col-sm-9 pointer" @click="goTo(item)">
+                    <h5 class="mb-1 mainTextDark d-inline">
+                      <span v-text="item.name"></span>
+                    </h5>
                     <p v-if="item && item.description" class="text-muted">
                       <small v-html="text"></small>
                     </p>
+                  </div>
+                  <div class="col-sm-2">
+                    <small class="text-muted" v-if="last_updated">
+                      Last updated <b class="d-block" v-text="last_updated"></b>
+                    </small>
+                    <div class="badge badge-pill text-light d-block" :class="color">
+                      <span v-text="n3c_status"></span> <a v-if="n3c_url" :href="n3c_url" target="_blank"><i class="fas fa-info-circle"></i></a>
+                    </div>
                   </div>
                 </div>
               </li>`
