@@ -10,7 +10,8 @@ from discovery.registry import *
 from discovery.web import notify
 from discovery.web.handlers import DiscoveryBaseHandler
 from tornado.httpclient import AsyncHTTPClient
-from tornado.web import Finish, HTTPError, MissingArgumentError
+from tornado.ioloop import IOLoop
+from tornado.web import Finish, HTTPError
 from torngithub import json_encode
 
 L = logging.getLogger(__name__)
@@ -81,23 +82,37 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                 except Exception as e:  # TODO
                     logging.warning(e)
                 else:
-                    if 'login' in user:
-                        logging.info('logged in user from github token: %s', user)
-                        self.set_secure_cookie("user", json_encode(user))
-                        self.current_user = user['login']
+                    if 'login' not in user:
+                        return
+                    if user.get('email'):  # prefer email as username
+                        user['login'] = user['email']
+                    logging.info('logged in user from github token: %s', user)
+                    self.set_secure_cookie("user", json_encode(user))
+                    self.current_user = user['login']
 
     def report(self, notifier, action, **details):
+        IOLoop.add_callback(partial(self._report, notifier, action, **details))
 
+    async def _report(self, notifier, action, **details):
+
+        # do not run in debug mode
+        # check if the action is defined
         client = AsyncHTTPClient()
         if not self.settings.get('debug') and hasattr(notifier, action):
-            for request in getattr(notifier, action)(**details):
+
+            # iterate all requests defined for this action
+            requests = getattr(notifier, action)(**details)
+            for request in requests:
+
+                if isinstance(request, notify.N3CChannel.N3CPreflightRequest):
+                    response = await client.fetch(request, raise_error=False)
+                    requests.send(response)
+                    notify.log_response(response)
+
                 if isinstance(request, notify.N3CChannel.N3CHTTPRequest):
-                    client.fetch(
-                        request, raise_error=False,
-                        callback=partial(notify.log_N3C_response, details.get('_id'))
-                    )
-                else:  # standard tornado HTTP request
-                    client.fetch(
-                        request, raise_error=False,
-                        callback=notify.log_response
-                    )
+                    response = await client.fetch(request, raise_error=False)
+                    notify.log_N3C_response(details.get('_id'), response)
+
+                else:  # standard tornado HTTP requests
+                    response = await client.fetch(request, raise_error=False)
+                    notify.log_response(response)
