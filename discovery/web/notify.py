@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 import certifi
 from biothings.utils.common import traverse
 from discovery.data.dataset import Dataset as ESDataset
-from discovery.utils import notifications, indices
+from discovery.utils import indices, notifications
 from pyadf.document import Document as ADF
 from pyadf.inline_nodes.marks.mark import Mark
 from tornado.httpclient import HTTPClient, HTTPRequest
@@ -28,6 +28,9 @@ class EmailChannel(Channel):
 
 class N3CChannel(Channel):
 
+    class N3CPreflightRequest(HTTPRequest):
+        pass
+
     class N3CHTTPRequest(HTTPRequest):
         pass
 
@@ -38,14 +41,51 @@ class N3CChannel(Channel):
 
     def send(self, message):
         yield self.N3CHTTPRequest(
-            url="https://n3c-help.atlassian.net/rest/api/3/issue",
-            method="POST",
+            "https://n3c-help.atlassian.net/rest/api/3/issue", method="POST",
             headers={"Content-Type": "application/json"},
             auth_username=self.user,
             auth_password=self.password,
             body=json.dumps(message.to_jira_payload(self.profile)),
             ca_certs=certifi.where()  # for Windows compatibility
         )
+
+    def sends_query(self, user):
+        return self.N3CPreflightRequest(
+            "https://n3c-help.atlassian.net/rest/api/3/user/search?query=" + user,
+            auth_username=self.user,
+            auth_password=self.password,
+            ca_certs=certifi.where()  # for Windows compatibility
+        )
+        # Response
+        # [
+        #   {
+        #      "accountId": "<-id->",
+        #      "accountType": "customer",
+        #      ...
+        #   }
+        # ]
+
+    def sends_signup(self, user):
+        # API Usage
+        # https://developer.atlassian.com/cloud/jira/service-desk/rest/api-group-customer/
+
+        return self.N3CPreflightRequest(
+            "https://n3c-help.atlassian.net/rest/servicedeskapi/customer", method="POST",
+            headers={"Content-Type": "application/json"},
+            auth_username=self.user,
+            auth_password=self.password,
+            body=json.dumps({
+                "displayName": user,
+                "email": user
+            }),
+            ca_certs=certifi.where()  # for Windows compatibility
+        )
+        # Response
+        # {
+        #   "accountId": "qm:a713c8ea-1075-4e30-9d96-891a7d181739:5ad6d3581db05e2a66fa80b",
+        #   "name": "qm:a713c8ea-1075-4e30-9d96-891a7d181739:5ad6d3581db05e2a66fa80b",
+        #   ...
+        # }
 
 
 class SlackChannel(Channel):
@@ -107,7 +147,7 @@ class Strong(Mark):
 class DatasetMessage(notifications.Message):
     """
     Dataset Registry Notifications
-    Additionally aware of _id, doc, and meta field.
+    Additionally aware of _id, doc, reporter, and meta field.
     """
 
     def _doc_to_codeblock(self):
@@ -202,10 +242,15 @@ class DatasetMessage(notifications.Message):
     # override
     def to_jira_payload(self, profile):
         payload = super().to_jira_payload(profile)
+
         # appending dataset name to the title, capped at max 50-chars
         _name = self.get("doc", {}).get("name", "Untitled")
         _summary = f'{self.title} - {_name[:50]}'
         payload["fields"]["summary"] = _summary
+
+        if self.get("reporter"):  # use N3C JIRA registered user id
+            payload["fields"]["reporter"]["id"] = self["reporter"]
+
         return payload
 
 
@@ -247,36 +292,43 @@ class DatasetNotifier(Notifier):
 
     def add(self, _id, doc, user, **meta):
 
-        # Separate messages by channels
-
-        general = DatasetMessage({
-            "title": "New Dataset Registered",
-            "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
-            "url": f"http://discovery.biothings.io/dataset/{_id}",
-            "url_text": "View details about this dataset",
-            "image": DatasetNotifier.get_portal_image(meta.get('guide', '')),
-            "image_altext": "DDE_PORTAL_IMG",
-        })
-
-        n3c = DatasetMessage({
-            "title": "External Dataset Request",  # customized title
-            "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
-            "url": f"http://discovery.biothings.io/dataset/{_id}",
-            "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
-            "doc": doc  # produce additional jira ticket content
-        })
-
         for channel in self.channels:
 
-            # for default channels
-            message = general
-
             if isinstance(channel, N3CChannel):
-                if meta.get('schema') != 'n3c::n3c:Dataset':
-                    continue  # skip this channel for non-N3c dataset
-                message = n3c
+                if meta.get('schema') == 'n3c::n3c:Dataset':
 
-            yield from channel.send(message)
+                    results = yield channel.sends_query(user)
+                    results = json.loads(results.body)
+                    yield
+
+                    if results:
+                        userid = results[0]["accountId"]
+                    elif "@" in user:
+                        userid = yield channel.sends_signup(user)
+                        userid = json.loads(userid.body)
+                        userid = userid["accountId"]
+                        yield
+                    else:  # no email address, cannot register
+                        userid = None
+
+                    yield from channel.send(DatasetMessage({
+                        "title": "External Dataset Request",  # customized title
+                        "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+                        "url": f"http://discovery.biothings.io/dataset/{_id}",
+                        "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
+                        "reporter": userid,  # registered user id basing on email
+                        "doc": doc  # produce additional jira ticket content
+                    }))
+
+            else:  # all other channels
+                yield from channel.send(DatasetMessage({
+                    "title": "New Dataset Registered",
+                    "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+                    "url": f"http://discovery.biothings.io/dataset/{_id}",
+                    "url_text": "View details about this dataset",
+                    "image": DatasetNotifier.get_portal_image(meta.get('guide', '')),
+                    "image_altext": "DDE_PORTAL_IMG",
+                }))
 
     def delete(self, _id, name, user):
 
@@ -335,6 +387,7 @@ schema = SchemaNotifier()
 def log_response(http_response):
     logger = logging.getLogger(__name__)
     logger.info(http_response.request.url)
+    logger.info(http_response.code)
     logger.info(http_response.body)
 
 
