@@ -22,6 +22,11 @@
     <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css"/>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <style>
+      .badge-purple{
+        background-color: rgb(100, 45, 136);
+      }
+    </style>
   </head>
   <header id="header">
     <title>{{site_name}}</title>
@@ -47,7 +52,14 @@
                 <span v-text="metadata.name"></span>
               </h1>
               <small v-if="metadata && metadata.version"  class="text-light d-block text-center" v-text="'Version '+metadata.version"></small>
-              <small v-if="last_updated"  class="text-light d-block text-center" v-text="'Last updated '+last_updated"></small>
+              <small v-if="last_updated"  class="text-light d-block text-center">
+                Last updated <b v-text="last_updated"></b>
+              </small>
+              <div class="text-center" v-if="isN3C" >
+                <div class="badge badge-pill text-light m-auto" :class="color">
+                  <span v-text="n3c_status"></span>
+                </div>
+              </div>
             </div>
             <div class="text-center alert-dark p-2">
               <template v-if="metadata && metadata._meta.username">
@@ -380,7 +392,10 @@
           loading:false,
           scripttext:'',
           meta_id:'',
-          metadata: {}
+          metadata: {},
+          isN3C: false,
+          n3c_status:'',
+          color: 'badge-light',
         }
       },
       methods:{
@@ -409,6 +424,27 @@
           .then(data => {
             self.loading = false;
             self.metadata = data
+            if( Object.prototype.hasOwnProperty.call(self.metadata['_meta'], 'n3c') && Object.keys(self.metadata['_meta']['n3c']).length){
+              self.isN3C = true;
+              self.n3c_status = Object.prototype.hasOwnProperty.call(self.metadata['_meta']['n3c'], 'status') ? self.metadata['_meta']['n3c']['status'] : 'Not Available';
+              switch (self.n3c_status) {
+                case "Done":
+                  self.color = 'badge-success'
+                  break;
+                case "Done/Rejected":
+                  self.color = 'badge-danger'
+                  break;
+                case "Selected for Development":
+                  self.color = 'badge-purple'
+                  break;
+                case "In Progress":
+                  self.color = 'badge-info'
+                  break;
+                default:
+                  self.color = 'badge-secondary'
+                  break;
+              }
+            }
             self.createScript();
             self.updateMetaTags(data);
           }).catch((err) => {
