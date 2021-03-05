@@ -1,6 +1,7 @@
 import json
 import logging
 from collections import defaultdict
+from datetime import datetime, timezone
 from functools import reduce
 from types import SimpleNamespace
 from urllib.parse import urlparse
@@ -406,6 +407,29 @@ def log_N3C_response(_id, http_response):
             dataset.update(_n3c={"url": url})
         except Exception as exc:
             logging.error(str(exc))
+
+
+def update_n3c_status(_id):
+    import requests
+    try:
+        dataset = ESDataset.get(_id)
+        dataset.update(_n3c={
+            "url": dataset._n3c.url,
+            "status": requests.get(dataset._n3c.url).json()["fields"]["status"]["name"],
+            "timestamp": datetime.now(timezone.utc)
+        })
+    except Exception as exc:
+        logging.warning(str(exc))
+
+
+def update_n3c_routine():
+    from discovery.data.dataset import Dataset
+
+    datasets = Dataset.search().query("exists", field="_n3c.url")
+    datasets = datasets.source(False).scan()
+
+    for dataset in datasets:
+        update_n3c_status(dataset.meta.id)
 
 
 def test_on(requests):
