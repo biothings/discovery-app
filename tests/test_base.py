@@ -21,3 +21,8 @@ class DiscoveryTestCase(BiothingsTestCase):
     @property
     def evil_user(self):
         return self.cookie_header('villain@example.com')
+
+    def get_app(self):
+        app = super().get_app()
+        app.settings['debug'] = True
+        return app
