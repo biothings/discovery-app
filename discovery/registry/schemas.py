@@ -23,7 +23,8 @@ SCHEMAS = {
     "google": "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/Google/Google.json",
     "datacite": "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/DataCite/DataCite.json",
     "biomedical": "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/BioMedical/BioMedicalDataset.json",
-    "ctsa": "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json"
+    "ctsa": "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json",
+    "n3c": "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
 }
 
 EXTENSION_OWNER = "cwu@scripps.edu"
