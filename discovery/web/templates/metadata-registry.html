@@ -2,16 +2,7 @@
 {% block content %}
 {% include "header.html" %}
 <style>
-  .registry-item-background{
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-color: #D0D0D0;
-    clip-path: polygon(0 0, 56% 0, 100% 100%, 0% 100%);
-  }
-  .badge-purple{
-    background-color: rgb(100, 45, 136);
-  }
+  
 </style>
 <div id="registry" class="jumbotron" style="min-height:80vh;">
   <div v-if=loading class="loader">
@@ -323,7 +314,6 @@
         options: false,
         isN3C: false,
         n3c_status:'',
-        n3c_url: '',
         color: 'badge-light',
       }
     },
@@ -396,8 +386,7 @@
       let self = this;
       if( Object.prototype.hasOwnProperty.call(self.item, '_n3c') && Object.keys(self.item['_n3c']).length){
           self.isN3C = true;
-          self.n3c_status = Object.prototype.hasOwnProperty.call(self.item['_n3c'], 'status') ? self.item['_n3c']['status'] : 'n/a';
-          self.n3c_url = Object.prototype.hasOwnProperty.call(self.item['_n3c'], 'url') ? self.item['_n3c']['url'] : '';
+          self.n3c_status = Object.prototype.hasOwnProperty.call(self.item['_n3c'], 'status') ? self.item['_n3c']['status'] : 'Not Available';
           switch (self.n3c_status) {
             case "Done":
               self.color = 'badge-success'
@@ -432,8 +421,8 @@
                     <small class="text-muted" v-if="last_updated">
                       Last updated <b class="d-block" v-text="last_updated"></b>
                     </small>
-                    <div class="badge badge-pill text-light d-block" :class="color">
-                      <span v-text="n3c_status"></span> <a v-if="n3c_url" :href="n3c_url" target="_blank"><i class="fas fa-info-circle"></i></a>
+                    <div v-if="isN3C" class="badge badge-pill text-light d-block mb-1" :class="color">
+                      <span v-text="n3c_status"></span>
                     </div>
                   </div>
                 </div>
