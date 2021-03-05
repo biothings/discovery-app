@@ -12,7 +12,7 @@ class DiscoveryQueryTest(BiothingsTestCase):
         [QUERY] Basic functionality
         '''
         res = self.query(q='__all__')
-        assert res['total']['value'] > 770
+        assert res['total'] > 770
 
     def test_02_customization(self):
         '''
