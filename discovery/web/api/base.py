@@ -91,7 +91,7 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                     self.current_user = user['login']
 
     def report(self, notifier, action, **details):
-        IOLoop.add_callback(partial(self._report, notifier, action, **details))
+        IOLoop.current().add_callback(partial(self._report, notifier, action, **details))
 
     async def _report(self, notifier, action, **details):
 
