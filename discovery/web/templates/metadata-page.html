@@ -428,7 +428,7 @@
               self.isN3C = true;
               self.n3c_status = Object.prototype.hasOwnProperty.call(self.metadata['_meta']['n3c'], 'status') ? self.metadata['_meta']['n3c']['status'] : 'Not Available';
               switch (self.n3c_status) {
-                case "Done":
+                case "Done/Imported":
                   self.color = 'badge-success'
                   break;
                 case "Done/Rejected":
