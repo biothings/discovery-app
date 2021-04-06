@@ -54,7 +54,7 @@ class Dataset(DiscoveryUserDoc):
     _ts = Object(TimestampMeta)
     identifier = Keyword(required=True)
     description = Text(required=True)
-    name = Text(required=True)
+    name = Text(required=True, fields={'raw': Keyword()})
 
     class Index:
         """
