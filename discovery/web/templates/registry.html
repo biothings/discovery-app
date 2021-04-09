@@ -35,18 +35,18 @@
         </div>
       </div> -->
       <div class="mt-4">
-        <form @submit.prevent="search(query)">
+        <form @submit.prevent="search()">
           <div class="row m-0 cBox actions bg-secondary rounded">
             <div class="col-sm-9 p-2">
               <div class="d-flex align-item-center">
                 <div>
-                  <small class="text-light px-2" v-text="registryTotal+' Results'"></small>
+                  <small class="text-light px-2" v-text="total+' Results'"></small>
                 </div>
                 <input class="form-control col-10" id="search_query" type="text" v-model="query" name="query" placeholder="Search..." >
               </div>
             </div>
             <div class="col-sm-3 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-              <span class="fa-stack fa-1x pointer search unselectable tip" @click.prevent="search(query)">
+              <span class="fa-stack fa-1x pointer search unselectable tip" @click.prevent="search()">
                 <i class="fas fa-circle text-muted fa-stack-2x"></i>
                 <i class="fas fa-search fa-stack-1x text-light"></i>
               </span>
@@ -62,39 +62,37 @@
           </div>
         </form>
       </div>
+      <div class="text-right d-none d-md-block">
+        <label class="text-muted mr-2" for="exampleFormControlSelect1"><small>Order</small></label>
+        <select class="form-control form-control-sm w-25 float-right" id="exampleFormControlSelect1" @change="search()" v-model="sortChange">
+          <option>Choose one</option>
+          <option value="relevance">Relevance</option>
+          <option value="A-Z">Alphabetically A-Z</option>
+          <option value="Z-A">Alphabetically Z-A</option>
+        </select>
+      </div>
       <div class="d-flex align-item-center justify-content-between px-3 text-muted">
         <small>Compare (Max 4)</small>
         <small>Details | <span class="badge badge-success mr-1 bold">V</span> validation available</small>
         <small>View/Extend</small>
       </div>
       <ul class="list-group context" id="regTippyParent">
-        <template v-if="registry.length" v-for="(item,index) in registryResults">
-          <registry-item :item='item' :key="index"></registry-item>
+        <template v-if="registry.length" v-for="item in registry">
+          <registry-item :item='item' :key="item._id"></registry-item>
         </template>
-        <li v-if="!registry.length" class="text-center text-muted list-group-item">
-          {% if site_name == "CTSA Data Discovery Engine" %}
-            <div class="jumbotron">
-              <h4>Search for schema classes</h4>
-              <h5>For example:</h5>
-              <a href="#" class="text-muted mr-1" @click.prevent='search("Thing")'>Thing <i class="fas fa-chevron-right"></i></a>
-              <a href="#" class="text-muted mr-1" @click.prevent='search("CreativeWork")'>CreativeWork <i class="fas fa-chevron-right"></i></a>
-              <a href="#" class="text-muted mr-1" @click.prevent='search("Dataset")'>Dataset <i class="fas fa-chevron-right"></i></a>
-            </div>
-          {% endif %}
-        </li>
       </ul>
       <div class="bg-light">
         <div class="row">
           <nav class="m-auto ">
             <ul class="pagination m-2 flex-wrap p-2">
               <li class="page-item" :class="{ 'disabled': page <= 1 }">
-                <a class="page-link" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
+                <a class="page-link" @click.prevent="prevPage(); search()"><i class="fas fa-step-backward"></i></a>
               </li>
               <li class="page-item" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
-                <a href="#" class="page-link" @click.prevent="page = n" v-text="n"></a>
+                <a href="#" class="page-link" @click.prevent="page = n; search()" v-text="n"></a>
               </li>
               <li class="page-item" :class="{ 'disabled': page >= pages }">
-                <a class="page-link" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
+                <a class="page-link" @click.prevent="nextPage(); search()"><i class="fas fa-step-forward"></i></a>
               </li>
             </ul>
           </nav>
@@ -506,9 +504,6 @@ const store = new Vuex.Store({
     getCompareUsedAvailable: state =>{
       return state.compareUsedAvailable
     }
-  },
-  actions:{
-    
   }
 });
 
@@ -550,7 +545,7 @@ Vue.component('registry-item', {
       if (goesToEditor) {
         // Extend and send analytics
         if (item && item.namespace && item.label && item.prefix) {
-          gtag('event','click',{'event_category':'class_extended','event_label':item.label,'event_value':1})
+          self.sendGAEvent('class_extended', item.label)
           let obj = JSON.stringify(item)
           localStorage.setItem('EditorData',obj);
           localStorage.setItem('EditorStartingPoint',item.prefix+':'+item.label);
@@ -564,7 +559,7 @@ Vue.component('registry-item', {
       }else{
         // View and send analytics
         if (item && item.namespace && item.label) {
-          gtag('event','click',{'event_category':'class_viewed','event_label':item.label,'event_value':1})
+          self.sendGAEvent('class_viewed', item.label)
           window.location.href = '/view/'+item.namespace+'/'+item.label;
         }else{
             Swal.fire(
@@ -748,43 +743,25 @@ var app = new Vue({
           user:{},
           testURL:'',
           registry:[],
-          registryTotal:'0',
-          sort:'Search Relevance',
+          total:'0',
+          sortChange: 'relevance',
           query:'',
           page: 1,
           pages: 1,
           perPage: 20,
           loading:false,
+          highlighter: null,
           startingPoints:{{starting_points}},
-          shortcuts:{{registry_shortcuts}}
+          shortcuts:{{registry_shortcuts}},
 				}
 			},
       methods:{
-        searchByUser(username){
-          var self = this;
-
-          $('#searching').show();
-
-          var context = document.querySelector(".context");
-          var instance = new Mark(context);
-          instance.unmark();
-
-          axios.get('/api/query?q=_meta.username:'+username+'&size=100').then(function (response) {
-            self.registry = response.data.hits;
-            self.registryTotal = response.data.total;
-            $( document ).ready(function() {
-              self.mark(username);
-            });
-            if (self.registryTotal) {
-              self.calculatePages();
-            }
-            $('#searching').hide();
-          });
+        mark: function(keyword){
+          this.highlighter.unmark();
+          this.highlighter.mark(keyword);
         },
-        mark: function(kw){
-          var context = document.querySelector(".context");
-          var instance = new Mark(context);
-          instance.mark(kw);
+        sendGAEvent(type, query){
+          gtag('event','click',{'event_category':type,'event_label':query,'event_value':1})
         },
         getQueryFilters: function(){
             var filters = [];
@@ -809,59 +786,75 @@ var app = new Vue({
 
             return finalFilters;
         },
-        search(query){
+        search(){
           var self = this;
 
-          query = query || "__all__";
+          let query = self.query || "__all__";
+          let url = `/api/registry/query?q=${query}`
 
-          if (query) {
+          self.loading = true;
+          self.registry = [];
+          self.highlighter.unmark();
 
-              gtag('event','click',{'event_category':'class_search','event_label':query,'event_value':1})
+          //query analytics
+          if (query !== "__all__") {
+            self.sendGAEvent('class_search', query)
+          }
 
-              var params = {
-                  "params": {
-                    "q": query,
-                  }
-              };
-            }
+          // sorting
+          switch (self.sortChange) {
+            case 'relevance':
+              //default behavior
+              break;
+            case 'A-Z':
+              url += '&sort=label.raw'
+              break;
+            case 'Z-A':
+              url += '&sort=-label.raw'
+              break;
+            default:
+              //no matching sort
+              break;
+          }
 
-            self.loading = true;
-
-            var context = document.querySelector(".context");
-            var instance = new Mark(context);
-            instance.unmark();
-            //clear registry to fix mixing results info
-            self.registry = [];
-            axios.get('/api/registry/query?size=1000', params).then(function (response){
-              // console.log('%c SEARCH..','color:hotpink')
-              // console.log(response.data)
-              self.registry = response.data.hits; 
-              if (response.data.total.hasOwnProperty('value')) {
-                self.registryTotal = response.data.total.value;
-              }else{
-                self.registryTotal = response.data.total;
+          var params = {
+              "params": {
+                'size': self.perPage,
+                'from': self.page == 1 ? self.page-1 : ((self.page-1) * self.perPage )  
               }
-              // mark results, doc must be loaded
-              $( document ).ready(function() {
-                self.mark(self.query);
-              });
-              self.calculatePages();
-              self.loading = false;
-            });
+          };
+           
+          axios.get(url, params).then(function (response){
+            self.registry = response.data.hits;
+            self.total = response.data.total;
+            self.calculatePages();
+            console.log('%c Query executed', 'color:violet')
+            console.log('%c '+ JSON.stringify({
+              'q': query,
+              'size': self.perPage,
+              'from': self.page == 1 ? self.page-1 : ((self.page-1) * self.perPage ),
+              'sorting': self.sortChange
+            }, null, 2), 'color:orange')
+            console.log('%c hits: '+response.data.total, 'color:limegreen')
+            self.loading = false;
+          }).catch(err=>{
+            self.loading = false;
+            throw err;
+          });
         },
         calculatePages: function () {
-          var self= this;
-          self.pages = Math.ceil(self.registry && self.registry.length / self.perPage);
+            this.pages = Math.ceil(this.total / this.perPage);
+            if(this.page > this.pages){
+              this.page = 1
+            }
         },
         prevPage: function () {
-          var self= this;
-          if (self.page > 1)
-              self.page -= 1
+            if (this.page > 1)
+                this.page -= 1
         },
         nextPage: function () {
-          var self= this;
-          if (self.page < self.pages)
-              self.page += 1
+            if (this.page < this.pages)
+                this.page += 1
         },
         sortResults(e){
           this.sort = e.target.value;
@@ -898,10 +891,15 @@ var app = new Vue({
           }
         }
     },
+    updated: function(){
+      // Highlight matches in results
+      this.mark(this.query);
+    },
     mounted:function(){
-      var self = this;
-      self.checkLoggedUser();
-      self.search();
+      this.checkLoggedUser();
+      this.highlighter = new Mark(document.querySelector(".context"))
+      this.search();
+      
       tippy( '.search', {
         maxWidth:'200px',
         placement:'top',
@@ -938,25 +936,19 @@ var app = new Vue({
           let info = instance.reference.dataset.tippyInfo;
           instance.setContent("<div class='text-muted m-0 text-center wraptext'>"+info+"</div>")
         }});
-
-    tippy( '#compareResults', {
-      target:'.tip',
-      placement:'right',
-      content: 'loading',
-      interactive: true,
-      animation: 'fade',
-      theme:'light',
-      onShow(instance) {
-        let info = instance.reference.dataset.tippyInfo;
-        instance.setContent("<div style='background:white;'>"+info+"</div>")
-      }});
+      tippy( '#compareResults', {
+        target:'.tip',
+        placement:'right',
+        content: 'loading',
+        interactive: true,
+        animation: 'fade',
+        theme:'light',
+        onShow(instance) {
+          let info = instance.reference.dataset.tippyInfo;
+          instance.setContent("<div style='background:white;'>"+info+"</div>")
+        }});
     },
     computed: {
-      registryResults: function () {
-          var start = (this.page - 1) * this.perPage,
-              end = start + this.perPage;
-          return this.registry && this.registry.slice(start, end);
-      },
       compareItems: function(){
         return store.getters.getCompareItems
       },
