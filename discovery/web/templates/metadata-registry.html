@@ -37,7 +37,7 @@
       <div class="alert-dark m-0 p-1">
         <template v-for="filter in all_filters['_meta.guide']" :key="filter.name">
           <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-secondary']">
-            <img :src="filter.icon" width="20px" :alt="filter.name"/> <span v-text="filter.name"></span>
+            <img :src="filter.icon" width="20px" :alt="filter.name"/> <span v-text="filter.name" class="gaText"></span>
           </span>
         </template>
       </div>
@@ -220,7 +220,7 @@
                 <div class="row m-0">
                   <div class="col-sm-1 registry-item-background" :style="{backgroundImage: 'url(' + imgIcon + ')' }"></div>
                   <div class="col-sm-9 pointer" @click="goTo(item)">
-                    <h5 class="mb-1 mainTextDark d-inline">
+                    <h5 class="mb-1 mainTextDark d-inline gaText">
                       <span v-text="item.name"></span>
                     </h5>
                     <p v-if="item && item.description" class="text-muted">
