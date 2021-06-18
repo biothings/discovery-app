@@ -545,7 +545,6 @@ Vue.component('registry-item', {
       if (goesToEditor) {
         // Extend and send analytics
         if (item && item.namespace && item.label && item.prefix) {
-          self.sendGAEvent('class_extended', item.label)
           let obj = JSON.stringify(item)
           localStorage.setItem('EditorData',obj);
           localStorage.setItem('EditorStartingPoint',item.prefix+':'+item.label);
@@ -559,7 +558,6 @@ Vue.component('registry-item', {
       }else{
         // View and send analytics
         if (item && item.namespace && item.label) {
-          self.sendGAEvent('class_viewed', item.label)
           window.location.href = '/view/'+item.namespace+'/'+item.label;
         }else{
             Swal.fire(
