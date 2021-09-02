@@ -66,11 +66,11 @@
         <span class="text-muted">|</span>
         <template v-for="filter in all_filters['name']" :key="filter.name">
           <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-dark']" :title='filter.tip'>
-            <a v-if="filter && filter.link" :href="filter.link" target="_blank" title='Learn more'>
+            <a v-if="filter && filter.link" class="ml-1" :href="filter.link" target="_blank" title='Learn more'>
               <i  class="fas fa-info-circle text-info"></i>
             </a>
             <i v-else class="fas fa-circle" :class="filter.color"></i>
-            <span v-text="filter.name" class="gaText"></span>
+            <span v-text="filter.name" class="gaText ml-3 mr-3"></span>
           </span>
         </template>
       </div>
@@ -315,7 +315,7 @@
             case "In Review":
               return 'text-info'
             default:
-              return 'text-secondary'
+              return 'text-dark'
           }
       },
       aggregate(field){
