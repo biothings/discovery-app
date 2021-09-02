@@ -63,6 +63,7 @@
             <i class="fas fa-circle" :class="filter.color"></i> <span v-text="filter.term"></span> (<span v-text="filter.count"></span>)
           </span>
         </template>
+        <span class="text-muted">|</span>
         <template v-for="filter in all_filters['name']" :key="filter.name">
           <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-dark']" :title='filter.tip'>
             <a v-if="filter && filter.link" :href="filter.link" target="_blank" title='Learn more'>
@@ -290,7 +291,7 @@
           ],
           'name':[
           {'name':'PPRL','value':'PPRL','active':false,'icon':'/static/img/N3Co.png', type: 'name', tip:'Privacy-Preserving Record Linkage', 
-          link:"https://ncats.nih.gov/n3c/about/data-overview#:~:text=Privacy%20Preserving%20Record%20Linkage%20(PPRL,while%20maintaining%20the%20individuals'%20privacy."},
+          link:"https://covid.cd2h.org/PPRL"},
           ]
         }
       }
