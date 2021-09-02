@@ -5,6 +5,21 @@
   .text-purple{
     color: #642d87;
   }
+  .smallBadge{
+    color: #fff !important;
+    margin: 2px;
+    padding: 3px 6px;
+    border: 0;
+    font-size: 9px;
+    font-weight: 700;
+    border-radius: 10px;
+    margin-right: 3px;
+    vertical-align: top;
+    border: 1.5px solid #d3d3d3;
+    white-space: nowrap!important;
+    cursor: default;
+    background-color: rgb(196, 27, 91);
+  }
 </style>
 <div id="registry" class="jumbotron" style="min-height:80vh;">
   <div v-if=loading class="loader">
@@ -41,10 +56,20 @@
           </span>
         </template>
       </div>
+      <!-- ONLY VISIBLE FOR N3C -->
       <div class="alert-dark m-0 p-1" v-if='window.location.href.includes("n3c")'>
         <template v-for="filter in all_filters['_n3c.status']" :key="filter.term">
           <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-secondary']">
             <i class="fas fa-circle" :class="filter.color"></i> <span v-text="filter.term"></span> (<span v-text="filter.count"></span>)
+          </span>
+        </template>
+        <template v-for="filter in all_filters['name']" :key="filter.name">
+          <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-dark']" :title='filter.tip'>
+            <a v-if="filter && filter.link" :href="filter.link" target="_blank" title='Learn more'>
+              <i  class="fas fa-info-circle text-info"></i>
+            </a>
+            <i v-else class="fas fa-circle" :class="filter.color"></i>
+            <span v-text="filter.name" class="gaText"></span>
           </span>
         </template>
       </div>
@@ -221,7 +246,7 @@
                   <div class="col-sm-1 registry-item-background" :style="{backgroundImage: 'url(' + imgIcon + ')' }"></div>
                   <div class="col-sm-9 pointer" @click="goTo(item)">
                     <h5 class="mb-1 mainTextDark d-inline gaText">
-                      <span v-text="item.name"></span>
+                      <span v-text="item.name"></span> <span v-if="item && item.name.includes('PPRL')" class="ml-2 badge smallBadge">PPRL</span>
                     </h5>
                     <p v-if="item && item.description" class="text-muted">
                       <small v-html="text"></small>
@@ -262,6 +287,10 @@
             {'name':'Outbreak','value':'/guide/outbreak/dataset','active':false,'icon':'/static/img/icon-01.svg', type: '_meta.guide'},
             {'name':'NIAID','value':'/guide/niaid','active':false,'icon':'/static/img/niaid/icon.svg', type: '_meta.guide'},
             {'name':'CD2H','value':'/guide','active':false,'icon':'/static/img/dde-logo-o.svg', type: '_meta.guide'}
+          ],
+          'name':[
+          {'name':'PPRL','value':'PPRL','active':false,'icon':'/static/img/N3Co.png', type: 'name', tip:'Privacy-Preserving Record Linkage', 
+          link:"https://ncats.nih.gov/n3c/about/data-overview#:~:text=Privacy%20Preserving%20Record%20Linkage%20(PPRL,while%20maintaining%20the%20individuals'%20privacy."},
           ]
         }
       }
@@ -326,8 +355,10 @@
         // match url to search filters
         let url = new URL(window.location.href)
         let active_list = []
+        let pprl_active = []
 
         url.searchParams.delete('guide');
+        url.searchParams.delete('dataset_type');
 
         this.all_filters['_meta.guide'].forEach(item => {
           if (item.active) {
@@ -335,8 +366,21 @@
           }
         })
 
+        this.all_filters['name'].forEach(item => {
+          if (item.active) {
+            pprl_active.push(item.value)
+          }
+        })
+
         if (active_list.length) {
           url = url+'?guide='+active_list.toString()
+        }
+        if (pprl_active.length) {
+          if (active_list.length) {
+            url = url+'&dataset_type='+pprl_active.toString();
+          }else{
+            url = url+'?dataset_type='+pprl_active.toString();
+          }
         }
         window.history.pushState({"html":'content',"pageTitle":'DDE'},"", url);
       },
@@ -458,25 +502,29 @@
         if (q) {
           this.query = q
         }
+        this.searchForFilterAndToggle(url, 'guide', '_meta.guide');
+        this.searchForFilterAndToggle(url, 'dataset_type', 'name');
+      },
+      searchForFilterAndToggle(url, param, filter_name){
+        let self = this;
+        let items = url.searchParams.get(param);
+        let item_paths =[]
 
-        let guides = url.searchParams.get("guide");
-        let guide_paths =[]
-
-        if (guides) {
-          if (guides.includes(',')) {
-            guides = guides.split(',')
+        if (items) {
+          if (items.includes(',')) {
+            items = items.split(',')
           }else {
-            guides = [guides]
+            items = [items]
           }
-          // console.log('GUIDES FOUND',guides)
-          for (var i = 0; i < guides.length; i++) {
-            let guide_url = guides[i]
-            guide_paths.push(guide_url)
+          // console.log('items found',items)
+          for (var i = 0; i < items.length; i++) {
+            let item_url = items[i]
+            item_paths.push(item_url)
           }
-          if (guide_paths.length) {
-            guide_paths.forEach(item => {
+          if (item_paths.length) {
+            item_paths.forEach(item => {
               let obj = {}
-              obj.type = '_meta.guide'
+              obj.type = filter_name
               obj.value = item
               self.toggleFilter(obj)
             })

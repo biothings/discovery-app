@@ -26,6 +26,21 @@
       .badge-purple{
         background-color: rgb(100, 45, 136);
       }
+      .smallBadge{
+        color: #fff !important;
+        margin: 2px;
+        padding: 3px 6px;
+        border: 0;
+        font-size: 9px;
+        font-weight: 700;
+        border-radius: 10px;
+        margin-right: 3px;
+        vertical-align: top;
+        border: 1.5px solid #d3d3d3;
+        white-space: nowrap!important;
+        cursor: default;
+        background-color: rgb(196, 27, 91);
+      }
     </style>
   </head>
   <header id="header">
@@ -51,6 +66,9 @@
               <h1 class="text-center mt-5">
                 <span v-text="metadata.name"></span>
               </h1>
+              <div class="text-center">
+                <span v-if="metadata && metadata.name.includes('PPRL')" class="ml-2 badge smallBadge">PPRL</span>
+              </div>
               <small v-if="metadata && metadata.version"  class="text-light d-block text-center" v-text="'Version '+metadata.version"></small>
               <small v-if="last_updated"  class="text-light d-block text-center">
                 Last updated <b v-text="last_updated"></b>
