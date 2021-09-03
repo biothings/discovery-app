@@ -1364,6 +1364,22 @@
     </div>`
   });
 
+  Vue.component('keywords-box', {
+    data: function(){
+      return{
+        
+      }
+    },
+    props: ['main_name'],
+    mounted: function(){
+
+    },
+    template:
+    `<div class="row m-0 w-100">
+      <h1>Keywords</h1>
+    </div>`
+  });
+ 
   Vue.component('type-selector', {
     data: function(){
       return{
@@ -1371,7 +1387,9 @@
         parsed_options: {},
         type_selected: '',
         userObject:{}, 
-        pulse: false
+        pulse: false,
+        keywords: new Set(),
+        keyword_input: ''
       }
     },
     props: ['info','main_name', 'isChild', 'childName'],
@@ -1383,28 +1401,33 @@
         // narrow options don't include array of existing options
         if (self.options.length) {
           // ANY OF AND ONE OF TYPE FIELDS
-          self.options.forEach(option =>{
-            
-             if (option && option['@type']) {
-               Vue.set(self.parsed_options, option['@type'] , option)
+          for (let i = 0; i < self.options.length; i++) {
+            const option = self.options[i];
+            if (option && option['@type']) {
+               Vue.set(self.parsed_options, option['@type'] , option);
              }
              else if (option && option['items'] && option['items']['@type']) {
                if (!self.parsed_options.hasOwnProperty(option['items']['@type'])) {
-                Vue.set(self.parsed_options, option['items']['@type'] , option)
+                Vue.set(self.parsed_options, option['items']['@type'] , option);
                }
              }
              else if (option && option['enum']) {
-               // use main prop name and replace underscore with space
-               let name = self.main_name.split('_').join(' ');
-               if (!self.parsed_options.hasOwnProperty(name)) {
-                Vue.set(self.parsed_options, name , option)
-               }
-             }else{
-              //  console.warn('Option exists in singular form.');
-              //  console.warn(`Option: ${JSON.stringify(option, null, 2)}`);
+                // use main prop name and replace underscore with space
+                let name = self.main_name.split('_').join(' ');
+                if (!self.parsed_options.hasOwnProperty(name)) {
+                  Vue.set(self.parsed_options, name , option);
+                }
+              }
+             else if(option && option['type'] == 'array'){
+                let name = self.main_name.split('_').join(' ');
+                if (!self.parsed_options.hasOwnProperty(name)) {
+                  option['keywords'] = true;
+                  Vue.set(self.parsed_options, name , option);
+                }
+                
              }
-             
-          });
+          }
+
         }else if( (self.info.hasOwnProperty('properties') && self.info.hasOwnProperty('@type')) && (self.info.hasOwnProperty('type') && self.info.type == 'object') ){
           // OBJECT TYPE FIELD
           Vue.set(self.parsed_options, self.info['@type'] , self.info)
@@ -1677,6 +1700,14 @@
 
           }
         })
+      },
+      addKeyword() {
+        var payload = {};
+        payload["item"] = this.keyword_input;
+        payload["from"] = this.main_name;
+        store.commit('addToArrayFrom', payload);
+        store.dispatch('saveProgress');
+        this.keyword_input = '';
       }
     },
     watch:{
@@ -1734,15 +1765,28 @@
             <!-- 🐸 VOCABULARY TOP LEVEL 🐸-->
             <div v-if="value && value.vocabulary" class="bg-light p-4 text-light d-flex justify-content-start align-items-center" :class="[isChild?'col-sm-12':'col-sm-12']">
               <vocab-box :main_name="main_name" :info="info"></vocab-box>
-              <!--<button class="btn btn-danger m-auto" @click.prevent="handleVocab(main_name, value)">
-                <i class="fas fa-plus"></i> <span v-text="main_name+'(s)'"></span>
-              </button> -->
             </div>
+
             <!-- 🍒 ENUMERATION TOP LEVEL 🍒-->
             <div v-else-if="value && value.enum" class="bg-light p-4 text-light d-flex justify-content-start align-items-center" :class="[isChild?'col-sm-12':'col-sm-12']">
               <button class="btn btn-danger m-auto" @click.prevent="handleEnum(main_name, value)">
                 <i class="fas fa-plus"></i> <span v-text="main_name"></span>
               </button>
+            </div>
+
+            <!-- 🎃 ARRAY KEYWORDS 🎃-->
+            <div v-else-if="value && value.keywords && !value.enum" class="bg-light p-4 text-light align-items-center" :class="[isChild?'col-sm-12':'col-sm-12']">
+              <div class="w-100">
+                <form id="keywords_form" class="w-100 d-flex justify-content-center" @submit.prevent=addKeyword>
+                  <input class="form-control" type="text" v-model="keyword_input">
+                  <button type="button" class="btn btn-sm btn-primary form-label" @click=addKeyword>Add Keyword</button>
+                </form>
+              </div>
+              <div class="alert alert-success m-3 w-100" v-show="keywords.size">
+                <span v-for="(text,i) in [...keywords]" class="badge badge-sm badge-success pointer">
+                  <small v-html="text"></small>
+                </span>
+              </div>
             </div>
             
             <!-- 🌈🌈🌈 FOR EACH PROP 🌈🌈🌈-->
@@ -1816,6 +1860,7 @@
                     </div>
                     <type-selector :info="propInfo" :main_name="main_name" :childName="propName" :isChild="true" @update="updateParent"></type-selector>
                   </template>
+                  
                   <!-- 🥶🥶🥶 LAST RESORT STRING 🥶🥶🥶-->
                   <input v-else class="form-control" type="text" @input="updateObject(propName, $event)" :placeholder="'enter '+propName">
                 </template>
@@ -1853,7 +1898,7 @@
               </div>
             </div>
             <!-- 🍏 SUBMIT IF NOT ENUM OR VOCAB🍏-->
-            <div class="col-sm-12 p-0 mt-2" v-if="value && !value.vocabulary && !value.enum">
+            <div class="col-sm-12 p-0 mt-2" v-if="value && !value.vocabulary && !value.enum & !value.keywords">
               <button type="submit" class="btn w-100" :class="[isChild?'btn-info btn-sm':'btn-success btn-lg', pulse && isChild ? 'jello':'']">
                 Add <span v-text="isChild?childName:name"></span>
               </button>
@@ -4175,9 +4220,6 @@
                     <!-- 🌈  ONE OF ANYTHING🌈 -->
                     <template v-if="name !== 'datePublished' && name !== 'dateModified'">
                       <div class="form-group p-2 row">
-                        <!-- <button class="btn themeButton text-light m-auto btnfocus" @click="addItem(name,info)" v-if="!userInput || canAcceptMultiple">
-                          <i class="fas fa-plus"></i> <span v-text="'Add new '+name"></span>
-                        </button> -->
                         <type-selector :info="info" :main_name="name" :isChild="false"></type-selector>
                       </div>
                       <div class="col-sm-12 m-auto">
@@ -5461,15 +5503,18 @@
                 // REGULAR TIP DESCRIPTION
                 try{
                   let json = JSON.parse(info)
-                  let html = ''
-                  for(key in json){
-                    html += `<tr>
-                              <td><small><b>`+key+`</b></small></td>
-                              <td style="word-break:break-all;"><small>`+getContent(json[key])+`</small></td>
-                            </tr>`
+                  if (typeof json == 'string') {
+                    instance.setContent("<div class='text-info text-left m-0 p-1 bg-white'><pre style='margin:0px !important;word-break:break-all;'>"+info+"</pre></div>")
+                  }else{
+                    let html = ''
+                    for(key in json){
+                      html += `<tr>
+                                <td><small><b>`+key+`</b></small></td>
+                                <td style="word-break:break-all;"><small>`+getContent(json[key])+`</small></td>
+                              </tr>`
+                    }
+                    instance.setContent("<table class='table table-sm table-striped'>"+html+"</table>")
                   }
-                  instance.setContent("<table class='table table-sm table-striped'>"+html+"</table>")
-
                 }
                 catch(err){
                   instance.setContent("<div class='text-info text-left m-0 p-1 bg-white'><pre style='margin:0px !important;word-break:break-all;'>"+info+"</pre></div>")
