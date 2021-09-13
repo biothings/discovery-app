@@ -50,6 +50,7 @@
         </form>
       </div>
       <div class="alert-dark m-0 p-1">
+        <div style="width: 90px;" class="text-muted d-inline-block"><small>Portal</small> </div>
         <template v-for="filter in all_filters['_meta.guide']" :key="filter.name">
           <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-secondary']">
             <img :src="filter.icon" width="20px" :alt="filter.name"/> <span v-text="filter.name" class="gaText"></span>
@@ -58,12 +59,15 @@
       </div>
       <!-- ONLY VISIBLE FOR N3C -->
       <div class="alert-dark m-0 p-1" v-if='window.location.href.includes("n3c")'>
+        <div style="width: 90px;" class="text-muted d-inline-block"><small>(N3C) Status</small> </div>
         <template v-for="filter in all_filters['_n3c.status']" :key="filter.term">
           <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-secondary']">
-            <i class="fas fa-circle" :class="filter.color"></i> <span v-text="filter.term"></span> (<span v-text="filter.count"></span>)
+            <i class="fas fa-circle" :class="filter.color"></i> <span v-text="filter.name"></span> (<span v-text="filter.count"></span>)
           </span>
         </template>
-        <span class="text-muted">|</span>
+      </div>
+      <div class="alert-dark m-0 p-1" v-if='window.location.href.includes("n3c")'>
+        <div style="width: 90px;" class="text-muted d-inline-block"><small>(N3C) Type</small> </div>
         <template v-for="filter in all_filters['name']" :key="filter.name">
           <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-dark']" :title='filter.tip'>
             <a v-if="filter && filter.link" class="ml-1" :href="filter.link" target="_blank" title='Learn more'>
@@ -178,6 +182,22 @@
           );
         }
       },
+      UpdateOldTerm(s){
+        switch (s) {
+            case "Done/Imported":
+              return 'Available'
+            case "Done/Rejected":
+              return 'Denied'
+            case "Ready for Import":
+              return 'Approved for Import'
+            case "Backlog":
+              return 'Pending Review'
+            case "In Review":
+              return 'Pending Review'
+            default:
+              return s
+          }
+      },
     },
     computed: {
       text: function() {
@@ -222,18 +242,18 @@
       let self = this;
       if( Object.prototype.hasOwnProperty.call(self.item, '_n3c') && Object.keys(self.item['_n3c']).length){
           self.isN3C = true;
-          self.n3c_status = Object.prototype.hasOwnProperty.call(self.item['_n3c'], 'status') ? self.item['_n3c']['status'] : 'Not Available';
+          self.n3c_status = Object.prototype.hasOwnProperty.call(self.item['_n3c'], 'status') ? self.UpdateOldTerm(self.item['_n3c']['status']) : 'Not Available';
           switch (self.n3c_status) {
-            case "Done/Imported":
+            case "Available":
               self.color = 'badge-success'
               break;
-            case "Done/Rejected":
+            case "Denied":
               self.color = 'badge-danger'
               break;
-            case "Ready for Import":
+            case "Approved for Import":
               self.color = 'badge-purple'
               break;
-            case "In Review":
+            case "Pending Review":
               self.color = 'badge-info'
               break;
             default:
@@ -245,7 +265,7 @@
     template: `<li class="list-group-item list-group-item-action p-0">
                 <div class="row m-0">
                   <div class="col-sm-1 registry-item-background" :style="{backgroundImage: 'url(' + imgIcon + ')' }"></div>
-                  <div class="col-sm-9 pointer" @click="goTo(item)">
+                  <div class="col-sm-8 pointer" @click="goTo(item)">
                     <h5 class="mb-1 mainTextDark d-inline gaText">
                       <span v-text="item.name"></span> <span v-if="item && item.name.includes('PPRL')" class="ml-2 badge smallBadge">PPRL</span>
                     </h5>
@@ -253,7 +273,7 @@
                       <small v-html="text"></small>
                     </p>
                   </div>
-                  <div class="col-sm-2">
+                  <div class="col-sm-3">
                     <small class="text-muted" v-if="last_updated">
                       Last updated <b class="d-block" v-text="last_updated"></b>
                     </small>
@@ -290,7 +310,7 @@
             {'name':'CD2H','value':'/guide','active':false,'icon':'/static/img/dde-logo-o.svg', type: '_meta.guide'}
           ],
           'name':[
-          {'name':'PPRL','value':'PPRL','active':false,'icon':'/static/img/N3Co.png', type: 'name', tip:'Privacy-Preserving Record Linkage', 
+          {'name':'IRB Required','value':'PPRL','active':false,'icon':'/static/img/N3Co.png', type: 'name', tip:'Institutional Review Board Required', 
           link:"https://covid.cd2h.org/PPRL"},
           ]
         }
@@ -306,16 +326,32 @@
       },
       getStatusTextColor(s){
         switch (s) {
-            case "Done/Imported":
+            case "Available":
               return 'text-success'
-            case "Done/Rejected":
+            case "Denied":
               return 'text-danger'
-            case "Ready for Import":
+            case "Approved for Import":
               return 'text-purple'
-            case "In Review":
+            case "Pending Review":
               return 'text-info'
             default:
               return 'text-dark'
+          }
+      },
+      UpdateOldTerm(s){
+        switch (s) {
+            case "Done/Imported":
+              return 'Available'
+            case "Done/Rejected":
+              return 'Denied'
+            case "Ready for Import":
+              return 'Approved for Import'
+            case "Backlog":
+              return 'Pending Review'
+            case "In Review":
+              return 'Pending Review'
+            default:
+              return s
           }
       },
       aggregate(field){
@@ -325,10 +361,10 @@
           //a.term and a.count
           let res = response.data?.facets?.[field]?.terms || []
           let complete = res.map(item => {
-            item.color = self.getStatusTextColor(item.term)
             item.active = false
             item.value = item.term
-            item.name = item.term
+            item.name = this.UpdateOldTerm(item.term)
+            item.color = self.getStatusTextColor(item.name)
             item.type = field
             return item
           })
