@@ -55,6 +55,7 @@ class Dataset(DiscoveryUserDoc):
     identifier = Keyword(required=True)
     description = Text(required=True)
     name = Text(required=True, fields={'raw': Keyword()})
+    keywords = Keyword()
 
     class Index:
         """

@@ -27,7 +27,9 @@
   </div>
   <div class="col-md-10 col-sm-12 m-auto p-0">
     <div class="">
-      <h1 class="text-center logoText mb-1 mt-2">Dataset Registry</h1>
+      <h1 class="text-center logoText mb-1 mt-2">
+        <span v-if='window.location.href.includes("n3c")'>N3C</span> Dataset Registry
+      </h1>
       <div>
         <form @submit.prevent="search(query)">
           <div class="row m-0 cBox actions bg-secondary">
@@ -49,8 +51,8 @@
           </div>
         </form>
       </div>
-      <div class="alert-dark m-0 p-1">
-        <div style="width: 90px;" class="text-muted d-inline-block"><small>Portal</small> </div>
+      <div class="alert-dark m-0 p-1" v-if='!window.location.href.includes("n3c")'>
+        <div style="width: 120px;" class="text-muted d-inline-block"><small>Portals</small> </div>
         <template v-for="filter in all_filters['_meta.guide']" :key="filter.name">
           <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-secondary']">
             <img :src="filter.icon" width="20px" :alt="filter.name"/> <span v-text="filter.name" class="gaText"></span>
@@ -59,7 +61,7 @@
       </div>
       <!-- ONLY VISIBLE FOR N3C -->
       <div class="alert-dark m-0 p-1" v-if='window.location.href.includes("n3c")'>
-        <div style="width: 90px;" class="text-muted d-inline-block"><small>(N3C) Status</small> </div>
+        <div style="width: 120px;" class="text-muted d-inline-block"><small>Submission Status</small> </div>
         <template v-for="filter in all_filters['_n3c.status']" :key="filter.term">
           <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-secondary']">
             <i class="fas fa-circle" :class="filter.color"></i> <span v-text="filter.name"></span> (<span v-text="filter.count"></span>)
@@ -67,9 +69,9 @@
         </template>
       </div>
       <div class="alert-dark m-0 p-1" v-if='window.location.href.includes("n3c")'>
-        <div style="width: 90px;" class="text-muted d-inline-block"><small>(N3C) Type</small> </div>
+        <div style="width: 120px;" class="text-muted d-inline-block"><small>Dataset Type</small> </div>
         <template v-for="filter in all_filters['name']" :key="filter.name">
-          <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-dark']" :title='filter.tip'>
+          <span class="badge pointer m-1 fade-in" @click="toggleFilter(filter);" :class="[filter.active?'badge-info':'badge-secondary']" :title='filter.tip'>
             <a v-if="filter && filter.link" class="ml-1" :href="filter.link" target="_blank" title='Learn more'>
               <i  class="fas fa-info-circle text-primary"></i>
             </a>
@@ -182,22 +184,6 @@
           );
         }
       },
-      UpdateOldTerm(s){
-        switch (s) {
-            case "Done/Imported":
-              return 'Available'
-            case "Done/Rejected":
-              return 'Denied'
-            case "Ready for Import":
-              return 'Approved for Import'
-            case "Backlog":
-              return 'Pending Review'
-            case "In Review":
-              return 'Pending Review'
-            default:
-              return s
-          }
-      },
     },
     computed: {
       text: function() {
@@ -242,7 +228,7 @@
       let self = this;
       if( Object.prototype.hasOwnProperty.call(self.item, '_n3c') && Object.keys(self.item['_n3c']).length){
           self.isN3C = true;
-          self.n3c_status = Object.prototype.hasOwnProperty.call(self.item['_n3c'], 'status') ? self.UpdateOldTerm(self.item['_n3c']['status']) : 'Not Available';
+          self.n3c_status = Object.prototype.hasOwnProperty.call(self.item['_n3c'], 'status') ? self.item['_n3c']['status']: 'Not Available';
           switch (self.n3c_status) {
             case "Available":
               self.color = 'badge-success'
@@ -338,22 +324,6 @@
               return 'text-dark'
           }
       },
-      UpdateOldTerm(s){
-        switch (s) {
-            case "Done/Imported":
-              return 'Available'
-            case "Done/Rejected":
-              return 'Denied'
-            case "Ready for Import":
-              return 'Approved for Import'
-            case "Backlog":
-              return 'Pending Review'
-            case "In Review":
-              return 'Pending Review'
-            default:
-              return s
-          }
-      },
       aggregate(field){
         let self = this;
         axios.get(`/api/dataset/query?aggs=${field}`)
@@ -363,7 +333,7 @@
           let complete = res.map(item => {
             item.active = false
             item.value = item.term
-            item.name = this.UpdateOldTerm(item.term)
+            item.name = item.term
             item.color = self.getStatusTextColor(item.name)
             item.type = field
             return item
