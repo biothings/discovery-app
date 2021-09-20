@@ -75,7 +75,7 @@
               </small>
               <div class="text-center" v-if="isN3C" >
                 <div class="badge badge-pill text-light m-auto" :class="color">
-                  <span v-text="UpdateOldTerm(n3c_status)"></span>
+                  <span v-text="n3c_status"></span>
                 </div>
               </div>
             </div>
@@ -429,22 +429,6 @@
             title: 'Copied',
             showConfirmButton:false,
             timer:1000})
-        },
-        UpdateOldTerm(s){
-            switch (s) {
-                case "Done/Imported":
-                  return 'Available'
-                case "Done/Rejected":
-                  return 'Denied'
-                case "Ready for Import":
-                  return 'Approved for Import'
-                case "Backlog":
-                  return 'Pending Review'
-                case "In Review":
-                  return 'Pending Review'
-                default:
-                  return s
-              }
         },
         getMetadata(id){
           var self = this;
