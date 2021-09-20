@@ -19,7 +19,7 @@ def updateLabels():
             elif status == 'Ready for Import':
                 doc.update(**{'_n3c':{'status': 'Approved for Import'}})
                 logging.info(f"Doc  updating label (3)")
-            elif status == 'Backglog':
+            elif status == 'Backlog':
                 doc.update(**{'_n3c':{'status': 'Pending Review'}})
                 logging.info(f"Doc  updating label (4)")
             elif status == 'In Review':
