@@ -10,6 +10,12 @@ import hashlib
 
 from .common import *
 
+# def below didn't work as expected, should be default feature
+# used hardcoded mappings with request
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/normalizer.html
+lowercase = normalizer('lowercase',
+    filter=['lowercase']
+)
 
 class DatasetMeta(DiscoveryMeta):
     """ Modifiable Metadata Fields """
@@ -54,8 +60,8 @@ class Dataset(DiscoveryUserDoc):
     _ts = Object(TimestampMeta)
     identifier = Keyword(required=True)
     description = Text(required=True)
-    name = Text(required=True, fields={'raw': Keyword()})
-    keywords = Keyword()
+    name = Text(required=True, fields={'raw': Keyword(normalizer=lowercase)})
+    keywords = Keyword(normalizer=lowercase)
 
     class Index:
         """
