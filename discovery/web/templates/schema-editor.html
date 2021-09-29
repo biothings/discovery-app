@@ -113,6 +113,20 @@
             <div class="bg-dark p-1" v-if="item">
               <editor></editor>
             </div>
+            <h5 class="text-light text-center m-0 text-muted pt-2">Definitions</h5>
+            <small class="text-info text-center d-block">Create reusable validation definitions</small>
+            <div class="border rounded p-2 alert-info mb-2">
+              <template v-for='item in definition_options'>
+                <div class='badge m-1' :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" :key='item.title'>
+                  <span v-text="item.title"></span>
+                  <span data-tippy-info="EDIT" class="badge badge-light pointer" @click="editDefinitionOption(item)"><i class="fas fa-pen-square"></i></span>
+                </div>
+              </template>
+              <div @click="addDefinitionOption()" data-tippy="ADD NEW" class="badge m-1 badge-secondary text-light pointer"><i class="fas fa-plus"></i></div>
+            </div>
+            <div class="bg-dark p-1" v-if="definition_item">
+              <definition-editor></definition-editor>
+            </div>
           </div>
           
         </div>
@@ -318,6 +332,7 @@ const store = new Vuex.Store({
     },
     'showDescriptions':false,
     'editThis':null,
+    'editThisDefinition':null,
     'previousPreviewProps': {},
     'validation_options': [
             {
@@ -461,6 +476,25 @@ const store = new Vuex.Store({
                 },
                 "strict": false
               },
+            },
+            {
+              _id: '1062',
+              title: '(DEF) citation(s)',
+              color: '#5a064d',
+              validation:{
+                "description": "A citation to the dataset",
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/citation"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/citation"
+                    }
+                  }
+                ]
+              },
             }
           ],
     'val_test': {
@@ -470,7 +504,49 @@ const store = new Vuex.Store({
       'size':{},
       'author':{}
     },
-    top_class_validation: {}
+    "top_class_validation": {},
+    "definition_options": [
+      {
+        _id: 'def001',
+        title: 'citation',
+        color: '#0263fd',
+        validation:{
+            "description": "A citation object for a resource which is cited by the dataset (ie- is a derivative of the dataset) , related to the dataset, or from which the dataset was based on (ie- is derived from).",
+            "@type": "Thing",
+            "type": "object",
+            "properties": {
+              "name": {
+                "description": "Name of or title of the citation",
+                "type": "string"
+              },
+              "identifier": {
+                "description": "An identifier associated with the citation",
+                "type": "string"
+              },
+              "pmid": {
+                "description": "A pubmed identifier if available",
+                "type": "string"
+              },
+              "doi": {
+                "description": "A doi if available",
+                "type": "string"
+              },
+              "url": {
+                "description": "The url of the resource cited",
+                "type": "string",
+                "format": "uri"
+              },
+              "citeText": {
+                "description": "The bibliographic citation for the referenced resource as is provided",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          }
+      },
+    ]
     
   },
   strict: true,
@@ -500,6 +576,11 @@ const store = new Vuex.Store({
       Vue.set(state, 'validation_options', v)
       // console.log('validation updated from localStorage')
     },
+    updateDefinitionOptions(state,payload){
+      let v = payload['definitions']
+      Vue.set(state, 'definition_options', v)
+      // console.log('validation updated from localStorage')
+    },
     resetValidationFor(state,payload){
       let name = payload['name']
       let obj = {}
@@ -527,6 +608,68 @@ const store = new Vuex.Store({
                 showConfirmButton:false,
                 timer:1000})
     },
+    addDefinitionOption(state,payload){
+
+      function makeID(length) {
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+      }
+
+      function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color
+      }
+
+      let item = payload['definition']
+      state.definition_options.push(item)
+      //automatically add validation options with this def
+      state.validation_options.push({
+                    _id: makeID(5),
+                    title: "(DEF)" + item.title + "(s)",
+                    color: getRandomColor(),
+                    list: 2,
+                    validation: {
+                      "oneOf": [
+                        {
+                          "$ref": "#/definitions/" + item.title
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/definitions/" + item.title
+                          }
+                        }
+                      ]
+                    }
+      });
+      state.validation_options.push({
+                    _id: makeID(5),
+                    title: "(DEF)" + item.title,
+                    color: getRandomColor(),
+                    list: 2,
+                    validation: {
+                      "$ref": "#/definitions/" + item.title
+                    }
+      });
+
+      localStorage.setItem('custom_definitions', JSON.stringify(state.definition_options) );
+      localStorage.setItem('custom_validation', JSON.stringify(state.validation_options) );
+
+      Swal.fire({type:'success',
+                toast:true,
+                title: 'Definition Added',
+                showConfirmButton:false,
+                timer:1000})
+    },
     editValidationItem(state,payload){
       let itemID = payload['item']['_id']
       let newItem = payload['item']
@@ -544,9 +687,30 @@ const store = new Vuex.Store({
       }
       localStorage.setItem('custom_validation', JSON.stringify(state.validation_options) );
     },
+    editDefinitionItem(state,payload){
+      let itemID = payload['item']['_id']
+      let newItem = payload['item']
+      for (let i = 0; i < state.definition_options.length; i++) {
+        let item = state.definition_options[i];
+        if (item['_id'] == itemID) {
+          Vue.set(state.definition_options, i, newItem)
+          state.editThisDefinition = ''
+          Swal.fire({type:'success',
+                toast:true,
+                title: 'Edits Saved',
+                showConfirmButton:false,
+                timer:1000})
+        }
+      }
+      localStorage.setItem('custom_definitions', JSON.stringify(state.definition_options) );
+    },
     editThis (state,payload){
       let item = payload['item']
       state.editThis = item;
+    },
+    editThisDefinition (state,payload){
+      let item = payload['item']
+      state.editThisDefinition = item;
     },
     savePrefix(state,payload){
       state.prefix = payload['prefix'];
@@ -747,6 +911,55 @@ const store = new Vuex.Store({
                   }
                 }
               }
+              //definitions
+              let defs_found = new Set();
+
+              function addRefsMentioned(obj){
+                if (_.isPlainObject(obj)) {
+                  if ('$ref' in obj) {
+                    return obj['$ref'].split('#/definitions/')[1];
+                  }else{
+                    for (const key in obj) {
+                      if (_.isArray(obj[key])) {
+                        for (let i = 0; i < obj[key].length; i++) {
+                          const element = obj[key][i];
+                          return addRefsMentioned(element);
+                        }
+                      }else if(_.isPlainObject(obj[key])){
+                        return addRefsMentioned(obj[key]);
+                      }else if(_.isString(obj[key])){
+                        continue;
+                      }else{
+                        return false;
+                      }
+                    }
+                  }
+                }else{
+                  return false;
+                }
+              }
+              //check for definitions
+              for (const key in state.validation.properties) {
+                let ref = addRefsMentioned(state.validation.properties[key]);
+                if (ref) {
+                  // console.log('ref found', ref)
+                  defs_found.add(ref);
+                }
+              }
+              if ([...defs_found].length) {
+                let defs = [...defs_found];
+                Vue.set(state.validation, 'definitions', {});
+                defs.forEach((def) => {
+                  state.definition_options.forEach((val) => {
+                    if (val.title == def) {
+                      // console.log('validation found',)
+                      if (Object.hasOwnProperty.call(val, 'validation')) {
+                        Vue.set(state.validation.definitions, def, val.validation);
+                      }
+                    }
+                  });
+                });
+              }
               //Once done add temp validation to finalschema
               if (state.finalschema['@graph'].length) {
                 Vue.set(state.finalschema['@graph'][0],'$validation',state.validation)
@@ -771,11 +984,17 @@ const store = new Vuex.Store({
     }
   },
   getters:{
+    getDefinitionOptions:state=>{
+      return state.definition_options
+    },
     getSchema:state=>{
       return state.schema
     },
     getEditItem:state=>{
       return state.editThis
+    },
+    getEditDefinitionItem:state=>{
+      return state.editThisDefinition
     },
     getValidationProps:state=>{
       return state.validation['properties']
@@ -1059,6 +1278,52 @@ Vue.component('ngx-graph', {
       self.makeGraph()
     },
     template:`<div id="classGraph" class="bg-light rounded"></div>`
+  });
+
+  Vue.component('definition-editor', {
+    data: function(){
+      return{
+        editor : null
+      }
+    },
+    computed:{
+      item(){
+        return store.getters.getEditDefinitionItem
+      }
+    },
+    methods:{
+      SaveDefinition(){
+        let self = this;
+        let value = self.editor.getValue();
+        let copy = Object.assign({}, self.item);
+        copy.validation = JSON.parse(value)
+          let payload = {
+            'item': copy
+          }
+        store.commit('editDefinitionItem', payload)
+      }
+    },
+    watch: {
+      item: function(v){
+        let self = this;
+        if (v) {
+          self.editor.setValue(JSON.stringify(self.item.validation,null,2));
+        }
+      }
+    },
+    mounted: function(){
+      let self = this;
+      self.editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+          mode: "json",
+          lineNumbers: true,
+      });
+    },
+    template:`<div>
+                <textarea id="code" name="code"></textarea>
+                <div>
+                  <button type="button" class="btn btn-primary w-100" @click="SaveDefinition()">Save</button>
+                </div>
+              </div>`
   });
 
 Vue.component('editor', {
@@ -2359,6 +2624,9 @@ var app = new Vue({
 				}
 			},
       computed:{
+        definition_options (){
+          return store.getters.getDefinitionOptions
+        },
         validation_props: function(){
           return store.getters.getValidationProps
         },
@@ -2384,6 +2652,9 @@ var app = new Vue({
         },
         item(){
           return store.getters.getEditItem
+        },
+        definition_item(){
+          return store.getters.getEditDefinitionItem
         }
       },
       watch:{
@@ -2437,8 +2708,11 @@ var app = new Vue({
         },
         editValidationOption(item){
           let copy = Object.assign({}, item);
-          let self = this;
           store.commit('editThis',{'item':copy});   
+        },
+        editDefinitionOption(item){
+          let copy = Object.assign({}, item);
+          store.commit('editThisDefinition',{'item':copy});   
         },
         makeid(length) {
           var result           = '';
@@ -2468,6 +2742,27 @@ var app = new Vue({
                   }
                 }
                 store.commit('addValidationOption', payload)
+          }         
+        },
+        async addDefinitionOption(){
+          let self = this;
+          const { value: name } = await Swal.fire({
+            title: "Name of new definition (must be unique)",
+            input: 'text',
+            inputPlaceholder: 'Name this option'
+          })
+
+          if (name) {
+            let payload = {
+                  'definition': {
+                    _id: self.makeid(6),
+                    title: name,
+                    color: self.getRandomColor(),
+                    list: 2,
+                    validation: {'type':'EDIT to define'}
+                  }
+                }
+                store.commit('addDefinitionOption', payload)
           }         
         },
         startDrag: (evt, item) => {
@@ -2740,6 +3035,12 @@ var app = new Vue({
             store.commit('updateValidationOptions', {'validation': JSON.parse(v) });
           }
         },
+        checkCustomDefinitions(){
+          let v = localStorage.getItem('custom_definitions');
+          if (v) {
+            store.commit('updateDefinitionOptions', {'definitions': JSON.parse(v) });
+          }
+        },
         clearCustomValidation(){
           
           Swal.fire({
@@ -2768,6 +3069,7 @@ var app = new Vue({
         self.checkUser();
         self.checkForData();
         self.checkCustomValidation();
+        self.checkCustomDefinitions();
         tippy( '#editor', {
           target:'*[data-tippy-info]',
           placement:'bottom',
