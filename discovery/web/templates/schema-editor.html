@@ -464,12 +464,13 @@ const store = new Vuex.Store({
             }
           ],
     'val_test': {
-            'name':{},
-            'contains_phi':{},
-            'description':{},
-            'size':{},
-            'author':{}
-          }
+      'name':{},
+      'contains_phi':{},
+      'description':{},
+      'size':{},
+      'author':{}
+    },
+    top_class_validation: {}
     
   },
   strict: true,
@@ -480,6 +481,12 @@ const store = new Vuex.Store({
     saveSchema(state,payload){
       state.schema.push(payload['schema']);
       state.startingPoint=payload['start'];
+      if (payload['schema'].hasOwnProperty('validation')) {
+        //save on initial load as state.schema will change
+        //later on validation will not be available.
+        state.top_class_validation = payload['schema'].validation;
+        // console.log('🍕🍕🍕 saved validation..🍕🍕🍕',state.top_class_validation);
+      }
       // console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
     },
     setValidation(state,payload){
@@ -643,9 +650,6 @@ const store = new Vuex.Store({
       } catch (error) {
         console.log('NO previousPreviewProps', state.previousPreviewProps)
       }
-      // if (_.size(state.previousPreviewProps)) {
-      //   console.log('previousPreviewProps found', state.previousPreviewProps)
-      // }
       Vue.set(state.finalschema,'@graph',[]);
       Vue.set(state.validation,'properties',{});
       Vue.set(state.validation,'required',[]);
@@ -723,6 +727,24 @@ const store = new Vuex.Store({
               if (state.schema[i].properties[y].isRequired) {
                 if (!state.validation['required'].includes(myLabel)) {
                   state.validation['required'].push(myLabel)
+                }
+              }
+              //pre populate validation from inherited if available
+              if (state.top_class_validation.hasOwnProperty('properties')) {
+                // console.log('pre-populating validation... ')
+                for (const propName in state.top_class_validation.properties) {
+                  if (Object.hasOwnProperty.call(state.validation['properties'], propName)) {
+                    // console.log('validation has ' + propName, Object.keys(state.validation['properties'][propName]).length)
+                    if (Object.keys(state.validation['properties'][propName]).length == 1){
+                      //begin to add existing validation if validation only has default desc field.
+                      for (const key in state.top_class_validation.properties[propName]) {
+                        if (key !== 'description') {
+                          // console.log('adding existing '+ key +' to ' + propName)
+                          Vue.set(state.validation['properties'][propName], key, state.top_class_validation.properties[propName][key])
+                        }
+                      }
+                    }
+                  }
                 }
               }
               //Once done add temp validation to finalschema
