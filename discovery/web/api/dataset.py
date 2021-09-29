@@ -82,6 +82,7 @@ class DatasetMetadataHandler(APIBaseHandler):
         Fetch  - GET ./api/dataset
         Fetch  - GET ./api/dataset?user=<username>
         Fetch  - GET ./api/dataset/<_id>
+        Update - PUT ./api/dataset/<_id>
         Remove - DELETE ./api/dataset/<_id>
     """
     name = 'dataset'
