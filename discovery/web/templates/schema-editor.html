@@ -106,6 +106,7 @@
                 <div class='badge drag-el m-1' :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" :key='item.title' draggable @dragstart='startDrag($event, item)'>
                   <span v-text="item.title"></span>
                   <span data-tippy-info="EDIT" class="badge badge-light pointer" @click="editValidationOption(item)"><i class="fas fa-pen-square"></i></span>
+                  <span v-if="item && item.can_delete" data-tippy-info="DELETE" class="badge badge-danger pointer" @click="deleteValidationOption(item)"><i class="fas fa-times"></i></span>
                 </div>
               </template>
               <div @click="addValidationOption()" data-tippy="ADD NEW" class="badge m-1 badge-secondary text-light pointer"><i class="fas fa-plus"></i></div>
@@ -117,9 +118,10 @@
             <small class="text-info text-center d-block">Create reusable validation definitions</small>
             <div class="border rounded p-2 alert-info mb-2">
               <template v-for='item in definition_options'>
-                <div class='badge m-1' :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" :key='item.title'>
+                <div class='badge m-1 text-light' :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" :key='item.title'>
                   <span v-text="item.title"></span>
                   <span data-tippy-info="EDIT" class="badge badge-light pointer" @click="editDefinitionOption(item)"><i class="fas fa-pen-square"></i></span>
+                  <span v-if="item && item.can_delete" data-tippy-info="DELETE" class="badge badge-danger pointer" @click="deleteDefinitionOption(item)"><i class="fas fa-times"></i></span>
                 </div>
               </template>
               <div @click="addDefinitionOption()" data-tippy="ADD NEW" class="badge m-1 badge-secondary text-light pointer"><i class="fas fa-plus"></i></div>
@@ -551,6 +553,36 @@ const store = new Vuex.Store({
   },
   strict: true,
   mutations: {
+    deleteValidationOption(state, payload){
+      const msg = ["Adios!", "Bye!", "See Ya!", "Deleted!", "Gone", "Poof!", "So Long!"];
+      const random = Math.floor(Math.random() * msg.length);
+      for (let i = 0; i < state.validation_options.length; i++) {
+        if (state.validation_options[i]["_id"] == payload.id) {
+          state.validation_options.splice(i, 1);
+          localStorage.setItem('custom_validation', JSON.stringify(state.validation_options) );
+          Swal.fire({type:'success',
+                toast:true,
+                title: msg[random],
+                showConfirmButton:false,
+                timer:1000});
+        }
+      }
+    },
+    deleteDefinitionOption(state, payload){
+      const msg = ["Adios!", "Bye!", "See Ya!", "Deleted!", "Gone", "Poof!", "So Long!"];
+      const random = Math.floor(Math.random() * msg.length);
+      for (let i = 0; i < state.definition_options.length; i++) {
+        if (state.definition_options[i]["_id"] == payload.id) {
+          state.definition_options.splice(i, 1);
+          localStorage.setItem('custom_definitions', JSON.stringify(state.definition_options) );
+          Swal.fire({type:'success',
+                toast:true,
+                title: msg[random],
+                showConfirmButton:false,
+                timer:1000});
+        }
+      }
+    },
     toggleDesc(state){
       state.showDescriptions = !state.showDescriptions
     },
@@ -649,7 +681,8 @@ const store = new Vuex.Store({
                           }
                         }
                       ]
-                    }
+                    },
+                    can_delete: true
       });
       state.validation_options.push({
                     _id: makeID(5),
@@ -658,7 +691,8 @@ const store = new Vuex.Store({
                     list: 2,
                     validation: {
                       "$ref": "#/definitions/" + item.title
-                    }
+                    },
+                    can_delete: true
       });
 
       localStorage.setItem('custom_definitions', JSON.stringify(state.definition_options) );
@@ -1280,7 +1314,7 @@ Vue.component('ngx-graph', {
     template:`<div id="classGraph" class="bg-light rounded"></div>`
   });
 
-  Vue.component('definition-editor', {
+Vue.component('definition-editor', {
     data: function(){
       return{
         editor : null
@@ -2738,7 +2772,8 @@ var app = new Vue({
                     title: name,
                     color: self.getRandomColor(),
                     list: 2,
-                    validation: {'type':'EDIT to define'}
+                    validation: {'type':'EDIT to define'},
+                    can_delete: true
                   }
                 }
                 store.commit('addValidationOption', payload)
@@ -2759,7 +2794,8 @@ var app = new Vue({
                     title: name,
                     color: self.getRandomColor(),
                     list: 2,
-                    validation: {'type':'EDIT to define'}
+                    validation: {'type':'EDIT to define'},
+                    can_delete: true
                   }
                 }
                 store.commit('addDefinitionOption', payload)
@@ -3041,28 +3077,38 @@ var app = new Vue({
             store.commit('updateDefinitionOptions', {'definitions': JSON.parse(v) });
           }
         },
-        clearCustomValidation(){
-          
+        deleteValidationOption(item) {
           Swal.fire({
             title: 'Are you sure?',
-            text: result.value[1],
+            text: `You are deleting "${item.title}" permanently.`,
             showCancelButton: true,
             confirmButtonColor:"{{color_main}}",
             cancelButtonColor:"{{color_sec}}",
             animation:false,
             customClass:'scale-in-center',
-            confirmButtonText: 'Reset it all!'
+            confirmButtonText: 'Delete'
           }).then((res) => {
             if (res.value) {
-              localStorage.removeItem('custom_validation');
-              Swal.fire({type:'success',
-                toast:true,
-                title: 'Validation Reset',
-                showConfirmButton:false,
-                timer:1000})
+              store.commit('deleteValidationOption', {id: item._id});
             }
           })
-        }
+        },
+        deleteDefinitionOption(item) {
+          Swal.fire({
+            title: 'Are you sure?',
+            html: `<b>Warning</b>: deleting this definition will remove it from your library entirely. <br>Definitions that are not referenced will not appear in your json schema validation. Continue?`,
+            showCancelButton: true,
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            animation:false,
+            customClass:'scale-in-center',
+            confirmButtonText: 'Yes, Delete'
+          }).then((res) => {
+            if (res.value) {
+              store.commit('deleteDefinitionOption', {id: item._id});
+            }
+          })
+        },
 			},
 			mounted:function(){
         var self = this;
