@@ -106,5 +106,11 @@ REGISTRY_SHORTCUTS = [
 ]
 
 # *****************************************************************************
-# DATA DISCOVERY ENGINE - FAQ
+# DATA DISCOVERY ENGINE - DATASET PAGE
 # *****************************************************************************
+
+#replace underscored of abbreviated names for more readable labels
+READABLE_LABEL_MAPPINGS = {
+    "contain_phi" : "Contains PHI",
+    "contain_geo_codes" : "Contain Geological Codes",
+}
