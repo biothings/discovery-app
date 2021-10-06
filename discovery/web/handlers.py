@@ -78,6 +78,8 @@ def setEnvVars(env, config):
     # SCHEMA
     env.globals['starting_points'] = config.STARTING_POINTS
     env.globals['registry_shortcuts'] = config.REGISTRY_SHORTCUTS
+    # DATASET CUSTOMIZATIONS
+    env.globals['readable_labels'] = config.READABLE_LABEL_MAPPINGS
     # IMAGES FOLDER
     env.globals['static_image_folder'] = config.STATIC_IMAGE_FOLDER
     # Colors used
