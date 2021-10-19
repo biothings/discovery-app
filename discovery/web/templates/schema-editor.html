@@ -2833,18 +2833,12 @@ var app = new Vue({
           }else{
             if (name && desc) {
               // DUPLICATE CHECK
-              if (store.getters.isDuplicateClass(name)) {
-                Swal.fire({type:'error',
-                  toast:true,
-                  title: 'Class already exists. Choose a different name',
-                  showConfirmButton:false,
-                  timer:1000})
-              }else {
-                  let payload = {}
-                  payload['name'] = name;
-                  payload['description'] = desc;
-                  store.commit('addClass',payload);
-              }
+              // store.getters.isDuplicateClass(name)
+              let payload = {
+                'name': name,
+                'description': desc
+              };
+              store.commit('addClass',payload);
             } else {
               Swal.fire({type:'error',
                   toast:true,
