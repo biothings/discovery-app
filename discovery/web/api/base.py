@@ -5,67 +5,64 @@ from functools import partial
 
 import certifi
 from biothings.web.handlers import BaseAPIHandler
-from biothings.web.handlers.exceptions import BadRequest
+from discovery.notify import N3CChannel
 from discovery.registry import *
-from discovery.web import notify
-from discovery.web.handlers import DiscoveryBaseHandler
 from tornado.httpclient import AsyncHTTPClient
 from tornado.ioloop import IOLoop
 from tornado.web import Finish, HTTPError
-from torngithub import json_encode
+
+from ..base import DiscoveryBaseHandler
 
 L = logging.getLogger(__name__)
 
 
-def github_authenticated(func):
-    '''
-    RegistryHandler Decorator
-    '''
-
+def authenticated(func):
     def _(self, *args, **kwargs):
 
         if not self.current_user:
-            self.send_error(
-                message='login with github first',
-                status_code=401)
-            return
+            raise HTTPError(401)
+
         return func(self, *args, **kwargs)
+    return _  # decorator
 
-    return _
 
-
-def capture_registry_error(func):
-
+def registryOperation(func):
     def _(self, *args, **kwargs):
 
-        try:
+        try:  # handle registry error
             return func(self, *args, **kwargs)
         except (HTTPError, Finish):
-            raise  # already tornado exceptions
+            raise  # tornado exception pass-thru
         except DatasetValidationError as err:
-            raise BadRequest(**err.to_dict())
+            raise HTTPError(400, None, err.to_dict())
         except NoEntityError:
             raise HTTPError(404)
         except ConflictError:
             raise HTTPError(409)
         except RegistryError as err:
-            raise BadRequest(reason=str(err))
-        except Exception as exc:
-            logging.exception(exc)
-            raise HTTPError(500, reason=str(exc))
+            raise HTTPError(400, reason=str(err))
 
-    return _
+    return _  # decorator
+
+
+def log_response(http_response):
+    logger = logging.getLogger(__name__)
+    logger.info(http_response.request.url)
+    logger.info(http_response.code)
+    logger.info(http_response.body)
 
 
 class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
 
+    cache = 0
+    notifier = None
+
+    def get_current_user(self):  # discovery-app user ID
+        return (self.get_current_userinfo() or {}).get("login")
+
     async def prepare(self):
 
         super().prepare()
-
-        # configure notifiers
-        notify.schema.configure(self.web_settings)
-        notify.dataset.configure(self.web_settings)
 
         # Additionally support GitHub Token Login
         # Mainly for debug and admin purposes
@@ -84,35 +81,31 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                 else:
                     if 'login' not in user:
                         return
-                    if user.get('email'):  # prefer email as username
-                        user['login'] = user['email']
                     logging.info('logged in user from github token: %s', user)
-                    self.set_secure_cookie("user", json_encode(user))
-                    self.current_user = user['login']
+                    self.set_secure_cookie("user", json.dumps(user))
+                    self.current_user = user.get('email') or user['login']
 
-    def report(self, notifier, action, **details):
-        IOLoop.current().add_callback(partial(self._report, notifier, action, **details))
+    def report(self, action, **details):
+        notifier = self.notifier(self.biothings.config)
+        requests = getattr(notifier, action)(**details)
+        IOLoop.current().add_callback(partial(self._report, requests))
 
-    async def _report(self, notifier, action, **details):
+    async def _report(self, requests):
 
         # do not run in debug mode
-        # check if the action is defined
         client = AsyncHTTPClient()
-        if not self.settings.get('debug') and hasattr(notifier, action):
+        if not self.settings.get('debug'):
 
-            # iterate all requests defined for this action
-            requests = getattr(notifier, action)(**details)
             for request in requests:
 
-                if isinstance(request, notify.N3CChannel.N3CPreflightRequest):
+                if isinstance(request, (
+                    N3CChannel.N3CPreflightRequest,
+                    N3CChannel.N3CHTTPRequest
+                )):
                     response = await client.fetch(request, raise_error=False)
                     requests.send(response)
-                    notify.log_response(response)
-
-                elif isinstance(request, notify.N3CChannel.N3CHTTPRequest):
-                    response = await client.fetch(request, raise_error=False)
-                    notify.log_N3C_response(details.get('_id'), response)
+                    log_response(response)
 
                 else:  # standard tornado HTTP requests
                     response = await client.fetch(request, raise_error=False)
-                    notify.log_response(response)
+                    log_response(response)

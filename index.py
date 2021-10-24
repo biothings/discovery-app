@@ -3,10 +3,10 @@
 from threading import Thread
 
 from aiocron import crontab
-from biothings.web.index_base import main
+from biothings.web.launcher import main
 
-from discovery.web.handlers import WEB_HANDLERS, TemplateHandler
-from discovery.web.notify import update_n3c_routine
+from discovery.web import HANDLERS, TemplateHandler
+from discovery.notify import update_n3c_routine
 
 
 def run_routine():
@@ -17,7 +17,7 @@ def run_routine():
 if __name__ == '__main__':
 
     crontab('0 0 * * *', func=run_routine, start=True)
-    main(WEB_HANDLERS, {
+    main(HANDLERS, {
         "default_handler_class": TemplateHandler,
         "default_handler_args": {
             "filename": "404.html",

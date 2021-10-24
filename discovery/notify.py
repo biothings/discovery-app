@@ -8,23 +8,15 @@ from urllib.parse import urlparse
 
 import certifi
 from biothings.utils.common import traverse
-from discovery.data.dataset import Dataset as ESDataset
-from discovery.utils import indices, notifications
+from biothings.web.analytics.channels import Channel, SlackChannel
+from biothings.web.analytics.events import Message
+from biothings.web.analytics.notifiers import Notifier
 from pyadf.document import Document as ADF
 from pyadf.inline_nodes.marks.mark import Mark
 from tornado.httpclient import HTTPClient, HTTPRequest
 
-
-class Channel:
-
-    def send(self, message):
-        raise NotImplementedError()
-
-
-class EmailChannel(Channel):
-
-    def send(self, message):
-        yield message.to_email_payload('from', 'to')  # TODO
+from discovery.data.dataset import Dataset as ESDataset
+from discovery.utils import indices
 
 
 class N3CChannel(Channel):
@@ -89,55 +81,6 @@ class N3CChannel(Channel):
         # }
 
 
-class SlackChannel(Channel):
-
-    def __init__(self, hook_urls):
-        self.hooks = hook_urls
-
-    def send(self, message):
-        for url in self.hooks:
-            yield HTTPRequest(
-                url=url,
-                method='POST',
-                headers={'content-type': 'application/json'},
-                body=json.dumps(message.to_slack_payload()),
-                ca_certs=certifi.where()  # for Windows compatibility
-            )
-
-
-class Notifier:
-    """
-    Configurable message channel manager.
-    Define an application's notification presets.
-    Each attribute method corresponds to a servie event.
-    """
-
-    def __init__(self):
-        self.configured = False
-        self.channels = []
-
-    def configure(self, settings):
-
-        if not self.configured:
-
-            if hasattr(settings, 'SLACK_WEBHOOKS'):
-                self.channels.append(SlackChannel(getattr(settings, 'SLACK_WEBHOOKS')))
-
-            # ------------ email ------------
-            #
-            # -------------------------------
-
-            self.configured = True
-
-    def broadcast(self, message):
-        """
-        return an iterator of requests that
-        send the message to all channels
-        """
-        for channel in self.channels:
-            yield from channel.send(message)
-
-
 class Strong(Mark):
     """
     PyADF Text Marking
@@ -145,7 +88,7 @@ class Strong(Mark):
     type = 'strong'
 
 
-class DatasetMessage(notifications.Message):
+class DatasetMessage(Message):
     """
     Dataset Registry Notifications
     Additionally aware of _id, doc, reporter, and meta field.
@@ -261,23 +204,21 @@ class DatasetNotifier(Notifier):
     Additionally support N3C Channel
     """
 
-    def configure(self, settings):
+    def __init__(self, settings):
+        super().__init__(settings)
 
-        if not self.configured:
-            super().configure(settings)
-
-            if hasattr(settings, 'N3C_AUTH_USER') and \
-                    hasattr(settings, 'N3C_AUTH_PASSWORD'):
-                profile = SimpleNamespace()
-                profile.project_id = "10016"    # External Dataset project
-                profile.issuetype_id = "10024"
-                profile.assignee_id = "5c708335e1bcdf6294d0c85e"    # Liz
-                profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"   # cwu
-                profile.label = "DATASET"
-                self.channels.append(N3CChannel(
-                    getattr(settings, 'N3C_AUTH_USER'),
-                    getattr(settings, 'N3C_AUTH_PASSWORD'),
-                    profile))
+        if hasattr(settings, 'N3C_AUTH_USER') and \
+                hasattr(settings, 'N3C_AUTH_PASSWORD'):
+            profile = SimpleNamespace()
+            profile.project_id = "10016"    # External Dataset project
+            profile.issuetype_id = "10024"
+            profile.assignee_id = "5c708335e1bcdf6294d0c85e"    # Liz
+            profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"   # cwu
+            profile.label = "DATASET"
+            self.channels.append(N3CChannel(
+                getattr(settings, 'N3C_AUTH_USER'),
+                getattr(settings, 'N3C_AUTH_PASSWORD'),
+                profile))
 
     @staticmethod
     def get_portal_image(guide=""):
@@ -312,7 +253,7 @@ class DatasetNotifier(Notifier):
                     else:  # no email address, cannot register
                         userid = None
 
-                    yield from channel.send(DatasetMessage({
+                    response = yield from channel.send(DatasetMessage({
                         "title": "External Dataset Request",  # customized title
                         "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
                         "url": f"http://discovery.biothings.io/dataset/{_id}",
@@ -320,6 +261,21 @@ class DatasetNotifier(Notifier):
                         "reporter": userid,  # registered user id basing on email
                         "doc": doc  # produce additional jira ticket content
                     }))
+                    yield
+
+                    if response.code == 201:
+                        try:
+                            url = json.loads(response.body)["self"]
+                            # {
+                            #   "id":"10668",
+                            #   "key":"EXTDATASET-33",
+                            #   "self":"https://n3c-help.atlassian.net/rest/api/3/issue/10668"
+                            # }
+                            indices.refresh()
+                            dataset = ESDataset.get(_id)
+                            dataset.update(_n3c={"url": url})
+                        except Exception as exc:
+                            logging.error(str(exc))
 
             else:  # all other channels
                 yield from channel.send(DatasetMessage({
@@ -333,7 +289,7 @@ class DatasetNotifier(Notifier):
 
     def delete(self, _id, name, user):
 
-        message = notifications.Message({
+        message = DatasetMessage({
             "title": "Dataset Metadata Deleted",
             "body": f'Dataset "{name}" is deleted by {user}.',
         })
@@ -341,7 +297,7 @@ class DatasetNotifier(Notifier):
 
     def update(self, _id, name, version, user):
 
-        message = notifications.Message({
+        message = DatasetMessage({
             "title": "Dataset Metadata Updated",
             "body": f'Dataset {name} is updated by {user}. Current version is {version}.',
             "url": f"http://discovery.biothings.io/dataset/{_id}",
@@ -359,7 +315,7 @@ class DatasetNotifier(Notifier):
 class SchemaNotifier(Notifier):
 
     def add(self, namespace, num_classes):
-        return self.broadcast(notifications.Message({
+        return self.broadcast(Message({
             "title": "New Schema Registration",
             "body": f'{num_classes} classes have been registered under namespace "{namespace}".',
             "url": f"https://discovery.biothings.io/view/{namespace}",
@@ -367,46 +323,18 @@ class SchemaNotifier(Notifier):
         }))
 
     def delete(self, namespace, num_classes):
-        return self.broadcast(notifications.Message({
+        return self.broadcast(Message({
             "title": "Schema Deleted",
             "body": f'{num_classes} classes have been deleted under namespace "{namespace}".'
         }))
 
     def update(self, namespace, num_classes):
-        return self.broadcast(notifications.Message({
+        return self.broadcast(Message({
             "title": "Schema Updated",
             "body": f'Schema "{namespace}" updated. {num_classes} current classes.',
             "url": f"https://discovery.biothings.io/view/{namespace}",
             "url_text": "Visualize Schema"
         }))
-
-
-dataset = DatasetNotifier()
-schema = SchemaNotifier()
-
-
-def log_response(http_response):
-    logger = logging.getLogger(__name__)
-    logger.info(http_response.request.url)
-    logger.info(http_response.code)
-    logger.info(http_response.body)
-
-
-def log_N3C_response(_id, http_response):
-    log_response(http_response)
-    if http_response.code == 201:
-        try:
-            url = json.loads(http_response.body)["self"]
-            # {
-            #   "id":"10668",
-            #   "key":"EXTDATASET-33",
-            #   "self":"https://n3c-help.atlassian.net/rest/api/3/issue/10668"
-            # }
-            indices.refresh()
-            dataset = ESDataset.get(_id)
-            dataset.update(_n3c={"url": url})
-        except Exception as exc:
-            logging.error(str(exc))
 
 
 def update_n3c_status(_id):
