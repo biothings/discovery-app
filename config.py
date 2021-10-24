@@ -24,15 +24,15 @@ ES_INDICES = {
 APP_LIST = [
     (r"/api/query/?", "biothings.web.handlers.QueryHandler", {"biothing_type": "schema"}),
     (r"/api/registry/query/?", "biothings.web.handlers.QueryHandler", {"biothing_type": "schema"}),
-    (r"/api/registry/([^/]+)/([^/]+)/?", "discovery.web.api.SchemaRegistryHandler"),
-    (r"/api/registry/([^/]+)/?", "discovery.web.api.SchemaRegistryHandler"),
-    (r"/api/registry/?", "discovery.web.api.SchemaRegistryHandler"),
+    (r"/api/registry/([^/]+)/([^/]+)/?", "discovery.handlers.api.SchemaRegistryHandler"),
+    (r"/api/registry/([^/]+)/?", "discovery.handlers.api.SchemaRegistryHandler"),
+    (r"/api/registry/?", "discovery.handlers.api.SchemaRegistryHandler"),
     (r"/api/dataset/query/?", "biothings.web.handlers.QueryHandler", {"biothing_type": "dataset"}),
-    (r"/api/dataset/([^/]+)/?", "discovery.web.api.DatasetMetadataHandler"),
-    (r"/api/dataset/?", "discovery.web.api.DatasetMetadataHandler"),
-    (r"/api/view/?", "discovery.web.api.SchemaViewHandler"),
-    (r"/api/gh/([^/]+)/?", "discovery.web.api.GHHandler"),
-    (r"/api/gh/?", "discovery.web.api.GHHandler"),
+    (r"/api/dataset/([^/]+)/?", "discovery.handlers.api.DatasetMetadataHandler"),
+    (r"/api/dataset/?", "discovery.handlers.api.DatasetMetadataHandler"),
+    (r"/api/view/?", "discovery.handlers.api.SchemaViewHandler"),
+    (r"/api/gh/([^/]+)/?", "discovery.handlers.api.GHHandler"),
+    (r"/api/gh/?", "discovery.handlers.api.GHHandler"),
 ]
 
 # biothings web tester will read this

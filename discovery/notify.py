@@ -15,7 +15,7 @@ from pyadf.document import Document as ADF
 from pyadf.inline_nodes.marks.mark import Mark
 from tornado.httpclient import HTTPClient, HTTPRequest
 
-from discovery.data.dataset import Dataset as ESDataset
+from discovery.model.dataset import Dataset as ESDataset
 from discovery.utils import indices
 
 
@@ -351,7 +351,7 @@ def update_n3c_status(_id):
 
 
 def update_n3c_routine():
-    from discovery.data.dataset import Dataset
+    from discovery.model.dataset import Dataset
 
     datasets = Dataset.search().query("exists", field="_n3c.url")
     datasets = datasets.source(False).scan()

@@ -27,7 +27,7 @@
 import logging
 
 from biothings_schema import Schema as SchemaParser
-from discovery.data import Schema as ESSchema
+from discovery.model import Schema as ESSchema
 
 # the underlying package uses warnings
 logging.captureWarnings(True)

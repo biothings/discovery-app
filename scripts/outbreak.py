@@ -13,7 +13,7 @@ import requests
 from elasticsearch import Elasticsearch, RequestError
 from tornado.options import options, parse_command_line
 
-from discovery.data.dataset import Dataset
+from discovery.model.dataset import Dataset
 
 options.define('target_host', default='api.outbreak.info')
 

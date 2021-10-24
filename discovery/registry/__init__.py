@@ -1,6 +1,6 @@
 """
     Dataset & Schema Registry
-    This module relies on discovery.data module.
+    This module relies on discovery.model module.
 
     Support CRUD, simple filtering, and search operations.
     Dataset & Schema operations have different function signatures.

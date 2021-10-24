@@ -2,7 +2,7 @@ import importlib.util
 import os.path
 
 import requests
-from discovery.web import notify
+from discovery.handlers import notify
 
 path = os.path.join(os.path.dirname(__file__), "../config_key.py")
 spec = importlib.util.spec_from_file_location("config_key", path)
