@@ -19,7 +19,7 @@
 
         The number of metadata fields in this application can be growing
         to support new features especially for the discovery frontend.
-        Refer to discovery.data.dataset module to check for supported fields.
+        Refer to discovery.model.dataset module to check for supported fields.
         Refer to _clean function below to use aliases working with metadata.
         Pay special attention to required fields like class_id and username.
 
@@ -34,8 +34,8 @@ import elasticsearch
 import elasticsearch_dsl
 import jsonschema
 import requests
-from discovery.data import Dataset as ESDataset
-from discovery.data import SchemaClass as ESSchemaClass
+from discovery.model import Dataset as ESDataset
+from discovery.model import SchemaClass as ESSchemaClass
 
 from .common import *
 

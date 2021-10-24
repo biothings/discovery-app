@@ -1,0 +1,30 @@
+{
+    "strict": true,
+    "debug": true,
+    "sp": {
+        "entityId": "https://dev.discovery.biothings.io/saml/metadata/",
+        "assertionConsumerService": {
+            "url": "https://dev.discovery.biothings.io/saml/acs",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+        },
+        "singleLogoutService": {
+            "url": "https://dev.discovery.biothings.io/saml/sls",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "NameIDFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+        "x509cert": "",
+        "privateKey": ""
+    },
+    "idp": {
+        "entityId": "https://auth.ncats.nih.gov/_api/v2/auth/ncats/DataDiscoveryDev",
+        "singleSignOnService": {
+            "url": "https://auth.ncats.nih.gov/_api/v2/auth/ncats/DataDiscoveryDev/saml",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "singleLogoutService": {
+            "url": "https://auth.ncats.nih.gov/_api/v2/auth/ncats/DataDiscoveryDev/saml/logout",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "x509cert": "MIICiTCCAfKgAwIBAgIJRkZnfxiekA+tMA0GCSqGSIb3DQEBBQUAMGMxFTATBgNVBAMTDGxhYnNoYXJlLm9yZzELMAkGA1UEBhMCVVMxEjAQBgNVBAcTCVJvY2t2aWxsZTELMAkGA1UECBMCTUQxDDAKBgNVBAoTA05JSDEOMAwGA1UECxMFTkNBVFMwHhcNMjAwNDA4MjAxNTU2WhcNMjUwNDA3MjAxNTU2WjBjMRUwEwYDVQQDEwxsYWJzaGFyZS5vcmcxCzAJBgNVBAYTAlVTMRIwEAYDVQQHEwlSb2NrdmlsbGUxCzAJBgNVBAgTAk1EMQwwCgYDVQQKEwNOSUgxDjAMBgNVBAsTBU5DQVRTMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzanoPcCzvXpft3PY7OEJddIKnvxpbDrco6iV0of3jYSh2oHlkdpPR30TMlALyy2jF7PSAwHm8CoLQAC7dFUsh9J1U1tzZQ9tUAjcUa2fZPd8MidJlszAaHirCpExnbw3LwQ4MkKCWZ/lPsTpXgbVxiqIl2REwOw+FEms2apK1YQIDAQABo0UwQzAMBgNVHRMEBTADAQH/MAsGA1UdDwQEAwIC9DAmBgNVHREEHzAdhhtodHRwOi8vZXhhbXBsZS5vcmcvd2ViaWQjbWUwDQYJKoZIhvcNAQEFBQADgYEAZ5qa/3qAqhSbcmGCXHWMGXYt/dKseuW2dxbw7PbFqQZLCm/VqZRdZuYCtWlWoVY1g4e7UcJWB9APO8zMZMu8Fwww5W0r0KnLyEZyUy5X6lV7Gf1UF8zQ32+YwvYSEXtyADDZ3P2hyYjCS+W3aOGUFgEkUYcI6RPPRNti4XSWUy4="
+    }
+}

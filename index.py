@@ -5,7 +5,7 @@ from threading import Thread
 from aiocron import crontab
 from biothings.web.launcher import main
 
-from discovery.web import HANDLERS, TemplateHandler
+from discovery.handlers import HANDLERS, TemplateHandler
 from discovery.notify import update_n3c_routine
 
 
