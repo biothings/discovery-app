@@ -19,7 +19,7 @@ ES_INDICES = {
 }
 
 # *****************************************************************************
-# Tornado URL Patterns
+# Web Application
 # *****************************************************************************
 APP_LIST = [
     (r"/api/query/?", "biothings.web.handlers.QueryHandler", {"biothing_type": "schema"}),
@@ -39,8 +39,9 @@ APP_LIST = [
 API_VERSION = ''
 API_PREFIX = 'api'
 
+STATIC_PATH = 'static'
+
 # *****************************************************************************
-# Biothings SDK Settings
+# Search Pipeline
 # *****************************************************************************
 ES_QUERY_BUILDER = "discovery.pipeline.DiscoveryQueryBuilder"
-DISABLE_CACHING = True  # TODO
