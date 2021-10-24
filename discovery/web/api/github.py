@@ -1,12 +1,19 @@
+"""
+    Github API Access
+    Author: Marco A. Cano
+"""
+
 import json
 import logging
 
-from github import Github, GithubException
 from tornado.web import HTTPError
 
-from .base import APIBaseHandler, github_authenticated
+from github import Github, GithubException
+
+from .base import APIBaseHandler, authenticated
 
 logger = logging.getLogger(__name__)
+
 
 class GHHandler(APIBaseHandler):
     """
@@ -36,7 +43,7 @@ class GHHandler(APIBaseHandler):
         },
     }
 
-    @github_authenticated
+    @authenticated
     def get(self, repo_name=None):
         """
         Check repo existence
@@ -99,8 +106,7 @@ class GHHandler(APIBaseHandler):
             else:
                 raise HTTPError(400, reason=f"Unable to authenticate user")
 
-
-    @github_authenticated
+    @authenticated
     def delete(self):
         """
         Delete repo
@@ -112,7 +118,7 @@ class GHHandler(APIBaseHandler):
         g = Github(user['access_token'])
         # authenticated user
         auth_user = g.get_user()
-        repo_name = self.args_json.get('name','')
+        repo_name = self.args_json.get('name', '')
         if not repo_name:
             raise HTTPError(400, reason=f"Repo name not provided")
         try:
@@ -129,7 +135,7 @@ class GHHandler(APIBaseHandler):
                 'msg': f"{repo_name} was deleted"
             })
 
-    @github_authenticated
+    @authenticated
     def post(self):
         """
         Create new repo with file
@@ -197,7 +203,7 @@ class GHHandler(APIBaseHandler):
                 'msg': f"{repo_name} does not exist"
             })
 
-    @github_authenticated
+    @authenticated
     def put(self):
         """
         Update file in repo

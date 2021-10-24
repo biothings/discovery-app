@@ -1,22 +1,18 @@
 """
     Dataset APIs
 
-    Add javascript rendering code generator.
-    Add copyright to the dataset metadata document.
-    Add authorization and private dataset permission control.
+    Support javascript rendering code generation.
+    Support adding copyright to the dataset metadata document.
+    Support authorization and private dataset permission control.
 
 """
 import json
-import logging
 
-from biothings.web.handlers.exceptions import BadRequest
 from discovery.registry import *
-from discovery.registry import datasets
-from discovery.web import notify
-from tornado.httpclient import AsyncHTTPClient
-from tornado.web import Finish, HTTPError, MissingArgumentError
+from discovery.notify import DatasetNotifier
+from tornado.web import Finish, HTTPError
 
-from .base import APIBaseHandler, capture_registry_error, github_authenticated
+from .base import APIBaseHandler, authenticated, registryOperation
 
 
 def add_copyright(doc, request):
@@ -64,6 +60,7 @@ def repr_regdoc(regdoc, show_metadata=False, show_id=True):
             ...
         }
     """
+    regdoc = regdoc.copy()
 
     if show_metadata:
         regdoc['_meta'] = regdoc.meta
@@ -105,9 +102,10 @@ class DatasetMetadataHandler(APIBaseHandler):
             'guide': {'type': str},
         }
     }
+    notifier = DatasetNotifier
 
-    @github_authenticated
-    @capture_registry_error
+    @authenticated
+    @registryOperation
     def post(self):
         """
         Add a dataset.
@@ -124,15 +122,14 @@ class DatasetMetadataHandler(APIBaseHandler):
         })
 
         self.report(
-            notify.dataset,
             'add', _id=_id,
             doc=self.args_json,
             user=self.current_user,
             **self.args
         )
 
-    @github_authenticated
-    @capture_registry_error
+    @authenticated
+    @registryOperation
     def put(self, _id=None):
         """
         Update the dataset of the specified id.
@@ -155,13 +152,13 @@ class DatasetMetadataHandler(APIBaseHandler):
         })
 
         self.report(
-            notify.dataset, 'update',
+            'update',
             _id=_id, version=version,
             name=self.args_json.get('name'),
             user=self.current_user,
         )
 
-    @capture_registry_error
+    @registryOperation
     def get(self, _id=None):
         """
         Get all public or private datasets.
@@ -212,8 +209,8 @@ class DatasetMetadataHandler(APIBaseHandler):
 
         self.finish(dataset)
 
-    @github_authenticated
-    @capture_registry_error
+    @authenticated
+    @registryOperation
     def delete(self, _id):
         """
         Delete a dataset.
@@ -229,7 +226,7 @@ class DatasetMetadataHandler(APIBaseHandler):
         })
 
         self.report(
-            notify.dataset, 'delete',
+            'delete',
             _id=_id, name=name,
             user=self.current_user,
         )

@@ -13,7 +13,7 @@ import logging
 import requests
 from discovery.data import Schema as ESSchemaFile
 from discovery.data import SchemaClass as ESSchemaClass
-from discovery.utils.adapters import SchemaAdapter
+# from discovery.utils.adapters import SchemaAdapter
 
 from .common import *
 

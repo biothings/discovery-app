@@ -19,12 +19,12 @@ import logging
 
 import certifi
 from discovery.registry import schemas
-from discovery.utils.adapters import SchemaAdapter
-from discovery.web import notify
+# from discovery.utils.adapters import SchemaAdapter
+from discovery.notify import SchemaNotifier
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import Finish, HTTPError
 
-from .base import APIBaseHandler, capture_registry_error, github_authenticated
+from .base import APIBaseHandler, registryOperation, authenticated
 
 CORE_SCHEMA_NS = ('schema', 'biomedical', 'datacite', 'google')
 RESERVED_SCHEMA_NS = ('metadata')
@@ -122,6 +122,7 @@ class SchemaRegistryHandler(APIBaseHandler):
             'source': {'type': bool, 'default': True}
         }
     }
+    notifier = SchemaNotifier
 
     def head(self, namespace):
         """
@@ -130,8 +131,8 @@ class SchemaRegistryHandler(APIBaseHandler):
         if not schemas.exists(namespace):
             self.set_status(404)
 
-    @github_authenticated
-    @capture_registry_error
+    @authenticated
+    @registryOperation
     async def post(self):
         """
         Add a schema and its classes. Request body:
@@ -179,12 +180,12 @@ class SchemaRegistryHandler(APIBaseHandler):
         })
 
         self.report(
-            notify.schema, "add",
+            "add",
             namespace=namespace,
             num_classes=count
         )
 
-    @capture_registry_error
+    @registryOperation
     def get(self, namespace=None, curie=None):
         """
         Access the schema registry.
@@ -253,8 +254,8 @@ class SchemaRegistryHandler(APIBaseHandler):
 
         self.finish(klass)
 
-    @github_authenticated
-    @capture_registry_error
+    @authenticated
+    @registryOperation
     async def put(self, namespace=None):
         """
         Update the schema of the specified namespace.
@@ -298,13 +299,13 @@ class SchemaRegistryHandler(APIBaseHandler):
         })
 
         self.report(
-            notify.schema, "update",
+            "update",
             namespace=namespace,
             num_classes=count
         )
 
-    @github_authenticated
-    @capture_registry_error
+    @authenticated
+    @registryOperation
     def delete(self, namespace):
         """
         Delete a schema and its classes by its namespace.
@@ -319,7 +320,7 @@ class SchemaRegistryHandler(APIBaseHandler):
         count = schemas.delete(namespace)
 
         self.report(
-            notify.schema, "delete",
+            "delete",
             namespace=namespace,
             num_classes=count
         )
