@@ -1,7 +1,4 @@
 
-''' Discovery App Configuration '''
-
-
 from config_key import *
 
 # *****************************************************************************
@@ -16,6 +13,7 @@ from config_key import *
 # Elasticsearch
 # *****************************************************************************
 ES_INDICES = {
+    # INTERNAL: 'discover_schema',
     'schema': 'discover_schema_class',
     'dataset': 'discover_dataset'
 }
@@ -35,7 +33,6 @@ APP_LIST = [
     (r"/api/view/?", "discovery.web.api.SchemaViewHandler"),
     (r"/api/gh/([^/]+)/?", "discovery.web.api.GHHandler"),
     (r"/api/gh/?", "discovery.web.api.GHHandler"),
-    (r"/sitemap/dataset.xml", "discovery.sitemap.DatasetHandler")
 ]
 
 # biothings web tester will read this
@@ -45,6 +42,5 @@ API_PREFIX = 'api'
 # *****************************************************************************
 # Biothings SDK Settings
 # *****************************************************************************
-ACCESS_CONTROL_ALLOW_METHODS = 'HEAD,GET,POST,DELETE,PUT,OPTIONS'
 ES_QUERY_BUILDER = "discovery.pipeline.DiscoveryQueryBuilder"
-DISABLE_CACHING = True
+DISABLE_CACHING = True  # TODO
