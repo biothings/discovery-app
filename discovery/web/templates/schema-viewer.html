@@ -711,6 +711,7 @@
       </div>`
   });
 
+  // The component displayed for every property
   Vue.component('propbox', {
     data: function(){
       return{
@@ -719,7 +720,7 @@
         backColor:'',
       }
     },
-    props: ['name','fullinfo','required'],
+    props: ['name','fullinfo','required', 'recommended', 'optional'],
     methods:{
       getText(ref){
         let arr = ref.split('/');
@@ -732,18 +733,17 @@
         }
         return false
       },
-      isRequired(propname){
-        if (this.required) {
-          for (var i = 0; i < this.required.length; i++) {
-            if (this.required[i]===propname) {
-              return true;
-            }
-          }
-          return false;
-        }else{
-          return false;
+      getColorClass(propname){
+        if (this.required && this.required.includes(propname)) {
+          return 'text-danger fa-asterisk';
+        } else if(this.recommended && this.recommended.includes(propname)){
+          return 'text-warning fa-circle';
+        } else if(this.optional && this.optional.includes(propname)){
+          return 'text-info fa-square';
+        } else{
+          return 'text-light';
         }
-      },
+      }
     },
     watch:{
     },
@@ -761,9 +761,10 @@
     },
     template:
     `<div class="border-bottom row m-0">
-      <div class="col-sm-12 col-md-3 bg-dark bold d-flex justify-content-center align-items-center">
+      <div class="col-sm-12 col-md-3 bg-dark bold d-flex justify-content-start align-items-center">
         <small class="m-0">
-          <span :class="[isRequired(name)?'text-danger font-weight-bold':'text-light']" v-text="name" :data-tippy-info="JSON.stringify(fullinfo,null,2)"></span>
+          <i class="fas" :class="getColorClass(name)"></i>
+          <span class=" text-light font-weight-bold" v-text="name" :data-tippy-info="JSON.stringify(fullinfo,null,2)"></span>
         </small>
       </div>
       <div class="col-sm-12 col-md-9 text-muted bg-light">
@@ -1117,19 +1118,69 @@
       </div>`
   });
 
+  // The wrapper container for each property component
   Vue.component('validation-box', {
     props: ['validation'],
-    computed: {
-      queryContent(){
-        return this.$store.state.queryStoreContent
+    data: function(){
+      return{
+        sorted_props: {}
       }
+    },
+    methods: {
+      sortByImportance(){
+        let self = this;
+        let sorted = {};
+        //get required
+        if (Object.hasOwnProperty.call(self.validation, 'required')) {
+            self.validation.required.forEach((item) => {
+              if ((item in self.validation.properties) && !(item in sorted)) {
+                sorted[item] = self.validation.properties[item];
+              }
+            });
+        }
+         //get recommended
+        if (Object.hasOwnProperty.call(self.validation, 'recommended')) {
+            self.validation.recommended.forEach((item) => {
+              if (item in self.validation.properties && !(item in sorted)) {
+                sorted[item] = self.validation.properties[item];
+              }
+            });
+        }
+         //get optional
+        if (Object.hasOwnProperty.call(self.validation, 'optional')) {
+            self.validation.optional.forEach((item) => {
+              if (item in self.validation.properties && !(item in sorted)) {
+                sorted[item] = self.validation.properties[item];
+              }
+            });
+        }
+        //get not categorized
+        for (const prop in self.validation.properties) {
+          if (!(prop in sorted)) {
+            sorted[prop] = self.validation.properties[prop];
+          }
+        }
+        self.sorted_props = sorted;
+      }
+    },
+    mounted: function(){
+      this.sortByImportance();
     },
     template:
     `<div class="alert-secondary p-1">
-      <small class="text-muted"><i class="fas fa-circle text-danger"></i> = required</small>
+      <small class="text-dark font-weight-bold">
+        <span class="mr-1"><i class="fas fa-asterisk text-danger"></i> required</span>
+        <span class="mr-1"><i class="fas fa-circle text-warning"></i> recommended</span>
+        <span class="mr-1"><i class="fas fa-square text-info"></i> optional</span>
+      </small>
       <div class="p-0">
-        <template v-for="(prop,index) in validation.properties">
-          <propbox :key="index" :name='index' :fullinfo="prop" :required='validation.required'></propbox>
+        <template v-for="(value,name) in sorted_props">
+          <propbox :key="name" 
+          :name='name' 
+          :fullinfo="value" 
+          :recommended='validation.recommended'
+          :optional='validation.optional'
+          :required='validation.required'></propbox>
         </template>
       </div>
     </div>`
@@ -2143,7 +2194,7 @@
             theme:'light',
             onShow(instance) {
               let info = instance.reference.dataset.tippyInfo;
-              instance.setContent("<div class='wraptext text-left bg-light'><pre>"+info+"</pre></div>")
+              instance.setContent("<div class='wraptext text-left bg-light' style='overflow: scroll; max-height: 417px;'><pre><small>"+info+"</small></pre></div>")
             }});
 
           tippy('#showButton', {
