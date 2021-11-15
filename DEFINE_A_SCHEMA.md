@@ -21,10 +21,11 @@ This document describes how to define your own Metadata schemas, which can be pu
    - To better reuse schemas for interoperabilities.
    
 ### How schema.org is defined?
-Schema.org defines schemas as a set of 'types', each associated with a set of properties. The types or classes (as they are referred to in the DDE) are arranged in a hierarchy. Schema.org is extremely flexible and has only a few constraints. 
- 1. Properties and classes should follow the appropriate naming conventions. 
- 2. Properties belonging to a class can be inherited by child classes. Eg- All properties of Thing can also be inherited by CreativeWork, a derivative class of Thing
- 3. Properties have an expected type (ie- the value of the property is expected to be constrained to a specific class or set of classes). For example, the value of `name` is expected to be `Text`; hence, a date/time value would not be expected.
+Schema.org defines schemas as a set of 'types', each associated with a set of properties. The types or classes (as they are referred to in the DDE) are arranged in a hierarchy. Schema.org is extremely flexible and has only a few constraints. These constraints include:
+ 1. Properties and classes must follow the appropriate naming conventions. These conventions can be found at: https://schema.org/docs/styleguide.html 
+ 2. Properties belonging to a class can be inherited by the children of that class. Eg- All properties of Thing can be inherited by CreativeWork, a child or derivative class of Thing. Hence, a single property may be included in multiple classes. Since classes are defined by their sets of properties, their are also constraints as to which classes a property can be expected to belong to.
+ 3. Properties must have at least one expected type (ie- the value of the property is expected to be constrained to a specific class or set of classes). For example, the value of `name` is expected to be `Text`; hence, a date/time value would not be expected.
+ 4. The expected type of a property cannot be another property
 
 Schema.org does not define cardinality/marginality; however, since these constraints are usually important in the biomedical research space, they can be defined within the DDE when creating your own schema by adding JSON-Schema based validation rules. More about schema.org can be found at https://schema.org/docs/documents.html
 
