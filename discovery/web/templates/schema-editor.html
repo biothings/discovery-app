@@ -330,7 +330,9 @@ const store = new Vuex.Store({
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
       "properties": {},
-      'required':[]
+      'required':[],
+      'recommended': [],
+      'optional': []
     },
     'showDescriptions':false,
     'editThis':null,
@@ -802,7 +804,10 @@ const store = new Vuex.Store({
                 Vue.set(state.schema[i]['properties'][x],'selected',!state.schema[i]['properties'][x]['selected'])
                 //If unselected also mark as not required
                 if (!state.schema[i]['properties'][x]['selected']) {
+                  // reset all marginality
                   Vue.set(state.schema[i]['properties'][x],'isRequired',false)
+                  Vue.set(state.schema[i]['properties'][x],'isOptional',false)
+                  Vue.set(state.schema[i]['properties'][x],'isRecommended',false)
                 }
               }else{
                 Vue.set(state.schema[i]['properties'][x],'selected',true)
@@ -822,6 +827,53 @@ const store = new Vuex.Store({
                 Vue.set(state.schema[i]['properties'][x],'isRequired',!state.schema[i]['properties'][x]['isRequired'])
               }else{
                 Vue.set(state.schema[i]['properties'][x],'isRequired',true)
+              }
+              //reset other marginality
+              if (state.schema[i]['properties'][x] && state.schema[i]['properties'][x]['isRequired']) {
+                Vue.set(state.schema[i]['properties'][x],'isOptional', false)
+                Vue.set(state.schema[i]['properties'][x],'isRecommended', false)
+              }
+            }
+          }
+        }
+      }
+    },
+    optionalProp(state,payload){
+      let label = payload['label']
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].hasOwnProperty('properties')) {
+          for (var x = 0; x < state.schema[i]['properties'].length; x++) {
+            if (state.schema[i]['properties'][x].hasOwnProperty('label') && state.schema[i]['properties'][x].label === label) {
+              if (state.schema[i]['properties'][x].hasOwnProperty('isOptional')) {
+                Vue.set(state.schema[i]['properties'][x],'isOptional',!state.schema[i]['properties'][x]['isOptional'])
+              }else{
+                Vue.set(state.schema[i]['properties'][x],'isOptional',true)
+              }
+              //reset other marginality
+              if (state.schema[i]['properties'][x] && state.schema[i]['properties'][x]['isOptional']) {
+                Vue.set(state.schema[i]['properties'][x],'isRequired', false)
+                Vue.set(state.schema[i]['properties'][x],'isRecommended', false)
+              }
+            }
+          }
+        }
+      }
+    },
+    recommendProp(state,payload){
+      let label = payload['label']
+      for (var i = 0; i < state.schema.length; i++) {
+        if (state.schema[i].hasOwnProperty('properties')) {
+          for (var x = 0; x < state.schema[i]['properties'].length; x++) {
+            if (state.schema[i]['properties'][x].hasOwnProperty('label') && state.schema[i]['properties'][x].label === label) {
+              if (state.schema[i]['properties'][x].hasOwnProperty('isRecommended')) {
+                Vue.set(state.schema[i]['properties'][x],'isRecommended',!state.schema[i]['properties'][x]['isRecommended'])
+              }else{
+                Vue.set(state.schema[i]['properties'][x],'isRecommended',true)
+              }
+              //reset other marginality
+              if (state.schema[i]['properties'][x] && state.schema[i]['properties'][x]['isRecommended']) {
+                Vue.set(state.schema[i]['properties'][x],'isRequired', false)
+                Vue.set(state.schema[i]['properties'][x],'isOptional', false)
               }
             }
           }
@@ -900,6 +952,18 @@ const store = new Vuex.Store({
                   state.validation['required'].push(p)
                 }
               }
+              if (state.schema[i].properties[x].isRecommended) {
+                let p = state.schema[i].properties[x].label;
+                if (!state.validation['recommended'].includes(p)) {
+                  state.validation['recommended'].push(p)
+                }
+              }
+              if (state.schema[i].properties[x].isOptional) {
+                let p = state.schema[i].properties[x].label;
+                if (!state.validation['optional'].includes(p)) {
+                  state.validation['optional'].push(p)
+                }
+              }
               //Add New Prop
               state.finalschema['@graph'].push(mainProp)
             }
@@ -925,6 +989,16 @@ const store = new Vuex.Store({
               if (state.schema[i].properties[y].isRequired) {
                 if (!state.validation['required'].includes(myLabel)) {
                   state.validation['required'].push(myLabel)
+                }
+              }
+              if (state.schema[i].properties[y].isRecommended) {
+                if (!state.validation['recommended'].includes(myLabel)) {
+                  state.validation['recommended'].push(myLabel)
+                }
+              }
+              if (state.schema[i].properties[y].isOptional) {
+                if (!state.validation['optional'].includes(myLabel)) {
+                  state.validation['optional'].push(myLabel)
                 }
               }
               //pre populate validation from inherited if available
@@ -1105,7 +1179,6 @@ const store = new Vuex.Store({
         let curie = pList[i];
         //pull definition from registered namespace - should match curie prefix
         namespace = curie.split(":")[0];
-        console.log('getting parents', namespace)
         let url = "api/registry/"+namespace+"/"+curie
         axios.get(url).then(res=>{
           if (res.data) {
@@ -2081,10 +2154,24 @@ Vue.component('c-box', {
       animation: 'fade',
       theme:'light'});
 
+      tippy( '.recommended', {
+      maxWidth:'200px',
+      placement:'top',
+      content: '<div class="text-warning m-0" style="border-radius:none">Mark As Recommended</div>',
+      animation: 'fade',
+      theme:'light'});
+
+      tippy( '.optional', {
+      maxWidth:'200px',
+      placement:'top',
+      content: '<div class="text-info m-0" style="border-radius:none">Mark As Optional</div>',
+      animation: 'fade',
+      theme:'light'});
+
     tippy( '.select', {
       maxWidth:'200px',
       placement:'top',
-      content: '<div class="text-muted m-0" style="border-radius:none">Re-Use This Property</div>',
+      content: '<div class="text-success m-0" style="border-radius:none">Select (Re-Use) This Property</div>',
       animation: 'fade',
       theme:'light'});
 
@@ -2113,8 +2200,18 @@ Vue.component('c-box', {
                       <tr>
                         <td v-for="(val, name) in totals" class="px-1"> 
                           <small>
-                            <i v-if="name == 'required'" class="fas fa-asterisk text-danger"></i>
-                            <i v-else-if="name == 'selected'" class="fas fa-check-circle text-success"></i> 
+                            <template v-if="name == 'required'">
+                              <i title="required" class="fas fa-asterisk text-danger"></i> req
+                            </template>
+                            <template v-else-if="name == 'selected'">
+                              <i title="selected" class="fas fa-check-circle text-success"></i> sel
+                            </template>
+                            <template v-else-if="name == 'optional'">
+                              <i title="optional" class="fas fa-square text-info"></i> opt
+                            </template>
+                            <template v-else-if="name == 'recommended'">
+                              <i title="recommended" class="fas fa-circle text-warning"></i> rec
+                            </template>
                             <i v-else v-text="name"></i> : <b v-text="val" :class="[val?'text-primary':'text-muted']"></b> 
                           </small>
                         </td>
@@ -2131,7 +2228,10 @@ Vue.component('c-box', {
                 <div v-if="!item.special" class="">
                   <template v-if="item && item.properties" v-for="prop in item.properties">
                     <small v-if="prop.selected" class="badge badge-success m-1">
-                      <i v-if="prop && prop.isRequired" class="fas fa-asterisk text-danger"></i> <span v-text="prop.label"></span>
+                      <i v-if="prop && prop.isRequired" class="fas fa-asterisk text-danger"></i> 
+                      <i v-else-if="prop && prop.isRecommended" class="fas fa-circle text-warning"></i>
+                      <i v-else-if="prop && prop.isOptional" class="fas fa-square text-info"></i> 
+                      <span v-text="prop.label"></span>
                     </small>
                   </template>
                 </div>
@@ -2158,6 +2258,8 @@ Vue.component('c-box', {
                           <i v-show="item.special" class="fas fa-minus-circle pointer text-muted unselectable remove" @click="removeProp(prop.label)"></i>
                           <i class="fas fa-check-circle pointer unselectable select" @click="markSelected(prop.label)" :class="{'text-muted':!prop.selected,'text-success':prop.selected}"></i>
                           <i class="fas fa-asterisk required pointer unselectable" @click="markRequired(prop.label)" :class="{'text-muted':!prop.isRequired,'text-danger':prop.isRequired}"></i>
+                          <i class="fas fa-circle recommended pointer unselectable" @click="markRecommended(prop.label)" :class="{'text-muted':!prop.isRecommended,'text-warning':prop.isRecommended}"></i>
+                          <i class="fas fa-square optional pointer unselectable" @click="markOptional(prop.label)" :class="{'text-muted':!prop.isOptional,'text-info':prop.isOptional}"></i>
                         </div>
                       </div>
                     </template>
@@ -2179,6 +2281,8 @@ Vue.component('c-box', {
                         <i v-show="item.special" class="fas fa-pen-square pointer text-info unselectable tip" data-tippy-info="Edit" @click="editCustomProp(prop)"></i>
                         <i class="fas fa-check-circle pointer unselectable select" @click="markSelected(prop.label)" :class="{'text-muted':!prop.selected,'text-success':prop.selected}"></i>
                         <i class="fas fa-asterisk required pointer unselectable" @click="markRequired(prop.label)" :class="{'text-muted':!prop.isRequired,'text-danger':prop.isRequired}"></i>
+                        <i class="fas fa-circle recommended pointer unselectable" @click="markRecommended(prop.label)" :class="{'text-muted':!prop.isRecommended,'text-warning':prop.isRecommended}"></i>
+                        <i class="fas fa-square optional pointer unselectable" @click="markOptional(prop.label)" :class="{'text-muted':!prop.isOptional,'text-info':prop.isOptional}"></i>
                       </div>
                     </div>
                   </template>
@@ -2340,7 +2444,9 @@ Vue.component('c-box', {
       let totals ={
         properties: 0,
         selected: 0,
-        required: 0
+        required: 0,
+        recommended: 0,
+        optional: 0,
       }
       if (this.item.hasOwnProperty('properties')) {
         this.item.properties.forEach( prop => {
@@ -2451,7 +2557,33 @@ Vue.component('c-box', {
           payload["label"] = propLabel
           store.commit('requireProp',payload);
         }else if (self.item.properties[i].label === propLabel && !self.item.properties[i].selected){
-          $.notify("Can't require an unselected property",{ globalPosition: 'right',style:'danger', showDuration: 40, });
+          $.notify("You must mark as selected first",{ globalPosition: 'right',style:'danger', showDuration: 40, });
+        }
+      }
+      this.updateTotals();
+    },
+    markOptional(propLabel){
+      var self = this;
+      for (var i = 0; i < self.item.properties.length; i++) {
+        if (self.item.properties[i].label === propLabel && self.item.properties[i].selected) {
+          var payload = {};
+          payload["label"] = propLabel
+          store.commit('optionalProp',payload);
+        }else if (self.item.properties[i].label === propLabel && !self.item.properties[i].selected){
+          $.notify("You must mark as selected first",{ globalPosition: 'right',style:'danger', showDuration: 40, });
+        }
+      }
+      this.updateTotals();
+    },
+    markRecommended(propLabel){
+      var self = this;
+      for (var i = 0; i < self.item.properties.length; i++) {
+        if (self.item.properties[i].label === propLabel && self.item.properties[i].selected) {
+          var payload = {};
+          payload["label"] = propLabel
+          store.commit('recommendProp',payload);
+        }else if (self.item.properties[i].label === propLabel && !self.item.properties[i].selected){
+          $.notify("You must mark as selected first",{ globalPosition: 'right',style:'danger', showDuration: 40, });
         }
       }
       this.updateTotals();
