@@ -1101,7 +1101,12 @@ const store = new Vuex.Store({
       // console.log('pList',pList)
       for (var i = 0; i < pList.length; i++) {
         state.loading = true;
-        let url = "api/registry/"+state.schema[0].namespace+"/"+pList[i]
+        let namespace = state.schema[0].namespace;
+        let curie = pList[i];
+        //pull definition from registered namespace - should match curie prefix
+        namespace = curie.split(":")[0];
+        console.log('getting parents', namespace)
+        let url = "api/registry/"+namespace+"/"+curie
         axios.get(url).then(res=>{
           if (res.data) {
             commit('saveParent',{'parent':res.data})
