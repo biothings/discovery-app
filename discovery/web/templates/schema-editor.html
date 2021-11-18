@@ -1103,8 +1103,8 @@ const store = new Vuex.Store({
         state.loading = true;
         let namespace = state.schema[0].namespace;
         let curie = pList[i];
-        // check if curie is from schema.org and change if necessary
-        namespace = curie.includes('schema:') ? 'schema' : namespace;
+        //pull definition from registered namespace - should match curie prefix
+        namespace = curie.split(":")[0];
         console.log('getting parents', namespace)
         let url = "api/registry/"+namespace+"/"+curie
         axios.get(url).then(res=>{
