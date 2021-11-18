@@ -2457,6 +2457,12 @@ Vue.component('c-box', {
           if (prop && prop.isRequired) {
             totals.required ++;
           }
+          if (prop && prop.isRecommended) {
+            totals.recommended ++;
+          }
+          if (prop && prop.isOptional) {
+            totals.optional ++;
+          }
         })
       }
       this.totals = totals
