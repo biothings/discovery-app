@@ -51,7 +51,7 @@ GUIDE_PRESETS = [
     {
         'namespace': 'niaid',
         'prefix': 'niaid',
-        'name': 'NiaidDataset',
+        'name': 'Dataset',
         'description': 'A schema describing a minimal Dataset for the National Institute of Allergy and Infectious Disease (NIAID). A dataset is a collection of data of a particular experimental type. Additional schema.org and/or custom properties could be added.'
     },
 ]
