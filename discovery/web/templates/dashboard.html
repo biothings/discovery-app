@@ -458,13 +458,8 @@ var app = new Vue({
                   data={
                     'url': newurl
                   }
-                  // let config = {
-                  //    headers: {
-                  //      'content-type': 'application/json'
-                  //    }
-                  //  }
                   self.loading = true;
-                  axios.put("/api/registry",data).then(res=>{
+                  axios.put("/api/registry/" + namespace, data).then(res=>{
                     if (res.data.result) {
                       Swal.fire(
                         'Ta-dah!',
