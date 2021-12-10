@@ -96,7 +96,7 @@
               
               
               <div class="p-3 text-left">
-                <p class="text-dark m-auto" v-html="processMarkdown(metadata.description)"></p>
+                <span class="text-dark m-auto" v-html="processMarkdown(metadata.description)"></span>
               </div>
               <template v-for="(content,name) in viewMetadata" :key="name">
                 <field-box :name="name" :content="content" isChild="false"></field-box>
@@ -615,8 +615,8 @@
         },
         processMarkdown(txt) {
           var conv = new showdown.Converter();
-          console.log(txt);
-          return conv.makeHtml(txt);
+          txt = conv.makeHtml(txt);
+          return txt.replace(/(?:\r\n|\r|\n)/g, '<br>');
         }
       },
       mounted:function(){
