@@ -260,7 +260,7 @@ WEB_HANDLERS = [
     (r"/portal/?", TemplateHandler, {"filename": "portals.html"}),
     (r"/portal/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "portal.html"}),
     (r"/editor/?", TemplateHandler, {"filename": "schema-editor.html"}),
-    (r"/faq/?", TemplateHandler, {"filename": "faq.html"}),
+    (r"/faq/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "faq-multi.html"}),
     (r"/compatibility/?", TemplateHandler, {"filename": "flowchart.html"}),
     (r"/registries/?", TemplateHandler, {"filename": "registries.html"}),
     (r"/guide/?", TemplateHandler, {"filename": "metadata-guide-new.html"}),
