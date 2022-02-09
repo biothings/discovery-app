@@ -66,11 +66,9 @@
               <h1 class="text-center mt-5">
                 <span v-text="metadata.name"></span>
               </h1>
-              <div class="text-center" v-if="metadata && metadata.name.includes('PPRL')">
+              <div class="text-center" v-if="metadata && !metadata.name.includes('PPRL')">
                 <span class="ml-2 badge smallBadge">PPRL</span>
-                <p>
-                  <a href="/faq/n3c" class="text-warning">FAQ</a>
-                </p>
+                <a href="/faq/n3c#MORTALITY" class="badge smallBadge bg-info ml-1" style="cursor: pointer;">FAQ</a>
               </div>
               <small v-if="metadata && metadata.version"  class="text-light d-block text-center" v-text="'Version '+metadata.version"></small>
               <small v-if="last_updated"  class="text-light d-block text-center">

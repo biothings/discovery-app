@@ -3,17 +3,17 @@
 {% include "header.html" %}
 <main id="faq-app" class="bg-light" style="min-height: 100vh;">
     <div class="jumbotron bg-light text-center pt-5" style="margin-top: 40px;">
-      <h1 class="logoText"><span v-text="name"></span> FAQ</h1>
+      <h1 class="logoText" v-text="name"></h1>
       <small class="text-muted">
         Jump To:
         <template v-for="section in faq">
-          <a class="badge badge-secondary mr-2" v-text='section.sectionName' :href='"#"+section.sectionName'></a>
+          <a class="badge badge-secondary mr-2" v-text='section.sectionName.replace("_"," ")' :href='"#"+section.sectionName'></a>
         </template>
       </small>
     </div>
     <div class="jumbotron container">
       <template v-for="section in faq">
-        <h6 class="text-dark my-1" v-text='section.sectionName'></h6>
+        <h6 class="text-dark my-1" v-text='section.sectionName.replace("_"," ")'></h6>
         <div class="ml-3">
           <template v-for="item in section.questions">
             <div>
@@ -26,13 +26,13 @@
     <div class="container p-0" style="margin-bottom:10vh;">
       <template v-for="section in faq">
         <div class="card">
-          <h4 class="text-light card-header pt-5 pb-5 grad" v-text='section.sectionName' :id='section.sectionName'></h4>
+          <h4 class="text-light card-header pt-5 pb-5 grad" v-text='section.sectionName.replace("_"," ")' :id='section.sectionName'></h4>
           <div class="card-body">
             <ul class="list-group card-text">
               <template v-for="item in section.questions">
                 <li class="list-group-item">
                   <div class="mainTextDark bold" :id="item.anchor" :value="window.location+item.anchor">
-                    <span v-text="item.question"></span> <a :href="'#'+item.anchor" data-tipy="Copy link" class="secondary-content" @click="copyClipboard(window.location.href+'#'+item.anchor)"> share <i class="fas fa-link"></i></a>
+                    <span v-text="item.question"></span> <a :href="'#'+item.anchor" data-tipy="Copy link" class="secondary-content" @click="copyClipboard(window.location.href+'#'+item.anchor)"><i class="fas fa-link"></i></a>
                   </div>
                   <div class="text-muted p-2" v-html="item.answer"></div>
                 </li>
@@ -143,7 +143,7 @@ var app = new Vue({
                   ]
                 },
                 {
-                  'sectionName': 'Schema Playground',
+                  'sectionName': 'Schema_Playground',
                   'questions':[
                     {
                       'anchor':'what-is-schema-playground',
@@ -388,7 +388,7 @@ var app = new Vue({
             ],
             n3c_faq:[
             {
-                  'sectionName': 'VIRAL VARIANCE',
+                  'sectionName': 'VIRAL_VARIANCE',
                   'questions':[
                     {
                       'anchor':'technical-specs',
@@ -645,12 +645,12 @@ var app = new Vue({
             case 'n3c':
               console.log('N3C')
                 self.faq = self.n3c_faq
-                self.name = "N3C"
+                self.name = "FAQ for N3C PPRL Datasets"
                 break;
             default:
             console.log('DEFAULT')
                 self.faq = self.dde_faq
-                self.name = "Data Discovery Engine"
+                self.name = "FAQ"
             }
         }
         tippy( '#faq-app', {
