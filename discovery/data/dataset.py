@@ -7,15 +7,19 @@
 """
 import hashlib
 
+from elasticsearch_dsl import Date, Keyword, Object, InnerDoc, Text, Boolean, normalizer
 
-from .common import *
+from .common import DiscoveryMeta, DiscoveryUserDoc
+
 
 # def below didn't work as expected, should be default feature
 # used hardcoded mappings with request
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/normalizer.html
-lowercase = normalizer('lowercase',
+lowercase = normalizer(
+    'lowercase',
     filter=['lowercase']
 )
+
 
 class DatasetMeta(DiscoveryMeta):
     """ Modifiable Metadata Fields """
