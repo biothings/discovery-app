@@ -13,3 +13,6 @@ PyGithub
 certifi
 pyadf
 aiocron==1.4
+
+# s3 backup
+boto3>=1.21.0
