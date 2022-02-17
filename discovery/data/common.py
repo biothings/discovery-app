@@ -1,5 +1,4 @@
-from elasticsearch_dsl import *
-from elasticsearch_dsl.exceptions import ValidationException
+from elasticsearch_dsl import Document, Keyword, InnerDoc, Object, MetaField
 
 
 class DiscoveryDoc(Document):

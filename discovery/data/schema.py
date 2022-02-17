@@ -9,7 +9,10 @@
 import functools
 from datetime import datetime
 
-from .common import *
+from elasticsearch_dsl import Date, Keyword, Object, InnerDoc, Text, Boolean
+from elasticsearch_dsl.exceptions import ValidationException
+
+from .common import DiscoveryMeta, DiscoveryUserDoc, DiscoveryDoc
 
 
 def mergeDict(d1, d2):
