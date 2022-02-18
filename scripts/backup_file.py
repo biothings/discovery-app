@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date
 import json
 import logging
 
@@ -6,6 +6,13 @@ import boto3
 
 from discovery.data.dataset import Dataset
 from discovery.data.schema import Schema, SchemaClass
+
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError("Type %s not serializable" % type(obj))
 
 
 def _default_filename():
@@ -19,7 +26,7 @@ def save_to_s3(data, filename=None, bucket="dde"):
     s3.put_object(
         Bucket=bucket,
         Key=obj_key,
-        Body=json.dumps(data, indent=2)
+        Body=json.dumps(data, indent=2, default=json_serial)
     )
     return obj_key
 
@@ -39,10 +46,11 @@ def backup_es(esdoc_class, outfile=None):
         }
     """
     data = esdoc_class._index.get()
-    data['docs'] = list(hit.to_dict() for hit in esdoc_class.search().scan())
+    idx_name = list(data)[0]
+    data[idx_name]['docs'] = list(hit.to_dict() for hit in esdoc_class.search().scan())
     if outfile:
         with open(outfile, 'w') as out_f:
-            json.dump(data, out_f, indent=2)
+            json.dump(data, out_f, indent=2, default=json_serial)
     return data
 
 
