@@ -71,6 +71,12 @@
             <h5>API <i class="fas fa-chevron-right"></i></h5>
           </a>
         </div>
+        <div v-if="portal && portal.faq_link" class="text-center p-2 m-1 rounded p-3" @mouseenter="hover('api')">
+          <object id="api" type="image/svg+xml" data="/static/img/faq-01.svg" width="100px" alt="API"></object>
+          <a :href="portal.faq_link" class="nd mt-2 tip text-info" data-tippy-info="Frequently Asked Questions">
+            <h5>FAQ <i class="fas fa-chevron-right"></i></h5>
+          </a>
+        </div>
       </div>
       <div class="text-center p-5 col-sm-12 mainBackLight p-2">
       </div>
@@ -163,7 +169,8 @@
             'schema': '/view/n3c',
             "guide": "/guide/n3c/dataset",
             "datasets": "/dataset?guide=/guide/n3c/dataset",
-            "colors": [{"hex":"#4B7E8F"},{"hex":"#64296B"}]
+            "colors": [{"hex":"#4B7E8F"},{"hex":"#64296B"}],
+            "faq_link" : "/faq/n3c"
           },
         ]
   	  }

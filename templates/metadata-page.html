@@ -66,8 +66,9 @@
               <h1 class="text-center mt-5">
                 <span v-text="metadata.name"></span>
               </h1>
-              <div class="text-center">
-                <span v-if="metadata && metadata.name.includes('PPRL')" class="ml-2 badge smallBadge">PPRL</span>
+              <div class="text-center" v-if="metadata && metadata.name.includes('PPRL')">
+                <span class="ml-2 badge smallBadge">PPRL</span>
+                <a href="/faq/n3c" class="badge smallBadge bg-info ml-1" style="cursor: pointer;">FAQ</a>
               </div>
               <small v-if="metadata && metadata.version"  class="text-light d-block text-center" v-text="'Version '+metadata.version"></small>
               <small v-if="last_updated"  class="text-light d-block text-center">
@@ -85,7 +86,7 @@
                 |
                 <small><a :href="'/api/dataset/'+meta_id" rel="noopener">raw json-ld</a></small>
                 |
-                <tempalte v-if="schemaLink">
+                <template v-if="schemaLink">
                   <small><a :href="schemaLink" rel="noopener">schema</a></small>
                 </template>
               </template>
@@ -96,7 +97,7 @@
               
               
               <div class="p-3 text-left">
-                <p class="text-dark m-auto" v-html="metadata.description"></p>
+                <span class="text-dark m-auto" v-html="processMarkdown(metadata.description)"></span>
               </div>
               <template v-for="(content,name) in viewMetadata" :key="name">
                 <field-box :name="name" :content="content" isChild="false"></field-box>
@@ -151,6 +152,7 @@
     </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.4.0/showdown.min.js"></script>
   <script>
     Vue.component('field-box', {
       data: function(){
@@ -166,6 +168,7 @@
           pageLimit: 20,
           startCapLimitReached: true,
           endCapLimitReached: false,
+          readable_labes : {}
         }
       },
       props: ['name','content','isChild'],
@@ -260,15 +263,38 @@
         if (self.type == 'array') {
           self.calculatePages();
         }
+        let labels = {{readable_labels}}
+        if (Object.keys(labels).length) {
+          self.readable_labels = labels;
+        }
       },
       computed: {
         arrayResults: function () {
             var start = (this.page - 1) * this.perPage,
                 end = start + this.perPage;
             return this.content && this.content.slice(start, end);
+        },
+        readable_name: function() {
+          if (Object.keys(this.readable_labels).length &&
+          Object.hasOwnProperty.call(this.readable_labels, this.name)) {
+            return this.readable_labels[this.name];
+          }
+          else if (this.name.includes("_")) {
+            let parts = this.name.split("_");
+            parts = parts.map(item => item.charAt(0).toUpperCase() + item.slice(1));
+            parts = parts.join(" ");
+            return parts;
+          }else{
+            if (/[A-Z]/.test(this.name)) {
+              let parts = this.name.split(/(?=[A-Z])/);
+              parts = parts.map(item => item.charAt(0).toUpperCase() + item.slice(1));
+              parts = parts.join(" ");
+              return parts;
+            }else{
+              return this.name.charAt(0).toUpperCase() + this.name.slice(1);
+            }
+          }
         }
-      },
-      watch:{
       },
       template:
         `<div v-if="name !== '_meta'" class="m-0 rounded-0" :class="[isChild?'p-1 border-left':'p-1 border-bottom']">
@@ -277,7 +303,7 @@
           <div class="row m-0">
             <div class="text-left">
               <small class="text-primary" @click="expandArray=!expandArray" style="cursor:pointer;">
-                <span v-text="name"></span> (<span v-text="content.length"></span>) 
+                <span v-text="readable_name"></span> (<span v-text="content.length"></span>) 
                 <b v-if="!expandArray">+</b>
                 <b v-if="expandArray">-</b>
               </small>
@@ -328,7 +354,7 @@
               <template v-if="isUrl(content)">
                 <div class="text-left">
                   <small class="mainTextDark">
-                    <b v-text="name"></b> <i v-if="!name" class="fas fa-circle"></i> <span v-else>:</span>
+                    <b v-text="readable_name"></b> <i v-if="!readable_name" class="fas fa-circle"></i> <span v-else>:</span>
                   </small>
                 </div>
                 <div class="ml-1">
@@ -340,7 +366,7 @@
               <template v-else> 
                 <div class="d-flex">
                   <small class="mainTextDark">
-                    <b v-text="name?name+' :':''" class="mr-1"></b>
+                    <b v-text="readable_name?readable_name+' :':''" class="mr-1"></b>
                   </small>
                 </div>
                 <div class="d-flex">
@@ -362,7 +388,7 @@
             <div class="d-flex">
               <div class=" d-flex justify-content-start align-items-center">
                 <small class="mainTextDark">
-                  <b v-text="name"></b> <i class="fas fa-chevron-circle-right mr-1"></i>
+                  <b v-text="readable_name"></b> <i class="fas fa-chevron-circle-right mr-1"></i>
                 </small>
               </div>
               <div>
@@ -377,7 +403,7 @@
             <div class="d-flex">
               <div class=" d-flex justify-content-start align-items-center">
                 <small class="mainTextDark">
-                  <b v-text="name"></b> :&nbsp;
+                  <b v-text="readable_name"></b> :&nbsp;
                 </small>
               </div>
               <div>
@@ -391,7 +417,7 @@
             <div class="d-flex">
               <div class=" d-flex justify-content-start align-items-center">
                 <small class="mainTextDark">
-                  <b v-text="name"></b> :&nbsp;
+                  <b v-text="readable_name"></b> :&nbsp;
                 </small>
               </div>
               <div>
@@ -587,6 +613,11 @@
           var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',	'November', 'December'];
           // return a formatted date
           return months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+        },
+        processMarkdown(txt) {
+          var conv = new showdown.Converter();
+          txt = conv.makeHtml(txt);
+          return txt.replace(/(?:\r\n|\r|\n)/g, '<br>');
         }
       },
       mounted:function(){

@@ -1,4 +1,4 @@
-git+git://github.com/biothings/biothings_schema.py.git@e5550d3#egg=biothings_schema
+git+git://github.com/biothings/biothings_schema.py.git@5dd929b#egg=biothings_schema
 biothings==0.10.0
 PyLD>=0.7.1
 jsonschema>=2.6.0
@@ -11,3 +11,6 @@ PyGithub
 certifi
 pyadf
 aiocron==1.4
+
+# s3 backup
+boto3>=1.21.0
