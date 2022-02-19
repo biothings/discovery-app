@@ -210,6 +210,21 @@
     </div>
     <!-- bulk end -->
     <div id="widget" class="mb-5 grad rounded">
+      <!-- EDIT EXISTING -->
+      <div id="editMessage" v-if="editingID">
+        <div class="p-1 alert-warning d-flex">
+          <h4 class="text-info d-inline-block p-2">
+            <span class="fa-stack">
+              <i class="fas fa-circle fa-stack-2x"></i>
+              <i class="fas fa-pencil-alt fa-stack-1x fa-inverse"></i>
+            </span>
+          </h4>
+          <small class="d-inline-block">
+            <b class="text-danger">Edit Mode:</b> You are editing an existing record.  You can add or change any allowed field. <code>identifier</code> field is disabled as this is the unique identifier for each entry.
+            If this is not what you intend to do please start over.
+          </small>
+        </div>
+      </div>
       <div>
         <div class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start">
           <span class="fa-stack fa-1x pointer tip mr-2" :data-tippy-info="'Logged in as '+userInfo.login" v-if="userInfo && userInfo.login">
@@ -294,32 +309,47 @@
           </template>
   
           <template v-if=" step === 5">
-            <template v-if="window.location.pathname == '/guide/n3c/dataset' ">
-              <h1 class="logoText">N3C Dataset Request</h1>
-              <div class="p-5 text-center m-3">
-                <img src="/static/img/N3C.png" width="250px" alt="N3C" class="text-center">
-                <p class="text-muted text-center">
-                  <b>Are you all done?</b> Click <b>Submit Request</b> to proceed.
-                </p>
-                <a class='btn btn-lg btn-success text-light' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()">
-                  <small>
-                    <i class="fas fa-check"></i> Submit Request
-                  </small>
-                </a>
-              </div>
+            <template v-if="editingID">
+              <h1 class="logoText">Save Your Changes</h1>
+                <div class="p-5 text-center m-3">
+                  <p class="text-muted text-center">
+                    <b>Are you all done?</b> Click <b>Save Changes</b> to proceed. <br />You will leave this page after successfully saving changes to this metadata.
+                  </p>
+                  <a class='btn btn-lg btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleEdits()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
+                    <small>
+                      <i class="fas fa-check"></i> Save Changes
+                    </small>
+                  </a>
+                </div>
             </template>
             <template v-else>
-              <h1 class="logoText">Registration</h1>
-              <div class="p-5 text-center m-3">
-                <p class="text-muted text-center">
-                  <b>Are you all done?</b> Click <b>Register</b> to proceed. <br />You will leave this page after successfully registering this metadata.
-                </p>
-                <a class='btn btn-lg btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
-                  <small>
-                    <i class="fas fa-check"></i> Register
-                  </small>
-                </a>
-              </div>
+              <template v-if="window.location.pathname == '/guide/n3c/dataset' ">
+                <h1 class="logoText">N3C Dataset Request</h1>
+                <div class="p-5 text-center m-3">
+                  <img src="/static/img/N3C.png" width="250px" alt="N3C" class="text-center">
+                  <p class="text-muted text-center">
+                    <b>Are you all done?</b> Click <b>Submit Request</b> to proceed.
+                  </p>
+                  <a class='btn btn-lg btn-success text-light' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()">
+                    <small>
+                      <i class="fas fa-check"></i> Submit Request
+                    </small>
+                  </a>
+                </div>
+              </template>
+              <template v-else>
+                <h1 class="logoText">Registration</h1>
+                <div class="p-5 text-center m-3">
+                  <p class="text-muted text-center">
+                    <b>Are you all done?</b> Click <b>Register</b> to proceed. <br />You will leave this page after successfully registering this metadata.
+                  </p>
+                  <a class='btn btn-lg btn-success text-light desc' :class="{ 'disabled text-muted notallowed': !isComplete, 'bg-success text-light pointer': isComplete }" @click="handleRegistration()" :data-tippy-info="[!isComplete ? 'Available when all required fields are complete' : 'Click to register your metadata']">
+                    <small>
+                      <i class="fas fa-check"></i> Register
+                    </small>
+                  </a>
+                </div>
+              </template>
             </template>
             <div class="col-sm-12">
               <div class="row">
@@ -352,7 +382,7 @@
 
 {% endblock %}
 {% block extra_scripts %}
-<script src="https://unpkg.com/vuex"></script>
+<script src="https://unpkg.com/vuex@3.6.2/dist/vuex.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
 <script src="/static/js/lodash.js"></script>
@@ -438,7 +468,8 @@
       valid: Boolean,
       errors: [],
       guide_prefilled: {{guide_prefilled}},
-      output_default:{}
+      output_default:{},
+      editingID: false,
     },
     strict: true,
     mutations: {
@@ -921,8 +952,15 @@
           }
         }
       },
+      setEditMode(state, payload) {
+        $.notify("Edit Mode: ON",{ style:'success', globalPosition: 'top center',style:"success", showDuration: 40, });
+        state.editingID = payload['id'];
+      }
     },
     getters:{
+      editingID: (state) =>{
+        return state.editingID
+      },
       getBulkJSONItems:state=>{
         return state.bulkJSONItems
       },
@@ -2761,6 +2799,9 @@
           store.dispatch('saveProgress');
         }
       },
+      editingID:function(){
+        return store.getters.editingID
+      },
     },
     watch:{
       userInput: function(v){
@@ -2812,7 +2853,14 @@
     },
     template:
     `<div>
-      <input type="text" v-model="userInput" class="form-control" placeholder="enter text here">
+      <div class="d-flex p-2" v-if="editingID">
+        <span class="fa-stack mr-2">
+          <i class="fas fa-circle fa-stack-2x text-info"></i>
+          <i class="fas fa-lock fa-stack-1x fa-inverse"></i>
+        </span>
+        <small class="text-primary"><b class="text-danger">Edit Mode:</b> This field is disabled in order to override existing record.</small>
+      </div>
+      <input :disabled="editingID" type="text" v-model="userInput" class="form-control" placeholder="enter text here">
       <div v-if="hitResults" class="row m-0 alert-warning">
         <div class="col-sm-12">
           <small @click.prevent="hitResults = false" class="float-right pointer m-1 text-danger">dismiss</small>
@@ -4525,6 +4573,9 @@
 				}
 			},
       computed:{
+        editingID:function(){
+          return store.getters.editingID
+        },
         validation:function(){
           return store.getters.getValidation
         },
@@ -4577,6 +4628,126 @@
         },
       },
 			methods:{
+        checkOverriddenID(id){
+          let self = this;
+          axios.get(`/api/dataset/query?size=100&q=identifier:"${encodeURIComponent(id)}"&meta=true`).then(res=>{
+            if (res.data.hits.length == 1 && Object.hasOwnProperty.call(res.data.hits[0], '_id')) {
+              //turn on edit mode
+              store.commit('setEditMode', {id: res.data.hits[0]['_id']});
+              return true;
+            }else{
+              return false;
+            }
+          }).catch(err=>{
+            return false;
+            throw err;
+          })
+        },
+        handleEdits(){
+          var self = this;
+
+          if (self.isComplete && self.editingID) {
+            store.commit('formPreview');
+            let output = store.getters.getOutput
+            self.loading = true;
+
+            let schema = store.getters.getSchema
+
+                let config = {
+                   headers: {
+                     'content-type': 'application/json'
+                   }
+                 }
+
+                axios.put('/api/dataset/' + self.editingID ,output,config).then(res=>{
+                  self.loading = false;
+                  if (res.data.success) {
+
+                    sessionStorage.removeItem('guideProgress');
+
+                    gtag('event','click',{'event_category':'dataset_edited','event_label': window.location.pathname,'event_value':1})
+
+                    let timerInterval
+                      Swal.fire({
+                        type:'success',
+                        title: 'Changes saved!',
+                        confirmButtonColor:"{{color_main}}",
+                        cancelButtonColor:"{{color_sec}}",
+                        animation:false,
+                        customClass:'scale-in-center',
+                        html:
+                          'Taking you to your dataset page in <strong></strong> seconds.',
+                        timer: 3000,
+                        onBeforeOpen: () => {
+                          const content = Swal.getContent()
+                          const $ = content.querySelector.bind(content)
+                          Swal.showLoading()
+                          timerInterval = setInterval(() => {
+                            Swal.getContent().querySelector('strong')
+                              .textContent = (Swal.getTimerLeft() / 1000)
+                                .toFixed(0)
+                          }, 100)
+                        },
+                        onClose: () => {
+                          clearInterval(timerInterval)
+                          store.dispatch('reset')
+                          window.location.href='/dataset/'+self.editingID
+                        }
+                      });
+
+                  }else{
+
+                    try {
+                      Swal.fire({
+                        type: 'error',
+                        position: 'top center',
+                        confirmButtonColor:"{{color_main}}",
+                        cancelButtonColor:"{{color_sec}}",
+                        title: 'Saving edits failed because: ',
+                        animation:false,
+                        customClass:'scale-in-center',
+                        text: res.data.reason
+                      });
+                    } catch (e) {
+                      throw e;
+                    }
+                  }
+                }).catch(err=>{
+                  self.loading = false;
+                  let culprit = "<h6>"+err.response.data.error+"</h6>"
+                  if (err.response.data && err.response.data.path) {
+                    culprit += "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></h5>"
+                  }
+                  if (err.response.data.parent && err.response.data.parent.path){
+                    if (true) {
+                      culprit += "<h5>Under <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></h5>"
+                    }
+                    if (err.response.data.parent && err.response.data.parent.reason) {
+                      culprit += "<div class='alert alert-warning'><small>"+err.response.data.parent.reason+"</small></div>"
+                    }
+                  }
+                  if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
+                    culprit += "<div class='alert alert-info'><small> Hint: "+err.response.data.validator_value+"</small></div>"
+                  }
+                  Swal.fire({
+                    type: 'error',
+                    position: 'top center',
+                    title: 'Saving edits failed because: ',
+                    confirmButtonColor:"{{color_main}}",
+                    cancelButtonColor:"{{color_sec}}",
+                    animation:false,
+                    customClass:'scale-in-center',
+                    html: culprit,
+                    footer:'<small>Validation Error</small>'
+                  });
+                  throw err;
+                })
+
+          
+            self.loading = true;
+          }
+
+        },
         checkUser(){
           let self = this;
           self.loading = true;
@@ -5122,6 +5293,7 @@
               'registered': 'Copy metadata from an existing dataset authored by you',
               'text':'JSON metadata text',
             },
+            footer:'Note: If you are loading an already registered item, this will trigger edit mode in which you are only allowed to change allowed fields.',
             inputPlaceholder: 'Select method',
             showCancelButton: true,
             animation:false,
@@ -5159,6 +5331,9 @@
                         let selected = res.data;
                         for(key in selected){
                           if (!['@context','@type','_id'].includes(key)) {
+                            if(key == 'identifier'){
+                              self.checkOverriddenID(selected[key]);
+                            }
                             var payload = {};
                             if (typeof selected[key] === 'object') {
                               let value = [selected[key]]
@@ -5217,6 +5392,10 @@
                               let selected = list[i]
                               for(key in selected){
                                 if (!['@context','@type','_id'].includes(key)) {
+                                  //check existing identifier for edit mode
+                                  if(key == 'identifier'){
+                                    self.checkOverriddenID(selected[key]);
+                                  }
                                   var payload = {};
                                   if (typeof selected[key] === 'object') {
                                     let value = [selected[key]]
@@ -5227,7 +5406,6 @@
                                     payload["completed"] = {'name':key,'value':value};
                                     store.commit('markCompleted',payload);
                                   }
-
                                 }
                               }
                               store.commit('formPreview');
@@ -5265,6 +5443,9 @@
                           console.log(selected)
                           for(key in selected){
                             if (!['@context','@type','_id'].includes(key)) {
+                              if(key == 'identifier'){
+                                self.checkOverriddenID(selected[key]);
+                              }
                               var payload = {};
                               if ( _.isPlainObject(selected[key]) ) {
                                 //look at keys and check for dates

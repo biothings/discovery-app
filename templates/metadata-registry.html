@@ -30,6 +30,10 @@
       <h1 class="text-center logoText mb-1 mt-2">
         <span v-if='window.location.href.includes("n3c")'>N3C</span> Dataset Registry
       </h1>
+      <p class="text-center text-muted" v-if='window.location.href.includes("n3c")'>
+        For more general information about PPRL datasets, such as what this data is, and how to participate, please visit our
+        <a href="/faq/n3c">PPRL FAQ</a>
+      </p>
       <div>
         <form @submit.prevent="search(query)">
           <div class="row m-0 cBox actions bg-secondary">
@@ -251,10 +255,12 @@
     template: `<li class="list-group-item list-group-item-action p-0">
                 <div class="row m-0">
                   <div class="col-sm-1 registry-item-background" :style="{backgroundImage: 'url(' + imgIcon + ')' }"></div>
-                  <div class="col-sm-8 pointer" @click="goTo(item)">
-                    <h5 class="mb-1 mainTextDark d-inline gaText">
-                      <span v-text="item.name"></span> <span v-if="item && item.name.includes('PPRL')" class="ml-2 badge smallBadge">PPRL</span>
+                  <div class="col-sm-8 pointer">
+                    <h5 class="mb-1 mainTextDark d-inline gaText d-inline pointer" @click="goTo(item)">
+                      <span v-text="item.name"></span> 
+                      <span v-if="item && item.name.includes('PPRL')" class="ml-2 badge smallBadge">PPRL</span>
                     </h5>
+                    <span v-if="item && item.name.includes('PPRL')" class="ml-1 badge smallBadge bg-light"><a href="/faq/n3c" target="_blank">FAQ</a></span>
                     <p v-if="item && item.description" class="text-muted">
                       <small v-html="text"></small>
                     </p>

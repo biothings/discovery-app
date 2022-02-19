@@ -69,6 +69,8 @@ def setEnvVars(env, config):
     # SCHEMA
     env.globals['starting_points'] = config.STARTING_POINTS
     env.globals['registry_shortcuts'] = config.REGISTRY_SHORTCUTS
+    # DATASET CUSTOMIZATIONS
+    env.globals['readable_labels'] = config.READABLE_LABEL_MAPPINGS
     # IMAGES FOLDER
     env.globals['static_image_folder'] = config.STATIC_IMAGE_FOLDER
     # Colors used
@@ -120,7 +122,7 @@ HANDLERS = [
     (r"/dataset/(geo/.+)", RedirectHandler, {"url": "http://metadataplus.biothings.io/{0}"}),
     (r"/dataset/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "metadata-page.html"}),
     (r"/editor/?", TemplateHandler, {"filename": "schema-editor.html"}),
-    (r"/faq/?", TemplateHandler, {"filename": "faq.html"}),
+    (r"/faq/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "faq-multi.html"}),
     (r"/guide/?", TemplateHandler, {"filename": "metadata-guide-new.html"}),
     (r"/guide/niaid/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "niaid"}),
     (r"/guide/outbreak/dataset/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "outbreak"}),
