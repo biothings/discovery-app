@@ -38,11 +38,19 @@ def _add_schema_class(schema, namespace):
 
     assert isinstance(schema, (ValidatedDict, type(None)))
 
-    try:
-        schema = SchemaAdapter(schema)
+    if schema is None and namespace == 'schema':
+        # handling "schema" namespace (from schema.org) differently
+        # since it's the pre-loaded default base/core schema
+        schema = SchemaAdapter(base_schema=['schema.org'])     # load only schema.org
+        # set defined class list as all schema.org classes
+        schema._classes_defs = schema._schema.list_all_classes(include_base=True)
         schema_classes = schema.get_classes()
-    except Exception as exc:  # TODO not sure what could go wrong
-        raise RegistryError(str(exc))
+    else:
+        try:
+            schema = SchemaAdapter(schema)
+            schema_classes = schema.get_classes()
+        except Exception as exc:  # TODO not sure what could go wrong
+            raise RegistryError(str(exc))
 
     # save class
     delete_classes(namespace)
