@@ -411,6 +411,7 @@ def log_N3C_response(_id, http_response):
 
 def update_n3c_status(_id):
     import requests
+    logger = logging.getLogger('update_n3c')
     try:
         dataset = ESDataset.get(_id)
         dataset.update(_n3c={
@@ -419,17 +420,22 @@ def update_n3c_status(_id):
             "timestamp": datetime.now(timezone.utc)
         })
     except Exception as exc:
-        logging.warning(str(exc))
+        logger.warning('Failed to update N3C dataset "%s" status:\n%s', _id, exc)
 
 
 def update_n3c_routine():
     from discovery.data.dataset import Dataset
 
+    logger = logging.getLogger('update_n3c')
+    logger.info("Updating status for all N3C datasets...")
     datasets = Dataset.search().query("exists", field="_n3c.url")
     datasets = datasets.source(False).scan()
 
+    _cnt = 0
     for dataset in datasets:
         update_n3c_status(dataset.meta.id)
+        _cnt += 1
+    logger.info("Done [%s N3C Datasets updated]", _cnt)
 
 
 def test_on(requests):
