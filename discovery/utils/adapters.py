@@ -44,7 +44,10 @@ class SchemaClassWrapper():
         self._parser_class.output_type = "curie"
 
     def __getattr__(self, attr):
-        return getattr(self._parser_class, attr)
+        value = getattr(self._parser_class, attr)
+        if isinstance(value, dict):
+            value = value.get("@value", "")
+        return value
 
     @property
     def parent_classes(self):
@@ -87,6 +90,10 @@ class SchemaClassWrapper():
 
         for property_ in properties:
             property_.pop('object')
+            _desc = property_.get('description', None)
+            if isinstance(_desc, dict):
+                _desc = _desc.get("@value", "")
+                property_['description'] = _desc
 
         return properties
 
@@ -97,9 +104,9 @@ class SchemaAdapter():
     Provide native type custom format schema class lists.
     """
 
-    def __init__(self, doc=None):
+    def __init__(self, doc=None, **kwargs):
         contexts = ESSchema.gather_field('@context')
-        self._schema = SchemaParser(doc, contexts)
+        self._schema = SchemaParser(schema=doc, context=contexts, **kwargs)
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
 
