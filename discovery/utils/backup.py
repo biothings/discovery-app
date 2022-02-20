@@ -4,8 +4,8 @@ import logging
 
 import boto3
 
-from discovery.data.dataset import Dataset
-from discovery.data.schema import Schema, SchemaClass
+from discovery.model.dataset import Dataset
+from discovery.model.schema import Schema, SchemaClass
 
 
 def json_serial(obj):
