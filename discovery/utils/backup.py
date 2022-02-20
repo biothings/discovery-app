@@ -87,7 +87,7 @@ def daily_backup_routine():
             logger.info("Backing up %s...", cls_name)
             _d = backup_fn()
             idx_name = list(_d)[0]
-            logger.info("Done. [index_name=%s, # of docs: %]", idx_name, len(_d[idx_name]['docs']))
+            logger.info("Done. [index_name=%s, # of docs: %s]", idx_name, len(_d[idx_name]['docs']))
             data.update(_d)
 
         logger.info("Saving to S3 bucket...")
