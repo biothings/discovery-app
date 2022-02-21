@@ -1,6 +1,7 @@
 import logging
 
 from tornado.httputil import url_concat
+from tornado.escape import json_encode
 from biothings.web.auth.oauth_mixins import GithubOAuth2Mixin
 
 from .base import DiscoveryBaseHandler
@@ -54,8 +55,7 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
         # correct URL on login
         _redirect = self.get_argument("next", "/")
         redirect_uri = url_concat(
-            self.request.protocol + "://" +
-            self.request.host + GITHUB_CALLBACK_PATH,
+            self.request.protocol + "://" + self.request.host + GITHUB_CALLBACK_PATH,
             {"next": _redirect}
         )
         # if we have a code, we have been authorized so we can log in
@@ -69,7 +69,7 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
             user = await self.github_get_authenticated_user(token['access_token'])
             if user:
                 logging.info('logged in user from github: %s', user)
-                self.set_secure_cookie("user", user)
+                self.set_secure_cookie("user", json_encode(user))
             else:
                 self.clear_cookie("user")
             self.redirect(_redirect)
@@ -85,5 +85,5 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
 
 
 HANDLERS = [
-    (GITHUB_CALLBACK_PATH, GithubLoginHandler),
+    (GITHUB_CALLBACK_PATH +'/?', GithubLoginHandler),
 ]
