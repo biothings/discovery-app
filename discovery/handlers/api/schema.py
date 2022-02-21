@@ -329,8 +329,10 @@ class SchemaRegistryHandler(APIBaseHandler):
 class SchemaViewHandler(APIBaseHandler):
 
     name = 'view'
-    # kwargs = {'GET': {'url': {'type': str, 'required': True}}}
-    kwargs = {'GET': {'url': {'type': str}}}
+    kwargs = {'GET': {
+        'url': {'type': str},      # pass schema as an url, alternatively can pass schema content in body
+        'ns': {'type': str}        # indicates the special target namespace of the schema, e.g. schema.org or bioschemas.
+    }}
 
     async def get(self):
         """
@@ -363,7 +365,17 @@ class SchemaViewHandler(APIBaseHandler):
                 doc = self.request.body
             if doc:
                 doc = json.loads(doc)
-                schema = SchemaAdapter(doc)
+                if self.args.ns:
+                    if self.args.ns == 'schema.org':
+                        # do no load any base schemas
+                        schema = SchemaAdapter(doc, base_schema=[])
+                    elif self.args.ns == 'bioschemas':
+                        # do not load bioschemas, only schema.org
+                        schema = SchemaAdapter(doc, base_schema=['schema.org'])
+                    else:
+                        schema = SchemaAdapter(doc)
+                else:
+                    schema = SchemaAdapter(doc)
             else:
                 self.finish({})
                 return
