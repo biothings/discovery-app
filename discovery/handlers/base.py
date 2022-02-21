@@ -43,7 +43,8 @@ class LogoutHandler(DiscoveryBaseHandler):
 class UserInfoHandler(DiscoveryBaseHandler):
 
     def get(self):  # frontend API
-        self.finish(self.get_current_userinfo() or {})
+        user = self.get_current_userinfo() or {}
+        self.finish(dict(user))    # dict(user) to convert UserInfo type to dict, self.finish cannot accept UserInfo
 
 
 class DatasetSitemapHandler(tornado.web.RequestHandler):
