@@ -76,7 +76,10 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
             return
 
         # otherwise we need to request an authorization code
-        await self.authorize_redirect(
+        # Using await here causes this error:
+        #   TypeError: object NoneType can't be used in 'await' expression
+        # await self.authorize_redirect(
+        self.authorize_redirect(
             redirect_uri=redirect_uri,
             client_id=self.biothings.config.GITHUB_CLIENT_ID,
             scope=GITHUB_SCOPES,
@@ -85,5 +88,5 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
 
 
 HANDLERS = [
-    (GITHUB_CALLBACK_PATH +'/?', GithubLoginHandler),
+    (GITHUB_CALLBACK_PATH + '/?', GithubLoginHandler),
 ]
