@@ -19,7 +19,7 @@ import logging
 
 import certifi
 from discovery.registry import schemas
-# from discovery.utils.adapters import SchemaAdapter
+from discovery.utils.adapters import SchemaAdapter
 from discovery.notify import SchemaNotifier
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import Finish, HTTPError
