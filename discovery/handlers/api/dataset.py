@@ -8,7 +8,7 @@
 """
 import json
 
-from discovery.registry import *
+from discovery.registry import datasets
 from discovery.notify import DatasetNotifier
 from tornado.web import Finish, HTTPError
 

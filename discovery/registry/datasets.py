@@ -37,7 +37,12 @@ import requests
 from discovery.model import Dataset as ESDataset
 from discovery.model import SchemaClass as ESSchemaClass
 
-from .common import *
+from .common import (
+    RegistryError, DatasetValidationError, DatasetJsonSchemaValidationError,
+    ConflictError, NoEntityError,
+    ValidatedDict, RegistryDocument
+)
+
 
 logger = logging.getLogger(__name__)
 

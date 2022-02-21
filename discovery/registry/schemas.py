@@ -13,9 +13,12 @@ import logging
 import requests
 from discovery.model import Schema as ESSchemaFile
 from discovery.model import SchemaClass as ESSchemaClass
-# from discovery.utils.adapters import SchemaAdapter
+from discovery.utils.adapters import SchemaAdapter
 
-from .common import *
+from .common import (
+    RegistryError, NoEntityError, ConflictError,
+    ValidatedDict, RegistryDocument
+)
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,9 @@ from functools import partial
 import certifi
 from biothings.web.handlers import BaseAPIHandler
 from discovery.notify import N3CChannel
-from discovery.registry import *
+from discovery.registry import (
+    DatasetValidationError, NoEntityError, ConflictError, RegistryError
+)
 from tornado.httpclient import AsyncHTTPClient
 from tornado.ioloop import IOLoop
 from tornado.web import Finish, HTTPError

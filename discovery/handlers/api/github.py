@@ -73,7 +73,7 @@ class GHHandler(APIBaseHandler):
                         'msg': repo_list
                     })
             else:
-                raise HTTPError(400, reason=f"Unable to authenticate user")
+                raise HTTPError(400, reason="Unable to authenticate user")
         else:
             if auth_user.login:
                 try:
@@ -104,7 +104,7 @@ class GHHandler(APIBaseHandler):
                             'msg': f"{repo_name} does not exist"
                         })
             else:
-                raise HTTPError(400, reason=f"Unable to authenticate user")
+                raise HTTPError(400, reason="Unable to authenticate user")
 
     @authenticated
     def delete(self):
@@ -120,7 +120,7 @@ class GHHandler(APIBaseHandler):
         auth_user = g.get_user()
         repo_name = self.args_json.get('name', '')
         if not repo_name:
-            raise HTTPError(400, reason=f"Repo name not provided")
+            raise HTTPError(400, reason="Repo name not provided")
         try:
             repo = auth_user.get_repo(full_name=repo_name)
             repo.delete()
@@ -129,7 +129,7 @@ class GHHandler(APIBaseHandler):
         except Exception as exc:  # unexpected
             raise HTTPError(500, reason=str(exc))
         if not repo:
-            logging.info(msg="Deleted repo "+repo_name)
+            logging.info("Deleted repo %s", repo_name)
             self.finish({
                 'success': True,
                 'msg': f"{repo_name} was deleted"
@@ -155,11 +155,11 @@ class GHHandler(APIBaseHandler):
         if data:
             content_encoded = json.dumps(data, indent=2).encode('utf-8')
         else:
-            raise HTTPError(400, reason=f"File content not provided")
+            raise HTTPError(400, reason="File content not provided")
         if not repo_name:
-            raise HTTPError(400, reason=f"Repo name not provided")
+            raise HTTPError(400, reason="Repo name not provided")
 
-        logging.info(msg="Repo name "+repo_name)
+        logging.info("Repo name %s", repo_name)
         user = json.loads(self.get_secure_cookie("user"))
         # signin with token
         g = Github(user['access_token'])
@@ -187,7 +187,7 @@ class GHHandler(APIBaseHandler):
                     raise HTTPError(500, reason=str(exc))
 
         else:
-            raise HTTPError(400, reason=f"Unable to authenticate user")
+            raise HTTPError(400, reason="Unable to authenticate user")
 
         if repo:
             path = file_name
@@ -226,11 +226,11 @@ class GHHandler(APIBaseHandler):
         if data:
             content_encoded = json.dumps(data, indent=2).encode('utf-8')
         else:
-            raise HTTPError(400, reason=f"File content not provided")
+            raise HTTPError(400, reason="File content not provided")
         if not repo_name:
-            raise HTTPError(400, reason=f"Repo name not provided")
+            raise HTTPError(400, reason="Repo name not provided")
 
-        logging.info(msg="Updating file on repo.name: "+repo_name)
+        logging.info("Updating file on repo.name: %s", repo_name)
         user = json.loads(self.get_secure_cookie("user"))
         g = Github(user['access_token'])
         # authenticated user
@@ -243,7 +243,7 @@ class GHHandler(APIBaseHandler):
             except Exception as exc:  # unexpected
                 raise HTTPError(500, reason=str(exc))
         else:
-            raise HTTPError(400, reason=f"Unable to authenticate user")
+            raise HTTPError(400, reason="Unable to authenticate user")
         if repo and existing_file:
             file_path = file_name
             try:
@@ -255,7 +255,7 @@ class GHHandler(APIBaseHandler):
             if file:
                 file_updated = repo.update_file(file_path, msg, content_encoded, file.sha)
                 if file_updated:
-                    logging.info(msg="File updated name "+file_name)
+                    logging.info("File updated name %s", file_name)
                     self.finish({
                         'success': True,
                         'msg': repo.full_name

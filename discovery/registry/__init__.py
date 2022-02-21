@@ -7,6 +7,6 @@
     Raise RegistryError. DatasetValidationError contains additional info.
 
 """
-from .common import *
-from . import datasets
-from . import schemas
+from .common import *       # noqa
+from . import datasets      # noqa
+from . import schemas       # noqa
