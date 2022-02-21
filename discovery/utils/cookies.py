@@ -33,12 +33,22 @@ class SAMLCookie(UserDict):
     def standardize(self):
         FIRST_NAME_KEY = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
         LAST_NAME_KEY = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+
+        def _get_val(data, k):
+            _val = data["samlUserdata"].get(k, [])
+            return _val[0] if _val else ''
+
+        _first_name = _get_val(self.data, FIRST_NAME_KEY)
+        _last_name = _get_val(self.data, LAST_NAME_KEY)
+        if _first_name or _last_name:
+            _name = " ".join((_first_name, _last_name))
+        else:
+            # if both first name and last name are empty,
+            # set name to the username ("samlNameId")
+            _name = self.data["samlNameId"]
         return UserInfo({
             "login": self.data["samlNameId"],  # or retrieve from samlUserData
-            "name": " ".join((
-                self.data["samlUserdata"][FIRST_NAME_KEY][0],
-                self.data["samlUserdata"][LAST_NAME_KEY][0]
-            )),
+            "name": _name,
             "avatar_url": None
         })
 
