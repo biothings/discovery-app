@@ -320,9 +320,9 @@ const store = new Vuex.Store({
     'finalschema':
     {
       '@context':{
-        "schema": "https://schema.org/",
-        "rdf": "https://www.w3.org/1999/02/22-rdf-syntax-ns#",
-        "rdfs": "https://www.w3.org/2000/01/rdf-schema#",
+        "schema": "http://schema.org/",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       },
       '@graph':[]
     },
@@ -750,7 +750,7 @@ const store = new Vuex.Store({
     },
     savePrefix(state,payload){
       state.prefix = payload['prefix'];
-      Vue.set(state.finalschema['@context'],state.prefix,'http://discovery.biothings.io/view/'+state.prefix+'/')
+      Vue.set(state.finalschema['@context'],state.prefix,'https://discovery.biothings.io/view/'+state.prefix+'/')
     },
     saveParent(state,payload){
       let parent = payload['parent']
@@ -1088,6 +1088,10 @@ const store = new Vuex.Store({
         if (incomplete){
           $.notify(incomplete+" properties still need validation rules",{ globalPosition: 'right',style:'warning', showDuration: 200, });
         }
+      }
+      //check if bioschemas is mentioned if so add bioschemas to context
+      if (JSON.stringify(state.finalschema).includes('bioschemas')) {
+          Vue.set(state.finalschema['@context'], 'bioschemas', 'https://discovery.biothings.io/view/bioschemas/')
       }
     }
   },
