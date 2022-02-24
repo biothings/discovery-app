@@ -1,6 +1,14 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
+  .anchor{
+    opacity: 0;
+  }
+  .anchorParent:hover > .anchor{
+    opacity: 1;
+  }
+</style>
 <main id="faq-app" class="bg-light" style="min-height: 100vh;">
     <div class="jumbotron bg-light text-center pt-5" style="margin-top: 40px;">
       <h1 class="logoText" v-text="name"></h1>
@@ -26,15 +34,15 @@
     <div class="container p-0" style="margin-bottom:10vh;">
       <template v-for="section in faq">
         <div class="card">
-          <h4 class="text-light card-header pt-5 pb-5 grad" :id='section.sectionName'>
-            <span v-text='section.sectionName.replace("_"," ")'></span> <a :href="'#'+section.sectionName" data-tipy="Copy link" class="secondary-content" @click="copyClipboard(window.location.href+'#'+section.sectionName)"><i class="fas fa-link"></i></a>
+          <h4 class="text-light card-header pt-5 pb-5 grad anchorParent" :id='section.sectionName'>
+            <span v-text='section.sectionName.replace("_"," ")'></span> <a :href="'#'+section.sectionName" data-tipy="Copy link" class="secondary-content anchor" @click="copyClipboard(window.location.href+'#'+section.sectionName)"><i class="fas fa-link"></i></a>
           </h4>
           <div class="card-body">
             <ul class="list-group card-text">
               <template v-for="item in section.questions">
                 <li class="list-group-item">
-                  <div class="mainTextDark bold" :id="item.anchor" :value="window.location+item.anchor">
-                    <span v-text="item.question"></span> <a :href="'#'+item.anchor" data-tipy="Copy link" class="secondary-content" @click="copyClipboard(window.location.href+'#'+item.anchor)"><i class="fas fa-link"></i></a>
+                  <div class="mainTextDark bold anchorParent" :id="item.anchor" :value="window.location+item.anchor">
+                    <span v-text="item.question"></span> <a :href="'#'+item.anchor" data-tipy="Copy link" class="secondary-content anchor" @click="copyClipboard(window.location.href+'#'+item.anchor)"><i class="fas fa-link"></i></a>
                   </div>
                   <div class="text-muted p-2" v-html="item.answer"></div>
                 </li>
@@ -610,15 +618,12 @@ var app = new Vue({
         let self = this;
         let context = {{Context}}
         if ( context.Query ) {
-          console.log('q', context.Query)
             switch (context.Query) {
             case 'n3c':
-              console.log('N3C')
                 self.faq = self.n3c_faq
                 self.name = "FAQ for N3C PPRL Datasets"
                 break;
             default:
-            console.log('DEFAULT')
                 self.faq = self.dde_faq
                 self.name = "FAQ"
             }
