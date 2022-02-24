@@ -1,6 +1,12 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
+  .metaCont{
+    max-height: 500px;
+    overflow-y: scroll;
+  }
+</style>
 <section id="dashboard">
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>
@@ -404,10 +410,12 @@ var app = new Vue({
             confirmButtonText: 'Go'
           }).then((result) => {
 
+            let ns = namespace == 'bioschemas' ? '?ns=bioschemas' : '';
+
             if (result.value == "Refresh URL") {
               // same url
               self.loading = true;
-              axios.put("/api/registry/"+namespace).then(res=>{
+              axios.put("/api/registry/"+namespace + ns).then(res=>{
                 if (res.data.result == 'updated') {
                   Swal.fire(
                     'Boom! Done!',
@@ -459,7 +467,7 @@ var app = new Vue({
                     'url': newurl
                   }
                   self.loading = true;
-                  axios.put("/api/registry/" + namespace, data).then(res=>{
+                  axios.put("/api/registry/" + namespace  + ns, data).then(res=>{
                     if (res.data.result) {
                       Swal.fire(
                         'Ta-dah!',
