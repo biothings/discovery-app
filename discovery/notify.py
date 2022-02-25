@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import certifi
 from biothings.utils.common import traverse
-from biothings.web.analytics.channels import Channel, SlackChannel
+from biothings.web.analytics.channels import Channel
 from biothings.web.analytics.events import Message
 from biothings.web.analytics.notifiers import Notifier
 from pyadf.document import Document as ADF
@@ -252,8 +252,8 @@ class DatasetNotifier(Notifier):
                         yield
                     else:  # no email address, cannot register
                         userid = None
-
-                    response = yield from channel.send(DatasetMessage({
+                    # response = yield from channel.send(DatasetMessage({
+                    response = yield channel.send(DatasetMessage({      # use yield here as N3CChannel.send does not yield from a list, we can refactor it later
                         "title": "External Dataset Request",  # customized title
                         "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
                         "url": f"http://discovery.biothings.io/dataset/{_id}",
@@ -367,6 +367,8 @@ def update_n3c_routine():
 
 
 def test_on(requests):
+    from discovery.handlers.api import log_response
+
     client = HTTPClient()
     for request in requests:
         response = client.fetch(request, raise_error=False)
@@ -376,7 +378,8 @@ def test_on(requests):
 def test_schema():
     settings = SimpleNamespace()
     settings.SLACK_WEBHOOKS = [input("slack webhook url: ")]
-    schema.configure(settings)
+    # schema.configure(settings)
+    schema = SchemaNotifier(settings)
     test_on(schema.add("ec", 538))
     test_on(schema.update("ec", 270))
     test_on(schema.delete("ec", 270))
@@ -388,7 +391,8 @@ def test_dataset():
     # settings.N3C_AUTH_USER = input("n3c user: ")
     # settings.N3C_AUTH_PASSWORD = input("n3c password: ")
     import config_key as settings
-    dataset.configure(settings)
+    # dataset.configure(settings)
+    dataset = DatasetNotifier(settings)
     test_on(dataset.add("0x0000", {
         "identifier": "grandtest",
         "description": "learn everything there is to know.",
