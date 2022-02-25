@@ -13,21 +13,21 @@ def updateLabels():
         if status:
             if status == 'Done/Imported':
                 doc.update(**{'_n3c': {'status': 'Available'}})
-                logging.info(f"Doc  updating label (1)")
+                logging.info("Doc  updating label (1)")
             elif status == 'Done/Rejected':
                 doc.update(**{'_n3c': {'status': 'Denied'}})
-                logging.info(f"Doc  updating label (2)")
+                logging.info("Doc  updating label (2)")
             elif status == 'Ready for Import':
                 doc.update(**{'_n3c': {'status': 'Approved for Import'}})
-                logging.info(f"Doc  updating label (3)")
+                logging.info("Doc  updating label (3)")
             elif status == 'Backlog':
                 doc.update(**{'_n3c': {'status': 'Pending Review'}})
-                logging.info(f"Doc  updating label (4)")
+                logging.info("Doc  updating label (4)")
             elif status == 'In Review':
                 doc.update(**{'_n3c': {'status': 'Pending Review'}})
-                logging.info(f"Doc  updating label (5)")
+                logging.info("Doc  updating label (5)")
             else:
-                logging.info(f"Doc  n3c label already up to date.")
+                logging.info("Doc  n3c label already up to date.")
 
 
 if __name__ == "__main__":
