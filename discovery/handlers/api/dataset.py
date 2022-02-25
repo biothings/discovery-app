@@ -7,6 +7,7 @@
 
 """
 import json
+from datetime import datetime, date
 
 from discovery.registry import datasets
 from discovery.notify import DatasetNotifier
@@ -60,15 +61,22 @@ def repr_regdoc(regdoc, show_metadata=False, show_id=True):
             ...
         }
     """
-    regdoc = regdoc.copy()
+    _regdoc = regdoc.copy()
 
     if show_metadata:
-        regdoc['_meta'] = regdoc.meta
+        _regdoc['_meta'] = regdoc.meta
+        if isinstance(_regdoc['_meta'], dict):
+            for k, v in _regdoc['_meta'].items():
+                # convert datetime object to str for proper json serialization
+                if isinstance(v, (datetime, date)):
+                    _regdoc['_meta'][k] = v.isoformat()
+            if 'n3c' in _regdoc['_meta'] and 'timestamp' in _regdoc['_meta']['n3c']:
+                _regdoc['_meta']['n3c']['timestamp'] = _regdoc['_meta']['n3c']['timestamp'].isoformat()
 
     if not show_id:
-        regdoc.pop('_id')
+        _regdoc.pop('_id')
 
-    return regdoc
+    return _regdoc
 
 
 class DatasetMetadataHandler(APIBaseHandler):
