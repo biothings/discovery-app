@@ -3,7 +3,7 @@
 {% include "header.html" %}
 <style>
   .metaCont{
-    max-height: 500px;
+    max-height: 200px;
     overflow-y: scroll;
   }
 </style>
@@ -567,7 +567,7 @@ var app = new Vue({
           if (this.user.login) {
             //SCHEMA NAMESPACES
             self.loading = true;
-            axios.get('/api/registry?user='+self.user.login+"&meta=true&size=50").then(res=>{
+            axios.get('/api/registry?user='+self.user.login+"&meta=true&size=20").then(res=>{
               // console.log("SCHEMAS",res.data)
               self.dashboard = res.data.hits;
               self.dashboardTotal = res.data.total;
@@ -578,7 +578,7 @@ var app = new Vue({
             });
             self.loading = true;
             // DATASETS PUBLIC
-            axios.get('/api/dataset?&user='+self.user.login+"&meta=true&size=50").then(res=>{
+            axios.get('/api/dataset?&user='+self.user.login+"&meta=true&size=20").then(res=>{
               // console.log("PUBLIC",res.data)
               self.publicDatasets = self.publicDatasets.concat(res.data.hits);
               self.datasetsTotal += res.data.total;
@@ -589,7 +589,7 @@ var app = new Vue({
             });
             self.loading = true;
             // DATASETS PRIVATE
-            axios.get('/api/dataset?private=true&user='+self.user.login+"&meta=true&size=50").then(res=>{
+            axios.get('/api/dataset?private=true&user='+self.user.login+"&meta=true&size=20").then(res=>{
               // console.log("PRIVATE",res.data)
               self.privateDatasets = self.privateDatasets.concat(res.data.hits);
               self.datasetsTotal += res.data.total;
