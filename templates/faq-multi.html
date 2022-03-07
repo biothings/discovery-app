@@ -1,6 +1,14 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+<style>
+  .anchor{
+    opacity: 0;
+  }
+  .anchorParent:hover > .anchor{
+    opacity: 1;
+  }
+</style>
 <main id="faq-app" class="bg-light" style="min-height: 100vh;">
     <div class="jumbotron bg-light text-center pt-5" style="margin-top: 40px;">
       <h1 class="logoText" v-text="name"></h1>
@@ -26,13 +34,15 @@
     <div class="container p-0" style="margin-bottom:10vh;">
       <template v-for="section in faq">
         <div class="card">
-          <h4 class="text-light card-header pt-5 pb-5 grad" v-text='section.sectionName.replace("_"," ")' :id='section.sectionName'></h4>
+          <h4 class="text-light card-header pt-5 pb-5 grad anchorParent" :id='section.sectionName'>
+            <span v-text='section.sectionName.replace("_"," ")'></span> <a :href="'#'+section.sectionName" data-tipy="Copy link" class="secondary-content anchor" @click="copyClipboard(window.location.href+'#'+section.sectionName)"><i class="fas fa-link"></i></a>
+          </h4>
           <div class="card-body">
             <ul class="list-group card-text">
               <template v-for="item in section.questions">
                 <li class="list-group-item">
-                  <div class="mainTextDark bold" :id="item.anchor" :value="window.location+item.anchor">
-                    <span v-text="item.question"></span> <a :href="'#'+item.anchor" data-tipy="Copy link" class="secondary-content" @click="copyClipboard(window.location.href+'#'+item.anchor)"><i class="fas fa-link"></i></a>
+                  <div class="mainTextDark bold anchorParent" :id="item.anchor" :value="window.location+item.anchor">
+                    <span v-text="item.question"></span> <a :href="'#'+item.anchor" data-tipy="Copy link" class="secondary-content anchor" @click="copyClipboard(window.location.href+'#'+item.anchor)"><i class="fas fa-link"></i></a>
                   </div>
                   <div class="text-muted p-2" v-html="item.answer"></div>
                 </li>
@@ -573,17 +583,7 @@ var app = new Vue({
                         'anchor':'cause-of-death',
                         'question':'Can I tell if the cause of death was COVID?',
                         'answer':`<p>
-                            The CDM or CMS sources may provide a cause of death that indicates the cause of death was COVID. The Government, Private Obituary, and ObituaryData.com sources do not provide a cause of death. 
-                            </p>`
-                        },
-                        {
-                        'anchor':'sex-probability',
-                        'question':'What is the sex probability score?',
-                        'answer':`<p>
-                            Not all of the sources in the MORTALITY table provide a sex for deceased individuals. The Government, Private Obituary, and ObituaryData.com sources often do not provide a sex for records. Therefore, every record is duplicated and assigned a sex of either male or female. This allows Datavant tokens, which are used for de-duplicating individuals, to be created. A Datavant token is a de-identified, secure key for an individual, created by hashing and encrypting combinations of demographic information for the individual. 
-                            </p>
-                            <p>
-                                After assigning the sex to the records, a sex probability score is assigned. This score is based solely on the first name provided by the source. For example, a first name of “Frederick” may receive a probability score of 99 (percent) for the male record and a probability of 1 for the female record. These probabilities are indicated in the Male_Sex_Probability and Female_Sex_Probability columns. 
+                          Supplemental PPRL Mortality data does not indicate cause of death. The harmonized OMOP CDM may provide a cause of death that indicates the cause of death was COVID. However, the Government, Private Obituary, and <a target="_blank" href="ObituaryData.com">ObituaryData.com</a> sources do not provide a cause of death.  
                             </p>`
                         },
                         {
@@ -594,28 +594,6 @@ var app = new Vue({
                             </p>
                             <p>
                                 Likewise, the Private Obituary source does not know the exact date for all reported deaths. If they know only the month of death (e.g., November 2021), they will provide the date of death as either the first day of that month or the middle of that month (e.g., 11/1/2021 or 11/15/2021). If they know only the year of death (e.g., 2021), they will provide the date of death as the first day of that year (e.g., 1/1/2021). 
-                            </p>`
-                        },
-                        {
-                        'anchor':'how-data-is-matched',
-                        'question':'How are records matched?',
-                        'answer':`<p>
-                            Records are matched using Datavant tokens, which are secure, stable, irreversible identifiers created through Datavant's tokenization engine. Tokens are created from structured PII from data sources, such as name, sex, date of birth, and SSN. 
-                            </p>
-                            <p>
-                                When matching mortality records to health system records, all present tokens must match for two records to be considered a match: The following tokens are considered when matching records from the Government, ObituaryData.com, and Private Obituary sources, because these sources provide only name, sex, date of birth, and, for the Government mortality source, SSN:
-                            </p>
-                            <p>
-                                <ul>
-                                    <li>Token 1: last name + first initial + sex + DOB</li>
-                                    <li>Token 2: last name (soundex) + first name (soundex) + sex + DOB</li>
-                                    <li>Token 4: last name + first name + sex + DOB</li>
-                                    <li>Token 5 (only when matching to Government source): SSN + sex + DOB</li>
-                                    <li>Token 16 (only when matching to Government source): SSN + first name</li>
-                                </ul>
-                            </p>
-                            <p>
-                                Health systems participating in PPRL submit a larger set of tokens for matching. Those tokens can be used to match and de-duplicate records between health systems. 
                             </p>`
                         },
                     ]
@@ -640,15 +618,12 @@ var app = new Vue({
         let self = this;
         let context = {{Context}}
         if ( context.Query ) {
-          console.log('q', context.Query)
             switch (context.Query) {
             case 'n3c':
-              console.log('N3C')
                 self.faq = self.n3c_faq
                 self.name = "FAQ for N3C PPRL Datasets"
                 break;
             default:
-            console.log('DEFAULT')
                 self.faq = self.dde_faq
                 self.name = "FAQ"
             }
