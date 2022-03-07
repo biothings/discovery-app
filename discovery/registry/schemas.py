@@ -37,7 +37,7 @@ EXTENSION_OWNER = "cwu@scripps.edu"
 # ----------------
 
 
-def _add_schema_class(schema, namespace):
+def _add_schema_class(schema, namespace, dryrun=False):
 
     assert isinstance(schema, (ValidatedDict, type(None)))
 
@@ -50,15 +50,35 @@ def _add_schema_class(schema, namespace):
         schema_classes = schema.get_classes()
     else:
         try:
-            schema = SchemaAdapter(schema)
-            schema_classes = schema.get_classes()
+            if namespace == 'bioschemas':
+                schema = SchemaAdapter(schema, base_schema=['schema.org'])
+            else:
+                schema = SchemaAdapter(schema)
+            schema_classes = schema.get_classes(include_ref=False)    # only get those defined classes
         except Exception as exc:  # TODO not sure what could go wrong
             raise RegistryError(str(exc))
 
-    # save class
-    delete_classes(namespace)
+    # TODO: validate all classes first before deleting the namespace
+    # delete the existing classes under the namespace
+    if dryrun:
+        logger.info(f'Deleting existing "{namespace}" classes... (Dryrun only, not actually deleting anything.')
+    else:
+        delete_classes(namespace)
+        logger.debug(f'"{namespace}" classes were deleted.')
+    # save classes
     for schema_class in schema_classes:
-        ESSchemaClass(namespace=namespace, **schema_class).save()
+        cls = ESSchemaClass(namespace=namespace, **schema_class)
+        if dryrun:
+            try:
+                cls.full_clean()    # This validates all class fields
+            except AttributeError:
+                logger.error(f'Failed to validate "{cls.name}" class')
+                logger.error(f'\n{json.dumps(schema_class, indent=2)}')
+                raise
+        else:
+            cls.save()
+    if dryrun:
+        logger.info("This is a dryrun, no classes are actually saved")
 
     return len(schema_classes)
 
