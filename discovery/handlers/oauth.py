@@ -69,6 +69,7 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
             user = await self.github_get_authenticated_user(token['access_token'])
             if user:
                 logging.info('logged in user from github: %s', user)
+                user['access_token'] = token['access_token']         # save access_token for future use in handlers.api.github
                 self.set_secure_cookie("user", json_encode(user))
             else:
                 self.clear_cookie("user")
