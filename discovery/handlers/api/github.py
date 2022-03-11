@@ -53,7 +53,7 @@ class GHHandler(APIBaseHandler):
         # if login method was not GitHub this is not allowed
         # token will not be available for other login methods
         if not 'access_token' in user: 
-            raise HTTPError(403, reason="Must login with")
+            raise HTTPError(403, reason="Must login with GitHub to access this feature GitHub to access this feature")
         g = Github(user['access_token'])
         auth_user = g.get_user()
         if not repo_name:
@@ -122,7 +122,7 @@ class GHHandler(APIBaseHandler):
         # if login method was not GitHub this is not allowed
         # token will not be available for other login methods
         if not 'access_token' in user: 
-            raise HTTPError(403, reason="Must login with")
+            raise HTTPError(403, reason="Must login with GitHub to access this feature")
         g = Github(user['access_token'])
         # authenticated user
         auth_user = g.get_user()
@@ -172,7 +172,7 @@ class GHHandler(APIBaseHandler):
         # if login method was not GitHub this is not allowed
         # token will not be available for other login methods
         if not 'access_token' in user: 
-            raise HTTPError(403, reason="Must login with")
+            raise HTTPError(403, reason="Must login with GitHub to access this feature")
         g = Github(user['access_token'])
         # authenticated user
         auth_user = g.get_user()
@@ -246,7 +246,7 @@ class GHHandler(APIBaseHandler):
         # if login method was not GitHub this is not allowed
         # token will not be available for other login methods
         if not 'access_token' in user: 
-            raise HTTPError(403, reason="Must login with")
+            raise HTTPError(403, reason="Must login with GitHub to access this feature")
         g = Github(user['access_token'])
         # authenticated user
         auth_user = g.get_user()
