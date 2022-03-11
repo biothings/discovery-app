@@ -1648,8 +1648,8 @@ Vue.component('github-option', {
         self.loading = false;
         Swal.fire({
           type: 'error',
-          title: 'Oops...Something went really wrong!',
-          text: err,
+          title: 'Oops!',
+          text: err?.response?.data?.error,
         })
         throw err;
       });
@@ -1923,7 +1923,7 @@ Vue.component('github-option', {
   `<div class="bg-light" style="position: relative;">
     <h4 class="logoText text-center m-2"><i class="fab fa-github-alt"></i> Save your work to GitHub</h4>
     <p class="text-dark w-50 m-auto mb-2">
-      <small><i class="fas fa-exclamation-circle text-info"></i> By continuing with this process you are giving us permission to access your GitHub account to create/edit <b>public</b> repos/files.
+      <small><i class="fas fa-exclamation-circle text-info"></i> By continuing with this process you are giving us permission to access your GitHub account to create/edit <b>public</b> repos/files. This might include public organizations and repos that you are part of.
       If you DO NOT accept this please close this window and choose the <b>Download</b> option to save manually.</small>
     </p>
     <div v-if="!accepts">
