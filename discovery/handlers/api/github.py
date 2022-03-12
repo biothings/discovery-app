@@ -230,7 +230,6 @@ class GHHandler(APIBaseHandler):
         repo_name = self.args_json.get('name', None)
         file_name = self.args_json.get('file', None)
         msg = self.args_json.get('comment', "updated via Data Discovery Engine")
-        existing = self.args_json.get('existing', True)
         existing_file = self.args_json.get('existing_file', True)
         # data must be encoded
         data = self.args_json.get('data', None)
