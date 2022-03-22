@@ -167,3 +167,14 @@ class SchemaAdapter():
                 _schema_class['ref'] = True
                 ans[schema_class.name] = _schema_class
         return ans
+
+    def has_validation_error(self):
+        """return True if there is at least one validation error."""
+        for err in self._schema.validator.validation_errors:
+            if not err.warning:
+                return True
+        return False
+
+    def get_validation_errors(self):
+        """return validation errors as a list of dictionaries"""
+        return [err.to_dict() for err in self._schema.validator.validation_errors]

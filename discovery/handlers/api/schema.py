@@ -365,29 +365,42 @@ class SchemaViewHandler(APIBaseHandler):
                 doc = self.request.body
             if doc:
                 doc = json.loads(doc)
+                validator_options = {"validation_merge": False, "raise_on_validation_error": False},
                 if self.args.ns:
                     if self.args.ns == 'schema.org':
                         # do no load any base schemas
-                        schema = SchemaAdapter(doc, base_schema=[])
+                        schema = SchemaAdapter(doc, base_schema=[], validator_options=validator_options)
                     elif self.args.ns == 'bioschemas':
                         # do not load bioschemas, only schema.org
-                        schema = SchemaAdapter(doc, base_schema=['schema.org'])
+                        schema = SchemaAdapter(doc, base_schema=['schema.org'], validator_options=validator_options)
                     else:
-                        schema = SchemaAdapter(doc)
+                        schema = SchemaAdapter(doc, validator_options=validator_options)
                 else:
-                    schema = SchemaAdapter(doc)
+                    schema = SchemaAdapter(doc, validator_options=validator_options)
             else:
                 self.finish({})
                 return
         except Exception as exc:  # TODO
             raise HTTPError(400, reason=str(exc))
 
-        classes = schema.get_classes()
+        if schema.has_validation_error():
+            classes = []
+            validation = {
+                "valid": False,
+                "errors": schema.get_validation_errors()
+            }
+        else:
+            classes = schema.get_classes()
+            validation = {
+                "valid": True,
+                "errors": schema.get_validation_errors()       # could still be some warnings even "valid" is True
+            }
 
         response = {
             "total": len(classes),
             "context": schema.context,
-            "hits": classes
+            "hits": classes,
+            "validation": validation
         }
 
         self.finish(response)
