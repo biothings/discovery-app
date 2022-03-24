@@ -365,7 +365,7 @@ class SchemaViewHandler(APIBaseHandler):
                 doc = self.request.body
             if doc:
                 doc = json.loads(doc)
-                validator_options = {"validation_merge": False, "raise_on_validation_error": False},
+                validator_options = {"validation_merge": False, "raise_on_validation_error": False}
                 if self.args.ns:
                     if self.args.ns == 'schema.org':
                         # do no load any base schemas
