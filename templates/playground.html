@@ -551,7 +551,7 @@ var app = new Vue({
             //CLEAN UP MSG
             error.message = error.message.replace(/\\"/g, '"');
             // WARNINGS ONLY
-            if (!Object.hasOwnProperty(error, 'warning')) {
+            if (!Object.hasOwnProperty.call(error, 'warning')) {
               only_warnings = false;
             }
             // ADD NEW PROP
@@ -642,8 +642,7 @@ var app = new Vue({
 
           axios.get("/api/view?url="+self.input).then(res=>{
             self.loading = false;
-            // console.log(res.data)
-            if (res.data.validation.valid) {
+            if (res.data.validation.valid && !res.data.validation.errors.length) {
               self.handleGoodSchema(res.data);
             }else{
               self.showErrorDetails(res.data.validation, res.data)
