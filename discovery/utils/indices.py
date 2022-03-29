@@ -2,8 +2,8 @@
 
 from elasticsearch_dsl import Index
 
-from discovery.data.dataset import Dataset
-from discovery.data.schema import Schema, SchemaClass
+from discovery.model.dataset import Dataset
+from discovery.model.schema import Schema, SchemaClass
 
 
 def setup():

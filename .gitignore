@@ -12,9 +12,9 @@ __pycache__/
 .vscode
 
 # Credentials
-discovery/web/saml/certs/*.crt
-discovery/web/saml/certs/*.key
-discovery/web/saml/*.json
+discovery/handlers/saml/certs/*.crt
+discovery/handlers/saml/certs/*.key
+discovery/handlers/saml/*.json
 discovery/config_key.py
 config_key.py
 

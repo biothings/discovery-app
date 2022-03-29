@@ -12,9 +12,9 @@ SAML_PATH = os.path.dirname(__file__)
 try:
     from .handlers import *
 except ImportError:
-    SAML_HANDLERS = []
+    HANDLERS = []
 else:
-    SAML_HANDLERS = [
+    HANDLERS = [
         (r"/saml/", SAMLUserHandler),
         (r"/saml/login/?", SAMLLoginHandler),
         (r"/saml/acs/?", SAMLACSHandler),
