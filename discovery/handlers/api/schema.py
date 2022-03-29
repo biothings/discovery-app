@@ -20,11 +20,11 @@ import logging
 import certifi
 from discovery.registry import schemas
 from discovery.utils.adapters import SchemaAdapter
-from discovery.web import notify
+from discovery.notify import SchemaNotifier
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import Finish, HTTPError
 
-from .base import APIBaseHandler, capture_registry_error, github_authenticated
+from .base import APIBaseHandler, registryOperation, authenticated
 
 CORE_SCHEMA_NS = ('schema', 'biomedical', 'datacite', 'google')
 RESERVED_SCHEMA_NS = ('metadata')
@@ -122,6 +122,7 @@ class SchemaRegistryHandler(APIBaseHandler):
             'source': {'type': bool, 'default': True}
         }
     }
+    notifier = SchemaNotifier
 
     def head(self, namespace):
         """
@@ -130,8 +131,8 @@ class SchemaRegistryHandler(APIBaseHandler):
         if not schemas.exists(namespace):
             self.set_status(404)
 
-    @github_authenticated
-    @capture_registry_error
+    @authenticated
+    @registryOperation
     async def post(self):
         """
         Add a schema and its classes. Request body:
@@ -179,12 +180,12 @@ class SchemaRegistryHandler(APIBaseHandler):
         })
 
         self.report(
-            notify.schema, "add",
+            "add",
             namespace=namespace,
             num_classes=count
         )
 
-    @capture_registry_error
+    @registryOperation
     def get(self, namespace=None, curie=None):
         """
         Access the schema registry.
@@ -253,8 +254,8 @@ class SchemaRegistryHandler(APIBaseHandler):
 
         self.finish(klass)
 
-    @github_authenticated
-    @capture_registry_error
+    @authenticated
+    @registryOperation
     async def put(self, namespace=None):
         """
         Update the schema of the specified namespace.
@@ -298,13 +299,13 @@ class SchemaRegistryHandler(APIBaseHandler):
         })
 
         self.report(
-            notify.schema, "update",
+            "update",
             namespace=namespace,
             num_classes=count
         )
 
-    @github_authenticated
-    @capture_registry_error
+    @authenticated
+    @registryOperation
     def delete(self, namespace):
         """
         Delete a schema and its classes by its namespace.
@@ -319,7 +320,7 @@ class SchemaRegistryHandler(APIBaseHandler):
         count = schemas.delete(namespace)
 
         self.report(
-            notify.schema, "delete",
+            "delete",
             namespace=namespace,
             num_classes=count
         )
@@ -328,7 +329,10 @@ class SchemaRegistryHandler(APIBaseHandler):
 class SchemaViewHandler(APIBaseHandler):
 
     name = 'view'
-    kwargs = {'GET': {'url': {'type': str, 'required': True}}}
+    kwargs = {'GET': {
+        'url': {'type': str},      # pass schema as an url, alternatively can pass schema content in body
+        'ns': {'type': str}        # indicates the special target namespace of the schema, e.g. schema.org or bioschemas.
+    }}
 
     async def get(self):
         """
@@ -349,20 +353,54 @@ class SchemaViewHandler(APIBaseHandler):
             ]
         }
         """
-        try:  # load doc from url
-            response = await AsyncHTTPClient().fetch(
-                self.args.url, ca_certs=certifi.where())
-            doc = json.loads(response.body)
-            schema = SchemaAdapter(doc)
+        try:
+            doc = None
+            if self.args.url:
+                # load doc from url
+                response = await AsyncHTTPClient().fetch(
+                    self.args.url, ca_certs=certifi.where())
+                doc = response.body
+            elif self.request.body:
+                # load doc from request body
+                doc = self.request.body
+            if doc:
+                doc = json.loads(doc)
+                validator_options = {"validation_merge": False, "raise_on_validation_error": False}
+                if self.args.ns:
+                    if self.args.ns == 'schema.org':
+                        # do no load any base schemas
+                        schema = SchemaAdapter(doc, base_schema=[], validator_options=validator_options)
+                    elif self.args.ns == 'bioschemas':
+                        # do not load bioschemas, only schema.org
+                        schema = SchemaAdapter(doc, base_schema=['schema.org'], validator_options=validator_options)
+                    else:
+                        schema = SchemaAdapter(doc, validator_options=validator_options)
+                else:
+                    schema = SchemaAdapter(doc, validator_options=validator_options)
+            else:
+                self.finish({})
+                return
         except Exception as exc:  # TODO
             raise HTTPError(400, reason=str(exc))
 
-        classes = schema.get_classes()
+        if schema.has_validation_error():
+            classes = []
+            validation = {
+                "valid": False,
+                "errors": schema.get_validation_errors()
+            }
+        else:
+            classes = schema.get_classes()
+            validation = {
+                "valid": True,
+                "errors": schema.get_validation_errors()       # could still be some warnings even "valid" is True
+            }
 
         response = {
             "total": len(classes),
             "context": schema.context,
-            "hits": classes
+            "hits": classes,
+            "validation": validation
         }
 
         self.finish(response)

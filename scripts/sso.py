@@ -6,7 +6,7 @@ import tornado.ioloop
 import tornado.web
 from tornado.log import enable_pretty_logging
 
-from discovery.web.saml import SAML_HANDLERS
+from discovery.handlers.saml import SAML_HANDLERS
 
 
 class Application(tornado.web.Application):

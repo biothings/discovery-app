@@ -27,7 +27,7 @@
 import logging
 
 from biothings_schema import Schema as SchemaParser
-from discovery.data import Schema as ESSchema
+from discovery.model import Schema as ESSchema
 
 # the underlying package uses warnings
 logging.captureWarnings(True)
@@ -45,8 +45,10 @@ class SchemaClassWrapper():
 
     def __getattr__(self, attr):
         value = getattr(self._parser_class, attr)
-        if isinstance(value, dict):
-            value = value.get("@value", "")
+        if isinstance(value, dict) and "@value" in value:
+            # a simplified handling of a JSON-LD value object
+            # like examples at https://www.w3.org/2018/jsonld-cg-reports/json-ld/#string-internationalization
+            value = value["@value"]
         return value
 
     @property
@@ -114,23 +116,25 @@ class SchemaAdapter():
         return getattr(self._schema, attr)
 
     def get_class_defs(self):
-        # get only classes defined in this schema
-        # each {} will have a field ref: false
+        """get only classes defined in this schema
+           each {} will have a field ref: false"""
         return list(self._get_class_defs().values())
 
     def get_class_refs(self):
-        # get only classes referenced outside this schema
-        # each {} will have a field ref: true
+        """get only classes referenced outside this schema
+           each {} will have a field ref: true"""
         return list(self._get_class_refs().values())
 
-    def get_classes(self):
-        # get all classes and label them if they are referenced
-
+    def get_classes(self, include_ref=True):
+        """get all classes and label them if they are referenced
+           if include_ref is False, only "defined" classes are included.
+        """
         defs = self._get_class_defs()
-        refs = self._get_class_refs()
         ans = {}
         ans.update(defs)
-        ans.update(refs)
+        if include_ref:
+            refs = self._get_class_refs()
+            ans.update(refs)
         return list(ans.values())
 
     @staticmethod
@@ -163,3 +167,14 @@ class SchemaAdapter():
                 _schema_class['ref'] = True
                 ans[schema_class.name] = _schema_class
         return ans
+
+    def has_validation_error(self):
+        """return True if there is at least one validation error."""
+        for err in self._schema.validator.validation_errors:
+            if not err.warning:
+                return True
+        return False
+
+    def get_validation_errors(self):
+        """return validation errors as a list of dictionaries"""
+        return [err.to_dict() for err in self._schema.validator.validation_errors]

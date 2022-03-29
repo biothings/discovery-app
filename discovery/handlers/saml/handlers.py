@@ -1,7 +1,6 @@
 """
-    SAML based SSO.
+    SAML based SSO using python3-saml.
 
-    Implemented with python3-saml package. May run this file directly.
     Require settings.json and advanced_settings.json under this folder.
     See configuration details: https://github.com/onelogin/python3-saml
 

@@ -1,12 +1,19 @@
+"""
+    Github API Access
+    Author: Marco A. Cano
+"""
+
 import json
 import logging
 
-from github import Github, GithubException
 from tornado.web import HTTPError
 
-from .base import APIBaseHandler, github_authenticated
+from github import Github, GithubException
+
+from .base import APIBaseHandler, authenticated
 
 logger = logging.getLogger(__name__)
+
 
 class GHHandler(APIBaseHandler):
     """
@@ -36,13 +43,17 @@ class GHHandler(APIBaseHandler):
         },
     }
 
-    @github_authenticated
+    @authenticated
     def get(self, repo_name=None):
         """
         Check repo existence
         or get all public repos
         """
         user = json.loads(self.get_secure_cookie("user"))
+        # if login method was not GitHub this is not allowed
+        # token will not be available for other login methods
+        if 'access_token' not in user:
+            raise HTTPError(403, reason="Must login with GitHub to access this feature")
         g = Github(user['access_token'])
         auth_user = g.get_user()
         if not repo_name:
@@ -66,7 +77,7 @@ class GHHandler(APIBaseHandler):
                         'msg': repo_list
                     })
             else:
-                raise HTTPError(400, reason=f"Unable to authenticate user")
+                raise HTTPError(400, reason="Unable to authenticate user")
         else:
             if auth_user.login:
                 try:
@@ -97,10 +108,9 @@ class GHHandler(APIBaseHandler):
                             'msg': f"{repo_name} does not exist"
                         })
             else:
-                raise HTTPError(400, reason=f"Unable to authenticate user")
+                raise HTTPError(400, reason="Unable to authenticate user")
 
-
-    @github_authenticated
+    @authenticated
     def delete(self):
         """
         Delete repo
@@ -109,12 +119,16 @@ class GHHandler(APIBaseHandler):
         }
         """
         user = json.loads(self.get_secure_cookie("user"))
+        # if login method was not GitHub this is not allowed
+        # token will not be available for other login methods
+        if 'access_token' not in user:
+            raise HTTPError(403, reason="Must login with GitHub to access this feature")
         g = Github(user['access_token'])
         # authenticated user
         auth_user = g.get_user()
-        repo_name = self.args_json.get('name','')
+        repo_name = self.args_json.get('name', '')
         if not repo_name:
-            raise HTTPError(400, reason=f"Repo name not provided")
+            raise HTTPError(400, reason="Repo name not provided")
         try:
             repo = auth_user.get_repo(full_name=repo_name)
             repo.delete()
@@ -123,13 +137,13 @@ class GHHandler(APIBaseHandler):
         except Exception as exc:  # unexpected
             raise HTTPError(500, reason=str(exc))
         if not repo:
-            logging.info(msg="Deleted repo "+repo_name)
+            logging.info("Deleted repo %s", repo_name)
             self.finish({
                 'success': True,
                 'msg': f"{repo_name} was deleted"
             })
 
-    @github_authenticated
+    @authenticated
     def post(self):
         """
         Create new repo with file
@@ -149,13 +163,16 @@ class GHHandler(APIBaseHandler):
         if data:
             content_encoded = json.dumps(data, indent=2).encode('utf-8')
         else:
-            raise HTTPError(400, reason=f"File content not provided")
+            raise HTTPError(400, reason="File content not provided")
         if not repo_name:
-            raise HTTPError(400, reason=f"Repo name not provided")
+            raise HTTPError(400, reason="Repo name not provided")
 
-        logging.info(msg="Repo name "+repo_name)
+        logging.info("Repo name %s", repo_name)
         user = json.loads(self.get_secure_cookie("user"))
-        # signin with token
+        # if login method was not GitHub this is not allowed
+        # token will not be available for other login methods
+        if 'access_token' not in user:
+            raise HTTPError(403, reason="Must login with GitHub to access this feature")
         g = Github(user['access_token'])
         # authenticated user
         auth_user = g.get_user()
@@ -181,7 +198,7 @@ class GHHandler(APIBaseHandler):
                     raise HTTPError(500, reason=str(exc))
 
         else:
-            raise HTTPError(400, reason=f"Unable to authenticate user")
+            raise HTTPError(400, reason="Unable to authenticate user")
 
         if repo:
             path = file_name
@@ -197,7 +214,7 @@ class GHHandler(APIBaseHandler):
                 'msg': f"{repo_name} does not exist"
             })
 
-    @github_authenticated
+    @authenticated
     def put(self):
         """
         Update file in repo
@@ -213,19 +230,22 @@ class GHHandler(APIBaseHandler):
         repo_name = self.args_json.get('name', None)
         file_name = self.args_json.get('file', None)
         msg = self.args_json.get('comment', "updated via Data Discovery Engine")
-        existing = self.args_json.get('existing', True)
         existing_file = self.args_json.get('existing_file', True)
         # data must be encoded
         data = self.args_json.get('data', None)
         if data:
             content_encoded = json.dumps(data, indent=2).encode('utf-8')
         else:
-            raise HTTPError(400, reason=f"File content not provided")
+            raise HTTPError(400, reason="File content not provided")
         if not repo_name:
-            raise HTTPError(400, reason=f"Repo name not provided")
+            raise HTTPError(400, reason="Repo name not provided")
 
-        logging.info(msg="Updating file on repo.name: "+repo_name)
+        logging.info("Updating file on repo.name: %s", repo_name)
         user = json.loads(self.get_secure_cookie("user"))
+        # if login method was not GitHub this is not allowed
+        # token will not be available for other login methods
+        if 'access_token' not in user:
+            raise HTTPError(403, reason="Must login with GitHub to access this feature")
         g = Github(user['access_token'])
         # authenticated user
         auth_user = g.get_user()
@@ -237,7 +257,7 @@ class GHHandler(APIBaseHandler):
             except Exception as exc:  # unexpected
                 raise HTTPError(500, reason=str(exc))
         else:
-            raise HTTPError(400, reason=f"Unable to authenticate user")
+            raise HTTPError(400, reason="Unable to authenticate user")
         if repo and existing_file:
             file_path = file_name
             try:
@@ -249,7 +269,7 @@ class GHHandler(APIBaseHandler):
             if file:
                 file_updated = repo.update_file(file_path, msg, content_encoded, file.sha)
                 if file_updated:
-                    logging.info(msg="File updated name "+file_name)
+                    logging.info("File updated name %s", file_name)
                     self.finish({
                         'success': True,
                         'msg': repo.full_name
