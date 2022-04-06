@@ -33,95 +33,60 @@
         </div>
         <!-- RESULTS -->
         <div class="col-sm-10" id="dashTippyParent">
-          <div class="mt-3 mainTextDark">
-            <div class="numberCircle mainBackDark" v-text="dashboardTotal"></div> Registered Schema Namespaces
-          </div>
-          <div class="metaCont" v-if="dashboard && dashboard.length">
-            <div v-for="item in dashboard" class="row m-1">
-              <div class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-between">
-                <a target="_blank" :href="'/view/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
-              </div>
-              <div class="col-sm-4 p-1 bg-dark actions d-flex align-items-center justify-content-around">
-                <div>
-                  <a target="_blank" :href="item.url" :title="item.url" >
-                    <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'source URL'">
-                      <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                      <i class="fas fa-code fa-stack-1x text-light"></i>
-                    </span>
-                  </a>
-                </div>
-                <div>
-                  <a :href="'/view/'+item.namespace+'/'">
-                    <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'Visualize'">
-                      <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                      <i class="fas fa-eye fa-stack-1x text-light"></i>
-                    </span>
-                  </a>
-                </div>
-                <div>
-                  <span class="fa-stack fa-1x pointer tip" @click="updateSelected('schema',item.namespace)" :data-tippy-info="'Update Schema'">
-                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                    <i class="fas fa-sync-alt fa-stack-1x text-light"></i>
-                  </span>
-                </div>
-                <div>
-                  <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('schema',item.namespace)" :data-tippy-info="'Delete'">
-                    <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                    <i class="fas fa-trash fa-stack-1x text-light"></i>
-                  </span>
-                </div>
-              </div>
-
+          <div class="alert-dark p-2">
+            <div class="mt-3 mainTextDark">
+              <div class="numberCircle mainBackDark" v-text="dashboardTotal"></div> Registered Schema Namespaces
             </div>
-          </div>
-
-
-          <div class="mt-3 mainTextLight">
-            <div class="numberCircle mainBackLight" v-text="datasetsTotal"></div> Registered Datasets
-          </div>
-          <div class="metaCont">
-            <template v-if="privateDatasets && privateDatasets.length">
-              <div v-for="item in privateDatasets" class="row m-1">
-                <div class="col-sm-12 col-md-8 p-1 mainBackLight d-flex align-items-center justify-content-between">
-                  <a :href="'/dataset/'+item._id" class="d-block m-2 text-light" :title="item.name">
-                    <small v-text="trunc(item.name)"></small>
-                  </a>
-                  <small class="text-light">
-                    <span v-html="formatDate(item['_meta'])"></span>
-                  </small>
+            <div class="metaCont" v-if="dashboard && dashboard.length">
+              <div v-for="item in dashboard" class="row m-1">
+                <div class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-between">
+                  <a target="_blank" :href="'/view/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
                 </div>
-                <div class="col-sm-12 col-md-4 p-1 bg-dark actions d-flex align-items-center justify-content-around">
+                <div class="col-sm-4 p-1 bg-dark actions d-flex align-items-center justify-content-around">
                   <div>
-                    <a :href="'/dataset/'+item._id">
-                      <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'View Dataset'">
+                    <a target="_blank" :href="item.url" :title="item.url" >
+                      <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'source URL'">
+                        <i class="fas fa-circle text-muted fa-stack-2x"></i>
+                        <i class="fas fa-code fa-stack-1x text-light"></i>
+                      </span>
+                    </a>
+                  </div>
+                  <div>
+                    <a :href="'/view/'+item.namespace+'/'">
+                      <span class="fa-stack fa-1x pointer tip" :data-tippy-info="'Visualize'">
                         <i class="fas fa-circle text-muted fa-stack-2x"></i>
                         <i class="fas fa-eye fa-stack-1x text-light"></i>
                       </span>
                     </a>
                   </div>
                   <div>
-                    <span class="fa-stack fa-1x pointer tip" @click="edit(item._id)" :data-tippy-info="'Quick Edit'">
+                    <span class="fa-stack fa-1x pointer tip" @click="updateSelected('schema',item.namespace)" :data-tippy-info="'Update Schema'">
                       <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                      <i class="fas fa-bolt fa-stack-1x text-light"></i>
+                      <i class="fas fa-sync-alt fa-stack-1x text-light"></i>
                     </span>
                   </div>
                   <div>
-                    <span class="fa-stack fa-1x pointer tip" @click="handlePrivacy(item,'private')" :data-tippy-info="'Item is PRIVATE - Edit Privacy'">
-                      <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                      <i class="fas fa-lock fa-stack-1x text-warning"></i>
-                    </span>
-                  </div>
-                  <div>
-                    <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('metadata',item._id)" :data-tippy-info="'Delete'">
+                    <span class="fa-stack fa-1x pointer tip" @click="deleteSelected('schema',item.namespace)" :data-tippy-info="'Delete'">
                       <i class="fas fa-circle text-muted fa-stack-2x"></i>
                       <i class="fas fa-trash fa-stack-1x text-light"></i>
                     </span>
                   </div>
                 </div>
+  
               </div>
-            </template>
-            <template v-if="publicDatasets && publicDatasets.length">
-              <div v-for="item in publicDatasets" class="row m-1">
+            </div>
+          </div>
+
+          <div class="alert-info p-2">
+            <div class="mt-3 mainTextLight">
+              <div class="numberCircle mainBackLight" v-text="datasetsTotal"></div> Registered Datasets
+            </div>
+            <div class="d-flex justify-content-start align-items-center">
+              <input type="checkbox" class="form-control slider mr-2" id="private_dataset" name="private_dataset" v-model="privateOnly" @change="getDatasets()">
+              <label for="private_dataset" class="m-0"> Show Private Datasets</label><br>
+            </div>
+            <div>
+              <div v-for="item,i in datasets" class="row m-1" :key="i+'dataset'">
                 <div class="col-sm-12 col-md-8 p-1 mainBackLight d-flex align-items-center justify-content-between">
                   <a :href="'/dataset/'+item._id" class="m-2 text-light d-block" :title="item.name">
                     <small v-text="trunc(item.name)"></small>
@@ -146,9 +111,10 @@
                     </span>
                   </div>
                   <div>
-                    <span class="fa-stack fa-1x pointer tip" @click="handlePrivacy(item,'public')" :data-tippy-info="'Item is PUBLIC - Edit Privacy'">
+                    <span class="fa-stack fa-1x pointer tip" @click="handlePrivacy(item,'public')" 
+                    :data-tippy-info="[item['_meta']['private'] ? 'Item is PRIVATE - Edit Privacy' : 'Item is PUBLIC - Edit Privacy']">
                       <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                      <i class="fas fa-lock-open fa-stack-1x text-light"></i>
+                      <i class="fas fa-stack-1x" :class="[item['_meta']['private'] ? 'fa-lock text-warning' : 'fa-lock-open text-light']"></i>
                     </span>
                   </div>
                   <div>
@@ -159,9 +125,43 @@
                   </div>
                 </div>
               </div>
-            </template>
+            </div>
+            <div>
+              <select class="form-control form-control-sm m-auto w-25" v-model="perPage" @change="getDatasets();calculatePages() " id="perPage">
+                  <option value="" disabled selected>Shown Per Page</option>
+                  <option value="5">5 per page</option>
+                  <option value="10">10 per page</option>
+                  <option value="20">20 per page</option>
+              </select>
+              <div class="d-flex flex-wrap justify-content-center p-1 mt-2">
+                <div class="page-item rounded-0" :class="{ 'disabled': page <= 1 }">
+                  <a class="page-link p-1" @click.prevent="prevPage(); getDatasets()"><i class="fas fa-step-backward"></i></a>
+                </div>
+                <template v-if="groupPages">
+                  <div class="page-item rounded-0" v-show="!startCapLimitReached">
+                    <a href="#" class="page-link p-1" @click.prevent="previousGroup(); getDatasets()">Previous 20</a>
+                  </div>
+                </template>
+                <template v-for="n in pages" :key="n + 'page'">
+                  <div v-if="n >= startCap && n <= endCap" class="page-item rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }">
+                    <a href="#" class="page-link p-1" @click.prevent="page = n; getDatasets()" v-text="n"></a>
+                  </div>
+                </template>
+                <template v-if="groupPages">
+                  <div class="page-item rounded-0" v-show="!endCapLimitReached">
+                    <a href="#" class="page-link p-1" @click.prevent="nextGroup(); getDatasets()">Next 20</a>
+                  </div>
+                </template>
+                <div class="page-item rounded-0" :class="{ 'disabled': page >= pages }">
+                  <a class="page-link p-1" @click.prevent="nextPage(); getDatasets()"><i class="fas fa-step-forward"></i></a>
+                </div>
+              </div>
+            </div>
           </div>
-          <template v-if="publicDatasets || privateDatasets">
+
+
+          
+          <template v-if="datasets || privateDatasets">
             <div class="alert alert-secondary mt-3">
               <small>
                 Want to edit a registered dataset? Learn how <a target="_blank" href="/faq#edit-dataset">HERE</a>
@@ -202,14 +202,25 @@ var app = new Vue({
           dashboard:[],
           dashboardTotal:0,
           privateDatasets:[],
-          publicDatasets:[],
+          datasets:[],
           datasetsTotal:0,
           selectedItem:{},
           slugInput:'',
           availableSlug: false,
           invalidChars : false,
           meta:{},
-          loading: false
+          loading: false,
+          total: 0,
+          perPage: 5,
+          page: 1,
+          pages: 1,
+          startCap:0,
+          endCap:20,
+          groupPages: false,
+          pageLimit: 20,
+          startCapLimitReached: true,
+          endCapLimitReached: false,
+          privateOnly: false
 				}
 			},
       watch:{
@@ -236,6 +247,60 @@ var app = new Vue({
         },
       },
 			methods:{
+        calculatePages: function () {
+          var self= this;
+          self.pages = Math.ceil(this.datasetsTotal / self.perPage);
+  
+          if (self.pages > self.pageLimit) {
+            self.groupPages =  true;
+          }
+        },
+        previousGroup: function(){
+          var self = this;
+  
+          if (!self.startCapLimitReached) {
+            if (self.startCap-20 > 0) {
+              self.page = self.startCap-20
+              self.startCap = self.startCap-20
+              self.endCap = self.endCap-20
+              self.endCapLimitReached = false;
+            }else {
+              self.page = 1
+              self.startCap = 0
+              self.endCap = 20
+              self.startCapLimitReached = true;
+              self.endCapLimitReached = false;
+            }
+          }
+        },
+        nextGroup: function(){
+          var self = this;
+  
+          if (!self.endCapLimitReached) {
+            if (self.endCap+20 < self.pages) {
+              self.page = self.startCap+20
+              self.startCap = self.startCap+20
+              self.endCap = self.endCap+20
+              self.startCapLimitReached = false;
+            }else {
+              self.page = self.startCap+20
+              self.startCap = self.startCap+20
+              self.endCap = self.pages
+              self.endCapLimitReached = true;
+              self.startCapLimitReached = false;
+            }
+          }
+        },
+        prevPage: function () {
+          var self= this;
+          if (self.page > 1)
+              self.page -= 1
+        },
+        nextPage: function () {
+          var self= this;
+          if (self.page < self.pages)
+              self.page += 1
+        },
         edit(id){
           var self = this;
           axios.get('/api/dataset/'+id).then(res=>{
@@ -562,11 +627,16 @@ var app = new Vue({
           });
         },
         getAll(){
-          let self= this;
           Vue.set(self.dashboard,[])
           if (this.user.login) {
-            //SCHEMA NAMESPACES
-            self.loading = true;
+            this.getNamespaces();
+            this.getDatasets();
+          }
+        },
+        getNamespaces(){
+          let self= this;
+          //SCHEMA NAMESPACES
+          self.loading = true;
             axios.get('/api/registry?user='+self.user.login+"&meta=true&size=20").then(res=>{
               // console.log("SCHEMAS",res.data)
               self.dashboard = res.data.hits;
@@ -576,29 +646,28 @@ var app = new Vue({
               self.loading = false;
               throw err;
             });
-            self.loading = true;
-            // DATASETS PUBLIC
-            axios.get('/api/dataset?&user='+self.user.login+"&meta=true&size=20").then(res=>{
-              // console.log("PUBLIC",res.data)
-              self.publicDatasets = self.publicDatasets.concat(res.data.hits);
-              self.datasetsTotal += res.data.total;
+        },
+        getDatasets(){
+          let self= this;
+          self.loading = true;
+            var params = {
+                "params": {
+                  'size': self.perPage,
+                  'from': self.page == 1 ? self.page -1 : ((self.page-1) * self.perPage ),
+                  'meta': true,
+                  'user': self.user.login,
+                  'private': self.privateOnly,
+                }
+            };
+            axios.get('/api/dataset', params).then(res=>{
+              self.datasets = res.data.hits;
+              self.datasetsTotal = res.data.total;
+              self.calculatePages();
               self.loading = false;
             }).catch(err=>{
               self.loading = false;
               throw err;
             });
-            self.loading = true;
-            // DATASETS PRIVATE
-            axios.get('/api/dataset?private=true&user='+self.user.login+"&meta=true&size=20").then(res=>{
-              // console.log("PRIVATE",res.data)
-              self.privateDatasets = self.privateDatasets.concat(res.data.hits);
-              self.datasetsTotal += res.data.total;
-              self.loading = false;
-            }).catch(err=>{
-              self.loading = false;
-              throw err;
-            });
-          }
         },
         handlePrivacy(item,privacyStatus){
           var self = this;
