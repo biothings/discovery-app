@@ -1,12 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
-<style>
-  .metaCont{
-    max-height: 200px;
-    overflow-y: scroll;
-  }
-</style>
 <section id="dashboard">
   <div v-if=loading class="loader">
     <img src="/static/img/ripple.svg"/>
@@ -37,7 +31,7 @@
             <div class="mt-3 mainTextDark">
               <div class="numberCircle mainBackDark" v-text="dashboardTotal"></div> Registered Schema Namespaces
             </div>
-            <div class="metaCont" v-if="dashboard && dashboard.length">
+            <div v-if="dashboard && dashboard.length">
               <div v-for="item in dashboard" class="row m-1">
                 <div class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-between">
                   <a target="_blank" :href="'/view/'+item.namespace+'/'" v-text="item.namespace" class="d-inline m-2 text-light"></a>
@@ -72,9 +66,41 @@
                     </span>
                   </div>
                 </div>
-  
               </div>
             </div>
+            <!-- Namespaces Pagination -->
+            <div class="mt-1">
+              <select class="form-control form-control-sm m-auto w-25" v-model="perPage_NS" @change="getNamespaces();calculatePages_NS() " id="perPage_NS">
+                  <option value="" disabled selected>Shown Per Page</option>
+                  <option value="5">5 per page</option>
+                  <option value="10">10 per page</option>
+                  <option value="20">20 per page</option>
+              </select>
+              <div class="d-flex flex-wrap justify-content-center p-1 mt-2">
+                <div class="page-item rounded-0" :class="{ 'disabled': page_NS <= 1 }">
+                  <a class="page-link p-1" @click.prevent="prevPage_NS(); getNamespaces()"><i class="fas fa-step-backward"></i></a>
+                </div>
+                <template v-if="groupPages_NS">
+                  <div class="page-item rounded-0" v-show="!startCapLimitReached_NS">
+                    <a href="#" class="page-link p-1" @click.prevent="previousGroup_NS(); getNamespaces()">Previous 20</a>
+                  </div>
+                </template>
+                <template v-for="n in pages_NS" :key="n + 'page'">
+                  <div v-if="n >= startCap_NS && n <= endCap_NS" class="page-item rounded-0" :class="{ 'active': page_NS == n, 'bg-primary': page_NS == n, 'white-text': page_NS == n  }">
+                    <a href="#" class="page-link p-1" @click.prevent="page_NS = n; getNamespaces()" v-text="n"></a>
+                  </div>
+                </template>
+                <template v-if="groupPages_NS">
+                  <div class="page-item rounded-0" v-show="!endCapLimitReached_NS">
+                    <a href="#" class="page-link p-1" @click.prevent="nextGroup_NS(); getNamespaces()">Next 20</a>
+                  </div>
+                </template>
+                <div class="page-item rounded-0" :class="{ 'disabled': page_NS >= pages_NS }">
+                  <a class="page-link p-1" @click.prevent="nextPage_NS(); getNamespaces()"><i class="fas fa-step-forward"></i></a>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <div class="alert-info p-2">
@@ -126,6 +152,7 @@
                 </div>
               </div>
             </div>
+            <!-- Datasets Pagination -->
             <div>
               <select class="form-control form-control-sm m-auto w-25" v-model="perPage" @change="getDatasets();calculatePages() " id="perPage">
                   <option value="" disabled selected>Shown Per Page</option>
@@ -157,6 +184,7 @@
                 </div>
               </div>
             </div>
+
           </div>
 
 
@@ -211,6 +239,7 @@ var app = new Vue({
           meta:{},
           loading: false,
           total: 0,
+          // Datasets
           perPage: 5,
           page: 1,
           pages: 1,
@@ -220,7 +249,17 @@ var app = new Vue({
           pageLimit: 20,
           startCapLimitReached: true,
           endCapLimitReached: false,
-          privateOnly: false
+          privateOnly: false,
+          // Namespaces
+          perPage_NS: 5,
+          page_NS: 1,
+          pages_NS: 1,
+          startCap_NS:0,
+          endCap_NS:20,
+          groupPages_NS: false,
+          pageLimit_NS: 20,
+          startCapLimitReached_NS: true,
+          endCapLimitReached_NS: false,
 				}
 			},
       watch:{
@@ -247,6 +286,62 @@ var app = new Vue({
         },
       },
 			methods:{
+        // Namespaces
+        calculatePages_NS: function () {
+          var self= this;
+          self.pages = Math.ceil(this.datasetsTotal / self.perPage);
+  
+          if (self.pages > self.pageLimit) {
+            self.groupPages =  true;
+          }
+        },
+        previousGroup_NS: function(){
+          var self = this;
+  
+          if (!self.startCapLimitReached) {
+            if (self.startCap-20 > 0) {
+              self.page = self.startCap-20
+              self.startCap = self.startCap-20
+              self.endCap = self.endCap-20
+              self.endCapLimitReached = false;
+            }else {
+              self.page = 1
+              self.startCap = 0
+              self.endCap = 20
+              self.startCapLimitReached = true;
+              self.endCapLimitReached = false;
+            }
+          }
+        },
+        nextGroup_NS: function(){
+          var self = this;
+  
+          if (!self.endCapLimitReached) {
+            if (self.endCap+20 < self.pages) {
+              self.page = self.startCap+20
+              self.startCap = self.startCap+20
+              self.endCap = self.endCap+20
+              self.startCapLimitReached = false;
+            }else {
+              self.page = self.startCap+20
+              self.startCap = self.startCap+20
+              self.endCap = self.pages
+              self.endCapLimitReached = true;
+              self.startCapLimitReached = false;
+            }
+          }
+        },
+        prevPage_NS: function () {
+          var self= this;
+          if (self.page > 1)
+              self.page -= 1
+        },
+        nextPage_NS: function () {
+          var self= this;
+          if (self.page < self.pages)
+              self.page += 1
+        },
+        // Datasets
         calculatePages: function () {
           var self= this;
           self.pages = Math.ceil(this.datasetsTotal / self.perPage);
@@ -635,12 +730,22 @@ var app = new Vue({
         },
         getNamespaces(){
           let self= this;
+          self.loading = true;
+            var params = {
+                "params": {
+                  'size': self.perPage_NS,
+                  'from': self.page_NS == 1 ? self.page_NS -1 : ((self.page_NS-1) * self.perPage_NS ),
+                  'meta': true,
+                  'user': self.user.login
+                }
+            };
           //SCHEMA NAMESPACES
           self.loading = true;
-            axios.get('/api/registry?user='+self.user.login+"&meta=true&size=20").then(res=>{
+            axios.get('/api/registry', params).then(res=>{
               // console.log("SCHEMAS",res.data)
               self.dashboard = res.data.hits;
               self.dashboardTotal = res.data.total;
+              self.calculatePages_NS();
               self.loading = false;
             }).catch(err=>{
               self.loading = false;
@@ -648,8 +753,8 @@ var app = new Vue({
             });
         },
         getDatasets(){
-          let self= this;
-          self.loading = true;
+            let self= this;
+            self.loading = true;
             var params = {
                 "params": {
                   'size': self.perPage,
