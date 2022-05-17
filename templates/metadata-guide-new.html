@@ -41,6 +41,24 @@
   border-top-right-radius: 10px;
 }
 
+.CodeMirror-lines{
+  text-align: left;
+}
+
+.CodeMirror-line:nth-child(odd){
+  background-color: #f0f0f0 !important;
+}
+
+.CodeMirror-linenumber {
+    padding: 1px 8px 0 5px;
+    color: #c8d2d7;
+    font-size: 10px;
+}
+
+.swal-wide{
+    width:80vw !important;
+}
+
 @keyframes stroke {
   100% {
     stroke-dashoffset: 0;
@@ -156,6 +174,7 @@
   zoom: 2;
 }
 </style>
+<link rel="stylesheet" href="/static/css/codemirror.css">
 <div id="guide" class="container-fluid pt-5 m-auto col-sm-12 col-md-10 col-lg-10 col-xl-8" style="min-height:90vh;" v-cloak>
   <div id="tip-cont">
     <img id="puff" src="/static/img/puff.gif">
@@ -174,29 +193,26 @@
       <!-- BULK -->
       <div v-if="jsonItems.length" class="alert grad">
         <small class="text-light">BULK REGISTRATION </small> <small class="text-info" v-text="jsonItems.length+' documents found'"></small>
-        <table class="m-0 table table-sm table-dark table-striped">
-          <colgroup>
-           <col span="1" style="width: 30%;">
-           <col span="1" style="width: 60%;">
-           <col span="1" style="width: 10%;">
-          </colgroup>
-          <thead>
-            <th>
-              <small>Name</small>
-            </th>
-            <th>
-              <small>Result/Details</small>
-            </th>
-            <th>
-              <small>Status</small>
-            </th>
-          </thead>
-        </table>
         <div style="max-height:500px; overflow:scroll;">
-          <table class="m-0 table table-sm table-dark">
+          <table class="m-0 table table-sm table-light table-hover table-striped">
+            <thead>
+              <th>
+                <small>Name</small>
+              </th>
+              <th>
+                <small>Result/Details</small>
+              </th>
+              <th>
+                <small>Options</small>
+              </th>
+              <th>
+                <small>Status</small>
+              </th>
+            </thead>
             <colgroup>
              <col span="1" style="width: 30%;">
-             <col span="1" style="width: 60%;">
+             <col span="1" style="width: 30%;">
+             <col span="1" style="width: 30%;">
              <col span="1" style="width: 10%;">
             </colgroup>
             <tbody style="max-height:500px; overflow:scroll;">
@@ -386,6 +402,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
 <script src="/static/js/lodash.js"></script>
+<script src="/static/js/codemirror.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/6.12.4/ajv.min.js" integrity="sha512-jT80r/QIunAH3Bng0028a3kMjhpr+ApSrAjshiM+0+6s/O01//jwogIby3WnFle7UxDas+/gf3BgI4Rjju17ww==" crossorigin="anonymous"></script>
 <script src="/static/js/renderjson.js"></script>
 <script src="/static/js/notify.min.js"></script>
@@ -1249,7 +1266,7 @@
           }
         }
       },
-      formObject(props, data){
+      formObject(props, item){
         for(key in props){
           switch(key){
             case 'identifier':
@@ -1953,25 +1970,111 @@
         errMSG:"",
         successMSG:"",
         loading: false,
+        editor : null,
+        beforeCloseVal: null,
+        missingRequired:[],
+        missingFields:[],
+        nullValueWarnings: [],
+        exists: null
       }
     },
     props: ['item', 'number'],
     methods:{
+      checkAlreadyExists(){
+        let self = this;
+        if (Object.hasOwnProperty.call(this.item, 'identifier')) {
+          axios.get(`/api/dataset/query?q=identifier:${this.item.identifier}`).then(res=>{
+            if (res.data.total == 1) {
+              self.exists = res.data.hits[0]['_id'];
+            }else{
+              self.registerJSONItem();
+            }
+          }).catch(err=>{
+            throw err;
+          });
+        }
+      },
+      compareFields(){
+        let self = this;
+        //rest first
+        self.nullValueWarnings = [];
+        self.missingFields = [];
+        self.missingRequired = [];
+
+        let itemFields = Object.keys(self.item);
+        let validationFields = Object.keys(self.validation.properties);
+        let requiredFields = self.validation.required;
+        for(key in self.item){
+          if (self.item[key] == null) {
+            self.nullValueWarnings.push(key);
+          }
+        }
+        requiredFields.forEach(field => {
+          if (!itemFields.includes(field)) {
+            self.missingRequired.push(field);
+          }
+        });
+        validationFields.forEach(field => {
+          if (!itemFields.includes(field) && !requiredFields.includes(field)) {
+            self.missingFields.push(field);
+          }
+        });
+      },
+      removeNullValues(){
+        let self = this;
+        self.item = self.clean(self.item);
+        Swal.fire({type:'success',
+        toast:true,
+        title: 'Null Values Removed',
+        showConfirmButton:false,
+        timer:1000});
+        self.compareFields();
+        setTimeout(() => {
+          self.registerJSONItem(true);
+        }, 1000);
+      },
+      clean(obj) {
+        for (var propName in obj) {
+          if (obj[propName] === null || obj[propName] === undefined) {
+            delete obj[propName];
+          }
+        }
+        return obj
+      },
+      SaveDefinition(){
+        let value = this.beforeCloseVal;
+        Swal.fire({type:'success',
+        toast:true,
+        title: 'Metadata Updated',
+        showConfirmButton:false,
+        timer:1000});
+        this.item = JSON.parse(value);
+      },
+      getPreview(){
+          Swal.fire({
+            position: 'center',
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            animation:false,
+            customClass:'scale-in-center',
+            html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><small><pre>`+JSON.stringify(this.item,null,2)+`</pre></small></div>`
+          });
+        },
       registerJSONItem(isRetry){
         var self = this;
 
         let schema = store.getters.getSchema
-
+        self.loading = true;
         let config = {
-           headers: {
-             'content-type': 'application/json'
-           }
-         }
+            headers: {
+              'content-type': 'application/json'
+            }
+        }
 
-        axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label'],self.item,config).then(res=>{
+        axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label']+"&guide="+self.startingPoint['guide'],self.item,config).then(res=>{
           self.loading = false;
           if (res.data.success) {
-            self.successMSG = `<a href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer"><small>Registration Successful! Click here to view.</small></a>`;
+            self.successMSG = `<a href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer">✨ Yay! Registration Successful! ✨</a>`;
             self.errMSG = '';
           }
         }).catch(err=>{
@@ -1979,129 +2082,67 @@
           if (isRetry) {
             Swal.fire({type:'error',
               toast:true,
-              title: 'Failed',
+              title: 'Failed Registration',
               showConfirmButton:false,
               timer:1000})
           }
-          let culprit = "<small class='d-block text-danger'><b>ERROR: "+err.response.data.error+"</b></small>"
-          if (err.response.data && err.response.data.path) {
-            culprit += "<small class='mr-2'>Culprit (index/property)<i class='fas fa-arrow-right'></i> <b class='text-danger'>"+err.response.data.path+"</b></small>"
-          }
-          if (err.response.data.parent && err.response.data.parent.path){
-            if (true) {
-              culprit += "<small>Under <i class='fas fa-arrow-right'6</i> <b class='text-danger'>"+err.response.data.parent.path+"</b></small>"
-            }
-            if (err.response.data.parent && err.response.data.parent.reason) {
-              culprit += "<div class='text-danger p-1 m-0'><small> "+err.response.data.parent.reason+"</small></div>"
-            }
-          }
-          if (err.response.data.hasOwnProperty('validator_value') && err.response.data.validator_value.length){
-            culprit += "<div class='text-info p-1 m-0'><small> Hint: "+err.response.data.validator_value+"</small></div>"
-          }
-          self.errMSG = culprit;
-          throw err;
+          self.errMSG = `<ul class='text-danger mb-0 text-left'>
+            <li>Reason: <b>${err.response.data.reason || 'N/A'}</b></li>
+            <li>Required: ${err.response.data.validator ? '🟢 Yes' : '🔴 No'}</li>
+            <li>Failing at field: <b>${err.response.data.path || 'N/A'}</b></li>
+            <li>Additional Details: <b>${(err.response.data.parent && err.response.data.parent.reason) || 'N/A'}</b></li>
+            </ul>`
         })
       },
-      edit(isRetry){
-        var self = this;
-        let list ={}
-        let notAllowed=['@context','@type']
-        for(key in self.item){
-          if (!notAllowed.includes(key)) {
-            list[key] = key
-          }
-        }
-
+      editItem(item){
+        let self = this;
         Swal.fire({
-          title: `Quick Edit`,
-          text:"Which field would you like to edit?",
-          input: 'select',
-          footer:"<b class='text-danger'>Important:<b>Only existing fields can be edited.</b>",
-          inputOptions: list,
-          inputPlaceholder: 'Select a field to edit',
-          showCancelButton: true,
-          confirmButtonColor:"{{color_main}}",
-          cancelButtonColor:"{{color_sec}}",
-          confirmButtonText: 'Edit',
-          inputValidator: (value) => {
-            return new Promise((resolve) => {
-              if (!value) {
-                resolve('You must select something first')
-              }else{
-                resolve()
-              }
-            })
-          }
-        }).then((keyname) => {
-          if (keyname.value) {
-            let iValue =''
-
-            if (typeof self.item[keyname.value] === 'string' ||  typeof self.item[keyname.value] === 'number' ||  typeof self.item[keyname.value] === 'boolean') {
-              iValue = self.item[keyname.value]
-            }else{
-              iValue = JSON.stringify(self.item[keyname.value],null,2)
-            }
-
-            Swal.fire({
-              title: "Edit: "+keyname.value,
-              input: 'textarea',
-              footer:`<small>Make sure to close all: {},[] and quotes</small>`,
+              title: "Edit Metadata",
               confirmButtonColor:"{{color_main}}",
               cancelButtonColor:"{{color_sec}}",
               animation:false,
-              customClass:'scale-in-center',
-              inputPlaceholder: self.item[keyname.value],
-              inputValue: iValue,
-              inputAttributes: {
-                'aria-label': keyname.value,
-                'rows':15
-              },
+              customClass:'scale-in-center swal-wide',
+              html: '<textarea id="editContent"></textarea>',
               showCancelButton: true,
-              confirmButtonText: 'Save',
-              inputValidator: (value) => {
-                return new Promise((resolve) => {
-                  if (value === self.item[keyname.value]) {
-                    resolve("You haven't changed anything yet")
-                  }else{
-                    resolve()
-                  }
-                })
-              }
-            }).then((newdata) => {
-              if (newdata.value) {
-                if (newdata.value[0]==="{" || newdata.value[0]==="[") {
-                  var payload = {};
-                  payload["item"] = self.item;
-                  payload["field"] = keyname.value;
-                  payload["change"] = JSON.parse(newdata.value);
-                  store.commit('updateJsonItem',payload);
-                }else{
-                  var payload = {};
-                  payload["item"] = self.item;
-                  payload["field"] = keyname.value;
-                  payload["change"] = newdata.value;
-                  store.commit('updateJsonItem',payload);
-                }
+              confirmButtonText: 'Save Changes',
+              onOpen: function(){
+                self.editor = CodeMirror.fromTextArea(document.getElementById('editContent'), {
+                    mode: "json",
+                    // lineNumbers: true,
+                    autorefresh: true,
+                    lineWrapping: true,
+                    spellcheck: true,
+                    autofocus: true
+                });
+                self.editor.setValue(JSON.stringify(item,null,2));
+                self.editor.on('change', (editor) => {
+                  self.beforeCloseVal = editor.getValue();
+                });
+              },
+              preConfirm: () => {
+                self.SaveDefinition();
               }
             })
-          }
-        })
-      },
+            .then((dataChange) => {
+              if (dataChange.value) {
+                self.SaveDefinition();
+              }
+            })
+      }
     },
     computed:{
-      short_name:function(){
-        if (this.item.name.length > 100) {
-          return this.item.name.substring(0,100)+"..."
-        }else {
-          return this.item.name
-        }
+      startingPoint: function(){
+        return store.getters.getStartingPoint
       },
-      tipInfo:function(){
-        return JSON.stringify(this.item,null,2)
-      }
+      validation:function(){
+        return store.getters.getValidation
+      },
     },
     mounted: function(){
       var self = this;
+
+      self.compareFields();
+      self.checkAlreadyExists();
 
       tippy( '#jsonTable', {
         target:'.tip',
@@ -2114,26 +2155,48 @@
         animation: 'fade',
         onShow(instance) {
           let info = instance.reference.dataset.tippyInfo;
-          instance.setContent("<div class='bg-light' style='max-height:300px; overflow:scroll;'><small class='text-left text-light'><pre id='callResults'>"+info+"</pre></small></div>");
+          instance.setContent("<div class='bg-light' style='max-height:200px; overflow:scroll;'>"+info+"</div>");
         }});
-
-      self.registerJSONItem();
     },
-    template: `<tr :class="{'alert-success':successMSG,'alert-warning':errMSG}">
+    template: `<tr>
                   <td>
-                    <b class="text-info" v-text="number+'- '"></b>
-                    <small :title="item.name">
-                      <span v-text="short_name"></span> <i class="fas fa-info-circle tip pointer text-primary" :data-tippy-info="tipInfo"></i>
-                    </small>
+                    <b class="text-info" v-text="number + ': '"></b>
+                    <small v-text="item.name"></small>
+                    <small class="ml-r pointer text-primary" @click="getPreview()">View Metadata</small>
                   </td>
                   <td class="align-middle">
-                    <small v-if="loading" class="text-muted">Registering...</small>
-                    <small v-if="errMSG" v-html="errMSG"></small>
-                    <small v-if="successMSG" v-html="successMSG"></small>
-                    <button role="button" v-if="errMSG" @click="edit" class="btn btn-sm mainBackDark text-light mr-1">Edit</button>
-                    <button role="button" v-if="errMSG" @click="registerJSONItem(1)" class="btn btn-sm mainBackLight text-light">Retry Registration</button>
+                    <small v-if="loading" class="text-muted">Please wait...</small>
+                    <details v-if="errMSG" class="text-left text-danger">
+                      <summary>View Issues</summary>
+                      <small v-html="errMSG"></small>
+                    </details>
+                    <details v-if="exists" class="text-left text-success">
+                      <summary>🚨 Already registered!</summary>
+                      <small>The identifier provided has already been used to register <a target="_blank" :href="'/dataset/'+ exists">this item</a>. 
+                        Make sure you are the owner of this metadata, if you are you can edit via your dashboard. <b>Bulk registration</b> will only work for new metadata.
+                      </small>
+                    </details>
+                    <details v-if="missingRequired.length && !exists" class="text-left text-danger">
+                      <summary v-text="'(' + missingRequired.length + ') Missing Required Fields'"></summary>
+                      <small v-text="missingRequired.join(', ')"></small>
+                    </details>
+                    <details v-if="missingFields.length && !exists" class="text-left text-info">
+                      <summary v-text="'(' + missingFields.length + ') Missing Optional Fields'"></summary>
+                      <small v-text="missingFields.join(', ')"></small>
+                    </details>
+                    <details v-if="nullValueWarnings.length && !exists" class="text-left text-danger">
+                      <summary class="mainTextDark" v-text="'(' + nullValueWarnings.length + ') Null value warnings! (Fix)'"></summary>
+                      <small v-text="nullValueWarnings.join(', ')"></small>
+                      <button @click="removeNullValues()" class="btn btn-sm badge-warning text-dark">Remove and Retry Registration</button>
+                    </details>
+                    <small v-if="successMSG && !exists" v-html="successMSG" class="text-success"></small>
                   </td>
-                  <td class="bg-dark align-middle">
+                  <td v-if="errMSG" class="align-middle">
+                    <button role="button" @click="editItem(item)" class="btn btn-sm mainBackDark text-light mr-1">Edit Metadata</button>
+                    <button role="button" @click="registerJSONItem(1)" class="btn btn-sm mainBackLight text-light">Retry Registration</button>
+                  </td>
+                  <td v-else><small>Nothing to report!</small></td>
+                  <td class="align-middle">
                     <span class="badge d-block" :class="{'badge-danger':errMSG,'badge-success':successMSG}">
                       <i v-if="loading" class="fas fa-spinner fa-pulse mainTextDark"></i>
                       <small v-if="errMSG">FAILED <i class="fas fa-poo"></i></small>
@@ -4570,6 +4633,7 @@
           loading: false,
           presets:{{guide_presets}},
           portals: {{guide_portals}},
+          guideQuery: '',
 				}
 			},
       computed:{
@@ -4775,7 +4839,8 @@
         getStartingPointSchema(item){
           let self = this;
           self.loading = true;
-          axios.get('/api/registry/'+item.namespace+'/'+item.prefix+':'+item.name).then(res=>{
+          let url = '/api/registry/'+item.namespace+'/'+item.prefix+':'+item.name;
+          axios.get(url).then(res=>{
             var payload = {};
             payload["name"] = item.name;
             store.commit('saveSchemaName',payload);
@@ -4943,7 +5008,7 @@
                    }
                  }
 
-                axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label']+"&guide="+encodeURI(window.location.pathname),output,config).then(res=>{
+                axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label']+"&guide="+self.startingPoint['guide'],output,config).then(res=>{
                   self.loading = false;
                   if (res.data.success) {
 
@@ -5123,54 +5188,54 @@
         },
         handleBulk(){
           var self = this;
-
-          Swal.fire({
-            title: 'Bulk registration',
-            text: 'What type of file do you have?',
-            input: 'select',
-            animation:false,
-            customClass:'scale-in-center',
-            confirmButtonColor:"{{color_main}}",
-            cancelButtonColor:"{{color_sec}}",
-            inputOptions: {
-              'json': 'JSON',
-              'csv': 'CSV (WIP)',
-            },
-            inputPlaceholder: 'Select type',
-            showCancelButton: true,
-            confirmButtonText: 'Next',
-            showLoaderOnConfirm: true,
-            preConfirm: (method) => {
-              return method
-            },
-            allowOutsideClick: () => !Swal.isLoading()
-          }).then((result) => {
-            if (result.value) {
-              switch (result.value) {
-                case 'json':
-                  self.getFile('json');
-                  break;
-                case 'csv':
-                  self.getFile('csv');
-                break;
-                default:
-                  //nothing
-              }
-            }
-          })
+          self.getFile('json');
+          // Swal.fire({
+          //   title: 'Bulk registration',
+          //   text: 'What type of file do you have?',
+          //   input: 'select',
+          //   animation:false,
+          //   customClass:'scale-in-center',
+          //   confirmButtonColor:"{{color_main}}",
+          //   cancelButtonColor:"{{color_sec}}",
+          //   inputOptions: {
+          //     'json': 'JSON',
+          //     'csv': 'CSV (WIP)',
+          //   },
+          //   inputPlaceholder: 'Select type',
+          //   showCancelButton: true,
+          //   confirmButtonText: 'Next',
+          //   showLoaderOnConfirm: true,
+          //   preConfirm: (method) => {
+          //     return method
+          //   },
+          //   allowOutsideClick: () => !Swal.isLoading()
+          // }).then((result) => {
+          //   if (result.value) {
+          //     switch (result.value) {
+          //       case 'json':
+          //         self.getFile('json');
+          //         break;
+          //       case 'csv':
+          //         self.getFile('csv');
+          //       break;
+          //       default:
+          //         //nothing
+          //     }
+          //   }
+          // })
         },
         async getFile(type){
           var self = this;
 
           if (type == 'json') {
             const { value: file } = await Swal.fire({
-            title: 'Select file',
+            title: 'Select JSON file',
             input: 'file',
             confirmButtonColor:"{{color_main}}",
             cancelButtonColor:"{{color_sec}}",
             animation:false,
             customClass:'scale-in-center',
-            footer:`<small class="text-danger">Registration will be triggered automatically when upload finishes.</small>`,
+            footer:`<small class="text-danger">100 item limit. Registration will be triggered automatically when upload finishes.</small>`,
             inputAttributes: {
               'accept': 'json',
               'aria-label': 'Upload your file'
@@ -5525,6 +5590,7 @@
         checkAutoLoad(){
           var self = this;
           let payload = {}
+          //if GUIDE_PRESETS is only ONE
           if (self.presets && self.presets.length === 1) {
             payload["startingPoint"] = self.presets[0];
             store.commit('setStartingPoint',payload);
@@ -5536,9 +5602,36 @@
               store.commit('changeStep',payload);
               self.getFormValues();
             }
-          }else{
-            payload["step"] = 1;
-            store.commit('changeStep',payload);
+          }
+          // if GUIDE_PRESETS is more than one
+          else{
+            // if url QUERY
+            if (self.guideQuery) {
+              let found = self.presets.find((guide) => guide.name == self.guideQuery)
+              console.log('Loading from context Query', found)
+              if (found) {
+                store.commit('setStartingPoint', {'startingPoint': found});
+                payload["step"] = 3;
+                store.commit('changeStep',payload);
+                self.getFormValues();
+              } else {
+                payload["step"] = 1;
+                store.commit('changeStep',payload);
+              }
+            }
+            // Choose first item from GUIDE_PRESETS as default
+            else {
+              payload["startingPoint"] = self.presets[0];
+              store.commit('setStartingPoint',payload);
+              if (self.portals && self.portals.length) {
+                payload["step"] = 2;
+                store.commit('changeStep',payload);
+              }else{
+                payload["step"] = 3;
+                store.commit('changeStep',payload);
+                self.getFormValues();
+              }
+            }
           }
         },
         getFormValues () {
@@ -5620,8 +5713,14 @@
         }
 			},
 			mounted:function(){
+        let self = this;
+        let context = {{Context}}
+        if ( context.Query ) {
+            self.guideQuery = context.Query
+        }
         this.checkUser();
         this.checkAutoLoad();
+        
 
         tippy( '#guide', {
             target:'.bar',

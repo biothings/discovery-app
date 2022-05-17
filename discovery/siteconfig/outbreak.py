@@ -52,6 +52,7 @@ GUIDE_PRESETS = [
         'namespace': 'outbreak',
         'prefix': 'outbreak',
         'name': 'Dataset',
+        'guide': '/guide/outbreak/dataset',
         'description': 'This is the schema for describing the Dataset schema used for outbreak.info.'
     },
 ]
