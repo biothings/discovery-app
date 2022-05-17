@@ -46,6 +46,7 @@ GUIDE_PRESETS = [
         'namespace': 'biomedical',
         'prefix': 'bts',
         'name': 'BioMedicalDataset',
+        'guide': '/guide',
         'description': 'A schema describing a BioMedical Dataset'
     },
 ]

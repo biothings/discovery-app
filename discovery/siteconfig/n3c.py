@@ -52,6 +52,7 @@ GUIDE_PRESETS = [
         'namespace': 'n3c',
         'prefix': 'n3c',
         'name': 'Dataset',
+        'guide': '/guide/n3c/dataset',
         'description': 'This is the schema for describing the Dataset schema used for N3C.'
     },
 ]

@@ -200,17 +200,20 @@
       imgIcon: function(){
         let self = this;
         let guide = Object.prototype.hasOwnProperty.call(self.item['_meta'], 'guide') ? self.item['_meta']['guide'] : '';
-        switch (guide) {
-          case '/guide/n3c/dataset':
-            return '/static/img/N3Co.png'
-          case '/guide/outbreak/dataset':
-            return '/static/img/outbreak.png'
-          case '/guide/niaid':
-            return '/static/img/niaid/icon.svg'
-          case '/guide':
-            return '/static/img/dde-logo-o.svg'
-          default:
-            return '/static/img/dde-logo-o.svg'
+        if (guide == '/guide') {
+          return '/static/img/dde-logo-o.svg'
+        }
+        else if (guide.includes('niaid')) {
+          return '/static/img/niaid/icon.svg'
+        }
+        else if (guide.includes('outbreak')) {
+          return '/static/img/outbreak.png'
+        }
+        else if (guide.includes('n3c')) {
+          return '/static/img/N3Co.png'
+        }
+        else {
+          return '/static/img/dde-logo-o.svg'
         }
       },
       detailLink: function(){
@@ -257,7 +260,7 @@
                   <div class="col-sm-1 registry-item-background" :style="{backgroundImage: 'url(' + imgIcon + ')' }"></div>
                   <div class="col-sm-8 pointer">
                     <h5 class="mb-1 mainTextDark d-inline gaText d-inline pointer" @click="goTo(item)">
-                      <span v-text="item.name"></span> 
+                      <span v-text="item.name"></span>
                       <span v-if="item && item.name.includes('PPRL')" class="ml-2 badge smallBadge">PPRL</span>
                     </h5>
                     <template v-if="item && item.name.includes('PPRL')">
@@ -299,10 +302,11 @@
         //value is the final val set to ES
         all_filters:{
           '_meta.guide': [
-            {'name':'N3C','value':'/guide/n3c/dataset','active':false,'icon':'/static/img/N3Co.png', type: '_meta.guide'},
-            {'name':'Outbreak','value':'/guide/outbreak/dataset','active':false,'icon':'/static/img/icon-01.svg', type: '_meta.guide'},
-            {'name':'NIAID','value':'/guide/niaid','active':false,'icon':'/static/img/niaid/icon.svg', type: '_meta.guide'},
-            {'name':'CD2H','value':'/guide','active':false,'icon':'/static/img/dde-logo-o.svg', type: '_meta.guide'}
+            {'name':'N3C:Dataset','value':'/guide/n3c/dataset','active':false,'icon':'/static/img/N3Co.png', type: '_meta.guide'},
+            {'name':'Outbreak:Dataset','value':'/guide/outbreak/dataset','active':false,'icon':'/static/img/icon-01.svg', type: '_meta.guide'},
+            {'name':'NIAID:Dataset','value':'/guide/niaid','active':false,'icon':'/static/img/niaid/icon.svg', type: '_meta.guide'},
+            {'name':'NIAID:ComputationalTool','value':'/guide/niaid/ComputationalTool','active':false,'icon':'/static/img/niaid/icon.svg', type: '_meta.guide'},
+            {'name':'CD2H:Dataset','value':'/guide','active':false,'icon':'/static/img/dde-logo-o.svg', type: '_meta.guide'}
           ],
           'name':[
           {'name':'IRB Required','value':'PPRL','active':false,'icon':'/static/img/N3Co.png', type: 'name', tip:'Institutional Review Board Required', 
