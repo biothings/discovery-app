@@ -125,6 +125,7 @@ HANDLERS = [
     (r"/faq/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "faq-multi.html"}),
     (r"/guide/?", TemplateHandler, {"filename": "metadata-guide-new.html"}),
     (r"/guide/niaid/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "niaid"}),
+    (r"/guide/niaid/(?P<Query>[^/]+)/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "niaid"}),
     (r"/guide/outbreak/dataset/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "outbreak"}),
     (r"/guide/n3c/dataset/?", TemplateHandler, {"filename": "metadata-guide-new.html", "env": "n3c"}),
     (r"/json-schema-viewer/?", TemplateHandler, {"filename": "json-schema-viewer.html"}),
