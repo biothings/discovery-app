@@ -1414,7 +1414,10 @@
     template:
     `<div class="p-3 mb-2 alert alert-light">
       <div>
-        <h3 class="bold d-inline" :class='textColor' :id='q.name' v-text='q.name'></h3>
+        <a class="d-inline text-info" :href="'/view/' + q.name.split(':')[0]">
+          <h3 class="bold d-inline" :id='q.name' v-text="q.name.split(':')[0] + ':'"></h3>
+        </a>
+        <h3 class="bold d-inline" :class='textColor' :id='q.name' v-text="q.name.split(':')[1]"></h3>
         <template v-if="q && q.domain">
           <small class="text-muted">is a property of: </small>
           <template v-for='(item,index) in q.domain'>
