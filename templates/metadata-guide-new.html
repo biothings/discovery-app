@@ -5180,7 +5180,9 @@
         handleBulk(){
           var self = this;
           self.bulkMode = !self.bulkMode;
-          self.getFile('json');
+          if (self.bulkMode) {
+            self.getFile('json');
+          }
           // Swal.fire({
           //   title: 'Bulk registration',
           //   text: 'What type of file do you have?',
