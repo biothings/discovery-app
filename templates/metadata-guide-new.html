@@ -185,10 +185,11 @@
     <div class="p-2 bg-light text-center mt-5">
       <h6 class="logoText">DISCOVERY GUIDE</h5>
       <p class="text-muted">
-        Follow best practices to make your dataset metadata more findable
+        Follow best practices to make your metadata more findable
       </p>
-      <a :href="'/dataset?guide='+window.location.pathname">Browse other registered dataset metadata using this guide <i class="fas fa-chevron-right"></i></a>
+      <a :href="'/dataset?guide='+window.location.pathname">Browse other registered metadata using this guide <i class="fas fa-chevron-right"></i></a>
     </div>
+    <h4 v-text="readableName(schemaName)" class="text-center logoText"></h4>
     <div id="jsonTable">
       <!-- BULK -->
       <div v-if="jsonItems.length" class="alert grad">
@@ -266,7 +267,7 @@
             <i class="fas fa-file-import fa-stack-1x fa-inverse"></i>
           </span>
           <span class="fa-stack fa-1x pointer tip mr-2" data-tippy-info="Bulk Registration" @click="handleBulk()"  v-show="validation">
-            <i class="fas fa-circle text-success fa-stack-2x"  :class="{ 'text-muted': !validation, 'mainTextDark': validation }"></i>
+            <i class="fas fa-circle text-success fa-stack-2x"  :class="[bulkMode ? 'text-warning' : 'mainTextDark']"></i>
             <i class="fas fa-registered fa-stack-1x fa-inverse"></i>
           </span>
           <div class="pillType tip pointer" @click="viewErrors()" data-tippy-info="Issues Details" :class="{'shake-horizontal':!valid}" style="outline: none !important;">
@@ -284,7 +285,7 @@
       </div>
   
       <div v-else class="widgetContainer bg-light text-center">
-          <template v-if="step === 1 ">
+          <template v-if="step === 1 && !bulkMode">
             <!-- STARTING POINT -->
             <h4 class="logoText">Metadata</h4>
             <p class="text-muted">
@@ -297,7 +298,7 @@
             </div>
           </template>
           <!-- OPTIONAL PORTALS -->
-          <template v-if=" step === 2 ">
+          <template v-if=" step === 2 && !bulkMode">
             <h4 class="logoText">Discovery Portals</h4>
             <p class="text-muted">
               Select the portals you are interested in. Each will add fields required in order to be discovered by that portal.
@@ -316,15 +317,15 @@
             </form>
           </template>
   
-          <template v-if=" step === 3 ">
+          <template v-if=" step === 3 && !bulkMode">
             <propcontainer v-show="validation" :type="'REQUIRED'"></propcontainer>
           </template>
   
-          <template v-if=" step === 4 ">
+          <template v-if=" step === 4 && !bulkMode">
             <propcontainer v-show="validation" :type="'RECOMMENDED'"></propcontainer>
           </template>
   
-          <template v-if=" step === 5">
+          <template v-if=" step === 5 && !bulkMode">
             <template v-if="editingID">
               <h1 class="logoText">Save Your Changes</h1>
                 <div class="p-5 text-center m-3">
@@ -1994,21 +1995,15 @@
           });
         }
       },
-      compareFields(){
+      checkRequirements(){
         let self = this;
         //rest first
-        self.nullValueWarnings = [];
         self.missingFields = [];
         self.missingRequired = [];
 
         let itemFields = Object.keys(self.item);
         let validationFields = Object.keys(self.validation.properties);
         let requiredFields = self.validation.required;
-        for(key in self.item){
-          if (self.item[key] == null) {
-            self.nullValueWarnings.push(key);
-          }
-        }
         requiredFields.forEach(field => {
           if (!itemFields.includes(field)) {
             self.missingRequired.push(field);
@@ -2020,26 +2015,20 @@
           }
         });
       },
-      removeNullValues(){
+      clean() {
         let self = this;
-        self.item = self.clean(self.item);
-        Swal.fire({type:'success',
-        toast:true,
-        title: 'Null Values Removed',
-        showConfirmButton:false,
-        timer:1000});
-        self.compareFields();
-        setTimeout(() => {
-          self.registerJSONItem(true);
-        }, 1000);
-      },
-      clean(obj) {
-        for (var propName in obj) {
-          if (obj[propName] === null || obj[propName] === undefined) {
-            delete obj[propName];
+        self.nullValueWarnings = [];
+        for (var propName in self.item) {
+          if (self.item[propName] === null || self.item[propName] === undefined) {
+            self.nullValueWarnings.push(propName);
+            delete self.item[propName];
           }
         }
-        return obj
+      },
+      register(){
+        this.clean();
+        this.checkRequirements();
+        this.checkAlreadyExists();
       },
       SaveDefinition(){
         let value = this.beforeCloseVal;
@@ -2048,7 +2037,15 @@
         title: 'Metadata Updated',
         showConfirmButton:false,
         timer:1000});
-        this.item = JSON.parse(value);
+        try {
+          this.item = JSON.parse(value);
+        } catch (error) {
+          Swal.fire({type:'error',
+              toast:true,
+              title: 'Invalid JSON',
+              showConfirmButton:false,
+              timer:1000})
+        }
       },
       getPreview(){
           Swal.fire({
@@ -2060,7 +2057,7 @@
             html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><small><pre>`+JSON.stringify(this.item,null,2)+`</pre></small></div>`
           });
         },
-      registerJSONItem(isRetry){
+      registerJSONItem(){
         var self = this;
 
         let schema = store.getters.getSchema
@@ -2079,13 +2076,6 @@
           }
         }).catch(err=>{
           self.loading = false;
-          if (isRetry) {
-            Swal.fire({type:'error',
-              toast:true,
-              title: 'Failed Registration',
-              showConfirmButton:false,
-              timer:1000})
-          }
           self.errMSG = `<ul class='text-danger mb-0 text-left'>
             <li>Reason: <b>${err.response.data.reason || 'N/A'}</b></li>
             <li>Required: ${err.response.data.validator ? '🟢 Yes' : '🔴 No'}</li>
@@ -2140,9 +2130,7 @@
     },
     mounted: function(){
       var self = this;
-
-      self.compareFields();
-      self.checkAlreadyExists();
+      self.register();
 
       tippy( '#jsonTable', {
         target:'.tip',
@@ -2185,19 +2173,18 @@
                       <small v-text="missingFields.join(', ')"></small>
                     </details>
                     <details v-if="nullValueWarnings.length && !exists" class="text-left text-danger">
-                      <summary class="mainTextDark" v-text="'(' + nullValueWarnings.length + ') Null value warnings! (Fix)'"></summary>
+                      <summary class="mainTextDark" v-text="'(' + nullValueWarnings.length + ') Null values found and removed'"></summary>
                       <small v-text="nullValueWarnings.join(', ')"></small>
-                      <button @click="removeNullValues()" class="btn btn-sm badge-warning text-dark">Remove and Retry Registration</button>
                     </details>
                     <small v-if="successMSG && !exists" v-html="successMSG" class="text-success"></small>
                   </td>
                   <td v-if="errMSG" class="align-middle">
-                    <button role="button" @click="editItem(item)" class="btn btn-sm mainBackDark text-light mr-1">Edit Metadata</button>
-                    <button role="button" @click="registerJSONItem(1)" class="btn btn-sm mainBackLight text-light">Retry Registration</button>
+                    <button role="button" @click="editItem(item)" class="btn btn-sm mainBackDark text-light m-1">Edit Metadata</button>
+                    <button role="button" @click="register()" class="btn btn-sm mainBackLight text-light m-1">Retry Registration</button>
                   </td>
                   <td v-else><small>Nothing to report!</small></td>
-                  <td class="align-middle">
-                    <span class="badge d-block" :class="{'badge-danger':errMSG,'badge-success':successMSG}">
+                  <td class="align-middle" :class="{'badge-danger':errMSG,'badge-success':successMSG}">
+                    <span class="d-block text-light">
                       <i v-if="loading" class="fas fa-spinner fa-pulse mainTextDark"></i>
                       <small v-if="errMSG">FAILED <i class="fas fa-poo"></i></small>
                       <small v-if="successMSG">REGISTERED <i class="fas fa-registered"></i></small>
@@ -4634,9 +4621,13 @@
           presets:{{guide_presets}},
           portals: {{guide_portals}},
           guideQuery: '',
+          bulkMode: false
 				}
 			},
       computed:{
+        schemaName: function(){
+          return store.getters.getSchemaName
+        },
         editingID:function(){
           return store.getters.editingID
         },
@@ -5188,6 +5179,7 @@
         },
         handleBulk(){
           var self = this;
+          self.bulkMode = !self.bulkMode;
           self.getFile('json');
           // Swal.fire({
           //   title: 'Bulk registration',
@@ -5642,6 +5634,15 @@
           payload["step"] = 3;
           store.commit('changeStep',payload);
 
+        },
+        readableName(text) {
+            if (text) {
+                let result = text.replace(/([A-Z])/g, " $1");
+                result =  result.charAt(0).toUpperCase() + result.slice(1);
+                return result.replaceAll('_', ' ');
+            }
+            
+            return text.replaceAll('_', ' ');
         },
         setStartingPoint(startingPointInfo){
           var self = this;
