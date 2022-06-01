@@ -2226,6 +2226,7 @@
                     <div v-if="canOverwrite">
                       <button role="button" @click="editItem(item)" class="btn btn-sm mainBackDark text-light m-1">Edit Metadata</button>
                       <button role="button" @click="updateJSONItem()" class="btn btn-sm btn-info text-light m-1">Update Metadata</button>
+                      <small v-if="successMSGUpdate" v-html="successMSGUpdate" class="text-success d-block"></small>
                     </div>
                     <small v-else>Nothing to report!</small>
                   </td>
