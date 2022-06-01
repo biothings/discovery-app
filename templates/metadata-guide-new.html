@@ -193,7 +193,13 @@
     <div id="jsonTable">
       <!-- BULK -->
       <div v-if="jsonItems.length" class="alert grad">
-        <small class="text-light">BULK REGISTRATION </small> <small class="text-info" v-text="jsonItems.length+' documents found'"></small> <small @click="location.reload();" class="pointer text-danger">Start Over</small>
+        <div class="p-1 d-flex justify-content-around align-items-center">
+          <small class="text-info" v-text="jsonItems.length+' documents found'"></small>
+          <small @click="restartBulk()" class="pointer text-light badge badge-danger"><i class="fas fa-undo"></i> Start Over</small>
+          <button v-if="!beginBulkRegistration" @click.prevent="startBulk()" class="btn btn-success text-light m-1" aria-label="Bulk Register Metadata">
+            <i class="fas fa-registered"></i> Register Metadata
+          </button>
+        </div>
         <div style="max-height:500px; overflow:scroll;">
           <table class="m-0 table table-sm table-light table-hover table-striped">
             <thead>
@@ -488,9 +494,13 @@
       guide_prefilled: {{guide_prefilled}},
       output_default:{},
       editingID: false,
+      beginBulkRegistration: false
     },
     strict: true,
     mutations: {
+      toggleBeginBulkRegistration(state){
+        state.beginBulkRegistration = !state.beginBulkRegistration
+      },
       toggleDesc(state){
         state.showDescriptions = !state.showDescriptions
       },
@@ -976,6 +986,9 @@
       }
     },
     getters:{
+      beginBulkRegistration: (state) =>{
+        return state.beginBulkRegistration
+      },
       editingID: (state) =>{
         return state.editingID
       },
@@ -1978,7 +1991,7 @@
         missingFields:[],
         nullValueWarnings: [],
         exists: null,
-        canOverwrite: false
+        canOverwrite: false,
       }
     },
     props: ['item', 'number', 'username'],
@@ -1986,7 +1999,7 @@
       checkAlreadyExists(){
         let self = this;
         if (Object.hasOwnProperty.call(this.item, 'identifier')) {
-          axios.get(`/api/dataset/query?q=identifier:${this.item.identifier}`).then(res=>{
+          axios.get(`/api/dataset/query?q=identifier:"${this.item.identifier}"`).then(res=>{
             if (res.data.total == 1) {
               self.exists = res.data.hits[0]['_id'];
               if (self.username == res.data.hits[0]['_meta']['username']) {
@@ -2022,18 +2035,32 @@
           }
         });
       },
-      clean() {
+      clean(object) {
         let self = this;
-        self.nullValueWarnings = [];
-        for (var propName in self.item) {
-          if (self.item[propName] === null || self.item[propName] === undefined) {
-            self.nullValueWarnings.push(propName);
-            delete self.item[propName];
-          }
-        }
+        Object
+            .entries(object)
+            .forEach(([k, v]) => {
+                if (v && typeof v === 'object')
+                    self.clean(v);
+                if (v && 
+                    typeof v === 'object' && 
+                    !Object.keys(v).length || 
+                    v === null || 
+                    v === undefined ||
+                    v.length === 0
+                ) {
+                    if (Array.isArray(object))
+                        object.splice(k, 1);
+                    else if (!(v instanceof Date)){
+                      self.nullValueWarnings.push(k);
+                      delete object[k];
+                    }
+                }
+            });
+        return object;
       },
       register(){
-        this.clean();
+        this.item = this.clean(this.item);
         this.checkRequirements();
         this.checkAlreadyExists();
       },
@@ -2159,10 +2186,18 @@
       validation:function(){
         return store.getters.getValidation
       },
+      beginBulkRegistration:function(){
+        return store.getters.beginBulkRegistration
+      },
+    },
+    watch:{
+      beginBulkRegistration: function(v){
+        if (v) {
+          this.register();
+        }
+      }
     },
     mounted: function(){
-      var self = this;
-      self.register();
 
       tippy( '#jsonTable', {
         target:'.tip',
@@ -2182,7 +2217,7 @@
                   <td>
                     <b class="text-info" v-text="number + ': '"></b>
                     <small v-text="item.name"></small>
-                    <small class="ml-r pointer text-primary" @click="getPreview()">View Metadata</small>
+                    <small class="ml-1 pointer text-primary" @click="getPreview()">View Metadata</small>
                   </td>
                   <td class="align-middle">
                     <small v-if="loading" class="text-muted">Please wait...</small>
@@ -2225,17 +2260,16 @@
                   <td v-else>
                     <div v-if="canOverwrite">
                       <button role="button" @click="editItem(item)" class="btn btn-sm mainBackDark text-light m-1">Edit Metadata</button>
-                      <button role="button" @click="updateJSONItem()" class="btn btn-sm btn-info text-light m-1">Update Metadata</button>
+                      <button role="button" @click="updateJSONItem()" class="btn btn-sm btn-info text-light m-1">Update Registration</button>
                       <small v-if="successMSGUpdate" v-html="successMSGUpdate" class="text-success d-block"></small>
                     </div>
-                    <small v-else>Nothing to report!</small>
                   </td>
-                  <td class="align-middle" :class="{'badge-danger':errMSG,'badge-success':successMSG, 'badge-success':successMSGUpdate}">
+                  <td class="align-middle" :class="{'badge-danger':errMSG,'badge-success':successMSG,'badge-info':successMSGUpdate}">
                     <span class="d-block text-light">
                       <i v-if="loading" class="fas fa-spinner fa-pulse mainTextDark"></i>
                       <small v-if="errMSG">FAILED <i class="fas fa-poo"></i></small>
                       <small v-if="successMSG">REGISTERED <i class="fas fa-registered"></i></small>
-                      <small v-if="successMSGUpdate">UPDATED <i class="fas fa-registered"></i></small>
+                      <small v-if="successMSGUpdate">UPDATED <i class="fas fa-check"></i></small>
                     </span>
                   </td>
                 </tr>`
@@ -4673,6 +4707,9 @@
 				}
 			},
       computed:{
+        beginBulkRegistration:function(){
+          return store.getters.beginBulkRegistration
+        },
         schemaName: function(){
           return store.getters.getSchemaName
         },
@@ -4731,6 +4768,9 @@
         },
       },
 			methods:{
+        startBulk(){
+          store.commit('toggleBeginBulkRegistration');
+        },
         checkOverriddenID(id){
           let self = this;
           axios.get(`/api/dataset/query?size=100&q=identifier:"${encodeURIComponent(id)}"&meta=true`).then(res=>{
@@ -5007,6 +5047,22 @@
             });
           }
         },
+        restartBulk(){
+          Swal.fire({
+              title: 'Are you sure?',
+              text: "You will lose any changes to this file...",
+              animation:false,
+              customClass:'scale-in-center',
+              showCancelButton: true,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              confirmButtonText: 'Yes, start over'
+            }).then((result) => {
+              if (result.value) {
+                location.reload();
+              }
+            });
+        },
         isRequired(propname){
           let req = store.getters.getValidation['required']
           if (req.includes(propname)) {
@@ -5278,7 +5334,7 @@
             cancelButtonColor:"{{color_sec}}",
             animation:false,
             customClass:'scale-in-center',
-            footer:`<small class="text-danger">100 item limit. Registration will be triggered automatically when upload finishes.</small>`,
+            footer:`<p class="text-danger"><strong>🚨 Please note there is a 100 document limit.</strong></p>`,
             inputAttributes: {
               'accept': 'json',
               'aria-label': 'Upload your file'
