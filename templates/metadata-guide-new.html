@@ -193,7 +193,7 @@
     <div id="jsonTable">
       <!-- BULK -->
       <div v-if="jsonItems.length" class="alert grad">
-        <small class="text-light">BULK REGISTRATION </small> <small class="text-info" v-text="jsonItems.length+' documents found'"></small>
+        <small class="text-light">BULK REGISTRATION </small> <small class="text-info" v-text="jsonItems.length+' documents found'"></small> <small @click="location.reload();" class="pointer text-danger">Start Over</small>
         <div style="max-height:500px; overflow:scroll;">
           <table class="m-0 table table-sm table-light table-hover table-striped">
             <thead>
@@ -218,7 +218,7 @@
             </colgroup>
             <tbody style="max-height:500px; overflow:scroll;">
               <template v-for="(item,i) in jsonItems">
-                <json-item :item="item" :number="i+1"></json-item>
+                <json-item :item="item" :number="i+1" :username="userInfo.login"></json-item>
               </template>
             </tbody>
           </table>
@@ -1970,16 +1970,18 @@
       return{
         errMSG:"",
         successMSG:"",
+        successMSGUpdate:"",
         loading: false,
         editor : null,
         beforeCloseVal: null,
         missingRequired:[],
         missingFields:[],
         nullValueWarnings: [],
-        exists: null
+        exists: null,
+        canOverwrite: false
       }
     },
-    props: ['item', 'number'],
+    props: ['item', 'number', 'username'],
     methods:{
       checkAlreadyExists(){
         let self = this;
@@ -1987,6 +1989,11 @@
           axios.get(`/api/dataset/query?q=identifier:${this.item.identifier}`).then(res=>{
             if (res.data.total == 1) {
               self.exists = res.data.hits[0]['_id'];
+              if (self.username == res.data.hits[0]['_meta']['username']) {
+                self.canOverwrite = true;
+              }else{
+                self.canOverwrite = false;
+              }
             }else{
               self.registerJSONItem();
             }
@@ -2084,6 +2091,31 @@
             </ul>`
         })
       },
+      updateJSONItem(){
+        var self = this;
+        self.loading = true;
+        let config = {
+            headers: {
+              'content-type': 'application/json'
+            }
+        }
+
+        axios.put('/api/dataset/' + self.exists, self.item, config).then(res=>{
+          self.loading = false;
+          if (res.data.success) {
+            self.successMSGUpdate = `<a href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer">✨ Nice! Update Successful! ✨</a>`;
+            self.errMSG = '';
+          }
+        }).catch(err=>{
+          self.loading = false;
+          self.errMSG = `<ul class='text-danger mb-0 text-left'>
+            <li>Reason: <b>${err.response.data.reason || 'N/A'}</b></li>
+            <li>Required: ${err.response.data.validator ? '🟢 Yes' : '🔴 No'}</li>
+            <li>Failing at field: <b>${err.response.data.path || 'N/A'}</b></li>
+            <li>Additional Details: <b>${(err.response.data.parent && err.response.data.parent.reason) || 'N/A'}</b></li>
+            </ul>`
+        })
+      },
       editItem(item){
         let self = this;
         Swal.fire({
@@ -2159,10 +2191,18 @@
                       <small v-html="errMSG"></small>
                     </details>
                     <details v-if="exists" class="text-left text-success">
-                      <summary>🚨 Already registered!</summary>
-                      <small>The identifier provided has already been used to register <a target="_blank" :href="'/dataset/'+ exists">this item</a>. 
-                        Make sure you are the owner of this metadata, if you are you can edit via your dashboard. <b>Bulk registration</b> will only work for new metadata.
-                      </small>
+                      <template v-if="canOverwrite">
+                        <summary>🛎️ You've already registered this metadata.</summary>
+                        <small>Here's a link to <a target="_blank" :href="'/dataset/'+ exists">that record</a>. 
+                          If you choose to update this record it will replace the previously registered metadata completely. 
+                        </small>
+                      </template>
+                      <template v-else>
+                        <summary>🚨 Already registered by someone else.</summary>
+                        <small>The identifier provided has already been used to register <a target="_blank" :href="'/dataset/'+ exists">this record</a>. 
+                          Looks like you won't be able to make any changes to this item.
+                        </small>
+                      </template>
                     </details>
                     <details v-if="missingRequired.length && !exists" class="text-left text-danger">
                       <summary v-text="'(' + missingRequired.length + ') Missing Required Fields'"></summary>
@@ -2182,12 +2222,19 @@
                     <button role="button" @click="editItem(item)" class="btn btn-sm mainBackDark text-light m-1">Edit Metadata</button>
                     <button role="button" @click="register()" class="btn btn-sm mainBackLight text-light m-1">Retry Registration</button>
                   </td>
-                  <td v-else><small>Nothing to report!</small></td>
-                  <td class="align-middle" :class="{'badge-danger':errMSG,'badge-success':successMSG}">
+                  <td v-else>
+                    <div v-if="canOverwrite">
+                      <button role="button" @click="editItem(item)" class="btn btn-sm mainBackDark text-light m-1">Edit Metadata</button>
+                      <button role="button" @click="updateJSONItem()" class="btn btn-sm btn-info text-light m-1">Update Metadata</button>
+                    </div>
+                    <small v-else>Nothing to report!</small>
+                  </td>
+                  <td class="align-middle" :class="{'badge-danger':errMSG,'badge-success':successMSG, 'badge-success':successMSGUpdate}">
                     <span class="d-block text-light">
                       <i v-if="loading" class="fas fa-spinner fa-pulse mainTextDark"></i>
                       <small v-if="errMSG">FAILED <i class="fas fa-poo"></i></small>
                       <small v-if="successMSG">REGISTERED <i class="fas fa-registered"></i></small>
+                      <small v-if="successMSGUpdate">UPDATED <i class="fas fa-registered"></i></small>
                     </span>
                   </td>
                 </tr>`
@@ -5223,7 +5270,8 @@
 
           if (type == 'json') {
             const { value: file } = await Swal.fire({
-            title: 'Select JSON file',
+            title: 'Bulk registration',
+            html: `<p>Select JSON file to start.</p>`,
             input: 'file',
             confirmButtonColor:"{{color_main}}",
             cancelButtonColor:"{{color_sec}}",
