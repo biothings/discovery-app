@@ -59,10 +59,8 @@ def main():
             }
         },
         "mappings": {
-            "_doc": {
-                "properties": requests.get(MAPPING_URL).json(),
-                "dynamic": False
-            }
+            "properties": requests.get(MAPPING_URL).json(),
+            "dynamic": False
         }
     })
     logging.debug(_)
