@@ -66,7 +66,7 @@ def main():
     logging.debug(_)
 
     for doc in Dataset.search().scan():
-        dic = doc.to_json()
+        dic = doc.to_dict()
         if dic.get('@type') == 'outbreak:Dataset':
             dic['@type'] = 'Dataset'
             try:
