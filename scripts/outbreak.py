@@ -15,7 +15,7 @@ from tornado.options import options, parse_command_line
 
 from discovery.model.dataset import Dataset
 
-options.define('target_host', default='api.outbreak.info')
+options.define('target_host', default='es7.outbreak.info')
 
 MAPPING_URL = 'https://raw.githubusercontent.com/SuLab/outbreak.info-resources/master/outbreak_resources_es_mapping.json'
 INDEX_PREFIX = 'outbreak-dataset-'
