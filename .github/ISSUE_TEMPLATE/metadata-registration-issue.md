@@ -1,7 +1,7 @@
 ---
 name: Metadata Registration Issue
-about: Describe this issue template's purpose here.
-title: Issue registering some metadata
+about: Report an issue while trying to register metadata on the DDE
+title: ''
 labels: bug
 assignees: marcodarko
 
