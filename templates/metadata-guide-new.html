@@ -200,7 +200,7 @@
             <i class="fas fa-registered"></i> Register Metadata
           </button>
         </div>
-        <div style="max-height:500px; overflow:scroll;">
+        <div style="height:700px; overflow:scroll; resize:vertical;">
           <table class="m-0 table table-sm table-light table-hover table-striped">
             <thead>
               <th>
@@ -1992,6 +1992,7 @@
         nullValueWarnings: [],
         exists: null,
         canOverwrite: false,
+        help: false
       }
     },
     props: ['item', 'number', 'username'],
@@ -1999,7 +2000,7 @@
       checkAlreadyExists(){
         let self = this;
         if (Object.hasOwnProperty.call(this.item, 'identifier')) {
-          axios.get(`/api/dataset/query?q=identifier:"${this.item.identifier}"`).then(res=>{
+          axios.get(`/api/dataset/query?q=(identifier:${this.item.identifier})`).then(res=>{
             if (res.data.total == 1) {
               self.exists = res.data.hits[0]['_id'];
               if (self.username == res.data.hits[0]['_meta']['username']) {
@@ -2105,7 +2106,8 @@
         axios.post('/api/dataset?schema='+schema['namespace']+'::'+schema['prefix']+':'+schema['label']+"&guide="+self.startingPoint['guide'],self.item,config).then(res=>{
           self.loading = false;
           if (res.data.success) {
-            self.successMSG = `<a href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer">✨ Yay! Registration Successful! ✨</a>`;
+            self.successMSG = `<a class="btn btn-sm alert-success" href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer"><i class="fa fa-check-circle" aria-hidden="true"></i> 
+              View Registration</a>`;
             self.errMSG = '';
           }
         }).catch(err=>{
@@ -2116,6 +2118,9 @@
             <li>Failing at field: <b>${err.response.data.path || 'N/A'}</b></li>
             <li>Additional Details: <b>${(err.response.data.parent && err.response.data.parent.reason) || 'N/A'}</b></li>
             </ul>`
+          self.help = `<a class="btn btn-sm alert-danger"
+              href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&template=bulk-registration-issue.md&title=Issue+registering+some+metadata"
+              target="_blank"  rel="nonreferrer"><i class="fa fa-exclamation-circle" aria-hidden="true"></i> Get help!</a>`
         })
       },
       updateJSONItem(){
@@ -2130,7 +2135,8 @@
         axios.put('/api/dataset/' + self.exists, self.item, config).then(res=>{
           self.loading = false;
           if (res.data.success) {
-            self.successMSGUpdate = `<a href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer">✨ Nice! Update Successful! ✨</a>`;
+            self.successMSGUpdate = `<a class="btn btn-sm alert-info" href="/dataset/`+self.exists+`" target="_blank" rel="nonreferrer">
+              <i class="fa fa-check-circle" aria-hidden="true"></i> View Update</a>`;
             self.errMSG = '';
           }
         }).catch(err=>{
@@ -2141,6 +2147,9 @@
             <li>Failing at field: <b>${err.response.data.path || 'N/A'}</b></li>
             <li>Additional Details: <b>${(err.response.data.parent && err.response.data.parent.reason) || 'N/A'}</b></li>
             </ul>`
+          self.help = `<a class="btn btn-sm alert-danger"
+              href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&template=bulk-registration-issue.md&title=Issue+registering+some+metadata"
+              target="_blank"  rel="nonreferrer"><i class="fa fa-exclamation-circle" aria-hidden="true"></i> Get help!</a>`
         })
       },
       editItem(item){
@@ -2217,7 +2226,7 @@
                   <td>
                     <b class="text-info" v-text="number + ': '"></b>
                     <small v-text="item.name"></small>
-                    <small class="ml-1 pointer text-primary" @click="getPreview()">View Metadata</small>
+                    <small class="ml-1 pointer text-primary" @click="getPreview()">Inspect Metadata</small>
                   </td>
                   <td class="align-middle">
                     <small v-if="loading" class="text-muted">Please wait...</small>
@@ -2251,7 +2260,6 @@
                       <summary class="mainTextDark" v-text="'(' + nullValueWarnings.length + ') Null values found and removed'"></summary>
                       <small v-text="nullValueWarnings.join(', ')"></small>
                     </details>
-                    <small v-if="successMSG && !exists" v-html="successMSG" class="text-success"></small>
                   </td>
                   <td v-if="errMSG" class="align-middle">
                     <button role="button" @click="editItem(item)" class="btn btn-sm mainBackDark text-light m-1">Edit Metadata</button>
@@ -2261,7 +2269,6 @@
                     <div v-if="canOverwrite">
                       <button role="button" @click="editItem(item)" class="btn btn-sm mainBackDark text-light m-1">Edit Metadata</button>
                       <button role="button" @click="updateJSONItem()" class="btn btn-sm btn-info text-light m-1">Update Registration</button>
-                      <small v-if="successMSGUpdate" v-html="successMSGUpdate" class="text-success d-block"></small>
                     </div>
                   </td>
                   <td class="align-middle" :class="{'badge-danger':errMSG,'badge-success':successMSG,'badge-info':successMSGUpdate}">
@@ -2270,6 +2277,10 @@
                       <small v-if="errMSG">FAILED <i class="fas fa-poo"></i></small>
                       <small v-if="successMSG">REGISTERED <i class="fas fa-registered"></i></small>
                       <small v-if="successMSGUpdate">UPDATED <i class="fas fa-check"></i></small>
+
+                      <small v-if="successMSG && !exists" v-html="successMSG" class="d-block"></small>
+                      <small v-if="successMSGUpdate" v-html="successMSGUpdate" class="d-block"></small>
+                      <small v-if="help" v-html="help" class="d-block"></small>
                     </span>
                   </td>
                 </tr>`
