@@ -194,7 +194,14 @@
       <!-- BULK -->
       <div v-if="jsonItems.length" class="alert grad">
         <div class="p-1 d-flex justify-content-around align-items-center">
-          <small class="text-info" v-text="jsonItems.length+' documents found'"></small>
+          <small class="text-light" v-text="jsonItems.length+' documents found'"></small>
+          <div class="alert p-1 m-1 d-flex">
+            <span v-for="value,field in bulkReport" :key="field" class="mr-2 pillType" 
+            >
+              <span class="alert-muted" v-text="field"></span>
+              <span :class="{'bg-success text-light': field == 'Registered', 'bg-info text-light': field == 'Updated','bg-danger text-light': field == 'Failed', 'warning-light text-dark': field == 'Exists'}"  v-text="value.length"></span>
+          </span>
+          </div>
           <small @click="restartBulk()" class="pointer text-light badge badge-danger"><i class="fas fa-undo"></i> Start Over</small>
           <button v-if="!beginBulkRegistration" @click.prevent="startBulk()" class="btn btn-success text-light m-1" aria-label="Bulk Register Metadata">
             <i class="fas fa-registered"></i> Register Metadata
@@ -494,10 +501,38 @@
       guide_prefilled: {{guide_prefilled}},
       output_default:{},
       editingID: false,
-      beginBulkRegistration: false
+      beginBulkRegistration: false,
+      bulkReport:{
+        'Exists': [],
+        'Registered': [],
+        'Updated': [],
+        'Failed': []
+      }
     },
     strict: true,
     mutations: {
+      addBulkReport(state, payload){
+        for(key in state.bulkReport){
+          if(state.bulkReport[key].includes(payload.value)){
+            var found = state.bulkReport[key].indexOf(payload.value);
+            while (found !== -1) {
+              state.bulkReport[key].splice(found, 1);
+              found = state.bulkReport[key].indexOf(payload.value);
+            }
+          }
+        }
+        state.bulkReport[payload.field].push(payload.value)
+        // console.log(state.bulkReport)
+      },
+      resetBulkReport(state){
+        console.log('%c Resetting Report', 'color: yellow');
+        state.bulkReport = {
+          'Exists': [],
+          'Registered': [],
+          'Updated': [],
+          'Failed': []
+        }
+      },
       toggleBeginBulkRegistration(state){
         state.beginBulkRegistration = !state.beginBulkRegistration
       },
@@ -986,6 +1021,9 @@
       }
     },
     getters:{
+      getBulkReport: (state) =>{
+        return state.bulkReport
+      },
       beginBulkRegistration: (state) =>{
         return state.beginBulkRegistration
       },
@@ -2004,6 +2042,7 @@
           axios.get(`/api/dataset/query?q=(identifier:"${id}")`).then(res=>{
             if (res.data.total == 1) {
               self.exists = res.data.hits[0]['_id'];
+              store.commit('addBulkReport', {'field': 'Exists', 'value': self.exists});
               if (self.username == res.data.hits[0]['_meta']['username']) {
                 self.canOverwrite = true;
               }else{
@@ -2110,9 +2149,11 @@
             self.successMSG = `<a class="btn btn-sm alert-success" href="/dataset/`+res.data.id+`" target="_blank" rel="nonreferrer"><i class="fa fa-check-circle" aria-hidden="true"></i> 
               View Registration</a>`;
             self.errMSG = '';
+            store.commit('addBulkReport', {'field': 'Registered', 'value': self.item.identifier});
           }
         }).catch(err=>{
           self.loading = false;
+          store.commit('addBulkReport', {'field': 'Failed', 'value': self.item.identifier});
           self.errMSG = `<ul class='text-danger mb-0 text-left'>
             <li>Reason: <b>${err.response.data.reason || 'N/A'}</b></li>
             <li>Required: ${err.response.data.validator ? '🟢 Yes' : '🔴 No'}</li>
@@ -2136,12 +2177,14 @@
         axios.put('/api/dataset/' + self.exists, self.item, config).then(res=>{
           self.loading = false;
           if (res.data.success) {
+            store.commit('addBulkReport', {'field': 'Updated', 'value': self.exists});
             self.successMSGUpdate = `<a class="btn btn-sm alert-info" href="/dataset/`+self.exists+`" target="_blank" rel="nonreferrer">
               <i class="fa fa-check-circle" aria-hidden="true"></i> View Update</a>`;
             self.errMSG = '';
           }
         }).catch(err=>{
           self.loading = false;
+          store.commit('addBulkReport', {'field': 'Failed', 'value': self.exists});
           self.errMSG = `<ul class='text-danger mb-0 text-left'>
             <li>Reason: <b>${err.response.data.reason || 'N/A'}</b></li>
             <li>Required: ${err.response.data.validator ? '🟢 Yes' : '🔴 No'}</li>
@@ -4719,6 +4762,9 @@
 				}
 			},
       computed:{
+        bulkReport:function(){
+          return store.getters.getBulkReport
+        },
         beginBulkRegistration:function(){
           return store.getters.beginBulkRegistration
         },
