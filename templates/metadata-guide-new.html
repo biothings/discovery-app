@@ -2000,7 +2000,7 @@
       checkAlreadyExists(){
         let self = this;
         if (Object.hasOwnProperty.call(this.item, 'identifier')) {
-          axios.get(`/api/dataset/query?q=(identifier:${this.item.identifier})`).then(res=>{
+          axios.get(`/api/dataset/query?q=(identifier:"${this.item.identifier}")`).then(res=>{
             if (res.data.total == 1) {
               self.exists = res.data.hits[0]['_id'];
               if (self.username == res.data.hits[0]['_meta']['username']) {
