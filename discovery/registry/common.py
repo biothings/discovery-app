@@ -91,6 +91,8 @@ class DatasetJsonSchemaValidationError(DatasetValidationError):
             return [self._json_serialize(val) for val in obj]
         if isinstance(obj, jsonschema.exceptions.ValidationError):
             return DatasetValidationError(obj).to_dict()
+        if isinstance(obj, ValueError):
+            return DatasetValidationError(obj).to_dict()
         raise TypeError(str(type(obj)))
 
     def __str__(self):
