@@ -43,11 +43,11 @@
               </div>
             </div>
             <div class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around">
-              <span data-tippy="search" class="fa-stack fa-1x pointer unselectable tip" @click.prevent="search(query)">
+              <span data-tippy="search" class="fa-stack fa-1x pointer unselectable tip" @click.prevent="search()">
                 <i class="fas fa-circle text-muted fa-stack-2x"></i>
                 <i class="fas fa-search fa-stack-1x text-light"></i>
               </span>
-              <span data-tippy="reset" class="fa-stack fa-1x pointer unselectable" @click.prevent="window.location.href = window.location.pathname">
+              <span data-tippy="reset" class="fa-stack fa-1x pointer unselectable" @click.prevent='query=""; search()'>
                 <i class="fas fa-circle fa-stack-2x text-muted"></i>
                 <i class="fas fa-undo fa-stack-1x text-light"></i>
               </span>
@@ -415,7 +415,7 @@
         startCapLimitReached: true,
         endCapLimitReached: false,
         total: Number,
-        registry_api_url: '/api/dataset/query?q=',
+        registry_api_url: '/api/dataset/query?',
         loading: false,
         hits: [],
         query: '',
@@ -585,16 +585,14 @@
       search(){
         let self = this;
         let url = self.registry_api_url
-        let query = self.query.trim() || "__all__";
-
         self.loading = true
         self.hits = []
         self.total = 0
 
         self.highlighter.unmark();
         //query analytics
-        if (query !== "__all__") {
-          self.sendGAEvent('dataset_search', query)
+        if (self.query !== "__all__") {
+          self.sendGAEvent('dataset_search', self.query)
         }
         //look for existing active filters and 
         let filters = self.getFilters();
@@ -608,22 +606,25 @@
         //add AND condition if multiple filters
         let field_query = f_list.join(' AND ');
 
-        //form correct query pattern
-        if (field_query && query !== '__all__') {
-          url += field_query + ' AND ' + query
-        }
-        else if (field_query && query == '__all__') {
-          url += field_query
-        }
-        else if (!field_query && query == '__all__') {
-          url += query
-        }
         //pagination
         var config = {
             "params": {
                 'size': self.perPage,
-                'from': self.page == 1 ? self.page-1 : ((self.page-1) * self.perPage )  
+                'from': self.page == 1 ? self.page-1 : ((self.page-1) * self.perPage ),
             }
+        }
+        if (self.query) {
+          url +=  "q=" + self.query
+        }else{
+          url +=  "q=" + "__all__"
+        }
+
+        if (field_query) {
+          url +=  (" AND " + field_query);
+          //remove __all__ as it makes fielded query fail
+          if (url.includes("__all__")) {
+            url = url.replace("__all__ AND ", '')
+          }
         }
         // sorting
         switch (self.sortChange) {
@@ -631,13 +632,13 @@
             //default behavior
             break;
           case 'A-Z':
-            url += '&sort=name.raw'
+            config.params.sort = 'name.raw'
             break;
           case 'Z-A':
-            url += '&sort=-name.raw'
+          config.params.sort = '-name.raw'
             break;
           case 'recent':
-            url += '&sort=-_ts.last_updated'
+            config.params.sort = '-_ts.last_updated'
             break;
           default:
             //no matching sort
@@ -647,13 +648,7 @@
         axios.get(url, config).then(function(response) {
           self.hits = response.data.hits;
           console.log('%c Query executed', 'color:hotpink')
-          console.log('%c '+ JSON.stringify({
-            'q': query,
-            'size': self.perPage,
-            'from': self.page == 1 ? self.page-1 : ((self.page-1) * self.perPage ),
-            'field_query': field_query,
-            'sorting': self.sortChange
-          }, null, 2), 'color:cyan')
+          console.log('%c '+ JSON.stringify(config, null, 2), 'color:cyan')
           console.log('%c hits: '+response.data.total, 'color:limegreen')
           self.loading = false
           self.total = response.data.total;
