@@ -93,6 +93,13 @@
           <option value="recent">Recently Updated</option>
         </select>
       </div>
+      <div class="d-flex justify-content-start align-items-center">
+        <!-- Download -->
+        <input type="checkbox" class="form-control slider mr-2" id="download_metadata" name="download_metadata" v-model="downloadMode" @click="toggleDownloadMode">
+        <label for="download_metadata" class="m-0">Download Mode <b :class="{'text-success': downloadMode}" v-text="downloadMode ? 'ON' : ''"></b></label>
+        <small v-if="downloadMode" class="bold text-secondary ml-2">Select items to download/ Toggle off to clear</small>
+        <button @click="handleDownloadList()" class="btn ml-3 btn-sm btn-success text-light" v-if="downloadList.length" v-text="'Download (' + downloadList.length + ') items'"></button>
+      </div>
       <div v-if="total" class="mt-0 p-1 bg-secondary text-light text-center col-sm-12 col-md-3" v-text="total+' Results'">
       </div>
       <ul class="list-group context" style="border-top:solid 3px var(--main)" id="regTippyParent">
@@ -109,7 +116,7 @@
           </div>
         </li>
       </ul>
-      <div class="bg-light">
+      <!-- <div class="bg-light">
         <div class="row">
           <nav class="m-auto ">
             <ul class="pagination m-2 flex-wrap p-2">
@@ -134,21 +141,116 @@
             </select>
           </div>
         </div>
+      </div> -->
+      <div>
+        <select class="form-control form-control-sm m-auto w-25" v-model="perPage" @change="calculatePages(); search();" id="perPage">
+            <option value="" disabled selected>Shown Per Page</option>
+            <option value="10">10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="100">100 per page</option>
+        </select>
+        <div class="d-flex flex-wrap justify-content-center p-1 mt-2">
+          <div class="page-item rounded-0" :class="{ 'disabled': page <= 1 }">
+            <a class="page-link p-1" @click.prevent="prevPage(); search()"><i class="fas fa-step-backward"></i></a>
+          </div>
+          <template v-if="groupPages">
+            <div class="page-item rounded-0" v-show="!startCapLimitReached">
+              <a href="#" class="page-link p-1" @click.prevent="previousGroup(); search()">Previous 20</a>
+            </div>
+          </template>
+          <template v-for="n in pages">
+            <div v-if="n >= startCap && n <= endCap" class="page-item rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }">
+              <a href="#" class="page-link p-1" @click.prevent="page = n; search()" v-text="n"></a>
+            </div>
+          </template>
+          <template v-if="groupPages">
+            <div class="page-item rounded-0" v-show="!endCapLimitReached">
+              <a href="#" class="page-link p-1" @click.prevent="nextGroup(); search()">Next 20</a>
+            </div>
+          </template>
+          <div class="page-item rounded-0" :class="{ 'disabled': page >= pages }">
+            <a class="page-link p-1" @click.prevent="nextPage(); search()"><i class="fas fa-step-forward"></i></a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
 {% block extra_scripts %}
+<script src="https://unpkg.com/vuex@3.6.2/dist/vuex.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 <script src="/static/js/lodash.js"></script>
 <script src="/static/js/moment.js"></script>
+<script src="/static/js/notify.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
+
+  $.notify.addStyle('success', {
+    html: "<div><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#28a745",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+  $.notify.addStyle('danger', {
+    html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
+    classes: {
+      base: {
+        "white-space": "nowrap",
+        "background-color": "#dc3545",
+        "padding": "5px",
+        "color":'white',
+      }
+    }
+  });
+
+  const store = new Vuex.Store({
+    state: {
+      downloadMode: false,
+      downloadList: [],
+    },
+    strict: true,
+    getters:{
+      downloadMode: (state) =>{
+        return state.downloadMode
+      },
+      downloadList: (state) =>{
+        return state.downloadList
+      },
+    },
+    mutations:{
+      toggleDownloadMode(state){
+        state.downloadMode = !state.downloadMode
+      },
+      clearDownloadList(state){
+        state.downloadList = [];
+        $.notify("Download Mode OFF",{ globalPosition: 'right',style:"danger", showDuration: 40});
+      },
+      addDownload(state, payload){
+        try {
+          let existingIndex = state.downloadList.indexOf(payload.value.id);
+          if (existingIndex > -1) {
+            state.downloadList.splice(existingIndex, 1);
+            $.notify("Removed",{ globalPosition: 'right',style:"danger", showDuration: 40});
+          }else{
+            state.downloadList.unshift(payload.value.id);
+            $.notify("Item Added",{ globalPosition: 'right', style:"success", showDuration: 40});
+          }
+        } catch (error) {
+          $.notify("Failed to add download",{ globalPosition: 'right',style:"danger", showDuration: 40});
+        }
+      }
+    }
+  });
 
   Vue.component('registry-item', {
     data: function() {
@@ -188,6 +290,13 @@
           );
         }
       },
+      handleDownload(){
+        let doc = {
+          'id': this.item._id,
+          'name': this.item.name
+        }
+        store.commit('addDownload', {'value': doc})
+      }
     },
     computed: {
       text: function() {
@@ -230,6 +339,12 @@
           }
         }
       },
+      downloadMode: function () {
+        return store.getters.downloadMode;
+      },
+      inDownloadCart: function(){
+        return store.getters.downloadList.includes(this.item._id);
+      }
     },
     mounted:function(){
       let self = this;
@@ -257,8 +372,11 @@
     },
     template: `<li class="list-group-item list-group-item-action p-0">
                 <div class="row m-0">
+                  <div v-if="downloadMode" class="p-1 d-flex justify-content-center align-items-center" :class="[inDownloadCart ? 'bg-success text-light' : 'bg-light text-info']" @click="handleDownload()">
+                    <i class="fa fa-2x" aria-hidden="true" :class="inDownloadCart ? 'fa-check' : 'fa-plus'"></i>
+                  </div>
                   <div class="col-sm-1 registry-item-background" :style="{backgroundImage: 'url(' + imgIcon + ')' }"></div>
-                  <div class="col-sm-8 pointer">
+                  <div class="col-sm-7 pointer">
                     <h5 class="mb-1 mainTextDark d-inline gaText d-inline pointer" @click="goTo(item)">
                       <span v-text="item.name"></span>
                       <span v-if="item && item.name.includes('PPRL')" class="ml-2 badge smallBadge">PPRL</span>
@@ -288,13 +406,19 @@
     data: function() {
       return {
         perPage: 10,
+        page: 1,
+        pages: 1,
+        startCap:0,
+        endCap:20,
+        groupPages: false,
+        pageLimit: 20,
+        startCapLimitReached: true,
+        endCapLimitReached: false,
         total: Number,
         registry_api_url: '/api/dataset/query?q=',
         loading: false,
         hits: [],
         query: '',
-        page: 1,
-        pages: 1,
         sortChange: 'recent',
         highlighter: null,
         // key is the direct field to be filtered by
@@ -315,6 +439,47 @@
       }
     },
     methods: {
+      toggleDownloadMode(){
+        store.commit('toggleDownloadMode');
+      },
+      handleDownloadList(){
+        let self = this;
+        Swal.fire({
+          title: 'Name your file',
+          input: 'text',
+          animation:false,
+          customClass:'scale-in-center',
+          inputAttributes: {
+            autocapitalize: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Download Metadata',
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            let docs = [];
+            let string = '';
+            string = self.downloadList.map((id) => {
+              return string += `(_id:"${id}")`
+            }).join(' OR ');
+
+            axios.get('/api/dataset/query?q=' + string).then(function(response) {
+              docs = response.data.hits;
+              self.download(JSON.stringify(docs, null, 2), result.value + '.json', 'text/plain');
+            }).catch(err=>{
+              $.notify("Failed to download items",{ globalPosition: 'right',style:"danger", showDuration: 40});
+              throw err;
+            });
+          }
+        })
+      },
+      download(content, fileName, contentType) {
+        var a = document.createElement("a");
+        var file = new Blob([content], {type: contentType});
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+      },
       mark: function(keyword){
         this.highlighter.unmark();
         this.highlighter.mark(keyword);
@@ -499,18 +664,58 @@
         });
       },
       calculatePages: function () {
-          this.pages = Math.ceil(this.total / this.perPage);
-          if(this.page > this.pages){
-            this.page = 1
+          var self= this;
+          self.pages = Math.ceil(this.total / self.perPage);
+  
+          if (self.pages > self.pageLimit) {
+            self.groupPages =  true;
           }
+        },
+      previousGroup: function(){
+        var self = this;
+
+        if (!self.startCapLimitReached) {
+          if (self.startCap-20 > 0) {
+            self.page = self.startCap-20
+            self.startCap = self.startCap-20
+            self.endCap = self.endCap-20
+            self.endCapLimitReached = false;
+          }else {
+            self.page = 1
+            self.startCap = 0
+            self.endCap = 20
+            self.startCapLimitReached = true;
+            self.endCapLimitReached = false;
+          }
+        }
+      },
+      nextGroup: function(){
+        var self = this;
+
+        if (!self.endCapLimitReached) {
+          if (self.endCap+20 < self.pages) {
+            self.page = self.startCap+20
+            self.startCap = self.startCap+20
+            self.endCap = self.endCap+20
+            self.startCapLimitReached = false;
+          }else {
+            self.page = self.startCap+20
+            self.startCap = self.startCap+20
+            self.endCap = self.pages
+            self.endCapLimitReached = true;
+            self.startCapLimitReached = false;
+          }
+        }
       },
       prevPage: function () {
-          if (this.page > 1)
-              this.page -= 1
+        var self= this;
+        if (self.page > 1)
+            self.page -= 1
       },
       nextPage: function () {
-          if (this.page < this.pages)
-              this.page += 1
+        var self= this;
+        if (self.page < self.pages)
+            self.page += 1
       },
       checkURLQuery(){
         let self = this;
@@ -550,6 +755,21 @@
           }
         }
       }
+    },
+    watch:{
+      downloadMode: function(v){
+        if (!v) {
+          store.commit('clearDownloadList');
+        }
+      }
+    },
+    computed:{
+      downloadMode: function () {
+        return store.getters.downloadMode;
+      },
+      downloadList: function () {
+        return store.getters.downloadList;
+      },
     },
     mounted: function() {
       this.highlighter = new Mark(document.querySelector(".context"))
