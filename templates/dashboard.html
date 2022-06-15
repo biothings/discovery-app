@@ -775,18 +775,17 @@ var app = new Vue({
         getDatasets(){
             let self= this;
             self.loading = true;
-            var params = {
+            if (self.datasetQuery) {
+              var params = {
                 "params": {
                   'size': self.perPage,
                   'from': self.page == 1 ? self.page -1 : ((self.page-1) * self.perPage ),
                   'meta': true,
-                  'user': self.user.login,
-                  'private': self.privateOnly,
                 }
             };
-            if (self.datasetQuery) {
-              params.params.q = self.datasetQuery;
-            }
+
+            params.params.q = `q="${self.datasetQuery}" AND _meta.private:${self.privateOnly} AND _meta.username:${self.user.login}`
+
             axios.get('/api/dataset/query', params).then(res=>{
               self.datasets = res.data.hits;
               self.datasetsTotal = res.data.total;
@@ -796,6 +795,28 @@ var app = new Vue({
               self.loading = false;
               throw err;
             });
+            } else {
+              var params = {
+                  "params": {
+                    'size': self.perPage,
+                    'from': self.page == 1 ? self.page -1 : ((self.page-1) * self.perPage ),
+                    'meta': true,
+                    'user': self.user.login,
+                    'private': self.privateOnly,
+                  }
+              };
+              
+              axios.get('/api/dataset', params).then(res=>{
+                self.datasets = res.data.hits;
+                self.datasetsTotal = res.data.total;
+                self.calculatePages();
+                self.loading = false;
+              }).catch(err=>{
+                self.loading = false;
+                throw err;
+              });
+            }
+            
         },
         handlePrivacy(item,privacyStatus){
           var self = this;
