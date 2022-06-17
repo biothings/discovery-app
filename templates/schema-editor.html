@@ -348,6 +348,14 @@ const store = new Vuex.Store({
               }
             },
             {
+              _id: '00002',
+              title: 'description',
+              color: '#ff6384',
+              validation:{
+                "description": "click EDIT to change your description"
+              }
+            },
+            {
               _id: '01432',
               title: 'string(s)',
               color: '#2717a1',
@@ -1478,6 +1486,7 @@ Vue.component('editor', {
       self.editor = CodeMirror.fromTextArea(document.getElementById("code"), {
           mode: "json",
           lineNumbers: true,
+          lineWrapping: true
       });
     },
     template:`<div>
@@ -1557,13 +1566,11 @@ Vue.component('validation-dropzone', {
           <small class="text-light" v-text="propname"></small>
           <i class="far fa-times-circle pointer text-warning" @click="resetValidation()" data-tippy-info="Clear Validation"></i>
         </div>
-        <div class="col-sm-12 col-md-7 p-1 text-success drop-zone" @drop='onDrop($event, propname)' @dragleave="leaveDrag($event)" @dragover="allowDrop($event);" @dragenter.prevent>
+        <div class="col-sm-12 col-md-7 p-1 text-success drop-zone" style="font-size:12px;" @drop='onDrop($event, propname)' @dragleave="leaveDrag($event)" @dragover="allowDrop($event);" @dragenter.prevent>
           <template v-for='item in matches'>
             <div v-if="val.type === item.validation.type" :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" class='badge drag-el m-1' :key='item.title' draggable @dragstart='startDrag($event, item)' v-text="item.title"></div>
           </template>
-          <small>
-          <pre v-text="JSON.stringify(val,null,2)"></pre>
-          </small>
+          <pre class="m-0" v-text="JSON.stringify(val,null,2)"></pre>
         </div>
       </div>`
   });
@@ -3263,9 +3270,10 @@ var app = new Vue({
           content: 'loading',
           animation: 'fade',
           theme:'light bg-light',
+          interactive:true,
           onShow(instance) {
             let info = instance.reference.dataset.tippyInfo;
-            instance.setContent("<pre class='text-left' style='margin:0px !important;'>"+info+"</pre>")
+            instance.setContent("<pre class='text-left' style='margin:0px !important;overflow: scroll; max-height: 390px;'>"+info+"</pre>")
           }});
 			}
 		});
