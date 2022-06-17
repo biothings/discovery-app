@@ -1393,7 +1393,6 @@
     },
     mounted: function(){
       var self = this;
-
       if (self.parent) {
         self.textColor = 'mainTextLight'
         self.backColor = 'mainBackLight'
@@ -1414,10 +1413,15 @@
     template:
     `<div class="p-3 mb-2 alert alert-light">
       <div>
-        <a class="d-inline text-info" :href="'/view/' + q.name.split(':')[0]">
-          <h3 class="bold d-inline" :id='q.name' v-text="q.name.split(':')[0] + ':'"></h3>
-        </a>
-        <h3 class="bold d-inline" :class='textColor' :id='q.name' v-text="q.name.split(':')[1]"></h3>
+        <div v-if="q && q.name">
+          <a class="d-inline text-info" :href="'/view/' + q.name.split(':')[0]">
+            <h3 class="bold d-inline" :id='q.name' v-text="q.name.split(':')[0] + ':'"></h3>
+          </a>
+          <h3 class="bold d-inline" :class='textColor' :id='q.name' v-text="q.name.split(':')[1]"></h3>
+        </div>
+        <div v-if="q && q.label">
+          <h3 class="bold d-inline" :class='textColor' :id='q.label' v-text="q.label.split(':')[0]"></h3>
+        </div>
         <template v-if="q && q.domain">
           <small class="text-muted">is a property of: </small>
           <template v-for='(item,index) in q.domain'>
