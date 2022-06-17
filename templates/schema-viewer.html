@@ -1419,7 +1419,7 @@
           </a>
           <h3 class="bold d-inline" :class='textColor' :id='q.name' v-text="q.name.split(':')[1]"></h3>
         </div>
-        <div v-if="q && q.label">
+        <div v-else-if="q && q.label">
           <h3 class="bold d-inline" :class='textColor' :id='q.label' v-text="q.label.split(':')[0]"></h3>
         </div>
         <template v-if="q && q.domain">
