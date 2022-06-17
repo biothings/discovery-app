@@ -537,7 +537,7 @@
                 header: true,
                 delimiter: ",",
               });
-              self.download(JSON.stringify(csv), result.value + '.csv', 'text/plain');
+              self.download(csv, result.value + '.csv', 'text/plain');
               
             }).catch(err=>{
               $.notify("Failed to download items",{ globalPosition: 'right',style:"danger", showDuration: 40});
