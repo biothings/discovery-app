@@ -28,7 +28,7 @@
   <div class="col-md-10 col-sm-12 m-auto p-0">
     <div class="">
       <h1 class="text-center logoText mb-1 mt-2">
-        <span v-if='window.location.href.includes("n3c")'>N3C</span> Dataset Registry
+        <span v-if='window.location.href.includes("n3c")'>N3C</span> Metadata Registry
       </h1>
       <p class="text-center text-muted" v-if='window.location.href.includes("n3c")'>
         For more general information about PPRL datasets, such as what this data is, and how to participate, please visit our
@@ -98,7 +98,7 @@
         <input type="checkbox" class="form-control slider mr-2" id="download_metadata" name="download_metadata" v-model="downloadMode" @click="toggleDownloadMode">
         <label for="download_metadata" class="m-0">Download Mode <b :class="{'text-success': downloadMode}" v-text="downloadMode ? 'ON' : ''"></b></label>
         <small v-if="downloadMode" class="bold text-secondary ml-2">Select items to download/ Toggle off to clear</small>
-        <button @click="handleDownloadList()" class="btn ml-3 btn-sm btn-success text-light" v-if="downloadList.length" v-text="'Download (' + downloadList.length + ') items'"></button>
+        <button @click="handleDownload()" class="btn ml-3 btn-sm btn-success text-light" v-if="downloadList.length" v-text="'Download (' + downloadList.length + ') items'"></button>
       </div>
       <div v-if="total" class="mt-0 p-1 bg-secondary text-light text-center col-sm-12 col-md-3" v-text="total+' Results'">
       </div>
@@ -116,32 +116,6 @@
           </div>
         </li>
       </ul>
-      <!-- <div class="bg-light">
-        <div class="row">
-          <nav class="m-auto ">
-            <ul class="pagination m-2 flex-wrap p-2">
-              <li class="page-item" :class="{ 'disabled': page <= 1 }">
-                <a class="page-link" @click.prevent="prevPage(); search()"><i class="fas fa-step-backward"></i></a>
-              </li>
-              <li class="page-item" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages" :key="n">
-                <a href="#" class="page-link" @click.prevent="page = n; search()" v-text="n"></a>
-              </li>
-              <li class="page-item" :class="{ 'disabled': page >= pages }">
-                <a class="page-link" @click.prevent="nextPage(); search()"><i class="fas fa-step-forward"></i></a>
-              </li>
-            </ul>
-          </nav>
-          <div class="col-sm-12 right-align form-group">
-            <select class="perPage form-control form-control-sm w-50 m-auto" v-model="perPage" id="perPage" @change="search()">
-              <option value="" disabled selected>Shown Per Page</option>
-              <option value="10">10 per page</option>
-              <option value="20">20 per page</option>
-              <option value="50">50 per page</option>
-              <option value="100">100 per page</option>
-            </select>
-          </div>
-        </div>
-      </div> -->
       <div>
         <select class="form-control form-control-sm m-auto w-25" v-model="perPage" @change="calculatePages(); search();" id="perPage">
             <option value="" disabled selected>Shown Per Page</option>
@@ -186,6 +160,7 @@
 <script src="/static/js/lodash.js"></script>
 <script src="/static/js/moment.js"></script>
 <script src="/static/js/notify.min.js"></script>
+<script src="/static/js/papaparse.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
 <script>
@@ -240,7 +215,7 @@
           let existingIndex = state.downloadList.indexOf(payload.value.id);
           if (existingIndex > -1) {
             state.downloadList.splice(existingIndex, 1);
-            $.notify("Removed",{ globalPosition: 'right',style:"danger", showDuration: 40});
+            $.notify("Item Removed",{ globalPosition: 'right',style:"danger", showDuration: 40});
           }else{
             state.downloadList.unshift(payload.value.id);
             $.notify("Item Added",{ globalPosition: 'right', style:"success", showDuration: 40});
@@ -442,18 +417,103 @@
       toggleDownloadMode(){
         store.commit('toggleDownloadMode');
       },
-      handleDownloadList(){
+      handleDownload(){
+        var self = this;
+        Swal.fire({
+          title: 'Download Metadata',
+          text: 'Select the desired output of the metadata selected',
+          input: 'select',
+          inputOptions: {
+            'json': 'JSON',
+            'csv': 'CSV',
+          },
+          footer:'Note: Documents will be flattened for CSV file.',
+          inputPlaceholder: 'Select Output',
+          showCancelButton: true,
+          animation:false,
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          customClass:'scale-in-center',
+          confirmButtonText: 'Next',
+          showLoaderOnConfirm: true,
+          preConfirm: (method) => {
+            return method
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            switch (result.value) {
+              case 'json':
+                self.downloadJSON();
+              case 'csv':
+                self.downloadCSV();
+              default:
+              return false;
+            }
+          }
+        })
+      },
+      flatten(target, opts) {
+
+        function isBuffer (obj) {
+          return obj &&
+            obj.constructor &&
+            (typeof obj.constructor.isBuffer === 'function') &&
+            obj.constructor.isBuffer(obj)
+        }
+
+        function keyIdentity (key) {
+          return key
+        }
+        opts = opts || {}
+
+        const delimiter = opts.delimiter || '.'
+        const maxDepth = opts.maxDepth
+        const transformKey = opts.transformKey || keyIdentity
+        const output = {}
+
+        function step (object, prev, currentDepth) {
+          currentDepth = currentDepth || 1
+          Object.keys(object).forEach(function (key) {
+            const value = object[key]
+            const isarray = opts.safe && Array.isArray(value)
+            const type = Object.prototype.toString.call(value)
+            const isbuffer = isBuffer(value)
+            const isobject = (
+              type === '[object Object]' ||
+              type === '[object Array]'
+            )
+
+            const newKey = prev
+              ? prev + delimiter + transformKey(key)
+              : transformKey(key)
+
+            if (!isarray && !isbuffer && isobject && Object.keys(value).length &&
+              (!opts.maxDepth || currentDepth < maxDepth)) {
+              return step(value, newKey, currentDepth + 1)
+            }
+
+            output[newKey] = value
+          })
+        }
+
+        step(target)
+
+        return output
+      },
+      downloadCSV(){
         let self = this;
         Swal.fire({
           title: 'Name your file',
           input: 'text',
           animation:false,
           customClass:'scale-in-center',
+          footer:'Note: First row is column names.',
           inputAttributes: {
             autocapitalize: 'off'
           },
           showCancelButton: true,
-          confirmButtonText: 'Download Metadata',
+          confirmButtonText: 'Download CSV',
           allowOutsideClick: () => !Swal.isLoading()
         }).then((result) => {
           if (result.value) {
@@ -465,6 +525,56 @@
 
             axios.get('/api/dataset/query?q=' + string).then(function(response) {
               docs = response.data.hits;
+              docs = docs.map((doc) => {
+                delete doc._meta
+                delete doc._ts
+                delete doc._score
+                return doc
+              });
+              docs = docs.map(self.flatten);
+              console.log(docs)
+              let csv = Papa.unparse(docs,{
+                header: true,
+                delimiter: ",",
+              });
+              self.download(JSON.stringify(csv), result.value + '.csv', 'text/plain');
+              
+            }).catch(err=>{
+              $.notify("Failed to download items",{ globalPosition: 'right',style:"danger", showDuration: 40});
+              throw err;
+            });
+          }
+        })
+      },
+      downloadJSON(){
+        let self = this;
+        Swal.fire({
+          title: 'Name your file',
+          input: 'text',
+          animation:false,
+          customClass:'scale-in-center',
+          inputAttributes: {
+            autocapitalize: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Download JSON',
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            let docs = [];
+            let string = '';
+            string = self.downloadList.map((id) => {
+              return string += `(_id:"${id}")`
+            }).join(' OR ');
+
+            axios.get('/api/dataset/query?q=' + string).then(function(response) {
+              docs = response.data.hits;
+              docs = docs.map((doc) => {
+                delete doc._meta
+                delete doc._ts
+                delete doc._score
+                return doc
+              });
               self.download(JSON.stringify(docs, null, 2), result.value + '.json', 'text/plain');
             }).catch(err=>{
               $.notify("Failed to download items",{ globalPosition: 'right',style:"danger", showDuration: 40});
