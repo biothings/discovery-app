@@ -4,6 +4,9 @@
 <style>
 [v-cloak] > * { display:none; }
 [v-cloak]::before { content: "Please wait..."; }
+.stripedList li:nth-child(even){
+  background-color: rgb(243, 243, 243);
+}
 </style>
 <div id="viewer" v-cloak>
   <!-- Loader -->
@@ -97,11 +100,12 @@
           <ul class="list-group mt-3">
             <li class="list-group-item list-group-item-action" v-for="(item,i) in classesGroupByLetter">
               <h3 :id="item.group" class="text-dark" v-text="item.group " v-show="classesGroupByLetter.length>5"></h3>
-              <ul style="list-style:none;">
-                <li v-for="def in item.children">
+              <ul style="list-style:none;" class="stripedList">
+                <li v-for="def in item.children" class="d-flex justify-content-between align-item-center p-1">
                   <a  :href="'/view/'+namespace+'/'+def">
-                    <span v-text="def"></span> <i class="fas fa-chevron-right"></i>
+                    <span v-text="def.split(':')[1]"></span> <i class="fas fa-chevron-right"></i>
                   </a>
+                  <i class="fas fa-code-branch pointer tip text-light btn btn-info p-1" @click.prevent="saveDataAndRedirect(def)" :data-tippy-info="'Extend '+def"></i>
                 </li>
               </ul>
             </li>
@@ -1614,6 +1618,21 @@
         }
       },
 			methods:{
+        saveDataAndRedirect(item){
+          var self = this;
+          let found = _.find(self.userSchema.hits, (o) => o.name == item);
+          if (found) {
+              let data = JSON.stringify(found)
+              localStorage.setItem('EditorData', data);
+              localStorage.setItem('EditorStartingPoint', item);
+              window.location.href = '/editor';
+            }else{
+              Swal.fire(
+                'Hmmm',
+                'Cannot find Class: ' + item,
+              );
+            }
+        },
         checkUser(){
           let self = this;
           $.ajax({url: "/user", success: function(result){
@@ -1750,14 +1769,14 @@
           var self = this;
           let res =[];
           for (var i = 0; i < self.userSchema['hits'].length; i++) {
-            //only order classses not refenced
+            //only order classes not referenced
             if (!self.userSchema['hits'][i]['ref']) {
-              res.push(self.userSchema['hits'][i]['label']);
+              res.push(self.userSchema['hits'][i]['name']);
             }
           }
 
           let data = res.reduce((r, e) => {
-            let group = e[0];
+            let group = e.split(":")[1][0];
             if(!r[group]) r[group] = {group, children: [e]}
             else r[group].children.push(e);
             return r;
