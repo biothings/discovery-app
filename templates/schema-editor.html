@@ -605,7 +605,7 @@ const store = new Vuex.Store({
         state.top_class_validation = payload['schema'].validation;
         // console.log('🍕🍕🍕 saved validation..🍕🍕🍕',state.top_class_validation);
       }
-      // console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
+      console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
     },
     setValidation(state,payload){
       let item = payload['validation']
@@ -1177,6 +1177,38 @@ const store = new Vuex.Store({
     }
   },
   actions:{
+    SelectExistingProps({commit, state}){
+      state.schema.forEach(schema => {
+        if (Object.hasOwnProperty.call(schema, 'validation')) {
+          if (Object.hasOwnProperty.call(schema.validation, 'properties')) {
+            Object.keys(schema.validation['properties']).forEach(propName => {
+              commit('selectProp', {'label': propName});
+            });
+          }
+        }
+      });
+    },
+    ApplyExistingValidationRules({commit, state}){
+      state.schema.forEach(schema => {
+        if (Object.hasOwnProperty.call(schema, 'validation')) {
+          if (Object.hasOwnProperty.call(schema.validation, 'optional')) {
+            schema.validation['optional'].forEach(propName => {
+              commit('optionalProp', {'label': propName});
+            });
+          }
+          if (Object.hasOwnProperty.call(schema.validation, 'recommended')) {
+            schema.validation['recommended'].forEach(propName => {
+              commit('recommendProp', {'label': propName});
+            });
+          }
+          if (Object.hasOwnProperty.call(schema.validation, 'required')) {
+            schema.validation['required'].forEach(propName => {
+              commit('requireProp', {'label': propName});
+            });
+          }
+        }
+      });
+    },
     getParents ({commit,state}) {
       let list =[];
       for (var i = 0; i < state.schema[0].parent_classes.length; i++) {
@@ -2849,6 +2881,12 @@ var app = new Vue({
         prefix:function(prefix,oldprefix){
           if (prefix) {
             store.dispatch('getParents')
+            setTimeout(() => {
+              store.dispatch('SelectExistingProps');
+            }, 1000);
+            setTimeout(() => {
+              store.dispatch('ApplyExistingValidationRules');
+            }, 1500);
           }
         },
         inputNamespace:function(value,oldvalue){
