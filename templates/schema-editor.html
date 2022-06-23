@@ -48,40 +48,40 @@
     </div>
     <div id="widget">
       <div class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start rounded-0">
-        <span class="fa-stack fa-1x pointer tip mr-2" :data-tippy-info="'Logged in as '+userInfo.login" v-if="userInfo && userInfo.login">
-          <i class="fas fa-circle text-success fa-stack-2x"></i>
-          <i class="fas fa-user-check fa-stack-1x fa-inverse"></i>
+        <span class="badge bg-success text-light tip mr-2" :data-tippy-info="'Logged in as '+userInfo.login" v-if="userInfo && userInfo.login">
+          <i class="fas fa-user-check text-light"></i>
         </span>
         <a class='nav-link active text-primary mr-2' :href='"/login?next="+window.location.pathname' v-if="userInfo && !userInfo.login">
-          <span class="fa-stack fa-1x pointer tip" data-tippy-info="Click to log in">
-            <i class="fas fa-circle text-primary fa-stack-2x"></i>
-            <i class="fas fa-sign-in-alt fa-stack-1x fa-inverse"></i>
+          <span class="badge bg-info text-light pointer tip" data-tippy-info="Click to sign in">
+            <i class="fas fa-sign-in-alt text-light"></i> Sign In
           </span>
         </a>
         <template v-if='newClassAdded'>
-          <span class="fa-stack fa-1x pointer tip mr-2" data-tippy-info="Preview" @click="getPreview()">
-            <i class="fas fa-circle fa-stack-2x mainTextDark"></i>
-            <i class="fas fa-code fa-stack-1x fa-inverse"></i>
+          <span class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Preview" @click="getPreview()">
+            <i class="fas fa-code text-light"></i> Preview
           </span>
-          <span class="fa-stack fa-1x pointer tip mr-2" data-tippy-info="Download your schema" @click='downloadSchema()'>
-            <i class="fas fa-circle fa-stack-2x text-primary"></i>
-            <i class="fas fa-stack-1x fa-file-download fa-inverse"></i>
+          <span class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Download your schema" @click='downloadSchema()'>
+            <i class="fas fa-file-download text-light"></i> Download
           </span>
-          <span class="fa-stack fa-1x pointer tip mr-2" data-tippy-info="Save (Requires GitHub Login)" @click.prevent="githubOptions()">
-            <i class="fas fa-circle fa-stack-2x text-success"></i>
-            <i class="fab fa-stack-1x fa-github fa-inverse"></i>
+          <span class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Save (Requires GitHub Login)" @click.prevent="githubOptions()">
+            <i class="fab fa-github text-light"></i> Save to GitHub
           </span>
-          <span class="fa-stack fa-1x pointer tip mr-2" data-tippy-info="Learn about this editor" @click.prevent="showHelp()">
-            <i class="fas fa-circle fa-stack-2x text-muted"></i>
-            <i class="fas fa-stack-1x fa-question-circle fa-inverse"></i>
+          <span class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Learn about this editor" @click.prevent="showHelp()">
+            <i class="fas fa-question-circle text-light"></i> Help
           </span>
-          <div class="mr-2">
-            <small class="text-light"><img src='/static/img/cube.svg' width="30px"> Validation Editor</small>
-          </div>
-          <div>
-            <input class="form-control slider m-auto tip" @click="editValidation()" data-tippy-info="Edit Schema Validation" type="checkbox"/>
-          </div>
         </template>
+        <span v-if="userInfo && userInfo.login" class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Save Progress Locally" @click.prevent="handleProgress()">
+          Save/Load Progress
+        </span>
+        <small class="text-muted">Extending <i class="fas fa-chevron-right"></i> <b v-text="startingPoint"></b></small>
+      </div>
+      <div v-if='newClassAdded' class="actions bg-info p-2 rounded d-flex align-items-center justify-content-center rounded-0">
+        <div class="mr-2">
+          <small class="text-light"><img src='/static/img/cube.svg' width="30px"> Validation Editor</small>
+        </div>
+        <div>
+          <input class="form-control slider m-auto tip" @click="editValidation()" data-tippy-info="Edit Schema Validation" type="checkbox"/>
+        </div>
       </div>
       <!-- Validation -->
       <div v-if="validationView" class="v-container p-0 bg-dark justify-content-center d-flex align-items-center">
@@ -194,7 +194,7 @@
               <p class="text-left">
                 <small class="text-muted d-block">1. <i class="fas fa-circle text-primary"></i> Reuse properties from parents <i class="text-danger">Required</i></small>
                 <small class="text-muted d-block">2. <i class="fas fa-star text-warning"></i> Add new properties <i class="text-danger">Required</i></small>
-                <small class="text-muted d-block">3. <img src='/static/img/cube.svg' width="15px"> Edit validation <i class="text-danger">Required</i></small>
+                <small class="text-muted d-block">3. <img src='/static/img/cube.svg' width="15px"> Complete Validation Editor <i class="text-danger">Required</i></small>
                 <small class="text-muted d-block">4. <i class="fab fa-github text-success"></i> Save/Download schema</small>
               </p>
             </div>
@@ -244,6 +244,7 @@
 <script src="/static/js/lodash.js"></script>
 <script src="/static/js/notify.min.js"></script>
 <script src="/static/js/codemirror.js"></script>
+<script src="/static/js/moment.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
@@ -334,8 +335,10 @@ const store = new Vuex.Store({
       'recommended': [],
       'optional': []
     },
+    'parentDataReceived': false,
     'showDescriptions':false,
     'editThis':null,
+    'loading': false,
     'editThisDefinition':null,
     'previousPreviewProps': {},
     'validation_options': [
@@ -563,6 +566,17 @@ const store = new Vuex.Store({
   },
   strict: true,
   mutations: {
+    resetSchema(state){
+      state.schema = [];
+      state.startingPoint = '';
+      console.log('Reset for loading data done ✅')
+    },
+    setLoading(state, payload){
+      state.loading = payload.state;
+    },
+    pdReceived(state, payload){
+      state.parentDataReceived = payload.state;
+    },
     deleteValidationOption(state, payload){
       const msg = ["Adios!", "Bye!", "See Ya!", "Deleted!", "Gone", "Poof!", "So Long!"];
       const random = Math.floor(Math.random() * msg.length);
@@ -597,15 +611,22 @@ const store = new Vuex.Store({
       state.showDescriptions = !state.showDescriptions
     },
     saveSchema(state,payload){
-      state.schema.push(payload['schema']);
-      state.startingPoint=payload['start'];
-      if (payload['schema'].hasOwnProperty('validation')) {
-        //save on initial load as state.schema will change
-        //later on validation will not be available.
-        state.top_class_validation = payload['schema'].validation;
-        // console.log('🍕🍕🍕 saved validation..🍕🍕🍕',state.top_class_validation);
+      let names = state.schema.map(cls => cls.name);
+      // console.log(names)
+      if (!names.includes(payload['schema'].name)) {
+        console.log('🔵 Adding Class: ', payload['schema'].name)
+        state.schema.push(payload['schema']);
+        state.startingPoint=payload['start'];
+        if (payload['schema'].hasOwnProperty('validation')) {
+          //save on initial load as state.schema will change
+          //later on validation will not be available.
+          state.top_class_validation = payload['schema'].validation;
+        }
+        console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
+      }else{
+        console.warn('🚫 Class already exists', payload['schema'].name)
       }
-      console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
+      
     },
     setValidation(state,payload){
       let item = payload['validation']
@@ -766,7 +787,12 @@ const store = new Vuex.Store({
       if (parent.hasOwnProperty('properties')) {
         parent.properties = _.orderBy(parent.properties, ['label'], ['asc']);
       }
-      state.schema.push(parent)
+      let names = state.schema.map(cls => cls.name);
+      // console.log(names)
+      if (!names.includes(parent.name)) {
+        console.log('🟣 Adding Parent Class: ', parent.name)
+        state.schema.push(parent)
+      }
     },
     addClass(state,payload){
       let newClass = {};
@@ -776,7 +802,7 @@ const store = new Vuex.Store({
       newClass['name'] = state.prefix+":"+payload['name']
       newClass['prefix'] = state.prefix
       newClass['parent_classes'] = [state.schema[0].name]
-
+      console.log('🟠 Adding User Class: ', payload['name'])
       state.schema.unshift(newClass)
     },
     addProperty(state,payload){
@@ -1104,6 +1130,12 @@ const store = new Vuex.Store({
     }
   },
   getters:{
+    loading: state =>{
+      return state.loading
+    },
+    parentData: state =>{
+      return state.parentDataReceived
+    },
     getDefinitionOptions:state=>{
       return state.definition_options
     },
@@ -1187,10 +1219,12 @@ const store = new Vuex.Store({
           }
         }
       });
+      console.log('Preselected properties ✅')
     },
     ApplyExistingValidationRules({commit, state}){
       state.schema.forEach(schema => {
         if (Object.hasOwnProperty.call(schema, 'validation')) {
+          console.log('Applying $Validation...', schema.validation)
           if (Object.hasOwnProperty.call(schema.validation, 'optional')) {
             schema.validation['optional'].forEach(propName => {
               commit('optionalProp', {'label': propName});
@@ -1208,31 +1242,33 @@ const store = new Vuex.Store({
           }
         }
       });
+      console.log('Applied existing validation and marginality ✅')
     },
-    getParents ({commit,state}) {
+    async getParents ({commit,state}) {
       let list =[];
       for (var i = 0; i < state.schema[0].parent_classes.length; i++) {
         list = list.concat(state.schema[0].parent_classes[i].split(", ").reverse())
       }
       let uniqueParents = new Set(list)
       let pList = [...uniqueParents]
-      // console.log('pList',pList)
-      for (var i = 0; i < pList.length; i++) {
-        state.loading = true;
-        let namespace = state.schema[0].namespace;
-        let curie = pList[i];
-        //pull definition from registered namespace - should match curie prefix
-        namespace = curie.split(":")[0];
-        let url = "api/registry/"+namespace+"/"+curie
-        axios.get(url).then(res=>{
-          if (res.data) {
-            commit('saveParent',{'parent':res.data})
-          }
-        }).catch(err=>{
-          console.warn("Failed query for class info "+url)
-          throw err;
-        })
+      let requests = pList.map(parent => axios.get("api/registry/" + parent.split(":")[0] + "/" + parent));
+
+      commit('setLoading', {'state': true});
+      try {
+        const res = await Promise.all(requests);
+        const data = res.map((res) => res.data);
+        data.forEach(parentInfo => commit('saveParent',{'parent': parentInfo}));
+        commit('setLoading', {'state': false});
+        console.log('Parent classes info received ✅')
+        commit('pdReceived', {'state': true});
+      } catch (error){
+        console.log(error)
+        commit('setLoading', {'state': false});
+        console.warn("Failed query for parent class")
       }
+
+      
+      
     }
   }
 });
@@ -1612,7 +1648,6 @@ Vue.component('github-option', {
     return{
       repoName: '',
       repos: [],
-      loading: false,
       repo_selected: '',
       filter: '',
       name_selected: '',
@@ -1633,7 +1668,7 @@ Vue.component('github-option', {
   methods:{
     resetFields(){
       let self = this;
-      self.loading = true;
+      store.commit('setLoading', {'state': true});
       setTimeout(function(){
         self.repo_selected = '';
         self.name_selected = '';
@@ -1643,13 +1678,13 @@ Vue.component('github-option', {
         self.files_available = [];
         self.file_selected = '';
       }, 1000);
-      self.loading = false;
+      store.commit('setLoading', {'state': false});
     },
     checkRepo(){
       let self = this;
-      self.loading = true;
+      store.commit('setLoading', {'state': true});
       axios.get("/api/gh/"+self.repoName).then(res=>{
-        self.loading = false;
+        store.commit('setLoading', {'state': false});
         if (res.data.success) {
           return "https://github.com/"+res.data.msg
         }else{
@@ -1660,7 +1695,7 @@ Vue.component('github-option', {
           })
         }
       }).catch(err=>{
-        self.loading = false;
+        store.commit('setLoading', {'state': false});
         Swal.fire({
           type: 'error',
           title: 'Oops...Something went really wrong!',
@@ -1671,9 +1706,9 @@ Vue.component('github-option', {
     },
     getRepos(){
       var self = this;
-      self.loading = true;
+      store.commit('setLoading', {'state': true});
       axios.get("/api/gh").then(res=>{
-        self.loading = false;
+        store.commit('setLoading', {'state': false});
         if (res.data.success) {
           self.repos = res.data.msg
         }else{
@@ -1684,7 +1719,7 @@ Vue.component('github-option', {
           })
         }
       }).catch(err=>{
-        self.loading = false;
+        store.commit('setLoading', {'state': false});
         Swal.fire({
           type: 'error',
           title: 'Oops!',
@@ -1711,10 +1746,10 @@ Vue.component('github-option', {
          }
        }
 
-      self.loading = true;
+      store.commit('setLoading', {'state': true});
 
       return axios.put("/api/gh", data, config).then(res=>{
-        self.loading = false;
+        store.commit('setLoading', {'state': false});
         if (res.data.success) {
           self.repo_saved = true;
           self.repo_link = "https://github.com/"+res.data.msg
@@ -1727,7 +1762,7 @@ Vue.component('github-option', {
           })
         }
       }).catch(err=>{
-        self.loading = false;
+        store.commit('setLoading', {'state': false});
         self.repo_saved = false;
         Swal.fire({
           type: 'error',
@@ -1758,10 +1793,10 @@ Vue.component('github-option', {
            }
          }
 
-        self.loading = true;
+        store.commit('setLoading', {'state': true});
 
         return axios.post("/api/gh", data, config).then(res=>{
-          self.loading = false;
+          store.commit('setLoading', {'state': false});
           if (res.data.success) {
             self.repo_saved = true;
             self.repo_link = "https://github.com/"+res.data.msg
@@ -1774,7 +1809,7 @@ Vue.component('github-option', {
             })
           }
         }).catch(err=>{
-          self.loading = false;
+          store.commit('setLoading', {'state': false});
           self.repo_saved = false;
           Swal.fire({
             type: 'error',
@@ -1809,16 +1844,16 @@ Vue.component('github-option', {
     },
     sendRequest(url, backupURL=""){
       let self = this;
-      self.loading = true;
+      store.commit('setLoading', {'state': true});
       axios.get("/api/view?url="+url).then(res=>{
         console.log(res.data)
         self.data = res.data;
-        self.loading = false;
+        store.commit('setLoading', {'state': false});
         localStorage.setItem('user-schema-classes',JSON.stringify(self.data));
         localStorage.setItem('user-schema-url',url);
         self.assignTempName(res.data.hits);
       }).catch(err=>{
-        self.loading = false;
+        store.commit('setLoading', {'state': false});
         if (backupURL){
           self.sendRequest(backupURL)
         }else{
@@ -1912,6 +1947,9 @@ Vue.component('github-option', {
     }
   },
   computed: {
+    loading(){
+      return store.getters.loading
+    },
     code:function(){
       return store.getters.getFinalSchema
     },
@@ -1928,9 +1966,9 @@ Vue.component('github-option', {
     repo_selected:function(name,oldname){
       let self = this;
       if(self.repos.length && self.repos.includes(name)){
-        self.loading = true;
+        store.commit('setLoading', {'state': true});
         return axios.get("/api/gh/"+name).then(res=>{
-          self.loading = false;
+          store.commit('setLoading', {'state': false});
           if (res.data.success) {
             self.files_available = res.data.msg
           }else{
@@ -1941,7 +1979,7 @@ Vue.component('github-option', {
             })
           }
         }).catch(err=>{
-          self.loading = false;
+          store.commit('setLoading', {'state': false});
           Swal.fire({
             type: 'error',
             title: 'Oops...Something went wrong!',
@@ -2836,7 +2874,6 @@ var app = new Vue({
       store: store,
 			data: function(){
 				return {
-          loading: false,
           inputNamespace:'',
           availableNamespace:false,
           userInfo:null,
@@ -2859,6 +2896,9 @@ var app = new Vue({
         prefix:function(){
           return store.getters.getPrefix
         },
+        parentData:function(){
+          return store.getters.parentData
+        },
         classesAvailable:function(){
           return store.getters.getSchema
         },
@@ -2875,18 +2915,23 @@ var app = new Vue({
         },
         definition_item(){
           return store.getters.getEditDefinitionItem
+        },
+        loading(){
+          return store.getters.loading
         }
       },
       watch:{
-        prefix:function(prefix,oldprefix){
+        prefix:function(prefix){
           if (prefix) {
-            store.dispatch('getParents')
-            setTimeout(() => {
-              store.dispatch('SelectExistingProps');
-            }, 1000);
+            store.dispatch('getParents');
+          }
+        },
+        parentData:function(p){
+          if (p) {
+            store.dispatch('SelectExistingProps');
             setTimeout(() => {
               store.dispatch('ApplyExistingValidationRules');
-            }, 1500);
+            }, 2000);
           }
         },
         inputNamespace:function(value,oldvalue){
@@ -3012,6 +3057,284 @@ var app = new Vue({
             modal.style.display = "none";
           }
         },
+        handleProgress(){
+          var self = this;
+          Swal.fire({
+            title: 'Save/Load Progress',
+            text: 'What would you like to do?',
+            input: 'select',
+            inputOptions: {
+              'save': '💾 Save my work',
+              'load': '⏬ Load something',
+              'delete': '🗑️ Delete some stuff',
+            },
+            footer:'<small>Note: This feature will use your local storage, clearing it will delete all your progress records. To manage your local storage: right click > inspect > click on the Application tab > Storage > Local Storage</small>',
+            inputPlaceholder: 'Select Action',
+            showCancelButton: true,
+            animation:false,
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            customClass:'scale-in-center',
+            confirmButtonText: 'Next',
+            showLoaderOnConfirm: true,
+            preConfirm: (method) => {
+              return method
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            if (result.value) {
+              switch (result.value) {
+                case 'save':
+                  self.saveProgress();
+                  break;
+                case 'load':
+                  self.loadProgress();
+                  break;
+                case 'delete':
+                  self.deleteProgress();
+                  break;
+                default:
+                  return false;
+              }
+            }
+          });
+        },
+        deleteProgress(){
+          var progress = localStorage.getItem('EditorProgress');
+          if (progress) {
+            progress = JSON.parse(progress);
+            let options = {
+              'all': '🗑️ Get rid of it all! 🗑️'
+            }
+            progress.forEach(entry => {
+              options[entry.date] = `🗑️ Delete : "${entry.description} (${entry.date})"`
+            });
+            Swal.fire({
+            title: '🗑️ Delete some stuff',
+            text: 'What would you like to do?',
+            input: 'select',
+            inputOptions: options,
+            footer:'Note: There is no way to recover anything once trashed.',
+            inputPlaceholder: 'Select Option',
+            showCancelButton: true,
+            animation:false,
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            customClass:'scale-in-center',
+            confirmButtonText: 'Next',
+            showLoaderOnConfirm: true,
+            preConfirm: (method) => {
+              return method
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            if (result.value) {
+              switch (result.value) {
+                case 'all':
+                  localStorage.removeItem('EditorProgress');
+                  $.notify("Done! All gone",{ globalPosition: 'right',style:'info', showDuration: 200});
+                  break;
+                default:
+                  let found = progress.find((entry) => entry.date == result.value);
+                  if (found) {
+                    let newEntries = progress.filter(entry => entry.date !== result.value);
+                    localStorage.setItem('EditorProgress', JSON.stringify(newEntries));
+                    $.notify("Gone!",{ globalPosition: 'right',style:'success', showDuration: 200});
+                  } else {
+                    $.notify("Not Found, nothing happened",{ globalPosition: 'right',style:'danger', showDuration: 200});
+                  }
+                  break;
+              }
+            }
+          });
+          }else{
+            $.notify("Nothing to delete",{ globalPosition: 'right',style:'info', showDuration: 200});
+          }
+        },
+        saveProgress(){
+          let self = this;
+
+          store.commit('formPreview');
+          let schema = store.getters.getFinalSchema;
+
+          var progress = localStorage.getItem('EditorProgress');
+          if (progress) {
+            progress = JSON.parse(progress);
+            let options = {
+              'new': '💾 Save as new entry 💾'
+            }
+            progress.forEach(entry => {
+              options[entry.date] = `💟 Save over : "${entry.description} (${entry.date})"`
+            });
+            Swal.fire({
+            title: '💾 Save Progress',
+            text: 'What would you like to do?',
+            input: 'select',
+            inputOptions: options,
+            footer:'Note: There is no way to recover old saves once saved over.',
+            inputPlaceholder: 'Select Option',
+            showCancelButton: true,
+            animation:false,
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            customClass:'scale-in-center',
+            confirmButtonText: 'Next',
+            showLoaderOnConfirm: true,
+            preConfirm: (method) => {
+              return method
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            if (result.value) {
+              switch (result.value) {
+                case 'new':
+                  self.saveNewEntry(schema);
+                  break;
+                default:
+                 self.saveOver(progress, result.value, schema);
+                 break;
+              }
+            }
+          });
+          }else{
+            // new progress
+            self.saveNewEntry(schema);
+          }
+        },
+        saveOver(entries, date, schema){
+          let found = entries.find((entry) => entry.date == date);
+          if (found) {
+            let newEntries = entries.map(entry => {
+              if (entry.date == date) {
+                return {
+                  'description': found.desc,
+                  'date': moment().format('MM-DD-YYYY, h:mm:ss A'),
+                  'schema': schema,
+                  'startingPoint': store.getters.getStartingPoint,
+                  'parentInfo': store.getters.getSchema.find(cls => cls.name == store.getters.getStartingPoint)
+                }
+              } else {
+                return entry
+              }
+            });
+            localStorage.setItem('EditorProgress', JSON.stringify(newEntries));
+            $.notify("Save Complete!",{ globalPosition: 'right',style:'success', showDuration: 200});
+          } else {
+            $.notify("Not Found, saving as new",{ globalPosition: 'right',style:'danger', showDuration: 200});
+            this.saveNewEntry(schema);
+          }
+        },
+        async saveNewEntry(schema){
+          var progress = localStorage.getItem('EditorProgress');
+          if (progress) {
+            progress = JSON.parse(progress);
+            const { 'value': desc } = await Swal.fire({
+                title: 'Enter a short description to help you remember this save file.',
+                input: 'text',
+                inputLabel: 'Enter description',
+                inputPlaceholder: 'Type here',
+                animation:false,
+                confirmButtonColor:"{{color_main}}",
+                cancelButtonColor:"{{color_sec}}",
+                customClass:'scale-in-center',
+              })
+
+            if (desc) {
+              let item = {
+                'description': desc,
+                'date': moment().format('MM-DD-YYYY, h:mm:ss A'),
+                'schema': schema,
+                'startingPoint': store.getters.getStartingPoint,
+                'parentInfo': store.getters.getSchema.find(cls => cls.name == store.getters.getStartingPoint)
+              }
+              progress.push(item);
+              localStorage.setItem('EditorProgress', JSON.stringify(progress));
+              $.notify(desc + " SAVED",{ globalPosition: 'right',style:'success', showDuration: 200});
+            }
+          }else{
+            const { 'value': desc } = await Swal.fire({
+                title: 'Enter a short description to help you remember this save file.',
+                input: 'text',
+                inputLabel: 'Enter description',
+                inputPlaceholder: 'Type here'
+              })
+
+            if (desc) {
+              let item = {
+                'description': desc,
+                'date': moment().format('MM-DD-YYYY, h:mm:ss A'),
+                'schema': schema,
+                'startingPoint': store.getters.getStartingPoint,
+                'parentInfo': store.getters.getSchema.find(cls => cls.name == store.getters.getStartingPoint)
+              }
+              localStorage.setItem('EditorProgress', JSON.stringify([item]));
+              $.notify(desc + " SAVED",{ globalPosition: 'right',style:'success', showDuration: 200});
+            }
+          }
+          
+        },
+        loadProgress(){
+            let self = this;
+            var progress = localStorage.getItem('EditorProgress');
+            progress = JSON.parse(progress);
+            let options = {}
+            progress.forEach(entry => {
+              options[entry.date] = entry.description + ` (${entry.date})`
+            });
+            Swal.fire({
+            title: '⏬ Load Progress',
+            text: 'Choose progress to load',
+            input: 'select',
+            inputOptions: options,
+            inputPlaceholder: 'Select item',
+            showCancelButton: true,
+            animation:false,
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            customClass:'scale-in-center',
+            confirmButtonText: 'Next',
+            showLoaderOnConfirm: true,
+            preConfirm: (method) => {
+              return method
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            if (result.value) {
+              let found = progress.find((entry) => entry.date == result.value);
+              if (found) {
+                self.loadDataIntoEditor(found);
+                $.notify("Loading: " + found.date + ", Please Wait!",{ globalPosition: 'right',style:'success', showDuration: 200});
+              } else {
+                $.notify("Oh no! We can't find this item!",{ globalPosition: 'right',style:'danger', showDuration: 200});
+              }
+            }
+          });
+        },
+        loadDataIntoEditor(data){
+          console.log(data)
+          //RESET
+          //needed as the incorrect starting point may have already started
+          store.commit('resetSchema');
+          // STARTING POINT AND EXTENDED CLASS INFO
+          var payload = {};
+          payload["schema"] = data.parentInfo;
+          payload["start"] = data.startingPoint;
+          store.commit('saveSchema',payload);
+          // RESTART NORMAL PROCESS
+          // this is the method that starts it all
+          this.checkForData();
+          // PREFIX
+          setTimeout(() => {
+            let prefix = data.schema['@graph'][0]['@id'].split(":")[0];
+            store.commit('savePrefix', {'prefix': prefix});
+          }, 1000);
+          // USER CLASS
+          setTimeout(() => {
+            let name = data.schema['@graph'][0]['@id'].split(":")[1];
+            let desc = data.schema['@graph'][0]['rdfs:comment'];
+            store.commit('addClass',{'name': name, 'description': desc});
+          }, 1500);
+        },
         toggleDesc(){
           store.commit('toggleDesc');
         },
@@ -3057,9 +3380,9 @@ var app = new Vue({
         },
         checkUser(){
           let self = this;
-          self.loading = true;
+          store.commit('setLoading', {'state': true});
           $.ajax({url: "/user", success: function(result){
-            self.loading = false;
+            store.commit('setLoading', {'state': false});
              self.userInfo = result;
           },
           cache: false});
