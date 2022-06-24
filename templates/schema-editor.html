@@ -816,7 +816,7 @@ const store = new Vuex.Store({
       newClass['prefix'] = state.prefix
       newClass['parent_classes'] = [state.schema[0].name]
       console.log('🟠 Adding User Class: ', payload['name'])
-      state.schema.unshift(newClass)
+      state.schema.unshift(newClass);
     },
     addProperty(state,payload){
       let newProp = {};
@@ -1255,10 +1255,11 @@ const store = new Vuex.Store({
       });
       console.log('Preselected properties ✅')
     },
-    ApplyExistingValidationRules({commit, state}){
+    applyExistingValidationRules({commit, state}){
+      console.log('%c Applying VALIDATION', 'color:orange');
       state.schema.forEach(schema => {
         if (Object.hasOwnProperty.call(schema, 'validation')) {
-          console.log('Applying $Validation...', schema.validation)
+          console.log('Applying Parent Validation...', schema.validation)
           if (Object.hasOwnProperty.call(schema.validation, 'optional')) {
             schema.validation['optional'].forEach(propName => {
               commit('optionalProp', {'label': propName});
@@ -1277,6 +1278,37 @@ const store = new Vuex.Store({
         }
       });
       console.log('Applied existing validation and marginality ✅')
+    },
+    apply$Validation({commit, state}, payload){
+      console.log('%c Applying $VALIDATION', 'color:purple');
+      payload.schema['@graph'].forEach((cls) => {
+        if (Object.hasOwnProperty.call(cls, '$validation')) {
+          let val = cls['$validation'];
+          let fields = ['required', 'recommended', 'optional'];
+          fields.forEach(field => {
+            if (Object.hasOwnProperty.call(val, field)){
+              val[field].forEach(f => {
+                switch (field) {
+                  case 'recommended':
+                    commit('recommendProp', {'label': f});
+                    break;
+                  case 'required':
+                    commit('requireProp', {'label': f});
+                    break;
+                  case 'optional':
+                    commit('optionalProp', {'label': f});
+                    break;
+                
+                  default:
+                    break;
+                }
+              })
+            }
+          });
+          
+        }
+      })
+      console.log('Applied $validation ✅')
     },
     async getParents ({commit,state}) {
       let list =[];
@@ -2393,7 +2425,7 @@ Vue.component('c-box', {
                       </div>
                       <div class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around">
                         <i v-show="item.special" class="fas fa-minus-circle pointer text-muted unselectable tip" data-tippy-info="Delete" @click="removeProp(prop.label)"></i>
-                        <i v-show="item.special" class="fas fa-pen-square pointer text-info unselectable tip" data-tippy-info="Edit" @click="editCustomProp(prop)"></i>
+                        <i v-show="item.special" class="fas fa-pen-square pointer text-muted unselectable tip mr-3" data-tippy-info="Edit" @click="editCustomProp(prop)"></i>
                         <i class="fas fa-check-circle pointer unselectable select" @click="markSelected(prop.label)" :class="{'text-muted':!prop.selected,'text-success':prop.selected}"></i>
                         <i class="fas fa-asterisk required pointer unselectable" @click="markRequired(prop.label)" :class="{'text-muted':!prop.isRequired,'text-danger':prop.isRequired}"></i>
                         <i class="fas fa-circle recommended pointer unselectable" @click="markRecommended(prop.label)" :class="{'text-muted':!prop.isRecommended,'text-warning':prop.isRecommended}"></i>
@@ -2911,7 +2943,9 @@ var app = new Vue({
           inputNamespace:'',
           availableNamespace:false,
           userInfo:null,
-          validationView:false,       
+          validationView:false,
+          loadingMode: false,
+          loadingSchema: null
 				}
 			},
       computed:{
@@ -2966,7 +3000,11 @@ var app = new Vue({
               store.dispatch('SelectExistingProps');
             }, 1000);
             setTimeout(() => {
-              store.dispatch('ApplyExistingValidationRules');
+              if (this.loadingMode) {
+                store.dispatch('apply$Validation', {'schema': this.loadingSchema});
+              } else {
+                store.dispatch('applyExistingValidationRules');
+              }
             }, 2000);
           }
         },
@@ -3348,7 +3386,10 @@ var app = new Vue({
           });
         },
         loadDataIntoEditor(data){
-          console.log(data)
+          this.loadingMode = true;
+          console.log('LOADING MODE: ', this.loadingMode);
+          this.loadingSchema = data.schema;
+          console.log(data);
           //RESET
           //needed as the incorrect starting point may have already started
           store.commit('resetSchema');
