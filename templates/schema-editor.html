@@ -34,6 +34,18 @@
     width: 100%;
     height: 400px;
   }
+  .renderjson a              { text-decoration: none; text-shadow: none !important;}
+  .renderjson .disclosure    { color: rgb(0, 182, 192);
+                              font-size: 150%; text-shadow: none !important;}
+  .renderjson .syntax        { color: grey; text-shadow: none !important;}
+  .renderjson .string        { color: rgb(87, 87, 87); text-shadow: none !important;}
+  .renderjson .number        { color: rgb(148, 52, 200); text-shadow: none !important;}
+  .renderjson .boolean       { color: rgb(227, 44, 160); text-shadow: none !important;}
+  .renderjson .key           { color: rgb(92, 33, 115); text-shadow: none !important;}
+  .renderjson .keyword       { color: rgb(32, 84, 161); text-shadow: none !important;}
+  .renderjson .object.syntax { color: lightseagreen; text-shadow: none !important;}
+  .renderjson .array.syntax  { color: rgb(223, 88, 55); text-shadow: none !important;}
+
 </style>
 <link rel="stylesheet" href="/static/css/codemirror.css">
 <section id="editor" class="container-fluid m-auto col-sm-12 col-md-10 col-lg-10 col-xl-8" style="min-height: 80vh;padding-top:60px;" v-cloak>
@@ -245,6 +257,7 @@
 <script src="/static/js/notify.min.js"></script>
 <script src="/static/js/codemirror.js"></script>
 <script src="/static/js/moment.js"></script>
+<script src="/static/js/renderjson.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script src="https://unpkg.com/tippy.js@3/dist/tippy.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
@@ -1209,6 +1222,27 @@ const store = new Vuex.Store({
     }
   },
   actions:{
+    addUserDefinedProps({commit, state}, payload){
+      payload.schema['@graph'].forEach(def => {
+        if (def['@type'] == 'rdf:Property') {
+          let payload = {}
+          payload['name'] = def['rdfs:label'];
+          payload['description'] = def['rdfs:comment'];
+
+          if (Object.hasOwnProperty.call(def, 'schema:rangeIncludes') &&
+          Object.hasOwnProperty.call(def['schema:rangeIncludes'], '@id')) {
+            payload['range'] = def['schema:rangeIncludes']['@id'];
+          }
+          if (Object.hasOwnProperty.call(def, 'schema:domainIncludes') &&
+          Object.hasOwnProperty.call(def['schema:domainIncludes'], '@id')) {
+            payload['domain'] = def['schema:domainIncludes']['@id'];
+          }
+          payload['special'] = true;
+          console.log('🟡 Adding User Property: ', payload['name']);
+          commit('addProperty', payload);
+        }
+      });
+    },
     SelectExistingProps({commit, state}){
       state.schema.forEach(schema => {
         if (Object.hasOwnProperty.call(schema, 'validation')) {
@@ -2928,7 +2962,9 @@ var app = new Vue({
         },
         parentData:function(p){
           if (p) {
-            store.dispatch('SelectExistingProps');
+            setTimeout(() => {
+              store.dispatch('SelectExistingProps');
+            }, 1000);
             setTimeout(() => {
               store.dispatch('ApplyExistingValidationRules');
             }, 2000);
@@ -3207,7 +3243,7 @@ var app = new Vue({
             let newEntries = entries.map(entry => {
               if (entry.date == date) {
                 return {
-                  'description': found.desc,
+                  'description': found.description,
                   'date': moment().format('MM-DD-YYYY, h:mm:ss A'),
                   'schema': schema,
                   'startingPoint': store.getters.getStartingPoint,
@@ -3303,7 +3339,8 @@ var app = new Vue({
               let found = progress.find((entry) => entry.date == result.value);
               if (found) {
                 self.loadDataIntoEditor(found);
-                $.notify("Loading: " + found.date + ", Please Wait!",{ globalPosition: 'right',style:'success', showDuration: 200});
+                $.notify("PLEASE WAIT...",{ globalPosition: 'right',style:'info', showDuration: 200});
+                $.notify("Loading: " + found.date, { globalPosition: 'right',style:'success', showDuration: 200});
               } else {
                 $.notify("Oh no! We can't find this item!",{ globalPosition: 'right',style:'danger', showDuration: 200});
               }
@@ -3333,6 +3370,7 @@ var app = new Vue({
             let name = data.schema['@graph'][0]['@id'].split(":")[1];
             let desc = data.schema['@graph'][0]['rdfs:comment'];
             store.commit('addClass',{'name': name, 'description': desc});
+            store.dispatch('addUserDefinedProps', {'schema': data.schema});
           }, 1500);
         },
         toggleDesc(){
@@ -3373,7 +3411,11 @@ var app = new Vue({
               cancelButtonColor:"{{color_sec}}",
               animation:false,
               customClass:'scale-in-center',
-              html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><small><pre>`+JSON.stringify(store.getters.getFinalSchema,null,2)+`</pre></small></div>`
+              html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><pre id="previewJSON"></pre></div>`,
+              onOpen: function(){
+                renderjson.set_show_to_level(5);
+                document.getElementById("previewJSON").appendChild(renderjson(store.getters.getFinalSchema));
+              }
             });
           }
 
