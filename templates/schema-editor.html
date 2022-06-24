@@ -51,7 +51,7 @@
 <section id="editor" class="container-fluid m-auto col-sm-12 col-md-10 col-lg-10 col-xl-8" style="min-height: 80vh;padding-top:60px;" v-cloak>
   <audio id="dropsound" src="/static/img/tinybutton.wav"></audio>
   <div>
-    <div class="jumbotron bg-light text-center m-1 pt-4">
+    <div class="jumbotron bg-light text-center m-1 p-2">
       <h1 class="logoText">Schema Editor</h1>
       <small class="text-muted">Extend an existing schema to create your own.</small>
     </div>
@@ -69,23 +69,23 @@
           </span>
         </a>
         <template v-if='newClassAdded'>
-          <span class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Preview" @click="getPreview()">
+          <span class="badge mainBackDark text-light pointer tip mr-2" data-tippy-info="Preview" @click="getPreview()">
             <i class="fas fa-code text-light"></i> Preview
           </span>
-          <span class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Download your schema" @click='downloadSchema()'>
+          <span class="badge bg-success text-light pointer tip mr-2" data-tippy-info="Download your schema" @click='downloadSchema()'>
             <i class="fas fa-file-download text-light"></i> Download
           </span>
-          <span class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Save (Requires GitHub Login)" @click.prevent="githubOptions()">
-            <i class="fab fa-github text-light"></i> Save to GitHub
+          <span class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Requires GitHub Login" @click.prevent="githubOptions()">
+            <i class="fab fa-github text-light"></i> Save to GitHub*
           </span>
-          <span class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Learn about this editor" @click.prevent="showHelp()">
+          <span class="badge bg-secondary text-light pointer tip mr-2" data-tippy-info="Learn about this editor" @click.prevent="showHelp()">
             <i class="fas fa-question-circle text-light"></i> Help
           </span>
         </template>
         <span v-if="userInfo && userInfo.login" class="badge bg-primary text-light pointer tip mr-2" data-tippy-info="Save Progress Locally" @click.prevent="handleProgress()">
           Save/Load Progress
         </span>
-        <small class="text-muted">Extending <i class="fas fa-chevron-right"></i> <b v-text="startingPoint"></b></small>
+        <small class="text-light">Extending <i class="fas fa-chevron-right"></i> <b v-text="startingPoint"></b></small>
       </div>
       <div v-if='newClassAdded' class="actions bg-info p-2 rounded d-flex align-items-center justify-content-center rounded-0">
         <div class="mr-2">
@@ -170,7 +170,7 @@
         </div>
 
         <!-- Custom Class -->
-        <div class="jumbotron alert-secondary text-center text-muted" v-if='prefix && !newClassAdded'>
+        <div class="jumbotron alert-secondary p-2 text-center text-muted" v-if='prefix && !newClassAdded'>
           <p class="text-center text-muted">
             <small>Extending schema: <span class="text-info" v-text="startingPoint"></span></small>
             <small class="text-muted"><i class="fas fa-chevron-right"></i> namespace: <span class="text-info" v-text="prefix"></span></small>
@@ -199,7 +199,7 @@
         </div>
 
         <!-- PARENT CLASSES -->
-        <div class="jumbotron alert-secondary" v-if="newClassAdded && !validationView" id="editorTippy">
+        <div class="jumbotron alert-secondary p-2" v-if="newClassAdded && !validationView" id="editorTippy">
           <div class="row m-0">
             <div class="col-sm-12">
               <h6 class="text-info text-left">Select and create properties for your schema</h6>
@@ -579,16 +579,15 @@ const store = new Vuex.Store({
   },
   strict: true,
   mutations: {
-    resetSchema(state){
-      state.schema = [];
-      state.startingPoint = '';
-      console.log('Reset for loading data done ✅')
+    restoreStore(state, payload){
+      let restore = payload.schema;
+      for (const key in restore) {
+        Vue.set(state, key, restore[key]);
+      }
+      console.log('✅ Restore Complete!')
     },
     setLoading(state, payload){
       state.loading = payload.state;
-    },
-    pdReceived(state, payload){
-      state.parentDataReceived = payload.state;
     },
     deleteValidationOption(state, payload){
       const msg = ["Adios!", "Bye!", "See Ya!", "Deleted!", "Gone", "Poof!", "So Long!"];
@@ -627,7 +626,7 @@ const store = new Vuex.Store({
       let names = state.schema.map(cls => cls.name);
       // console.log(names)
       if (!names.includes(payload['schema'].name)) {
-        console.log('🔵 Adding Class: ', payload['schema'].name)
+        console.log('✅ Adding Class: ', payload['schema'].name)
         state.schema.push(payload['schema']);
         state.startingPoint=payload['start'];
         if (payload['schema'].hasOwnProperty('validation')) {
@@ -635,7 +634,7 @@ const store = new Vuex.Store({
           //later on validation will not be available.
           state.top_class_validation = payload['schema'].validation;
         }
-        console.log('🍕🍕🍕 saved schema..🍕🍕🍕',state.schema);
+        console.log('✅ saved schema...',state.schema);
       }else{
         console.warn('🚫 Class already exists', payload['schema'].name)
       }
@@ -1146,9 +1145,6 @@ const store = new Vuex.Store({
     loading: state =>{
       return state.loading
     },
-    parentData: state =>{
-      return state.parentDataReceived
-    },
     getDefinitionOptions:state=>{
       return state.definition_options
     },
@@ -1222,27 +1218,6 @@ const store = new Vuex.Store({
     }
   },
   actions:{
-    addUserDefinedProps({commit, state}, payload){
-      payload.schema['@graph'].forEach(def => {
-        if (def['@type'] == 'rdf:Property') {
-          let payload = {}
-          payload['name'] = def['rdfs:label'];
-          payload['description'] = def['rdfs:comment'];
-
-          if (Object.hasOwnProperty.call(def, 'schema:rangeIncludes') &&
-          Object.hasOwnProperty.call(def['schema:rangeIncludes'], '@id')) {
-            payload['range'] = def['schema:rangeIncludes']['@id'];
-          }
-          if (Object.hasOwnProperty.call(def, 'schema:domainIncludes') &&
-          Object.hasOwnProperty.call(def['schema:domainIncludes'], '@id')) {
-            payload['domain'] = def['schema:domainIncludes']['@id'];
-          }
-          payload['special'] = true;
-          console.log('🟡 Adding User Property: ', payload['name']);
-          commit('addProperty', payload);
-        }
-      });
-    },
     SelectExistingProps({commit, state}){
       state.schema.forEach(schema => {
         if (Object.hasOwnProperty.call(schema, 'validation')) {
@@ -1279,37 +1254,6 @@ const store = new Vuex.Store({
       });
       console.log('Applied existing validation and marginality ✅')
     },
-    apply$Validation({commit, state}, payload){
-      console.log('%c Applying $VALIDATION', 'color:purple');
-      payload.schema['@graph'].forEach((cls) => {
-        if (Object.hasOwnProperty.call(cls, '$validation')) {
-          let val = cls['$validation'];
-          let fields = ['required', 'recommended', 'optional'];
-          fields.forEach(field => {
-            if (Object.hasOwnProperty.call(val, field)){
-              val[field].forEach(f => {
-                switch (field) {
-                  case 'recommended':
-                    commit('recommendProp', {'label': f});
-                    break;
-                  case 'required':
-                    commit('requireProp', {'label': f});
-                    break;
-                  case 'optional':
-                    commit('optionalProp', {'label': f});
-                    break;
-                
-                  default:
-                    break;
-                }
-              })
-            }
-          });
-          
-        }
-      })
-      console.log('Applied $validation ✅')
-    },
     async getParents ({commit,state}) {
       let list =[];
       for (var i = 0; i < state.schema[0].parent_classes.length; i++) {
@@ -1325,12 +1269,12 @@ const store = new Vuex.Store({
         const data = res.map((res) => res.data);
         data.forEach(parentInfo => commit('saveParent',{'parent': parentInfo}));
         commit('setLoading', {'state': false});
-        console.log('Parent classes info received ✅')
-        commit('pdReceived', {'state': true});
+        console.log('✅ Parent classes info received')
       } catch (error){
         console.log(error)
         commit('setLoading', {'state': false});
         console.warn("Failed query for parent class")
+        $.notify("Error loading schema, contact us.", { globalPosition: 'right',style:'danger', showDuration: 200});
       }
 
       
@@ -2964,9 +2908,6 @@ var app = new Vue({
         prefix:function(){
           return store.getters.getPrefix
         },
-        parentData:function(){
-          return store.getters.parentData
-        },
         classesAvailable:function(){
           return store.getters.getSchema
         },
@@ -2990,21 +2931,13 @@ var app = new Vue({
       },
       watch:{
         prefix:function(prefix){
-          if (prefix) {
+          if (prefix && !this.loadingMode) {
             store.dispatch('getParents');
-          }
-        },
-        parentData:function(p){
-          if (p) {
             setTimeout(() => {
               store.dispatch('SelectExistingProps');
             }, 1000);
             setTimeout(() => {
-              if (this.loadingMode) {
-                store.dispatch('apply$Validation', {'schema': this.loadingSchema});
-              } else {
-                store.dispatch('applyExistingValidationRules');
-              }
+              store.dispatch('applyExistingValidationRules');
             }, 2000);
           }
         },
@@ -3283,9 +3216,9 @@ var app = new Vue({
                 return {
                   'description': found.description,
                   'date': moment().format('MM-DD-YYYY, h:mm:ss A'),
-                  'schema': schema,
-                  'startingPoint': store.getters.getStartingPoint,
-                  'parentInfo': store.getters.getSchema.find(cls => cls.name == store.getters.getStartingPoint)
+                  'schema': store.state,
+                  // 'startingPoint': store.getters.getStartingPoint,
+                  // 'parentInfo': store.getters.getSchema.find(cls => cls.name == store.getters.getStartingPoint)
                 }
               } else {
                 return entry
@@ -3317,9 +3250,9 @@ var app = new Vue({
               let item = {
                 'description': desc,
                 'date': moment().format('MM-DD-YYYY, h:mm:ss A'),
-                'schema': schema,
-                'startingPoint': store.getters.getStartingPoint,
-                'parentInfo': store.getters.getSchema.find(cls => cls.name == store.getters.getStartingPoint)
+                'schema': store.state,
+                // 'startingPoint': store.getters.getStartingPoint,
+                // 'parentInfo': store.getters.getSchema.find(cls => cls.name == store.getters.getStartingPoint)
               }
               progress.push(item);
               localStorage.setItem('EditorProgress', JSON.stringify(progress));
@@ -3337,9 +3270,9 @@ var app = new Vue({
               let item = {
                 'description': desc,
                 'date': moment().format('MM-DD-YYYY, h:mm:ss A'),
-                'schema': schema,
-                'startingPoint': store.getters.getStartingPoint,
-                'parentInfo': store.getters.getSchema.find(cls => cls.name == store.getters.getStartingPoint)
+                'schema': store.state,
+                // 'startingPoint': store.getters.getStartingPoint,
+                // 'parentInfo': store.getters.getSchema.find(cls => cls.name == store.getters.getStartingPoint)
               }
               localStorage.setItem('EditorProgress', JSON.stringify([item]));
               $.notify(desc + " SAVED",{ globalPosition: 'right',style:'success', showDuration: 200});
@@ -3387,32 +3320,8 @@ var app = new Vue({
         },
         loadDataIntoEditor(data){
           this.loadingMode = true;
-          console.log('LOADING MODE: ', this.loadingMode);
-          this.loadingSchema = data.schema;
-          console.log(data);
-          //RESET
-          //needed as the incorrect starting point may have already started
-          store.commit('resetSchema');
-          // STARTING POINT AND EXTENDED CLASS INFO
-          var payload = {};
-          payload["schema"] = data.parentInfo;
-          payload["start"] = data.startingPoint;
-          store.commit('saveSchema',payload);
-          // RESTART NORMAL PROCESS
-          // this is the method that starts it all
-          this.checkForData();
-          // PREFIX
-          setTimeout(() => {
-            let prefix = data.schema['@graph'][0]['@id'].split(":")[0];
-            store.commit('savePrefix', {'prefix': prefix});
-          }, 1000);
-          // USER CLASS
-          setTimeout(() => {
-            let name = data.schema['@graph'][0]['@id'].split(":")[1];
-            let desc = data.schema['@graph'][0]['rdfs:comment'];
-            store.commit('addClass',{'name': name, 'description': desc});
-            store.dispatch('addUserDefinedProps', {'schema': data.schema});
-          }, 1500);
+          console.log('✅ Loading Mode: ', this.loadingMode);
+          store.commit('restoreStore', {'schema': data.schema});
         },
         toggleDesc(){
           store.commit('toggleDesc');
