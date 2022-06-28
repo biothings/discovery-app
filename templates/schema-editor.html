@@ -2286,7 +2286,7 @@ Vue.component('c-box', {
                   </template>
                   <small class="bold"><span v-text="item.label"></span> <i class="fas fa-info-circle text-info cTip pointer" :data-tippy-description="item.description" :data-tippy-label="item.label"></i></small class="bold">
                   <!-- 🌈 prop totals 🌈 -->
-                  <div v-if="totals" class="float-right">
+                  <div v-if="totals" class="col-sm-12">
                     <table>
                       <tr>
                         <td v-for="(val, name) in totals" class="px-1"> 
