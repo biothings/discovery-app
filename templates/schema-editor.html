@@ -87,16 +87,18 @@
         </span>
         <small class="text-light">Extending <i class="fas fa-chevron-right"></i> <b v-text="startingPoint"></b></small>
       </div>
-      <div v-if='newClassAdded' class="actions bg-info p-2 rounded d-flex align-items-center justify-content-center rounded-0">
-        <div class="mr-2">
-          <small class="text-light"><img src='/static/img/cube.svg' width="30px"> Validation Editor</small>
-        </div>
-        <div>
-          <input class="form-control slider m-auto tip" @click="editValidation()" data-tippy-info="Edit Schema Validation" type="checkbox"/>
+      <div v-if='newClassAdded && !removeValidation' class="actions bg-info p-2 rounded d-flex align-items-center justify-content-center rounded-0">
+        <div class="col-sm-5 mr-1 d-flex align-items-center justify-content-center ">
+          <div class="mr-2">
+            <small class="text-light"><img src='/static/img/cube.svg' width="30px"> Validation Editor</small>
+          </div>
+          <div>
+            <input class="form-control slider m-auto tip" @click="editValidation()" data-tippy-info="Edit Schema Validation" type="checkbox"/>
+          </div>
         </div>
       </div>
       <!-- Validation -->
-      <div v-if="validationView" class="v-container p-0 bg-dark justify-content-center d-flex align-items-center">
+      <div v-if="validationView && !removeValidation" class="v-container p-0 bg-dark justify-content-center d-flex align-items-center">
         
         <div class="w-100 row m-0">
           <div class="bg-info p-1 col-sm-12">
@@ -206,14 +208,22 @@
               <p class="text-left">
                 <small class="text-muted d-block">1. <i class="fas fa-circle text-primary"></i> Reuse properties from parents <i class="text-danger">Required</i></small>
                 <small class="text-muted d-block">2. <i class="fas fa-star text-warning"></i> Add new properties <i class="text-danger">Required</i></small>
-                <small class="text-muted d-block">3. <img src='/static/img/cube.svg' width="15px"> Complete Validation Editor <i class="text-danger">Required</i></small>
+                <small class="text-muted d-block">3. (<img src='/static/img/cube.svg' width="15px"> Complete Validation Editor) <b>OR</b> (<i class="fas fa-times text-danger mr-1"></i> Remove Validation) <i class="text-danger">Required</i></small>
                 <small class="text-muted d-block">4. <i class="fab fa-github text-success"></i> Save/Download schema</small>
               </p>
             </div>
           </div>
-          <div class="mt-2">
-            <input type="checkbox" class="slider mr-2" id="customControlInline" @click="toggleDesc()">
-            <label for="customControlInline"><small class="text-muted">Show Descriptions</small></label>
+          
+          <!-- REMOVE VALIDATION -->
+          <div class="col-sm-12 d-flex align-items-center justify-content-around">
+            <div class="mt-2">
+              <input v-model="removeValidation" id="rv" class="slider mr-2 tip" @click="toggleRemoveValidation()" data-tippy-info="Remove Validation" type="checkbox"/>
+              <label class="text-muted" for="rv"><i class="fas fa-times text-danger mr-1"></i>Remove Validation</label>
+            </div>
+            <div class="mt-2">
+              <input type="checkbox" class="slider mr-2" id="customControlInline" @click="toggleDesc()">
+              <label for="customControlInline" class="text-muted">Show Descriptions</label>
+            </div>
           </div>
           <template  v-for="(item,index) in classesAvailable">
             <c-box :item="item" :key="index"></c-box>
@@ -340,6 +350,7 @@ const store = new Vuex.Store({
       },
       '@graph':[]
     },
+    'removeValidation': false,
     'validation':{
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
@@ -579,6 +590,14 @@ const store = new Vuex.Store({
   },
   strict: true,
   mutations: {
+    toggleRemoveValidation(state){
+      state.removeValidation = !state.removeValidation;
+      if (state.removeValidation) {
+        $.notify("Validation OFF",{ globalPosition: 'right',style:'warning', showDuration: 200});
+      } else {
+        $.notify("Validation ON",{ globalPosition: 'right',style:'success', showDuration: 200});
+      }
+    },
     restoreStore(state, payload){
       let restore = payload.schema;
       for (const key in restore) {
@@ -1131,9 +1150,18 @@ const store = new Vuex.Store({
             incomplete += 1;
           }
         }
-        if (incomplete){
+        if (incomplete && !state.removeValidation){
           $.notify(incomplete+" properties still need validation rules",{ globalPosition: 'right',style:'warning', showDuration: 200, });
         }
+      }
+      // REMOVE VALIDATION
+      if (state.removeValidation) {
+        state.finalschema['@graph'].forEach(cls => {
+          if (Object.hasOwnProperty.call(cls, '$validation')) {
+            delete cls['$validation']
+            console.log('%c Removed Validation', 'color: hotpink');
+          }
+        });
       }
       //check if bioschemas is mentioned if so add bioschemas to context
       if (JSON.stringify(state.finalschema).includes('bioschemas')) {
@@ -1144,6 +1172,9 @@ const store = new Vuex.Store({
   getters:{
     loading: state =>{
       return state.loading
+    },
+    removeValidation: state =>{
+      return state.removeValidation
     },
     getDefinitionOptions:state=>{
       return state.definition_options
@@ -2893,6 +2924,9 @@ var app = new Vue({
 				}
 			},
       computed:{
+        removeValidation (){
+          return store.getters.removeValidation
+        },
         definition_options (){
           return store.getters.getDefinitionOptions
         },
@@ -3075,7 +3109,7 @@ var app = new Vue({
               'load': '⏬ Load something',
               'delete': '🗑️ Delete some stuff',
             },
-            footer:'<small>Note: This feature will use your local storage, clearing it will delete all your progress records. To manage your local storage: right click > inspect > click on the Application tab > Storage > Local Storage</small>',
+            footer:"<small>Note: This feature will use your <a href='https://www.w3schools.com/html/html5_webstorage.asp' target='_blank'>browser's local storage</a>, <b>clearing it will delete all your progress records</b>. To manage your local storage: <code>right click > inspect > click on the Application tab > Storage > Local Storage</code></small>",
             inputPlaceholder: 'Select Action',
             showCancelButton: true,
             animation:false,
@@ -3325,6 +3359,9 @@ var app = new Vue({
         },
         toggleDesc(){
           store.commit('toggleDesc');
+        },
+        toggleRemoveValidation(){
+          store.commit('toggleRemoveValidation')
         },
         addClass(){
           let self = this;
