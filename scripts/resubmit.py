@@ -2,7 +2,7 @@ import importlib.util
 import os.path
 
 import requests
-from discovery.handlers import notify
+from discovery import notify
 
 path = os.path.join(os.path.dirname(__file__), "../config_key.py")
 spec = importlib.util.spec_from_file_location("config_key", path)
@@ -46,8 +46,7 @@ class DatasetTestNotifier(notify.DatasetNotifier):
             yield from channel.send(message)
 
 
-notifider = DatasetTestNotifier()
-notifider.configure(conf)
+notifider = DatasetTestNotifier(conf)
 
 
 def resubmit(_id=None):
@@ -58,6 +57,29 @@ def resubmit(_id=None):
     dataset_meta = dataset.pop("_meta")
     dataset_username = dataset_meta.pop("username")
     notify.test_on(notifider.add(_id, dataset, dataset_username, **dataset_meta))
+
+
+def resubmit_n3c(_id=None, test=None):
+    """if a new dataset did not trigger a success JIRA issue creation,
+       use this helper function to resubmit the JIRA issue creation.
+    """
+    _id = _id or input("Discovery App Dataset ID: ")
+    _url = "https://discovery.biothings.io/api/dataset/{}?metadata"
+    dataset = requests.get(_url.format(_id)).json()
+    del dataset["_id"]
+    dataset_meta = dataset.pop("_meta")
+    dataset_username = dataset_meta.pop("username")
+    notifier = notify.DatasetNotifier(conf)
+    # keep only N3CChannel instance
+    notifier.channels = [channel for channel in notifier.channels if isinstance(channel, notify.N3CChannel)]
+    if test == 1:
+        return (_id, dataset, dataset_username, dataset_meta)
+    elif test == 2:
+        return notifier
+    elif test == 3:
+        return notifier.add(_id, dataset, dataset_username, **dataset_meta)
+
+    notify.test_on(notifier.add(_id, dataset, dataset_username, **dataset_meta))
 
 
 if __name__ == "__main__":
