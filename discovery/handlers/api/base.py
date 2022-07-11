@@ -49,6 +49,7 @@ def registryOperation(func):
 
 def log_response(http_response):
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
     logger.info(http_response.request.url)
     logger.info(http_response.code)
     logger.info(http_response.body)

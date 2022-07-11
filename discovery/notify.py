@@ -33,14 +33,14 @@ class N3CChannel(Channel):
         self.profile = profile  # project related info
 
     def send(self, message):
-        yield self.N3CHTTPRequest(
+        yield from [self.N3CHTTPRequest(
             "https://n3c-help.atlassian.net/rest/api/3/issue", method="POST",
             headers={"Content-Type": "application/json"},
             auth_username=self.user,
             auth_password=self.password,
             body=json.dumps(message.to_jira_payload(self.profile)),
             ca_certs=certifi.where()  # for Windows compatibility
-        )
+        )]
 
     def sends_query(self, user):
         return self.N3CPreflightRequest(
@@ -233,27 +233,26 @@ class DatasetNotifier(Notifier):
                 return url
 
     def add(self, _id, doc, user, **meta):
-
+        """return an iterator of HTTPRequest instances during add event"""
         for channel in self.channels:
 
             if isinstance(channel, N3CChannel):
-                if meta.get('schema') == 'n3c::n3c:Dataset':
-
+                if meta.get('class_id') == 'n3c::n3c:Dataset':
+                    # check if the user has a registered account first
                     results = yield channel.sends_query(user)
                     results = json.loads(results.body)
-                    yield
 
                     if results:
                         userid = results[0]["accountId"]
                     elif "@" in user:
+                        # register this user by email if not registered yet
                         userid = yield channel.sends_signup(user)
                         userid = json.loads(userid.body)
                         userid = userid["accountId"]
-                        yield
+
                     else:  # no email address, cannot register
                         userid = None
-                    # response = yield from channel.send(DatasetMessage({
-                    response = yield channel.send(DatasetMessage({      # use yield here as N3CChannel.send does not yield from a list, we can refactor it later
+                    response = yield from channel.send(DatasetMessage({
                         "title": "External Dataset Request",  # customized title
                         "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
                         "url": f"http://discovery.biothings.io/dataset/{_id}",
@@ -261,7 +260,6 @@ class DatasetNotifier(Notifier):
                         "reporter": userid,  # registered user id basing on email
                         "doc": doc  # produce additional jira ticket content
                     }))
-                    yield
 
                     if response.code == 201:
                         try:
@@ -367,12 +365,13 @@ def update_n3c_routine():
 
 
 def test_on(requests):
-    from discovery.handlers.api import log_response
+    from discovery.handlers.api.base import log_response
 
     client = HTTPClient()
     for request in requests:
-        response = client.fetch(request, raise_error=False)
-        log_response(response)
+        if request:
+            response = client.fetch(request, raise_error=False)
+            log_response(response)
 
 
 def test_schema():
