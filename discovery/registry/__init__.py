@@ -1,9 +1,12 @@
 """
-    Dataset Registry
+    Dataset & Schema Registry
+    This module relies on discovery.model module.
 
-    Support CRUD, and simple filtering, searching elasticsearch operations.
-    Two types have slightly different signatures, because of document size, etc.
-    Raise RegistryError. Subclass DatasetValidationError contains additional info.
+    Support CRUD, simple filtering, and search operations.
+    Dataset & Schema operations have different function signatures.
+    Raise RegistryError. DatasetValidationError contains additional info.
 
 """
-from .common import *
+from .common import *       # noqa
+from . import datasets      # noqa
+from . import schemas       # noqa

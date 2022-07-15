@@ -7,47 +7,33 @@ Should continue to evaluate if this is appropriate as new features are developed
 """
 
 
-from biothings.utils.web.es_dsl import AsyncSearch
-from biothings.web.pipeline import ESQueryBuilder
+from biothings.web.query import ESQueryBuilder
+from elasticsearch_dsl import Search
 
 
 class DiscoveryQueryBuilder(ESQueryBuilder):
-    '''
-    Allow direct search with class name or partial match
-    '''
 
     def default_string_query(self, q, options):
-        search = AsyncSearch()
 
-        if q == '__all__':
-            search = search.query()
-
-        elif q == '__any__' and self.allow_random_query:
-            search = search.query('function_score', random_score={})
-
-        else:  # elasticsearch default
-            query = {
-                "query": {
-                    "function_score": {
-                        "query": {"dis_max": {"queries": [
-                            {"term": {"_id": {"value": q, "boost": 15.0}}},
-                            {"term": {"label.raw": {"value": q, "boost": 10.0}}},
-                            {"term": {"_meta.username": {"value": q}}},  # for dataset
-                            {"term": {"name": {"value": q}}},
-                            {"match": {"parent_classes": {"query": q}}},
-                            {"prefix": {"label": {"value": q}}},
-                            {"query_string": {"query": q}}
-                        ]}},
-                        "functions": [
-                            {"filter": {"term": {"namespace": "schema"}}, "weight": 0.5},
-                            {"filter": {"term": {"prefix.raw": "schema"}}, "weight": 0.5},
-                            {"filter": {"match": {"parent_classes": "bts:BiologicalEntity"}}, "weight": 1.5}
-                        ]
-                    }
+        search = Search()
+        search = search.update_from_dict({
+            "query": {
+                "function_score": {
+                    "query": {"dis_max": {"queries": [
+                        {"term": {"_id": {"value": q, "boost": 15.0}}},
+                        {"term": {"label.raw": {"value": q, "boost": 10.0}}},
+                        {"term": {"_meta.username": {"value": q}}},  # for dataset
+                        {"term": {"name": {"value": q}}},
+                        {"match": {"parent_classes": {"query": q}}},
+                        {"prefix": {"label": {"value": q}}},
+                        {"query_string": {"query": q}}
+                    ]}},
+                    "functions": [
+                        {"filter": {"term": {"namespace": "schema"}}, "weight": 0.5},
+                        {"filter": {"term": {"prefix.raw": "schema"}}, "weight": 0.5},
+                        {"filter": {"match": {"parent_classes": "bts:BiologicalEntity"}}, "weight": 1.5}
+                    ]
                 }
             }
-            search = AsyncSearch()
-            search = search.update_from_dict(query)
-
-        search = search.params(rest_total_hits_as_int=True)
+        })
         return search
