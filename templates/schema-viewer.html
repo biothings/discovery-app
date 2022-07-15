@@ -1,0 +1,2355 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<style>
+[v-cloak] > * { display:none; }
+[v-cloak]::before { content: "Please wait..."; }
+.stripedList li:nth-child(even){
+  background-color: rgb(243, 243, 243);
+}
+</style>
+<div id="viewer" v-cloak>
+  <!-- Loader -->
+  <div v-if="loading" class="loader">
+    <img src="/static/img/ripple.svg"/>
+  </div>
+  <!-- HOMEPAGE MODE -->
+  <div class="bg-light" v-if="!query">
+    <div class="grad d-flex justify-content-center align-items-center flex-wrap pt-5">
+      <div>
+        <template v-if='namespaceRegistered'>
+          <div class="text-center p-5">
+            <h1 style="font-size:3em" class="text-light" v-if='namespace === "schema"' >Schema.org</h1>
+            <h1 style="font-size:3em" class="text-light" v-else-if='namespace === "bts"' >BioLink Schema</h1>
+            <h1 style="font-size:3em" class="text-light" v-else-if='namespace === "ctsa"' >CTSA</h1>
+            <h1 style="font-size:3em" class="text-light" v-else v-text='namespace' ></h1>
+            <p class="text-light" v-if='namespace === "schema"'>
+            Schema.org is a collaborative, community activity with a mission to create,
+            maintain, and promote schemas for structured data on the Internet. In addition
+            to people from the founding companies (Google, Microsoft, Yahoo and Yandex), there is  substantial participation by the
+            larger Web community, through public mailing lists such as <a target="_blank" href="https://lists.w3.org/Archives/Public/public-vocabs/">public-vocabs@w3.org</a>
+            and through <a target="_blank" href="http://github.com/schemaorg/schemaorg">GitHub</a>. <a target="_blank" href="https://schema.org/">Learn More.</a>
+             </p>
+            <p class="text-light" v-if='namespace === "bts"'>
+              A high level datamodel of biological entities (genes, diseases, phenotypes, pathways, individuals, substances, etc) and their associations. Maintained by <a target="_blank" rel="noreferrer" href="https://github.com/biolink">biolink</a>.
+             </p>
+          </div>
+        </template>
+        <template v-else>
+          <div class="text-center p-5">
+            <h1 style="font-size:3em" class="text-light" v-text='namespace' ></h1>
+            <small class="text-info">(Temporary Namespace)</small>
+          </div>
+        </template>
+        <div class="row" v-show='!namespaceRegistered'>
+          <div class="col-sm-12 text-center p-3">
+            <button role="button" class="btn btn-sm btn-success" @click='openRegistration()'><i class="fas fa-registered"></i> Register This Schema</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group input-group-sm mb-2 col-sm-12 col-md-4">
+        <div class="input-group-prepend">
+          <div class="input-group-text bg-secondary text-light"><i class="fas fa-search"></i></div>
+        </div>
+        <input type="text" v-model='searchQuery' class="form-control" id="inlineFormInputGroup" placeholder="Search...">
+      </div>
+
+    </div>
+
+    <div class="row w-100 alert alert-secondary m-0" v-if="searchResults.length || searchResultsProps.length">
+      <div class="col-sm-12 col-md-6 p-4">
+        <ul>
+          <li v-if="searchResults.length" class="mainTextDark bold" style="list-style:none;">
+            Classes
+          </li>
+          <li v-for='item in searchResults' >
+            <a :href='"./"+item["label"]'><small v-text='item["label"]'></small></a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-sm-12 col-md-6 p-4">
+        <ul>
+          <li v-if="searchResultsProps.length" class="mainTextLight bold" style="list-style:none;">
+            Properties
+          </li>
+          <li v-for='item in searchResultsProps'>
+            <a :href='"./"+item["label"]'><small v-text='item["label"]'></small></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+
+    <div class="flipcard container my-5">
+      <div class="face front">
+        <!-- alphabetical view -->
+        <div id="alpabetical-order" class="text-left p-4 bg-light overflow-x-scroll">
+          <h3 class="text-muted d-inline mr-2 logoText">Definitions</h3> <a role="button" class="btn btn-sm btn-info pointer ml-2" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
+          <div v-if="userSchemaURL" class="w-100 text-right">
+            <a class="mr-2 text-primary" :href="userSchemaURL" target="_blank" rel="noreferrer">
+              <small>View Source <i class="fas fa-external-link-alt"></i></small>
+            </a>
+          </div>
+          <div v-show='developerMode' id="canvasTest"></div>
+          <ul class="pagination overflow-x-scroll mt-3" v-show="classesGroupByLetter.length>5">
+            <li class="page-link" v-for="(item,i) in classesGroupByLetter">
+              <a :href="'#'+item.group" v-text="item.group"></a>
+            </li>
+          </ul>
+          <ul class="list-group mt-3">
+            <li class="list-group-item list-group-item-action" v-for="(item,i) in classesGroupByLetter">
+              <h3 :id="item.group" class="text-dark" v-text="item.group " v-show="classesGroupByLetter.length>5"></h3>
+              <ul style="list-style:none;" class="stripedList">
+                <li v-for="def in item.children" class="d-flex justify-content-between align-item-center p-1">
+                  <a  :href="'/view/'+namespace+'/'+def">
+                    <span v-text="def.split(':')[1]"></span> <i class="fas fa-chevron-right"></i>
+                  </a>
+                  <i class="fas fa-code-branch pointer tip text-light btn btn-info p-1" @click.prevent="saveDataAndRedirect(def)" :data-tippy-info="'Extend '+def"></i>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="face back">
+        <!--hierarchical view -->
+        <div id="hierarchical" class="text-left p-4 bg-light overflow-x-scroll">
+          <h3 class="text-muted d-inline mr-2 logoText">Definition Hierarchy</h3> <a role="button" class="btn btn-sm btn-info pointer ml-2" @click='flipView()'>Change View <i class="fas fa-retweet"></i></a>
+          <div class="alert alert-warning" v-if="treeBuildErr">
+            <small>Hierarchical view not available. Tree could not be built due to endless cycles found on schema definition.</small>
+          </div>
+          <ul class="pagination mt-2" v-if="!treeBuildErr">
+            <li v-for="n in [0,1,2,3,4,5,6,7,8,9,10]" class="d-inline hierarchicalSwatch" :class="'bg-'+n" >
+            </li>
+          </ul>
+          <ul class="tree" v-if="!treeBuildErr">
+            <li>
+              <a class="text-0" :href="'/view/'+namespace+'/'+rootNode" v-text="rootNode"></a>
+              <ul>
+                <li v-for="item in getNeighbors(rootNode)">
+                  <a class="text-1 " :href="'/view/'+namespace+'/'+item" v-text="item"></a>
+                  <ul>
+                    <li v-for="item2 in getNeighbors(item)">
+                      <a class="text-2 " :href="'/view/'+namespace+'/'+item2" v-text="item2"></a>
+                      <ul>
+                        <li v-for="item3 in getNeighbors(item2)">
+                          <a class="text-3 " :href="'/view/'+namespace+'/'+item3" v-text="item3"></a>
+                          <ul>
+                            <li v-for="item4 in getNeighbors(item3)">
+                              <a class="text-4 " :href="'/view/'+namespace+'/'+item4" v-text="item4"></a>
+                              <ul>
+                                <li v-for="item5 in getNeighbors(item4)">
+                                  <a class="text-5 " :href="'/view/'+namespace+'/'+item5" v-text="item5"></a>
+                                  <ul>
+                                    <li v-for="item6 in getNeighbors(item5)">
+                                      <a class="text-6 " :href="'/view/'+namespace+'/'+item6" v-text="item6"></a>
+                                      <ul>
+                                        <li v-for="item7 in getNeighbors(item6)">
+                                          <a class="text-7 " :href="'/view/'+namespace+'/'+item7" v-text="item7"></a>
+                                          <ul>
+                                            <li v-for="item8 in getNeighbors(item7)">
+                                              <a class="text-8 " :href="'/view/'+namespace+'/'+item8" v-text="item8"></a>
+                                              <ul>
+                                                <li v-for="item9 in getNeighbors(item8)">
+                                                  <a class="text-9 " :href="'/view/'+namespace+'/'+item9" v-text="item9"></a>
+                                                  <ul>
+                                                    <li v-for="item10 in getNeighbors(item9)">
+                                                      <a class="text-10 " :href="'/view/'+namespace+'/'+item10" v-text="item10"></a>
+                                                    </li>
+                                                  </ul>
+                                                </li>
+                                              </ul>
+                                            </li>
+                                          </ul>
+                                        </li>
+                                      </ul>
+                                    </li>
+                                  </ul>
+                                </li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- QUERY MODE -->
+  <div id="mainCont">
+    <div class="container mt-5" v-if="query">
+      <div class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around p-3">
+        <span class="fa-stack fa-1x pointer unselectable" data-tippy="Go Back" @click.prevent="window.location.href=RemoveLastDirectoryPartOf(window.location.href)">
+          <i class="fas fa-circle text-muted fa-stack-2x"></i>
+          <i class="fas fa-chevron-left fa-stack-1x text-light"></i>
+        </span>
+        <div>
+          <template v-if='!validationView'>
+            <small class="text-center text-light mb-1">Expand Properties</small>
+            <input id="toggle" class="form-control slider text-light m-auto" @change="showAll()" data-tippy="Expand or contract all property lists"  type="checkbox" checked/>
+          </template>
+        </div>
+        <div>
+          <small class="text-center text-light mb-1"><img src='/static/img/cube.svg' width="15px"> Validation View</small>
+          <input id="showButton" class="form-control slider m-auto" @change="changeView()" data-tippy="Show this class only and any validation included"  type="checkbox" v-model="validationView"/>
+        </div>
+        <div v-if="userSchemaURL">
+          <a class="text-center text-light mb-1" :href="userSchemaURL" target="_blank" rel="noreferrer">
+            <small>View Source <i class="fas fa-external-link-alt"></i></small>
+          </a>
+        </div>
+      </div>
+      
+      <!-- CLASSES FOR QUERY -->
+      <div class="context">
+        <query-box v-if='queryContent && userSchemaParents' :parent="false" :q='queryContent' :userSchema='userSchema'></query-box>
+        <template  v-if='queryContent && userSchemaParents' v-for='parent in userSchemaParents'>
+          <query-box v-show='!validationView' :parent="true" :q='parent' :userSchema='userSchema'></query-box>
+        </template>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<script src="/static/js/vuex.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
+<script src="/static/js/lodash.js"></script>
+<script src="https://d3js.org/d3.v3.js"></script>
+<script src="/static/js/networkx.js"></script>
+<script src="/static/js/notify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsonld@1.0.0/dist/jsonld.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@7.28.11/dist/sweetalert2.all.min.js"></script>
+<script>
+
+
+  const store = new Vuex.Store({
+    state: {
+      'validationView':true,
+      'userSchema':Object,
+      'userSchemaProps':Array,
+      'queryStoreContent':Object,
+      'showAll':true,
+    },
+    strict: true,
+    mutations: {
+      toggleView (state) {
+        state.validationView = !state.validationView
+      },
+      toggleShowAll (state) {
+        state.showAll = !state.showAll
+      },
+      saveSchema(state,payload){
+        state.userSchema = payload['schema'];
+        // console.log('saved schema 🦄 ...',state.userSchema)
+      },
+      saveProps(state,payload){
+        state.userSchemaProps = payload['props'];
+        // console.log('saving props 🛍 ...',state.userSchemaProps)
+      },
+      checkIFValidationView(state,payload){
+        state.queryStoreContent = payload['queryContent'];
+        if (!state.queryStoreContent.hasOwnProperty('validation')) {
+          state.validationView = false;
+        }else if (state.queryStoreContent.hasOwnProperty('validation') && state.queryStoreContent['validation'] == null) {
+          state.validationView = false;
+        }
+        // console.log('saved Query Content 🌎...',state.queryStoreContent)
+      },
+    },
+    getters:{
+      // exposed as store.getters.nameOfGetter
+      getViewMode: state => {
+        return state.validationView
+      },
+      getShowAll: state => {
+        return state.showAll
+      },
+      getDomainOfProp: (state) => (propname) => {
+
+      },
+      handleLink: (state) => (name) =>{
+        let prefix='';
+        let cName ='';
+        let link =''
+        if (name.includes(':')) {
+          prefix = name.split(':')[0];
+          cName = name.split(':')[1];
+        }else{
+          cName = name;
+        }
+        // console.log('handling Link...',prefix,cName)
+        for (var x = 0; x < state.userSchema.hits.length; x++) {
+         if (state.userSchema.hits[x].label.includes(cName)) {
+           if (prefix && prefix === 'schema') {
+             link = '/schema/'+cName
+           }else{
+             link = "./"+cName
+           }
+           return link;
+         }else{
+           link = state.userSchema.context[prefix]+cName
+         }
+        }
+        return link
+
+      },
+      removeDomainsNotIncluded: (state) => (domains) =>{
+        let res = []
+        if (domains) {
+          for (var i = 0; i < domains.length; i++) {
+            for (var x = 0; x < state.userSchema.hits.length; x++) {
+              if (domains[i].includes(state.userSchema.hits[x].label)) {
+                if (!res.includes(domains[i])) {
+                  res.push(domains[i])
+                }
+              }
+            }
+          }
+        }
+        return res
+      }
+    },
+    actions: {
+      toggleShowAll (context) {
+        context.commit('toggleShowAll')
+      }
+    }
+  });
+
+  Vue.component('more-info', {
+    props: [''],
+    mounted: function(){
+      var self = this;
+      tippy('#showButton', {
+        content: `<div class='m-0'><table class='table'>
+          <tr>
+            <td>
+              <i class="far fa-star"></i> Show All
+            </td>
+            <td>
+              Shows full class hierachy and properties
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <i class="fas fa-star"></i> Show Class Only
+            </td>
+            <td>
+              Shows me this class only and any <b>validation</b> included
+            </td>
+          </tr>
+        </table></div>`,
+        placement: 'left',
+        theme:'light',
+      })
+    },
+    template:
+    `<i id='showButton' class="fas fa-info-circle text-info"></i>`
+  });
+
+  Vue.component('object-box', {
+    data: function(){
+      return{
+        // required: []
+      }
+    },
+    props: ['properties', 'required'],
+    mounted: function(){
+      var self = this;
+    },
+    template:
+      `<div class="p-1 m-1 bg-light rounded">
+        <template v-for="(propContent, propName) in properties">
+          <propbox :name="propName" :fullinfo="propContent" :required="required"></propbox>
+        </template>
+      </div>`
+  });
+
+  Vue.component('enum-box', {
+    props: ['enumeration'],
+    template:
+      `<div class="p-1 m-1 bg-light rounded">
+        <div class="form-group">
+          <select multiple class="form-control" id="exampleFormControlSelect2">
+            <template v-for="option in enumeration">
+              <option :value="option" v-text="option"></option>
+            </template>
+          </select>
+        </div>
+      </div>`
+  });
+
+  Vue.component('one-of', {
+    data: function(){
+      return{
+        expand: false,
+        style:{},
+        ontologyExamples:[]
+      }
+    },
+    props: ['option','name','isChild'],
+    methods:{
+      getRandomColor() {
+        let self = this;
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        self.style={
+          'border-color':color,
+          'border-width': '3px',
+          'border-style': 'solid'
+          
+        }
+      },
+      testOntologyLookup(){
+        var self = this;
+
+        Swal.fire({
+          title: self.name,
+          text: 'Search for an existing term here:',
+          input: 'text',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          animation:false,
+          customClass:'scale-in-center',
+          inputAttributes: {
+            autocapitalize: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Look up',
+          showLoaderOnConfirm: true,
+          focusConfirm: false,
+          preConfirm: (query) => {
+
+            let ontologies = self.option['vocabulary']['ontology'].toString()
+            let children = self.option['vocabulary']['children_of'].toString()
+
+            let url = `https://www.ebi.ac.uk/ols/api/search?q=`+query
+            +"&ontology="+ontologies
+            +"&childrenOf="+children
+            +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+            +"&queryFields=label"
+            +"&rows=10"
+
+            return fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(response.statusText)
+                }
+                return response.json()
+              })
+              .catch(error => {
+                Swal.showValidationMessage(
+                  `Request failed: ${error}`
+                )
+              })
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            let html ="<div id='ontology' class='p-1 text-left'>";
+
+            for (var i = 0; i < result.value.response.docs.length; i++) {
+              tippy('#cb'+i,{
+                content:result.value.response.docs[i]
+              });
+
+              let label = result.value.response.docs[i]['label']
+              if (label && label.length > 37) {
+                label = label.substring(0,37)+"..."
+              }
+
+              html += `<div class="form-check">
+                        <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
+                            `+label+`
+                            <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
+                        </label>
+                      </div>`
+            }
+            html += "</div>";
+
+            Swal.fire({
+              title: "Top 10 Results",
+              html: html,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              animation:false,
+              customClass:'scale-in-center',
+            });
+
+          }
+        })
+      },
+      getTermExamples(){
+        let self = this;
+        let query = 'gene OR chemical'
+        let ontologies = self.option['vocabulary']['ontology'].toString()
+        let children = self.option['vocabulary']['children_of'].toString()
+
+        if (ontologies) {
+          let url = `https://www.ebi.ac.uk/ols/api/search?q=`+ query
+          +"&ontology="+ontologies
+          +"&childrenOf="+children
+          +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+          +"&queryFields=label"
+          +"&rows=5"
+
+          axios.get(url).then(res =>{
+            self.ontologyExamples = res.data.response.docs
+          }).catch(err => {throw err});
+        }else{
+          self.ontologyExamples = [{'label': 'No examples available'}]
+        }
+      }
+    },
+    computed:{
+      optionName: function(){
+        let self = this;
+        if(self.option.hasOwnProperty('items') && self.option['items'].hasOwnProperty('@type') ){
+          return "List of "+self.option['items']['@type']+"(s)"
+        }else if(self.option.hasOwnProperty('items') && self.option['items'].hasOwnProperty('type') ){
+          return "List of "+self.option['items']['type']+"(s)"
+        }else if(self.option.hasOwnProperty('@type') || self.option.hasOwnProperty('type')){
+          return self.option['@type'] || self.option['type']
+        }else if(self.option.hasOwnProperty('enum')){
+          return 'enum item'
+        }else{
+          return 'item'
+        }
+      }
+    },
+    mounted: function(){
+      var self = this;
+      // console.log(self.name, self.option)
+      
+      if (self.isChild) {
+        self.style={
+          'border-color':'#e1e1e1',
+          'border-width': '3px',
+          'border-style': 'solid'
+          
+        }
+      }else{
+        self.getRandomColor();
+      }
+      if (Object.hasOwnProperty.call(this.option, 'vocabulary')) {
+        self.getTermExamples();
+      }
+      if (self.isChild) {
+        self.expand = true;
+      }
+    },
+    template:
+      `<div class="m-1 rounded text-dark bg-light" :style="style" style="min-width:45%">
+        <button v-if="!isChild" @click="expand=!expand" :class="[expand?'btn-primary':'btn-dark']" class="btn btn-sm d-block w-100 rounded-0">
+          <b v-text="optionName"></b>
+          <small class="text-warning" v-text="!expand?'show':'hide'"></small>
+        </button>
+        <template v-if="expand">
+          <div class="alert-light" v-if="!option.items">
+            <h6 class="m-0" v-if="option && option['@type']" v-text="option['@type']"></h6>
+            <small v-if="option && option.description" v-text="option.description"></small>
+          </div>
+          <small class="badge badge-pill badge-dark text-warning m-2" v-text="option.type == 'string'?'string':''"></small>
+          <!-- 🌈 VOCAB 🌈 -->
+          <div v-if="option && option.vocabulary" class="text-center p-1">
+            <button type="button" class="btn btn-sm btn-success text-light m-1" @click="testOntologyLookup()">
+              <small class="badge" :class="[option.strict?'badge-danger':'badge-info']">
+                <b v-text="option.strict?'STRICT':'NON-STRICT'"></b>
+              </small> Term Lookup <i class="fas fa-search"></i>
+            </button>
+            <table class="table table-sm table-striped text-left">
+              <thead>
+                <th>Examples:</th>
+              </thead>
+              <tbody>
+                <tr v-for="example,i in ontologyExamples" :key="i + 'ont'">
+                  <td>
+                    <small v-text="example.label" :data-tippy-info="JSON.stringify(example,null,2)"></small>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- 🌈 OBJECT 🌈 -->
+          <div v-if="option && option.properties">
+            <object-box :properties="option.properties" :required="option.required"></object-box>
+          </div>
+          <!-- 🌈 ENUM 🌈 -->
+          <div v-if="option && option.enum">
+            <enum-box :enumeration="option.enum"></objeenum>
+          </div>
+          <!-- 🌈 LIST OF 🌈 -->
+          <div v-if="option.items" class="bg-light p-1">
+            <b class="text-muted font-weight-bold">LIST OF:</b>
+            <one-of :name="name" :option="option.items" :isChild="true"></one-of>
+          </div>
+        </template>
+      </div>`
+  });
+
+  Vue.component('any-of', {
+    data: function(){
+      return{
+        expand:false,
+        style:{},
+        ontologyExamples:[]
+      }
+    },
+    props: ['option','name',"isChild"],
+    methods:{
+      getRandomColor() {
+        let self = this;
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        self.style={
+          'border-color':color,
+          'border-width': '3px',
+          'border-style': 'solid'
+        }
+      },
+      testOntologyLookup(){
+        var self = this;
+
+        Swal.fire({
+          title: self.name,
+          text: 'Search for an existing term here:',
+          input: 'text',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          animation:false,
+          customClass:'scale-in-center',
+          inputAttributes: {
+            autocapitalize: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Look up',
+          showLoaderOnConfirm: true,
+          focusConfirm: false,
+          preConfirm: (query) => {
+
+            let ontologies = self.option['vocabulary']['ontology'].toString()
+            let children = self.option['vocabulary']['children_of'].toString()
+
+            let url = `https://www.ebi.ac.uk/ols/api/search?q=`+query
+            +"&ontology="+ontologies
+            +"&childrenOf="+children
+            +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+            +"&queryFields=label"
+            +"&rows=10"
+
+            return fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(response.statusText)
+                }
+                return response.json()
+              })
+              .catch(error => {
+                Swal.showValidationMessage(
+                  `Request failed: ${error}`
+                )
+              })
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            let html ="<div id='ontology' class='p-1 text-left'>";
+
+            for (var i = 0; i < result.value.response.docs.length; i++) {
+              tippy('#cb'+i,{
+                content:result.value.response.docs[i]
+              });
+
+              let label = result.value.response.docs[i]['label']
+              if (label && label.length > 37) {
+                label = label.substring(0,37)+"..."
+              }
+
+              html += `<div class="form-check">
+                        <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
+                            `+label+`
+                            <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
+                        </label>
+                      </div>`
+            }
+            html += "</div>";
+
+            Swal.fire({
+              title: "Top 10 Results",
+              html: html,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              animation:false,
+              customClass:'scale-in-center',
+            });
+
+          }
+        })
+      },
+      getTermExamples(){
+        let self = this;
+        let query = 'gene OR chemical'
+        let ontologies = self.option['vocabulary']['ontology'].toString()
+        let children = self.option['vocabulary']['children_of'].toString()
+
+        if (ontologies) {
+          let url = `https://www.ebi.ac.uk/ols/api/search?q=`+ query
+          +"&ontology="+ontologies
+          +"&childrenOf="+children
+          +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+          +"&queryFields=label"
+          +"&rows=5"
+
+          axios.get(url).then(res =>{
+            self.ontologyExamples = res.data.response.docs
+          }).catch(err => {throw err});
+        }else{
+          self.ontologyExamples = [{'label': 'No examples available'}]
+        }
+      }
+    },
+    computed:{
+      optionName: function(){
+        let self = this;
+        if(self.option.hasOwnProperty('items') && self.option['items'].hasOwnProperty('@type') ){
+          return "List of "+self.option['items']['@type']+"(s)"
+        }else if(self.option.hasOwnProperty('items') && self.option['items'].hasOwnProperty('type') ){
+          return "List of "+self.option['items']['type']+"(s)"
+        }else if(self.option.hasOwnProperty('@type') || self.option.hasOwnProperty('type')){
+          return self.option['@type'] || self.option['type']
+        }else{
+          return 'Option'
+        }
+      }
+    },
+    mounted: function(){
+      var self = this;
+      if (self.isChild) {
+        self.style={
+          'border-color':'#e1e1e1',
+          'border-width': '3px',
+          'border-style': 'solid'
+          
+        }
+      }else{
+        self.getRandomColor();
+      }
+      if (Object.hasOwnProperty.call(this.option, 'vocabulary')) {
+        self.getTermExamples();
+      }
+      if (self.isChild) {
+        self.expand = true;
+      }
+    },
+    template:
+      `<div class="m-1 rounded text-dark bg-light" :style="style" style="min-width:45%">
+        <button v-if="!isChild" @click="expand=!expand" :class="[expand?'btn-primary':'btn-dark']" class="btn btn-sm w-100 rounded-0">
+          <b v-text="optionName"></b>
+          <small class="text-warning" v-text="!expand?'show':'hide'"></small>
+        </button>
+        <template v-if="expand">
+          <div class="alert-light" v-if="!option.items">
+            <h6 class="m-0" v-if="option && option['@type']" v-text="option['@type']"></h6>
+            <small v-if="option && option.description" v-text="option.description"></small>
+          </div>
+          <small class="badge badge-pill badge-dark text-warning m-1" v-text="option.type == 'string' ? 'string' : ''"></small>
+          <!-- 🌈 VOCAB 🌈 -->
+          <div v-if="option && option.vocabulary" class="text-center p-1">
+            <button type="button" class="btn btn-sm btn-success text-light m-1" @click="testOntologyLookup()">
+              <small class="badge" :class="[option.strict?'badge-danger':'badge-info']">
+                <b v-text="option.strict?'STRICT':'NON-STRICT'"></b>
+              </small> Term Lookup <i class="fas fa-search"></i>
+            </button>
+            <table class="table table-sm table-striped text-left">
+              <thead>
+                <th>Examples:</th>
+              </thead>
+              <tbody>
+                <tr v-for="example,i in ontologyExamples" :key="i + 'ont'">
+                  <td>
+                    <small v-text="example.label" :data-tippy-info="JSON.stringify(example,null,2)"></small>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- 🌈 OBJECT 🌈 -->
+          <div v-if="option && option.properties">
+            <object-box :properties="option.properties" :required="option.required"></object-box>
+          </div>
+          <!-- 🌈 ENUM 🌈 -->
+          <div v-if="option && option.enum">
+            <enum-box :enumeration="option.enum"></objeenum>
+          </div>
+          <!-- 🌈 LIST OF 🌈 -->
+          <div v-if="option.items" class="bg-light p-1">
+            <b class="text-muted font-weight-bold">LIST OF:</b>
+            <one-of :name="name" :option="option.items" isChild="true"></one-of>
+          </div>
+        </template>
+
+      </div>`
+  });
+
+  // The component displayed for every property
+  Vue.component('propbox', {
+    data: function(){
+      return{
+        userSchema:[],
+        textColor:'',
+        backColor:'',
+      }
+    },
+    props: ['name','fullinfo','required', 'recommended', 'optional'],
+    methods:{
+      getText(ref){
+        let arr = ref.split('/');
+        return arr[arr.length-1];
+      },
+      isPropRequired(name){
+        var self = this;
+        if (self.fullinfo.hasOwnProperty('required') && self.fullinfo['required'].includes(name)) {
+          return true
+        }
+        return false
+      },
+      getColorClass(propname){
+        if (this.required && this.required.includes(propname)) {
+          return 'text-danger fa-asterisk';
+        } else if(this.recommended && this.recommended.includes(propname)){
+          return 'text-warning fa-circle';
+        } else if(this.optional && this.optional.includes(propname)){
+          return 'text-info fa-square';
+        } else{
+          return 'text-light';
+        }
+      }
+    },
+    watch:{
+    },
+    mounted: function(){
+      var self = this;
+      if (self.parent) {
+        self.textColor = 'mainTextLight'
+        self.backColor = 'mainBackLight'
+      }else{
+        self.textColor = 'mainTextDark'
+        self.backColor = 'mainBackDark'
+      }
+    },
+    computed: {
+    },
+    template:
+    `<div class="border-bottom row m-0">
+      <div class="col-sm-12 col-md-3 bg-dark bold d-flex justify-content-start align-items-center">
+        <small class="m-0">
+          <i class="fas" :class="getColorClass(name)"></i>
+          <span class=" text-light font-weight-bold" v-text="name" :data-tippy-info="JSON.stringify(fullinfo,null,2)"></span>
+        </small>
+      </div>
+      <div class="col-sm-12 col-md-9 text-muted bg-light">
+        <small v-text="fullinfo['description']"></small>
+        <div class="rounded-0">
+          <div class="p-1 rounded-0 d-flex">
+            <!-- HAS TYPE -->
+            <div v-if="fullinfo && fullinfo.type" class="d-flex justify-content-center align-items-center">
+              <div class="badge badge-pill badge-dark m-1">
+              <span class="text-warning" v-text="fullinfo['type']"></span>
+              </div>
+            </div>
+
+            <!-- ARRAY -->
+            <div v-if="fullinfo && fullinfo.items" class="d-flex justify-content-center align-items-center">
+              <div class="badge badge-pill badge-secondary m-1">
+                <span v-text="fullinfo.items.type"></span>
+              </div>
+            </div>
+
+            <template v-if="fullinfo.enum">
+              <select multiple class="form-control" id="exampleFormControlSelect2">
+                <template v-for="option in fullinfo.enum">
+                  <option :value="option" v-text="option"></option>
+                </template>
+              </select>
+            </template>
+
+            <template v-if="fullinfo['const']">
+              <div class="pillType d-inline">
+                <span style='background:#17a2b8' v-text="'const'"></span>
+                <span v-text="fullinfo['const']"></span>
+              </div>
+            </template>
+
+            <!-- OBJECT -->
+            <div v-if="fullinfo && fullinfo.properties" class="d-flex justify-content-center align-items-center">
+              <i class="fas fa-chevron-right m-1 text-muted"></i>
+            </div>
+            <div v-if="fullinfo && fullinfo.properties" class="d-flex justify-content-center align-items-center">
+              <div class="border-left border-info pl-3">
+                <template v-for="(value,name) in fullinfo['properties']" :key="option">
+                  <div class="border-left border-primary my-4 pl-2">
+                    <small class="mainTextDark"><i class="fas fa-circle"></i> <b v-text="name"></b></small>
+                    <span v-if="isPropRequired(name)" class="text-danger caps" style="zoom:.5;">is required</span>
+
+                    <i class="fas fa-caret-right m-1 text-dark"></i>
+
+                    <small class="badge badge-pill alert-dark" v-text="fullinfo['properties'][name]['type']"></small>
+                    <small class="badge badge-pill alert-light" v-text="fullinfo['properties'][name]['format']"></small>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- ONE OF -->
+            <div v-if="fullinfo && fullinfo.oneOf" class="row m-0 w-100 p-0">
+              <div class="col-sm-12 text-center bold mainTextDark alert-dark">
+                <small>
+                  ONE OF
+                </small>
+              </div>
+              <div class="col-sm-12 d-flex justify-content-center align-items-start flex-wrap">
+                <template v-for="(option,index) in fullinfo['oneOf']" :key="option">
+                  <one-of :key="index" :name="name" :option="option"></one-of>
+                </template>
+              </div>
+            </div>
+
+            <!-- ANY OF -->
+            <div v-if="fullinfo && fullinfo.anyOf" class="row m-0 p-0 w-100">
+              <div class="col-sm-12 text-center bold mainTextLight alert-dark">
+                <small>
+                  ANY OF
+                </small>
+              </div>
+              <div class="col-sm-12 d-flex justify-content-center align-items-start flex-wrap">
+                <template v-for="(option,index) in fullinfo['anyOf']" :key="option">
+                  <any-of :key="index" :name="name" :option="option"></any-of>
+                </template>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>`
+  });
+
+  Vue.component('field-box', {
+    data: function(){
+      return{
+        type: '',
+        expandArray:false,
+        perPage: 10,
+        page: 1,
+        pages: 1,
+      }
+    },
+    props: ['name','content','isChild','isRequirement'],
+    methods:{
+      getType(content){
+        var self = this;
+        if (_.isPlainObject(content)) {
+          self.type = 'object'
+        }
+        else if (_.isArray(content)) {
+          self.type = 'array'
+        }
+        else if (_.isBoolean(content)) {
+          self.type = 'boolean'
+        }
+        else if (_.isNumber(content)) {
+          self.type = 'number'
+        }
+        else if (_.isString(content)) {
+          self.type = 'string'
+        }else {
+          self.type = 'IDK'
+        }
+      },
+      isUrl(txt){
+        if (txt.includes("url") || txt.includes('http')) {
+          return true
+        }else {
+          return false
+        }
+      },
+      calculatePages: function () {
+        var self= this;
+        self.pages = Math.ceil(self.content.length / self.perPage);
+      },
+      prevPage: function () {
+        var self= this;
+        if (self.page > 1)
+            self.page -= 1
+      },
+      nextPage: function () {
+        var self= this;
+        if (self.page < self.pages)
+            self.page += 1
+      },
+      testOntologyLookup(){
+        var self = this;
+
+        Swal.fire({
+          title: self.name,
+          text: 'Search for an existing term here:',
+          input: 'text',
+          confirmButtonColor:"{{color_main}}",
+          cancelButtonColor:"{{color_sec}}",
+          animation:false,
+          customClass:'scale-in-center',
+          inputAttributes: {
+            autocapitalize: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Look up',
+          showLoaderOnConfirm: true,
+          focusConfirm: false,
+          preConfirm: (query) => {
+
+            let ontologies = self.content['vocabulary']['ontology'].toString()
+            let children = self.content['vocabulary']['children_of'].toString()
+
+            let url = `https://www.ebi.ac.uk/ols/api/search?q=`+query
+            +"&ontology="+ontologies
+            +"&childrenOf="+children
+            +"&type=class&fieldList=id,iri,label,description,obo_id,short_form,ontology_prefix"
+            +"&queryFields=label"
+            +"&rows=10"
+
+            return fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(response.statusText)
+                }
+                return response.json()
+              })
+              .catch(error => {
+                Swal.showValidationMessage(
+                  `Request failed: ${error}`
+                )
+              })
+          },
+          allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+          if (result.value) {
+            let html ="<div id='ontology' class='p-1 text-left'>";
+
+            for (var i = 0; i < result.value.response.docs.length; i++) {
+              tippy('#cb'+i,{
+                content:result.value.response.docs[i]
+              });
+
+              let label = result.value.response.docs[i]['label']
+              if (label && label.length > 37) {
+                label = label.substring(0,37)+"..."
+              }
+
+              html += `<div class="form-check">
+                        <label class="form-check-label" for="cb`+i+`" title="`+result.value.response.docs[i]['label']+`">
+                            `+label+`
+                            <i class="fa fa-info-circle text-info modaltip" data-tippy-info='`+JSON.stringify(result.value.response.docs[i])+`'></i>
+                        </label>
+                      </div>`
+            }
+            html += "</div>";
+
+            Swal.fire({
+              title: "Top 10 Results",
+              html: html,
+              confirmButtonColor:"{{color_main}}",
+              cancelButtonColor:"{{color_sec}}",
+              animation:false,
+              customClass:'scale-in-center',
+            });
+
+          }
+        })
+      }
+    },
+    mounted: function(){
+      var self = this;
+      self.getType(self.content)
+      if (self.type == 'array') {
+        self.calculatePages();
+      }
+      // console.log("%c "+self.name,'color:lightblue')
+      // console.log("%c "+self.type,'color:yellow')
+      if (self.name == 'required') {
+        self.expandArray = true;
+      }
+    },
+    computed: {
+      arrayResults: function () {
+          var start = (this.page - 1) * this.perPage,
+              end = start + this.perPage;
+          return this.content && this.content.slice(start, end);
+      }
+    },
+    template:
+      `<div class="m-0 rounded-0" :class="[isChild?'p-1 bg-op-2':'p-1 border-bottom']">
+      <!-- 🌈 Array 🌈 -->
+      <template v-if="type == 'array'">
+        <div class="row m-0">
+          <div class="text-left">
+            <small class="pointer" :class="[name == 'required'?'badge badge-danger':'mainTextDark']">
+              <span v-text="name"></span> (<span v-text="content.length"></span>)
+            </small>
+            <i class="fas pointer" @click="expandArray=!expandArray" :class="[expandArray?'fa-caret-square-down text-danger':'fa-plus-square text-primary']"></i>
+          </div>
+          <div class="col-sm-12" v-if="expandArray">
+            <div>
+              <template v-if="content.length > perPage">
+                <select class="form-control form-control-sm m-auto w-25" v-model="perPage" @change="calculatePages" id="perPage">
+                    <option value="" disabled selected>Shown Per Page</option>
+                    <option value="10">10 per page</option>
+                    <option value="25">25 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+                <div class="paginati flex-wrap p-1 mt-2">
+                  <div class="badge rounded-0" :class="{ 'disabled': page <= 1 }">
+                    <a class="page-link p-1" @click.prevent="prevPage()"><i class="fas fa-step-backward"></i></a>
+                  </div>
+                  <div class="badge rounded-0" :class="{ 'active': page == n, 'bg-primary': page == n, 'white-text': page == n  }" v-for="n in pages">
+                    <a href="#" class="page-link p-1" @click.prevent="page = n" v-text="n"></a>
+                  </div>
+                  <div class="badge rounded-0" :class="{ 'disabled': page >= pages }">
+                    <a class="page-link p-1" @click.prevent="nextPage()"><i class="fas fa-step-forward"></i></a>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <template v-for="item in arrayResults">
+              <field-box :isRequirement="name=='required'?true:false" class="m-1" name="" :content="item" isChild="false"></field-box>
+            </template>
+          </div>
+        </div>
+      </template>
+        <!-- 🌈 String 🌈 -->
+        <template v-if="type == 'string'">
+          <div class="d-flex">
+            <template v-if="isUrl(content)">
+              <div class="text-left">
+                <small class="mainTextDark">
+                  <span v-text="name"></span><i v-if="!name" class="fas fa-circle"></i> <span v-else>:</span>
+                </small>
+              </div>
+              <div class="ml-1">
+                <a :href="content" target="_blank" rel="nonreferrer">
+                  <i v-if="isRequirement" class="fas fa-asterisk text-danger"></i>
+                  <small><span v-text="content"></span> <i class="fas fa-external-link-alt"></i></small>
+                </a>
+              </div>
+            </template>
+            <template v-else>
+              <div class="d-flex">
+                <small class="mainTextDark">
+                  <span v-text="name"></span> <span v-if="name" class="mr-1">:</span>
+                  <i v-if="isRequirement" class="fas fa-asterisk text-danger"></i>
+                </small>
+              </div>
+              <div class="d-flex">
+                <a class="ml-1" v-if="isUrl(content)" v-text="content" :href="content" target="_blank" rel="nonreferrer"></a>
+                <template v-else>
+                  <small>
+                    <i v-if="name == '@type' && content == 'Person' " class="fas fa-user text-muted"></i>
+                    <i v-if="name == '@type' && content == 'Organization' " class="fas fa-building text-muted"></i>
+                    <i v-if="name == '@type' && content == 'CreativeWork' " class="fas fa-lightbulb text-muted"></i>
+                  </small> &nbsp;
+                  <small v-if="name == 'type'" class="badge badge-pill badge-dark" v-html="content"></small>
+                  <small v-else-if="name == 'format'" class="badge badge-pill badge-secondary" v-html="content"></small>
+                  <small v-else class="text-muted" v-html="content"></small>
+                </template>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- 🌈 VOCAB 🌈 -->
+        <div v-if="content && content.vocabulary" class="d-flex justify-content-center align-items-center">
+          <div>
+            <a role="button" class="btn btn-sm btn-primary text-light m-1" @click="testOntologyLookup()">
+              <small class="badge" :class="[content.strict?'badge-danger':'badge-success']">
+                <b v-text="content.strict?'STRICT':'NON-STRICT'"></b>
+              </small> Test Term Lookup <i class="fas fa-chevron-right"></i>
+            </a>
+          </div>
+        </div>
+
+
+        <!-- 🌈 Object 🌈 -->
+        <template v-if="type == 'object'">
+          <div class="d-flex">
+            <div class=" d-flex justify-content-start align-items-center">
+              <span v-if="name !== 'properties'" class="badge bold text-light mr-1 mainTextDark">
+                <span v-text="name"></span> <i class="fas fa-caret-right"></i>
+              </span>
+            </div>
+            <div>
+              <template v-for="(value,key) in content">
+                <field-box :name="key" :content="value" isChild="true"></field-box>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>`
+  });
+
+  // The wrapper container for each property component
+  Vue.component('validation-box', {
+    props: ['validation'],
+    data: function(){
+      return{
+        sorted_props: {}
+      }
+    },
+    methods: {
+      sortByImportance(){
+        let self = this;
+        let sorted = {};
+        //get required
+        if (Object.hasOwnProperty.call(self.validation, 'required')) {
+            self.validation.required.forEach((item) => {
+              if ((item in self.validation.properties) && !(item in sorted)) {
+                sorted[item] = self.validation.properties[item];
+              }
+            });
+        }
+         //get recommended
+        if (Object.hasOwnProperty.call(self.validation, 'recommended')) {
+            self.validation.recommended.forEach((item) => {
+              if (item in self.validation.properties && !(item in sorted)) {
+                sorted[item] = self.validation.properties[item];
+              }
+            });
+        }
+         //get optional
+        if (Object.hasOwnProperty.call(self.validation, 'optional')) {
+            self.validation.optional.forEach((item) => {
+              if (item in self.validation.properties && !(item in sorted)) {
+                sorted[item] = self.validation.properties[item];
+              }
+            });
+        }
+        //get not categorized
+        for (const prop in self.validation.properties) {
+          if (!(prop in sorted)) {
+            sorted[prop] = self.validation.properties[prop];
+          }
+        }
+        self.sorted_props = sorted;
+      }
+    },
+    mounted: function(){
+      this.sortByImportance();
+    },
+    template:
+    `<div class="alert-secondary p-1">
+      <small class="text-dark font-weight-bold">
+        <span class="mr-1"><i class="fas fa-asterisk text-danger"></i> required</span>
+        <span class="mr-1"><i class="fas fa-circle text-warning"></i> recommended</span>
+        <span class="mr-1"><i class="fas fa-square text-info"></i> optional</span>
+      </small>
+      <div class="p-0">
+        <template v-for="(value,name) in sorted_props">
+          <propbox :key="name" 
+          :name='name' 
+          :fullinfo="value" 
+          :recommended='validation.recommended'
+          :optional='validation.optional'
+          :required='validation.required'></propbox>
+        </template>
+      </div>
+    </div>`
+  });
+
+  Vue.component('query-box', {
+    data: function(){
+      return{
+        userSchema:[],
+        textColor:'',
+        backColor:'',
+        expand:true,
+        properties:[],
+      }
+    },
+    props: ['q','userSchema','parent','validationView'],
+    methods:{
+      getPaths(classInfo){
+        // console.log('getting all possible paths...')
+        var self = this;
+        let res = [];
+        for (var i = 0; i < classInfo["parent_classes"].length; i++) {
+          if (classInfo["parent_classes"][i]) {
+            let parents =classInfo["parent_classes"][i].split(', ');
+            parents.push(classInfo.name)
+            res.push(parents)
+          }
+        }
+        return res;
+      },
+      getPropertiesFor(classInfo){
+        var self = this;
+        // console.log('getting props for ', classInfo.name);
+        if (classInfo.hasOwnProperty('properties') && classInfo['properties'].length>0) {
+          return classInfo['properties'];
+          // console.log('returning ', classInfo['properties']);
+        }else{
+          return ['This class has no properties of its own']
+        }
+      },
+      getType: function(data){
+        let types=[];
+        if (data.hasOwnProperty("schema:rangeIncludes")) {
+          if (_.isString(data["schema:rangeIncludes"])) {
+            let type = data['schema:rangeIncludes'].split(':');
+            type = type[type.length-1];
+            types.push(type);
+          }
+          else if (_.isArray(data["schema:rangeIncludes"])) {
+            for (var i = 0; i < data['schema:rangeIncludes'].length; i++) {
+              let type = data['schema:rangeIncludes'][i]['@id'].split(':');
+              type = type[type.length-1];
+              types.push(type);
+            }
+          }else if(_.isObject(data["schema:rangeIncludes"])){
+            let type = data['schema:rangeIncludes']['@id'].split(':');
+            type = type[type.length-1];
+            types.push(type);
+          }
+        }
+        return types;
+      },
+      getName(string){
+        let res ='';
+        if (string.includes('http')) {
+          let arr =  string.split('/');
+          res = arr[arr.length-1];
+        }else if (string.includes(':')) {
+          let arr =  string.split(':');
+          res = arr[arr.length-1];
+        }else{
+          res = string
+        }
+        return res
+      },
+      getBreadcrumbLink(string){
+        let res ='';
+        let arr = []
+        if (string.includes(':')) {
+          arr =  string.split(':');
+          let name = arr[arr.length-1];
+          arr['0'] == 'schema' ? res+='/view/schema/'+name : res+='./'+name;
+        }else{
+          res = string
+        }
+        return res
+      },
+      getLink(qName){
+        // console.log('getLink', qName)
+        try {
+          let link = [store.getters.handleLink(qName)];
+          return link;
+        } catch (e) {
+          if (qName.includes(':')) {
+            let arr = qName.split(':')
+            return ['./'+arr[arr.length-1]]
+          }else{
+            return false
+          }
+        } finally {
+          if (qName.includes(':')) {
+            let arr = qName.split(':')
+            return ['./'+arr[arr.length-1]]
+          }else{
+            return false
+          }
+        }
+      }
+    },
+    watch:{
+      expandAll:function(exp){
+        var self = this;
+        if (exp) {
+          self.expand = true;
+        }else{
+          self.expand = false;
+        }
+      }
+    },
+    mounted: function(){
+      var self = this;
+      if (self.parent) {
+        self.textColor = 'mainTextLight'
+        self.backColor = 'mainBackLight'
+      }else{
+        self.textColor = 'mainTextDark'
+        self.backColor = 'mainBackDark'
+      }
+
+    },
+    computed: {
+      validationView () {
+        return this.$store.state.validationView
+      },
+      expandAll () {
+        return this.$store.getters.getShowAll
+      }
+    },
+    template:
+    `<div class="p-3 mb-2 alert alert-light">
+      <div>
+        <div v-if="q && q.name">
+          <a class="d-inline text-info" :href="'/view/' + q.name.split(':')[0]">
+            <h3 class="bold d-inline" :id='q.name' v-text="q.name.split(':')[0] + ':'"></h3>
+          </a>
+          <h3 class="bold d-inline" :class='textColor' :id='q.name' v-text="q.name.split(':')[1]"></h3>
+        </div>
+        <div v-else-if="q && q.label">
+          <h3 class="bold d-inline" :class='textColor' :id='q.label' v-text="q.label.split(':')[0]"></h3>
+        </div>
+        <template v-if="q && q.domain">
+          <small class="text-muted">is a property of: </small>
+          <template v-for='(item,index) in q.domain'>
+            <template v-for="link in getLink(item)">
+              <a class='d-inline bold mr-1' :href='link' :target="link[0] !== '.'?'_blank':'_self'" :class="[ index !== q.domain.length-1 ? 'text-muted' : textColor]" >
+                <small >
+                  <span v-html='item'></span>
+                </small>
+                <i v-if="link[0] !== '.'" class="fas small fa-external-link-alt"></i>
+              </a>
+            </template>
+          </template>
+        </template>
+        <template v-if='q.label && q.parent_classes'>
+          <ul style="list-style:none;">
+            <li v-for="path in getPaths(q)">
+              <span v-for="(item,index) in path">
+                <a :class="[ index !== path.length-1 ? 'text-muted' : textColor]" class="font-weight-bold" :href="getBreadcrumbLink(item)" v-text="item"></a>
+                <span v-if="index !== path.length-1">&nbsp;<i class="fas fa-caret-right" :class='textColor'></i>&nbsp;</span>
+              </span>
+            </li>
+          </ul>
+        </template>
+        <p v-html="q['description'] || 'No Description Provided'" class="padding20 description" :class='textColor'></p>
+        <template v-if="q && q.range">
+          <small class="text-muted">Values expected to be one of these types: </small>
+          <template v-for='(item,index) in q.range'>
+            <template v-for="link in getLink(item)">
+              <a class='d-inline bold' :href='link' :target="link[0] !== '.'?'_blank':'_self'" :class="[ index !== q.domain.length-1 ? 'text-muted' : textColor]" >
+                <small >
+                  <span v-html='item'></span>
+                </small>
+                <i v-if="link[0] !== '.'" class="fas small fa-external-link-alt"></i>
+              </a>
+            </template>
+          </template>
+        </template>
+        <div v-if='q.properties && !validationView'>
+          <div class="resultsTabFull mt-3 p-3 text-light" :class='backColor'>
+            <h5 class='d-inline'><span v-text='q.label+" has "'></span>
+              <span class='badge badge-light' :class='textColor'>
+                <span v-if='q && q.properties' v-text='q.properties.length+" properties"'>
+
+                </span>
+                <span v-else>
+
+                </span>
+              </span>
+            </h5>
+            <button v-if='q && q.properties.length' @click='expand=!expand' style='border:2px solid white;' class='btn text-light ml-5' :class='backColor' v-text="expand?'Hide All':'Show All'"></button>
+          </div>
+          <table v-show='expand' class="table mb-2" :class='!parent?"table-striped-sec":"table-striped-main"'>
+            <tbody>
+              <tr v-if='q && q.properties' v-for="(item,i) in q.properties">
+                <td >
+                  <a class="font-weight-bold" :href='"./"+item.label'>
+                    <span v-html='item.label'></span>
+                  </a>
+                  <p>
+                    <small class='text-muted' v-html='item.description || "No description provided"'></small>
+                  </p>
+                </td>
+                <td>
+                  <small class="mainTextDark bold">Expected Type: </small>
+                  <template v-for="(type,i) in item.range">
+                    <a :href="getLink(type)">
+                      <small >
+                        <span v-html='type'></span>
+                      </small>
+                    </a>
+                    <span v-if="i !== item.range.length-1">, </span>
+                  </template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-if='validationView && q.validation'>
+          <validation-box :validation='q.validation'></validation-box>
+        </div>
+    </div>`
+  });
+
+
+
+
+  var app = new Vue({
+      el: '#viewer',
+      store: store,
+			data: function(){
+				return {
+          // set to true to see step notifications
+          developerMode:false,
+          //  NEW VIEWER DATA
+          userSchema: [],
+          userSchemaURL: '',
+          userSchemaAllProps:[],
+          userSchemaAllClasses:[],
+          parentList:[],
+          userInfo:{},
+          userSchemaParents:[],
+          query:'',
+          namespace:'',
+          namespaceRegistered:false,
+          classesGroupByLetter:[],
+          nxG:null,
+          rootNode:null,
+          edgeGraph:[],
+          searchQuery:'',
+          searchResults:[],
+          searchResultsProps:[],
+          filterLetters:[],
+          topProp:{},
+          filter:'',
+          loading:false,
+          queryContentParents:[],
+          checkbox:null,
+          treeBuildErr: false
+				}
+			},
+      computed:{
+        validationView () {
+          return this.$store.state.validationView
+        },
+        queryContent () {
+          return this.$store.state.queryStoreContent
+        },
+        schemaFilters(){
+          let letters = [];
+          let self = this;
+          if (self.userSchema) {
+            for (var i = 0; i < self.userSchema['hits'].length; i++) {
+              let q = self.userSchema['hits'][i]["label"][0];
+              if ( !letters.includes(q) ) {
+                letters.push( q );
+              }
+            }
+          }
+          return letters.sort();
+          // console.log('FILTERS COMPUTED',letters)
+        },
+        expandAll () {
+          return this.$store.getters.getShowAll
+        }
+      },
+      watch:{
+        searchQuery:function(newQ,oldQ) {
+          if (newQ.length) {
+            let result = _.filter(this.userSchema.hits, function(o) {
+                if (o['label'].toLowerCase().includes(newQ.toLowerCase())) {
+                  return o;
+                }
+            });
+            let resultProps = _.filter(this.userSchemaAllProps, function(o) {
+                if (o['label'].toLowerCase().includes(newQ.toLowerCase())) {
+                  return o;
+                }
+            });
+
+            this.searchResults = result;
+            this.searchResultsProps = resultProps;
+
+          }else{
+            this.searchResults = [];
+            this.searchResultsProps = [];
+          }
+        },
+        queryContent:{
+          handler:function(klass,oldklass){
+            var self = this;
+            let res = [];
+            if (klass.hasOwnProperty('parent_classes')) {
+              for (var i = 0; i < klass["parent_classes"].length; i++) {
+                if (klass["parent_classes"][i]) {
+                  let parents =klass["parent_classes"][i].split(', ');
+                  for (var x = 0; x < parents.length; x++) {
+                    let name = self.getName(parents[x]);
+                    res.push(name)
+                  }
+                }
+              }
+              if (res.length) {
+                self.queryContentParents = res;
+              }else{
+                self.queryContentParents = []
+              }
+            }
+          },
+          deep:true
+        }
+      },
+			methods:{
+        saveDataAndRedirect(item){
+          var self = this;
+          let found = _.find(self.userSchema.hits, (o) => o.name == item);
+          if (found) {
+              let data = JSON.stringify(found)
+              localStorage.setItem('EditorData', data);
+              localStorage.setItem('EditorStartingPoint', item);
+              window.location.href = '/editor';
+            }else{
+              Swal.fire(
+                'Hmmm',
+                'Cannot find Class: ' + item,
+              );
+            }
+        },
+        checkUser(){
+          let self = this;
+          $.ajax({url: "/user", success: function(result){
+             self.userInfo = result;
+          },
+          cache: false});
+        },
+        checkIfNamespaceIsRegistered(namespace){
+          let self = this;
+          self.loading = true;
+          if(self.developerMode)console.log('Checking Namespace..',namespace)
+          axios.get(`/api/registry/`+namespace).then(function (res) {
+            self.loading = false;
+            if(self.developerMode)console.log('Registration Check ', res)
+            if (res.data) {
+              let url = res.data.url;
+              if (url || res.data) {
+                self.namespaceRegistered = true;
+                self.loadSchema(namespace,url);
+                if(self.developerMode)console.log('%c REGISTERED...'+namespace,'color: green')
+                if (self.developerMode ) {
+                  $.notify(namespace+" is registered",{ globalPosition: 'right',className:'info', showDuration: 40, });
+                }
+              }else{
+                Swal.fire(
+                  'This namespace is registered but..',
+                  'No URL was found',
+                  'error'
+                );
+              }
+            }
+          }).catch(err=>{
+            self.loading = false;
+            if (self.developerMode ) {
+              $.notify(namespace+" is NOT registered",{ globalPosition: 'right',className:'error', showDuration: 40, });
+            }
+            self.loadSchema();
+            throw err;
+          });
+        },
+        loadSchema(namespace,url){
+          let self = this;
+          if (namespace && self.namespaceRegistered) {
+            if (self.developerMode ) {
+              $.notify("REGITERED SCHEMA LOADED",{ globalPosition: 'right',className:'success', showDuration: 40, });
+            }
+            axios.get("/api/registry/"+namespace).then(res=>{
+              if(self.developerMode)console.log('%c GET REGISTERED SCHEMA RES...','color:purple')
+              if(self.developerMode)console.log(res.data)
+              self.data = res.data;
+              self.loading = false;
+              self.userSchema = res.data
+              self.userSchemaURL = url
+
+              if (self.developerMode ) {
+                $.notify("REGISTERED SCHEMA LOADED",{ globalPosition: 'right',className:'success', showDuration: 40, });
+              }
+
+              var payload = {};
+              payload["schema"] = res.data;
+              store.commit('saveSchema',payload);
+
+              if(self.developerMode)console.log('userSchema',self.userSchema)
+              self.orderAlphabetically();
+
+              if (self.query) {
+                self.handleQuery();
+              }
+
+            }).catch(err=>{
+              self.loading = false;
+              throw err;
+            })
+          }else if(!namespace){
+            if(self.developerMode)console.log('LOADING SCHEMA FROM LOCALSTORAGE')
+            this.userSchema = JSON.parse(localStorage.getItem('user-schema-classes'));
+            this.userSchemaURL = localStorage.getItem('user-schema-url');
+
+            var payload = {};
+            payload["schema"] = JSON.parse(localStorage.getItem('user-schema-classes'));
+
+            // CHECK IF LS ITEM EXISTS AT ALL
+            if (localStorage.getItem("user-schema-classes") !== null) {
+              // console.log('LS loaded')
+              store.commit('saveSchema',payload);
+
+              if (self.developerMode ) {
+                $.notify("LOCALSTORAGE SCHEMA LOADED",{ globalPosition: 'right',className:'success', showDuration: 40, });
+              }
+              if(self.developerMode)console.log('userSchema',this.userSchema)
+              this.orderAlphabetically();
+
+              if (self.query) {
+                self.handleQuery();
+              }
+            }else {
+              // IF NO SCHEMA AT ALL
+              // $.notify("SCHEMA AND NAMESPACE DO NOT EXIST",{ globalPosition: 'right',className:'error', showDuration: 40, });
+              if (sessionStorage.getItem(self.namespace)) {
+                // Last VIEWED DAT MATCHES url
+                // console.log('last temporaty loaded')
+                localStorage.setItem('user-schema-classes',sessionStorage.getItem(self.namespace));
+                localStorage.setItem('user-schema-url',sessionStorage.getItem(self.namespace+'-url'));
+                self.loadSchema();
+
+              }else {
+                // DATA DOES NOT EXIST AT All
+                let timerInterval
+                Swal.fire({
+                  type:'error',
+                  title: "Page Does Not Exist",
+                  html:
+                     "Taking you to the Schema Playground in <strong></strong> seconds...",
+                  timer: 3000,
+                  onBeforeOpen: () => {
+                    const content = Swal.getContent()
+                    const $ = content.querySelector.bind(content)
+                    Swal.showLoading()
+                    timerInterval = setInterval(() => {
+                      Swal.getContent().querySelector('strong')
+                        .textContent = (Swal.getTimerLeft() / 1000)
+                          .toFixed(0)
+                    }, 100)
+                  },
+                  onClose: () => {
+                    window.location.href='/schema-playground/'
+                  }
+                });
+              }
+            }
+          }
+        },
+        orderAlphabetically(){
+          var self = this;
+          let res =[];
+          for (var i = 0; i < self.userSchema['hits'].length; i++) {
+            //only order classes not referenced
+            if (!self.userSchema['hits'][i]['ref']) {
+              res.push(self.userSchema['hits'][i]['name']);
+            }
+          }
+
+          let data = res.reduce((r, e) => {
+            let group = e.split(":")[1][0];
+            if(!r[group]) r[group] = {group, children: [e]}
+            else r[group].children.push(e);
+            return r;
+          }, {});
+
+          res = Object.values(data)
+          self.classesGroupByLetter= _.orderBy(res, ['group'], ['asc']);
+          self.makeHierarchyTree();
+          self.getAllProps();
+        },
+        flipView(){
+          if ($('.flipcard').hasClass("flipped")) {
+            $('.flipcard').removeClass('flipped');
+          } else {
+            $('.flipcard').addClass('flipped');
+          }
+        },
+        getCycle(graph) {
+          // TODO detect cycles and deal with them
+          console.log(graph)
+        },
+        makeHierarchyTree(){
+          var self = this;
+          // if (!self.query) {
+            self.nxG = new jsnx.DiGraph();
+            if (self.userSchema['hits'].length > 1) {
+              for (var i = 0; i < self.userSchema['hits'].length; i++) {
+                // console.log('CLASS: ',i,self.userSchema['hits'][i]["label"])
+                let topLevel = self.userSchema['hits'][i]["name"];
+                self.addNode(topLevel);
+                // console.log("add node",self.userSchema['hits'][i]["name"])
+                if (self.userSchema['hits'][i].hasOwnProperty('parent_classes')) {
+                  let parents = self.userSchema['hits'][i]["parent_classes"][0];
+                  if (parents) {
+                    let parentList = parents.split(", ");
+                    parentList.push(topLevel)
+                    // console.log('parent list', parentList)
+                    // let lastParent = parentList[parentList.length-1]
+                    // self.addNode(lastParent);
+                    // self.addEdge(lastParent,self.userSchema['hits'][i]["name"]);
+                    for (var currentParent = 0; currentParent < parentList.length; currentParent++) {
+                      if (parentList[currentParent] && parentList[currentParent-1]) {
+                        self.addNode(parentList[currentParent]);
+                        self.addEdge(parentList[currentParent-1],parentList[currentParent]);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            // self.addNode('schema:Intangible');
+            // self.addEdge('schema:Intangible','schema:CreativeWork');
+
+            try {
+              let topoRes = jsnx.topologicalSort(self.nxG);
+              // console.log('ROOT NODE IS...', topoRes[0])
+              if(self.developerMode)console.log('ROOT NODE IS...', topoRes[0])
+              let rootNode = '';
+              // if (topoRes.includes('Thing')) {
+              //   rootNode ='Thing';
+              // }else{
+              //   rootNode = topoRes[0];
+              // }
+              rootNode = topoRes[0];
+
+              self.rootNode= rootNode;
+            } catch (e) {
+              console.log("Oh no...",e)
+              self.treeBuildErr = true;
+            } finally {
+
+            }
+
+
+            // if (self.developerMode) {
+            //   jsnx.draw(self.nxG, {
+            //     element: '#canvasTest',
+            //     weighted: true,
+            //     edgeStyle: {
+            //         'stroke-width': 10,
+            //         'fill': '#b4b4b4'
+            //     },
+            //     layoutAttr: {
+            //         charge: -800,
+            //         linkDistance: 100
+            //     },
+            //     height:300,
+            //     labelStyle: {fill: '#5C3069'},
+            //     withLabels: true,
+            //     nodeLabels: 'label',
+            //     nodeStyle: {
+            //         'stroke': '#8feddc',
+            //         'fill': '#84dcdf',
+            //         'cursor': 'pointer',
+            //         'nodeShape':'s'
+            //     }
+            //   });
+            // }
+          // }
+        },
+        getName(string){
+          let res ='';
+          if (string.includes('http')) {
+            let arr =  string.split('/');
+            res = arr[arr.length-1];
+          }else if (string.includes(':')) {
+            let arr =  string.split(':');
+            res = arr[arr.length-1];
+          }else{
+            res = string
+          }
+          return res
+        },
+        addEdge(class1,class2){
+          this.nxG.addEdge(class1,class2);
+          let node = [class2,class1];
+          this.edgeGraph.push(node);
+        },
+        addNode(className){
+          this.nxG.addNode(className,{'label':className});
+        },
+        getNeighbors(node){
+          if (node) {
+            let neighbors = this.nxG.neighbors(node);
+            // console.log('neighbors', neighbors)
+            return neighbors;
+          }
+        },
+        getAllProps(){
+          let res = [];
+          let self = this;
+          for (var i = 0; i < self.userSchema['hits'].length; i++) {
+            if (self.userSchema['hits'][i].hasOwnProperty('properties') && self.userSchema['hits'][i]['properties'].length>0) {
+              res = res.concat(self.userSchema['hits'][i]['properties']);
+            }
+          }
+          self.userSchemaAllProps = res;
+          // console.log('ALL Props', self.userSchemaAllProps)
+
+          var payload = {};
+          payload["props"] = res;
+          store.commit('saveProps',payload);
+        },
+        handleQuery(){
+          var self = this;
+          if (self.developerMode ) {
+            $.notify(self.query+" is the query",{ globalPosition: 'right',className:'warning', showDuration: 40, });
+          }
+          // Attempt to find Class first
+          let q = self.findClass(self.query);
+          if (q) {
+            // self.queryContent = q;
+            self.getParentsOf(q);
+            // console.log('>>>>TOP CLASS', q)
+            var payload = {};
+            payload["queryContent"] = q;
+            store.commit('checkIFValidationView',payload);
+
+            if (self.developerMode ) {
+              $.notify("CLASS MODE: "+q.label,{ globalPosition: 'right',className:'warning', showDuration: 40, });
+            }
+          }else if (self.findProp(self.query)) {
+            let prop = self.findProp(self.query);
+            // self.topProp = prop;
+            // console.log('FOUND PROP', self.topProp)
+            var payload = {};
+            payload["queryContent"] = prop;
+            store.commit('checkIFValidationView',payload);
+            if (self.developerMode ) {
+              $.notify("PROPERTY MODE: "+prop.label,{ globalPosition: 'right',className:'warning', showDuration: 40, });
+            }
+          }else{
+            if (self.developerMode ) {
+              $.notify("NO QUERY MATCH",{ globalPosition: 'right',className:'error', showDuration: 40, });
+            }
+          }
+
+        },
+        findClass(query){
+          let self = this;
+          if (self.namespace === 'schema') {
+            console.log("SCHEMA.org case")
+            axios.get('/api/registry/'+self.namespace +'/'+'schema:'+self.query+'?v').then(res=>{
+              var payload = {};
+              payload["schema"] = res.data;
+              store.commit('saveSchema',payload);
+              this.userSchema = res.data
+              for (var i = 0; i < self.userSchema['hits'].length; i++) {
+                if (self.userSchema['hits'][i]["label"] === query ) {
+                  // console.log("MATCH",self.userSchema['hits'][i])
+                  let q = self.userSchema['hits'][i];
+                  self.getParentsOf(q);
+                  var payload = {};
+                  payload["queryContent"] = q;
+                  store.commit('checkIFValidationView',payload);
+                }
+              }
+              return false;
+            }).catch(err=>{
+              throw err;
+            });
+
+          }else{
+            if(self.developerMode)console.log('Looking in schema for CLASS: ',query)
+            for (var i = 0; i < self.userSchema['hits'].length; i++) {
+              if (self.userSchema['hits'][i]["name"] === query || self.userSchema['hits'][i]["label"] == query ) {
+                let found = self.userSchema['hits'][i];
+                return found;
+              }
+            }
+            return false;
+          }
+        },
+        findProp(query){
+          let self = this;
+          // console.log('Looking in schema for PROP: ',query)
+          for (var i = 0; i < self.userSchemaAllProps.length; i++) {
+            if (self.userSchemaAllProps[i]["label"] === query ) {
+              return self.userSchemaAllProps[i];
+            }
+          }
+          return false;
+        },
+        RemoveLastDirectoryPartOf(the_url){
+          var the_arr = the_url.split('/');
+          the_arr.pop();
+          return( the_arr.join('/')+'/' );
+        },
+        handleFilter(e){
+          if (e.target.value !== 'Choose...') {
+            window.location.href = "./"+e.target.value;
+          }
+        },
+        handleChange(e){
+          let target = e.target.value;
+          this.filter = e.target.value;
+          let fullList = this.userSchema;
+          let results = [];
+          switch (target) {
+            case 'ALL':
+              this.filterResults = fullList;
+              break;
+            default:
+              results = fullList;
+              results = fullList.filter(word => word["name"].split(":")[1][0] === target);
+              this.filterResults =  _.sortBy(results, [q => q['name'].split(":")[1]], ['asc']);
+          }
+        },
+        getUniqueContent(paths){
+          var finalArr = [];
+          let mergedpaths =[]
+          for (var i = 0; i < paths.length; i++) {
+            mergedpaths = mergedpaths.concat(paths[i])
+          }
+
+          function onlyUnique(value, index, self) {
+            return self.indexOf(value) === index;
+          }
+
+          finalArr =  mergedpaths.filter( onlyUnique );
+          // console.log('Unique Arr Elements ',finalArr)
+          return finalArr;
+        },
+        getParentsOf(classInfo){
+          // console.log("Getting parents of ",classInfo)
+          var self = this;
+          let res = [];
+          if (classInfo.hasOwnProperty('parent_classes')) {
+            for (var i = 0; i < classInfo["parent_classes"].length; i++) {
+              if (classInfo["parent_classes"][i]) {
+                let parents =classInfo["parent_classes"][i].split(', ');
+                res.push(parents)
+              }
+            }
+            // console.log('ALL PATHS',res)
+            self.queryContentParents = self.getUniqueContent(res).reverse();
+            // console.log('TOP CLASS PARENTS...',self.queryContentParents)
+            self.getParentsInfo(self.queryContentParents)
+          }
+          return res;
+        },
+        getParentsInfo(list){
+          var self= this;
+          let res = [];
+          for (var i = 0; i < list.length; i++) {
+            for (var x = 0; x < self.userSchema['hits'].length; x++) {
+              let parentName = list[i];
+              // compare name not label as there might be duplicates
+              if (self.userSchema['hits'][x].name=== parentName) {
+                // console.log("GOT PARENT FULL INFO...",self.userSchema['hits'][x].label,parentName)
+                res.push(self.userSchema['hits'][x])
+              }
+            }
+          }
+          self.userSchemaParents = res;
+          // console.log('ALL PARENTS INFO', self.userSchemaParents)
+        },
+        changeView(){
+          store.commit('toggleView')
+        },
+        drawGraph(g,container){
+          jsnx.draw(g,{
+            element: container,
+            weighted: true,
+            edgeStyle: {
+                'stroke-width': 10,
+                'fill': '#b4b4b4'
+            },
+            layoutAttr: {
+                charge: -800,
+                linkDistance: 100
+            },
+            height:300,
+            optBind:true,
+            labelStyle: {fill: '#5C3069'},
+            withLabels: true,
+            nodeLabels: 'label',
+            nodeStyle: {
+                'stroke': '#8feddc',
+                'fill': '#84dcdf',
+                'cursor': 'pointer',
+                'nodeShape':'s'
+            }
+          });
+        },
+        openRegistration(){
+          var self = this;
+          if (self.userInfo && self.userInfo.login) {
+            Swal.fire({
+              animation:false,
+              customClass:'scale-in-center',
+              title: 'Why should I register my schema?',
+              html:`<ul class="text-muted text-left">
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> Share your work with other members of the community. Your schema definition could be helpful to many others in the community as a starting point for their reserach.
+                  </small>
+                </li>
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> By registering a schema derived from an existing schema you are helping to maintain the <a href="https://www.go-fair.org/fair-principles/" target="_blank">FAIR</a> (Findable, Accessible, Interoperable, Reusable) principles of data-sharing/creation.
+                  </small>
+                </li>
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> It's easy to register your schema! If everything looks good here all you have to do is choose a namespace for your schema's homepage.
+                  </small>
+                </li>
+                <li>
+                  <small>
+                    <i class="fas fa-star"></i> You'll be able to easily share your schema and visualize it in a way that it's easy to undertand.
+                  </small>
+                </li>
+              </ul>`,
+              footer:'<p>If everything looks good, click <b> Continue</b></p>',
+              showCancelButton: true,
+              confirmButtonColor:'#5C3069',
+              cancelButtonColor:'#006476',
+              confirmButtonText: 'Continue'
+            }).then((result) => {
+              if (result.value) {
+                Swal.fire({
+                  title: 'Registration',
+                  input:'text',
+                  animation:false,
+                  customClass:'scale-in-center',
+                  text:"Choose a namespace (a-z,0-9)",
+                  footer:`<small>Namespace must be unique and cannot be 'metadata','dataset' or 'schema'</small>`,
+                  confirmButtonColor:'#5C3069',
+                  cancelButtonColor:'#006476',
+                  showCancelButton: true,
+                  confirmButtonText: 'Register',
+                  inputValidator: (input) => {
+                    return new Promise((resolve) => {
+                      var re = /^[a-zA-Z0-9_.-]*$/;
+                      if (!re.test(input) ) {
+                        resolve('Namespace contains invalid characters')
+                      }else{
+                        axios.head(`/api/registry/`+input).then(function (res) {
+                          resolve('<small>Sorry, that namespace is already taken: <a href="/view/'+input+'/" target="_blank">http://discovery.biothings.io/view/'+input+'</a></small>')
+                        }).catch(err=>{
+                          resolve()
+                          throw err;
+                        });
+                      }
+                    })
+                  },
+                  showLoaderOnConfirm: true,
+                  preConfirm: (input) => {
+                     console.log('make it',input)
+                     let data= {
+                       "namespace": input,
+                       "url": encodeURI(self.userSchemaURL)
+                     }
+                     let config = {
+                        headers: {
+                          'content-type': 'application/json'
+                        }
+                      }
+                     return axios.post('/api/registry',data,config).then(res=>{
+                       return res.data
+                     }).catch(err=>{
+                       return err;
+                       throw err;
+                     });
+                  },
+                  allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                  if (result.value) {
+                    // console.log("FINAL",result)
+                    if (result.value.success) {
+                      let name = result.value.url.split('/').splice(-1,1);
+                      gtag('event','click',{'event_category':'schema_added','event_label': name,'event_value':1})
+                      gtag('event','click',{'event_category':'schema_added','event_label': 'ALL','event_value':1})
+                      let timerInterval
+                      Swal.fire({
+                        type:'success',
+                        title: 'Registration Successful',
+                        animation:false,
+                        customClass:'scale-in-center',
+                        html:
+                          'Taking you to your schema homepage in <strong></strong> seconds.',
+                        timer: 3000,
+                        onBeforeOpen: () => {
+                          const content = Swal.getContent()
+                          const $ = content.querySelector.bind(content)
+                          Swal.showLoading()
+                          timerInterval = setInterval(() => {
+                            Swal.getContent().querySelector('strong')
+                              .textContent = (Swal.getTimerLeft() / 1000)
+                                .toFixed(0)
+                          }, 100)
+                        },
+                        onClose: () => {
+                          clearInterval(timerInterval)
+                          window.location.href='/view/'+name+'/'
+                        }
+                      })
+                    }else{
+
+                      if (result.value.response.statusText) {
+                        Swal.fire({
+                          type: 'error',
+                          toast: true,
+                          position: 'top center',
+                          title: 'Registration Failed: ',
+                          text: result.value.response.statusText
+                        });
+                      }else{
+                        console.error('Error:',result)
+                        Swal.fire({
+                          type: 'error',
+                          toast: true,
+                          position: 'top center',
+                          title: 'Registration Failed: ',
+                          text: 'Check console'
+                        });
+                      }
+
+                    }
+                  }
+                })
+              }
+            })
+
+          }else{
+            Swal.fire({
+              type: 'error',
+              toast: true,
+              position: 'top',
+              title: 'You Must Log-in To Register a Schema',
+            });
+          }
+        },
+        extend(itemname){
+    			var self = this;
+          Swal.fire({
+            title: "Extend class: "+itemname,
+            html:'<small>By entending this class you are creating a more specific version of this class</small>',
+            showCancelButton: true,
+            confirmButtonColor:'#5C3069',
+            cancelButtonColor:'#006476',
+            animation:false,
+            customClass:'scale-in-center',
+            confirmButtonText: 'Extend',
+          }).then((result) => {
+            if (result.value) {
+              let q = self.findClass(itemname);
+              console.log('q',q)
+              if (q) {
+                axios.get('/api/registry/'+q.namespace+'/'+q.name).then(res=>{
+          				let obj = JSON.stringify(res.data)
+          				localStorage.setItem('EditorData',obj);
+          				localStorage.setItem('EditorStartingPoint',q.name);
+          				window.location.href ='/editor'
+          			}).catch(err=>{
+          				throw err;
+          			})
+              }else{
+
+              }
+
+            }
+          });
+
+        },
+        showAll(){
+          store.dispatch('toggleShowAll');
+        }
+			},
+			mounted:function(){
+        let context = {{Context}}
+        let self= this;
+        tippy( '#viewer', {
+          target:'.tip',
+          placement:'top',
+          content: 'loading',
+          animation: 'fade',
+          theme:'light',
+          onShow(instance) {
+            let info = instance.reference.dataset.tippyInfo;
+            instance.setContent("<div class='p-0'>"+info+"</div>")
+          }});
+
+          tippy( '#mainCont', {
+            target:'*[data-tippy-info]',
+            placement:'left',
+            content: 'loading',
+            animation: 'fade',
+            interactive:true,
+            theme:'light',
+            onShow(instance) {
+              let info = instance.reference.dataset.tippyInfo;
+              instance.setContent("<div class='wraptext text-left bg-light' style='overflow: scroll; max-height: 417px;'><pre><small>"+info+"</small></pre></div>")
+            }});
+
+          tippy('#showButton', {
+            content: `<div class='m-0'><table class='table'>
+              <tr>
+                <td>
+                  <small class='mainTextDark'><i class="far fa-star"></i> Show All Inherited Properties</small>
+                </td>
+                <td>
+                  <small>Shows all parents classes of the current class and their properties</small>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <small class='mainTextDark'><i class="fas fa-star"></i> Show Used Properties Only</small>
+                </td>
+                <td>
+                  <small>Shows only the current class and properties used specified in the <b>validation</b> field</small>
+                </td>
+              </tr>
+            </table></div>`,
+            placement: 'left',
+            theme:'light',
+          })
+        self.checkUser()
+         if ( context ) {
+           self.query = context.query;
+           self.namespace = context.namespace;
+           if(self.developerMode)console.log('namespace', self.namespace)
+           if(self.developerMode)console.log('query', self.query)
+           self.checkIfNamespaceIsRegistered(self.namespace);
+         }
+
+
+			}
+		});
+
+
+</script>
+{% include "footer.html" %}
+{% endblock %}

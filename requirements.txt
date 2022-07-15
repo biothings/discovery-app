@@ -1,15 +1,17 @@
-git+git://github.com/biothings/biothings_schema.py.git@e5550d3#egg=biothings_schema
-biothings==0.9.0
-elasticsearch>=7, <8
-elasticsearch-dsl>=7, <8
-PyLD>=0.7.1
-jsonschema>=2.6.0
-torngithub==0.2.0
+git+https://github.com/biothings/biothings_schema.py@ee026d8#egg=biothings_schema
+git+https://github.com/biothings/biothings.api.git#egg=biothings
+#biothings==0.10.0
+#PyLD>=0.7.1
+#jsonschema>=2.6.0
+#torngithub==0.2.0
 Jinja2>=2.9.6
 pycurl>=7.19
-libsass==0.19.2
+libsass==0.19.2     # compile SASS to CSS in templates
 python3-saml==1.9.0 # SAML SSO
-PyGithub
+PyGithub>=1.53
 certifi
-pyadf
-aiocron==1.4
+pyadf==0.2.29       # create rich text in Jira
+aiocron==1.8
+
+# s3 backup
+boto3>=1.21.0

@@ -2,7 +2,7 @@ import logging
 
 import config
 import requests
-from discovery.data import Dataset
+from discovery.model import Dataset
 
 logging.basicConfig(level="DEBUG")
 
