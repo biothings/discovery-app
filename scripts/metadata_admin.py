@@ -111,9 +111,6 @@ def change_ownership(_id=None, new_owner=None, dryrun=True):
             return
 
 
-
-
-
 def update(_id, new_meta, dryrun=True):
     '''
         Update a specific document chosen by ID.
