@@ -119,3 +119,6 @@ venv.bak/
 biothings
 elasticsearch_dsl
 biothings_schema
+
+# notebook tests
+*.ipynb

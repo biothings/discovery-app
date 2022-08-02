@@ -2,9 +2,16 @@
 
 from elasticsearch_dsl import Index
 
-from discovery.model.dataset import Dataset
+import sys # for local testing
+sys.path.append('/Users/nacosta/Documents/discovery-app')
+
+
+from  discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
 
+
+def exists():
+    return Index(Dataset.Index.name).exists()
 
 def setup():
 

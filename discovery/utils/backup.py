@@ -1,11 +1,18 @@
 from datetime import datetime, date
 import json
 import logging
-
+import datetime
+from tkinter import W
 import boto3
 
+import sys # for local testing
+sys.path.append('/Users/nacosta/Documents/discovery-app')
+
+from discovery.utils import indices
 from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
+
+logging.basicConfig(level="INFO")
 
 
 def json_serial(obj):
@@ -95,3 +102,91 @@ def daily_backup_routine():
         logger.info("Done. [%s]", s3_obj)
     except Exception as exc:
         logger.error(str(exc))
+
+###################################################################
+
+def _restore(ddeapis):
+    if indices.exists():
+        logging.error("Cannot write to an existing index.")
+        return
+    indices.reset()
+    for key in ddeapis:
+        if key == "discover_dataset": 
+            dde_dataset = ddeapis[key]
+        elif key == "discover_schema": 
+            dde_schema = ddeapis[key]
+        elif key == "discover_schema_class": 
+            dde_schema_class = ddeapis[key]          
+
+    # Restore discovery document: schema class, schema, and dataset
+    # need to clarify the @id key in the schema
+    for doc in dde_schema_class['docs']:
+        try:
+            schema_class_api = SchemaClass(doc)
+            schema_class_api.namespace = doc['namespace']
+            schema_class_api.name = doc['name']
+            schema_class_api.description = doc['description']
+            schema_class_api.prefix = doc['prefix']
+            schema_class_api.label = doc['label']
+            schema_class_api.uri = doc['uri']
+            schema_class_api.parent_classes = doc['parent_classes']
+            schema_class_api.validation = doc['validation']
+            schema_class_api.ref = doc['ref']
+            schema_class_api.save()
+        except Exception as e:
+            logging.error("error restoring schema class, ", e)
+
+    for doc in dde_schema['docs']:
+        try:
+            schema_api = Schema(doc)
+            if '@id' in doc.keys():
+                schema_api.meta.id = doc['@id']
+            else:
+                schema_api.meta.id = "Null"
+            schema_api._meta = doc['_meta']
+            schema_api.save()
+        except Exception as e:
+            logging.error("error restoring schema class, ", e)
+
+    for doc in dde_dataset['docs']:
+        try:
+            _api = Dataset(doc)
+            _api.identifier = doc['identifier']
+            _api.description = doc['description']
+            _api.name = doc['name']
+            _api._meta = doc['_meta']
+            _api.save()
+        except Exception as e:
+            logging.error("error restoring dataset, ", e)
+
+def restore_from_s3(filename=None,bucket='dde'):
+
+    s3 = boto3.client('s3')
+
+    if not filename: 
+        objects = s3.list_objects_v2(Bucket='dde', Prefix='db_backup')['Contents']
+        filename = max(objects, key=lambda x: x['LastModified'])['Key'] 
+    
+    if not filename.startswith('db_backup/'):
+        filename = 'db_backup/' + filename
+
+    logging.info("GET s3://%s/%s", bucket, filename)
+
+    obj = s3.get_object(
+        Bucket=bucket,
+        Key=filename
+    )
+    discoveryappapis = json.loads(obj['Body'].read())
+    _restore(discoveryappapis)
+
+
+def restore_from_file(filename="/Users/nacosta/Documents/dde_backup_20220503.json"):
+    with open(filename) as file:
+        discoveryappapis = json.load(file)
+        _restore(discoveryappapis)
+
+
+###################################################################
+
+if __name__ == '__main__':
+    restore_from_file()
