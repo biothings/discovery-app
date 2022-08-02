@@ -5,9 +5,6 @@ import datetime
 from tkinter import W
 import boto3
 
-import sys # for local testing
-sys.path.append('/Users/nacosta/Documents/discovery-app')
-
 from discovery.utils import indices
 from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
