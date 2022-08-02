@@ -185,5 +185,3 @@ def restore_from_file(filename="/Users/nacosta/Documents/dde_backup_20220503.jso
 
 ###################################################################
 
-if __name__ == '__main__':
-    restore_from_file()
