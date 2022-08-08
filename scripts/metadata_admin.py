@@ -14,6 +14,8 @@ from discovery.registry import datasets
 from discovery.registry.datasets import validate
 from discovery.handlers.api.dataset import repr_regdoc
 
+logging.basicConfig(level="INFO")
+logger = logging.getLogger("metadata_admin")
 
 def is_github_user(username):
     '''
@@ -25,10 +27,10 @@ def is_github_user(username):
         r = requests.get(f'https://api.github.com/users/{username}')
         if r.status_code == 200:
             return True
-        print(f'{username}: {r.status_code}')
+        logger.debug(f'{username}: {r.status_code}')
         return False
     else:
-        print(f'username check skipped because email: {username}')
+        logger.debug(f'username check skipped because email: {username}')
         return False
 
 
@@ -49,7 +51,7 @@ def is_dde_metadata_owner(username):
             return True
         else:
             return False
-    print(f'{username}: {r.status_code}')
+    logger.debug(f'{username}: {r.status_code}')
     return False
 
 
@@ -69,10 +71,9 @@ def delete():
     '''
     _id = input("Enter ID of metadata to be deleted: ")
     if ask(f'Confirm deletion of {_id}? ') == 'Y':
-        print(f'Deleting metadata with ID: {_id}')
+        logger.info(f'Deleting metadata with ID: {_id}')
         name = datasets.delete(_id)
-        logging.info(f'Deleted metadata with ID: {_id}')
-        print(f'Deleted: {name}')
+        logger.info(f'Deleted: {name}')
 
 
 def change_ownership(_id=None, new_owner=None, dryrun=True):
@@ -82,32 +83,31 @@ def change_ownership(_id=None, new_owner=None, dryrun=True):
     '''
     if not _id:
         _id = input("Enter ID of metadata document: ")
-    logging.info(f'Changing ownership of ID: {_id}')
+    logger.info(f'Changing ownership of ID: {_id}')
     doc = datasets.get(_id)
     if not doc:
-        logging.info('Document not found. Terminating')
-        print('Document not found. Terminating')
+        logger.error('Document not found. Terminating')
         return
     doc = repr_regdoc(doc, True)
     current_owner = doc['_meta']['username']
-    print(f'Metadata ownership belongs to {current_owner}')
+    logger.info(f'Metadata ownership belongs to {current_owner}')
     if not new_owner:
         new_owner = input("Enter username of new owner:")
     if current_owner == new_owner:
-        print(f'New owner: {new_owner} - Current owner: {current_owner} are the same. Terminating')
+        logger.info(f'New owner: {new_owner} - Current owner: {current_owner} are the same. Terminating')
         return
     doc['_meta']['username'] = new_owner
     if is_dde_metadata_owner(new_owner) or is_github_user(new_owner):
         if ask(f'{new_owner} will be the new owner, continue? ') == 'Y':
             update(_id, doc, dryrun)
         else:
-            print('Transfer of ownership cancelled')
+            logger.info('Transfer of ownership cancelled')
             return
     else:
         if ask(f'User: ({new_owner}) cannot be found, continue anyway? ') == 'Y':
             update(_id, doc, dryrun)
         else:
-            print('Transfer of ownership cancelled')
+            logger.info('Transfer of ownership cancelled')
             return
 
 
@@ -116,36 +116,29 @@ def update(_id, new_meta, dryrun=True):
         Update a specific document chosen by ID.
     '''
     if not _id:
-        logging.info('ID required. Terminating')
-        print('ID required. Terminating')
+        logger.error('ID required. Terminating')
         return False
-    print(f'Updating metadata with ID: {_id}')
-    logging.info(f'Updating metadata with ID: {_id}')
+    logger.info(f'Updating metadata with ID: {_id}')
     doc = datasets.get(_id)
     if not doc:
-        logging.info('Document not found. Terminating')
-        print('Document not found. Terminating')
+        logger.error('Document not found. Terminating')
         return False
     doc = repr_regdoc(doc, True)
     current_owner = doc['_meta']['username']
-    print(f'You are updating metadata that belongs to: {current_owner}')
+    logger.info(f'You are updating metadata that belongs to: {current_owner}')
     if not dryrun:
         try:
             version = datasets.update(_id, new_meta)
-            logging.info(f'Success! Updated: new version: {version}')
-            print(f'Success! Updated: new version: {version}')
+            logger.info(f'Success! Updated: new version: {version}')
         except Exception as e:
-            logging.info(f'Update Error. Terminating because {e}')
-            print(f'Update Error. Terminating because {e}')
+            logger.info(f'Update Error. Terminating because {e}')
             return False
     else:
         try:
             validate(new_meta, doc['_meta']['class_id'])
-            logging.info('(Dry Run) Valid document, can be updated!')
-            print('(Dry Run) Valid document, can be updated!')
+            logger.info('(Dry Run) Valid document, can be updated!')
         except Exception as e:
-            logging.info(f'(Dry Run) Invalid document, cannot be updated because {e}')
-            print(f'(Dry Run) Invalid document, cannot be updated because {e}')
+            logger.info(f'(Dry Run) Invalid document, cannot be updated because {e}')
             return False
 
 
