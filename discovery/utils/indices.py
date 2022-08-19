@@ -1,10 +1,4 @@
-
-
 from elasticsearch_dsl import Index
-
-import sys # for local testing
-sys.path.append('/Users/nacosta/Documents/discovery-app')
-
 
 from  discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
@@ -26,7 +20,6 @@ def setup():
 
 
 def refresh():
-
     Index(Schema.Index.name).refresh()
     Index(SchemaClass.Index.name).refresh()
     Index(Dataset.Index.name).refresh()
