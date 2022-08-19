@@ -1,13 +1,15 @@
 from datetime import datetime, date
 import json
+#from json import tool
 import logging
 import datetime
-from tkinter import W
+#from tkinter import W
 import boto3
 
 from discovery.utils import indices
 from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
+
 
 logging.basicConfig(level="INFO")
 
@@ -100,7 +102,6 @@ def daily_backup_routine():
     except Exception as exc:
         logger.error(str(exc))
 
-###################################################################
 
 def _restore(ddeapis):
     if indices.exists():
@@ -173,15 +174,13 @@ def restore_from_s3(filename=None,bucket='dde'):
         Bucket=bucket,
         Key=filename
     )
-    discoveryappapis = json.loads(obj['Body'].read())
-    _restore(discoveryappapis)
+    dddeapis = json.loads(obj['Body'].read())
+    _restore(dddeapis)
 
 
-def restore_from_file(filename="/Users/nacosta/Documents/dde_backup_20220503.json"):
+def restore_from_file(filename=None):
     with open(filename) as file:
-        discoveryappapis = json.load(file)
-        _restore(discoveryappapis)
+        ddeapis = json.load(file)
+        _restore(ddeapis)
 
-
-###################################################################
 
