@@ -1,2 +1,28 @@
 @import "./base.css";
 
+.route-active{
+  font-weight: bold;
+}
+
+.anchor {
+  opacity: 0;
+}
+.anchorParent:hover > .anchor {
+  opacity: 1;
+}
+
+.flowchart {
+  min-height: 90vh;
+}
+.resTable {
+  max-height: 80vh;
+  overflow: scroll;
+}
+.filterBox {
+  max-height: 300px;
+  overflow-y: scroll;
+}
+#flow_chart {
+  width: 100%;
+  height: 500px;
+}

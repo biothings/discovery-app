@@ -1,13 +1,21 @@
-<script setup>
-import { RouterView } from "vue-router";
-import Nav from './components/Nav.vue'
-</script>
-
 <template>
   <Nav></Nav>
+  <div id="modals-go-here"></div>
   <main>
     <RouterView />
   </main>
+  <Footer></Footer>
 </template>
 
-<style scoped></style>
+<script>
+import Nav from "./components/Nav.vue";
+import Footer from "./components/Footer.vue";
+
+export default {
+  name: "Home",
+  components: {
+    Nav,
+    Footer,
+  }
+};
+</script>
