@@ -6,12 +6,6 @@
   [v-cloak]::before { content: "Please wait..."; }
   .drag-el{
     color: white;
-    transition: all .3s;
-    background-image: url("/static/img/cube.svg");
-    background-position: left;
-    background-repeat: no-repeat;
-    outline: none !important;
-    padding: 10px 10px 10px 40px !important;
   }
   .drag-el:hover{
     cursor: grab;
@@ -87,10 +81,10 @@
         </span>
         <small class="text-light">Extending <i class="fas fa-chevron-right"></i> <b v-text="startingPoint"></b></small>
       </div>
-      <div v-if='newClassAdded && !removeValidation' class="actions bg-info p-2 rounded d-flex align-items-center justify-content-center rounded-0">
+      <div v-if='newClassAdded && !removeValidation' class="actions p-2 rounded d-flex align-items-center justify-content-center rounded-0" :class="[validationView ? 'bg-info text-light' : 'alert-info text-dark']">
         <div class="col-sm-5 mr-1 d-flex align-items-center justify-content-center ">
           <div class="mr-2">
-            <small class="text-light"><img src='/static/img/cube.svg' width="30px"> Validation Editor</small>
+            <small><img src='/static/img/cube.svg' width="30px"> Validation Editor</small>
           </div>
           <div>
             <input class="form-control slider m-auto tip" @click="editValidation()" data-tippy-info="Edit Schema Validation" type="checkbox"/>
@@ -113,8 +107,16 @@
             </template>
           </div>
           <div class="col-sm-12 col-md-6 bg-dark border-left">
-            <h5 class="text-light text-center m-0 text-muted pt-2">Common Validation Options</h5>
-            <small class="text-info text-center d-block">Drag & drop to merge validation</small>
+            <h4 class="text-light text-left m-0 pt-2">Options</h4>
+            <!-- CARDINALITY -->
+            <h5 class="text-left m-0 text-muted pt-2">Cardinality</h5>
+            <small class="text-info text-left d-block">Refers to the number of elements in a set or other grouping, as a property of that grouping.</small>
+            <div class="my-1 alert alert-primary justify-content-start d-flex align-items-center">
+              <label class="text-muted m-0" for="ac">Enable Cardinality</label>
+              <input v-model="addCardinality" id="ac" class="slider ml-2" @click="toggleCardinality()" type="checkbox"/>
+            </div>
+            <h5 class="text-left m-0 text-muted pt-2">Common Validation</h5>
+            <small class="text-info text-left d-block">Drag & drop common validation options to merge into each property.</small>
             <div class="border rounded p-2 bg-light mb-2">
               <template v-for='item in validation_options'>
                 <div class='badge drag-el m-1' :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" :key='item.title' draggable @dragstart='startDrag($event, item)'>
@@ -128,8 +130,8 @@
             <div class="bg-dark p-1" v-if="item">
               <editor></editor>
             </div>
-            <h5 class="text-light text-center m-0 text-muted pt-2">Definitions</h5>
-            <small class="text-info text-center d-block">Create reusable validation definitions</small>
+            <h5 class="text-left m-0 text-muted pt-2">Definitions</h5>
+            <small class="text-info text-left d-block">Create reusable validation definitions to use in your schema.</small>
             <div class="border rounded p-2 alert-info mb-2">
               <template v-for='item in definition_options'>
                 <div class='badge m-1 text-light' :data-tippy-info="JSON.stringify(item.validation,null,2)" :style="{ 'background-color': item.color }" :key='item.title'>
@@ -363,6 +365,7 @@ const store = new Vuex.Store({
     'showDescriptions':false,
     'editThis':null,
     'loading': false,
+    'addCardinality': false,
     'editThisDefinition':null,
     'previousPreviewProps': {},
     'validation_options': [
@@ -372,14 +375,6 @@ const store = new Vuex.Store({
               color: '#0263fd',
               validation:{
                 "type": "string"
-              }
-            },
-            {
-              _id: '00002',
-              title: 'description',
-              color: '#ff6384',
-              validation:{
-                "description": "click EDIT to change your description"
               }
             },
             {
@@ -664,6 +659,20 @@ const store = new Vuex.Store({
       let name = payload['name']
       let newval = Object.assign({}, state.finalschema['@graph'][0]['$validation']['properties'][name], item['validation'])
       Vue.set(state.finalschema['@graph'][0]['$validation']['properties'], name, newval)
+    },
+    toggleCardinality(state){
+      state.addCardinality = !state.addCardinality;
+      //remove all marginality in validation
+      if (!state.addCardinality) {
+        $.notify("Removing cardinality",{ globalPosition: 'right',style:'info', showDuration: 200});
+        for (const name in state.finalschema['@graph'][0]['$validation']['properties']) {
+          if (Object.hasOwnProperty.call(state.finalschema['@graph'][0]['$validation']['properties'][name], 'owl:cardinality')) {
+            let newV = state.finalschema['@graph'][0]['$validation']['properties'][name]
+            delete newV['owl:cardinality']
+            Vue.set(state.finalschema['@graph'][0]['$validation']['properties'], name, newV)
+          }
+        }
+      }
     },
     updateValidationOptions(state,payload){
       let v = payload['validation']
@@ -1173,6 +1182,9 @@ const store = new Vuex.Store({
     loading: state =>{
       return state.loading
     },
+    addCardinality: state =>{
+      return state.addCardinality
+    },
     removeValidation: state =>{
       return state.removeValidation
     },
@@ -1606,6 +1618,75 @@ Vue.component('editor', {
               </div>`
   });
 
+Vue.component('edit-validation-description', {
+    props: ['propname', 'val'],
+    methods:{
+      handleEdit(){
+        let self = this;
+        let hasDesc = false;
+        if (Object.hasOwnProperty.call(self.val, 'description')) {
+          hasDesc = true;
+        } else {
+          $.notify("Adding new description",{ globalPosition: 'right',style:'info', showDuration: 200});
+        }
+        Swal.fire({
+            title: 'Edit description',
+            text: hasDesc ? "Current: " + self.val.description : 'Enter new description',
+            input: 'textarea',
+            inputPlaceholder: 'Enter text here',
+            showCancelButton: true,
+            animation:false,
+            confirmButtonColor:"{{color_main}}",
+            cancelButtonColor:"{{color_sec}}",
+            customClass:'scale-in-center',
+            confirmButtonText: 'Save',
+            showLoaderOnConfirm: true,
+            preConfirm: (method) => {
+              return method
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+          }).then((result) => {
+            let payload = {
+              // follow structure of val options
+              'validation': {'validation': {'description': result.value}},
+              'name':self.propname
+            };
+            store.commit('setValidation', payload);
+          });
+      }
+    },
+    template:
+      `<button class="btn btn-sm btn-info mt-4 mb-1" @click="handleEdit()"><small>edit description <i class="fas fa-pen-square"></i></small></button>`
+  });
+
+Vue.component('cardinality-selector', {
+    props: ['propname', 'val'],
+    data: function() {
+      return {
+        'selection': ''
+      }
+    },
+    methods:{
+      handleChange(){
+        let self = this;
+        let payload = {
+          // follow structure of val options
+          'validation': {'validation': {"owl:cardinality": self.selection}},
+          'name':self.propname
+        };
+        store.commit('setValidation', payload);
+      }
+    },
+    template:
+      `<form class="my-1">
+        <label class="text-info" for="cardinalitys"><small>Choose cardinality:</small></label>
+        <select class="px-2 py-1" :class="[selection == 'many' ? 'text-primary' : 'text-info']" name="cardinality" id="cardinality" @change="handleChange()" v-model="selection">
+        <option value="one">One</option>
+        <option value="many">Many</option>
+      </select></form>`
+  });
+
+
 Vue.component('validation-dropzone', {
     props: ['propname', 'val'],
     data: function(){
@@ -1631,7 +1712,6 @@ Vue.component('validation-dropzone', {
         let self = this;
         self.matches = [];
         const itemID = evt.dataTransfer.getData('itemID')
-        // const item = this.validation_options.find(item => item.id == itemID)
         this.validation_options.forEach(item => {
           if(item._id == itemID){
             // console.log(itemID, item)
@@ -1668,12 +1748,23 @@ Vue.component('validation-dropzone', {
       validation_options (){
         return store.getters.getValidationOptions
       },
+      addCardinality(){
+        return store.getters.addCardinality
+      }
     },
     template:
       `<div class="row m-0 valBox bg-dark m-1">
         <div class="col-sm-12 col-md-5">
-          <small class="text-light" v-text="propname"></small>
-          <i class="far fa-times-circle pointer text-warning" @click="resetValidation()" data-tippy-info="Clear Validation"></i>
+          <div class="row">
+            <div class="col-sm-12">
+              <small class="text-light" v-text="propname"></small>
+              <i class="far fa-times-circle pointer text-warning" @click="resetValidation()" data-tippy-info="Clear Validation"></i>
+            </div>
+            <div class="col-sm-12">
+              <edit-validation-description :propname="propname" :val="val"></edit-validation-description>
+              <cardinality-selector v-if="addCardinality" :propname="propname" :val="val"></cardinality-selector>
+            </div>
+          </div>
         </div>
         <div class="col-sm-12 col-md-7 p-1 text-success drop-zone" style="font-size:12px;" @drop='onDrop($event, propname)' @dragleave="leaveDrag($event)" @dragover="allowDrop($event);" @dragenter.prevent>
           <template v-for='item in matches'>
@@ -2924,6 +3015,9 @@ var app = new Vue({
 				}
 			},
       computed:{
+        addCardinality(){
+          return store.getters.addCardinality
+        },
         removeValidation (){
           return store.getters.removeValidation
         },
@@ -3359,6 +3453,9 @@ var app = new Vue({
         },
         toggleDesc(){
           store.commit('toggleDesc');
+        },
+        toggleCardinality(){
+          store.commit('toggleCardinality');
         },
         toggleRemoveValidation(){
           store.commit('toggleRemoveValidation')
