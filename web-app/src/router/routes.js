@@ -15,10 +15,21 @@ export const routes = [
     component: () => import("../views/About.vue"),
   },
   {
+    path: "/dashboard",
+    name: "Dashboard",
+    component: () => import("../views/Dashboard.vue"),
+  },
+  {
     path: "/faq/:portal?",
     name: "FAQ",
     props: true,
     component: () => import("../views/FAQ2.vue"),
+  },
+  {
+    path: "/contributor/:username?",
+    name: "Contributor",
+    props: true,
+    component: () => import("../views/Contributor.vue"),
   },
   {
     path: "/compatibility",

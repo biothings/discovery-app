@@ -43,11 +43,14 @@
               :href="'#' + section.sectionName"
               data-tippy="Copy link"
               class="tip anchor"
+            >
+              <CopyBtn
+                class="btn ml-1 btn-sm btn-secondary"
+                :copy_this="window.location.href + '#' + section.sectionName"
               >
-              <CopyBtn class="btn ml-1 btn-sm btn-secondary" :copy_this="window.location.href + '#' + section.sectionName">
-                  copy
+                copy
               </CopyBtn>
-              </a>
+            </a>
           </h4>
           <div class="card-body">
             <ul class="list-group card-text">
@@ -63,11 +66,14 @@
                       :href="'#' + item.anchor"
                       data-tippy="Copy link"
                       class="tip anchor"
+                    >
+                      <CopyBtn
+                        class="btn ml-1 btn-sm btn-secondary"
+                        :copy_this="window.location.href + '#' + item.anchor"
                       >
-                      <CopyBtn class="btn ml-1 btn-sm btn-secondary" :copy_this="window.location.href + '#' + item.anchor">
-                          copy
+                        copy
                       </CopyBtn>
-                      </a>
+                    </a>
                   </div>
                   <DynamicImage
                     v-if="item?.image"
@@ -100,7 +106,7 @@ export default {
   },
   components: {
     DynamicImage,
-},
+  },
   props: ["portal"],
   mounted: function () {
     switch (this.portal) {

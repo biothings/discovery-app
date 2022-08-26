@@ -211,11 +211,11 @@
 <script>
 import Vivus from "vivus";
 import tippy from "tippy.js";
-import site from '../assets/img/site.svg'
-import api from '../assets/img/api-01.svg'
-import schema from '../assets/img/sp1-01.svg'
-import faq from '../assets/img/faq-01.svg'
-import dataset from '../assets/img/dataset-01.svg'
+import site from "../assets/img/site.svg";
+import api from "../assets/img/api-01.svg";
+import schema from "../assets/img/sp1-01.svg";
+import faq from "../assets/img/faq-01.svg";
+import dataset from "../assets/img/dataset-01.svg";
 
 import DynamicImage from "../components/DynamicImage.vue";
 
@@ -223,15 +223,15 @@ export default {
   name: "Portal",
   data: function () {
     return {
-        web_pic: site,
-        api_pic: api,
-        schema_pic: schema,
-        faq_pic: faq,
-        dataset_pic: dataset,
-        window: window,
-        portal: {},
-        colors: [],
-        portals: [
+      web_pic: site,
+      api_pic: api,
+      schema_pic: schema,
+      faq_pic: faq,
+      dataset_pic: dataset,
+      window: window,
+      portal: {},
+      colors: [],
+      portals: [
         {
           name: "Outbreak.info",
           header:
@@ -349,68 +349,71 @@ export default {
   },
   methods: {
     redirect() {
-        let timerInterval
-        this.$swal.fire({
-        title: 'Portal Does Not Exist!',
-        icon: 'error',
-        html: 'Taking you to the Portals page in <b></b> seconds...',
-        timer: 2000,
-        timerProgressBar: true,
-        didOpen: () => {
-            this.$swal.showLoading()
-            const b = this.$swal.getHtmlContainer().querySelector('b')
+      let timerInterval;
+      this.$swal
+        .fire({
+          title: "Portal Does Not Exist!",
+          icon: "error",
+          html: "Taking you to the Portals page in <b></b> seconds...",
+          timer: 2000,
+          timerProgressBar: true,
+          didOpen: () => {
+            this.$swal.showLoading();
+            const b = this.$swal.getHtmlContainer().querySelector("b");
             timerInterval = setInterval(() => {
-            b.textContent = this.$swal.getTimerLeft()
-            }, 100)
-        },
-        willClose: () => {
-            clearInterval(timerInterval)
-        }
-        }).then((result) => {
-            /* Read more about handling dismissals below */
-            if (result.dismiss === this.$swal.DismissReason.timer) {
-                this.$router.push({name: 'Portals'})
-            }
+              b.textContent = this.$swal.getTimerLeft();
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        })
+        .then((result) => {
+          /* Read more about handling dismissals below */
+          if (result.dismiss === this.$swal.DismissReason.timer) {
+            this.$router.push({ name: "Portals" });
+          }
         });
     },
     hover(id) {
       new Vivus(id, { duration: 100 });
     },
   },
-  watch:{
+  watch: {
     portal_name: {
-        immediate: true,
-        handler: function(v){
-            switch (v) {
-                case "niaid":
-                    this.portal = this.portals[1];
-                    break;
-                case "outbreak":
-                    this.portal = this.portals[0];
-                    break;
-                case "cd2h":
-                    this.portal = this.portals[2];
-                    break;
-                case "n3c":
-                    this.portal = this.portals[3];
-                    break;
-                default:
-                    this.redirect();
-            }
-            this.colors = this.portal["colors"];
+      immediate: true,
+      handler: function (v) {
+        switch (v) {
+          case "niaid":
+            this.portal = this.portals[1];
+            break;
+          case "outbreak":
+            this.portal = this.portals[0];
+            break;
+          case "cd2h":
+            this.portal = this.portals[2];
+            break;
+          case "n3c":
+            this.portal = this.portals[3];
+            break;
+          default:
+            this.redirect();
         }
-    }
+        this.colors = this.portal["colors"];
+      },
+    },
   },
   mounted: function () {
-    tippy('[data-tippy-info]', {
-         placement:'bottom',
-         theme:'light',
-         content: 'loading',
-         interactive: true,
-         animation: 'fade',
-         onShow(instance) {
-           instance.setContent(instance.reference.dataset.tippyInfo);
-         }});
+    tippy("[data-tippy-info]", {
+      placement: "bottom",
+      theme: "light",
+      content: "loading",
+      interactive: true,
+      animation: "fade",
+      onShow(instance) {
+        instance.setContent(instance.reference.dataset.tippyInfo);
+      },
+    });
   },
   computed: {
     gradient() {
@@ -419,7 +422,7 @@ export default {
         colors += "," + e.hex;
       });
       colors += " 30%)";
-    //   console.log(colors);
+      //   console.log(colors);
       return colors;
     },
   },

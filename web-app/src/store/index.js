@@ -11,4 +11,17 @@ export default createStore({
     compatibility,
     json_schema_viewer,
   },
+  state: () => ({
+    loading: false,
+  }),
+  mutations: {
+    setLoading(state, payload) {
+      state.loading = payload.value;
+    },
+  },
+  getters: {
+    loading: (state) => {
+      return state.loading;
+    },
+  },
 });

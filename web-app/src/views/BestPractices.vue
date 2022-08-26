@@ -1,339 +1,550 @@
 <template>
-  <div id="guides" class="container-fluid" style="min-height: 100vh;padding-top:60px;">
-  <div class="bg-light text-center mt-1 p-1">
-    <h1 class="logoText">DATASET DISCOVERY BEST PRACTICES</h1>
-  </div>
-  <div class="text-center mb-5">
-    <div class="col-md-8 col-sm-12 m-auto p-3 container text-center text-muted">
-      <p>
-        This guide provides an easy way to create discoverable structured dataset metadata with little to no <a data-tippy-theme="light" data-tippy="Learn More About Schema.org" href="https://schema.org/" target="_blank">Schema.org</a> microdata markup or <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> data-sharing best-practices knowledge.
-      </p>
-      <p class="text-muted">
-        Let the guided wizard do all the hard work and just fill out the fields provided and register your metadata.
-      </p>
-      <p>
-        See examples of registered dataset metadata <a href="/dataset">here</a>.
-      </p>
+  <div
+    id="guides"
+    class="container-fluid"
+    style="min-height: 100vh; padding-top: 60px"
+  >
+    <div class="bg-light text-center mt-1 p-1">
+      <h1 class="logoText">DATASET DISCOVERY BEST PRACTICES</h1>
     </div>
     <div class="text-center mb-5">
-      <div class="row m-0">
-        <div class="col-sm-12 col-md-4 align-items-stretch d-flex p-0">
-          <div class="row m-0">
-            <div class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary  text-center py-4">
-              <div>
-                <span class="fa-stack fa-1x m-2">
-                  <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
-                  <i class="fas fa-cogs fa-stack-1x fa-inverse"></i>
-                </span>
-                <h6 class="text-muted caps">
-                  Produce <a data-tippy="Learn More About FAIR Principles" data-tippy-theme="light" class="bold" target="_blank" href="https://www.go-fair.org/fair-principles/">FAIR</a> data<br /> right from the start.
-                </h6>
-              </div>
-            </div>
-            <div class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary  text-center py-4">
-              <div>
-                <span class="fa-stack fa-1x m-2">
-                  <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
-                  <i class="fas fa-list-ol fa-stack-1x fa-inverse"></i>
-                </span>
-                <h6 class="text-muted caps">
-                  Fast and easy to use <br />Step-by-step guide.
-                </h6>
-              </div>
-            </div>
-            <div class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4">
-              <div>
-                <span class="fa-stack fa-1x m-2">
-                  <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
-                  <i class="fas fa-tasks fa-stack-1x fa-inverse"></i>
-                </span>
-                <h6 class="text-muted caps">
-                  Customize discoverability<br /> by Data Portals.
-                </h6>
-              </div>
-            </div>
-            <div class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4">
-              <div>
-                <span class="fa-stack fa-1x m-2">
-                  <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
-                  <i class="fas fa-lightbulb fa-stack-1x fa-inverse"></i>
-                </span>
-                <h6 class="text-muted caps">
-                  Generate findable metadata<br /> by computers and humans.
-                </h6>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="jumbotron rounded-0 col-sm-12 col-md-8 m-0 d-flex justify-content-center align-items-center discoveryIntroBack" style="background-color:#0b5570;">
-          <div class="col-sm-12 col-md-8">
-            <img src="@/assets/img/discoverable-01.png" alt="DISCOVERY" width="200"/>
-            <h1 class="text-light">DISCOVERY GUIDE</h1>
-            <a class="btn btn-lg themeButton text-light m-2 px-3 py-3" href="#choose">GET STARTED</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="container px-5" id="choose">
-      <h1 class="logoText">Choose a Guide</h1>
-      <div class="container">
+      <div
+        class="col-md-8 col-sm-12 m-auto p-3 container text-center text-muted"
+      >
+        <p>
+          This guide provides an easy way to create discoverable structured
+          dataset metadata with little to no
+          <a
+            data-tippy-theme="light"
+            data-tippy="Learn More About Schema.org"
+            href="https://schema.org/"
+            target="_blank"
+            >Schema.org</a
+          >
+          microdata markup or
+          <a
+            data-tippy="Learn More About FAIR Principles"
+            data-tippy-theme="light"
+            target="_blank"
+            href="https://www.go-fair.org/fair-principles/"
+            >FAIR</a
+          >
+          data-sharing best-practices knowledge.
+        </p>
         <p class="text-muted">
-          Learn how this metadata will be available via our <a href="https://crawler.biothings.io/" target="_blank" rel="nonreferrer">API</a>.
+          Let the guided wizard do all the hard work and just fill out the
+          fields provided and register your metadata.
+        </p>
+        <p>
+          See examples of registered dataset metadata
+          <a href="/dataset">here</a>.
         </p>
       </div>
-      <div class="d-flex justify-content-center align-items-stretch flex-wrap">
-        <div class="card text-center m-1 border border-success" style="width: 18rem;">
-          <div class="card-header">
-            Data Portal | <router-link to="/portal/cd2h">CD2H</router-link>
+      <div class="text-center mb-5">
+        <div class="row m-0">
+          <div class="col-sm-12 col-md-4 align-items-stretch d-flex p-0">
+            <div class="row m-0">
+              <div
+                class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4"
+              >
+                <div>
+                  <span class="fa-stack fa-1x m-2">
+                    <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
+                    <i class="fas fa-cogs fa-stack-1x fa-inverse"></i>
+                  </span>
+                  <h6 class="text-muted caps">
+                    Produce
+                    <a
+                      data-tippy="Learn More About FAIR Principles"
+                      data-tippy-theme="light"
+                      class="bold"
+                      target="_blank"
+                      href="https://www.go-fair.org/fair-principles/"
+                      >FAIR</a
+                    >
+                    data<br />
+                    right from the start.
+                  </h6>
+                </div>
+              </div>
+              <div
+                class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4"
+              >
+                <div>
+                  <span class="fa-stack fa-1x m-2">
+                    <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
+                    <i class="fas fa-list-ol fa-stack-1x fa-inverse"></i>
+                  </span>
+                  <h6 class="text-muted caps">
+                    Fast and easy to use <br />Step-by-step guide.
+                  </h6>
+                </div>
+              </div>
+              <div
+                class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4"
+              >
+                <div>
+                  <span class="fa-stack fa-1x m-2">
+                    <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
+                    <i class="fas fa-tasks fa-stack-1x fa-inverse"></i>
+                  </span>
+                  <h6 class="text-muted caps">
+                    Customize discoverability<br />
+                    by Data Portals.
+                  </h6>
+                </div>
+              </div>
+              <div
+                class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4"
+              >
+                <div>
+                  <span class="fa-stack fa-1x m-2">
+                    <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
+                    <i class="fas fa-lightbulb fa-stack-1x fa-inverse"></i>
+                  </span>
+                  <h6 class="text-muted caps">
+                    Generate findable metadata<br />
+                    by computers and humans.
+                  </h6>
+                </div>
+              </div>
+            </div>
           </div>
-          <img src="@/assets/img/cd2h-logo.png" alt="CD2H" class="w-50 m-auto" width="50px"/>
-          <div class="card-body d-flex flex-column justify-content-around">
-            <h5 class="card-title">CD2H</h5>
-            <p class="card-text"><b>
-              CTSA National Center for Data to Health </b> (<a href="https://ctsa.ncats.nih.gov/cd2h/" target="_blank" rel="nonreferrer">CD2H <i class="fas fa-external-link-alt"></i></a>) biomedical dataset metadata based on this <a href="/view/biomedical/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure. <small class="text-info more" data-tippy-info="You can choose data portals you are interested in and add their requirements" data-tippy-theme="light">Customizable</small>
-            </p>
-            <a href="/guide/" @click="gtag('event','click',{'event_category':'portal_guide','event_label':'/guide','event_value':1})" class="btn btn-lg themeButton text-light" role="button">
-              <i class="fas fa-plus"></i> Add Dataset Metadata
-            </a>
-          </div>
-          <div class="card-footer text-muted alert-secondary">
-            <b>About this guide:</b>
-            <table class="table table-sm table-secondary table-striped">
-              <tbody>
-                <tr>
-                  <td>
-                    <small>Intend</small>
-                  </td>
-                  <td>
-                    <small class="badge badge-dark">General Purpose</small>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Topics</small>
-                  </td>
-                  <td>
-                    <small class="badge badge-light">Biomedical</small>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Associations</small>
-                  </td>
-                  <td>
-                    <router-link to="/portal/cd2h"><small class="badge badge-light">CD2H</small></router-link>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Schema</small>
-                  </td>
-                  <td>
-                    <a href="/view/biomedical"><small class="badge badge-light">Dataset</small></a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="card text-center m-1" style="width: 18rem;">
-          <div class="card-header">
-            Data Portal | <router-link to="/portal/n3c">N3C</router-link>
-          </div>
-          <img src="@/assets/img/N3C.png" alt="CD2H" class="w-50 m-auto" width="50px"/>
-          <div class="card-body d-flex flex-column justify-content-around">
-            <h5 class="card-title">N3C</h5>
-            <p class="card-text"><b>
-              The National COVID Cohort Collaborative </b> (<a href="https://covid.cd2h.org/N3C" target="_blank" rel="nonreferrer">N3C <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/n3c/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.
-            </p>
-            <a href="/guide/n3c/dataset" @click="gtag('event','click',{'event_category':'portal_guide','event_label':'/guide/n3c/dataset','event_value':1})" class="btn btn-lg themeButton text-light" role="button">
-              <i class="fas fa-plus"></i> Submit Request
-            </a>
-          </div>
-          <div class="card-footer text-muted alert-info">
-            <b>About this guide:</b>
-            <table class="table table-sm table-secondary table-striped">
-              <tbody>
-                <tr>
-                  <td>
-                    <small>Intend</small>
-                  </td>
-                  <td>
-                    <small class="badge badge-info">Portal Specific</small>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Topics</small>
-                  </td>
-                  <td>
-                    <small class="badge badge-light">COVID-19</small>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Associations</small>
-                  </td>
-                  <td>
-                    <router-link to="/portal/cd2h"><small class="badge badge-light">CD2H</small></router-link>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Schema</small>
-                  </td>
-                  <td>
-                    <a href="/view/n3c"><small class="badge badge-light">Dataset</small></a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div
+            class="jumbotron rounded-0 col-sm-12 col-md-8 m-0 d-flex justify-content-center align-items-center discoveryIntroBack"
+            style="background-color: #0b5570"
+          >
+            <div class="col-sm-12 col-md-8">
+              <img
+                src="@/assets/img/discoverable-01.png"
+                alt="DISCOVERY"
+                width="200"
+              />
+              <h1 class="text-light">DISCOVERY GUIDE</h1>
+              <a
+                class="btn btn-lg themeButton text-light m-2 px-3 py-3"
+                href="#choose"
+                >GET STARTED</a
+              >
+            </div>
           </div>
         </div>
-        <div class="card text-center m-1" style="width: 18rem;">
-          <div class="card-header">
-            Data Portal | <router-link to="/portal/outbreak">Outbreak.info</router-link>
-          </div>
-          <img src="@/assets/img/outbreak.svg" alt="outbreak.info" class="card-img-top p-2" width="150px"/>
-          <div class="card-body d-flex flex-column justify-content-around">
-            <h5 class="card-title">Outbreak.info</h5>
-            <p class="card-text"><b>Outbreak.info</b> (<a href="https://outbreak.info/" target="_blank" rel="nonreferrer">Outbreak.info <i class="fas fa-external-link-alt"></i></a>) COVID-19 epidimiology dataset metadata based on this <a href="/view/outbreak/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.</p>
-            <a href="/guide/outbreak/dataset" @click="gtag('event','click',{'event_category':'portal_guide','event_label':'/guide/outbreak/dataset','event_value':1})" class="btn btn-lg themeButton text-light" role="button">
-              <i class="fas fa-plus"></i> Add Dataset Metadata
-            </a>
-          </div>
-          <div class="card-footer text-muted alert-info">
-            <b>About this guide:</b>
-            <table class="table table-sm table-info table-striped">
-              <tbody>
-                <tr>
-                  <td>
-                    <small>Intend</small>
-                  </td>
-                  <td>
-                    <small class="badge badge-info">Portal Specific</small>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Topics</small>
-                  </td>
-                  <td>
-                    <small class="badge badge-light">COVID-19</small>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Associations</small>
-                  </td>
-                  <td>
-                    <router-link to="/portal/outbreak"><small class="badge badge-light">Outbreak.info</small></router-link>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Schema</small>
-                  </td>
-                  <td>
-                    <a href="/view/outbreak"><small class="badge badge-light">Dataset</small></a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      </div>
+      <div class="container px-5" id="choose">
+        <h1 class="logoText">Choose a Guide</h1>
+        <div class="container">
+          <p class="text-muted">
+            Learn how this metadata will be available via our
+            <a
+              href="https://crawler.biothings.io/"
+              target="_blank"
+              rel="nonreferrer"
+              >API</a
+            >.
+          </p>
         </div>
-        <div class="card text-center m-1" style="width: 18rem;">
-          <div class="card-header">
-            Data Portal | <router-link to="/portal/niaid">NIAID</router-link>
+        <div
+          class="d-flex justify-content-center align-items-stretch flex-wrap"
+        >
+          <div
+            class="card text-center m-1 border border-success"
+            style="width: 18rem"
+          >
+            <div class="card-header">
+              Data Portal | <router-link to="/portal/cd2h">CD2H</router-link>
+            </div>
+            <img
+              src="@/assets/img/cd2h-logo.png"
+              alt="CD2H"
+              class="w-50 m-auto"
+              width="50px"
+            />
+            <div class="card-body d-flex flex-column justify-content-around">
+              <h5 class="card-title">CD2H</h5>
+              <p class="card-text">
+                <b> CTSA National Center for Data to Health </b> (<a
+                  href="https://ctsa.ncats.nih.gov/cd2h/"
+                  target="_blank"
+                  rel="nonreferrer"
+                  >CD2H <i class="fas fa-external-link-alt"></i></a
+                >) biomedical dataset metadata based on this
+                <a href="/view/biomedical/" target="_blank" rel="nonreferrer"
+                  >schema <i class="fas fa-external-link-alt"></i
+                ></a>
+                structure.
+                <small
+                  class="text-info more"
+                  data-tippy-info="You can choose data portals you are interested in and add their requirements"
+                  data-tippy-theme="light"
+                  >Customizable</small
+                >
+              </p>
+              <a
+                href="/guide/"
+                @click="
+                  gtag('event', 'click', {
+                    event_category: 'portal_guide',
+                    event_label: '/guide',
+                    event_value: 1,
+                  })
+                "
+                class="btn btn-lg themeButton text-light"
+                role="button"
+              >
+                <i class="fas fa-plus"></i> Add Dataset Metadata
+              </a>
+            </div>
+            <div class="card-footer text-muted alert-secondary">
+              <b>About this guide:</b>
+              <table class="table table-sm table-secondary table-striped">
+                <tbody>
+                  <tr>
+                    <td>
+                      <small>Intend</small>
+                    </td>
+                    <td>
+                      <small class="badge badge-dark">General Purpose</small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Topics</small>
+                    </td>
+                    <td>
+                      <small class="badge badge-light">Biomedical</small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Associations</small>
+                    </td>
+                    <td>
+                      <router-link to="/portal/cd2h"
+                        ><small class="badge badge-light"
+                          >CD2H</small
+                        ></router-link
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Schema</small>
+                    </td>
+                    <td>
+                      <a href="/view/biomedical"
+                        ><small class="badge badge-light">Dataset</small></a
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <img src="@/assets/img/niaid/logo.svg" alt="NIAID" class="card-img-top p-2" width="150px"/>
-          <div class="card-body d-flex flex-column justify-content-around">
-            <h5 class="card-title">NIAID Data Portal</h5>
-            <p class="card-text">
-              <b>National Institute of Allergy and Infectious Diseases (<a href="https://www.niaid.nih.gov/" target="_blank" rel="nonreferrer">NIAID <i class="fas fa-external-link-alt"></i></a>)</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID Data Portal <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.
-            </p>
-            <a href="/guide/niaid" @click="gtag('event','click',{'event_category':'portal_guide','event_label':'/guide/niaid','event_value':1})" class="btn btn-lg themeButton text-light" role="button">
-              <i class="fas fa-plus"></i> Add Dataset Metadata
-            </a>
+          <div class="card text-center m-1" style="width: 18rem">
+            <div class="card-header">
+              Data Portal | <router-link to="/portal/n3c">N3C</router-link>
+            </div>
+            <img
+              src="@/assets/img/N3C.png"
+              alt="CD2H"
+              class="w-50 m-auto"
+              width="50px"
+            />
+            <div class="card-body d-flex flex-column justify-content-around">
+              <h5 class="card-title">N3C</h5>
+              <p class="card-text">
+                <b> The National COVID Cohort Collaborative </b> (<a
+                  href="https://covid.cd2h.org/N3C"
+                  target="_blank"
+                  rel="nonreferrer"
+                  >N3C <i class="fas fa-external-link-alt"></i></a
+                >) dataset metadata based on this
+                <a href="/view/n3c/" target="_blank" rel="nonreferrer"
+                  >schema <i class="fas fa-external-link-alt"></i
+                ></a>
+                structure.
+              </p>
+              <a
+                href="/guide/n3c/dataset"
+                @click="
+                  gtag('event', 'click', {
+                    event_category: 'portal_guide',
+                    event_label: '/guide/n3c/dataset',
+                    event_value: 1,
+                  })
+                "
+                class="btn btn-lg themeButton text-light"
+                role="button"
+              >
+                <i class="fas fa-plus"></i> Submit Request
+              </a>
+            </div>
+            <div class="card-footer text-muted alert-info">
+              <b>About this guide:</b>
+              <table class="table table-sm table-secondary table-striped">
+                <tbody>
+                  <tr>
+                    <td>
+                      <small>Intend</small>
+                    </td>
+                    <td>
+                      <small class="badge badge-info">Portal Specific</small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Topics</small>
+                    </td>
+                    <td>
+                      <small class="badge badge-light">COVID-19</small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Associations</small>
+                    </td>
+                    <td>
+                      <router-link to="/portal/cd2h"
+                        ><small class="badge badge-light"
+                          >CD2H</small
+                        ></router-link
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Schema</small>
+                    </td>
+                    <td>
+                      <a href="/view/n3c"
+                        ><small class="badge badge-light">Dataset</small></a
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div class="card-footer text-muted alert-info">
-            <b>About this guide:</b>
-            <table class="table table-sm table-info table-striped">
-              <tbody>
-                <tr>
-                  <td>
-                    <small>Intend</small>
-                  </td>
-                  <td>
-                    <small class="badge badge-info">Portal Specific</small>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Topics</small>
-                  </td>
-                  <td>
-                    <small class="badge badge-light">Allergies</small>
-                    <small class="badge badge-light">Infectious Diseases</small>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Associations</small>
-                  </td>
-                  <td>
-                    <router-link to="/portal/niaid"><small class="badge badge-light">NIAID</small></router-link>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <small>Schema</small>
-                  </td>
-                  <td>
-                    <a href="/view/niaid"><small class="badge badge-light">Dataset</small></a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="card text-center m-1" style="width: 18rem">
+            <div class="card-header">
+              Data Portal |
+              <router-link to="/portal/outbreak">Outbreak.info</router-link>
+            </div>
+            <img
+              src="@/assets/img/outbreak.svg"
+              alt="outbreak.info"
+              class="card-img-top p-2"
+              width="150px"
+            />
+            <div class="card-body d-flex flex-column justify-content-around">
+              <h5 class="card-title">Outbreak.info</h5>
+              <p class="card-text">
+                <b>Outbreak.info</b> (<a
+                  href="https://outbreak.info/"
+                  target="_blank"
+                  rel="nonreferrer"
+                  >Outbreak.info <i class="fas fa-external-link-alt"></i></a
+                >) COVID-19 epidimiology dataset metadata based on this
+                <a href="/view/outbreak/" target="_blank" rel="nonreferrer"
+                  >schema <i class="fas fa-external-link-alt"></i
+                ></a>
+                structure.
+              </p>
+              <a
+                href="/guide/outbreak/dataset"
+                @click="
+                  gtag('event', 'click', {
+                    event_category: 'portal_guide',
+                    event_label: '/guide/outbreak/dataset',
+                    event_value: 1,
+                  })
+                "
+                class="btn btn-lg themeButton text-light"
+                role="button"
+              >
+                <i class="fas fa-plus"></i> Add Dataset Metadata
+              </a>
+            </div>
+            <div class="card-footer text-muted alert-info">
+              <b>About this guide:</b>
+              <table class="table table-sm table-info table-striped">
+                <tbody>
+                  <tr>
+                    <td>
+                      <small>Intend</small>
+                    </td>
+                    <td>
+                      <small class="badge badge-info">Portal Specific</small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Topics</small>
+                    </td>
+                    <td>
+                      <small class="badge badge-light">COVID-19</small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Associations</small>
+                    </td>
+                    <td>
+                      <router-link to="/portal/outbreak"
+                        ><small class="badge badge-light"
+                          >Outbreak.info</small
+                        ></router-link
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Schema</small>
+                    </td>
+                    <td>
+                      <a href="/view/outbreak"
+                        ><small class="badge badge-light">Dataset</small></a
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card text-center m-1" style="width: 18rem">
+            <div class="card-header">
+              Data Portal | <router-link to="/portal/niaid">NIAID</router-link>
+            </div>
+            <img
+              src="@/assets/img/niaid/logo.svg"
+              alt="NIAID"
+              class="card-img-top p-2"
+              width="150px"
+            />
+            <div class="card-body d-flex flex-column justify-content-around">
+              <h5 class="card-title">NIAID Data Portal</h5>
+              <p class="card-text">
+                <b
+                  >National Institute of Allergy and Infectious Diseases (<a
+                    href="https://www.niaid.nih.gov/"
+                    target="_blank"
+                    rel="nonreferrer"
+                    >NIAID <i class="fas fa-external-link-alt"></i></a
+                  >)</b
+                >
+                (<a
+                  href="https://discovery.biothings.io/niaid/"
+                  target="_blank"
+                  rel="nonreferrer"
+                  >NIAID Data Portal <i class="fas fa-external-link-alt"></i></a
+                >) dataset metadata based on this
+                <a href="/view/niaid/" target="_blank" rel="nonreferrer"
+                  >schema <i class="fas fa-external-link-alt"></i
+                ></a>
+                structure.
+              </p>
+              <a
+                href="/guide/niaid"
+                @click="
+                  gtag('event', 'click', {
+                    event_category: 'portal_guide',
+                    event_label: '/guide/niaid',
+                    event_value: 1,
+                  })
+                "
+                class="btn btn-lg themeButton text-light"
+                role="button"
+              >
+                <i class="fas fa-plus"></i> Add Dataset Metadata
+              </a>
+            </div>
+            <div class="card-footer text-muted alert-info">
+              <b>About this guide:</b>
+              <table class="table table-sm table-info table-striped">
+                <tbody>
+                  <tr>
+                    <td>
+                      <small>Intend</small>
+                    </td>
+                    <td>
+                      <small class="badge badge-info">Portal Specific</small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Topics</small>
+                    </td>
+                    <td>
+                      <small class="badge badge-light">Allergies</small>
+                      <small class="badge badge-light"
+                        >Infectious Diseases</small
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Associations</small>
+                    </td>
+                    <td>
+                      <router-link to="/portal/niaid"
+                        ><small class="badge badge-light"
+                          >NIAID</small
+                        ></router-link
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <small>Schema</small>
+                    </td>
+                    <td>
+                      <a href="/view/niaid"
+                        ><small class="badge badge-light">Dataset</small></a
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
-import tippy from 'tippy.js';
+import tippy from "tippy.js";
 
 export default {
-    name: "BestPractices",
-    data: function(){
-            return {
-        start: false
-            }
-        },
-    mounted:function(){
-        tippy( '*[data-tippy-info]', {
-          placement:'top',
-          theme:'light',
-          content: 'loading',
-          interactive: true,
-          allowHTML: true,
-          animation: 'fade',
-          onShow(instance) {
-            let info = instance.reference.dataset.tippyInfo;
-            instance.setContent("<div class='bg-light'>"+info+"</div>");
-          }});
-          document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-              anchor.addEventListener('click', function (e) {
-                  e.preventDefault();
+  name: "BestPractices",
+  data: function () {
+    return {
+      start: false,
+    };
+  },
+  mounted: function () {
+    tippy("*[data-tippy-info]", {
+      placement: "top",
+      theme: "light",
+      content: "loading",
+      interactive: true,
+      allowHTML: true,
+      animation: "fade",
+      onShow(instance) {
+        let info = instance.reference.dataset.tippyInfo;
+        instance.setContent("<div class='bg-light'>" + info + "</div>");
+      },
+    });
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener("click", function (e) {
+        e.preventDefault();
 
-                  document.querySelector(this.getAttribute('href')).scrollIntoView({
-                      behavior: 'smooth'
-                  });
-              });
-          });
-	}
-}
+        document.querySelector(this.getAttribute("href")).scrollIntoView({
+          behavior: "smooth",
+        });
+      });
+    });
+  },
+};
 </script>
