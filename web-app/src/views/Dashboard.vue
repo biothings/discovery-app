@@ -33,7 +33,7 @@
                 target="_blank"
                 :href="'http://www.github.com/' + userInfo.login"
               >
-                <i class="fab fa-github"></i>
+                <font-awesome-icon icon="fab fa-github" class="mr-2"/>
                 <span v-text="userInfo.login"></span>
               </a>
             </div>
@@ -66,8 +66,8 @@
                           class="fa-stack fa-1x pointer tip"
                           data-tippy-info='source URL'
                         >
-                          <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                          <i class="fas fa-code fa-stack-1x text-light"></i>
+                          <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                          <font-awesome-icon icon="fas fa-code"  class="fa-stack-1x text-light"/>
                         </span>
                       </a>
                     </div>
@@ -77,8 +77,8 @@
                           class="fa-stack fa-1x pointer tip"
                           data-tippy-info="Visualize"
                         >
-                          <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                          <i class="fas fa-eye fa-stack-1x text-light"></i>
+                          <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                          <font-awesome-icon icon="fas fa-eye"  class="fa-stack-1x text-light"/>
                         </span>
                       </a>
                     </div>
@@ -88,8 +88,8 @@
                         @click="updateSelected('schema', item.namespace)"
                         data-tippy-info="Update Schema"
                       >
-                        <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                        <i class="fas fa-sync-alt fa-stack-1x text-light"></i>
+                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                        <font-awesome-icon icon="fas fa-sync-alt"  class="fa-stack-1x text-light"/>
                       </span>
                     </div>
                     <div>
@@ -98,8 +98,8 @@
                         @click="deleteSelected('schema', item.namespace)"
                         data-tippy-info="Delete"
                       >
-                        <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                        <i class="fas fa-trash fa-stack-1x text-light"></i>
+                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                        <font-awesome-icon icon="fas fa-trash"  class="fa-stack-1x text-light"/>
                       </span>
                     </div>
                   </div>
@@ -132,8 +132,7 @@
                         prevPage_NS();
                         getNamespaces();
                       "
-                      ><i class="fas fa-step-backward"></i
-                    ></a>
+                      ><font-awesome-icon icon="fas fa-step-backward"/></a>
                   </div>
                   <template v-if="groupPages_NS">
                     <div
@@ -198,8 +197,7 @@
                         nextPage_NS();
                         getNamespaces();
                       "
-                      ><i class="fas fa-step-forward"></i
-                    ></a>
+                      ><font-awesome-icon icon="fas fa-step-forward"/></a>
                   </div>
                 </div>
               </div>
@@ -279,8 +277,8 @@
                           class="fa-stack fa-1x pointer tip"
                           :data-tippy-info="'View Dataset'"
                         >
-                          <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                          <i class="fas fa-eye fa-stack-1x text-light"></i>
+                          <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                          <font-awesome-icon icon="fas fa-eye"  class="fa-stack-1x text-light"/>
                         </span>
                       </a>
                     </div>
@@ -290,8 +288,8 @@
                         @click="edit(item._id)"
                         :data-tippy-info="'Quick Edit'"
                       >
-                        <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                        <i class="fas fa-bolt fa-stack-1x text-light"></i>
+                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                        <font-awesome-icon icon="fas fa-bolt"  class="fa-stack-1x text-light"/>
                       </span>
                     </div>
                     <div>
@@ -304,15 +302,9 @@
                             : 'Item is PUBLIC - Edit Privacy',
                         ]"
                       >
-                        <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                        <i
-                          class="fas fa-stack-1x"
-                          :class="[
-                            item['_meta']['private']
-                              ? 'fa-lock text-warning'
-                              : 'fa-lock-open text-light',
-                          ]"
-                        ></i>
+                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                        <font-awesome-icon icon="fas fa-lock"  class="fa-stack-1x text-warning" v-if="item['_meta']['private']"/>
+                        <font-awesome-icon icon="fas fa-lock-open"  class="fa-stack-1x text-light" v-else/>
                       </span>
                     </div>
                     <div>
@@ -321,8 +313,8 @@
                         @click="deleteSelected('metadata', item._id)"
                         :data-tippy-info="'Delete'"
                       >
-                        <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                        <i class="fas fa-trash fa-stack-1x text-light"></i>
+                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                        <font-awesome-icon icon="fas fa-trash"  class="fa-stack-1x text-light"/>
                       </span>
                     </div>
                   </div>
@@ -355,8 +347,7 @@
                         prevPage();
                         getDatasets();
                       "
-                      ><i class="fas fa-step-backward"></i
-                    ></a>
+                      ><font-awesome-icon icon="fas fa-step-backward"/></a>
                   </div>
                   <template v-if="groupPages">
                     <div
@@ -421,8 +412,7 @@
                         nextPage();
                         getDatasets();
                       "
-                      ><i class="fas fa-step-forward"></i
-                    ></a>
+                      ><font-awesome-icon icon="fas fa-step-forward"/></a>
                   </div>
                 </div>
               </div>
@@ -779,7 +769,7 @@ export default {
                             if (err.response.data.hasOwnProperty("path")) {
                               if (err.response.data.path.length) {
                                 culprit +=
-                                  "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>" +
+                                  "<h5>Culprit --> <b class='text-danger'>" +
                                   err.response.data.path +
                                   "</b></h5>";
                               }
@@ -790,7 +780,7 @@ export default {
                             ) {
                               if (true) {
                                 culprit +=
-                                  "<h5>Also check <i class='fas fa-arrow-right'6</i> <b class='text-danger'>" +
+                                  "<h5>Also check --> <b class='text-danger'>" +
                                   err.response.data.parent.path +
                                   "</b></h5>";
                               }
@@ -1155,7 +1145,7 @@ export default {
       if (meta.hasOwnProperty("last_updated")) {
         date = meta["last_updated"];
         return (
-          '<i class="far fa-clock"></i> last updated ' +
+          'last updated ' +
           moment(date).format("MMM Do YYYY, h:mm a")
         );
       }
