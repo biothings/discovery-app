@@ -16,6 +16,20 @@ import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
 import "sweetalert2/dist/sweetalert2.min.css";
 
+/* fontawesome core */
+import { library } from '@fortawesome/fontawesome-svg-core'
+
+/* FontAwesome components */
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+/* import specific icons */
+import { faCircle, faEye, faCode, faSyncAlt, faTrash, faBolt, faLock, faLockOpen, faStepBackward,
+faStepForward } from '@fortawesome/free-solid-svg-icons'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
+
+/* add icons to the library */
+library.add(faGithub, faCircle, faEye, faCode, faSyncAlt, faTrash, faBolt, faLock, faLockOpen, faStepBackward, faStepForward)
+
 const app = createApp(App);
 
 app
@@ -28,7 +42,8 @@ app
   .use(VueSweetalert2)
   .use(store);
 
-app.component("CopyBtn", CopyBtn);
+app.component("CopyBtn", CopyBtn)
+.component('font-awesome-icon', FontAwesomeIcon)
 
 // dev base api url
 app.config.globalProperties.$apiUrl =
