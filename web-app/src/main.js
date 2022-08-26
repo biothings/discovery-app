@@ -8,7 +8,7 @@ import store from "./store";
 import VueGtag from "vue-gtag-next";
 import VueSweetalert2 from "vue-sweetalert2";
 // Global Components
-import CopyBtn from "./components/CopyBtn.vue"
+import CopyBtn from "./components/CopyBtn.vue";
 
 import "./assets/main.css";
 import "./assets/css/styles.css";
@@ -28,12 +28,12 @@ app
   .use(VueSweetalert2)
   .use(store);
 
-app.component('CopyBtn', CopyBtn);
+app.component("CopyBtn", CopyBtn);
 
 // dev base api url
 app.config.globalProperties.$apiUrl =
-  process.env.NODE_ENV == "development"
-    ? "http://localhost:8000/"
-    : "https://discovery.biothings.io/";
+  !process.env.NODE_ENV == "development"
+    ? "http://localhost:8000"
+    : "https://discovery.biothings.io";
 
 app.mount("#app");

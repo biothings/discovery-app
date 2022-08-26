@@ -28,7 +28,7 @@ export const auth = {
           user: {
             name: "Marco Cano",
             email: "artofmarco@gmail.com",
-            login: "marcodarko",
+            login: "flaneuse",
             avatar_url: "https://avatars.githubusercontent.com/u/23092057?v=4",
           },
         });
