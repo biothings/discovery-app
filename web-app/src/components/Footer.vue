@@ -24,7 +24,7 @@
             class="d-block text-light"
             target="_blank"
             href="mailto:cd2h-metadata@googlegroups.com"
-            ><i class="fas fa-envelope"></i> Email</a
+            ><font-awesome-icon icon="fas fa-envelope" /> Email</a
           >
         </div>
         <div class="p-2">
@@ -33,7 +33,7 @@
             class="d-block text-light"
             target="_blank"
             href="https://github.com/data2health/rdp-portal"
-            ><i class="fab fa-github"></i> GitHub</a
+            ><font-awesome-icon icon="fab fa-github" /> GitHub</a
           >
         </div>
       </div>

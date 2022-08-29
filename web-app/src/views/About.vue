@@ -66,7 +66,8 @@
             class="d-block"
             rel="noreferrer"
           >
-            Learn More About CD2H <i class="fas fa-chevron-right"></i>
+            Learn More About CD2H
+            <font-awesome-icon icon="fas fa-chevron-right" />
           </a>
         </p>
       </div>
@@ -76,12 +77,12 @@
           href="http://metadataplus.biothings.io/"
           target="_blank"
           rel="noreferrer"
-          >METADATA PLUS <i class="fas fa-chevron-right"></i
-        ></a>
+          >METADATA PLUS <font-awesome-icon icon="fas fa-chevron-right"
+        /></a>
         <br />
         <a href="https://crawler.biothings.io/" target="_blank" rel="noreferrer"
-          >Metadata Crawler <i class="fas fa-chevron-right"></i
-        ></a>
+          >Metadata Crawler <font-awesome-icon icon="fas fa-chevron-right"
+        /></a>
       </div>
     </div>
   </div>

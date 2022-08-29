@@ -50,8 +50,8 @@
             MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS
           </h6>
           <a class="text-muted" href="/about"
-            >Learn More <i class="fas fa-chevron-right"></i
-          ></a>
+            >Learn More <font-awesome-icon icon="fas fa-chevron-right"
+          /></a>
         </div>
       </div>
     </div>
@@ -70,7 +70,10 @@
             >
               <h3 class="text-light">
                 DISCOVERY
-                <i class="fas fa-chevron-right d-inline d-md-none"></i>
+                <font-awesome-icon
+                  icon="fas fa-chevron-right"
+                  class="d-inline d-md-none"
+                />
               </h3>
             </a>
             <p class="m-auto w-75 text-light o-0 d-none d-md-block">
@@ -95,7 +98,10 @@
             >
               <h3 class="text-light">
                 SCHEMA PLAYGROUND
-                <i class="fas fa-chevron-right d-inline d-md-none"></i>
+                <font-awesome-icon
+                  icon="fas fa-chevron-right"
+                  class="d-inline d-md-none"
+                />
               </h3>
             </a>
             <p class="m-auto w-75 text-light o-0 d-none d-md-block">
@@ -152,7 +158,7 @@
               >-standard structured metadata.
             </h5>
             <a href="https://metadataplus.biothings.io" target="_blank">
-              Learn More <i class="fas fa-external-link-alt"></i>
+              Learn More <font-awesome-icon icon="fas fa-external-link-alt" />
             </a>
           </div>
         </div>
@@ -173,7 +179,7 @@
               through an API.
             </h5>
             <a href="https://crawler.biothings.io" target="_blank">
-              Learn More <i class="fas fa-external-link-alt"></i>
+              Learn More <font-awesome-icon icon="fas fa-external-link-alt" />
             </a>
           </div>
         </div>
@@ -232,7 +238,10 @@
             <h3 class="text-muted lighter caps" id="connect">CONNECT</h3>
             <dl>
               <dt>
-                <i class="fab fa-github fa-2x mainTextDark"></i>
+                <font-awesome-icon
+                  icon="fab fa-github fa-2x"
+                  class="mainTextDark"
+                />
                 <br />
                 <a
                   class="mainTextDark"
@@ -244,7 +253,10 @@
               </dt>
               <dd class="lighter">Learn more about our project on GitHub</dd>
               <dt>
-                <i class="fab fa-github fa-2x mainTextLight"></i>
+                <font-awesome-icon
+                  icon="fab fa-github fa-2x"
+                  class="mainTextLight"
+                />
                 <br />
                 <a
                   class="mainTextLight"

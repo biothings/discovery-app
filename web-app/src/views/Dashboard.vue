@@ -33,7 +33,7 @@
                 target="_blank"
                 :href="'http://www.github.com/' + userInfo.login"
               >
-                <font-awesome-icon icon="fab fa-github" class="mr-2"/>
+                <font-awesome-icon icon="fab fa-github" class="mr-2" />
                 <span v-text="userInfo.login"></span>
               </a>
             </div>
@@ -64,10 +64,16 @@
                       <a target="_blank" :href="item.url" :title="item.url">
                         <span
                           class="fa-stack fa-1x pointer tip"
-                          data-tippy-info='source URL'
+                          data-tippy-content="source URL"
                         >
-                          <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                          <font-awesome-icon icon="fas fa-code"  class="fa-stack-1x text-light"/>
+                          <font-awesome-icon
+                            icon="fas fa-circle"
+                            class="text-muted fa-stack-2x"
+                          />
+                          <font-awesome-icon
+                            icon="fas fa-code"
+                            class="fa-stack-1x text-light"
+                          />
                         </span>
                       </a>
                     </div>
@@ -75,10 +81,16 @@
                       <a :href="'/view/' + item.namespace + '/'">
                         <span
                           class="fa-stack fa-1x pointer tip"
-                          data-tippy-info="Visualize"
+                          data-tippy-content="Visualize"
                         >
-                          <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                          <font-awesome-icon icon="fas fa-eye"  class="fa-stack-1x text-light"/>
+                          <font-awesome-icon
+                            icon="fas fa-circle"
+                            class="text-muted fa-stack-2x"
+                          />
+                          <font-awesome-icon
+                            icon="fas fa-eye"
+                            class="fa-stack-1x text-light"
+                          />
                         </span>
                       </a>
                     </div>
@@ -86,20 +98,32 @@
                       <span
                         class="fa-stack fa-1x pointer tip"
                         @click="updateSelected('schema', item.namespace)"
-                        data-tippy-info="Update Schema"
+                        data-tippy-content="Update Schema"
                       >
-                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                        <font-awesome-icon icon="fas fa-sync-alt"  class="fa-stack-1x text-light"/>
+                        <font-awesome-icon
+                          icon="fas fa-circle"
+                          class="text-muted fa-stack-2x"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-sync-alt"
+                          class="fa-stack-1x text-light"
+                        />
                       </span>
                     </div>
                     <div>
                       <span
                         class="fa-stack fa-1x pointer tip"
                         @click="deleteSelected('schema', item.namespace)"
-                        data-tippy-info="Delete"
+                        data-tippy-content="Delete"
                       >
-                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                        <font-awesome-icon icon="fas fa-trash"  class="fa-stack-1x text-light"/>
+                        <font-awesome-icon
+                          icon="fas fa-circle"
+                          class="text-muted fa-stack-2x"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-trash"
+                          class="fa-stack-1x text-light"
+                        />
                       </span>
                     </div>
                   </div>
@@ -132,7 +156,8 @@
                         prevPage_NS();
                         getNamespaces();
                       "
-                      ><font-awesome-icon icon="fas fa-step-backward"/></a>
+                      ><font-awesome-icon icon="fas fa-step-backward"
+                    /></a>
                   </div>
                   <template v-if="groupPages_NS">
                     <div
@@ -197,7 +222,8 @@
                         nextPage_NS();
                         getNamespaces();
                       "
-                      ><font-awesome-icon icon="fas fa-step-forward"/></a>
+                      ><font-awesome-icon icon="fas fa-step-forward"
+                    /></a>
                   </div>
                 </div>
               </div>
@@ -275,10 +301,16 @@
                       <a :href="'/dataset/' + item._id">
                         <span
                           class="fa-stack fa-1x pointer tip"
-                          :data-tippy-info="'View Dataset'"
+                          :data-tippy-content="'View Dataset'"
                         >
-                          <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                          <font-awesome-icon icon="fas fa-eye"  class="fa-stack-1x text-light"/>
+                          <font-awesome-icon
+                            icon="fas fa-circle"
+                            class="text-muted fa-stack-2x"
+                          />
+                          <font-awesome-icon
+                            icon="fas fa-eye"
+                            class="fa-stack-1x text-light"
+                          />
                         </span>
                       </a>
                     </div>
@@ -286,35 +318,58 @@
                       <span
                         class="fa-stack fa-1x pointer tip"
                         @click="edit(item._id)"
-                        :data-tippy-info="'Quick Edit'"
+                        :data-tippy-content="'Quick Edit'"
                       >
-                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                        <font-awesome-icon icon="fas fa-bolt"  class="fa-stack-1x text-light"/>
+                        <font-awesome-icon
+                          icon="fas fa-circle"
+                          class="text-muted fa-stack-2x"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-bolt"
+                          class="fa-stack-1x text-light"
+                        />
                       </span>
                     </div>
                     <div>
                       <span
                         class="fa-stack fa-1x pointer tip"
                         @click="handlePrivacy(item, 'public')"
-                        :data-tippy-info="[
+                        :data-tippy-content="[
                           item['_meta']['private']
                             ? 'Item is PRIVATE - Edit Privacy'
                             : 'Item is PUBLIC - Edit Privacy',
                         ]"
                       >
-                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                        <font-awesome-icon icon="fas fa-lock"  class="fa-stack-1x text-warning" v-if="item['_meta']['private']"/>
-                        <font-awesome-icon icon="fas fa-lock-open"  class="fa-stack-1x text-light" v-else/>
+                        <font-awesome-icon
+                          icon="fas fa-circle"
+                          class="text-muted fa-stack-2x"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-lock"
+                          class="fa-stack-1x text-warning"
+                          v-if="item['_meta']['private']"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-lock-open"
+                          class="fa-stack-1x text-light"
+                          v-else
+                        />
                       </span>
                     </div>
                     <div>
                       <span
                         class="fa-stack fa-1x pointer tip"
                         @click="deleteSelected('metadata', item._id)"
-                        :data-tippy-info="'Delete'"
+                        :data-tippy-content="'Delete'"
                       >
-                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                        <font-awesome-icon icon="fas fa-trash"  class="fa-stack-1x text-light"/>
+                        <font-awesome-icon
+                          icon="fas fa-circle"
+                          class="text-muted fa-stack-2x"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-trash"
+                          class="fa-stack-1x text-light"
+                        />
                       </span>
                     </div>
                   </div>
@@ -347,7 +402,8 @@
                         prevPage();
                         getDatasets();
                       "
-                      ><font-awesome-icon icon="fas fa-step-backward"/></a>
+                      ><font-awesome-icon icon="fas fa-step-backward"
+                    /></a>
                   </div>
                   <template v-if="groupPages">
                     <div
@@ -412,7 +468,8 @@
                         nextPage();
                         getDatasets();
                       "
-                      ><font-awesome-icon icon="fas fa-step-forward"/></a>
+                      ><font-awesome-icon icon="fas fa-step-forward"
+                    /></a>
                   </div>
                 </div>
               </div>
@@ -1144,10 +1201,7 @@ export default {
       let date = "";
       if (meta.hasOwnProperty("last_updated")) {
         date = meta["last_updated"];
-        return (
-          'last updated ' +
-          moment(date).format("MMM Do YYYY, h:mm a")
-        );
+        return "last updated " + moment(date).format("MMM Do YYYY, h:mm a");
       }
       return "No recent updates";
     },
@@ -1166,23 +1220,18 @@ export default {
       },
     });
 
-    tippy("*[data-tippy-info]", {
-      placement: "top",
-      maxWidth: "200px",
-      content: "loading",
-      animation: "fade",
-      theme: "light",
-      onShow(instance) {
-        let info = instance.reference.dataset.tippyInfo;
-        instance.setContent(
-          "<div class='text-muted m-0 text-center wraptext'>" + info + "</div>"
-        );
-      },
-    });
     this.getAll();
   },
   created: function () {
     this.checkUser();
+  },
+  updated: function () {
+    tippy(".tip", {
+      placement: "top",
+      maxWidth: "200px",
+      animation: "fade",
+      theme: "light",
+    });
   },
 };
 </script>

@@ -49,8 +49,14 @@
               >
                 <div>
                   <span class="fa-stack fa-1x m-2">
-                    <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
-                    <i class="fas fa-cogs fa-stack-1x fa-inverse"></i>
+                    <font-awesome-icon
+                      icon="fas fa-circle"
+                      class="mainTextLight fa-stack-2x"
+                    />
+                    <font-awesome-icon
+                      icon="fas fa-cogs"
+                      class="fa-stack-1x text-light"
+                    />
                   </span>
                   <h6 class="text-muted caps">
                     Produce
@@ -72,8 +78,14 @@
               >
                 <div>
                   <span class="fa-stack fa-1x m-2">
-                    <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
-                    <i class="fas fa-list-ol fa-stack-1x fa-inverse"></i>
+                    <font-awesome-icon
+                      icon="fas fa-circle"
+                      class="mainTextLight fa-stack-2x"
+                    />
+                    <font-awesome-icon
+                      icon="fas fa-list-ol"
+                      class="fa-stack-1x text-light"
+                    />
                   </span>
                   <h6 class="text-muted caps">
                     Fast and easy to use <br />Step-by-step guide.
@@ -85,8 +97,14 @@
               >
                 <div>
                   <span class="fa-stack fa-1x m-2">
-                    <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
-                    <i class="fas fa-tasks fa-stack-1x fa-inverse"></i>
+                    <font-awesome-icon
+                      icon="fas fa-circle"
+                      class="mainTextLight fa-stack-2x"
+                    />
+                    <font-awesome-icon
+                      icon="fas fa-tasks"
+                      class="fa-stack-1x text-light"
+                    />
                   </span>
                   <h6 class="text-muted caps">
                     Customize discoverability<br />
@@ -99,8 +117,14 @@
               >
                 <div>
                   <span class="fa-stack fa-1x m-2">
-                    <i class="fas fa-circle fa-stack-2x mainTextLight"></i>
-                    <i class="fas fa-lightbulb fa-stack-1x fa-inverse"></i>
+                    <font-awesome-icon
+                      icon="fas fa-circle"
+                      class="mainTextLight fa-stack-2x"
+                    />
+                    <font-awesome-icon
+                      icon="fas fa-lightbulb"
+                      class="fa-stack-1x text-light"
+                    />
                   </span>
                   <h6 class="text-muted caps">
                     Generate findable metadata<br />
@@ -166,11 +190,11 @@
                   href="https://ctsa.ncats.nih.gov/cd2h/"
                   target="_blank"
                   rel="nonreferrer"
-                  >CD2H <i class="fas fa-external-link-alt"></i></a
+                  >CD2H <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) biomedical dataset metadata based on this
                 <a href="/view/biomedical/" target="_blank" rel="nonreferrer"
-                  >schema <i class="fas fa-external-link-alt"></i
-                ></a>
+                  >schema <font-awesome-icon icon="fas fa-external-link-alt"
+                /></a>
                 structure.
                 <small
                   class="text-info more"
@@ -191,7 +215,7 @@
                 class="btn btn-lg themeButton text-light"
                 role="button"
               >
-                <i class="fas fa-plus"></i> Add Dataset Metadata
+                <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
               </a>
             </div>
             <div class="card-footer text-muted alert-secondary">
@@ -257,11 +281,11 @@
                   href="https://covid.cd2h.org/N3C"
                   target="_blank"
                   rel="nonreferrer"
-                  >N3C <i class="fas fa-external-link-alt"></i></a
+                  >N3C <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) dataset metadata based on this
                 <a href="/view/n3c/" target="_blank" rel="nonreferrer"
-                  >schema <i class="fas fa-external-link-alt"></i
-                ></a>
+                  >schema <font-awesome-icon icon="fas fa-external-link-alt"
+                /></a>
                 structure.
               </p>
               <a
@@ -276,7 +300,7 @@
                 class="btn btn-lg themeButton text-light"
                 role="button"
               >
-                <i class="fas fa-plus"></i> Submit Request
+                <font-awesome-icon icon="fas fa-plus" /> Submit Request
               </a>
             </div>
             <div class="card-footer text-muted alert-info">
@@ -343,11 +367,12 @@
                   href="https://outbreak.info/"
                   target="_blank"
                   rel="nonreferrer"
-                  >Outbreak.info <i class="fas fa-external-link-alt"></i></a
+                  >Outbreak.info
+                  <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) COVID-19 epidimiology dataset metadata based on this
                 <a href="/view/outbreak/" target="_blank" rel="nonreferrer"
-                  >schema <i class="fas fa-external-link-alt"></i
-                ></a>
+                  >schema <font-awesome-icon icon="fas fa-external-link-alt"
+                /></a>
                 structure.
               </p>
               <a
@@ -362,7 +387,7 @@
                 class="btn btn-lg themeButton text-light"
                 role="button"
               >
-                <i class="fas fa-plus"></i> Add Dataset Metadata
+                <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
               </a>
             </div>
             <div class="card-footer text-muted alert-info">
@@ -429,18 +454,20 @@
                     href="https://www.niaid.nih.gov/"
                     target="_blank"
                     rel="nonreferrer"
-                    >NIAID <i class="fas fa-external-link-alt"></i></a
+                    >NIAID
+                    <font-awesome-icon icon="fas fa-external-link-alt" /></a
                   >)</b
                 >
                 (<a
                   href="https://discovery.biothings.io/niaid/"
                   target="_blank"
                   rel="nonreferrer"
-                  >NIAID Data Portal <i class="fas fa-external-link-alt"></i></a
+                  >NIAID Data Portal
+                  <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) dataset metadata based on this
                 <a href="/view/niaid/" target="_blank" rel="nonreferrer"
-                  >schema <i class="fas fa-external-link-alt"></i
-                ></a>
+                  >schema <font-awesome-icon icon="fas fa-external-link-alt"
+                /></a>
                 structure.
               </p>
               <a
@@ -455,7 +482,7 @@
                 class="btn btn-lg themeButton text-light"
                 role="button"
               >
-                <i class="fas fa-plus"></i> Add Dataset Metadata
+                <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
               </a>
             </div>
             <div class="card-footer text-muted alert-info">

@@ -23,7 +23,7 @@ export const routes = [
     path: "/faq/:portal?",
     name: "FAQ",
     props: true,
-    component: () => import("../views/FAQ2.vue"),
+    component: () => import("../views/FAQ.vue"),
   },
   {
     path: "/contributor/:username?",
