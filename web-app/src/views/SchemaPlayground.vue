@@ -4,9 +4,9 @@
       <h1 class="logoText">SCHEMA PLAYGROUND</h1>
       <p class="text-muted">Create, Visualize and Register Your Own Schema</p>
       <p class="text-center">
-        <a href="/registry"
-          >Go To Registry <i class="fas fa-chevron-right"></i
-        ></a>
+        <RouterLink to="/registry"
+          >Go To Registry <font-awesome-icon icon="fas fa-chevron-right"
+        /></RouterLink>
       </p>
     </div>
     <div class="jumbotron bg-light col-sm-12 m-0">
@@ -20,7 +20,8 @@
             :class="[choice == 'visualize' ? 'bg-dark' : '']"
             @click.prevent="choice = 'visualize'"
           >
-            <i class="fas fa-eye text-light"></i> Register Schema
+            <font-awesome-icon icon="fas fa-eye" class="text-light" /> Register
+            Schema
           </button>
           <button
             type="button"
@@ -28,7 +29,8 @@
             :class="[choice == 'create' ? 'bg-dark' : '']"
             @click.prevent="choice = 'create'"
           >
-            <i class="fas fa-code-branch text-light"></i> Create Schema
+            <font-awesome-icon icon="fas fa-code-branch" class="text-light" />
+            Create Schema
           </button>
           <button
             type="button"
@@ -36,7 +38,8 @@
             :class="[choice == 'search' ? 'bg-dark' : '']"
             @click.prevent="choice = 'search'"
           >
-            <i class="fas fa-search text-light"></i> Search Existing
+            <font-awesome-icon icon="fas fa-search" class="text-light" /> Search
+            Existing
           </button>
         </div>
       </div>
@@ -67,7 +70,7 @@
               </div>
             </div>
             <div class="col-sm-12 col-md-4 p-2">
-              <img src="@/assets/img/sp2-01.svg" alt="Hierachy" />
+              <img src="@/assets/img/sp2-01.svg" alt="Hierarchy" />
               <h4 class="text-center mainTextDark caps">Hierarchy</h4>
               <div class="mt-3">
                 <p class="text-muted">
@@ -168,8 +171,14 @@
           >
             <div>
               <span class="fa-stack fa-2x m-2 scale-in-center">
-                <i class="fas fa-circle fa-stack-2x text-success"></i>
-                <i class="fas fa-eye fa-stack-1x fa-inverse"></i>
+                <font-awesome-icon
+                  icon="fas fa-circle"
+                  class="text-success fa-stack-2x"
+                />
+                <font-awesome-icon
+                  icon="fas fa-eye"
+                  class="fa-stack-1x text-light"
+                />
               </span>
               <h6 class="text-muted caps">
                 <b class="mainTextDark">Visualize</b> your schema<br />
@@ -182,8 +191,14 @@
           >
             <div>
               <span class="fa-stack fa-2x m-2 scale-in-center">
-                <i class="fas fa-circle fa-stack-2x text-success"></i>
-                <i class="fas fa-check fa-stack-1x fa-inverse"></i>
+                <font-awesome-icon
+                  icon="fas fa-circle"
+                  class="text-success fa-stack-2x"
+                />
+                <font-awesome-icon
+                  icon="fas fa-check"
+                  class="fa-stack-1x text-light"
+                />
               </span>
               <h6 class="text-muted caps">
                 <b class="mainTextDark">Register</b> your schema<br />
@@ -198,8 +213,9 @@
       >
         <div class="col-sm-12 col-md-8">
           <h4 class="mb-3 mt-3 text-light">
-            Visualize <i class="fas fa-arrow-right text-info"></i> Register Your
-            Schema
+            Visualize
+            <font-awesome-icon icon="fas fa-arrow-right" class="text-info" />
+            Register Your Schema
           </h4>
           <form id="linkForm" class="w-100 m-auto">
             <div v-if="!loading" class="input-group mb-3 shadow rounded">
@@ -230,7 +246,11 @@
             </div>
             <div v-else>
               <h3 class="text-light">
-                <i class="fas fa-cog fa-spin text-success"></i> Please Wait...
+                <font-awesome-icon
+                  icon="fas fa-cog fa-spin"
+                  class="text-success"
+                />
+                Please Wait...
               </h3>
             </div>
             <small class="text-light">Examples:</small>
@@ -288,8 +308,14 @@
           >
             <div>
               <span class="fa-stack fa-2x m-2 scale-in-center">
-                <i class="fas fa-circle fa-stack-2x text-success"></i>
-                <i class="fas fa-code-branch fa-stack-1x fa-inverse"></i>
+                <font-awesome-icon
+                  icon="fas fa-circle"
+                  class="text-success fa-stack-2x"
+                />
+                <font-awesome-icon
+                  icon="fas fa-code-branch"
+                  class="fa-stack-1x text-light"
+                />
               </span>
               <h6 class="text-muted caps">
                 <b class="mainTextDark">Extend</b> an existing schema<br />
@@ -365,8 +391,14 @@
           >
             <div>
               <span class="fa-stack fa-2x m-2 scale-in-center">
-                <i class="fas fa-circle fa-stack-2x text-success"></i>
-                <i class="fas fa-search fa-stack-1x fa-inverse"></i>
+                <font-awesome-icon
+                  icon="fas fa-circle"
+                  class="text-success fa-stack-2x"
+                />
+                <font-awesome-icon
+                  icon="fas fa-search"
+                  class="fa-stack-1x text-light"
+                />
               </span>
               <h6 class="text-muted caps">
                 <b class="text-muted">Search schemas and classes available</b>
@@ -633,9 +665,9 @@ export default {
         );
         //warning
         if (err && err.warning) {
-          warning = `<i class="fas fa-exclamation-circle text-warning"></i>`;
+          warning = `🟡`;
         } else {
-          warning = `<i class="fas fa-exclamation-triangle text-danger"></i>`;
+          warning = `🟡`;
         }
         //field
         if (err && err.field) {
@@ -700,7 +732,7 @@ export default {
             html: html,
             animation: false,
             customClass: "scale-in-center",
-            footer: `<small class="text-muted"><i class="fas fa-exclamation-circle text-warning"></i>: warning - optional</small>
+            footer: `<small class="text-muted">🟡: warning - optional</small>
               <p>These appear to be small warnings only but we recommend fixing them to prevent future issues.</p>`,
             showConfirmButton: true,
             showCancelButton: true,
@@ -724,8 +756,8 @@ export default {
             html: html,
             animation: false,
             customClass: "scale-in-center",
-            footer: `<small class="text-muted"><i class="fas fa-exclamation-triangle text-danger"></i> : error - must be resolved, 
-              <i class="fas fa-exclamation-circle text-warning"></i>: warning - optional</small>`,
+            footer: `<small class="text-muted">🔴 : error - must be resolved, 
+              🟡: warning - optional</small>`,
             showCancelButton: true,
             confirmButtonText: "Download Report",
             cancelButtonText: "Close",
@@ -788,14 +820,14 @@ export default {
           let culprit = "<h6>" + err.response.data.error + "</h6>";
           if (err.response.data && err.response.data.path) {
             culprit +=
-              "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>" +
+              "<h5>Culprit -> <b class='text-danger'>" +
               err.response.data.path +
               "</b></h5>";
           }
           if (err.response.data.parent && err.response.data.parent.path) {
             if (true) {
               culprit +=
-                "<h5>Under <i class='fas fa-arrow-right'6</i> <b class='text-danger'>" +
+                "<h5>Under -> <b class='text-danger'>" +
                 err.response.data.parent.path +
                 "</b></h5>";
             }

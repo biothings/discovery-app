@@ -3,9 +3,11 @@
     v-bind="$attrs"
     class="btn-copy"
     @click="copy"
+    title="Copy"
     :data-clipboard-text="copy_this"
   >
-    {{ msg }}
+    <template v-if="msg">{{ msg }}</template>
+    <font-awesome-icon v-else icon="fas fa-clipboard" />
   </button>
 </template>
 
@@ -17,7 +19,6 @@ export default {
   props: {
     msg: {
       type: String,
-      default: "share link",
     },
     copy_msg: {
       type: String,

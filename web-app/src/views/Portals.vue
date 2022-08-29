@@ -34,7 +34,7 @@
                 >
                   <h4 class="d-inline">
                     <span v-text="portal.name"></span>
-                    <i class="fas fa-chevron-right"></i>
+                    <font-awesome-icon icon="fas fa-chevron-right" />
                   </h4>
                 </a>
               </div>
@@ -113,7 +113,7 @@ export default {
           header:
             "An aggregator of open datasets, with a particular focus on allergy and infectious diseases.",
           linkname: "niaid",
-          description: `<b>National Institute of Allergy and Infectious Diseases (<a href="https://www.niaid.nih.gov/" target="_blank" rel="nonreferrer">NIAID <i class="fas fa-external-link-alt"></i></a>)</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID Data Portal <i class="fas fa-external-link-alt"></i></a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema <i class="fas fa-external-link-alt"></i></a> structure.`,
+          description: `<b>National Institute of Allergy and Infectious Diseases (<a href="https://www.niaid.nih.gov/" target="_blank" rel="nonreferrer">NIAID &gt;</a>)</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID Data Portal &gt;</a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema &gt;</a> structure.`,
           image: "niaid/logo.svg",
           portalicon: "niaid/icon.svg",
           colors: [{ hex: "#369AC1" }, { hex: "#113B56" }],

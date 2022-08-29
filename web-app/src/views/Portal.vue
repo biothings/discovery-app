@@ -14,7 +14,8 @@
               width="300"
             ></DynamicImage>
             <a href="/portal" class="d-block text-info"
-              ><i class="fas fa-chevron-left"></i> Back to Portals</a
+              ><font-awesome-icon icon="fas fa-chevron-left" /> Back to
+              Portals</a
             >
           </div>
         </div>
@@ -82,7 +83,7 @@
                     class="btn text-light btn-lg nd mt-2 tip"
                     :href="g.guide"
                   >
-                    <i class="fas fa-plus"></i> Add
+                    <font-awesome-icon icon="fas fa-plus" /> Add
                     <b v-text="g.name"></b> Metadata
                   </a>
                 </div>
@@ -111,7 +112,7 @@
               class="nd mt-2 tip text-info"
               :data-tippy-info="'Explore the ' + portal.name + ' website'"
             >
-              <h5>Site <i class="fas fa-chevron-right"></i></h5>
+              <h5>Site <font-awesome-icon icon="fas fa-chevron-right" /></h5>
             </a>
           </div>
           <div
@@ -130,7 +131,7 @@
               class="nd mt-2 tip text-info"
               :data-tippy-info="'Explore the schema used in ' + portal.name"
             >
-              <h5>Schema <i class="fas fa-chevron-right"></i></h5>
+              <h5>Schema <font-awesome-icon icon="fas fa-chevron-right" /></h5>
             </a>
           </div>
           <div
@@ -155,7 +156,7 @@
             >
               <h5>
                 <span v-text="g.name + 's'"></span>
-                <i class="fas fa-chevron-right"></i>
+                <font-awesome-icon icon="fas fa-chevron-right" />
               </h5>
             </a>
           </div>
@@ -178,7 +179,7 @@
               class="nd mt-2 tip text-info"
               :data-tippy-info="'Explore API for ' + portal.name"
             >
-              <h5>API <i class="fas fa-chevron-right"></i></h5>
+              <h5>API <font-awesome-icon icon="fas fa-chevron-right" /></h5>
             </a>
           </div>
           <div
@@ -198,7 +199,7 @@
               class="nd mt-2 tip text-info"
               data-tippy-info="Frequently Asked Questions"
             >
-              <h5>FAQ <i class="fas fa-chevron-right"></i></h5>
+              <h5>FAQ <font-awesome-icon icon="fas fa-chevron-right" /></h5>
             </a>
           </div>
         </div>

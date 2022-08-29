@@ -28,10 +28,16 @@
             <a :href="'/view/' + item.namespace + '/'">
               <span
                 class="fa-stack fa-1x pointer tip"
-                :data-tippy-info="'Visualize'"
+                data-tippy-content="Visualize"
               >
-                <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                <i class="fas fa-eye fa-stack-1x text-light"></i>
+                <font-awesome-icon
+                  icon="fas fa-circle"
+                  class="text-muted fa-stack-2x"
+                />
+                <font-awesome-icon
+                  icon="fas fa-eye"
+                  class="fa-stack-1x text-light"
+                />
               </span>
             </a>
           </div>
@@ -59,10 +65,16 @@
             <a :href="'/dataset/' + item._id">
               <span
                 class="fa-stack fa-1x pointer tip"
-                :data-tippy-info="'View Dataset'"
+                data-tippy-content="View Dataset"
               >
-                <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                <i class="fas fa-eye fa-stack-1x text-light"></i>
+                <font-awesome-icon
+                  icon="fas fa-circle"
+                  class="text-muted fa-stack-2x"
+                />
+                <font-awesome-icon
+                  icon="fas fa-eye"
+                  class="fa-stack-1x text-light"
+                />
               </span>
             </a>
           </div>
@@ -121,19 +133,12 @@ export default {
         });
     },
   },
-  mounted: function () {
-    tippy("*[data-tippy-info]", {
+  updated: function () {
+    tippy(".tip", {
       placement: "top",
       maxWidth: "200px",
-      content: "loading",
       animation: "fade",
       theme: "light",
-      onShow(instance) {
-        let info = instance.reference.dataset.tippyInfo;
-        instance.setContent(
-          "<div class='text-muted m-0 text-center wraptext'>" + info + "</div>"
-        );
-      },
     });
   },
   created: function () {

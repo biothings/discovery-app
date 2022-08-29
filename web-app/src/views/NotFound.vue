@@ -12,7 +12,7 @@
         src="@/assets/img/notfound.svg"
         alt="page not found"
       /><br />
-      <small>Go back to our <a href="/">homepage</a></small>
+      <small>Go back to our <router-link to="/">homepage</router-link></small>
     </div>
   </div>
 </template>
