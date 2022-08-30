@@ -63,6 +63,33 @@ export const routes = [
     component: () => import("../views/Portal.vue"),
   },
   {
+    path: "/resource",
+    name: "ResourceRegistry",
+    component: () => import("../views/Portals.vue"),
+  },
+  {
+    path: "/resource/:id",
+    name: "Resource",
+    props: true,
+    component: () => import("../views/Resource.vue"),
+  },
+  {
+    path: "/dataset",
+    name: "DatasetRegistry",
+    redirect: (to) => {
+      return { name: "ResourceRegistry" };
+    },
+  },
+  {
+    path: "/dataset/:id",
+    name: "Dataset",
+    redirect: (to) => {
+      // the function receives the target route as the argument
+      // we return a redirect path/location here.
+      return { path: "/resource/" + to.params.id };
+    },
+  },
+  {
     path: "/:catchAll(.*)",
     name: "NotFound",
     component: () => import("../views/NotFound.vue"),

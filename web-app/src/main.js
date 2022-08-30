@@ -9,6 +9,7 @@ import VueGtag from "vue-gtag-next";
 import VueSweetalert2 from "vue-sweetalert2";
 // Global Components
 import CopyBtn from "./components/CopyBtn.vue";
+import ResourceFieldBox from "./components/ResourceFieldBox.vue";
 
 import "./assets/main.css";
 import "./assets/css/styles.css";
@@ -48,6 +49,9 @@ import {
   faCodeBranch,
   faSearch,
   faArrowRight,
+  faUser,
+  faBuilding,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
@@ -77,7 +81,10 @@ library.add(
   faCheck,
   faCodeBranch,
   faSearch,
-  faArrowRight
+  faArrowRight,
+  faUser,
+  faBuilding,
+  faTimes
 );
 
 const app = createApp(App);
@@ -94,7 +101,8 @@ app
 
 app
   .component("CopyBtn", CopyBtn)
-  .component("font-awesome-icon", FontAwesomeIcon);
+  .component("font-awesome-icon", FontAwesomeIcon)
+  .component("ResourceFieldBox", ResourceFieldBox)
 
 // dev base api url
 app.config.globalProperties.$apiUrl =
