@@ -49,9 +49,9 @@
             A CD2H PROJECT TO PROMOTE FAIR DATA-SHARING BEST PRACTICES &
             MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS
           </h6>
-          <a class="text-muted" href="/about"
+          <router-link class="text-muted" to="/about"
             >Learn More <font-awesome-icon icon="fas fa-chevron-right"
-          /></a>
+          /></router-link>
         </div>
       </div>
     </div>
@@ -63,9 +63,9 @@
           class="jumbotron bg-none text-center pRelative tip"
         >
           <div class="link-wrapper">
-            <a
+            <router-link
               class="link hover-1 mt-5"
-              href="./best-practices"
+              to="/best-practices"
               style="z-index: 2"
             >
               <h3 class="text-light">
@@ -75,7 +75,7 @@
                   class="d-inline d-md-none"
                 />
               </h3>
-            </a>
+            </router-link>
             <p class="m-auto w-75 text-light o-0 d-none d-md-block">
               Follow best practices to make your data more findable
             </p>
@@ -91,9 +91,9 @@
           class="jumbotron bg-none text-center pRelative tip"
         >
           <div class="link-wrapper">
-            <a
+            <router-link
               class="link hover-1 mt-5"
-              href="./schema-playground"
+              to="/schema-playground"
               style="z-index: 2"
             >
               <h3 class="text-light">
@@ -103,7 +103,7 @@
                   class="d-inline d-md-none"
                 />
               </h3>
-            </a>
+            </router-link>
             <p class="m-auto w-75 text-light o-0 d-none d-md-block">
               Build and host your own schema for better interoperability
             </p>
@@ -138,8 +138,8 @@
         </h5>
         <div class="m-0 p-5 text-center col-sm-12">
           <h3 class="logoText">Browse Registered Schemas & Metadata</h3>
-          <a class="btn btn-outline-info" role="button" href="/registries"
-            >Continue</a
+          <router-link class="btn btn-outline-info" role="button" to="/registries"
+            >Continue</router-link
           >
         </div>
         <div class="card col-sm-12 col-md-6">

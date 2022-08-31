@@ -27,16 +27,16 @@
                   width="50"
                   class="mr-2"
                 ></DynamicImage>
-                <a
+                <RouterLink
                   class="tip"
-                  :href="'/portal/' + portal.linkname"
+                  :to="{path: '/portal/' + portal.linkname}"
                   data-tippy-info="Learn More"
                 >
                   <h4 class="d-inline">
                     <span v-text="portal.name"></span>
                     <font-awesome-icon icon="fas fa-chevron-right" />
                   </h4>
-                </a>
+                </RouterLink>
               </div>
               <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
             </div>

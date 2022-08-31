@@ -13,9 +13,9 @@
               :alt="portal.name"
               width="300"
             ></DynamicImage>
-            <a href="/portal" class="d-block text-info"
+            <RouterLink to="/portal" class="d-block text-info"
               ><font-awesome-icon icon="fas fa-chevron-left" /> Back to
-              Portals</a
+              Portals</RouterLink
             >
           </div>
         </div>
@@ -45,15 +45,15 @@
                   environment.
                 </p>
                 <div class="text-center p-2 m-1 rounded p-3">
-                  <a
+                  <RouterLink
                     role="button"
                     :style="{ background: portal.colors[0].hex }"
                     class="btn text-light btn-lg nd mt-2 tip"
-                    href="/guide/n3c/dataset"
+                    to="/guide/n3c/dataset"
                     :data-tippy-info="'Add a dtaset for ' + portal.name"
                   >
                     Submit Request
-                  </a>
+                  </RouterLink>
                 </div>
               </div>
             </template>
@@ -63,14 +63,14 @@
                 <p>
                   Follow an easy-to-follow guide to help you contribute metadata
                   for <span v-text="portal.name"></span> following this schema's
-                  <a :href="portal.schema" target="_blank">structure</a>:
+                  <RouterLink :to="{path: portal.schema}">structure</RouterLink>:
                 </p>
                 <div
                   v-for="(g, i) in portal.guides"
                   :key="i + 'g'"
                   class="text-center p-2 m-1 rounded p-3"
                 >
-                  <a
+                  <RouterLink
                     role="button"
                     :style="{ background: portal.colors[0].hex }"
                     @click="
@@ -81,11 +81,11 @@
                       })
                     "
                     class="btn text-light btn-lg nd mt-2 tip"
-                    :href="g.guide"
+                    :to="{path: g.guide}"
                   >
                     <font-awesome-icon icon="fas fa-plus" /> Add
                     <b v-text="g.name"></b> Metadata
-                  </a>
+                  </RouterLink>
                 </div>
               </div>
             </template>
@@ -126,13 +126,13 @@
               width="100"
               alt="SCHEMA"
             ></object>
-            <a
-              :href="portal.schema"
+            <RouterLink
+              :to="{path: portal.schema}"
               class="nd mt-2 tip text-info"
               :data-tippy-info="'Explore the schema used in ' + portal.name"
             >
               <h5>Schema <font-awesome-icon icon="fas fa-chevron-right" /></h5>
-            </a>
+            </RouterLink>
           </div>
           <div
             v-for="(g, i) in portal.guides"
@@ -147,8 +147,8 @@
               width="100"
               :alt="g.name"
             ></object>
-            <a
-              :href="g.registry"
+            <RouterLink
+              :to="{path: g.registry}"
               class="nd mt-2 tip text-info"
               :data-tippy-info="
                 'Browse metadata in Data Discovery Engine for ' + g.name
@@ -158,7 +158,7 @@
                 <span v-text="g.name + 's'"></span>
                 <font-awesome-icon icon="fas fa-chevron-right" />
               </h5>
-            </a>
+            </RouterLink>
           </div>
           <div
             v-if="portal && portal.api"
@@ -194,13 +194,13 @@
               width="100px"
               alt="API"
             ></object>
-            <a
-              :href="portal.faq_link"
+            <RouterLink
+              :to="{path: portal.faq_link}"
               class="nd mt-2 tip text-info"
               data-tippy-info="Frequently Asked Questions"
             >
               <h5>FAQ <font-awesome-icon icon="fas fa-chevron-right" /></h5>
-            </a>
+            </RouterLink>
           </div>
         </div>
         <div class="text-center p-5 col-sm-12 mainBackLight p-2"></div>

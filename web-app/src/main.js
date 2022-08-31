@@ -52,6 +52,7 @@ import {
   faUser,
   faBuilding,
   faTimes,
+  faUndo
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
@@ -84,7 +85,8 @@ library.add(
   faArrowRight,
   faUser,
   faBuilding,
-  faTimes
+  faTimes,
+  faUndo
 );
 
 const app = createApp(App);
