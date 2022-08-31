@@ -52,6 +52,11 @@ export const routes = [
     component: () => import("../views/JSONSchemaViewer.vue"),
   },
   {
+    path: "/registries",
+    name: "Registries",
+    component: () => import("../views/Registries.vue"),
+  },
+  {
     path: "/portal",
     name: "Portals",
     component: () => import("../views/Portals.vue"),
@@ -65,7 +70,7 @@ export const routes = [
   {
     path: "/resource",
     name: "ResourceRegistry",
-    component: () => import("../views/Portals.vue"),
+    component: () => import("../views/ResourceRegistry.vue"),
   },
   {
     path: "/resource/:id",

@@ -3,6 +3,7 @@ import { auth } from "./modules/auth";
 import { faq } from "./modules/faq";
 import { compatibility } from "./modules/compatibility";
 import { json_schema_viewer } from "./modules/json_schema_viewer";
+import { resource_registry } from "./modules/resource_registry";
 
 export default createStore({
   modules: {
@@ -10,6 +11,7 @@ export default createStore({
     faq,
     compatibility,
     json_schema_viewer,
+    resource_registry,
   },
   state: () => ({
     loading: false,

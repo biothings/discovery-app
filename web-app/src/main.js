@@ -102,7 +102,7 @@ app
 app
   .component("CopyBtn", CopyBtn)
   .component("font-awesome-icon", FontAwesomeIcon)
-  .component("ResourceFieldBox", ResourceFieldBox)
+  .component("ResourceFieldBox", ResourceFieldBox);
 
 // dev base api url
 app.config.globalProperties.$apiUrl =

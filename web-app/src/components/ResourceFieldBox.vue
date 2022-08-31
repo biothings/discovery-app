@@ -41,9 +41,8 @@
                   :class="{ disabled: page <= 1 }"
                 >
                   <a class="page-link p-1" @click.prevent="prevPage()"
-                    ><font-awesome-icon
-                      icon="fas fa-step-backward"
-                    /></a>
+                    ><font-awesome-icon icon="fas fa-step-backward"
+                  /></a>
                 </div>
                 <template v-if="groupPages">
                   <div
@@ -91,9 +90,8 @@
                   :class="{ disabled: page >= pages }"
                 >
                   <a class="page-link p-1" @click.prevent="nextPage()"
-                    ><font-awesome-icon
-                      icon="fas fa-step-forward"
-                    /></a>
+                    ><font-awesome-icon icon="fas fa-step-forward"
+                  /></a>
                 </div>
               </div>
             </template>
@@ -116,9 +114,7 @@
           <div class="text-left">
             <small class="mainTextDark">
               <b v-text="readable_name"></b>
-              <font-awesome-icon v-if="!readable_name"
-                      icon="fas fa-circle"
-                    />
+              <font-awesome-icon v-if="!readable_name" icon="fas fa-circle" />
               <span v-else>:</span>
             </small>
           </div>
@@ -126,7 +122,8 @@
             <a :href="content" target="_blank" rel="nonreferrer">
               <small
                 ><span v-text="content"></span>
-                <font-awesome-icon icon="fas fa-external-link-alt" class="ml-1"/></small>
+                <font-awesome-icon icon="fas fa-external-link-alt" class="ml-1"
+              /></small>
             </a>
           </div>
         </template>
@@ -151,9 +148,21 @@
             ></a>
             <template v-else>
               <small>
-                <font-awesome-icon v-if="name == '@type' && content == 'Person'" icon="fas fa-user" class="text-muted"/>
-                <font-awesome-icon v-if="name == '@type' && content == 'Organization'" icon="fas fa-building" class="text-muted"/>
-                <font-awesome-icon v-if="name == '@type' && content == 'CreativeWork'" icon="fas fa-lightbulb" class="text-muted"/>
+                <font-awesome-icon
+                  v-if="name == '@type' && content == 'Person'"
+                  icon="fas fa-user"
+                  class="text-muted"
+                />
+                <font-awesome-icon
+                  v-if="name == '@type' && content == 'Organization'"
+                  icon="fas fa-building"
+                  class="text-muted"
+                />
+                <font-awesome-icon
+                  v-if="name == '@type' && content == 'CreativeWork'"
+                  icon="fas fa-lightbulb"
+                  class="text-muted"
+                />
               </small>
               &nbsp;
               <small class="text-muted text-left" v-html="content"></small>
@@ -168,12 +177,16 @@
         <div class="d-flex justify-content-start align-items-center">
           <small class="mainTextDark">
             <b v-text="readable_name"></b>
-            <font-awesome-icon icon="fas fa-chevron-right" class="mr-1"/>
+            <font-awesome-icon icon="fas fa-chevron-right" class="mr-1" />
           </small>
         </div>
         <div>
           <template v-for="(value, key) in content" :key="key + 'child'">
-            <ResourceFieldBox :name="key" :content="value" :isChild="true"></ResourceFieldBox>
+            <ResourceFieldBox
+              :name="key"
+              :content="value"
+              :isChild="true"
+            ></ResourceFieldBox>
           </template>
         </div>
       </div>
@@ -188,11 +201,11 @@
         </div>
         <div>
           <small v-if="content === true"
-            ><font-awesome-icon icon="fas fa-check" class="text-success"/>
+            ><font-awesome-icon icon="fas fa-check" class="text-success" />
             <span v-text="content"></span
           ></small>
           <small v-else
-            ><font-awesome-icon icon="fas fa-times" class="text-danger"/>
+            ><font-awesome-icon icon="fas fa-times" class="text-danger" />
             <span v-text="content"></span
           ></small>
         </div>
@@ -323,7 +336,7 @@ export default {
   mounted: function () {
     var self = this;
     if (self.content) {
-        self.getType(self.content);
+      self.getType(self.content);
     }
     if (self.type == "array") {
       self.calculatePages();
