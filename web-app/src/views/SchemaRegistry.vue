@@ -423,7 +423,6 @@ export default {
         "Z",
       ],
       input: "",
-      linkPrefix: "./",
       data: null,
       user: {},
       testURL: "",
