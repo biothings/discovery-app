@@ -16,6 +16,7 @@ import "./assets/css/styles.css";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
 import "sweetalert2/dist/sweetalert2.min.css";
+import "tabulator-tables/dist/css/tabulator.min.css"
 
 /* FontAwesome core */
 import { library } from "@fortawesome/fontawesome-svg-core";

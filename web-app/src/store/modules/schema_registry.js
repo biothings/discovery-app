@@ -1,4 +1,4 @@
-import { Tabulator } from "tabulator-tables";
+import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { remove } from "lodash";
 
 export const schema_registry = {
@@ -74,11 +74,11 @@ export const schema_registry = {
             let propLabel = main.properties[i]["label"];
             if (propName.includes("schema:")) {
               propLabel =
-                '<i class="fas fa-dot-circle text-danger"></i> ' +
+                '🔴 ' +
                 main.properties[i]["label"];
             } else {
               propLabel =
-                '<span><i class="fas fa-circle text-info"></i> ' +
+                '<span>🔵 ' +
                 main.properties[i]["curie"] +
                 "</span>";
             }
@@ -220,11 +220,11 @@ export const schema_registry = {
             let propLabel = main.properties[i]["label"];
             if (propName.includes("schema:")) {
               propLabel =
-                '<i class="fas fa-dot-circle text-danger"></i> ' +
+                '🔴 ' +
                 main.properties[i]["label"];
             } else {
               propLabel =
-                '<span><i class="fas fa-circle text-info"></i> ' +
+                '<span>🔵 ' +
                 main.properties[i]["curie"] +
                 "</span>";
             }
