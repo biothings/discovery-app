@@ -235,7 +235,7 @@ export default {
           self.$swal.fire({
             icon: "error",
             title: "Page does not exist",
-            html: "<a href='/dataset' rel='nonreferrer'>Go To Registry</a>",
+            html: "<a href='/resource' rel='nonreferrer'>Go To Registry</a>",
           });
           throw err;
         });

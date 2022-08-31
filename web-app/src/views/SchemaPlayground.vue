@@ -347,11 +347,11 @@
               <h4 class="text-light mt-3 mb-3">Search for starting point:</h4>
               <div class="message text-center text-muted p-4">
                 <h5 class="text-muted">Search for a Class</h5>
-                <a
+                <RouterLink
                   role="button"
                   class="btn btn-lg themeButton text-light m-3"
-                  href="/registry"
-                  >To Registry</a
+                  to="/registry"
+                  >To Registry</RouterLink
                 >
               </div>
             </div>
@@ -417,11 +417,11 @@
           <h6 class="text-muted">
             Find and compare existing classes you can extend to create your own.
           </h6>
-          <a
+          <RouterLink
             role="button"
             class="btn btn-lg themeButton text-light m-3"
-            href="/registry"
-            >To Registry</a
+            to="/registry"
+            >To Registry</RouterLink
           >
         </div>
       </div>

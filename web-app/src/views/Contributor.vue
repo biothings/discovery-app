@@ -14,18 +14,17 @@
         <div
           class="col-sm-5 p-1 mainBackDark d-flex align-items-center justify-content-left"
         >
-          <a
-            target="_blank"
-            :href="'/' + item.namespace + '/'"
+          <router-link
+            :to="{path: '/' + item.namespace + '/'}"
             v-text="item.namespace"
             class="d-inline m-2 text-light"
-          ></a>
+          ></router-link>
         </div>
         <div
           class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around"
         >
           <div>
-            <a :href="'/view/' + item.namespace + '/'">
+            <router-link :to="{path: '/view/' + item.namespace + '/'}">
               <span
                 class="fa-stack fa-1x pointer tip"
                 data-tippy-content="Visualize"
@@ -39,7 +38,7 @@
                   class="fa-stack-1x text-light"
                 />
               </span>
-            </a>
+            </router-link>
           </div>
         </div>
       </div>
@@ -51,18 +50,17 @@
         <div
           class="col-sm-5 p-1 mainBackLight d-flex align-items-center justify-content-left"
         >
-          <a
-            target="_blank"
-            :href="'/api/dataset/' + item._id"
+          <router-link
+            :to="{path: '/api/dataset/' + item._id}"
             v-text="item.name"
             class="d-inline m-2 text-light"
-          ></a>
+          ></router-link>
         </div>
         <div
           class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around"
         >
           <div>
-            <a :href="'/dataset/' + item._id">
+            <router-link :to="{path: '/dataset/' + item._id}">
               <span
                 class="fa-stack fa-1x pointer tip"
                 data-tippy-content="View Dataset"
@@ -76,7 +74,7 @@
                   class="fa-stack-1x text-light"
                 />
               </span>
-            </a>
+            </router-link>
           </div>
         </div>
       </div>

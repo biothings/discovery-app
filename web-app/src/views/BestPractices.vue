@@ -37,7 +37,7 @@
         </p>
         <p>
           See examples of registered dataset metadata
-          <a href="/dataset">here</a>.
+          <router-link to="/resource">here</router-link>.
         </p>
       </div>
       <div class="text-center mb-5">
@@ -192,9 +192,9 @@
                   rel="nonreferrer"
                   >CD2H <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) biomedical dataset metadata based on this
-                <a href="/view/biomedical/" target="_blank" rel="nonreferrer"
+                <router-link to="/view/biomedical/" rel="nonreferrer"
                   >schema <font-awesome-icon icon="fas fa-external-link-alt"
-                /></a>
+                /></router-link>
                 structure.
                 <small
                   class="text-info more"
@@ -203,8 +203,8 @@
                   >Customizable</small
                 >
               </p>
-              <a
-                href="/guide/"
+              <router-link
+                to="/guide"
                 @click="
                   gtag('event', 'click', {
                     event_category: 'portal_guide',
@@ -216,7 +216,7 @@
                 role="button"
               >
                 <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
-              </a>
+              </router-link>
             </div>
             <div class="card-footer text-muted alert-secondary">
               <b>About this guide:</b>
@@ -255,8 +255,8 @@
                       <small>Schema</small>
                     </td>
                     <td>
-                      <a href="/view/biomedical"
-                        ><small class="badge badge-light">Dataset</small></a
+                      <router-link to="/view/biomedical"
+                        ><small class="badge badge-light">Dataset</small></router-link
                       >
                     </td>
                   </tr>
@@ -283,13 +283,13 @@
                   rel="nonreferrer"
                   >N3C <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) dataset metadata based on this
-                <a href="/view/n3c/" target="_blank" rel="nonreferrer"
+                <router-link to="/view/n3c/" rel="nonreferrer"
                   >schema <font-awesome-icon icon="fas fa-external-link-alt"
-                /></a>
+                /></router-link>
                 structure.
               </p>
-              <a
-                href="/guide/n3c/dataset"
+              <router-link
+                to="/guide/n3c/dataset"
                 @click="
                   gtag('event', 'click', {
                     event_category: 'portal_guide',
@@ -301,7 +301,7 @@
                 role="button"
               >
                 <font-awesome-icon icon="fas fa-plus" /> Submit Request
-              </a>
+              </router-link>
             </div>
             <div class="card-footer text-muted alert-info">
               <b>About this guide:</b>
@@ -340,8 +340,8 @@
                       <small>Schema</small>
                     </td>
                     <td>
-                      <a href="/view/n3c"
-                        ><small class="badge badge-light">Dataset</small></a
+                      <router-link to="/view/n3c"
+                        ><small class="badge badge-light">Dataset</small></router-link
                       >
                     </td>
                   </tr>
@@ -370,13 +370,13 @@
                   >Outbreak.info
                   <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) COVID-19 epidimiology dataset metadata based on this
-                <a href="/view/outbreak/" target="_blank" rel="nonreferrer"
+                <router-link to="/view/outbreak/" rel="nonreferrer"
                   >schema <font-awesome-icon icon="fas fa-external-link-alt"
-                /></a>
+                /></router-link>
                 structure.
               </p>
-              <a
-                href="/guide/outbreak/dataset"
+              <router-link
+                to="/guide/outbreak/dataset"
                 @click="
                   gtag('event', 'click', {
                     event_category: 'portal_guide',
@@ -388,7 +388,7 @@
                 role="button"
               >
                 <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
-              </a>
+              </router-link>
             </div>
             <div class="card-footer text-muted alert-info">
               <b>About this guide:</b>
@@ -427,8 +427,8 @@
                       <small>Schema</small>
                     </td>
                     <td>
-                      <a href="/view/outbreak"
-                        ><small class="badge badge-light">Dataset</small></a
+                      <router-link to="/view/outbreak"
+                        ><small class="badge badge-light">Dataset</small></router-link
                       >
                     </td>
                   </tr>
@@ -465,13 +465,13 @@
                   >NIAID Data Portal
                   <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) dataset metadata based on this
-                <a href="/view/niaid/" target="_blank" rel="nonreferrer"
+                <router-link to="/view/niaid/" rel="nonreferrer"
                   >schema <font-awesome-icon icon="fas fa-external-link-alt"
-                /></a>
+                /></router-link>
                 structure.
               </p>
-              <a
-                href="/guide/niaid"
+              <router-link
+                to="/guide/niaid"
                 @click="
                   gtag('event', 'click', {
                     event_category: 'portal_guide',
@@ -483,7 +483,7 @@
                 role="button"
               >
                 <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
-              </a>
+              </router-link>
             </div>
             <div class="card-footer text-muted alert-info">
               <b>About this guide:</b>
@@ -525,8 +525,8 @@
                       <small>Schema</small>
                     </td>
                     <td>
-                      <a href="/view/niaid"
-                        ><small class="badge badge-light">Dataset</small></a
+                      <router-link to="/view/niaid"
+                        ><small class="badge badge-light">Dataset</small></router-link
                       >
                     </td>
                   </tr>

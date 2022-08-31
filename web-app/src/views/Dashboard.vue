@@ -50,12 +50,11 @@
                   <div
                     class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-between"
                   >
-                    <a
-                      target="_blank"
-                      :href="'/view/' + item.namespace + '/'"
+                    <router-link
+                      :to="{path: '/view/' + item.namespace + '/'}"
                       v-text="item.namespace"
                       class="d-inline m-2 text-light"
-                    ></a>
+                    ></router-link>
                   </div>
                   <div
                     class="col-sm-4 p-1 bg-dark actions d-flex align-items-center justify-content-around"
@@ -78,7 +77,7 @@
                       </a>
                     </div>
                     <div>
-                      <a :href="'/view/' + item.namespace + '/'">
+                      <router-link :to="{path: '/view/' + item.namespace + '/'}">
                         <span
                           class="fa-stack fa-1x pointer tip"
                           data-tippy-content="Visualize"
@@ -92,7 +91,7 @@
                             class="fa-stack-1x text-light"
                           />
                         </span>
-                      </a>
+                      </router-link>
                     </div>
                     <div>
                       <span
@@ -283,13 +282,13 @@
                   <div
                     class="col-sm-12 col-md-8 p-1 mainBackLight d-flex align-items-center justify-content-between"
                   >
-                    <a
-                      :href="'/dataset/' + item._id"
+                    <router-link
+                      :to="{path: '/dataset/' + item._id}"
                       class="m-2 text-light d-block"
                       :title="item.name"
                     >
                       <small v-text="trunc(item.name)"></small>
-                    </a>
+                    </router-link>
                     <small class="text-light">
                       <span v-html="formatDate(item['_meta'])"></span>
                     </small>
@@ -298,7 +297,7 @@
                     class="col-sm-12 col-md-4 p-1 bg-dark actions d-flex align-items-center justify-content-around"
                   >
                     <div>
-                      <a :href="'/dataset/' + item._id">
+                      <router-link :to="{path: '/dataset/' + item._id}">
                         <span
                           class="fa-stack fa-1x pointer tip"
                           :data-tippy-content="'View Dataset'"
@@ -312,7 +311,7 @@
                             class="fa-stack-1x text-light"
                           />
                         </span>
-                      </a>
+                      </router-link>
                     </div>
                     <div>
                       <span
@@ -479,7 +478,7 @@
               <div class="alert alert-secondary mt-3">
                 <small>
                   Want to edit a registered dataset? Learn how
-                  <a target="_blank" href="/faq#edit-dataset">HERE</a>
+                  <router-link to="/faq#edit-dataset">HERE</router-link>
                 </small>
               </div>
             </template>

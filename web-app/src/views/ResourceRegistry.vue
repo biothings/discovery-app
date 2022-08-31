@@ -29,23 +29,23 @@
                 class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around"
               >
                 <span
-                  data-tippy="search"
+                  data-tippy-content="search"
                   class="fa-stack fa-1x pointer unselectable tip"
                   @click.prevent="search()"
                 >
-                  <i class="fas fa-circle text-muted fa-stack-2x"></i>
-                  <i class="fas fa-search fa-stack-1x text-light"></i>
+                  <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                  <font-awesome-icon icon="fas fa-search" class="fa-stack-1x text-light"/>
                 </span>
                 <span
-                  data-tippy="reset"
-                  class="fa-stack fa-1x pointer unselectable"
+                  data-tippy-content="reset"
+                  class="fa-stack fa-1x pointer unselectable tip"
                   @click.prevent="
                     query = '';
                     search();
                   "
                 >
-                  <i class="fas fa-circle fa-stack-2x text-muted"></i>
-                  <i class="fas fa-undo fa-stack-1x text-light"></i>
+                  <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
+                  <font-awesome-icon icon="fas fa-undo" class="fa-stack-1x text-light"/>
                 </span>
               </div>
             </div>
@@ -90,7 +90,7 @@
                 @click="toggleFilter(filter)"
                 :class="[filter.active ? 'badge-info' : 'badge-secondary']"
               >
-                <i class="fas fa-circle" :class="filter.color"></i>
+                <font-awesome-icon icon="fas fa-circle" :class="filter.color" class="mr-1"/>
                 <span v-text="filter.name"></span> (<span
                   v-text="filter.count"
                 ></span
@@ -116,9 +116,9 @@
                   target="_blank"
                   title="Learn more"
                 >
-                  <i class="fas fa-info-circle text-primary"></i>
+                  <font-awesome-icon icon="fas fa-circle" class="text-primary"/>
                 </a>
-                <i v-else class="fas fa-circle" :class="filter.color"></i>
+                <font-awesome-icon v-else icon="fas fa-circle" :class="filter.color"/>
                 <span v-text="filter.name" class="gaText ml-3 mr-3"></span>
               </span>
             </template>
@@ -150,7 +150,7 @@
             v-model="downloadMode"
             @click="toggleDownloadMode"
           />
-          <label for="download_metadata" class="m-0"
+          <label for="download_metadata" class="m-0 tip" data-tippy-content="Select registry items for download"
             >Download Mode
             <b
               :class="{ 'text-success': downloadMode }"
@@ -219,13 +219,12 @@
                   prevPage();
                   search();
                 "
-                ><i class="fas fa-step-backward"></i
-              ></a>
+                ><font-awesome-icon icon="fas fa-step-backward"/></a>
             </div>
             <template v-if="groupPages">
               <div class="page-item rounded-0" v-show="!startCapLimitReached">
                 <a
-                  href="#"
+                  href="javascript:void(0)"
                   class="page-link p-1"
                   @click.prevent="
                     previousGroup();
@@ -246,7 +245,7 @@
                 }"
               >
                 <a
-                  href="#"
+                  href="javascript:void(0)"
                   class="page-link p-1"
                   @click.prevent="
                     page = n;
@@ -259,7 +258,7 @@
             <template v-if="groupPages">
               <div class="page-item rounded-0" v-show="!endCapLimitReached">
                 <a
-                  href="#"
+                  href="javascript:void(0)"
                   class="page-link p-1"
                   @click.prevent="
                     nextGroup();
@@ -279,8 +278,7 @@
                   nextPage();
                   search();
                 "
-                ><i class="fas fa-step-forward"></i
-              ></a>
+                ><font-awesome-icon icon="fas fa-step-forward"/></a>
             </div>
           </div>
         </div>
