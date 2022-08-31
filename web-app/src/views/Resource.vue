@@ -54,27 +54,27 @@
           </div>
         </div>
         <div class="bg-light p-4 text-center">
-            <div class="p-3 text-left">
-              <span
-                class="text-dark m-auto"
-                v-html="processMarkdown(metadata.description)"
-              ></span>
-            </div>
-            <template v-for="(content, name) in viewMetadata" :key="name">
-              <ResourceFieldBox
-                :name="name"
-                :content="content"
-                isChild="false"
-              ></ResourceFieldBox>
-            </template>
-            <div class="d-flex flex-wrap mt-5 justify-content-center">
-              <template v-for="item in metadata.keywords">
-                <small class="text-muted m-1"
-                  ># <span v-text="item"></span
-                ></small>
-              </template>
-            </div>
+          <div class="p-3 text-left">
+            <span
+              class="text-dark m-auto"
+              v-html="processMarkdown(metadata.description)"
+            ></span>
           </div>
+          <template v-for="(content, name) in viewMetadata" :key="name">
+            <ResourceFieldBox
+              :name="name"
+              :content="content"
+              isChild="false"
+            ></ResourceFieldBox>
+          </template>
+          <div class="d-flex flex-wrap mt-5 justify-content-center">
+            <template v-for="item in metadata.keywords">
+              <small class="text-muted m-1"
+                ># <span v-text="item"></span
+              ></small>
+            </template>
+          </div>
+        </div>
         <div class="alert alert-info text-muted mt-5">
           <h5>Embed this structured dataset metadata on your website</h5>
           <h6>Embedding options:</h6>
@@ -334,8 +334,9 @@ export default {
           `<h6 class="text-center mainTextDark">Copy this code</h6><div class="text-left alert-secondary">
                     <div>
                       <small>
-                        <pre>` + txt +
-                          `</pre>
+                        <pre>` +
+          txt +
+          `</pre>
                       </small>
                     </div>
                   </div>`,
@@ -395,7 +396,7 @@ export default {
     var self = this;
     if (self.id) {
       self.query = self.id;
-      console.log('ID', self.id)
+      console.log("ID", self.id);
       self.getMetadata(self.query);
     }
   },
