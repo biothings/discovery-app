@@ -4,6 +4,7 @@ import { faq } from "./modules/faq";
 import { compatibility } from "./modules/compatibility";
 import { json_schema_viewer } from "./modules/json_schema_viewer";
 import { resource_registry } from "./modules/resource_registry";
+import { schema_registry } from "./modules/schema_registry";
 
 export default createStore({
   modules: {
@@ -12,6 +13,7 @@ export default createStore({
     compatibility,
     json_schema_viewer,
     resource_registry,
+    schema_registry,
   },
   state: () => ({
     loading: false,

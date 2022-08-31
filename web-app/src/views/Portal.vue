@@ -63,7 +63,9 @@
                 <p>
                   Follow an easy-to-follow guide to help you contribute metadata
                   for <span v-text="portal.name"></span> following this schema's
-                  <RouterLink :to="{path: portal.schema}">structure</RouterLink>:
+                  <RouterLink :to="{ path: portal.schema }"
+                    >structure</RouterLink
+                  >:
                 </p>
                 <div
                   v-for="(g, i) in portal.guides"
@@ -81,7 +83,7 @@
                       })
                     "
                     class="btn text-light btn-lg nd mt-2 tip"
-                    :to="{path: g.guide}"
+                    :to="{ path: g.guide }"
                   >
                     <font-awesome-icon icon="fas fa-plus" /> Add
                     <b v-text="g.name"></b> Metadata
@@ -127,7 +129,7 @@
               alt="SCHEMA"
             ></object>
             <RouterLink
-              :to="{path: portal.schema}"
+              :to="{ path: portal.schema }"
               class="nd mt-2 tip text-info"
               :data-tippy-info="'Explore the schema used in ' + portal.name"
             >
@@ -148,7 +150,7 @@
               :alt="g.name"
             ></object>
             <RouterLink
-              :to="{path: g.registry}"
+              :to="{ path: g.registry }"
               class="nd mt-2 tip text-info"
               :data-tippy-info="
                 'Browse metadata in Data Discovery Engine for ' + g.name
@@ -195,7 +197,7 @@
               alt="API"
             ></object>
             <RouterLink
-              :to="{path: portal.faq_link}"
+              :to="{ path: portal.faq_link }"
               class="nd mt-2 tip text-info"
               data-tippy-info="Frequently Asked Questions"
             >

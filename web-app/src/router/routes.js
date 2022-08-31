@@ -32,6 +32,7 @@ export const routes = [
     component: () => import("../views/Contributor.vue"),
   },
   {
+    // NIAID specific, schema.org compatibility portals
     path: "/compatibility",
     name: "Compatibility",
     component: () => import("../views/Compatibility.vue"),
@@ -47,6 +48,7 @@ export const routes = [
     component: () => import("../views/SchemaPlayground.vue"),
   },
   {
+    // internal testing tool for JSON Schema Validation
     path: "/json-schema-viewer",
     name: "JSONSchemaViewer",
     component: () => import("../views/JSONSchemaViewer.vue"),
@@ -93,6 +95,11 @@ export const routes = [
       // we return a redirect path/location here.
       return { path: "/resource/" + to.params.id };
     },
+  },
+  {
+    path: "/registry",
+    name: "SchemaRegistry",
+    component: () => import("../views/SchemaRegistry.vue"),
   },
   {
     path: "/:catchAll(.*)",
