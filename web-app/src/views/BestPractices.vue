@@ -256,7 +256,9 @@
                     </td>
                     <td>
                       <router-link to="/view/biomedical"
-                        ><small class="badge badge-light">Dataset</small></router-link
+                        ><small class="badge badge-light"
+                          >Dataset</small
+                        ></router-link
                       >
                     </td>
                   </tr>
@@ -341,7 +343,9 @@
                     </td>
                     <td>
                       <router-link to="/view/n3c"
-                        ><small class="badge badge-light">Dataset</small></router-link
+                        ><small class="badge badge-light"
+                          >Dataset</small
+                        ></router-link
                       >
                     </td>
                   </tr>
@@ -428,7 +432,9 @@
                     </td>
                     <td>
                       <router-link to="/view/outbreak"
-                        ><small class="badge badge-light">Dataset</small></router-link
+                        ><small class="badge badge-light"
+                          >Dataset</small
+                        ></router-link
                       >
                     </td>
                   </tr>
@@ -526,7 +532,9 @@
                     </td>
                     <td>
                       <router-link to="/view/niaid"
-                        ><small class="badge badge-light">Dataset</small></router-link
+                        ><small class="badge badge-light"
+                          >Dataset</small
+                        ></router-link
                       >
                     </td>
                   </tr>

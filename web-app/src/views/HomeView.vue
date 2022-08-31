@@ -138,7 +138,10 @@
         </h5>
         <div class="m-0 p-5 text-center col-sm-12">
           <h3 class="logoText">Browse Registered Schemas & Metadata</h3>
-          <router-link class="btn btn-outline-info" role="button" to="/registries"
+          <router-link
+            class="btn btn-outline-info"
+            role="button"
+            to="/registries"
             >Continue</router-link
           >
         </div>

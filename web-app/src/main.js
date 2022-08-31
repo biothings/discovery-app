@@ -52,7 +52,16 @@ import {
   faUser,
   faBuilding,
   faTimes,
-  faUndo
+  faUndo,
+  faSpinner,
+  faMinusSquare,
+  faPlusSquare,
+  faHome,
+  faNotEqual,
+  faListUl,
+  faDotCircle,
+  faFileDownload,
+  faExclamationCircle
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
@@ -74,6 +83,7 @@ library.add(
   faEnvelope,
   faCogs,
   faListOl,
+  faListUl,
   faTasks,
   faLightbulb,
   faPlus,
@@ -86,7 +96,15 @@ library.add(
   faUser,
   faBuilding,
   faTimes,
-  faUndo
+  faUndo,
+  faSpinner,
+  faMinusSquare,
+  faPlusSquare,
+  faHome,
+  faNotEqual,
+  faDotCircle,
+  faFileDownload,
+  faExclamationCircle
 );
 
 const app = createApp(App);

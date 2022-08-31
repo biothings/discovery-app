@@ -51,7 +51,7 @@
                     class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-between"
                   >
                     <router-link
-                      :to="{path: '/view/' + item.namespace + '/'}"
+                      :to="{ path: '/view/' + item.namespace + '/' }"
                       v-text="item.namespace"
                       class="d-inline m-2 text-light"
                     ></router-link>
@@ -77,7 +77,9 @@
                       </a>
                     </div>
                     <div>
-                      <router-link :to="{path: '/view/' + item.namespace + '/'}">
+                      <router-link
+                        :to="{ path: '/view/' + item.namespace + '/' }"
+                      >
                         <span
                           class="fa-stack fa-1x pointer tip"
                           data-tippy-content="Visualize"
@@ -283,7 +285,7 @@
                     class="col-sm-12 col-md-8 p-1 mainBackLight d-flex align-items-center justify-content-between"
                   >
                     <router-link
-                      :to="{path: '/dataset/' + item._id}"
+                      :to="{ path: '/dataset/' + item._id }"
                       class="m-2 text-light d-block"
                       :title="item.name"
                     >
@@ -297,7 +299,7 @@
                     class="col-sm-12 col-md-4 p-1 bg-dark actions d-flex align-items-center justify-content-around"
                   >
                     <div>
-                      <router-link :to="{path: '/dataset/' + item._id}">
+                      <router-link :to="{ path: '/dataset/' + item._id }">
                         <span
                           class="fa-stack fa-1x pointer tip"
                           :data-tippy-content="'View Dataset'"

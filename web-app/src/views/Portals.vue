@@ -29,7 +29,7 @@
                 ></DynamicImage>
                 <RouterLink
                   class="tip"
-                  :to="{path: '/portal/' + portal.linkname}"
+                  :to="{ path: '/portal/' + portal.linkname }"
                   data-tippy-info="Learn More"
                 >
                   <h4 class="d-inline">

@@ -803,11 +803,11 @@ export default {
     },
     sendRequest() {
       let self = this;
-      self.loading = true;
+      self.$store.commit("setLoading", { value: true });
       axios
         .get("/api/view?url=" + self.input)
         .then((res) => {
-          self.loading = false;
+          self.$store.commit("setLoading", { value: false });
           if (res.data.validation.valid && !res.data.validation.errors.length) {
             self.handleGoodSchema(res.data);
           } else {
@@ -815,7 +815,7 @@ export default {
           }
         })
         .catch((err) => {
-          self.loading = false;
+          self.$store.commit("setLoading", { value: false });
           console.log(err);
           let culprit = "<h6>" + err.response.data.error + "</h6>";
           if (err.response.data && err.response.data.path) {

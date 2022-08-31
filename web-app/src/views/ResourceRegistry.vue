@@ -33,8 +33,14 @@
                   class="fa-stack fa-1x pointer unselectable tip"
                   @click.prevent="search()"
                 >
-                  <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                  <font-awesome-icon icon="fas fa-search" class="fa-stack-1x text-light"/>
+                  <font-awesome-icon
+                    icon="fas fa-circle"
+                    class="text-muted fa-stack-2x"
+                  />
+                  <font-awesome-icon
+                    icon="fas fa-search"
+                    class="fa-stack-1x text-light"
+                  />
                 </span>
                 <span
                   data-tippy-content="reset"
@@ -44,8 +50,14 @@
                     search();
                   "
                 >
-                  <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                  <font-awesome-icon icon="fas fa-undo" class="fa-stack-1x text-light"/>
+                  <font-awesome-icon
+                    icon="fas fa-circle"
+                    class="text-muted fa-stack-2x"
+                  />
+                  <font-awesome-icon
+                    icon="fas fa-undo"
+                    class="fa-stack-1x text-light"
+                  />
                 </span>
               </div>
             </div>
@@ -90,7 +102,11 @@
                 @click="toggleFilter(filter)"
                 :class="[filter.active ? 'badge-info' : 'badge-secondary']"
               >
-                <font-awesome-icon icon="fas fa-circle" :class="filter.color" class="mr-1"/>
+                <font-awesome-icon
+                  icon="fas fa-circle"
+                  :class="filter.color"
+                  class="mr-1"
+                />
                 <span v-text="filter.name"></span> (<span
                   v-text="filter.count"
                 ></span
@@ -116,9 +132,16 @@
                   target="_blank"
                   title="Learn more"
                 >
-                  <font-awesome-icon icon="fas fa-circle" class="text-primary"/>
+                  <font-awesome-icon
+                    icon="fas fa-circle"
+                    class="text-primary"
+                  />
                 </a>
-                <font-awesome-icon v-else icon="fas fa-circle" :class="filter.color"/>
+                <font-awesome-icon
+                  v-else
+                  icon="fas fa-circle"
+                  :class="filter.color"
+                />
                 <span v-text="filter.name" class="gaText ml-3 mr-3"></span>
               </span>
             </template>
@@ -150,7 +173,10 @@
             v-model="downloadMode"
             @click="toggleDownloadMode"
           />
-          <label for="download_metadata" class="m-0 tip" data-tippy-content="Select registry items for download"
+          <label
+            for="download_metadata"
+            class="m-0 tip"
+            data-tippy-content="Select registry items for download"
             >Download Mode
             <b
               :class="{ 'text-success': downloadMode }"
@@ -219,7 +245,8 @@
                   prevPage();
                   search();
                 "
-                ><font-awesome-icon icon="fas fa-step-backward"/></a>
+                ><font-awesome-icon icon="fas fa-step-backward"
+              /></a>
             </div>
             <template v-if="groupPages">
               <div class="page-item rounded-0" v-show="!startCapLimitReached">
@@ -278,7 +305,8 @@
                   nextPage();
                   search();
                 "
-                ><font-awesome-icon icon="fas fa-step-forward"/></a>
+                ><font-awesome-icon icon="fas fa-step-forward"
+              /></a>
             </div>
           </div>
         </div>
