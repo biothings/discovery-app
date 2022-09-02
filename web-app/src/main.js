@@ -140,7 +140,7 @@ app
   // circular dependency components need to be global
   .component("PropertyBox", PropertyBox)
   .component("AnyOf", AnyOf)
-  .component("OneOf", OneOf)
+  .component("OneOf", OneOf);
 
 // dev base api url
 app.config.globalProperties.$apiUrl =

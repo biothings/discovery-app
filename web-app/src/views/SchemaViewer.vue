@@ -82,7 +82,8 @@
                 class="btn btn-sm btn-success"
                 @click="openRegistration()"
               >
-              <font-awesome-icon icon="fas fa-registered"/> Register This Schema
+                <font-awesome-icon icon="fas fa-registered" /> Register This
+                Schema
               </button>
             </div>
           </div>
@@ -91,7 +92,7 @@
         <div class="input-group input-group-sm mb-2 col-sm-12 col-md-4">
           <div class="input-group-prepend">
             <div class="input-group-text bg-secondary text-light">
-                <font-awesome-icon icon="fas fa-search"/>
+              <font-awesome-icon icon="fas fa-search" />
             </div>
           </div>
           <input
@@ -154,7 +155,8 @@
               role="button"
               class="btn btn-sm btn-info pointer ml-2"
               @click="flipView()"
-              >Change View <font-awesome-icon icon="fas fa-retweet"/></a>
+              >Change View <font-awesome-icon icon="fas fa-retweet"
+            /></a>
             <div v-if="userSchemaURL" class="w-100 text-right">
               <a
                 class="mr-2 text-primary"
@@ -163,7 +165,9 @@
                 rel="noreferrer"
               >
                 <small
-                  >View Source <font-awesome-icon icon="fas fa-external-link-alt"/></small>
+                  >View Source
+                  <font-awesome-icon icon="fas fa-external-link-alt"
+                /></small>
               </a>
             </div>
             <div v-show="developerMode" id="canvasTest"></div>
@@ -171,14 +175,19 @@
               class="pagination overflow-x-scroll mt-3"
               v-show="classesGroupByLetter.length > 5"
             >
-              <li class="page-link" v-for="(item, i) in classesGroupByLetter" :key="i">
+              <li
+                class="page-link"
+                v-for="(item, i) in classesGroupByLetter"
+                :key="i"
+              >
                 <a :href="'#' + item.group" v-text="item.group"></a>
               </li>
             </ul>
             <ul class="list-group mt-3">
               <li
                 class="list-group-item list-group-item-action"
-                v-for="(item, i) in classesGroupByLetter" :key="i + 'l'"
+                v-for="(item, i) in classesGroupByLetter"
+                :key="i + 'l'"
               >
                 <h3
                   :id="item.group"
@@ -191,15 +200,18 @@
                     v-for="def in item.children"
                     class="d-flex justify-content-between align-item-center p-1"
                   >
-                    <router-link :to="{path: '/view/' + namespace + '/' + def}">
+                    <router-link
+                      :to="{ path: '/view/' + namespace + '/' + def }"
+                    >
                       <span v-text="def.split(':')[1]"></span>
-                      <font-awesome-icon icon="fas fa-chevron-right"/>
+                      <font-awesome-icon icon="fas fa-chevron-right" />
                     </router-link>
-                    <font-awesome-icon 
-                    icon="fas fa-code-branch" 
-                    class="pointer tip text-light btn btn-info p-1"
-                    @click.prevent="saveDataAndRedirect(def)"
-                    :data-tippy-content="'Extend ' + def"/>
+                    <font-awesome-icon
+                      icon="fas fa-code-branch"
+                      class="pointer tip text-light btn btn-info p-1"
+                      @click.prevent="saveDataAndRedirect(def)"
+                      :data-tippy-content="'Extend ' + def"
+                    />
                   </li>
                 </ul>
               </li>
@@ -219,7 +231,8 @@
               role="button"
               class="btn btn-sm btn-info pointer ml-2"
               @click="flipView()"
-              >Change View <font-awesome-icon icon="fas fa-retweet"/></a>
+              >Change View <font-awesome-icon icon="fas fa-retweet"
+            /></a>
             <div class="alert alert-warning" v-if="treeBuildErr">
               <small
                 >Hierarchical view not available. Tree could not be built due to
@@ -383,8 +396,14 @@
             data-tippy-content="Go Back"
             @click.prevent="$router.go(-1)"
           >
-            <font-awesome-icon icon="fas fa-circle" class="fa-stack-2x text-muted"/>
-            <font-awesome-icon icon="fas fa-chevron-left" class="text-light fa-stack-1x"/>
+            <font-awesome-icon
+              icon="fas fa-circle"
+              class="fa-stack-2x text-muted"
+            />
+            <font-awesome-icon
+              icon="fas fa-chevron-left"
+              class="text-light fa-stack-1x"
+            />
           </span>
           <div>
             <template v-if="!validationView">
@@ -423,14 +442,15 @@
               rel="noreferrer"
             >
               <small
-                >View Source <font-awesome-icon icon="fas fa-external-link-alt"/></small>
+                >View Source <font-awesome-icon icon="fas fa-external-link-alt"
+              /></small>
             </a>
           </div>
         </div>
 
         <!-- CLASSES FOR QUERY -->
         <div class="context">
-            <!-- Main Class -->
+          <!-- Main Class -->
           <QueryBox
             v-if="queryContent"
             :parent="false"
@@ -469,14 +489,14 @@ import "@/assets/js/notify.min.js";
 export default {
   name: "SchemaViewer",
   //namespace argument and query argument
-  props:['namespace', 'query'],
+  props: ["namespace", "query"],
   components: {
     QueryBox,
   },
   data: function () {
     return {
-        //show network x graph
-        developerMode: true,
+      //show network x graph
+      developerMode: true,
       //NEW VIEWER DATA
       userSchema: [],
       userSchemaURL: "",
@@ -484,8 +504,8 @@ export default {
       userSchemaAllClasses: [],
       parentList: [],
       userSchemaParents: [],
-    //   query: "",
-    //   namespace: "",
+      //   query: "",
+      //   namespace: "",
       namespaceRegistered: false,
       classesGroupByLetter: [],
       nxG: null,
@@ -503,10 +523,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["loading", "userInfo", "queryContent"]),
-    validationView() {
-      return this.$store.state.validationView;
-    },
+    ...mapGetters(["loading", "userInfo", "queryContent", "validationView"]),
     schemaFilters() {
       let letters = [];
       let self = this;
@@ -519,9 +536,6 @@ export default {
         }
       }
       return letters.sort();
-    },
-    expandAll() {
-      return this.$store.getters.getShowAll;
     },
   },
   watch: {
@@ -577,7 +591,7 @@ export default {
         let data = JSON.stringify(found);
         localStorage.setItem("EditorData", data);
         localStorage.setItem("EditorStartingPoint", item);
-        self.$router.push({path: '/editor'})
+        self.$router.push({ path: "/editor" });
       } else {
         self.$swal.fire("Hmmm", "Cannot find Class: " + item);
       }
@@ -683,7 +697,7 @@ export default {
                 }, 100);
               },
               onClose: () => {
-                self.$router.push({path: '/schema-playground'})
+                self.$router.push({ path: "/schema-playground" });
               },
             });
           }
@@ -893,7 +907,7 @@ export default {
     },
     handleFilter(e) {
       if (e.target.value !== "Choose...") {
-        self.$router.push({path: '/' + e.target.value})
+        self.$router.push({ path: "/" + e.target.value });
       }
     },
     handleChange(e) {
@@ -964,10 +978,10 @@ export default {
         }
       }
       self.userSchemaParents = res;
-    //   console.log('ALL PARENTS INFO', self.userSchemaParents)
+      //   console.log('ALL PARENTS INFO', self.userSchemaParents)
     },
     changeView() {
-        this.$store.commit("toggleView");
+      this.$store.commit("toggleView");
     },
     drawGraph(g, container) {
       jsnx.draw(g, {
@@ -1129,10 +1143,9 @@ export default {
                         },
                         onClose: () => {
                           clearInterval(timerInterval);
-                          self.$router.push({path: "/view/" + name + "/"})
+                          self.$router.push({ path: "/view/" + name + "/" });
                         },
                       });
-
                     } else {
                       if (result.value.response.statusText) {
                         self.$swal.fire({
@@ -1192,7 +1205,7 @@ export default {
                   let obj = JSON.stringify(res.data);
                   localStorage.setItem("EditorData", obj);
                   localStorage.setItem("EditorStartingPoint", q.name);
-                  self.$router.push({path: "/editor"})
+                  self.$router.push({ path: "/editor" });
                 })
                 .catch((err) => {
                   throw err;
@@ -1208,7 +1221,10 @@ export default {
   },
   mounted: function () {
     let self = this;
-
+    tippy(".tip", {
+      placement: "top",
+      theme: "light",
+    });
     tippy("#showButton", {
       content: `<div class='m-0'><table class='table'>
               <tr>
@@ -1233,15 +1249,15 @@ export default {
     });
     // self.query = self.q;
     // self.namespace = self.ns;
-    console.log("%c NAMESPACe: " + this.namespace, 'background: hotpink; color:white; padding:4px;')
-    console.log("%c QUERY " + this.query, 'background: blue; color:white; padding:4px;')
+    console.log(
+      "%c NAMESPACe: " + this.namespace,
+      "background: hotpink; color:white; padding:4px;"
+    );
+    console.log(
+      "%c QUERY " + this.query,
+      "background: blue; color:white; padding:4px;"
+    );
     self.checkIfNamespaceIsRegistered(self.namespace);
   },
-  updated:function(){
-    tippy(".tip", {
-      placement: "top",
-      theme: "light",
-    });
-  }
 };
 </script>

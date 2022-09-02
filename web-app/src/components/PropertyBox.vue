@@ -4,11 +4,17 @@
       class="col-sm-12 col-md-3 bg-dark bold d-flex justify-content-start align-items-center"
     >
       <small class="m-0">
-        <font-awesome-icon v-if="FAClass" :icon="'fas ' + FAClass" :class="getColorClass(name)" class="mr-1"/>
+        <font-awesome-icon
+          v-if="FAClass"
+          :icon="'fas ' + FAClass"
+          :class="getColorClass(name)"
+          class="mr-1"
+        />
         <span
           class="text-light font-weight-bold"
           v-text="name"
-          :data-tippy-info="JSON.stringify(fullInfo, null, 2)"
+          :data-tippy-content="JSON.stringify(fullInfo, null, 2)"
+          :id="'tipped' + itemID"
         ></span>
       </small>
     </div>
@@ -60,7 +66,7 @@
             v-if="fullInfo && fullInfo.properties"
             class="d-flex justify-content-center align-items-center"
           >
-            <font-awesome-icon icon="fas fa-chevron-right" class="text-muted"/>
+            <font-awesome-icon icon="fas fa-chevron-right" class="text-muted" />
           </div>
           <div
             v-if="fullInfo && fullInfo.properties"
@@ -73,7 +79,8 @@
               >
                 <div class="border-left border-primary my-4 pl-2">
                   <small class="mainTextDark"
-                    ><font-awesome-icon icon="fas fa-circle"/> <b v-text="name"></b
+                    ><font-awesome-icon icon="fas fa-circle" />
+                    <b v-text="name"></b
                   ></small>
                   <span
                     v-if="isPropRequired(name)"
@@ -82,7 +89,10 @@
                     >is required</span
                   >
 
-                  <font-awesome-icon icon="fas fa-caret-right" class="text-dark m-1"/>
+                  <font-awesome-icon
+                    icon="fas fa-caret-right"
+                    class="text-dark m-1"
+                  />
 
                   <small
                     class="badge badge-pill alert-dark"
@@ -131,6 +141,7 @@
 </template>
 
 <script>
+import tippy from "tippy.js";
 
 export default {
   name: "PropertyBox",
@@ -139,6 +150,7 @@ export default {
       userSchema: [],
       textColor: "",
       backColor: "",
+      itemID: Math.floor(Math.random() * 90000) + 10000,
     };
   },
   props: ["name", "fullInfo", "required", "recommended", "optional"],
@@ -169,7 +181,7 @@ export default {
       }
     },
   },
-  computed:{
+  computed: {
     FAClass() {
       if (this.required && this.required.includes(this.name)) {
         return "fa-asterisk";
@@ -177,13 +189,16 @@ export default {
         return "fa-circle";
       } else if (this.optional && this.optional.includes(this.name)) {
         return "fa-square";
-      }else{
-        return false
+      } else {
+        return false;
       }
     },
   },
   mounted: function () {
     var self = this;
+    tippy("#tipped" + this.itemID, {
+      theme: "light",
+    });
     if (self.parent) {
       self.textColor = "mainTextLight";
       self.backColor = "mainBackLight";

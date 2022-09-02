@@ -42,7 +42,7 @@
           >
             <b v-text="option.strict ? 'STRICT' : 'NON-STRICT'"></b>
           </small>
-          Term Lookup <font-awesome-icon icon="fas fa-search"/>
+          Term Lookup <font-awesome-icon icon="fas fa-search" />
         </button>
         <table class="table table-sm table-striped text-left">
           <thead>
