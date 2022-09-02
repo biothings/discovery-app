@@ -14,9 +14,8 @@
 </template>
 
 <script>
-
 export default {
   name: "ObjectBox",
-  props: ["properties", "required"]
+  props: ["properties", "required"],
 };
 </script>

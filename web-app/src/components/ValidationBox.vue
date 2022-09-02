@@ -2,12 +2,17 @@
   <div class="alert-secondary p-1">
     <small class="text-dark font-weight-bold">
       <span class="mr-1"
-        ><font-awesome-icon icon="fas fa-asterisk" class="text-danger"/> required</span
+        ><font-awesome-icon icon="fas fa-asterisk" class="text-danger" />
+        required</span
       >
       <span class="mr-1"
-        ><font-awesome-icon icon="fas fa-circle" class="text-warning"/> recommended</span
+        ><font-awesome-icon icon="fas fa-circle" class="text-warning" />
+        recommended</span
       >
-      <span class="mr-1"><font-awesome-icon icon="fas fa-square" class="text-info"/> optional</span>
+      <span class="mr-1"
+        ><font-awesome-icon icon="fas fa-square" class="text-info" />
+        optional</span
+      >
     </small>
     <div class="p-0">
       <template v-for="(value, name) in sorted_props" :key="name">

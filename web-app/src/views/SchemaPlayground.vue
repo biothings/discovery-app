@@ -433,10 +433,10 @@
 import axios from "axios";
 import PresetBox from "../components/PresetBox.vue";
 
-import woohoo from "@/assets/img/woohoo-01.svg"
-import oh_no from "@/assets/img/oh_no-01.svg"
-import dde_logo from "@/assets/img/dde-logo-o.svg"
-import not_right from "@/assets/img/not_right-01.svg"
+import woohoo from "@/assets/img/woohoo-01.svg";
+import oh_no from "@/assets/img/oh_no-01.svg";
+import dde_logo from "@/assets/img/dde-logo-o.svg";
+import not_right from "@/assets/img/not_right-01.svg";
 
 export default {
   name: "SchemaPlayground",
@@ -520,7 +520,7 @@ export default {
                 this.$swal({
                   title: "Link Converted",
                   imageAlt: "Warning",
-                  
+
                   customClass: "scale-in-center",
                   html:
                     "<p>We noticed that was not a raw data link. We have converted it to: </p> " +
@@ -550,7 +550,7 @@ export default {
             }
           });
       } else {
-        self.$router.push({path: '/registry'})
+        self.$router.push({ path: "/registry" });
       }
     },
     getFormValues() {
@@ -776,7 +776,7 @@ export default {
         .fire({
           title: "Name your file",
           input: "text",
-          
+
           customClass: "scale-in-center",
           inputAttributes: {
             autocapitalize: "off",
@@ -851,7 +851,7 @@ export default {
           this.$swal.fire({
             imageUrl: oh_no,
             imageHeight: 200,
-            
+
             customClass: "scale-in-center",
             imageAlt: "Error",
             position: "center",
@@ -863,33 +863,35 @@ export default {
     },
     makeURLandRedirect() {
       let self = this;
-      let timerInterval
-      this.$swal.fire({
-        imageUrl: woohoo,
-        imageHeight: 200,
-        imageAlt: "Error",
-        title: "Everything looks good!",
-        html: 'Taking you to your schema in <b></b> seconds..',
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: () => {
-          self.$swal.showLoading()
-          const b = self.$swal.getHtmlContainer().querySelector('b')
-          timerInterval = setInterval(() => {
-            b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000)
-          }, 100)
-        },
-        willClose: () => {
-          clearInterval(timerInterval)
-        }
-      }).then((result) => {
-        /* Read more about handling dismissals below */
-        if (result.dismiss === self.$swal.DismissReason.timer) {
-          this.number = Math.floor(Math.random() * 90000) + 10000;
-          this.setLastViewed();
-          self.$router.push({path: "/view/" + this.slug + this.number})
-        }
-      });
+      let timerInterval;
+      this.$swal
+        .fire({
+          imageUrl: woohoo,
+          imageHeight: 200,
+          imageAlt: "Error",
+          title: "Everything looks good!",
+          html: "Taking you to your schema in <b></b> seconds..",
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: () => {
+            self.$swal.showLoading();
+            const b = self.$swal.getHtmlContainer().querySelector("b");
+            timerInterval = setInterval(() => {
+              b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000);
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          },
+        })
+        .then((result) => {
+          /* Read more about handling dismissals below */
+          if (result.dismiss === self.$swal.DismissReason.timer) {
+            this.number = Math.floor(Math.random() * 90000) + 10000;
+            this.setLastViewed();
+            self.$router.push({ path: "/view/" + this.slug + this.number });
+          }
+        });
     },
     setLastViewed() {
       let temp = this.slug + this.number;
