@@ -97,6 +97,11 @@ export const routes = [
     },
   },
   {
+    path: "/editor",
+    name: "SchemaEditor",
+    component: () => import("../views/Editor.vue"),
+  },
+  {
     path: "/registry",
     name: "SchemaRegistry",
     component: () => import("../views/SchemaRegistry.vue"),

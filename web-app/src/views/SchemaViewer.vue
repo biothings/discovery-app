@@ -393,8 +393,8 @@
         >
           <span
             class="fa-stack fa-1x pointer unselectable tip"
-            data-tippy-content="Go Back"
-            @click.prevent="$router.go(-1)"
+            data-tippy-content="Back to namespace home"
+            @click.prevent="$router.push('/view/' + namespace)"
           >
             <font-awesome-icon
               icon="fas fa-circle"
@@ -427,9 +427,9 @@
             >
             <input
               id="showButton"
-              class="form-control slider m-auto tip"
+              class="form-control slider m-auto"
               @change="changeView()"
-              data-tippy-content="Show this class only and any validation included"
+              title="Show this class only and any validation included"
               type="checkbox"
               v-model="validationView"
             />

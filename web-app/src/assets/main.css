@@ -54,3 +54,74 @@
 .stripedList li:nth-child(even) {
   background-color: rgb(243, 243, 243);
 }
+.drag-el {
+  color: white;
+  transition: all 0.3s;
+  background-image: url("@/assets/img/cube.svg");
+  background-position: left;
+  background-repeat: no-repeat;
+  outline: none !important;
+  padding: 10px 10px 10px 40px !important;
+}
+.drag-el:hover {
+  cursor: grab;
+}
+.v-container {
+  position: relative;
+  transform-style: preserve-3d;
+}
+.drop-zone {
+  background-color: honeydew;
+  border: grey dotted 2px;
+  max-height: 200px;
+  overflow: scroll;
+}
+.drop-zone[drop-active="true"] {
+  background-color: #d2ff8f;
+  border: #caff37 dotted 2px;
+}
+#classGraph {
+  width: 100%;
+  height: 400px;
+}
+.renderjson a {
+  text-decoration: none;
+  text-shadow: none !important;
+}
+.renderjson .disclosure {
+  color: rgb(0, 182, 192);
+  font-size: 150%;
+  text-shadow: none !important;
+}
+.renderjson .syntax {
+  color: grey;
+  text-shadow: none !important;
+}
+.renderjson .string {
+  color: rgb(87, 87, 87);
+  text-shadow: none !important;
+}
+.renderjson .number {
+  color: rgb(148, 52, 200);
+  text-shadow: none !important;
+}
+.renderjson .boolean {
+  color: rgb(227, 44, 160);
+  text-shadow: none !important;
+}
+.renderjson .key {
+  color: rgb(92, 33, 115);
+  text-shadow: none !important;
+}
+.renderjson .keyword {
+  color: rgb(32, 84, 161);
+  text-shadow: none !important;
+}
+.renderjson .object.syntax {
+  color: lightseagreen;
+  text-shadow: none !important;
+}
+.renderjson .array.syntax {
+  color: rgb(223, 88, 55);
+  text-shadow: none !important;
+}

@@ -1,30 +1,30 @@
 export const json_schema_viewer = {
   state: {
-    schema: Object,
+    schemaJSV: Object,
     showDescriptions: false,
   },
   strict: true,
   mutations: {
     saveSchema(state, payload) {
-      state.schema = payload["schema"];
-      console.log("🍕🍕🍕 saved schema..🍕🍕🍕", state.schema);
+      state.schemaJSV = payload["schema"];
+      console.log("🍕🍕🍕 saved schemaJSV..🍕🍕🍕", state.schemaJSV);
     },
   },
   getters: {
-    getSchema: (state) => {
-      return state.schema;
+    getSchemaJSV: (state) => {
+      return state.schemaJSV;
     },
     getType: (state) => {
-      if (state.schema) {
-        return state.schema["@type"];
+      if (state.schemaJSV) {
+        return state.schemaJSV["@type"];
       }
     },
-    getShowDesc: (state) => {
+    getShowDescJSV: (state) => {
       return state.showDescriptions;
     },
     isPropRequired: (state) => (propname) => {
-      if (state.schema && state.schema.hasOwnProperty("required")) {
-        if (state.schema["required"].includes(propname)) {
+      if (state.schemaJSV && state.schemaJSV.hasOwnProperty("required")) {
+        if (state.schemaJSV["required"].includes(propname)) {
           return true;
         } else {
           return false;

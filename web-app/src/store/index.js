@@ -6,6 +6,7 @@ import { json_schema_viewer } from "./modules/json_schema_viewer";
 import { resource_registry } from "./modules/resource_registry";
 import { schema_registry } from "./modules/schema_registry";
 import { schema_viewer } from "./modules/schema_viewer";
+import { editor } from "./modules/editor";
 
 export default createStore({
   modules: {
@@ -16,6 +17,7 @@ export default createStore({
     resource_registry,
     schema_registry,
     schema_viewer,
+    editor,
   },
   state: () => ({
     loading: false,
