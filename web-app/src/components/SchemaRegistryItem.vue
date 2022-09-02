@@ -11,7 +11,11 @@
           "
           type="checkbox"
         />
-        <font-awesome-icon v-if="adding" icon="fas fa-spinner" class="fa-pulse text-info ml-2"/>
+        <font-awesome-icon
+          v-if="adding"
+          icon="fas fa-spinner"
+          class="fa-pulse text-info ml-2"
+        />
       </div>
       <div class="flex-grow-1 d-flex align-items-center">
         <div class="d-inline mr-1">
@@ -26,7 +30,11 @@
           <h6 class="m-1 mainTextDark d-inline">
             {{ item.label }}
             <small
-              ><font-awesome-icon :id="item.label" icon="fas fa-circle" class="text-info"/></small>
+              ><font-awesome-icon
+                :id="item.label"
+                icon="fas fa-circle"
+                class="text-info"
+            /></small>
           </h6>
         </div>
         <p class="m-0 text-muted d-none d-md-inline">
@@ -35,12 +43,20 @@
               ><span v-text="propTotal"></span> Properties</span
             >
             <template v-show="propTotal">
-                <font-awesome-icon v-if="!expand" icon="fas fa-plus-square" class="text-success"/>
-                <font-awesome-icon v-else icon="fas fa-minus-square" class="text-danger"/>
+              <font-awesome-icon
+                v-if="!expand"
+                icon="fas fa-plus-square"
+                class="text-success"
+              />
+              <font-awesome-icon
+                v-else
+                icon="fas fa-minus-square"
+                class="text-danger"
+              />
             </template>
           </small>
           |
-          <small><font-awesome-icon icon="fas fa-home"/>: </small>
+          <small><font-awesome-icon icon="fas fa-home" />: </small>
           <small class="text-muted">
             <a v-text="item.namespace" :href="'/view/' + item.namespace"></a>
           </small>
@@ -63,9 +79,16 @@
             class="fa-stack fa-1x pointer tip mr-2 ml-2"
             @click.prevent="saveDataAndRedirect(item)"
             :data-tippy-content="'Visualize ' + item.label"
+            :id="'viz' + itemID"
           >
-            <font-awesome-icon icon="fas fa-circle" class="fa-stack-2x text-info"/>
-            <font-awesome-icon icon="fas fa-eye" class="fa-stack-1x text-light"/>
+            <font-awesome-icon
+              icon="fas fa-circle"
+              class="fa-stack-2x text-info"
+            />
+            <font-awesome-icon
+              icon="fas fa-eye"
+              class="fa-stack-1x text-light"
+            />
           </span>
         </div>
         <div>
@@ -73,9 +96,16 @@
             class="fa-stack fa-1x pointer tip mr-2 ml-2"
             @click.prevent="saveDataAndRedirect(item, 'editor')"
             :data-tippy-content="'Extend ' + item.label"
+            :id="'ext' + itemID"
           >
-            <font-awesome-icon icon="fas fa-circle" class="fa-stack-2x mainTextLight"/>
-            <font-awesome-icon icon="fas fa-code-branch" class="fa-stack-1x text-light"/>
+            <font-awesome-icon
+              icon="fas fa-circle"
+              class="fa-stack-2x mainTextLight"
+            />
+            <font-awesome-icon
+              icon="fas fa-code-branch"
+              class="fa-stack-1x text-light"
+            />
           </span>
         </div>
       </div>
@@ -111,6 +141,7 @@ export default {
       expand: false,
       picked: false,
       adding: false,
+      itemID: Math.floor(Math.random() * 90000) + 10000,
     };
   },
   components: {
@@ -185,8 +216,8 @@ export default {
               return o.label;
             },
           ]);
-          item['properties'] = sorted;
-          item['color'] = self.getRandomColor();
+          item["properties"] = sorted;
+          item["color"] = self.getRandomColor();
           let payload = {};
           payload["item"] = item;
           self.$store.commit("addItem", payload);
@@ -236,8 +267,11 @@ export default {
       return this.$store.getters.getMaxReached;
     },
   },
-  mounted: function(){
-    tippy(".tip", {
+  mounted: function () {
+    tippy("#viz" + this.itemID, {
+      theme: "light",
+    });
+    tippy("#ext" + this.itemID, {
       theme: "light",
     });
   },

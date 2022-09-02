@@ -10,13 +10,16 @@ import VueSweetalert2 from "vue-sweetalert2";
 // Global Components
 import CopyBtn from "./components/CopyBtn.vue";
 import ResourceFieldBox from "./components/ResourceFieldBox.vue";
+import PropertyBox from "./components/PropertyBox.vue";
+import AnyOf from "./components/AnyOf.vue";
+import OneOf from "./components/OneOf.vue";
 
 import "./assets/main.css";
 import "./assets/css/styles.css";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
 import "sweetalert2/dist/sweetalert2.min.css";
-import "tabulator-tables/dist/css/tabulator.min.css"
+import "tabulator-tables/dist/css/tabulator.min.css";
 
 /* FontAwesome core */
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -62,7 +65,12 @@ import {
   faListUl,
   faDotCircle,
   faFileDownload,
-  faExclamationCircle
+  faExclamationCircle,
+  faRegistered,
+  faRetweet,
+  faAsterisk,
+  faSquare,
+  faCaretRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
@@ -105,7 +113,12 @@ library.add(
   faNotEqual,
   faDotCircle,
   faFileDownload,
-  faExclamationCircle
+  faExclamationCircle,
+  faRegistered,
+  faRetweet,
+  faAsterisk,
+  faSquare,
+  faCaretRight
 );
 
 const app = createApp(App);
@@ -123,7 +136,11 @@ app
 app
   .component("CopyBtn", CopyBtn)
   .component("font-awesome-icon", FontAwesomeIcon)
-  .component("ResourceFieldBox", ResourceFieldBox);
+  .component("ResourceFieldBox", ResourceFieldBox)
+  // circular dependency components need to be global
+  .component("PropertyBox", PropertyBox)
+  .component("AnyOf", AnyOf)
+  .component("OneOf", OneOf)
 
 // dev base api url
 app.config.globalProperties.$apiUrl =
