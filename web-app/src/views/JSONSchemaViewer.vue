@@ -348,7 +348,7 @@ export default {
   },
   computed: {
     schema: function () {
-      return this.$store.getters.getSchema;
+      return this.$store.getters.getSchemaJSV;
     },
     schemaType: function () {
       return this.$store.getters.getType;
