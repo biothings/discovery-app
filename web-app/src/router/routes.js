@@ -102,6 +102,12 @@ export const routes = [
     component: () => import("../views/SchemaRegistry.vue"),
   },
   {
+    path: "/view/:namespace?/:query?",
+    name: "SchemaViewer",
+    props: true,
+    component: () => import("../views/SchemaViewer.vue"),
+  },
+  {
     path: "/:catchAll(.*)",
     name: "NotFound",
     component: () => import("../views/NotFound.vue"),

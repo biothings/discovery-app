@@ -44,3 +44,13 @@
   cursor: default;
   background-color: rgb(196, 27, 91);
 }
+
+[v-cloak] > * {
+  display: none;
+}
+[v-cloak]::before {
+  content: "Please wait...";
+}
+.stripedList li:nth-child(even) {
+  background-color: rgb(243, 243, 243);
+}

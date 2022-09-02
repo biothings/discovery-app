@@ -431,8 +431,12 @@
 
 <script>
 import axios from "axios";
-import tippy from "tippy.js";
 import PresetBox from "../components/PresetBox.vue";
+
+import woohoo from "@/assets/img/woohoo-01.svg"
+import oh_no from "@/assets/img/oh_no-01.svg"
+import dde_logo from "@/assets/img/dde-logo-o.svg"
+import not_right from "@/assets/img/not_right-01.svg"
 
 export default {
   name: "SchemaPlayground",
@@ -468,10 +472,9 @@ export default {
           .replace("www.github.com", "raw.githubusercontent.com");
         this.$swal({
           title: "Link Converted",
-          imageUrl: ".@/assets/img/dde-logo-o.svg",
+          imageUrl: dde_logo,
           imageHeight: 100,
           imageAlt: "Warning",
-          animation: false,
           customClass: "scale-in-center",
           html:
             "<p>We noticed that was not a raw data link. We have converted it to: </p> " +
@@ -482,8 +485,8 @@ export default {
             "</a></p>" +
             "<p>Proceed with this link?</p>",
           showCancelButton: true,
-          confirmButtonColor: "{{color_main}}",
-          cancelButtonColor: "{{color_sec}}",
+          confirmButtonColor: "#5C3069",
+          cancelButtonColor: "#006476",
           confirmButtonText: "Yes, use this link!",
         }).then((result) => {
           if (result.value) {
@@ -517,7 +520,7 @@ export default {
                 this.$swal({
                   title: "Link Converted",
                   imageAlt: "Warning",
-                  animation: false,
+                  
                   customClass: "scale-in-center",
                   html:
                     "<p>We noticed that was not a raw data link. We have converted it to: </p> " +
@@ -528,8 +531,8 @@ export default {
                     "</a></p>" +
                     "<p>Proceed with this link?</p>",
                   showCancelButton: true,
-                  confirmButtonColor: "{{color_main}}",
-                  cancelButtonColor: "{{color_sec}}",
+                  confirmButtonColor: "#5C3069",
+                  cancelButtonColor: "#006476",
                   confirmButtonText: "Yes, use this link!",
                 }).then((result) => {
                   if (result.value) {
@@ -547,7 +550,7 @@ export default {
             }
           });
       } else {
-        window.location.href = "./registry";
+        self.$router.push({path: '/registry'})
       }
     },
     getFormValues() {
@@ -568,7 +571,7 @@ export default {
         self.makeURLandRedirect();
       } else {
         this.$swal({
-          imageUrl: "@/assets/img/not_right-01.svg",
+          imageUrl: not_right,
           imageHeight: 200,
           imageAlt: "Error",
           title: "Error parsing schema",
@@ -592,9 +595,9 @@ export default {
         self.makeURLandRedirect();
       } else {
         this.$swal({
-          imageUrl: "@/assets/img/oh_no-01.svg",
+          imageUrl: oh_no,
           imageHeight: 200,
-          imageAlt: "Error",
+          icon: "Error",
           title: "Something went wrong",
           text: JSON.stringify(data.validation.errors),
         });
@@ -725,12 +728,11 @@ export default {
       if (only_warnings) {
         this.$swal
           .fire({
-            position: "top center",
+            position: "center",
             title: `There ${
               validation.errors.length > 1 ? "are warnings" : "is a warning"
             } with your schema:`,
             html: html,
-            animation: false,
             customClass: "scale-in-center",
             footer: `<small class="text-muted">🟡: warning - optional</small>
               <p>These appear to be small warnings only but we recommend fixing them to prevent future issues.</p>`,
@@ -749,12 +751,11 @@ export default {
       } else {
         this.$swal
           .fire({
-            position: "top center",
+            position: "center",
             title: `There ${
               validation.errors.length > 1 ? "are problems" : "is a problem"
             } with your schema:`,
             html: html,
-            animation: false,
             customClass: "scale-in-center",
             footer: `<small class="text-muted">🔴 : error - must be resolved, 
               🟡: warning - optional</small>`,
@@ -775,7 +776,7 @@ export default {
         .fire({
           title: "Name your file",
           input: "text",
-          animation: false,
+          
           customClass: "scale-in-center",
           inputAttributes: {
             autocapitalize: "off",
@@ -805,7 +806,7 @@ export default {
       let self = this;
       self.$store.commit("setLoading", { value: true });
       axios
-        .get("/api/view?url=" + self.input)
+        .get(self.$apiUrl + "/api/view?url=" + self.input)
         .then((res) => {
           self.$store.commit("setLoading", { value: false });
           if (res.data.validation.valid && !res.data.validation.errors.length) {
@@ -848,12 +849,12 @@ export default {
               "</small></div>";
           }
           this.$swal.fire({
-            imageUrl: "@/assets/img/oh_no-01.svg",
+            imageUrl: oh_no,
             imageHeight: 200,
-            animation: false,
+            
             customClass: "scale-in-center",
             imageAlt: "Error",
-            position: "top center",
+            position: "center",
             title: "Details: ",
             html: culprit,
           });
@@ -861,34 +862,33 @@ export default {
         });
     },
     makeURLandRedirect() {
-      let timerInterval;
+      let self = this;
+      let timerInterval
       this.$swal.fire({
-        imageUrl: "@/assets/img/woohoo-01.svg",
+        imageUrl: woohoo,
         imageHeight: 200,
         imageAlt: "Error",
         title: "Everything looks good!",
-        confirmButtonColor: "{{color_main}}",
-        cancelButtonColor: "{{color_sec}}",
-        animation: false,
-        customClass: "scale-in-center",
-        html: "Taking you to your schema in <strong></strong> seconds.",
+        html: 'Taking you to your schema in <b></b> seconds..',
         timer: 3000,
-        onBeforeOpen: () => {
-          const content = this.$swal.getContent();
-          const $ = content.querySelector.bind(content);
-          this.$swal.showLoading();
+        timerProgressBar: true,
+        didOpen: () => {
+          self.$swal.showLoading()
+          const b = self.$swal.getHtmlContainer().querySelector('b')
           timerInterval = setInterval(() => {
-            this.$swal.getContent().querySelector("strong").textContent = (
-              this.$swal.getTimerLeft() / 1000
-            ).toFixed(0);
-          }, 100);
+            b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000)
+          }, 100)
         },
-        onClose: () => {
-          clearInterval(timerInterval);
+        willClose: () => {
+          clearInterval(timerInterval)
+        }
+      }).then((result) => {
+        /* Read more about handling dismissals below */
+        if (result.dismiss === self.$swal.DismissReason.timer) {
           this.number = Math.floor(Math.random() * 90000) + 10000;
           this.setLastViewed();
-          window.location.href = "./view/" + this.slug + this.number + "/";
-        },
+          self.$router.push({path: "/view/" + this.slug + this.number})
+        }
       });
     },
     setLastViewed() {
@@ -900,22 +900,6 @@ export default {
         localStorage.getItem("user-schema-url")
       );
     },
-  },
-  mounted: function () {
-    tippy("*[data-tippy-info]", {
-      placement: "bottom",
-      theme: "tomato",
-      allowHTML: true,
-      content: "loading",
-      interactive: true,
-      animation: "fade",
-      onShow(instance) {
-        let src = instance.reference.dataset.tippyInfo;
-        instance.setContent(
-          "<div><img src='" + src + "' width='150px'/></div>"
-        );
-      },
-    });
   },
   components: { PresetBox },
 };

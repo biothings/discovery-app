@@ -41,8 +41,16 @@
               <div class="alert alert-light jumbotron">
                 <h2 class="logoText">Classes</h2>
                 <p>
-                  Visualize (<font-awesome-icon icon="fas fa-eye" class="text-info"/>), extend (<font-awesome-icon icon="fas fa-code-branch" class="mainTextLight"/>) and compare (<font-awesome-icon icon="fas fa-not-equal" class="mainTextDark"/>)
-                  available schema classes.
+                  Visualize (<font-awesome-icon
+                    icon="fas fa-eye"
+                    class="text-info"
+                  />), extend (<font-awesome-icon
+                    icon="fas fa-code-branch"
+                    class="mainTextLight"
+                  />) and compare (<font-awesome-icon
+                    icon="fas fa-not-equal"
+                    class="mainTextDark"
+                  />) available schema classes.
                 </p>
               </div>
               <div>
@@ -50,7 +58,9 @@
                   <div class="row m-0 cBox actions bg-secondary rounded">
                     <div class="col-sm-9 p-2">
                       <div class="d-flex align-item-center">
-                        <div class="d-flex align-item-center justify-content-center">
+                        <div
+                          class="d-flex align-item-center justify-content-center"
+                        >
                           <small
                             class="text-light px-2"
                             v-text="total + ' Results'"
@@ -74,24 +84,45 @@
                         data-tippy-content="Search"
                         @click.prevent="search()"
                       >
-                        <font-awesome-icon icon="fas fa-circle" class="text-muted fa-stack-2x"/>
-                        <font-awesome-icon icon="fas fa-search" class="fa-stack-1x text-light"/>
+                        <font-awesome-icon
+                          icon="fas fa-circle"
+                          class="text-muted fa-stack-2x"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-search"
+                          class="fa-stack-1x text-light"
+                        />
                       </span>
                       <span
                         class="fa-stack fa-1x pointer tip unselectable"
                         data-tippy-content="Reset"
-                        @click.prevent="query=''; search()"
+                        @click.prevent="
+                          query = '';
+                          search();
+                        "
                       >
-                        <font-awesome-icon icon="fas fa-circle" class="text-danger fa-stack-2x"/>
-                        <font-awesome-icon icon="fas fa-undo" class="fa-stack-1x text-light"/>
+                        <font-awesome-icon
+                          icon="fas fa-circle"
+                          class="text-danger fa-stack-2x"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-undo"
+                          class="fa-stack-1x text-light"
+                        />
                       </span>
                       <span
                         class="fa-stack fa-1x pointer unselectable tip"
                         data-tippy-content="Compare Schemas"
                         @click="openModal()"
                       >
-                        <font-awesome-icon icon="fas fa-circle" class="mainTextDark fa-stack-2x"/>
-                        <font-awesome-icon icon="fas fa-not-equal" class="fa-stack-1x text-light"/>
+                        <font-awesome-icon
+                          icon="fas fa-circle"
+                          class="mainTextDark fa-stack-2x"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-not-equal"
+                          class="fa-stack-1x text-light"
+                        />
                       </span>
                     </div>
                   </div>
@@ -159,7 +190,8 @@
                         prevPage();
                         search();
                       "
-                      ><font-awesome-icon icon="fas fa-step-backward"/></a>
+                      ><font-awesome-icon icon="fas fa-step-backward"
+                    /></a>
                   </div>
                   <template v-if="groupPages">
                     <div
@@ -224,7 +256,8 @@
                         nextPage();
                         search();
                       "
-                      ><font-awesome-icon icon="fas fa-step-forward"/></a>
+                      ><font-awesome-icon icon="fas fa-step-forward"
+                    /></a>
                   </div>
                 </div>
               </div>
@@ -249,7 +282,11 @@
                 class="pagination overflow-x-scroll mt-3"
                 v-show="classesGroupByLetter.length > 5"
               >
-                <li class="page-link" v-for="(item, i) in classesGroupByLetter" :key="i + 'sm'">
+                <li
+                  class="page-link"
+                  v-for="(item, i) in classesGroupByLetter"
+                  :key="i + 'sm'"
+                >
                   <a :href="'#' + item.group" v-text="item.group"></a>
                 </li>
               </ul>
@@ -257,7 +294,8 @@
                 <ul class="list-group mt-3">
                   <li
                     class="list-group-item list-group-item-action"
-                    v-for="(item, i) in classesGroupByLetter" :key="i + 'letter'"
+                    v-for="(item, i) in classesGroupByLetter"
+                    :key="i + 'letter'"
                   >
                     <h3
                       :id="item.group"
@@ -267,9 +305,9 @@
                     ></h3>
                     <ul style="list-style: none">
                       <li v-for="def in item.children">
-                        <router-link :to="{path: '/view/' + def}">
+                        <router-link :to="{ path: '/view/' + def }">
                           <span v-text="def"></span>
-                          <font-awesome-icon icon="fas fa-chevron-right"/>
+                          <font-awesome-icon icon="fas fa-chevron-right" />
                         </router-link>
                       </li>
                     </ul>
@@ -301,18 +339,21 @@
               Compare All Properties (Extended and Inherited)
             </h6>
             <small class="d-block"
-              ><font-awesome-icon icon="fas fa-dot-circle" class="text-danger"/> Inherited from
-              Schema.org</small
+              ><font-awesome-icon
+                icon="fas fa-dot-circle"
+                class="text-danger"
+              />
+              Inherited from Schema.org</small
             >
             <small class="d-block"
-              ><font-awesome-icon icon="fas fa-circle" class="text-info"/> Extended
-              Definition</small
+              ><font-awesome-icon icon="fas fa-circle" class="text-info" />
+              Extended Definition</small
             >
             <button
               @click="compareAll()"
               class="btn mainBackLight text-light m-auto"
             >
-            <font-awesome-icon icon="fas fa-list-ul"/> Compare All
+              <font-awesome-icon icon="fas fa-list-ul" /> Compare All
             </button>
           </div>
           <div class="w-50 border-left p-1 text-muted text-center">
@@ -334,14 +375,17 @@
               @click="compareUsed()"
               class="btn mainBackDark text-light m-auto"
             >
-            <font-awesome-icon icon="fas fa-tasks"/> Compare Used
+              <font-awesome-icon icon="fas fa-tasks" /> Compare Used
             </button>
           </div>
         </div>
         <p v-else class="text-center text-muted alert alert-light p-2 mt-2">
-        <font-awesome-icon icon="fas fa-exclamation-circle" class="text-danger"/> Please select at
-          least 2 items to compare. <br />Select any items to compare ALL
-          properties or items with validation available (
+          <font-awesome-icon
+            icon="fas fa-exclamation-circle"
+            class="text-danger"
+          />
+          Please select at least 2 items to compare. <br />Select any items to
+          compare ALL properties or items with validation available (
           <small class="badge badge-success">V</small> ) to compare USED
           properties only.
         </p>
@@ -356,7 +400,10 @@
           class="p-1 alert-secondary text-center"
         >
           <a id="downloadCSV" href="#" class="text-muted">
-            <small><font-awesome-icon icon="fas fa-file-download"/> Download CSV</small>
+            <small
+              ><font-awesome-icon icon="fas fa-file-download" /> Download
+              CSV</small
+            >
           </a>
         </div>
       </div>
@@ -368,7 +415,7 @@
 import tippy from "tippy.js";
 import Mark from "mark.js";
 import axios from "axios";
-import { orderBy } from 'lodash'
+import { orderBy } from "lodash";
 import "@/assets/js/notify.min.js";
 
 import { mapGetters } from "vuex";

@@ -73,14 +73,9 @@ export const schema_registry = {
             let propName = main.properties[i]["curie"];
             let propLabel = main.properties[i]["label"];
             if (propName.includes("schema:")) {
-              propLabel =
-                '🔴 ' +
-                main.properties[i]["label"];
+              propLabel = "🔴 " + main.properties[i]["label"];
             } else {
-              propLabel =
-                '<span>🔵 ' +
-                main.properties[i]["curie"] +
-                "</span>";
+              propLabel = "<span>🔵 " + main.properties[i]["curie"] + "</span>";
             }
             // look for prop in others
             let tableRow = { Property: propLabel };
@@ -219,14 +214,9 @@ export const schema_registry = {
             let propName = main.properties[i]["curie"];
             let propLabel = main.properties[i]["label"];
             if (propName.includes("schema:")) {
-              propLabel =
-                '🔴 ' +
-                main.properties[i]["label"];
+              propLabel = "🔴 " + main.properties[i]["label"];
             } else {
-              propLabel =
-                '<span>🔵 ' +
-                main.properties[i]["curie"] +
-                "</span>";
+              propLabel = "<span>🔵 " + main.properties[i]["curie"] + "</span>";
             }
             // look for prop in others
             let tableRow = { Property: propLabel };
