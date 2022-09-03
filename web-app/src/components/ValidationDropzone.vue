@@ -3,10 +3,10 @@
     <div class="col-sm-12 col-md-5">
       <small class="text-light" v-text="propname"></small>
       <font-awesome-icon
-        icon="far fa-times-circle"
-        class="pointer text-warning"
+        icon="fas fa-times-circle"
+        class="pointer text-warning ml-1"
         @click="resetValidation()"
-        data-tippy-info="Clear Validation"
+        data-tippy-content="Clear Validation"
     />
     </div>
     <div
@@ -20,7 +20,7 @@
       <template v-for="item in matches">
         <div
           v-if="val.type === item.validation.type"
-          :data-tippy-info="JSON.stringify(item.validation, null, 2)"
+          :data-tippy-content="JSON.stringify(item.validation, null, 2)"
           :style="{ 'background-color': item.color }"
           class="badge drag-el m-1"
           :key="item.title"

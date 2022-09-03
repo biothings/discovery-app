@@ -73,6 +73,16 @@ import {
   faCaretRight,
   faTimesCircle,
   faFileMedical,
+  faUserCheck,
+  faSignInAlt,
+  faPenSquare,
+  faQuestionCircle,
+  faStar,
+  faInfoCircle,
+  faMinusCircle,
+  faCheckCircle,
+  faEllipsisH,
+  faMinus,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub, faGithubAlt } from "@fortawesome/free-brands-svg-icons";
 
@@ -123,7 +133,20 @@ library.add(
   faCaretRight,
   faTimesCircle,
   faGithubAlt,
-  faFileMedical
+  faFileMedical,
+  faUserCheck,
+  faSignInAlt,
+  faPenSquare,
+  faQuestionCircle,
+  faStar,
+  faInfoCircle,
+  faTimesCircle,
+  faMinusCircle,
+  faCheckCircle,
+  faEllipsisH,
+  faMinus,
+  faTimesCircle
+
 );
 
 const app = createApp(App);

@@ -19,10 +19,10 @@
         >
           <span
             class="badge bg-success text-light tip mr-2"
-            :data-tippy-info="'Logged in as ' + userInfo.login"
+            :data-tippy-content="'Logged in as ' + userInfo.login"
             v-if="userInfo && userInfo.login"
           >
-            <i class="fas fa-user-check text-light"></i>
+            <font-awesome-icon icon="fas fa-user-check" class="text-light"></font-awesome-icon>
           </span>
           <a
             class="nav-link active text-primary mr-2"
@@ -31,51 +31,51 @@
           >
             <span
               class="badge bg-info text-light pointer tip"
-              data-tippy-info="Click to sign in"
+              data-tippy-content="Click to sign in"
             >
-              <i class="fas fa-sign-in-alt text-light"></i> Sign In
+              <font-awesome-icon icon="fas fa-sign-in-alt" class="text-light"></font-awesome-icon> Sign In
             </span>
           </a>
           <template v-if="newClassAdded">
             <span
               class="badge mainBackDark text-light pointer tip mr-2"
-              data-tippy-info="Preview"
+              data-tippy-content="Preview"
               @click="getPreview()"
             >
-              <i class="fas fa-code text-light"></i> Preview
+              <font-awesome-icon icon="fas fa-code" class="text-light"></font-awesome-icon> Preview
             </span>
             <span
               class="badge bg-success text-light pointer tip mr-2"
-              data-tippy-info="Download your schema"
+              data-tippy-content="Download your schema"
               @click="downloadSchema()"
             >
-              <i class="fas fa-file-download text-light"></i> Download
+              <font-awesome-icon icon="fas fa-file-download" class="text-light"></font-awesome-icon> Download
             </span>
             <span
               class="badge bg-primary text-light pointer tip mr-2"
-              data-tippy-info="Requires GitHub Login"
+              data-tippy-content="Requires GitHub Login"
               @click.prevent="githubOptions()"
             >
-              <i class="fab fa-github text-light"></i> Save to GitHub*
+              <font-awesome-icon icon="fab fa-github" class="text-light"></font-awesome-icon> Save to GitHub*
             </span>
             <span
               class="badge bg-secondary text-light pointer tip mr-2"
-              data-tippy-info="Learn about this editor"
+              data-tippy-content="Learn about this editor"
               @click.prevent="showHelp()"
             >
-              <i class="fas fa-question-circle text-light"></i> Help
+              <font-awesome-icon icon="fas fa-question-circle" class="text-light"></font-awesome-icon> Help
             </span>
           </template>
           <span
             v-if="userInfo && userInfo.login"
             class="badge bg-primary text-light pointer tip mr-2"
-            data-tippy-info="Save Progress Locally"
+            data-tippy-content="Save Progress Locally"
             @click.prevent="handleProgress()"
           >
             Save/Load Progress
           </span>
           <small class="text-light"
-            >Extending <i class="fas fa-chevron-right"></i>
+            >Extending <font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon>
             <b v-text="startingPoint"></b
           ></small>
         </div>
@@ -96,7 +96,7 @@
               <input
                 class="form-control slider m-auto tip"
                 @click="editValidation()"
-                data-tippy-info="Edit Schema Validation"
+                data-tippy-content="Edit Schema Validation"
                 type="checkbox"
               />
             </div>
@@ -111,7 +111,7 @@
             <div class="bg-info p-1 col-sm-12">
               <p class="text-center text-light m-0">
                 <small class="text-light"
-                  ><i class="fas fa-info-circle text-light"></i> Define how the
+                  ><font-awesome-icon icon="fas fa-info-circle" class="text-light"></font-awesome-icon> Define how the
                   input for each property should be validated, drag and drop
                   common rules or create your own.</small
                 >
@@ -145,25 +145,23 @@
                 <template v-for="item in validation_options" :key="item.title">
                   <div
                     class="badge drag-el m-1"
-                    :data-tippy-info="JSON.stringify(item.validation, null, 2)"
+                    :data-tippy-content="JSON.stringify(item.validation, null, 2)"
                     :style="{ 'background-color': item.color }"
                     draggable
                     @dragstart="startDrag($event, item)"
                   >
                     <span v-text="item.title"></span>
                     <span
-                      data-tippy-info="EDIT"
+                      data-tippy-content="EDIT"
                       class="badge badge-light pointer"
                       @click="editValidationOption(item)"
-                      ><i class="fas fa-pen-square"></i
-                    ></span>
+                      ><font-awesome-icon icon="fas fa-pen-square"></font-awesome-icon></span>
                     <span
                       v-if="item && item.can_delete"
-                      data-tippy-info="DELETE"
+                      data-tippy-content="DELETE"
                       class="badge badge-danger pointer"
                       @click="deleteValidationOption(item)"
-                      ><i class="fas fa-times"></i
-                    ></span>
+                      ><font-awesome-icon icon="fas fa-times"></font-awesome-icon></span>
                   </div>
                 </template>
                 <div
@@ -171,7 +169,7 @@
                   data-tippy="ADD NEW"
                   class="badge m-1 badge-secondary text-light pointer"
                 >
-                  <i class="fas fa-plus"></i>
+                  <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
                 </div>
               </div>
               <div class="bg-dark p-1" v-if="item">
@@ -187,22 +185,21 @@
                 <template v-for="item in definition_options" :key="item.title">
                   <div
                     class="badge m-1 text-light"
-                    :data-tippy-info="JSON.stringify(item.validation, null, 2)"
+                    :data-tippy-content="JSON.stringify(item.validation, null, 2)"
                     :style="{ 'background-color': item.color }"
                   >
                     <span v-text="item.title"></span>
                     <span
-                      data-tippy-info="EDIT"
+                      data-tippy-content="EDIT"
                       class="badge badge-light pointer"
                       @click="editDefinitionOption(item)"
-                      ><i class="fas fa-pen-square"></i
-                    ></span>
+                      ><font-awesome-icon icon="fas fa-pen-square"></font-awesome-icon></span>
                     <span
                       v-if="item && item.can_delete"
-                      data-tippy-info="DELETE"
+                      data-tippy-content="DELETE"
                       class="badge badge-danger pointer"
                       @click="deleteDefinitionOption(item)"
-                      ><i class="fas fa-times"></i
+                      ><font-awesome-icon icon="fas fa-times"></font-awesome-icon
                     ></span>
                   </div>
                 </template>
@@ -211,7 +208,7 @@
                   data-tippy="ADD NEW"
                   class="badge m-1 badge-secondary text-light pointer"
                 >
-                  <i class="fas fa-plus"></i>
+                  <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
                 </div>
               </div>
               <div class="bg-dark p-1" v-if="definition_item">
@@ -235,7 +232,7 @@
                   'text-success': availableNamespace,
                   'text-danger': !availableNamespace,
                 }"
-                ><i class="fas fa-chevron-right"></i> Choose a namespace</small
+                ><font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon> Choose a namespace</small
               >
             </p>
             <h4 class="text-info text-center">
@@ -243,7 +240,7 @@
             </h4>
             <p class="text-center text-muted">
               <small class="text-muted"
-                ><i class="fas fa-info-circle text-info"></i> For example:
+                ><font-awesome-icon icon="fas fa-info-circle" class="text-info"></font-awesome-icon> For example:
                 <b>myname</b>:ClassName
               </small>
             </p>
@@ -295,11 +292,11 @@
                 <span class="text-info" v-text="startingPoint"></span
               ></small>
               <small class="text-muted"
-                ><i class="fas fa-chevron-right"></i> namespace:
+                ><font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon> namespace:
                 <span class="text-info" v-text="prefix"></span
               ></small>
               <small class="text-muted bold"
-                ><i class="fas fa-chevron-right"></i> Create a new class</small
+                ><font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon> Create a new class</small
               >
             </p>
             <hr />
@@ -310,7 +307,7 @@
               <h4 class="text-info">Create a new class</h4>
               <small>
                 <p>
-                  <i class="fas fa-info-circle text-info"></i> You are extending
+                  <font-awesome-icon icon="fas fa-info-circle" class="text-info"></font-awesome-icon> You are extending
                   <span class="text-info" v-text="startingPoint"></span>,
                   consider naming your class something more specific or relevant
                   to the class' hierarchy.
@@ -323,7 +320,7 @@
               </small>
               <div class="form-group">
                 <h5 for="exampleInputEmail1" class="text-dark">
-                  <i class="fas fa-asterisk text-danger"></i> Name of the new
+                  <font-awesome-icon icon="fas fa-asterisk" class="text-danger"></font-awesome-icon> Name of the new
                   extended class:
                 </h5>
                 <small class="d-block my-1 text-info"
@@ -345,7 +342,7 @@
               </div>
               <div class="form-group">
                 <h5 for="exampleInputPassword1" class="text-dark">
-                  <i class="fas fa-asterisk text-danger"></i> Brief description
+                  <font-awesome-icon icon="fas fa-asterisk" class="text-danger"></font-awesome-icon> Brief description
                   about this class:
                 </h5>
                 <textarea
@@ -376,12 +373,12 @@
                 </h6>
                 <p class="text-left">
                   <small class="text-muted d-block"
-                    >1. <i class="fas fa-circle text-primary"></i> Reuse
+                    >1. <font-awesome-icon icon="fas fa-circle" class="text-primary"></font-awesome-icon> Reuse
                     properties from parents
                     <i class="text-danger">Required</i></small
                   >
                   <small class="text-muted d-block"
-                    >2. <i class="fas fa-star text-warning"></i> Add new
+                    >2. <font-awesome-icon icon="fas fa-star" class="text-warning"></font-awesome-icon> Add new
                     properties <i class="text-danger">Required</i></small
                   >
                   <small class="text-muted d-block"
@@ -393,7 +390,7 @@
                     <i class="text-danger">Required</i></small
                   >
                   <small class="text-muted d-block"
-                    >4. <i class="fab fa-github text-success"></i> Save/Download
+                    >4. <font-awesome-icon icon="fab fa-github" class="text-success"></font-awesome-icon> Save/Download
                     schema</small
                   >
                 </p>
@@ -410,11 +407,11 @@
                   id="rv"
                   class="slider mr-2 tip"
                   @click="toggleRemoveValidation()"
-                  data-tippy-info="Remove Validation"
+                  data-tippy-content="Remove Validation"
                   type="checkbox"
                 />
                 <label class="text-muted" for="rv"
-                  ><i class="fas fa-times text-danger mr-1"></i>Remove
+                  ><font-awesome-icon icon="fas fa-times" class="text-danger mr-1"></font-awesome-icon>Remove
                   Validation</label
                 >
               </div>
@@ -448,8 +445,8 @@
     <div class="alert alert-secondary" v-if="newClassAdded">
       <p class="m-0">
         Done editing? Easy!
-        <i class="fas fa-arrow-right text-success"></i> Click <b>Download</b>
-        <i class="fas fa-arrow-right text-success"></i> Host your schema
+        <font-awesome-icon icon="fas fa-arrow-right" class="text-success"></font-awesome-icon> Click <b>Download</b>
+        <font-awesome-icon icon="fas fa-arrow-right" class="text-success"></font-awesome-icon> Host your schema
         file<span class="text-danger">*</span>. Eg. on
         <a target="_blank" rel="noreferrer" href="https://github.com/"
           >GitHub</a
@@ -457,7 +454,7 @@
       </p>
       <p class="m-0">
         Done with that too?
-        <i class="fas fa-arrow-right text-success"></i> Visualize, Register and
+        <font-awesome-icon icon="fas fa-arrow-right" class="text-success"></font-awesome-icon> Visualize, Register and
         share your schema here:
         <a href="/schema-playground">Schema Playground</a>
       </p>
@@ -567,6 +564,7 @@ export default {
           self.availableNamespace = false;
         } else {
           let url = self.$apiUrl +  "/api/registry/" + value;
+          self.$store.commit("setLoading", { value: true });
           axios
             .head(url)
             .then(function (res) {
@@ -575,9 +573,11 @@ export default {
                 '%c Namespace "' + value + '" is NOT available',
                 "color:coral"
               );
+              self.$store.commit("setLoading", { value: false });
             })
             .catch((err) => {
               //last check for reserved names
+              self.$store.commit("setLoading", { value: false });
               if (value === "metadata" || value === "dataset") {
                 self.availableNamespace = false;
               } else {
@@ -1191,8 +1191,8 @@ export default {
           showCancelButton: true,
           footer: `<small class="text-danger">Important: You need to have logged in using GitHub and given us permission to access your repositories.</small>`,
           progressSteps: [
-            '<i class="fab fa-github-alt"></i>A',
-            '<i class="fab fa-github-alt"></i>B',
+            'A',
+            'B',
           ],
         })
         .queue([
@@ -1341,10 +1341,8 @@ export default {
     this.checkCustomDefinitions();
 
     tippy(".tip", {
-      placement: "bottom",
       animation: "fade",
       theme: "light bg-light",
-      interactive: true,
     });
 
     $.notify.addStyle("success", {
@@ -1392,8 +1390,7 @@ export default {
       },
     });
     $.notify.addStyle("trophy", {
-      html: `<div class="bg-dark p-1 text-light">
-        <i class="fas fa-thumbs-up text-success"></i> <span data-notify-text/>
+      html: `<div class="bg-dark p-1 text-light"> <span data-notify-text/>
       </div>`,
       classes: {
         base: {

@@ -57,11 +57,8 @@
 .drag-el {
   color: white;
   transition: all 0.3s;
-  background-image: url("@/assets/img/cube.svg");
-  background-position: left;
-  background-repeat: no-repeat;
   outline: none !important;
-  padding: 10px 10px 10px 40px !important;
+  padding:10px !important;
 }
 .drag-el:hover {
   cursor: grab;

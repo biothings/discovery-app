@@ -1,5 +1,8 @@
 import axios from "axios";
 import { orderBy, isPlainObject, isArray, isString } from "lodash";
+// editor default options
+import { validation_options } from "./editor_options/validation_options";
+import { definition_options } from "./editor_options/definition_options";
 
 export const editor = {
   state: {
@@ -28,172 +31,7 @@ export const editor = {
     editThis: null,
     editThisDefinition: null,
     previousPreviewProps: {},
-    validation_options: [
-      {
-        _id: "01233",
-        title: "string",
-        color: "#0263fd",
-        validation: {
-          type: "string",
-        },
-      },
-      {
-        _id: "00002",
-        title: "description",
-        color: "#ff6384",
-        validation: {
-          description: "click EDIT to change your description",
-        },
-      },
-      {
-        _id: "01432",
-        title: "string(s)",
-        color: "#2717a1",
-        validation: {
-          oneOf: [
-            {
-              type: "string",
-            },
-            {
-              type: "array",
-              items: {
-                type: "string",
-              },
-            },
-          ],
-        },
-      },
-      {
-        _id: "14325",
-        title: "boolean",
-        color: "#d62979",
-        validation: {
-          type: "boolean",
-        },
-      },
-      {
-        _id: "3543",
-        title: "integer",
-        color: "#6e3ac5",
-        validation: {
-          type: "integer",
-        },
-      },
-      {
-        _id: "4654",
-        title: "url",
-        color: "#fc6903",
-        validation: {
-          type: "string",
-          format: "uri",
-        },
-      },
-      {
-        _id: "5867",
-        title: "keywords",
-        color: "#28908c",
-        validation: {
-          oneOf: [
-            {
-              type: "string",
-            },
-            {
-              type: "array",
-              items: {
-                type: "string",
-              },
-            },
-          ],
-        },
-      },
-      {
-        _id: "6876",
-        title: "date",
-        color: "#9bbf06",
-        validation: {
-          format: "date",
-          type: "string",
-        },
-      },
-      {
-        _id: "7645",
-        title: "enumeration",
-        color: "#5a71a5",
-        validation: {
-          oneOf: [
-            {
-              type: "string",
-              enum: ["option1", "option2", "option3"],
-            },
-            {
-              type: "array",
-              items: {
-                type: "string",
-                enum: ["option1", "option2", "option3"],
-              },
-            },
-          ],
-        },
-      },
-      {
-        _id: "8567",
-        title: "constant",
-        color: "#d8272a",
-        validation: {
-          const: "Edit const value",
-        },
-      },
-      {
-        _id: "9654",
-        title: "object|Person",
-        color: "#49414b",
-        validation: {
-          "@type": "Person",
-          type: "object",
-          properties: {
-            name: { type: "string" },
-            url: { type: "string", format: "uri" },
-          },
-          required: ["name"],
-        },
-      },
-      {
-        _id: "1065",
-        title: "ontology",
-        color: "#a37d00",
-        validation: {
-          "@type": "CreativeWork",
-          type: "string",
-          vocabulary: {
-            ontology: ["[For example:]", "ncbitaxon"],
-            children_of: [
-              "[For example:]",
-              "http://purl.obolibrary.org/obo/NCBITaxon_10239",
-            ],
-          },
-          strict: false,
-        },
-      },
-      {
-        _id: "1062",
-        title: "(DEF) citation(s)",
-        color: "#5a064d",
-        validation: {
-          description: "A citation to the dataset",
-          oneOf: [
-            {
-              $ref: "#/definitions/citation",
-            },
-            {
-              type: "array",
-              items: {
-                $ref: "#/definitions/citation",
-              },
-            },
-          ],
-        },
-      },
-    ],
+    validation_options: validation_options,
     val_test: {
       name: {},
       contains_phi: {},
@@ -202,48 +40,7 @@ export const editor = {
       author: {},
     },
     top_class_validation: {},
-    definition_options: [
-      {
-        _id: "def001",
-        title: "citation",
-        color: "#0263fd",
-        validation: {
-          description:
-            "A citation object for a resource which is cited by the dataset (ie- is a derivative of the dataset) , related to the dataset, or from which the dataset was based on (ie- is derived from).",
-          "@type": "Thing",
-          type: "object",
-          properties: {
-            name: {
-              description: "Name of or title of the citation",
-              type: "string",
-            },
-            identifier: {
-              description: "An identifier associated with the citation",
-              type: "string",
-            },
-            pmid: {
-              description: "A pubmed identifier if available",
-              type: "string",
-            },
-            doi: {
-              description: "A doi if available",
-              type: "string",
-            },
-            url: {
-              description: "The url of the resource cited",
-              type: "string",
-              format: "uri",
-            },
-            citeText: {
-              description:
-                "The bibliographic citation for the referenced resource as is provided",
-              type: "string",
-            },
-          },
-          required: ["name"],
-        },
-      },
-    ],
+    definition_options: definition_options,
   },
   strict: true,
   mutations: {
@@ -1093,18 +890,18 @@ export const editor = {
         axios.get("https://discovery.biothings.io/api/registry/" + parent.split(":")[0] + "/" + parent)
       );
 
-      commit("setLoading", { state: true });
+      commit("setLoading", { value: true });
       try {
         const res = await Promise.all(requests);
         const data = res.map((res) => res.data);
         data.forEach((parentInfo) =>
           commit("saveParent", { parent: parentInfo })
         );
-        commit("setLoading", { state: false });
+        commit("setLoading", { value: false });
         console.log("✅ Parent classes info received");
       } catch (error) {
         console.log(error);
-        commit("setLoading", { state: false });
+        commit("setLoading", { value: false });
         console.warn("Failed query for parent class");
         $.notify("Error loading schema, contact us.", {
           globalPosition: "right",
