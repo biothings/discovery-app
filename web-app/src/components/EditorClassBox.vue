@@ -8,25 +8,23 @@
   >
     <div class="col-sm-10 p-2">
       <div>
-        <i v-if="item.special" class="fas fa-star text-warning"></i>
-        <i v-else class="fas fa-circle text-primary"></i>
-        <template
-          v-if="item && item.parent_classes.length"
-          v-for="tree in item.parent_classes"
-        >
-          <template v-for="(name, i) in getSubclass(tree)">
-            <small v-text="name"></small>
-            <small><i class="fas fa-chevron-right"></i></small>
+        <font-awesome-icon v-if="item.special" icon="fas fa-star" class="text-warning"></font-awesome-icon>
+        <font-awesome-icon v-else icon="fas fa-circle" class="text-primary"></font-awesome-icon>
+        <template v-if="item?.parent_classes?.length">
+          <template v-for="tree in item?.parent_classes">
+            <template v-for="(name, i) in getSubclass(tree)" :key="i + 'sc'">
+              <small v-text="name"></small>
+              <small><font-awesome-icon icon="fas fa-chevron-right" class="mr-1"></font-awesome-icon></small>
+            </template>
           </template>
         </template>
         <small class="bold"
           ><span v-text="item.label"></span>
-          <i
-            class="fas fa-info-circle text-info cTip pointer"
+          <font-awesome-icon
+            icon="fas fa-info-circle" class="text-info cTip pointer"
             :data-tippy-description="item.description"
             :data-tippy-label="item.label"
-          ></i
-        ></small>
+          ></font-awesome-icon></small>
         <!-- 🌈 prop totals 🌈 -->
         <div v-if="totals" class="col-sm-12">
           <table>
@@ -34,24 +32,24 @@
               <td v-for="(val, name) in totals" class="px-1">
                 <small>
                   <template v-if="name == 'required'">
-                    <i title="required" class="fas fa-asterisk text-danger"></i>
+                    <font-awesome-icon title="required" icon="fas fa-asterisk" class="text-danger"></font-awesome-icon>
                     req
                   </template>
                   <template v-else-if="name == 'selected'">
-                    <i
+                    <font-awesome-icon
                       title="selected"
-                      class="fas fa-check-circle text-success"
-                    ></i>
+                      icon="fas fa-check-circle" class="text-success"
+                    ></font-awesome-icon>
                     sel
                   </template>
                   <template v-else-if="name == 'optional'">
-                    <i title="optional" class="fas fa-square text-info"></i> opt
+                    <font-awesome-icon title="optional" icon="fas fa-square" class="text-info"></font-awesome-icon> opt
                   </template>
                   <template v-else-if="name == 'recommended'">
-                    <i
+                    <font-awesome-icon
                       title="recommended"
-                      class="fas fa-circle text-warning"
-                    ></i>
+                      icon="fas fa-circle" class="text-warning"
+                    ></font-awesome-icon>
                     rec
                   </template>
                   <i v-else v-text="name"></i> :
@@ -68,7 +66,7 @@
           style="clear: both"
           v-if="item.special && !item.properties"
           class="text-muted float-right"
-          >Add properties here <i class="fas fa-arrow-right text-danger"></i
+          >Add properties here <font-awesome-icon icon="fas fa-arrow-right" class="text-danger"></font-awesome-icon
         ></small>
         <template v-if="showDesc">
           <small
@@ -85,18 +83,18 @@
           v-for="prop in item.properties"
         >
           <small v-if="prop.selected" class="badge badge-success m-1">
-            <i
+            <font-awesome-icon
               v-if="prop && prop.isRequired"
-              class="fas fa-asterisk text-danger"
-            ></i>
-            <i
+              icon="fas fa-asterisk" class="text-danger mr-1"
+            ></font-awesome-icon>
+            <font-awesome-icon
               v-else-if="prop && prop.isRecommended"
-              class="fas fa-circle text-warning"
-            ></i>
-            <i
+              icon="fas fa-circle" class="text-warning mr-1"
+            ></font-awesome-icon>
+            <font-awesome-icon
               v-else-if="prop && prop.isOptional"
-              class="fas fa-square text-info"
-            ></i>
+              icon="fas fa-square" class="text-info mr-1"
+            ></font-awesome-icon>
             <span v-text="prop.label"></span>
           </small>
         </template>
@@ -123,11 +121,11 @@
               <div class="col-sm-9">
                 <small class="text-dark">
                   <span v-text="prop.label"></span>
-                  <i
-                    class="fas fa-info-circle cTip pointer text-info"
+                  <font-awesome-icon
+                    icon="fas fa-info-circle" class="cTip pointer text-info"
                     :data-tippy-description="prop.description"
                     :data-tippy-label="prop.label"
-                  ></i>
+                  ></font-awesome-icon>
                   <template v-if="showDesc">
                     <small
                       class="d-block text-muted"
@@ -139,43 +137,43 @@
               <div
                 class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around"
               >
-                <i
+                <font-awesome-icon
                   v-show="item.special"
-                  class="fas fa-minus-circle pointer text-muted unselectable remove"
+                  icon="fas fa-minus-circle" class="pointer text-muted unselectable remove"
                   @click="removeProp(prop.label)"
-                ></i>
-                <i
-                  class="fas fa-check-circle pointer unselectable select"
+                ></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-check-circle" class="pointer unselectable select"
                   @click="markSelected(prop.label)"
                   :class="{
                     'text-muted': !prop.selected,
                     'text-success': prop.selected,
                   }"
-                ></i>
-                <i
-                  class="fas fa-asterisk required pointer unselectable"
+                ></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-asterisk" class="required pointer unselectable"
                   @click="markRequired(prop.label)"
                   :class="{
                     'text-muted': !prop.isRequired,
                     'text-danger': prop.isRequired,
                   }"
-                ></i>
-                <i
-                  class="fas fa-circle recommended pointer unselectable"
+                ></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-circle" class="recommended pointer unselectable"
                   @click="markRecommended(prop.label)"
                   :class="{
                     'text-muted': !prop.isRecommended,
                     'text-warning': prop.isRecommended,
                   }"
-                ></i>
-                <i
-                  class="fas fa-square optional pointer unselectable"
+                ></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-square" class="optional pointer unselectable"
                   @click="markOptional(prop.label)"
                   :class="{
                     'text-muted': !prop.isOptional,
                     'text-info': prop.isOptional,
                   }"
-                ></i>
+                ></font-awesome-icon>
               </div>
             </div>
           </template>
@@ -187,11 +185,11 @@
             <div class="col-sm-9">
               <small class="mainTextDark">
                 <span v-text="prop.label"></span>
-                <i
-                  class="fas fa-info-circle cTip pointer text-info"
+                <font-awesome-icon
+                  icon="fas fa-info-circle" class="cTip pointer text-info"
                   :data-tippy-description="prop.description"
                   :data-tippy-label="prop.label"
-                ></i>
+                ></font-awesome-icon>
                 <template v-if="showDesc">
                   <small
                     class="d-block text-muted"
@@ -203,50 +201,50 @@
             <div
               class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around"
             >
-              <i
+              <font-awesome-icon
                 v-show="item.special"
-                class="fas fa-minus-circle pointer text-muted unselectable tip"
+                icon="fas fa-minus-circle" class="pointer text-muted unselectable tip"
                 data-tippy-info="Delete"
                 @click="removeProp(prop.label)"
-              ></i>
-              <i
+              ></font-awesome-icon>
+              <font-awesome-icon
                 v-show="item.special"
-                class="fas fa-pen-square pointer text-muted unselectable tip mr-3"
+                icon="fas fa-pen-square" class="pointer text-muted unselectable tip mr-3"
                 data-tippy-info="Edit"
                 @click="editCustomProp(prop)"
-              ></i>
-              <i
-                class="fas fa-check-circle pointer unselectable select"
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-check-circle" class="pointer unselectable select"
                 @click="markSelected(prop.label)"
                 :class="{
                   'text-muted': !prop.selected,
                   'text-success': prop.selected,
                 }"
-              ></i>
-              <i
-                class="fas fa-asterisk required pointer unselectable"
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-asterisk" class="required pointer unselectable"
                 @click="markRequired(prop.label)"
                 :class="{
                   'text-muted': !prop.isRequired,
                   'text-danger': prop.isRequired,
                 }"
-              ></i>
-              <i
-                class="fas fa-circle recommended pointer unselectable"
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-circle" class="recommended pointer unselectable"
                 @click="markRecommended(prop.label)"
                 :class="{
                   'text-muted': !prop.isRecommended,
                   'text-warning': prop.isRecommended,
                 }"
-              ></i>
-              <i
-                class="fas fa-square optional pointer unselectable"
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-square" class="optional pointer unselectable"
                 @click="markOptional(prop.label)"
                 :class="{
                   'text-muted': !prop.isOptional,
                   'text-info': prop.isOptional,
                 }"
-              ></i>
+              ></font-awesome-icon>
             </div>
           </div>
         </template>
@@ -256,7 +254,7 @@
           <div class="d-flex flex-wrap justify-content-center p-1 mt-2">
             <div class="page-item rounded-0" :class="{ disabled: page <= 1 }">
               <a class="page-link p-1" @click.prevent="prevPage()"
-                ><i class="fas fa-step-backward"></i
+                ><font-awesome-icon icon="fas fa-step-backward"></font-awesome-icon
               ></a>
             </div>
             <template v-if="groupPages">
@@ -299,7 +297,7 @@
               :class="{ disabled: page >= pages }"
             >
               <a class="page-link p-1" @click.prevent="nextPage()"
-                ><i class="fas fa-step-forward"></i
+                ><font-awesome-icon icon="fas fa-step-forward"></font-awesome-icon
               ></a>
             </div>
           </div>
@@ -310,36 +308,15 @@
     <div
       class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around"
     >
-      <span
-        v-if="item.special"
-        class="fa-stack fa-1x pointer addprop unselectable tip"
-        @click="
-          addPropMode = !addPropMode;
-          (newPropDomain = item.label), populateInputOptions();
-        "
-      >
-        <i
-          class="fas fa-circle fa-stack-2x"
-          :class="[addPropMode ? 'text-success' : 'mainTextLight']"
-        ></i>
-        <i
-          class="fas fa-stack-1x text-light"
-          :class="[addPropMode ? 'fa-minus' : 'fa-plus']"
-        ></i>
+      <span v-if="item.special" class="fa-stack fa-1x pointer addprop unselectable tip" @click="addPropMode = !addPropMode; (newPropDomain = item.label), populateInputOptions();">
+        <font-awesome-icon icon="fas fa-circle" class="fa-stack-2x" :class="[addPropMode ? 'text-success' : 'mainTextLight']"></font-awesome-icon>
+        <font-awesome-icon v-if="addPropMode" icon="fas fa-minus" class="text-light fa-stack-1x"></font-awesome-icon>
+        <font-awesome-icon v-else icon="fas fa-plus" class="text-light fa-stack-1x"></font-awesome-icon>
       </span>
-      <span
-        class="fa-stack fa-1x pointer expand unselectable"
-        @click="expand = !expand"
-        v-if="item && item.properties"
-      >
-        <i
-          class="fas fa-circle fa-stack-2x"
-          :class="{ 'text-muted': !expand, 'text-success': expand }"
-        ></i>
-        <i
-          class="fas fa-stack-1x text-light"
-          :class="[expand ? 'fa-list-ul' : 'fa-ellipsis-h']"
-        ></i>
+      <span class="fa-stack fa-1x pointer expand unselectable" @click="expand = !expand" v-if="item && item.properties">
+        <font-awesome-icon icon="fas fa-circle" class="fa-stack-2x" :class="{ 'text-muted': !expand, 'text-success': expand }"></font-awesome-icon>
+        <font-awesome-icon v-if="expand" icon="fas fa-list-ul" class="text-light fa-stack-1x"></font-awesome-icon>
+        <font-awesome-icon v-else icon="fas fa-ellipsis-h" class="text-light fa-stack-1x"></font-awesome-icon>
       </span>
     </div>
 
@@ -352,7 +329,7 @@
         <form>
           <div class="form-group">
             <label for="name"
-              >Name <i class="fas fa-asterisk text-danger"></i
+              >Name <font-awesome-icon icon="fas fa-asterisk" class="text-danger"></font-awesome-icon
             ></label>
             <input
               v-model="newPropName"
@@ -376,7 +353,7 @@
           </div>
           <div class="form-group">
             <label for="desc"
-              >Description <i class="fas fa-asterisk text-danger"></i
+              >Description <font-awesome-icon icon="fas fa-asterisk" class="text-danger"></font-awesome-icon
             ></label>
             <input
               v-model="newPropDescription"
@@ -388,7 +365,7 @@
           </div>
           <div class="form-group">
             <label for="domain"
-              >Domain <i class="fas fa-asterisk text-danger"></i
+              >Domain <font-awesome-icon icon="fas fa-asterisk" class="text-danger"></font-awesome-icon
             ></label>
             <input
               disabled
@@ -400,7 +377,7 @@
           </div>
           <div class="form-group">
             <label for="input"
-              >Input Type(s) <i class="fas fa-asterisk text-danger"></i
+              >Input Type(s) <font-awesome-icon icon="fas fa-asterisk" class="text-danger"></font-awesome-icon
             ></label>
             <div
               class="border p-1 rounded border-secondary mb-2"
@@ -643,8 +620,8 @@ export default {
           title: "Are you sure you want to delete " + propLabel + "?",
           text: "You won't be able to revert this",
           showCancelButton: true,
-          confirmButtonColor: "{{color_main}}",
-          cancelButtonColor: "{{color_sec}}",
+          confirmButtonColor: "#63296b",
+          cancelButtonColor: "#4a7d8f",
           animation: false,
           customClass: "scale-in-center",
           confirmButtonText: "Yes, Delete it!",
@@ -852,8 +829,8 @@ export default {
             "Start typing to check for existing classes. If none found specify it's context prefix and name. eg. prefix:Name (Multiple separated by commas)",
           html: '<datalist id="myCustomList"></datalist>',
           input: "text",
-          confirmButtonColor: "{{color_main}}",
-          cancelButtonColor: "{{color_sec}}",
+          confirmButtonColor: "#63296b",
+          cancelButtonColor: "#4a7d8f",
           confirmButtonText: "Add",
           animation: false,
           customClass: "scale-in-center",
@@ -895,8 +872,8 @@ export default {
           input: "text",
           confirmButtonText: "Next &rarr;",
           showCancelButton: true,
-          confirmButtonColor: "{{color_main}}",
-          cancelButtonColor: "{{color_sec}}",
+          confirmButtonColor: "#63296b",
+          cancelButtonColor: "#4a7d8f",
           animation: false,
           customClass: "scale-in-center",
           progressSteps: ["1", "2", "3"],
@@ -986,8 +963,8 @@ export default {
                 title: "Add Property " + result.value[0] + "?",
                 text: result.value[2],
                 showCancelButton: true,
-                confirmButtonColor: "{{color_main}}",
-                cancelButtonColor: "{{color_sec}}",
+                confirmButtonColor: "#63296b",
+                cancelButtonColor: "#4a7d8f",
                 confirmButtonText: "Yes, Add It!",
                 animation: false,
                 customClass: "scale-in-center",
@@ -1047,7 +1024,7 @@ export default {
       maxWidth: "200px",
       placement: "top",
       content:
-        '<div class="text-muted m-0" style="border-radius:none">Show/Hide Properties</div>',
+        'Show/Hide Properties',
       animation: "fade",
       theme: "light",
     });
@@ -1056,7 +1033,7 @@ export default {
       maxWidth: "200px",
       placement: "top",
       content:
-        '<div class="text-muted m-0" style="border-radius:none">Add New Property</div>',
+        'Add New Property',
       animation: "fade",
       theme: "light",
     });
@@ -1065,7 +1042,7 @@ export default {
       maxWidth: "200px",
       placement: "top",
       content:
-        '<div class="text-danger m-0" style="border-radius:none">Mark As Required</div>',
+        'Mark As Required',
       animation: "fade",
       theme: "light",
     });
@@ -1074,7 +1051,7 @@ export default {
       maxWidth: "200px",
       placement: "top",
       content:
-        '<div class="text-warning m-0" style="border-radius:none">Mark As Recommended</div>',
+        'Mark As Recommended',
       animation: "fade",
       theme: "light",
     });
@@ -1083,7 +1060,7 @@ export default {
       maxWidth: "200px",
       placement: "top",
       content:
-        '<div class="text-info m-0" style="border-radius:none">Mark As Optional</div>',
+        'Mark As Optional',
       animation: "fade",
       theme: "light",
     });
@@ -1092,7 +1069,7 @@ export default {
       maxWidth: "200px",
       placement: "top",
       content:
-        '<div class="text-success m-0" style="border-radius:none">Select (Re-Use) This Property</div>',
+        'Select (Re-Use) This Property',
       animation: "fade",
       theme: "light",
     });
@@ -1101,7 +1078,7 @@ export default {
       maxWidth: "200px",
       placement: "top",
       content:
-        '<div class="text-danger m-0" style="border-radius:none">Delete Property</div>',
+        'Delete Property',
       animation: "fade",
       theme: "light",
     });

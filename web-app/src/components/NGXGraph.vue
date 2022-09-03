@@ -102,7 +102,7 @@ export default {
       let green = "#28A745";
       let yellow = "#FFC007";
 
-      for (i = 0; i < self.classesAvailable.length; i++) {
+      for (let i = 0; i < self.classesAvailable.length; i++) {
         if (
           self.classesAvailable[i].hasOwnProperty("special") &&
           self.classesAvailable[i].special
@@ -131,7 +131,7 @@ export default {
         }
         if (self.classesAvailable[i].hasOwnProperty("parent_classes")) {
           let parents = self.classesAvailable[i]["parent_classes"];
-          for (p = 0; p < parents.length; p++) {
+          for (let p = 0; p < parents.length; p++) {
             let branch_parents = parents[p].split(",");
             let parent = branch_parents[branch_parents.length - 1].trim();
             let edge = {
@@ -148,7 +148,7 @@ export default {
         }
       }
       if (self.propsSelected.length) {
-        for (i = 0; i < self.propsSelected.length; i++) {
+        for (let i = 0; i < self.propsSelected.length; i++) {
           if (self.propsSelected[i]["special"]) {
             let node = {
               group: "nodes",
