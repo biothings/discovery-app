@@ -18,9 +18,9 @@ export default {
   },
   computed: {
     ...mapGetters({
-        classesAvailable: 'getSchema',
-        propsSelected: 'getPropsSelected'
-    })
+      classesAvailable: "getSchema",
+      propsSelected: "getPropsSelected",
+    }),
   },
   watch: {
     propsSelected: function (v) {

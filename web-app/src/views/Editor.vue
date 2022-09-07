@@ -22,7 +22,10 @@
             :data-tippy-content="'Logged in as ' + userInfo.login"
             v-if="userInfo && userInfo.login"
           >
-            <font-awesome-icon icon="fas fa-user-check" class="text-light"></font-awesome-icon>
+            <font-awesome-icon
+              icon="fas fa-user-check"
+              class="text-light"
+            ></font-awesome-icon>
           </span>
           <a
             class="nav-link active text-primary mr-2"
@@ -33,7 +36,11 @@
               class="badge bg-info text-light pointer tip"
               data-tippy-content="Click to sign in"
             >
-              <font-awesome-icon icon="fas fa-sign-in-alt" class="text-light"></font-awesome-icon> Sign In
+              <font-awesome-icon
+                icon="fas fa-sign-in-alt"
+                class="text-light"
+              ></font-awesome-icon>
+              Sign In
             </span>
           </a>
           <template v-if="newClassAdded">
@@ -42,28 +49,44 @@
               data-tippy-content="Preview"
               @click="getPreview()"
             >
-              <font-awesome-icon icon="fas fa-code" class="text-light"></font-awesome-icon> Preview
+              <font-awesome-icon
+                icon="fas fa-code"
+                class="text-light"
+              ></font-awesome-icon>
+              Preview
             </span>
             <span
               class="badge bg-success text-light pointer tip mr-2"
               data-tippy-content="Download your schema"
               @click="downloadSchema()"
             >
-              <font-awesome-icon icon="fas fa-file-download" class="text-light"></font-awesome-icon> Download
+              <font-awesome-icon
+                icon="fas fa-file-download"
+                class="text-light"
+              ></font-awesome-icon>
+              Download
             </span>
             <span
               class="badge bg-primary text-light pointer tip mr-2"
               data-tippy-content="Requires GitHub Login"
               @click.prevent="githubOptions()"
             >
-              <font-awesome-icon icon="fab fa-github" class="text-light"></font-awesome-icon> Save to GitHub*
+              <font-awesome-icon
+                icon="fab fa-github"
+                class="text-light"
+              ></font-awesome-icon>
+              Save to GitHub*
             </span>
             <span
               class="badge bg-secondary text-light pointer tip mr-2"
               data-tippy-content="Learn about this editor"
               @click.prevent="showHelp()"
             >
-              <font-awesome-icon icon="fas fa-question-circle" class="text-light"></font-awesome-icon> Help
+              <font-awesome-icon
+                icon="fas fa-question-circle"
+                class="text-light"
+              ></font-awesome-icon>
+              Help
             </span>
           </template>
           <span
@@ -75,19 +98,23 @@
             Save/Load Progress
           </span>
           <small class="text-light"
-            >Extending <font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon>
+            >Extending
+            <font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon>
             <b v-text="startingPoint"></b
           ></small>
         </div>
         <div
           v-if="newClassAdded && !removeValidation"
-          class="actions bg-info p-2 rounded d-flex align-items-center justify-content-center rounded-0"
+          class="actions p-2 rounded d-flex align-items-center justify-content-center rounded-0"
+          :class="[
+            validationView ? 'bg-info text-light' : 'alert-info text-dark',
+          ]"
         >
           <div
             class="col-sm-5 mr-1 d-flex align-items-center justify-content-center"
           >
             <div class="mr-2">
-              <small class="text-light"
+              <small
                 ><img src="@/assets/img/cube.svg" width="30px" /> Validation
                 Editor</small
               >
@@ -111,9 +138,12 @@
             <div class="bg-info p-1 col-sm-12">
               <p class="text-center text-light m-0">
                 <small class="text-light"
-                  ><font-awesome-icon icon="fas fa-info-circle" class="text-light"></font-awesome-icon> Define how the
-                  input for each property should be validated, drag and drop
-                  common rules or create your own.</small
+                  ><font-awesome-icon
+                    icon="fas fa-info-circle"
+                    class="text-light"
+                  ></font-awesome-icon>
+                  Define how the input for each property should be validated,
+                  drag and drop common rules or create your own.</small
                 >
               </p>
             </div>
@@ -135,17 +165,39 @@
               </template>
             </div>
             <div class="col-sm-12 col-md-6 bg-dark border-left">
-              <h5 class="text-light text-center m-0 text-muted pt-2">
-                Common Validation Options
-              </h5>
-              <small class="text-info text-center d-block"
-                >Drag & drop to merge validation</small
+              <h4 class="text-light text-left m-0 pt-2">Options</h4>
+              <!-- CARDINALITY -->
+              <h5 class="text-left m-0 text-muted pt-2">Cardinality</h5>
+              <small class="text-info text-left d-block"
+                >Refers to the number of elements in a set or other grouping, as
+                a property of that grouping.</small
+              >
+              <div
+                class="my-1 alert alert-primary justify-content-start d-flex align-items-center"
+              >
+                <label class="text-muted m-0" for="ac"
+                  >Enable Cardinality</label
+                >
+                <input
+                  v-model="addCardinality"
+                  id="ac"
+                  class="slider ml-2"
+                  @click="toggleCardinality()"
+                  type="checkbox"
+                />
+              </div>
+              <h5 class="text-left m-0 text-muted pt-2">Common Validation</h5>
+              <small class="text-info text-left d-block"
+                >Drag & drop common validation options to merge into each
+                property.</small
               >
               <div class="border rounded p-2 bg-light mb-2">
                 <template v-for="item in validation_options" :key="item.title">
                   <div
                     class="badge drag-el m-1"
-                    :data-tippy-content="JSON.stringify(item.validation, null, 2)"
+                    :data-tippy-content="
+                      JSON.stringify(item.validation, null, 2)
+                    "
                     :style="{ 'background-color': item.color }"
                     draggable
                     @dragstart="startDrag($event, item)"
@@ -155,13 +207,19 @@
                       data-tippy-content="EDIT"
                       class="badge badge-light pointer"
                       @click="editValidationOption(item)"
-                      ><font-awesome-icon icon="fas fa-pen-square"></font-awesome-icon></span>
+                      ><font-awesome-icon
+                        icon="fas fa-pen-square"
+                      ></font-awesome-icon
+                    ></span>
                     <span
                       v-if="item && item.can_delete"
                       data-tippy-content="DELETE"
                       class="badge badge-danger pointer"
                       @click="deleteValidationOption(item)"
-                      ><font-awesome-icon icon="fas fa-times"></font-awesome-icon></span>
+                      ><font-awesome-icon
+                        icon="fas fa-times"
+                      ></font-awesome-icon
+                    ></span>
                   </div>
                 </template>
                 <div
@@ -175,17 +233,18 @@
               <div class="bg-dark p-1" v-if="item">
                 <CodeEditor></CodeEditor>
               </div>
-              <h5 class="text-light text-center m-0 text-muted pt-2">
-                Definitions
-              </h5>
-              <small class="text-info text-center d-block"
-                >Create reusable validation definitions</small
+              <h5 class="text-left m-0 text-muted pt-2">Definitions</h5>
+              <small class="text-info text-left d-block"
+                >Create reusable validation definitions to use in your
+                schema.</small
               >
               <div class="border rounded p-2 alert-info mb-2">
                 <template v-for="item in definition_options" :key="item.title">
                   <div
                     class="badge m-1 text-light"
-                    :data-tippy-content="JSON.stringify(item.validation, null, 2)"
+                    :data-tippy-content="
+                      JSON.stringify(item.validation, null, 2)
+                    "
                     :style="{ 'background-color': item.color }"
                   >
                     <span v-text="item.title"></span>
@@ -193,13 +252,18 @@
                       data-tippy-content="EDIT"
                       class="badge badge-light pointer"
                       @click="editDefinitionOption(item)"
-                      ><font-awesome-icon icon="fas fa-pen-square"></font-awesome-icon></span>
+                      ><font-awesome-icon
+                        icon="fas fa-pen-square"
+                      ></font-awesome-icon
+                    ></span>
                     <span
                       v-if="item && item.can_delete"
                       data-tippy-content="DELETE"
                       class="badge badge-danger pointer"
                       @click="deleteDefinitionOption(item)"
-                      ><font-awesome-icon icon="fas fa-times"></font-awesome-icon
+                      ><font-awesome-icon
+                        icon="fas fa-times"
+                      ></font-awesome-icon
                     ></span>
                   </div>
                 </template>
@@ -232,7 +296,10 @@
                   'text-success': availableNamespace,
                   'text-danger': !availableNamespace,
                 }"
-                ><font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon> Choose a namespace</small
+                ><font-awesome-icon
+                  icon="fas fa-chevron-right"
+                ></font-awesome-icon>
+                Choose a namespace</small
               >
             </p>
             <h4 class="text-info text-center">
@@ -240,8 +307,11 @@
             </h4>
             <p class="text-center text-muted">
               <small class="text-muted"
-                ><font-awesome-icon icon="fas fa-info-circle" class="text-info"></font-awesome-icon> For example:
-                <b>myname</b>:ClassName
+                ><font-awesome-icon
+                  icon="fas fa-info-circle"
+                  class="text-info"
+                ></font-awesome-icon>
+                For example: <b>myname</b>:ClassName
               </small>
             </p>
             <div
@@ -292,11 +362,16 @@
                 <span class="text-info" v-text="startingPoint"></span
               ></small>
               <small class="text-muted"
-                ><font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon> namespace:
-                <span class="text-info" v-text="prefix"></span
+                ><font-awesome-icon
+                  icon="fas fa-chevron-right"
+                ></font-awesome-icon>
+                namespace: <span class="text-info" v-text="prefix"></span
               ></small>
               <small class="text-muted bold"
-                ><font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon> Create a new class</small
+                ><font-awesome-icon
+                  icon="fas fa-chevron-right"
+                ></font-awesome-icon>
+                Create a new class</small
               >
             </p>
             <hr />
@@ -307,7 +382,11 @@
               <h4 class="text-info">Create a new class</h4>
               <small>
                 <p>
-                  <font-awesome-icon icon="fas fa-info-circle" class="text-info"></font-awesome-icon> You are extending
+                  <font-awesome-icon
+                    icon="fas fa-info-circle"
+                    class="text-info"
+                  ></font-awesome-icon>
+                  You are extending
                   <span class="text-info" v-text="startingPoint"></span>,
                   consider naming your class something more specific or relevant
                   to the class' hierarchy.
@@ -320,8 +399,11 @@
               </small>
               <div class="form-group">
                 <h5 for="exampleInputEmail1" class="text-dark">
-                  <font-awesome-icon icon="fas fa-asterisk" class="text-danger"></font-awesome-icon> Name of the new
-                  extended class:
+                  <font-awesome-icon
+                    icon="fas fa-asterisk"
+                    class="text-danger"
+                  ></font-awesome-icon>
+                  Name of the new extended class:
                 </h5>
                 <small class="d-block my-1 text-info"
                   >Learn about naming conventions
@@ -342,8 +424,11 @@
               </div>
               <div class="form-group">
                 <h5 for="exampleInputPassword1" class="text-dark">
-                  <font-awesome-icon icon="fas fa-asterisk" class="text-danger"></font-awesome-icon> Brief description
-                  about this class:
+                  <font-awesome-icon
+                    icon="fas fa-asterisk"
+                    class="text-danger"
+                  ></font-awesome-icon>
+                  Brief description about this class:
                 </h5>
                 <textarea
                   type="password"
@@ -373,13 +458,22 @@
                 </h6>
                 <p class="text-left">
                   <small class="text-muted d-block"
-                    >1. <font-awesome-icon icon="fas fa-circle" class="text-primary"></font-awesome-icon> Reuse
-                    properties from parents
+                    >1.
+                    <font-awesome-icon
+                      icon="fas fa-circle"
+                      class="text-primary"
+                    ></font-awesome-icon>
+                    Reuse properties from parents
                     <i class="text-danger">Required</i></small
                   >
                   <small class="text-muted d-block"
-                    >2. <font-awesome-icon icon="fas fa-star" class="text-warning"></font-awesome-icon> Add new
-                    properties <i class="text-danger">Required</i></small
+                    >2.
+                    <font-awesome-icon
+                      icon="fas fa-star"
+                      class="text-warning"
+                    ></font-awesome-icon>
+                    Add new properties
+                    <i class="text-danger">Required</i></small
                   >
                   <small class="text-muted d-block"
                     >3. (<img src="@/assets/img/cube.svg" width="15px" />
@@ -390,8 +484,12 @@
                     <i class="text-danger">Required</i></small
                   >
                   <small class="text-muted d-block"
-                    >4. <font-awesome-icon icon="fab fa-github" class="text-success"></font-awesome-icon> Save/Download
-                    schema</small
+                    >4.
+                    <font-awesome-icon
+                      icon="fab fa-github"
+                      class="text-success"
+                    ></font-awesome-icon>
+                    Save/Download schema</small
                   >
                 </p>
               </div>
@@ -411,8 +509,11 @@
                   type="checkbox"
                 />
                 <label class="text-muted" for="rv"
-                  ><font-awesome-icon icon="fas fa-times" class="text-danger mr-1"></font-awesome-icon>Remove
-                  Validation</label
+                  ><font-awesome-icon
+                    icon="fas fa-times"
+                    class="text-danger mr-1"
+                  ></font-awesome-icon
+                  >Remove Validation</label
                 >
               </div>
               <div class="mt-2">
@@ -445,17 +546,27 @@
     <div class="alert alert-secondary" v-if="newClassAdded">
       <p class="m-0">
         Done editing? Easy!
-        <font-awesome-icon icon="fas fa-arrow-right" class="text-success"></font-awesome-icon> Click <b>Download</b>
-        <font-awesome-icon icon="fas fa-arrow-right" class="text-success"></font-awesome-icon> Host your schema
-        file<span class="text-danger">*</span>. Eg. on
+        <font-awesome-icon
+          icon="fas fa-arrow-right"
+          class="text-success"
+        ></font-awesome-icon>
+        Click <b>Download</b>
+        <font-awesome-icon
+          icon="fas fa-arrow-right"
+          class="text-success"
+        ></font-awesome-icon>
+        Host your schema file<span class="text-danger">*</span>. Eg. on
         <a target="_blank" rel="noreferrer" href="https://github.com/"
           >GitHub</a
         >
       </p>
       <p class="m-0">
         Done with that too?
-        <font-awesome-icon icon="fas fa-arrow-right" class="text-success"></font-awesome-icon> Visualize, Register and
-        share your schema here:
+        <font-awesome-icon
+          icon="fas fa-arrow-right"
+          class="text-success"
+        ></font-awesome-icon>
+        Visualize, Register and share your schema here:
         <a href="/schema-playground">Schema Playground</a>
       </p>
     </div>
@@ -476,12 +587,11 @@ import tippy from "tippy.js";
 import { mapGetters, mapState } from "vuex";
 import axios from "axios";
 import moment from "moment";
-import renderjson from 'renderjson'
-
+import renderjson from "renderjson";
 
 import cubeImg from "@/assets/img/cubeplus.svg";
 import editorImg from "@/assets/img/editor.png";
-import dropSound from "@/assets/img/tinybutton.wav"
+import dropSound from "@/assets/img/tinybutton.wav";
 
 import NGXGraph from "../components/NGXGraph.vue";
 import DefinitionEditor from "../components/DefinitionEditor.vue";
@@ -507,35 +617,35 @@ export default {
       validationView: false,
       loadingMode: false,
       loadingSchema: null,
-      dropSound: dropSound
+      dropSound: dropSound,
     };
   },
   computed: {
     ...mapGetters({
-        userInfo: 'userInfo',
-        removeValidation: 'removeValidation',
-        definition_options: 'getDefinitionOptions',
-        validation_props: 'getValidationProps',
-        validation_options: 'getValidationOptions',
-        startingPoint: 'getStartingPoint',
-        prefix: 'getPrefix',
-        classesAvailable: 'getSchema',
-        item: 'getEditItem',
-        definition_item: 'getEditDefinitionItem',
-        loading: 'loading',
-
+      userInfo: "userInfo",
+      removeValidation: "removeValidation",
+      definition_options: "getDefinitionOptions",
+      validation_props: "getValidationProps",
+      validation_options: "getValidationOptions",
+      startingPoint: "getStartingPoint",
+      prefix: "getPrefix",
+      classesAvailable: "getSchema",
+      item: "getEditItem",
+      definition_item: "getEditDefinitionItem",
+      loading: "loading",
+      addCardinality: "addCardinality",
     }),
     ...mapState({
-        newClassAdded: state => {
-            console.log('STATE', state)
-            for (var i = 0; i < state.editor.schema.length; i++) {
-                if (state.editor.schema[i].special) {
-                return true;
-                }
-            }
-            return false;
+      newClassAdded: (state) => {
+        console.log("STATE", state);
+        for (var i = 0; i < state.editor.schema.length; i++) {
+          if (state.editor.schema[i].special) {
+            return true;
+          }
         }
-    })
+        return false;
+      },
+    }),
   },
   watch: {
     prefix: function (prefix) {
@@ -563,7 +673,7 @@ export default {
           });
           self.availableNamespace = false;
         } else {
-          let url = self.$apiUrl +  "/api/registry/" + value;
+          let url = self.$apiUrl + "/api/registry/" + value;
           self.$store.commit("setLoading", { value: true });
           axios
             .head(url)
@@ -594,6 +704,9 @@ export default {
     },
   },
   methods: {
+    toggleCardinality() {
+      this.$store.commit("toggleCardinality");
+    },
     editValidation() {
       let self = this;
       self.validationView = !self.validationView;
@@ -1190,10 +1303,7 @@ export default {
           confirmButtonText: "Next &rarr;",
           showCancelButton: true,
           footer: `<small class="text-danger">Important: You need to have logged in using GitHub and given us permission to access your repositories.</small>`,
-          progressSteps: [
-            'A',
-            'B',
-          ],
+          progressSteps: ["A", "B"],
         })
         .queue([
           {

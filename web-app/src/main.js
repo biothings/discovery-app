@@ -146,7 +146,6 @@ library.add(
   faEllipsisH,
   faMinus,
   faTimesCircle
-
 );
 
 const app = createApp(App);
