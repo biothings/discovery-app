@@ -41,9 +41,37 @@ export const editor = {
     },
     top_class_validation: {},
     definition_options: definition_options,
+    addCardinality: false,
   },
   strict: true,
   mutations: {
+    toggleCardinality(state) {
+      state.addCardinality = !state.addCardinality;
+      //remove all marginality in validation
+      if (!state.addCardinality) {
+        $.notify("Removing cardinality", {
+          globalPosition: "right",
+          style: "info",
+          showDuration: 200,
+        });
+        for (const name in state.finalschema["@graph"][0]["$validation"][
+          "properties"
+        ]) {
+          if (
+            Object.hasOwnProperty.call(
+              state.finalschema["@graph"][0]["$validation"]["properties"][name],
+              "owl:cardinality"
+            )
+          ) {
+            let newV =
+              state.finalschema["@graph"][0]["$validation"]["properties"][name];
+            delete newV["owl:cardinality"];
+            state.finalschema["@graph"][0]["$validation"]["properties"][name] =
+              newV;
+          }
+        }
+      }
+    },
     toggleRemoveValidation(state) {
       state.removeValidation = !state.removeValidation;
       if (state.removeValidation) {
@@ -151,7 +179,8 @@ export const editor = {
         state.finalschema["@graph"][0]["$validation"]["properties"][name],
         item["validation"]
       );
-      state.finalschema["@graph"][0]["$validation"]["properties"][name] = newval;
+      state.finalschema["@graph"][0]["$validation"]["properties"][name] =
+        newval;
     },
     updateValidationOptions(state, payload) {
       state.validation_options = payload["validation"];
@@ -325,7 +354,8 @@ export const editor = {
     },
     savePrefix(state, payload) {
       state.prefix = payload["prefix"];
-      state.finalschema["@context"][state.prefix] = "https://discovery.biothings.io/view/" + state.prefix + "/";
+      state.finalschema["@context"][state.prefix] =
+        "https://discovery.biothings.io/view/" + state.prefix + "/";
     },
     saveParent(state, payload) {
       let parent = payload["parent"];
@@ -367,7 +397,7 @@ export const editor = {
           if (state.schema[i].hasOwnProperty("properties")) {
             state.schema[i].properties.push(newProp);
           } else if (!state.schema[i].hasOwnProperty("properties")) {
-            state.schema[i]['properties'] = [];
+            state.schema[i]["properties"] = [];
             state.schema[i].properties.push(newProp);
           }
         }
@@ -383,16 +413,17 @@ export const editor = {
               state.schema[i]["properties"][x].label === label
             ) {
               if (state.schema[i]["properties"][x].hasOwnProperty("selected")) {
-                state.schema[i]["properties"][x]['selected'] = !state.schema[i]["properties"][x]["selected"];
+                state.schema[i]["properties"][x]["selected"] =
+                  !state.schema[i]["properties"][x]["selected"];
                 //If unselected also mark as not required
                 if (!state.schema[i]["properties"][x]["selected"]) {
                   // reset all marginality
-                  state.schema[i]["properties"][x]['isRequired'] = false;
-                  state.schema[i]["properties"][x]['isOptional'] = false;
-                  state.schema[i]["properties"][x]['isRecommended'] = false;
+                  state.schema[i]["properties"][x]["isRequired"] = false;
+                  state.schema[i]["properties"][x]["isOptional"] = false;
+                  state.schema[i]["properties"][x]["isRecommended"] = false;
                 }
               } else {
-                state.schema[i]["properties"][x]['selected'] = true;
+                state.schema[i]["properties"][x]["selected"] = true;
               }
             }
           }
@@ -411,17 +442,18 @@ export const editor = {
               if (
                 state.schema[i]["properties"][x].hasOwnProperty("isRequired")
               ) {
-                state.schema[i]["properties"][x]['isRequired'] = !state.schema[i]["properties"][x]["isRequired"];
+                state.schema[i]["properties"][x]["isRequired"] =
+                  !state.schema[i]["properties"][x]["isRequired"];
               } else {
-                state.schema[i]["properties"][x]['isRequired'] = true;
+                state.schema[i]["properties"][x]["isRequired"] = true;
               }
               //reset other marginality
               if (
                 state.schema[i]["properties"][x] &&
                 state.schema[i]["properties"][x]["isRequired"]
               ) {
-                state.schema[i]["properties"][x]['isOptional'] = false;
-                state.schema[i]["properties"][x]['isRecommended'] = false;
+                state.schema[i]["properties"][x]["isOptional"] = false;
+                state.schema[i]["properties"][x]["isRecommended"] = false;
               }
             }
           }
@@ -440,17 +472,18 @@ export const editor = {
               if (
                 state.schema[i]["properties"][x].hasOwnProperty("isOptional")
               ) {
-                state.schema[i]["properties"][x]['isOptional'] = !state.schema[i]["properties"][x]["isOptional"];
+                state.schema[i]["properties"][x]["isOptional"] =
+                  !state.schema[i]["properties"][x]["isOptional"];
               } else {
-                state.schema[i]["properties"][x]['isOptional'] = true;
+                state.schema[i]["properties"][x]["isOptional"] = true;
               }
               //reset other marginality
               if (
                 state.schema[i]["properties"][x] &&
                 state.schema[i]["properties"][x]["isOptional"]
               ) {
-                state.schema[i]["properties"][x]['isRequired'] = false;
-                state.schema[i]["properties"][x]['isRecommneded'] = false;
+                state.schema[i]["properties"][x]["isRequired"] = false;
+                state.schema[i]["properties"][x]["isRecommneded"] = false;
               }
             }
           }
@@ -469,17 +502,18 @@ export const editor = {
               if (
                 state.schema[i]["properties"][x].hasOwnProperty("isRecommended")
               ) {
-                state.schema[i]["properties"][x]['isRecommended'] = !state.schema[i]["properties"][x]["isRecommended"];
+                state.schema[i]["properties"][x]["isRecommended"] =
+                  !state.schema[i]["properties"][x]["isRecommended"];
               } else {
-                state.schema[i]["properties"][x]['isRecommended'] = true;
+                state.schema[i]["properties"][x]["isRecommended"] = true;
               }
               //reset other marginality
               if (
                 state.schema[i]["properties"][x] &&
                 state.schema[i]["properties"][x]["isRecommended"]
               ) {
-                state.schema[i]["properties"][x]['isRequired'] = false;
-                state.schema[i]["properties"][x]['isOptional'] = false;
+                state.schema[i]["properties"][x]["isRequired"] = false;
+                state.schema[i]["properties"][x]["isOptional"] = false;
               }
             }
           }
@@ -515,31 +549,32 @@ export const editor = {
       } catch (error) {
         console.log("NO previousPreviewProps", state.previousPreviewProps);
       }
-      state.finalschema['@graph'] = [];
-      state.validation['properties'] = {};
-      state.validation['required'] = [];
+      state.finalschema["@graph"] = [];
+      state.validation["properties"] = {};
+      state.validation["required"] = [];
 
       for (var i = 0; i < state.schema.length; i++) {
         if (state.schema[i].special) {
           //Add Main Class to Graph
           let mainClass = {};
-          mainClass['@id'] = state.schema[i]["name"];
-          mainClass['@type'] = "rdfs:Class";
-          mainClass['rdfs:comment'] = state.schema[i]["description"];
-          mainClass['rdfs:label'] = state.schema[i]["label"];
-          mainClass['rdfs:subClassOf'] = { "@id": state.startingPoint };
-          mainClass['$validation'] = {};
+          mainClass["@id"] = state.schema[i]["name"];
+          mainClass["@type"] = "rdfs:Class";
+          mainClass["rdfs:comment"] = state.schema[i]["description"];
+          mainClass["rdfs:label"] = state.schema[i]["label"];
+          mainClass["rdfs:subClassOf"] = { "@id": state.startingPoint };
+          mainClass["$validation"] = {};
           //Add New Class
           state.finalschema["@graph"].push(mainClass);
           //Handle main Class Properties
           if (state.schema[i].properties) {
             for (var x = 0; x < state.schema[i].properties.length; x++) {
               let mainProp = {};
-              mainProp['@id'] = state.schema[i].properties[x]["name"];
-              mainProp['@type'] = "rdf:Property";
-              mainProp['rdfs:comment'] = state.schema[i].properties[x]["description"];
-              mainProp['rdfs:label'] = state.schema[i].properties[x]["label"];
-              mainProp['schema:domainIncludes'] = state.schema[i]["name"];
+              mainProp["@id"] = state.schema[i].properties[x]["name"];
+              mainProp["@type"] = "rdf:Property";
+              mainProp["rdfs:comment"] =
+                state.schema[i].properties[x]["description"];
+              mainProp["rdfs:label"] = state.schema[i].properties[x]["label"];
+              mainProp["schema:domainIncludes"] = state.schema[i]["name"];
               //Ranges of Property
               if (state.schema[i].properties[x]["range"]) {
                 let ranges = state.schema[i].properties[x]["range"].split(",");
@@ -571,9 +606,12 @@ export const editor = {
                   );
                 } else {
                   //for first time add description
-                  propValue['description'] = state.schema[i].properties[x].description;
+                  propValue["description"] =
+                    state.schema[i].properties[x].description;
                 }
-                state.validation["properties"][state.schema[i].properties[x].label] = propValue;
+                state.validation["properties"][
+                  state.schema[i].properties[x].label
+                ] = propValue;
               }
               if (state.schema[i].properties[x].isRequired) {
                 let p = state.schema[i].properties[x].label;
@@ -613,7 +651,8 @@ export const editor = {
                   );
                 } else {
                   //for first time add description
-                  propValue['description'] = state.schema[i].properties[y].description;
+                  propValue["description"] =
+                    state.schema[i].properties[y].description;
                 }
                 myLabel = state.schema[i].properties[y].label;
                 state.validation["properties"][myLabel] = propValue;
@@ -654,7 +693,10 @@ export const editor = {
                       ]) {
                         if (key !== "description") {
                           // console.log('adding existing '+ key +' to ' + propName)
-                          state.validation["properties"][propName][key] = state.top_class_validation.properties[propName][key];
+                          state.validation["properties"][propName][key] =
+                            state.top_class_validation.properties[propName][
+                              key
+                            ];
                         }
                       }
                     }
@@ -698,13 +740,13 @@ export const editor = {
               }
               if ([...defs_found].length) {
                 let defs = [...defs_found];
-                state.validation['definitions'] = {};
+                state.validation["definitions"] = {};
                 defs.forEach((def) => {
                   state.definition_options.forEach((val) => {
                     if (val.title == def) {
                       // console.log('validation found',)
                       if (Object.hasOwnProperty.call(val, "validation")) {
-                        state.validation.definitions[def] = val.validation
+                        state.validation.definitions[def] = val.validation;
                       }
                     }
                   });
@@ -712,7 +754,8 @@ export const editor = {
               }
               //Once done add temp validation to finalschema
               if (state.finalschema["@graph"].length) {
-                state.finalschema["@graph"][0]['$validation'] = state.validation
+                state.finalschema["@graph"][0]["$validation"] =
+                  state.validation;
               }
             }
           }
@@ -721,7 +764,7 @@ export const editor = {
       // Check validation is complete
       let incomplete = 0;
       if (state.validation.hasOwnProperty("properties")) {
-        for (key in state.validation["properties"]) {
+        for (let key in state.validation["properties"]) {
           let keys = Object.keys(state.validation["properties"][key]).length;
           if (keys <= 1) {
             incomplete += 1;
@@ -746,11 +789,15 @@ export const editor = {
       }
       //check if bioschemas is mentioned if so add bioschemas to context
       if (JSON.stringify(state.finalschema).includes("bioschemas")) {
-        state.finalschema["@context"]['bioschemas'] = "https://discovery.biothings.io/view/bioschemas/";
+        state.finalschema["@context"]["bioschemas"] =
+          "https://discovery.biothings.io/view/bioschemas/";
       }
     },
   },
   getters: {
+    addCardinality: (state) => {
+      return state.addCardinality;
+    },
     removeValidation: (state) => {
       return state.removeValidation;
     },
@@ -887,7 +934,12 @@ export const editor = {
       let uniqueParents = new Set(list);
       let pList = [...uniqueParents];
       let requests = pList.map((parent) =>
-        axios.get("https://discovery.biothings.io/api/registry/" + parent.split(":")[0] + "/" + parent)
+        axios.get(
+          "https://discovery.biothings.io/api/registry/" +
+            parent.split(":")[0] +
+            "/" +
+            parent
+        )
       );
 
       commit("setLoading", { value: true });

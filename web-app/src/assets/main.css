@@ -58,7 +58,7 @@
   color: white;
   transition: all 0.3s;
   outline: none !important;
-  padding:10px !important;
+  padding: 10px !important;
 }
 .drag-el:hover {
   cursor: grab;

@@ -1,16 +1,19 @@
 <template>
   <div class="bg-light" style="position: relative">
     <h4 class="logoText text-center m-2">
-      <font-awesome-icon icon="fab fa-github-alt"/> Save your work to GitHub
+      <font-awesome-icon icon="fab fa-github-alt" /> Save your work to GitHub
     </h4>
     <p class="text-dark w-50 m-auto mb-2">
       <small
-        ><font-awesome-icon icon="fas fa-exclamation-circle" class="text-info"/> By continuing with
-        this process you are giving us permission to access your GitHub account
-        to create/edit <b>public</b> repos/files. This might include public
-        organizations and repos that you are part of. If you DO NOT accept this
-        please close this window and choose the <b>Download</b> option to save
-        manually.</small
+        ><font-awesome-icon
+          icon="fas fa-exclamation-circle"
+          class="text-info"
+        />
+        By continuing with this process you are giving us permission to access
+        your GitHub account to create/edit <b>public</b> repos/files. This might
+        include public organizations and repos that you are part of. If you DO
+        NOT accept this please close this window and choose the
+        <b>Download</b> option to save manually.</small
       >
     </p>
     <div v-if="!accepts">
@@ -24,7 +27,10 @@
         v-if="loading"
         style="position: absolute; top: 45%; z-index: 2000"
       >
-        <font-awesome-icon icon="fab fa-github-alt" class="fa-spin fa-5x p-2 text-info"/>
+        <font-awesome-icon
+          icon="fab fa-github-alt"
+          class="fa-spin fa-5x p-2 text-info"
+        />
       </div>
       <div
         class="col-sm-12 col-md-4 border p-1"
@@ -39,7 +45,7 @@
           class="btn themeButton text-light btn-sm"
           @click="getRepos()"
         >
-        <font-awesome-icon icon="fab fa-github-alt"/> Get Repos
+          <font-awesome-icon icon="fab fa-github-alt" /> Get Repos
         </button>
         <template v-if="repos.length">
           <h6 class="text-muted">1. Choose one (All available):</h6>
@@ -83,12 +89,14 @@
           <div class="alert alert-dark text-center">
             <template v-if="repo_selected && existing_file">
               <h6 class="text-muted">
-                <font-awesome-icon icon="fas fa-sync-alt text-success"/> Update File
+                <font-awesome-icon icon="fas fa-sync-alt text-success" /> Update
+                File
               </h6>
             </template>
             <template v-if="repo_selected && !existing_file">
               <h6 class="text-muted">
-                <font-awesome-icon icon="fas fa-file-medical text-success"/> Create File
+                <font-awesome-icon icon="fas fa-file-medical text-success" />
+                Create File
               </h6>
             </template>
             <input
@@ -184,24 +192,26 @@
               class="btn btn-success text-light btn-sm"
               @click="saveWork()"
             >
-            <font-awesome-icon icon="fab fa-github-alt"/>
+              <font-awesome-icon icon="fab fa-github-alt" />
               <span v-text="existing_file ? 'Update' : 'Save'"></span>
             </button>
           </template>
           <template v-else>
             <small class="d-block"
-              ><font-awesome-icon icon="fab fa-github-alt fa-2x"/></small>
+              ><font-awesome-icon icon="fab fa-github-alt fa-2x"
+            /></small>
           </template>
         </div>
         <div v-if="repo_saved && repo_link" class="text-center mt-3">
           <h6>
-            <font-awesome-icon icon="fa fa-check"/> Work
+            <font-awesome-icon icon="fa fa-check" /> Work
             <span v-text="existing_file ? 'Updated' : 'Saved'"></span>!
           </h6>
           <small>
             <a :href="repo_link" target="_blank" rel="nonreferrer"
               ><b v-text="repo_link"></b>
-              <font-awesome-icon icon="fas fa-external-link-alt"/></a>
+              <font-awesome-icon icon="fas fa-external-link-alt"
+            /></a>
           </small>
         </div>
       </div>
@@ -229,7 +239,7 @@
             </button>
             <div v-if="loading">
               <h3 class="text-light">
-                <font-awesome-icon icon="fas fa-cog fa-spin"/> Please Wait...
+                <font-awesome-icon icon="fas fa-cog fa-spin" /> Please Wait...
               </h3>
             </div>
           </template>
@@ -586,8 +596,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-        loading: 'loading',
-        code: 'getFinalSchema'
+      loading: "loading",
+      code: "getFinalSchema",
     }),
     readyLink: function () {
       let self = this;

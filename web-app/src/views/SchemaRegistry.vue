@@ -513,6 +513,8 @@ export default {
     getNameSpaces() {
       var self = this;
       let res = [];
+      // TODO:
+      // change this to use https://discovery.biothings.io/api/registry?field=_id&size=20
       axios
         .get(
           self.$apiUrl + "/api/registry/query?facets=namespace&facet_size=100"

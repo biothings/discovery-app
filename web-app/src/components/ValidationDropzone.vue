@@ -1,13 +1,25 @@
 <template>
   <div class="row m-0 valBox bg-dark m-1">
     <div class="col-sm-12 col-md-5">
-      <small class="text-light" v-text="propname"></small>
-      <font-awesome-icon
-        icon="fas fa-times-circle"
-        class="pointer text-warning ml-1"
-        @click="resetValidation()"
-        data-tippy-content="Clear Validation"
-    />
+      <div class="row">
+        <div class="col-sm-12">
+          <small class="text-light" v-text="propname"></small>
+          <font-awesome-icon
+            icon="fa fa-times-circle"
+            class="pointer text-warning ml-1"
+            @click="resetValidation()"
+            data-tippy-info="Clear Validation"
+          ></font-awesome-icon>
+        </div>
+        <div class="col-sm-12">
+          <EditDescription :propname="propname" :val="val"></EditDescription>
+          <CardinalitySelector
+            v-if="addCardinality"
+            :propname="propname"
+            :val="val"
+          ></CardinalitySelector>
+        </div>
+      </div>
     </div>
     <div
       class="col-sm-12 col-md-7 p-1 text-success drop-zone"
@@ -36,6 +48,8 @@
 
 <script>
 import { mapGetters } from "vuex";
+import EditDescription from "./EditDescription.vue";
+import CardinalitySelector from "./CardinalitySelector.vue";
 
 import cubePlus from "@/assets/img/cubeplus.svg";
 
@@ -46,6 +60,10 @@ export default {
     return {
       matches: [],
     };
+  },
+  components: {
+    EditDescription,
+    CardinalitySelector,
   },
   methods: {
     allowDrop(ev) {
@@ -76,7 +94,7 @@ export default {
           };
           let audio = document.getElementById("dropsound");
           audio.play();
-          store.commit("setValidation", payload);
+          self.$store.commit("setValidation", payload);
         }
       });
     },
@@ -94,12 +112,13 @@ export default {
         name: self.propname,
       };
       self.matches = [];
-      store.commit("resetValidationFor", payload);
+      this.$store.commit("resetValidationFor", payload);
     },
   },
   computed: {
     ...mapGetters({
       validation_options: "getValidationOptions",
+      addCardinality: "addCardinality",
     }),
   },
 };
