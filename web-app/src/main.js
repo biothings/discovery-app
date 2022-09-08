@@ -84,6 +84,7 @@ import {
   faCheckCircle,
   faEllipsisH,
   faMinus,
+  faFileImport,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub, faGithubAlt } from "@fortawesome/free-brands-svg-icons";
 
@@ -146,7 +147,8 @@ library.add(
   faCheckCircle,
   faEllipsisH,
   faMinus,
-  faTimesCircle
+  faTimesCircle,
+  faFileImport
 );
 
 const app = createApp(App);

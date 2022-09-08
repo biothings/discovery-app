@@ -69,7 +69,8 @@ export default {
   },
   mounted: function () {
     var self = this;
-    let sp = self.$store.getters.getStartingPoint;
+    let sp = self.$store.getters.startingPoint;
+    console.log(sp);
     if (sp.name == self.cat) {
       self.canRemove = false;
     }

@@ -13,9 +13,9 @@
         <p class="text-muted">
           Follow best practices to make your metadata more findable
         </p>
-        <a :href="'/dataset?guide=' + window.location.pathname"
+        <a :href="'/dataset?guide=' + $router.currentRoute"
           >Browse other registered metadata using this guide
-          <i class="fas fa-chevron-right"></i
+          <font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon
         ></a>
       </div>
       <h4 v-text="readableName(schemaName)" class="text-center logoText"></h4>
@@ -48,7 +48,8 @@
             <small
               @click="restartBulk()"
               class="pointer text-light badge badge-danger"
-              ><i class="fas fa-undo"></i> Start Over</small
+              ><font-awesome-icon icon="fas fa-undo"></font-awesome-icon> Start
+              Over</small
             >
             <button
               v-if="!beginBulkRegistration"
@@ -56,7 +57,8 @@
               class="btn btn-success text-light m-1"
               aria-label="Bulk Register Metadata"
             >
-              <i class="fas fa-registered"></i> Register Metadata
+              <font-awesome-icon icon="fas fa-registered"></font-awesome-icon>
+              Register Metadata
             </button>
           </div>
           <div style="height: 700px; overflow: scroll; resize: vertical">
@@ -103,8 +105,14 @@
           <div class="p-1 alert-warning d-flex">
             <h4 class="text-info d-inline-block p-2">
               <span class="fa-stack">
-                <i class="fas fa-circle fa-stack-2x"></i>
-                <i class="fas fa-pencil-alt fa-stack-1x fa-inverse"></i>
+                <font-awesome-icon
+                  icon="fas fa-circle"
+                  class="fa-stack-2x"
+                ></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-pencil-alt"
+                  class="fa-stack-1x fa-inverse"
+                ></font-awesome-icon>
               </span>
             </h4>
             <small class="d-inline-block">
@@ -125,20 +133,32 @@
               :data-tippy-info="'Logged in as ' + userInfo.login"
               v-if="userInfo && userInfo.login"
             >
-              <i class="fas fa-circle text-success fa-stack-2x"></i>
-              <i class="fas fa-user-check fa-stack-1x fa-inverse"></i>
+              <font-awesome-icon
+                icon="fas fa-circle"
+                class="text-success fa-stack-2x"
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-user-check"
+                class="fa-stack-1x fa-inverse"
+              ></font-awesome-icon>
             </span>
             <a
               class="nav-link active text-primary mr-2"
-              :href="'/login?next=' + window.location.pathname"
+              :href="'/login?next=' + $router.currentRoute"
               v-if="userInfo && !userInfo.login"
             >
               <span
                 class="fa-stack fa-1x pointer tip"
                 data-tippy-info="Click to log in"
               >
-                <i class="fas fa-circle text-primary fa-stack-2x"></i>
-                <i class="fas fa-sign-in-alt fa-stack-1x fa-inverse"></i>
+                <font-awesome-icon
+                  icon="fas fa-circle"
+                  class="text-primary fa-stack-2x"
+                ></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-sign-in-alt"
+                  class="fa-stack-1x fa-inverse"
+                ></font-awesome-icon>
               </span>
             </a>
             <span
@@ -150,14 +170,18 @@
                 pointer: validation,
               }"
             >
-              <i
-                class="fas fa-circle text-success fa-stack-2x"
+              <font-awesome-icon
+                icon="fas fa-circle"
+                class="text-success fa-stack-2x"
                 :class="{
                   'text-muted': !validation,
                   'text-danger': validation,
                 }"
-              ></i>
-              <i class="fas fa-undo fa-stack-1x fa-inverse"></i>
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-undo"
+                class="fa-stack-1x fa-inverse"
+              ></font-awesome-icon>
             </span>
             <span
               class="fa-stack fa-1x pointer tip mr-2"
@@ -168,11 +192,15 @@
                 pointer: validation,
               }"
             >
-              <i
-                class="fas fa-circle text-success fa-stack-2x"
+              <font-awesome-icon
+                icon="fas fa-circle"
+                class="text-success fa-stack-2"
                 :class="{ 'text-muted': !validation, mainTextDark: validation }"
-              ></i>
-              <i class="fas fa-code fa-stack-1x fa-inverse"></i>
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-code"
+                class="fa-stack-1x fa-inverse"
+              ></font-awesome-icon>
             </span>
             <span
               class="fa-stack fa-1x pointer tip mr-2"
@@ -180,11 +208,15 @@
               @click="loadData()"
               v-show="validation"
             >
-              <i
-                class="fas fa-circle text-success fa-stack-2x"
+              <font-awesome-icon
+                icon="fas fa-circle"
+                class="text-success fa-stack-2x"
                 :class="{ 'text-muted': !validation, mainTextDark: validation }"
-              ></i>
-              <i class="fas fa-file-import fa-stack-1x fa-inverse"></i>
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-file-import"
+                class="fa-stack-1x fa-inverse"
+              ></font-awesome-icon>
             </span>
             <span
               class="fa-stack fa-1x pointer tip mr-2"
@@ -192,11 +224,15 @@
               @click="handleBulk()"
               v-show="validation"
             >
-              <i
-                class="fas fa-circle text-success fa-stack-2x"
+              <font-awesome-icon
+                icon="fas fa-circle"
+                class="text-success fa-stack-2x"
                 :class="[bulkMode ? 'text-warning' : 'mainTextDark']"
-              ></i>
-              <i class="fas fa-registered fa-stack-1x fa-inverse"></i>
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-registered"
+                class="fa-stack-1x fa-inverse"
+              ></font-awesome-icon>
             </span>
             <div
               class="pillType tip pointer"
@@ -222,7 +258,7 @@
           <div class="alert text-danger text-center p-5">
             <h5>You must be logged in to proceed</h5>
             <h6>
-              <a :href="'/login?next=' + window.location.pathname"
+              <a :href="'/login?next=' + $router.currentRoute"
                 >click here to log in</a
               >
             </h6>
@@ -268,15 +304,19 @@
                   />
                   <label class="form-check-label" :for="item.displayName">
                     <span v-text="item.displayName"></span>
-                    <i
-                      class="fas fa-info-circle text-info desc"
+                    <font-awesome-icon
+                      icon="fas fa-info-circle"
+                      class="text-info desc"
                       :data-tippy-info="item.description"
-                    ></i>
+                    ></font-awesome-icon>
                   </label>
                 </div>
               </template>
               <button class="btn themeButton text-light mt-3" type="submit">
-                NEXT <i class="fas fa-chevron-right"></i>
+                NEXT
+                <font-awesome-icon
+                  icon="fas fa-chevron-right"
+                ></font-awesome-icon>
               </button>
             </form>
           </template>
@@ -311,12 +351,15 @@
                       : 'Click to register your metadata',
                   ]"
                 >
-                  <small> <i class="fas fa-check"></i> Save Changes </small>
+                  <small>
+                    <font-awesome-icon icon="fas fa-check"></font-awesome-icon>
+                    Save Changes
+                  </small>
                 </a>
               </div>
             </template>
             <template v-else>
-              <template v-if="window.location.pathname == '/guide/n3c/dataset'">
+              <template v-if="$router.currentRoute == '/guide/n3c/dataset'">
                 <h1 class="logoText">N3C Dataset Request</h1>
                 <div class="p-5 text-center m-3">
                   <img
@@ -337,7 +380,12 @@
                     }"
                     @click="handleRegistration()"
                   >
-                    <small> <i class="fas fa-check"></i> Submit Request </small>
+                    <small>
+                      <font-awesome-icon
+                        icon="fas fa-check"
+                      ></font-awesome-icon>
+                      Submit Request
+                    </small>
                   </a>
                 </div>
               </template>
@@ -362,7 +410,12 @@
                         : 'Click to register your metadata',
                     ]"
                   >
-                    <small> <i class="fas fa-check"></i> Register </small>
+                    <small>
+                      <font-awesome-icon
+                        icon="fas fa-check"
+                      ></font-awesome-icon>
+                      Register
+                    </small>
                   </a>
                 </div>
               </template>
@@ -416,7 +469,10 @@
                   class="btn btn-danger text-light"
                   @click="goToStep(step - 1)"
                 >
-                  <i class="fas fa-chevron-left"></i> BACK
+                  <font-awesome-icon
+                    icon="fas fa-chevron-left"
+                  ></font-awesome-icon>
+                  BACK
                 </button>
               </div>
               <div class="d-flex justify-content-center flex-wrap">
@@ -442,9 +498,10 @@
 
 <script>
 import axios from "axios";
+import tippy from "tippy.js";
 import { mapGetters } from "vuex";
 import { isArray, isPlainObject, isString } from "lodash";
-import presets from "../store/modules/guide/presets.js";
+import "@/assets/js/notify.min.js";
 
 import popSound from "@/assets/img/pop.wav";
 import metaPic from "@/assets/img/metadata.png";
@@ -463,8 +520,8 @@ export default {
   },
   data: function () {
     return {
-      presets: presets,
       popSound: popSound,
+      presets: [],
       //   portals: [
       //          {'namespace': 'google',
       //           'prefix': 'bts',
@@ -547,7 +604,7 @@ export default {
       if (self.isComplete && self.editingID) {
         self.$store.commit("formPreview");
         let output = self.$store.getters.getOutput;
-        self.loading = true;
+        self.$store.commit("setLoading", { value: true });
 
         let schema = self.$store.getters.schema;
 
@@ -560,19 +617,19 @@ export default {
         axios
           .put(self.$apiUrl + "/api/dataset/" + self.editingID, output, config)
           .then((res) => {
-            self.loading = false;
+            self.$store.commit("setLoading", { value: false });
             if (res.data.success) {
               sessionStorage.removeItem("guideProgress");
 
               self.$gtag.event("click", {
                 event_category: "dataset_edited",
-                event_label: window.location.pathname,
+                event_label: self.$router.currentRoute,
                 event_value: 1,
               });
 
               let timerInterval;
               self.$swal.fire({
-                type: "success",
+                icon: "success",
                 title: "Changes saved!",
                 confirmButtonColor: "#5C3069",
                 cancelButtonColor: "#006476",
@@ -595,7 +652,7 @@ export default {
                 onClose: () => {
                   clearInterval(timerInterval);
                   self.$store.dispatch("reset");
-                  window.location.href = "/dataset/" + self.editingID;
+                  self.$router.push({ path: "/dataset/" + self.editingID });
                 },
               });
             } else {
@@ -616,18 +673,18 @@ export default {
             }
           })
           .catch((err) => {
-            self.loading = false;
+            self.$store.commit("setLoading", { value: false });
             let culprit = "<h6>" + err.response.data.error + "</h6>";
             if (err.response.data && err.response.data.path) {
               culprit +=
-                "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>" +
+                "<h5>Culprit: <b class='text-danger'>" +
                 err.response.data.path +
                 "</b></h5>";
             }
             if (err.response.data.parent && err.response.data.parent.path) {
               if (true) {
                 culprit +=
-                  "<h5>Under <i class='fas fa-arrow-right'6</i> <b class='text-danger'>" +
+                  "<h5>Under: <b class='text-danger'>" +
                   err.response.data.parent.path +
                   "</b></h5>";
               }
@@ -661,22 +718,22 @@ export default {
             throw err;
           });
 
-        self.loading = true;
+        self.$store.commit("setLoading", { value: true });
       }
     },
     getAndLoadSchema(url) {
       var self = this;
-      self.loading = true;
+      self.$store.commit("setLoading", { value: true });
       axios
         .get(url)
         .then((res) => {
-          self.loading = false;
+          self.$store.commit("setLoading", { value: false });
           var payload = {};
           payload["schema"] = res.data;
           self.$store.commit("saveSchema", payload);
         })
         .catch((err) => {
-          self.loading = false;
+          self.$store.commit("setLoading", { value: false });
           $.notify("Failed to load schema", {
             globalPosition: "right",
             style: "danger",
@@ -687,7 +744,7 @@ export default {
     },
     getStartingPointSchema(item) {
       let self = this;
-      self.loading = true;
+      self.$store.commit("setLoading", { value: true });
       let url =
         self.$apiUrl +
         "/api/registry/" +
@@ -741,16 +798,16 @@ export default {
               }
             }
           }
-          self.loading = false;
+          self.$store.commit("setLoading", { value: false });
         })
         .catch((err) => {
-          self.loading = false;
+          self.$store.commit("setLoading", { value: false });
           try {
             self.$swal.fire({
               type: "error",
               position: "center",
               title: "Failed because: ",
-              text: err.response.data.error,
+              text: err,
             });
           } catch (e) {
             throw e;
@@ -894,7 +951,7 @@ export default {
       if (this.isComplete) {
         self.$store.commit("formPreview");
         let output = self.$store.getters.getOutput;
-        self.loading = true;
+        self.$store.commit("setLoading", { value: true });
 
         let schema = self.$store.getters.schema;
 
@@ -919,19 +976,19 @@ export default {
             config
           )
           .then((res) => {
-            self.loading = false;
+            self.$store.commit("setLoading", { value: false });
             if (res.data.success) {
               sessionStorage.removeItem("guideProgress");
 
               self.$gtag.event("click", {
                 event_category: "dataset_added",
-                event_label: window.location.pathname,
+                event_label: self.$router.currentRoute,
                 event_value: 1,
               });
 
-              if (window.location.pathname == "/guide/n3c/dataset") {
+              if (self.$router.currentRoute == "/guide/n3c/dataset") {
                 self.$swal.fire({
-                  type: "success",
+                  icon: "success",
                   title: "Registration Successful",
                   position: "center",
                   confirmButtonColor: "#5C3069",
@@ -968,7 +1025,7 @@ export default {
               } else {
                 let timerInterval;
                 self.$swal.fire({
-                  type: "success",
+                  icon: "success",
                   title: "Registration Successful",
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
@@ -991,7 +1048,7 @@ export default {
                   onClose: () => {
                     clearInterval(timerInterval);
                     self.$store.dispatch("reset");
-                    window.location.href = "/dataset/" + res.data.id;
+                    self.$router.push({ path: "/dataset/" + res.data.id });
                   },
                 });
               }
@@ -1013,18 +1070,18 @@ export default {
             }
           })
           .catch((err) => {
-            self.loading = false;
+            self.$store.commit("setLoading", { value: false });
             let culprit = "<h6>" + err.response.data.error + "</h6>";
             if (err.response.data && err.response.data.path) {
               culprit +=
-                "<h5>Culprit <i class='fas fa-arrow-right'></i> <b class='text-danger'>" +
+                "<h5>Culprit: <b class='text-danger'>" +
                 err.response.data.path +
                 "</b></h5>";
             }
             if (err.response.data.parent && err.response.data.parent.path) {
               if (true) {
                 culprit +=
-                  "<h5>Under <i class='fas fa-arrow-right'6</i> <b class='text-danger'>" +
+                  "<h5>Under: <b class='text-danger'>" +
                   err.response.data.parent.path +
                   "</b></h5>";
               }
@@ -1058,7 +1115,7 @@ export default {
             throw err;
           });
 
-        self.loading = true;
+        self.$store.commit("setLoading", { value: true });
       }
     },
     showHelp() {
@@ -1330,7 +1387,7 @@ export default {
                         .get(url)
                         .then((res) => {
                           let selected = res.data;
-                          for (key in selected) {
+                          for (let key in selected) {
                             if (!["@context", "@type", "_id"].includes(key)) {
                               if (key == "identifier") {
                                 self.checkOverriddenID(selected[key]);
@@ -1372,8 +1429,7 @@ export default {
                   )
                   .then((publicres) => {
                     let list = publicres.data.hits;
-                    self.loading = false;
-                    self.loading = true;
+                    self.$store.commit("setLoading", { value: true });
                     axios
                       .get(
                         self.$apiUrl +
@@ -1381,7 +1437,7 @@ export default {
                           self.userInfo.login
                       )
                       .then((privateres) => {
-                        self.loading = false;
+                        self.$store.commit("setLoading", { value: false });
                         list = list.concat(privateres.data.hits);
                         let options = {};
                         for (var i = 0; i < list.length; i++) {
@@ -1409,7 +1465,7 @@ export default {
                               for (var i = 0; i < list.length; i++) {
                                 if (result.value === list[i]["name"]) {
                                   let selected = list[i];
-                                  for (key in selected) {
+                                  for (let key in selected) {
                                     if (
                                       !["@context", "@type", "_id"].includes(
                                         key
@@ -1479,7 +1535,7 @@ export default {
                       try {
                         let selected = JSON.parse(result.value);
                         console.log(selected);
-                        for (key in selected) {
+                        for (let key in selected) {
                           if (!["@context", "@type", "_id"].includes(key)) {
                             if (key == "identifier") {
                               self.checkOverriddenID(selected[key]);
@@ -1590,7 +1646,7 @@ export default {
         // if url QUERY
         if (self.guideQuery) {
           let found = self.presets.find(
-            (guide) => guide.name == self.guideQuery
+            (guide) => guide.name.toLowerCase() == self.guideQuery.toLowerCase()
           );
           console.log("Loading from context Query", found);
           if (found) {
@@ -1669,7 +1725,7 @@ export default {
         });
         let selected = JSON.parse(p);
 
-        for (key in selected) {
+        for (let key in selected) {
           if (!["@context", "@type", "_id"].includes(key)) {
             var payload = {};
             let value = selected[key];
@@ -1705,7 +1761,7 @@ export default {
         });
       } else {
         self.$swal.fire({
-          type: "success",
+          icon: "success",
           toast: true,
           title: "Everything Looks Good!",
           showConfirmButton: false,
@@ -1715,6 +1771,7 @@ export default {
     },
   },
   mounted: function () {
+    this.presets = this.$route.meta.presets;
     if (this.guide_query) {
       this.guideQuery = this.guide_query;
     }
@@ -1766,7 +1823,7 @@ export default {
     });
     $.notify.addStyle("trophy", {
       html: `<div class="bg-dark p-1 text-light">
-        <i class="fas fa-thumbs-up text-success"></i> <span data-notify-text/>
+         <span data-notify-text/>
       </div>`,
       classes: {
         base: {

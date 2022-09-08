@@ -1919,8 +1919,7 @@ export default {
       animation: "fade",
       theme: "light",
     });
-    tippy("#masterForm", {
-      target: ".inputpreview",
+    tippy(".inputpreview", {
       content: "Loading...",
       maxWidth: "200px",
       placement: "left",
@@ -1936,7 +1935,6 @@ export default {
       },
     });
     tippy(".info", {
-      target: ".info",
       maxWidth: "200px",
       placement: "left",
       animation: "fade",
@@ -1959,7 +1957,7 @@ export default {
     },
     userInput: {
       get() {
-        return this.$store.state.schema.validation.properties[this.name].value;
+        return this.$store.getters.getValidationValue(this.name);
       },
       set(newValue) {
         var payload = {};

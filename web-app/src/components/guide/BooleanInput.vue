@@ -35,7 +35,7 @@ export default {
   computed: {
     done: {
       get() {
-        return this.$store.state.schema.validation.properties[this.name].value;
+        return this.$store.getters.getValidationValue(this.name);
       },
     },
   },

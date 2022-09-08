@@ -32,247 +32,209 @@
       <!-- 🍏 TAB SECTIONS 🍏-->
       <div class="col-sm-12 w-100 text-dark">
         <form
-          v-if="type_selected == name"
           class="w-100 fade-in"
           v-for="(value, name) in parsed_options"
           @submit.prevent="handleSubmit(name, value)"
         >
-          <div class="col-sm-12 py-2">
-            <template v-if="!isChild">
-              <small class="text-muted m-2"
-                ><i class="fas fa-circle text-danger"></i> = required</small
-              >
-              <small class="text-muted"
-                ><i class="fas fa-circle text-info"></i> = recommended</small
-              >
-            </template>
-          </div>
-
-          <!-- 🤩 CLASS TYPE  IF NOT ENUM OR VOCAB🤩-->
-          <div
-            class="col-sm-12 mainBackLight text-light p-1 text-center classTab"
-            v-if="value && !value.vocabulary && !value.enum"
-          >
-            <h5 class="m-0" v-text="name"></h5>
-          </div>
-
-          <!-- 🐸 VOCABULARY TOP LEVEL 🐸-->
-          <div
-            v-if="value && value.vocabulary"
-            class="bg-light p-4 text-light d-flex justify-content-start align-items-center"
-            :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
-          >
-            <Vocabulary :main_name="main_name" :info="info"></Vocabulary>
-          </div>
-
-          <!-- 🍒 ENUMERATION TOP LEVEL 🍒-->
-          <div
-            v-else-if="value && value.enum"
-            class="bg-light p-4 text-light d-flex justify-content-start align-items-center"
-            :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
-          >
-            <button
-              class="btn btn-danger m-auto"
-              @click.prevent="handleEnum(main_name, value)"
-            >
-              <i class="fas fa-plus"></i> <span v-text="main_name"></span>
-            </button>
-          </div>
-
-          <!-- 🎃 ARRAY KEYWORDS 🎃-->
-          <div
-            v-else-if="value && value.keywords && !value.enum"
-            class="bg-light p-4 text-light align-items-center"
-            :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
-          >
-            <div class="w-100">
-              <form
-                id="keywords_form"
-                class="w-100 d-flex justify-content-center"
-                @submit.prevent="addKeyword"
-              >
-                <input
-                  class="form-control"
-                  type="text"
-                  v-model="keyword_input"
-                />
-                <button
-                  type="button"
-                  class="btn btn-sm btn-primary form-label"
-                  @click="addKeyword"
+          <template v-if="type_selected == name">
+            <div class="col-sm-12 py-2">
+              <template v-if="!isChild">
+                <small class="text-muted m-2"
+                  ><i class="fas fa-circle text-danger"></i> = required</small
                 >
-                  Add Keyword
-                </button>
-              </form>
+                <small class="text-muted"
+                  ><i class="fas fa-circle text-info"></i> = recommended</small
+                >
+              </template>
             </div>
-            <div class="alert alert-success m-3 w-100" v-show="keywords.size">
-              <span
-                v-for="(text, i) in [...keywords]"
-                class="badge badge-sm badge-success pointer"
+
+            <!-- 🤩 CLASS TYPE  IF NOT ENUM OR VOCAB🤩-->
+            <div
+              class="col-sm-12 mainBackLight text-light p-1 text-center classTab"
+              v-if="value && !value.vocabulary && !value.enum"
+            >
+              <h5 class="m-0" v-text="name"></h5>
+            </div>
+
+            <!-- 🐸 VOCABULARY TOP LEVEL 🐸-->
+            <div
+              v-if="value && value.vocabulary"
+              class="bg-light p-4 text-light d-flex justify-content-start align-items-center"
+              :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
+            >
+              <Vocabulary :main_name="main_name" :info="info"></Vocabulary>
+            </div>
+
+            <!-- 🍒 ENUMERATION TOP LEVEL 🍒-->
+            <div
+              v-else-if="value && value.enum"
+              class="bg-light p-4 text-light d-flex justify-content-start align-items-center"
+              :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
+            >
+              <button
+                class="btn btn-danger m-auto"
+                @click.prevent="handleEnum(main_name, value)"
               >
-                <small v-html="text"></small>
-              </span>
+                <i class="fas fa-plus"></i> <span v-text="main_name"></span>
+              </button>
             </div>
-          </div>
 
-          <!-- 🌈🌈🌈 FOR EACH PROP 🌈🌈🌈-->
-
-          <div v-for="(propInfo, propName) in value.properties" class="row m-0">
-            <!-- 🤩 INPUT DESCRIPTION 🤩-->
+            <!-- 🎃 ARRAY KEYWORDS 🎃-->
             <div
-              class="col-sm-12 p-1"
-              v-if="propInfo && propInfo.description && propName !== '@type'"
+              v-else-if="value && value.keywords && !value.enum"
+              class="bg-light p-4 text-light align-items-center"
+              :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
             >
-              <small v-html="propInfo.description"></small>
-            </div>
-            <!-- 🤩 INPUT NAME 🤩-->
-            <div
-              class="bg-dark p-1 text-light d-flex justify-content-start align-items-center border-bottom"
-              :class="[isChild ? 'col-sm-12' : 'col-sm-12 col-md-4']"
-              v-if="propName !== '@type'"
-            >
-              <small>
-                <b v-if="value && value.required">
-                  <i
-                    class="fas fa-circle text-info"
-                    :class="[
-                      isRequired(value.required, propName)
-                        ? 'text-danger'
-                        : 'text-info',
-                    ]"
-                  ></i>
-                  <span v-text="propName"></span>
-                </b>
-                <b v-else class="text-info" v-text="propName"></b>
-              </small>
-            </div>
-            <!-- 🎃 INPUT TYPES 🎃-->
-            <div
-              class="p-1 text-dark border-bottom"
-              :class="[
-                isChild
-                  ? 'col-sm-12 alert-secondary'
-                  : 'col-sm-12 col-md-8 bg-light',
-              ]"
-              v-if="propName !== '@type'"
-            >
-              <!-- 🥶 WITH TYPE 🥶-->
-              <template v-if="propInfo && propInfo.type">
-                <!-- 🥶 STRING TYPES 🥶-->
-                <template v-if="propInfo.type == 'string'">
-                  <!-- 🐸 VOCABULARY UNDER PROPERTIES 🐸-->
-                  <template v-if="propInfo && propInfo.vocabulary">
-                    <button
-                      class="btn btn-danger m-auto"
-                      @click.prevent="handleVocab(main_name, value)"
-                    >
-                      <i class="fas fa-plus"></i>
-                      <span v-text="main_name + '(s)'"></span>
-                    </button>
-                  </template>
-                  <!-- 🥶 WITH FORMAT 🥶-->
-                  <template v-else-if="propInfo && propInfo.format == 'uri'">
-                    <!-- 🥶 STRING URL 🥶-->
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1"
-                          ><i class="fas fa-link"></i
-                        ></span>
-                      </div>
-                      <input
-                        class="form-control"
-                        type="url"
-                        @input="updateObject(propName, $event)"
-                        :placeholder="'enter ' + propName"
-                      />
-                    </div>
-                  </template>
-                  <template v-else-if="propInfo && propInfo.format == 'date'">
-                    <!-- 🥶 STRING DATE 🥶-->
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1"
-                          ><i class="fas fa-calendar-alt"></i
-                        ></span>
-                      </div>
-                      <input
-                        class="form-control"
-                        type="date"
-                        @input="updateObject(propName, $event)"
-                      />
-                    </div>
-                  </template>
-                  <!-- 🥶 REGULAR STRING 🥶-->
+              <div class="w-100">
+                <form
+                  id="keywords_form"
+                  class="w-100 d-flex justify-content-center"
+                  @submit.prevent="addKeyword"
+                >
                   <input
-                    v-else
                     class="form-control"
                     type="text"
-                    @input="updateObject(propName, $event)"
-                    :placeholder="'enter ' + propName"
+                    v-model="keyword_input"
                   />
-                </template>
-                <!-- 🧤  INTEGER 🧤 -->
-                <template v-else-if="propInfo && propInfo.type == 'integer'">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text" id="basic-addon1"
-                        ><i class="fas fa-hashtag"></i
-                      ></span>
-                    </div>
-                    <input
-                      class="form-control"
-                      type="number"
-                      @input="updateObject(propName, $event)"
-                    />
-                  </div>
-                </template>
-                <!-- 🌼   BOOLEAN 🌼  -->
-                <template v-else-if="propInfo && propInfo.type == 'boolean'">
-                  <small>Oops, this hasn't been handled yet..</small>
-                </template>
-                <!-- 🩳  TYPE OBJECT 🩳 -->
-                <template v-else-if="propInfo && propInfo.type == 'object'">
-                  <div class="alert-secondary">
-                    <pre v-text="getNestedValue(propName)"></pre>
-                  </div>
-                  <type-selector
-                    :info="propInfo"
-                    :main_name="main_name"
-                    :childName="propName"
-                    :isChild="true"
-                    @update="updateParent"
-                  ></type-selector>
-                </template>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-primary form-label"
+                    @click="addKeyword"
+                  >
+                    Add Keyword
+                  </button>
+                </form>
+              </div>
+              <div class="alert alert-success m-3 w-100" v-show="keywords.size">
+                <span
+                  v-for="(text, i) in [...keywords]"
+                  class="badge badge-sm badge-success pointer"
+                >
+                  <small v-html="text"></small>
+                </span>
+              </div>
+            </div>
 
-                <!-- 🥶🥶🥶 LAST RESORT STRING 🥶🥶🥶-->
-                <input
-                  v-else
-                  class="form-control"
-                  type="text"
-                  @input="updateObject(propName, $event)"
-                  :placeholder="'enter ' + propName"
-                />
-              </template>
-              <!-- 👹  NO TYPE ON TOP LEVEL 👹 -->
-              <template v-else>
-                <template v-if="propInfo && propInfo.anyOf">
-                  <!-- 🦷  ANY OF 🦷 -->
-                  <div class="w-100">
-                    <div class="border rounded p-1">
-                      <pre v-text="getNestedValue(propName)"></pre>
+            <!-- 🌈🌈🌈 FOR EACH PROP 🌈🌈🌈-->
+
+            <div
+              v-for="(propInfo, propName) in value.properties"
+              class="row m-0"
+            >
+              <!-- 🤩 INPUT DESCRIPTION 🤩-->
+              <div
+                class="col-sm-12 p-1"
+                v-if="propInfo && propInfo.description && propName !== '@type'"
+              >
+                <small v-html="propInfo.description"></small>
+              </div>
+              <!-- 🤩 INPUT NAME 🤩-->
+              <div
+                class="bg-dark p-1 text-light d-flex justify-content-start align-items-center border-bottom"
+                :class="[isChild ? 'col-sm-12' : 'col-sm-12 col-md-4']"
+                v-if="propName !== '@type'"
+              >
+                <small>
+                  <b v-if="value && value.required">
+                    <i
+                      class="fas fa-circle text-info"
+                      :class="[
+                        isRequired(value.required, propName)
+                          ? 'text-danger'
+                          : 'text-info',
+                      ]"
+                    ></i>
+                    <span v-text="propName"></span>
+                  </b>
+                  <b v-else class="text-info" v-text="propName"></b>
+                </small>
+              </div>
+              <!-- 🎃 INPUT TYPES 🎃-->
+              <div
+                class="p-1 text-dark border-bottom"
+                :class="[
+                  isChild
+                    ? 'col-sm-12 alert-secondary'
+                    : 'col-sm-12 col-md-8 bg-light',
+                ]"
+                v-if="propName !== '@type'"
+              >
+                <!-- 🥶 WITH TYPE 🥶-->
+                <template v-if="propInfo && propInfo.type">
+                  <!-- 🥶 STRING TYPES 🥶-->
+                  <template v-if="propInfo.type == 'string'">
+                    <!-- 🐸 VOCABULARY UNDER PROPERTIES 🐸-->
+                    <template v-if="propInfo && propInfo.vocabulary">
+                      <button
+                        class="btn btn-danger m-auto"
+                        @click.prevent="handleVocab(main_name, value)"
+                      >
+                        <i class="fas fa-plus"></i>
+                        <span v-text="main_name + '(s)'"></span>
+                      </button>
+                    </template>
+                    <!-- 🥶 WITH FORMAT 🥶-->
+                    <template v-else-if="propInfo && propInfo.format == 'uri'">
+                      <!-- 🥶 STRING URL 🥶-->
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text" id="basic-addon1"
+                            ><i class="fas fa-link"></i
+                          ></span>
+                        </div>
+                        <input
+                          class="form-control"
+                          type="url"
+                          @input="updateObject(propName, $event)"
+                          :placeholder="'enter ' + propName"
+                        />
+                      </div>
+                    </template>
+                    <template v-else-if="propInfo && propInfo.format == 'date'">
+                      <!-- 🥶 STRING DATE 🥶-->
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text" id="basic-addon1"
+                            ><i class="fas fa-calendar-alt"></i
+                          ></span>
+                        </div>
+                        <input
+                          class="form-control"
+                          type="date"
+                          @input="updateObject(propName, $event)"
+                        />
+                      </div>
+                    </template>
+                    <!-- 🥶 REGULAR STRING 🥶-->
+                    <input
+                      v-else
+                      class="form-control"
+                      type="text"
+                      @input="updateObject(propName, $event)"
+                      :placeholder="'enter ' + propName"
+                    />
+                  </template>
+                  <!-- 🧤  INTEGER 🧤 -->
+                  <template v-else-if="propInfo && propInfo.type == 'integer'">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1"
+                          ><i class="fas fa-hashtag"></i
+                        ></span>
+                      </div>
+                      <input
+                        class="form-control"
+                        type="number"
+                        @input="updateObject(propName, $event)"
+                      />
                     </div>
-                    <type-selector
-                      :info="propInfo"
-                      :main_name="main_name"
-                      :childName="propName"
-                      :isChild="true"
-                      @update="updateParent"
-                    ></type-selector>
-                  </div>
-                </template>
-                <template v-if="propInfo && propInfo.oneOf">
-                  <!-- 👿  ONE OF 👿 -->
-                  <div class="w-100">
+                  </template>
+                  <!-- 🌼   BOOLEAN 🌼  -->
+                  <template v-else-if="propInfo && propInfo.type == 'boolean'">
+                    <small>Oops, this hasn't been handled yet..</small>
+                  </template>
+                  <!-- 🩳  TYPE OBJECT 🩳 -->
+                  <template v-else-if="propInfo && propInfo.type == 'object'">
                     <div class="alert-secondary">
                       <pre v-text="getNestedValue(propName)"></pre>
                     </div>
@@ -283,37 +245,79 @@
                       :isChild="true"
                       @update="updateParent"
                     ></type-selector>
-                  </div>
+                  </template>
+
+                  <!-- 🥶🥶🥶 LAST RESORT STRING 🥶🥶🥶-->
+                  <input
+                    v-else
+                    class="form-control"
+                    type="text"
+                    @input="updateObject(propName, $event)"
+                    :placeholder="'enter ' + propName"
+                  />
                 </template>
-                <!-- 👹  CONSTANT 👹 -->
-                <template v-else-if="propInfo && propInfo.const">
-                  <div class="text-muted">
-                    <small v-text="propInfo.const"></small>
-                  </div>
-                </template>
-                <!-- 🥶🥶🥶 LAST RESORT NO TYPE 🥶🥶🥶-->
+                <!-- 👹  NO TYPE ON TOP LEVEL 👹 -->
                 <template v-else>
-                  <small v-text="propInfo"></small>
+                  <template v-if="propInfo && propInfo.anyOf">
+                    <!-- 🦷  ANY OF 🦷 -->
+                    <div class="w-100">
+                      <div class="border rounded p-1">
+                        <pre v-text="getNestedValue(propName)"></pre>
+                      </div>
+                      <type-selector
+                        :info="propInfo"
+                        :main_name="main_name"
+                        :childName="propName"
+                        :isChild="true"
+                        @update="updateParent"
+                      ></type-selector>
+                    </div>
+                  </template>
+                  <template v-if="propInfo && propInfo.oneOf">
+                    <!-- 👿  ONE OF 👿 -->
+                    <div class="w-100">
+                      <div class="alert-secondary">
+                        <pre v-text="getNestedValue(propName)"></pre>
+                      </div>
+                      <type-selector
+                        :info="propInfo"
+                        :main_name="main_name"
+                        :childName="propName"
+                        :isChild="true"
+                        @update="updateParent"
+                      ></type-selector>
+                    </div>
+                  </template>
+                  <!-- 👹  CONSTANT 👹 -->
+                  <template v-else-if="propInfo && propInfo.const">
+                    <div class="text-muted">
+                      <small v-text="propInfo.const"></small>
+                    </div>
+                  </template>
+                  <!-- 🥶🥶🥶 LAST RESORT NO TYPE 🥶🥶🥶-->
+                  <template v-else>
+                    <small v-text="propInfo"></small>
+                  </template>
                 </template>
-              </template>
+              </div>
             </div>
-          </div>
-          <!-- 🍏 SUBMIT IF NOT ENUM OR VOCAB🍏-->
-          <div
-            class="col-sm-12 p-0 mt-2"
-            v-if="value && !value.vocabulary && !value.enum & !value.keywords"
-          >
-            <button
-              type="submit"
-              class="btn w-100"
-              :class="[
-                isChild ? 'btn-info btn-sm' : 'btn-success btn-lg',
-                pulse && isChild ? 'jello' : '',
-              ]"
+            <!-- 🍏 SUBMIT IF NOT ENUM OR VOCAB🍏-->
+            <div
+              class="col-sm-12 p-0 mt-2"
+              v-if="value && !value.vocabulary && !value.enum & !value.keywords"
             >
-              Add <span v-text="isChild ? childName : name"></span>
-            </button>
-          </div>
+              <button
+                type="submit"
+                class="btn w-100"
+                :class="[
+                  isChild ? 'btn-info btn-sm' : 'btn-success btn-lg',
+                  pulse && isChild ? 'jello' : '',
+                ]"
+              >
+                Add <span v-text="isChild ? childName : name"></span>
+              </button>
+            </div>
+          </template>
         </form>
       </div>
     </div>
@@ -364,7 +368,7 @@ export default {
             // use main prop name and replace underscore with space
             let name = self.main_name.split("_").join(" ");
             if (!self.parsed_options.hasOwnProperty(name)) {
-              self.parsed_options[name] = options;
+              self.parsed_options[name] = option;
             }
           } else if (option && option["type"] == "array") {
             let name = self.main_name.split("_").join(" ");
