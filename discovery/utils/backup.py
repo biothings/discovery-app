@@ -1,9 +1,6 @@
 from datetime import datetime, date
 import json
-#from json import tool
 import logging
-import datetime
-#from tkinter import W
 import boto3
 
 from discovery.utils import indices
@@ -53,7 +50,7 @@ def backup_es(esdoc_class, outfile=None):
     """
     data = esdoc_class._index.get()
     idx_name = list(data)[0]
-    data[idx_name]['docs'] = list(hit.to_dict() for hit in esdoc_class.search().scan())
+    data[idx_name]['docs'] = list(dict(_id=hit.meta.id, **hit.to_dict()) for hit in esdoc_class.search().scan())
     if outfile:
         with open(outfile, 'w') as out_f:
             json.dump(data, out_f, indent=2, default=json_serial)
@@ -109,12 +106,12 @@ def _restore(ddeapis):
         return
     indices.reset()
     for key in ddeapis:
-        if key == "discover_dataset": 
+        if key == "discover_dataset":
             dde_dataset = ddeapis[key]
-        elif key == "discover_schema": 
+        elif key == "discover_schema":
             dde_schema = ddeapis[key]
-        elif key == "discover_schema_class": 
-            dde_schema_class = ddeapis[key]          
+        elif key == "discover_schema_class":
+            dde_schema_class = ddeapis[key]
 
     # Restore discovery document: schema class, schema, and dataset
     # need to clarify the @id key in the schema
@@ -161,10 +158,10 @@ def restore_from_s3(filename=None,bucket='dde'):
 
     s3 = boto3.client('s3')
 
-    if not filename: 
+    if not filename:
         objects = s3.list_objects_v2(Bucket='dde', Prefix='db_backup')['Contents']
-        filename = max(objects, key=lambda x: x['LastModified'])['Key'] 
-    
+        filename = max(objects, key=lambda x: x['LastModified'])['Key']
+
     if not filename.startswith('db_backup/'):
         filename = 'db_backup/' + filename
 
