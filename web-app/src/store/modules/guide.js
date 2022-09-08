@@ -1,4 +1,5 @@
 import { isArray, isPlainObject, isEqual } from "lodash";
+import Ajv from "ajv";
 
 export const guide = {
   state: {
@@ -33,7 +34,7 @@ export const guide = {
   strict: true,
   mutations: {
     addBulkReport(state, payload) {
-      for (key in state.bulkReport) {
+      for (let key in state.bulkReport) {
         if (state.bulkReport[key].includes(payload.value)) {
           var found = state.bulkReport[key].indexOf(payload.value);
           while (found !== -1) {
@@ -135,7 +136,7 @@ export const guide = {
     },
     markSelected(state, payload) {
       let selection = payload["select"];
-      for (key in state.schema.validation.properties) {
+      for (let key in state.schema.validation.properties) {
         if (key === selection) {
           state.schema.validation.properties[selection]["selected"] = true;
         } else {
@@ -144,7 +145,7 @@ export const guide = {
       }
     },
     selectNext(state) {
-      for (key in state.schema.validation.properties) {
+      for (let key in state.schema.validation.properties) {
         if (
           state.schema.validation.properties[key] &&
           !state.schema.validation.properties[key].value
@@ -349,7 +350,7 @@ export const guide = {
       for (var key in state.guide_prefilled) {
         state.output[key] = state.guide_prefilled[key];
       }
-      for (key in props) {
+      for (let key in props) {
         if (props[key].hasOwnProperty("value")) {
           if (props[key]["value"] || props[key]["value"] === false) {
             if (
@@ -364,7 +365,7 @@ export const guide = {
         }
       }
       // VALIDATION ON COMPLETE
-      var ajv = new Ajv({ allErrors: true, jsonPointers: true });
+      var ajv = new Ajv({ allErrors: true, strict: false });
       var schema = state.schema.validation;
       var data = state.output;
       const isValid = ajv.validate(schema, data);
@@ -548,7 +549,7 @@ export const guide = {
       let info = payload["info"];
       let value = payload["value"];
       let props = state.schema.validation.properties;
-      for (key in props) {
+      for (let key in props) {
         if (key === name) {
           if (info.hasOwnProperty("type") && info["type"] == "object") {
             console.log("OBJECT");
@@ -709,6 +710,9 @@ export const guide = {
         return 0;
       }
     },
+    getValidationValue: (state) => (propname) => {
+      return state.schema.validation?.properties?.[propname]?.value || "";
+    },
     isRequired: (state) => (propname) => {
       if (state.schema.validation.required.includes(propname)) {
         return true;
@@ -741,7 +745,7 @@ export const guide = {
       let completeCount = 0;
       if (state.schema.hasOwnProperty("validation")) {
         let totalprops = Object.keys(state.schema.validation.properties).length;
-        for (key in state.schema.validation.properties) {
+        for (let key in state.schema.validation.properties) {
           if (
             state.schema.validation.properties[key] &&
             state.schema.validation.properties[key].value
@@ -760,7 +764,7 @@ export const guide = {
     getCategoryTotals: (state) => {
       let cats = {};
       if (state.schema.hasOwnProperty("validation")) {
-        for (key in state.schema.validation.properties) {
+        for (let key in state.schema.validation.properties) {
           if (
             state.schema.validation.properties[key].hasOwnProperty("categories")
           ) {
@@ -775,8 +779,8 @@ export const guide = {
                 ];
               if (!cats.hasOwnProperty(c)) {
                 cats[c] = {};
-                cats["Required"] = { completed: 0, todo: 0 };
-                cats["Recommended"] = { completed: 0, todo: 0 };
+                cats[c]["Required"] = { completed: 0, todo: 0 };
+                cats[c]["Recommended"] = { completed: 0, todo: 0 };
 
                 switch (
                   state.schema.validation.properties[key]["categories"][i][
@@ -784,6 +788,7 @@ export const guide = {
                   ]
                 ) {
                   case "Required":
+                    console.log(c, cats);
                     cats[c]["Required"]["todo"] += 1;
                     break;
                   case "Recommended":
@@ -810,7 +815,7 @@ export const guide = {
           }
         }
         // UPDATE TOTALS
-        for (key in state.schema.validation.properties) {
+        for (let key in state.schema.validation.properties) {
           if (
             (state.schema.validation.properties[key] &&
               state.schema.validation.properties[key].value) ||

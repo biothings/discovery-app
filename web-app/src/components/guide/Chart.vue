@@ -11,7 +11,7 @@
 
 <script>
 import tippy from "tippy.js";
-import { Chart } from "chart.js";
+import { Chart, registerables } from "chart.js";
 
 export default {
   name: "Chart",
@@ -27,6 +27,10 @@ export default {
       var self = this;
       let progressColor = self["totals"]["todo"] === 0 ? "#28A744" : "#17A2B7";
       let mainColor = self.name === "Required" ? "#9fa7aa" : "#b4b7b8";
+      Chart.register(...registerables);
+      if (self.myChart) {
+        this.myChart.destroy();
+      }
       self.myChart = new Chart(document.getElementById(self.unique), {
         type: "pie",
         data: {
@@ -79,6 +83,7 @@ export default {
   },
   mounted: function () {
     this.visualize();
+    console.log("UNIQUE", this.unique);
     tippy(".fa-highlighter", {
       maxWidth: "200px",
       placement: "top",
