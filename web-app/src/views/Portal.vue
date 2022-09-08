@@ -76,7 +76,7 @@
                     role="button"
                     :style="{ background: portal.colors[0].hex }"
                     @click="
-                      gtag('event', 'click', {
+                      $gtag.event('click', {
                         event_category: 'portal_guide',
                         event_label: g.guide,
                         event_value: 1,

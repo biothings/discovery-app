@@ -97,6 +97,30 @@ export const routes = [
     },
   },
   {
+    path: "/guide/niaid/:guide_query",
+    name: "Guide",
+    props: true,
+    component: () => import("../views/Guide.vue"),
+  },
+  {
+    path: "/guide/outbreak/:guide_query",
+    name: "Guide",
+    props: true,
+    component: () => import("../views/Guide.vue"),
+  },
+  {
+    path: "/guide/n3c/:guide_query",
+    name: "Guide",
+    props: true,
+    component: () => import("../views/Guide.vue"),
+  },
+  {
+    path: "/guide/:guide_query",
+    name: "Guide",
+    props: true,
+    component: () => import("../views/Guide.vue"),
+  },
+  {
     path: "/editor",
     name: "SchemaEditor",
     component: () => import("../views/Editor.vue"),

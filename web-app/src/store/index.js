@@ -7,6 +7,7 @@ import { resource_registry } from "./modules/resource_registry";
 import { schema_registry } from "./modules/schema_registry";
 import { schema_viewer } from "./modules/schema_viewer";
 import { editor } from "./modules/editor";
+import { guide } from "./modules/guide";
 
 export default createStore({
   modules: {
@@ -18,6 +19,7 @@ export default createStore({
     schema_registry,
     schema_viewer,
     editor,
+    guide,
   },
   state: () => ({
     loading: false,

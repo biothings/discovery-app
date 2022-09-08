@@ -617,7 +617,7 @@ export default {
       this.highlighter.mark(keyword);
     },
     sendGAEvent(type, query) {
-      gtag("event", "click", {
+      this.$gtag.event("click", {
         event_category: type,
         event_label: query,
         event_value: 1,
