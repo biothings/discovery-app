@@ -13,6 +13,7 @@ import ResourceFieldBox from "./components/ResourceFieldBox.vue";
 import PropertyBox from "./components/PropertyBox.vue";
 import AnyOf from "./components/AnyOf.vue";
 import OneOf from "./components/OneOf.vue";
+import TypeSelector from "./components/guide/TypeSelector.vue";
 
 import "./assets/main.css";
 import "./assets/css/styles.css";
@@ -166,6 +167,7 @@ app
   .component("ResourceFieldBox", ResourceFieldBox)
   // circular dependency components need to be global
   .component("PropertyBox", PropertyBox)
+  .component("TypeSelector", TypeSelector)
   .component("AnyOf", AnyOf)
   .component("OneOf", OneOf);
 

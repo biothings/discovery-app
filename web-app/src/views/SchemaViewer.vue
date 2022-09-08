@@ -1110,12 +1110,12 @@ export default {
                     // console.log("FINAL",result)
                     if (result.value.success) {
                       let name = result.value.url.split("/").splice(-1, 1);
-                      gtag("event", "click", {
+                      self.$gtag.event("click", {
                         event_category: "schema_added",
                         event_label: name,
                         event_value: 1,
                       });
-                      gtag("event", "click", {
+                      self.$gtag.event("click", {
                         event_category: "schema_added",
                         event_label: "ALL",
                         event_value: 1,

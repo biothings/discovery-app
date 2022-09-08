@@ -206,7 +206,7 @@
               <router-link
                 to="/guide"
                 @click="
-                  gtag('event', 'click', {
+                  $gtag.event('click', {
                     event_category: 'portal_guide',
                     event_label: '/guide',
                     event_value: 1,
@@ -293,7 +293,7 @@
               <router-link
                 to="/guide/n3c/dataset"
                 @click="
-                  gtag('event', 'click', {
+                  $gtag.event('click', {
                     event_category: 'portal_guide',
                     event_label: '/guide/n3c/dataset',
                     event_value: 1,
@@ -382,7 +382,7 @@
               <router-link
                 to="/guide/outbreak/dataset"
                 @click="
-                  gtag('event', 'click', {
+                  $gtag.event('click', {
                     event_category: 'portal_guide',
                     event_label: '/guide/outbreak/dataset',
                     event_value: 1,
@@ -479,7 +479,7 @@
               <router-link
                 to="/guide/niaid"
                 @click="
-                  gtag('event', 'click', {
+                  $gtag.event('click', {
                     event_category: 'portal_guide',
                     event_label: '/guide/niaid',
                     event_value: 1,
