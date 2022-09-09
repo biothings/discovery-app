@@ -7,20 +7,23 @@
         class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc"
         title="remove"
       >
-        <i class="fas fa-check"></i>
+        <font-awesome-icon icon="fas fa-check"></font-awesome-icon>
         <template v-if="userInput && userInput.name">
           <span v-text="userInput.name"></span>
         </template>
         <template v-else>
           <span v-text="name"></span>
-          <i class="fas fa-info-circle text-info"></i>
+          <font-awesome-icon
+            icon="fas fa-info-circle"
+            class="text-info"
+          ></font-awesome-icon>
         </template>
         <span
           style="opacity: 0"
           class="d-inline"
           @click="removeItem($event, userInput)"
         >
-          <i class="fas fa-times"></i
+          <font-awesome-icon icon="fas fa-times"></font-awesome-icon
         ></span>
       </span>
     </template>
@@ -31,7 +34,7 @@
         class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc"
         title="remove"
       >
-        <i class="fas fa-check"></i>
+        <font-awesome-icon icon="fas fa-check"></font-awesome-icon>
         <template v-if="person && person.name">
           <span v-text="person.name"></span>
         </template>
@@ -44,7 +47,7 @@
           class="d-inline"
           @click="removeItem($event, person)"
         >
-          <i class="fas fa-times"></i
+          <font-awesome-icon icon="fas fa-times"></font-awesome-icon
         ></span>
       </span>
     </template>

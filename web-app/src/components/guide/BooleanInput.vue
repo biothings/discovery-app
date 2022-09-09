@@ -7,7 +7,7 @@
       @click="markCompletedBoolean(true)"
       class="border rounded p-1 mx-2 pointer w-25 text-center"
     >
-      <i class="fas fa-check"></i> Yes
+      <font-awesome-icon icon="fas fa-check"></font-awesome-icon> Yes
     </div>
     <div
       :class="[
@@ -16,7 +16,7 @@
       @click="markCompletedBoolean(false)"
       class="border rounded p-1 mx-2 pointer w-25 text-center"
     >
-      <i class="fas fa-times"></i> No
+      <font-awesome-icon icon="fas fa-times"></font-awesome-icon> No
     </div>
   </div>
 </template>

@@ -88,8 +88,13 @@ import {
   faLink,
   faCalendarAlt,
   faHashtag,
+  faCog,
 } from "@fortawesome/free-solid-svg-icons";
-import { faGithub, faGithubAlt } from "@fortawesome/free-brands-svg-icons";
+import {
+  faGithub,
+  faGithubAlt,
+  faGoogle,
+} from "@fortawesome/free-brands-svg-icons";
 
 /* add icons to the library */
 library.add(
@@ -154,7 +159,9 @@ library.add(
   faFileImport,
   faLink,
   faCalendarAlt,
-  faHashtag
+  faHashtag,
+  faGoogle,
+  faCog
 );
 
 const app = createApp(App);

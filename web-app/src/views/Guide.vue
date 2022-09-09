@@ -130,7 +130,7 @@
           >
             <span
               class="fa-stack fa-1x pointer tip mr-2"
-              :data-tippy-info="'Logged in as ' + userInfo.login"
+              :data-tippy-content="'Logged in as ' + userInfo.login"
               v-if="userInfo && userInfo.login"
             >
               <font-awesome-icon
@@ -149,7 +149,7 @@
             >
               <span
                 class="fa-stack fa-1x pointer tip"
-                data-tippy-info="Click to log in"
+                data-tippy-content="Click to log in"
               >
                 <font-awesome-icon
                   icon="fas fa-circle"
@@ -163,7 +163,7 @@
             </a>
             <span
               class="fa-stack fa-1x pointer tip mr-2"
-              data-tippy-info="Start Over"
+              data-tippy-content="Start Over"
               @click="reset()"
               :class="{
                 'disabled notallowed': !validation,
@@ -185,7 +185,7 @@
             </span>
             <span
               class="fa-stack fa-1x pointer tip mr-2"
-              data-tippy-info="Preview Progress"
+              data-tippy-content="Preview Progress"
               @click="getPreview()"
               :class="{
                 'disabled notallowed': !validation,
@@ -194,8 +194,11 @@
             >
               <font-awesome-icon
                 icon="fas fa-circle"
-                class="text-success fa-stack-2"
-                :class="{ 'text-muted': !validation, mainTextDark: validation }"
+                class="text-success fa-stack-2x"
+                :class="{
+                  'text-muted': !validation,
+                  mainTextDark: validation,
+                }"
               ></font-awesome-icon>
               <font-awesome-icon
                 icon="fas fa-code"
@@ -204,7 +207,7 @@
             </span>
             <span
               class="fa-stack fa-1x pointer tip mr-2"
-              data-tippy-info="Import Metadata"
+              data-tippy-content="Import Metadata"
               @click="loadData()"
               v-show="validation"
             >
@@ -220,7 +223,7 @@
             </span>
             <span
               class="fa-stack fa-1x pointer tip mr-2"
-              data-tippy-info="Bulk Registration"
+              data-tippy-content="Bulk Registration"
               @click="handleBulk()"
               v-show="validation"
             >
@@ -237,7 +240,7 @@
             <div
               class="pillType tip pointer"
               @click="viewErrors()"
-              data-tippy-info="Issues Details"
+              data-tippy-content="Issues Details"
               :class="{ 'shake-horizontal': !valid }"
               style="outline: none !important"
             >
@@ -278,7 +281,7 @@
                   @click="setStartingPoint(item)"
                   class="btn themeButton text-light mr-2 tip"
                   v-text="item.name"
-                  :data-tippy-info="item.description"
+                  :data-tippy-content="item.description"
                 ></button>
               </template>
             </div>
@@ -307,7 +310,7 @@
                     <font-awesome-icon
                       icon="fas fa-info-circle"
                       class="text-info desc"
-                      :data-tippy-info="item.description"
+                      :data-tippy-content="item.description"
                     ></font-awesome-icon>
                   </label>
                 </div>
@@ -345,7 +348,7 @@
                     'bg-success text-light pointer': isComplete,
                   }"
                   @click="handleEdits()"
-                  :data-tippy-info="[
+                  :data-tippy-content="[
                     !isComplete
                       ? 'Available when all required fields are complete'
                       : 'Click to register your metadata',
@@ -404,7 +407,7 @@
                       'bg-success text-light pointer': isComplete,
                     }"
                     @click="handleRegistration()"
-                    :data-tippy-info="[
+                    :data-tippy-content="[
                       !isComplete
                         ? 'Available when all required fields are complete'
                         : 'Click to register your metadata',
@@ -475,11 +478,13 @@
                   BACK
                 </button>
               </div>
-              <div class="d-flex justify-content-center flex-wrap">
+              <div
+                class="d-flex justify-content-center flex-wrap"
+                v-if="categoryTotals"
+              >
                 <template
-                  v-if="categoryTotals"
-                  v-for="(subcats, cat) in categoryTotals"
-                  :key="cat + subcats"
+                  v-for="(subcats, cat, i) in categoryTotals"
+                  :key="cat + i"
                 >
                   <Category
                     class="fade-in"
@@ -552,7 +557,7 @@ export default {
       errors: "getErrors",
       isComplete: "isComplete",
       totals: "getTotals",
-      categoryTotals: "getCAtegoryTotals",
+      categoryTotals: "getCategoryTotals",
       startingPoint: "startingPoint",
       step: "getStep",
       jsonItems: "getBulkJSONItems",
@@ -602,7 +607,7 @@ export default {
       var self = this;
 
       if (self.isComplete && self.editingID) {
-        self.$store.commit("formPreview");
+        self.$store.commit("formPreviewForGuide");
         let output = self.$store.getters.getOutput;
         self.$store.commit("setLoading", { value: true });
 
@@ -633,7 +638,7 @@ export default {
                 title: "Changes saved!",
                 confirmButtonColor: "#5C3069",
                 cancelButtonColor: "#006476",
-                
+
                 customClass: "scale-in-center",
                 html: "Taking you to your dataset page in <strong></strong> seconds.",
                 timer: 3000,
@@ -663,7 +668,7 @@ export default {
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
                   title: "Saving edits failed because: ",
-                  
+
                   customClass: "scale-in-center",
                   text: res.data.reason,
                 });
@@ -710,7 +715,7 @@ export default {
               title: "Saving edits failed because: ",
               confirmButtonColor: "#5C3069",
               cancelButtonColor: "#006476",
-              
+
               customClass: "scale-in-center",
               html: culprit,
               footer: "<small>Validation Error</small>",
@@ -885,7 +890,7 @@ export default {
           .fire({
             title: "Are you sure?",
             text: "You won't be able to revert this!",
-            
+
             customClass: "scale-in-center",
             showCancelButton: true,
             confirmButtonColor: "#5C3069",
@@ -905,7 +910,7 @@ export default {
         .fire({
           title: "Are you sure?",
           text: "You will lose any changes to this file...",
-          
+
           customClass: "scale-in-center",
           showCancelButton: true,
           confirmButtonColor: "#5C3069",
@@ -932,7 +937,7 @@ export default {
       this.$store.commit("markSelected", payload);
     },
     getPreview() {
-      this.$store.commit("formPreview");
+      this.$store.commit("formPreviewForGuide");
       this.$swal.fire({
         position: "center",
         confirmButtonColor: "#5C3069",
@@ -948,7 +953,7 @@ export default {
       var self = this;
 
       if (this.isComplete) {
-        self.$store.commit("formPreview");
+        self.$store.commit("formPreviewForGuide");
         let output = self.$store.getters.getOutput;
         self.$store.commit("setLoading", { value: true });
 
@@ -992,7 +997,7 @@ export default {
                   position: "center",
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
-                  
+
                   customClass: "scale-in-center",
                   html:
                     `<div class="row m-0">
@@ -1028,7 +1033,7 @@ export default {
                   title: "Registration Successful",
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
-                  
+
                   customClass: "scale-in-center",
                   html: "Taking you to your dataset page in <strong></strong> seconds.",
                   timer: 3000,
@@ -1059,7 +1064,7 @@ export default {
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
                   title: "Registration failed because: ",
-                  
+
                   customClass: "scale-in-center",
                   text: res.data.reason,
                 });
@@ -1106,7 +1111,7 @@ export default {
               title: "Registration failed because: ",
               confirmButtonColor: "#5C3069",
               cancelButtonColor: "#006476",
-              
+
               customClass: "scale-in-center",
               html: culprit,
               footer: "<small>Validation Error</small>",
@@ -1162,7 +1167,7 @@ export default {
         confirmButtonColor: "#5C3069",
         cancelButtonColor: "#006476",
         confirmButtonText: "Ready!",
-        
+
         customClass: "scale-in-center",
         imageUrl: metaPic,
         imageAlt: "Dataset Editor",
@@ -1174,40 +1179,6 @@ export default {
       if (self.bulkMode) {
         self.getFile("json");
       }
-      // self.$swal.fire({
-      //   title: 'Bulk registration',
-      //   text: 'What type of file do you have?',
-      //   input: 'select',
-      //   animation:false,
-      //   customClass:'scale-in-center',
-      //   confirmButtonColor:"{{color_main}}",
-      //   cancelButtonColor:"{{color_sec}}",
-      //   inputOptions: {
-      //     'json': 'JSON',
-      //     'csv': 'CSV (WIP)',
-      //   },
-      //   inputPlaceholder: 'Select type',
-      //   showCancelButton: true,
-      //   confirmButtonText: 'Next',
-      //   showLoaderOnConfirm: true,
-      //   preConfirm: (method) => {
-      //     return method
-      //   },
-      //   allowOutsideClick: () => !self.$swal.isLoading()
-      // }).then((result) => {
-      //   if (result.value) {
-      //     switch (result.value) {
-      //       case 'json':
-      //         self.getFile('json');
-      //         break;
-      //       case 'csv':
-      //         self.getFile('csv');
-      //       break;
-      //       default:
-      //         //nothing
-      //     }
-      //   }
-      // })
     },
     async getFile(type) {
       var self = this;
@@ -1219,7 +1190,7 @@ export default {
           input: "file",
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
-          
+
           customClass: "scale-in-center",
           footer: `<p class="text-danger"><strong>🚨 Please note there is a 100 document limit.</strong></p>`,
           inputAttributes: {
@@ -1265,7 +1236,7 @@ export default {
           input: "file",
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
-          
+
           customClass: "scale-in-center",
           footer: `<small class="text-danger">Registration will be triggered automatically when upload finishes.</small>`,
           inputAttributes: {
@@ -1348,7 +1319,7 @@ export default {
             "Note: If you are loading an already registered item, this will trigger edit mode in which you are only allowed to change allowed fields.",
           inputPlaceholder: "Select method",
           showCancelButton: true,
-          
+
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
           customClass: "scale-in-center",
@@ -1358,6 +1329,7 @@ export default {
             return method;
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -1373,11 +1345,12 @@ export default {
                     },
                     confirmButtonColor: "#5C3069",
                     cancelButtonColor: "#006476",
-                    
+
                     customClass: "scale-in-center",
                     showCancelButton: true,
                     confirmButtonText: "Go",
                     allowOutsideClick: () => !self.$swal.isLoading(),
+                    backdrop: true,
                   })
                   .then((result) => {
                     if (result.value) {
@@ -1447,10 +1420,10 @@ export default {
                             title: "Select Metadata To Import",
                             input: "select",
                             inputOptions: options,
-                            
+
                             confirmButtonColor: "#5C3069",
                             cancelButtonColor: "#006476",
-                            
+
                             customClass: "scale-in-center",
                             footer: `<p>
                         WARNING: <span class='text-danger'>You are loading already registered metadata.</span> If -identifier- field <b>IS NOT</b> changed, changes will override current saved data. If -identifier- field <b>IS</b> changed this this create a new entry.
@@ -1498,7 +1471,7 @@ export default {
                                       }
                                     }
                                   }
-                                  self.$store.commit("formPreview");
+                                  self.$store.commit("formPreviewForGuide");
                                 }
                               }
                             }
@@ -1524,10 +1497,11 @@ export default {
                     showCancelButton: true,
                     confirmButtonColor: "#5C3069",
                     cancelButtonColor: "#006476",
-                    
+
                     customClass: "scale-in-center",
                     confirmButtonText: "Go",
                     allowOutsideClick: () => !self.$swal.isLoading(),
+                    backdrop: true,
                   })
                   .then((result) => {
                     if (result.value) {
@@ -1609,7 +1583,7 @@ export default {
                           title: "Oops...",
                           confirmButtonColor: "#5C3069",
                           cancelButtonColor: "#006476",
-                          
+
                           customClass: "scale-in-center",
                           text: e,
                           footer: "Oh no, something looks wrong...",
@@ -1740,7 +1714,7 @@ export default {
       if (self.errors.length) {
         self.$swal.fire({
           title: "Issues",
-          
+
           customClass: "scale-in-center",
           showConfirmButton: true,
           confirmButtonColor: "#5C3069",
@@ -1854,6 +1828,24 @@ export default {
 
     tippy(".tip", {
       theme: "light",
+    });
+    tippy(".required", {
+      maxWidth: "200px",
+      placement: "top",
+      content: "This field is required",
+      animation: "fade",
+      theme: "light",
+    });
+
+    tippy(".info", {
+      maxWidth: "200px",
+      placement: "left",
+      animation: "fade",
+      theme: "light",
+      onShow(instance) {
+        let info = instance.reference.dataset.tippyInfo;
+        instance.setContent("<div class='text-muted m-0'>" + info + "</div>");
+      },
     });
 
     tippy(".desc", {

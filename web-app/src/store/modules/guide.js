@@ -1,5 +1,6 @@
 import { isArray, isPlainObject, isEqual } from "lodash";
 import Ajv from "ajv";
+import addFormats from "ajv-formats";
 
 export const guide = {
   state: {
@@ -342,7 +343,7 @@ export const guide = {
         }
       }
     },
-    formPreview(state) {
+    formPreviewForGuide(state) {
       let props = state.schema.validation.properties;
       // Add prefilled values from config
       state.output = Object.assign({}, state.output_default);
@@ -366,6 +367,7 @@ export const guide = {
       }
       // VALIDATION ON COMPLETE
       var ajv = new Ajv({ allErrors: true, strict: false });
+      addFormats(ajv);
       var schema = state.schema.validation;
       var data = state.output;
       const isValid = ajv.validate(schema, data);
@@ -711,7 +713,7 @@ export const guide = {
       }
     },
     getValidationValue: (state) => (propname) => {
-      return state.schema.validation?.properties?.[propname]?.value || "";
+      return state.schema.validation?.properties?.[propname]?.value;
     },
     isRequired: (state) => (propname) => {
       if (state.schema.validation.required.includes(propname)) {
@@ -788,7 +790,6 @@ export const guide = {
                   ]
                 ) {
                   case "Required":
-                    console.log(c, cats);
                     cats[c]["Required"]["todo"] += 1;
                     break;
                   case "Recommended":
@@ -903,7 +904,7 @@ export const guide = {
       commit("reset");
     },
     saveProgress({ commit, state }) {
-      commit("formPreview");
+      commit("formPreviewForGuide");
       let obj = state.output;
       sessionStorage.setItem("guideProgress", JSON.stringify(obj));
     },

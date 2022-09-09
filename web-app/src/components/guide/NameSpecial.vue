@@ -16,12 +16,18 @@
       </div>
       <div class="col-sm-12" style="max-height: 200px; overflow-y: scroll">
         <h6 v-if="window.location.href.includes('n3c')" class="text-muted mt-2">
-          <i class="fas fa-exclamation-circle text-info"></i> Similar Dataset(s)
-          found. Avoid submitting duplicate dataset requests.
+          <font-awesome-icon
+            icon="fas fa-exclamation-circle"
+            class="text-info"
+          ></font-awesome-icon>
+          Similar Dataset(s) found. Avoid submitting duplicate dataset requests.
         </h6>
         <h6 v-else class="text-muted mt-2">
-          <i class="fas fa-exclamation-circle text-info"></i> Similar Dataset(s)
-          found:
+          <font-awesome-icon
+            icon="fas fa-exclamation-circle"
+            class="text-info"
+          ></font-awesome-icon>
+          Similar Dataset(s) found:
         </h6>
         <table class="table table-sm table-striped">
           <tbody>
@@ -31,7 +37,10 @@
                   <small>
                     <span class="text-dark" v-text="hit.name"></span>.
                     <a :href="'/dataset/' + hit['_id']" target="_blank"
-                      >Show me this dataset <i class="fas fa-chevron-right"></i
+                      >Show me this dataset
+                      <font-awesome-icon
+                        icon="fas fa-chevron-right"
+                      ></font-awesome-icon
                     ></a>
                   </small>
                 </b>

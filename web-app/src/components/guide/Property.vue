@@ -13,7 +13,10 @@
           class="btn btn-sm btn-outline-secondary text-light"
           @click="viewSettings = !viewSettings"
         >
-          <small><i class="fas fa-cog"></i> Display Settings</small>
+          <small
+            ><font-awesome-icon icon="fas fa-cog"></font-awesome-icon> Display
+            Settings</small
+          >
         </button>
         <div v-show="viewSettings">
           <input
@@ -75,7 +78,10 @@
           <!-- 🌈  TODO 🌈 -->
           <div class="p-1 bg-dark text-left mb-0">
             <span class="badge m-1 badge-dark text-warning">
-              TO-DO <i class="fas fa-chevron-right"></i>
+              TO-DO
+              <font-awesome-icon
+                icon="fas fa-chevron-right"
+              ></font-awesome-icon>
             </span>
             <template v-if="type === 'REQUIRED'">
               <template
@@ -89,10 +95,11 @@
                   :class="{ highlight: prop.highlighted }"
                 >
                   <span v-text="index"></span>
-                  <i
-                    class="fas fa-asterisk text-danger required pointer unselectable"
+                  <font-awesome-icon
+                    icon="fas fa-asterisk"
+                    class="text-danger required pointer unselectable"
                     v-if="isRequired(index)"
-                  ></i>
+                  ></font-awesome-icon>
                 </span>
               </template>
             </template>
@@ -115,7 +122,10 @@
           <!-- 🌈  DONE 🌈 -->
           <div class="p-1 alert-success text-left mb-0">
             <span class="badge m-1 badge-light text-success">
-              DONE <i class="fas fa-chevron-right"></i>
+              DONE
+              <font-awesome-icon
+                icon="fas fa-chevron-right"
+              ></font-awesome-icon>
             </span>
             <template v-if="type === 'REQUIRED'">
               <template
@@ -129,12 +139,16 @@
                   :class="{ highlight: prop.highlighted }"
                   data-tippy-info="Edit"
                 >
-                  <i class="fas fa-check-circle text-success"></i>
+                  <font-awesome-icon
+                    icon="fas fa-check-circle"
+                    class="text-success"
+                  ></font-awesome-icon>
                   <span v-text="index"></span>
-                  <i
-                    class="fas fa-asterisk text-danger required pointer unselectable"
+                  <font-awesome-icon
+                    icon="fas fa-asterisk"
+                    class="text-danger required pointer unselectable"
                     v-if="isRequired(index)"
-                  ></i>
+                  ></font-awesome-icon>
                 </small>
               </template>
             </template>
@@ -150,7 +164,10 @@
                   :class="{ highlight: prop.highlighted }"
                   data-tippy-info="Edit"
                 >
-                  <i class="fas fa-check-circle text-success"></i>
+                  <font-awesome-icon
+                    icon="fas fa-check-circle"
+                    class="text-success"
+                  ></font-awesome-icon>
                   <span v-text="index"></span>
                 </small>
               </template>
@@ -179,12 +196,10 @@
         >
           <h6>Progress Tracker</h6>
         </div>
-        <template
-          v-if="categoryTotals"
-          v-for="(subcats, cat) in categoryTotals"
-          :key="cat + subcats"
-        >
-          <Category class="fade-in" :cat="cat" :subcats="subcats"></Category>
+        <template v-if="categoryTotals">
+          <template v-for="(subcats, cat, i) in categoryTotals" :key="cat + i">
+            <Category class="fade-in" :cat="cat" :subcats="subcats"></Category>
+          </template>
         </template>
       </div>
       <div
@@ -231,10 +246,14 @@
               class="btn btn-danger text-light mr-3 ml-3"
               @click="goToStep(step - 1)"
             >
-              <i class="fas fa-chevron-left"></i> BACK
+              <font-awesome-icon icon="fas fa-chevron-left"></font-awesome-icon>
+              BACK
             </button>
             <button class="btn themeButton text-light" @click="nextStep()">
-              NEXT <i class="fas fa-chevron-right"></i>
+              NEXT
+              <font-awesome-icon
+                icon="fas fa-chevron-right"
+              ></font-awesome-icon>
             </button>
           </template>
         </div>

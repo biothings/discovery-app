@@ -5,16 +5,21 @@
     style="max-height: 109px; outline: none !important"
   >
     <small class="bold text-info d-block">
-      <i v-if="cat === 'Google'" class="fab fa-google googleText mr-1"></i>
+      <font-awesome-icon
+        v-if="cat === 'Google'"
+        icon="fab fa-google"
+        class="googleText mr-1"
+      ></font-awesome-icon>
       <span v-text="cat + ' Progress'"></span>
-      <i
+      <font-awesome-icon
         v-if="canRemove"
-        class="fas fa-minus-square text-danger pointer desc"
+        icon="fas fa-minus-square"
+        class="text-danger pointer desc"
         data-tippy-info="Remove"
         @click="removeCat()"
-      ></i>
+      ></font-awesome-icon>
     </small>
-    <div class="d-flex justify-content-around">
+    <div class="d-flex justify-content-around" v-if="subcats">
       <template v-for="(totals, subcat) in subcats" :key="cat + subcat">
         <Chart
           class="d-inline-block"
@@ -68,11 +73,10 @@ export default {
     },
   },
   mounted: function () {
-    var self = this;
-    let sp = self.$store.getters.startingPoint;
-    console.log(sp);
-    if (sp.name == self.cat) {
-      self.canRemove = false;
+    let sp = this.$store.getters.startingPoint;
+    console.log(this.subcats);
+    if (sp.name == this.cat) {
+      this.canRemove = false;
     }
   },
 };
