@@ -107,8 +107,9 @@ class SchemaAdapter():
     """
 
     def __init__(self, doc=None, **kwargs):
-        contexts = ESSchema.gather_field('@context')
-        self._schema = SchemaParser(schema=doc, context=contexts, **kwargs)
+        # contexts = ESSchema.gather_field('@context')
+        # self._schema = SchemaParser(schema=doc, context=contexts, **kwargs)
+        self._schema = SchemaParser(schema=doc, **kwargs)
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
 
