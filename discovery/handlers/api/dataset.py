@@ -104,7 +104,7 @@ class DatasetMetadataHandler(APIBaseHandler):
         },
         'GET': {
             'start': {'type': int, 'default': 0, 'alias': ['from', 'skip']},
-            'size': {'type': int, 'default': 10, 'max': 20, 'alias': 'skip'},
+            'size': {'type': int, 'default': 10, 'max': 100, 'alias': 'skip'},
             'meta': {'type': bool, 'default': False, 'alias': ['metadata']},
             'user': {'type': str},
             'private': {'type': bool},
