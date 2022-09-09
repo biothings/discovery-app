@@ -633,7 +633,7 @@ export default {
                 title: "Changes saved!",
                 confirmButtonColor: "#5C3069",
                 cancelButtonColor: "#006476",
-                animation: false,
+                
                 customClass: "scale-in-center",
                 html: "Taking you to your dataset page in <strong></strong> seconds.",
                 timer: 3000,
@@ -663,7 +663,7 @@ export default {
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
                   title: "Saving edits failed because: ",
-                  animation: false,
+                  
                   customClass: "scale-in-center",
                   text: res.data.reason,
                 });
@@ -710,7 +710,7 @@ export default {
               title: "Saving edits failed because: ",
               confirmButtonColor: "#5C3069",
               cancelButtonColor: "#006476",
-              animation: false,
+              
               customClass: "scale-in-center",
               html: culprit,
               footer: "<small>Validation Error</small>",
@@ -885,7 +885,7 @@ export default {
           .fire({
             title: "Are you sure?",
             text: "You won't be able to revert this!",
-            animation: false,
+            
             customClass: "scale-in-center",
             showCancelButton: true,
             confirmButtonColor: "#5C3069",
@@ -905,7 +905,7 @@ export default {
         .fire({
           title: "Are you sure?",
           text: "You will lose any changes to this file...",
-          animation: false,
+          
           customClass: "scale-in-center",
           showCancelButton: true,
           confirmButtonColor: "#5C3069",
@@ -933,15 +933,14 @@ export default {
     },
     getPreview() {
       this.$store.commit("formPreview");
-      self.$swal.fire({
+      this.$swal.fire({
         position: "center",
         confirmButtonColor: "#5C3069",
         cancelButtonColor: "#006476",
-        animation: false,
         customClass: "scale-in-center",
         html:
           `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><small><pre>` +
-          JSON.stringify(store.getters.getPreview, null, 2) +
+          JSON.stringify(this.$store.getters.getPreview, null, 2) +
           `</pre></small></div>`,
       });
     },
@@ -993,7 +992,7 @@ export default {
                   position: "center",
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
-                  animation: false,
+                  
                   customClass: "scale-in-center",
                   html:
                     `<div class="row m-0">
@@ -1029,7 +1028,7 @@ export default {
                   title: "Registration Successful",
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
-                  animation: false,
+                  
                   customClass: "scale-in-center",
                   html: "Taking you to your dataset page in <strong></strong> seconds.",
                   timer: 3000,
@@ -1060,7 +1059,7 @@ export default {
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
                   title: "Registration failed because: ",
-                  animation: false,
+                  
                   customClass: "scale-in-center",
                   text: res.data.reason,
                 });
@@ -1107,7 +1106,7 @@ export default {
               title: "Registration failed because: ",
               confirmButtonColor: "#5C3069",
               cancelButtonColor: "#006476",
-              animation: false,
+              
               customClass: "scale-in-center",
               html: culprit,
               footer: "<small>Validation Error</small>",
@@ -1163,7 +1162,7 @@ export default {
         confirmButtonColor: "#5C3069",
         cancelButtonColor: "#006476",
         confirmButtonText: "Ready!",
-        animation: false,
+        
         customClass: "scale-in-center",
         imageUrl: metaPic,
         imageAlt: "Dataset Editor",
@@ -1220,7 +1219,7 @@ export default {
           input: "file",
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
-          animation: false,
+          
           customClass: "scale-in-center",
           footer: `<p class="text-danger"><strong>🚨 Please note there is a 100 document limit.</strong></p>`,
           inputAttributes: {
@@ -1266,7 +1265,7 @@ export default {
           input: "file",
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
-          animation: false,
+          
           customClass: "scale-in-center",
           footer: `<small class="text-danger">Registration will be triggered automatically when upload finishes.</small>`,
           inputAttributes: {
@@ -1349,7 +1348,7 @@ export default {
             "Note: If you are loading an already registered item, this will trigger edit mode in which you are only allowed to change allowed fields.",
           inputPlaceholder: "Select method",
           showCancelButton: true,
-          animation: false,
+          
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
           customClass: "scale-in-center",
@@ -1374,7 +1373,7 @@ export default {
                     },
                     confirmButtonColor: "#5C3069",
                     cancelButtonColor: "#006476",
-                    animation: false,
+                    
                     customClass: "scale-in-center",
                     showCancelButton: true,
                     confirmButtonText: "Go",
@@ -1448,10 +1447,10 @@ export default {
                             title: "Select Metadata To Import",
                             input: "select",
                             inputOptions: options,
-                            animation: false,
+                            
                             confirmButtonColor: "#5C3069",
                             cancelButtonColor: "#006476",
-                            animation: false,
+                            
                             customClass: "scale-in-center",
                             footer: `<p>
                         WARNING: <span class='text-danger'>You are loading already registered metadata.</span> If -identifier- field <b>IS NOT</b> changed, changes will override current saved data. If -identifier- field <b>IS</b> changed this this create a new entry.
@@ -1525,7 +1524,7 @@ export default {
                     showCancelButton: true,
                     confirmButtonColor: "#5C3069",
                     cancelButtonColor: "#006476",
-                    animation: false,
+                    
                     customClass: "scale-in-center",
                     confirmButtonText: "Go",
                     allowOutsideClick: () => !self.$swal.isLoading(),
@@ -1610,7 +1609,7 @@ export default {
                           title: "Oops...",
                           confirmButtonColor: "#5C3069",
                           cancelButtonColor: "#006476",
-                          animation: false,
+                          
                           customClass: "scale-in-center",
                           text: e,
                           footer: "Oh no, something looks wrong...",
@@ -1741,7 +1740,7 @@ export default {
       if (self.errors.length) {
         self.$swal.fire({
           title: "Issues",
-          animation: false,
+          
           customClass: "scale-in-center",
           showConfirmButton: true,
           confirmButtonColor: "#5C3069",
