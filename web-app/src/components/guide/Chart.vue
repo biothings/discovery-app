@@ -1,16 +1,15 @@
 <template>
-  <div class="p-1">
+  <div class="p-1" style="width: 90px; height: 90px">
     <div class="text-center">
       <small :class="[name === 'Required' ? 'text-danger' : 'text-muted']">
         <span v-text="name"></span>
       </small>
     </div>
-    <canvas :id="unique" width="90"></canvas>
+    <canvas :id="unique"></canvas>
   </div>
 </template>
 
 <script>
-import tippy from "tippy.js";
 import { Chart, registerables } from "chart.js";
 
 export default {
@@ -28,11 +27,10 @@ export default {
       let progressColor = self["totals"]["todo"] === 0 ? "#28A744" : "#17A2B7";
       let mainColor = self.name === "Required" ? "#9fa7aa" : "#b4b7b8";
       Chart.register(...registerables);
-      if (self.myChart) {
-        this.myChart.destroy();
-      }
       self.myChart = new Chart(document.getElementById(self.unique), {
         type: "pie",
+        maintainAspectRatio: false,
+        responsive: true,
         data: {
           labels: ["Done", "To-Do"],
           datasets: [
@@ -43,36 +41,48 @@ export default {
           ],
         },
         options: {
-          plugins:{
-            animation: false,
-            responsive: true,
+          animation: false,
+          plugins: {
             title: {
               display: false,
-              text: self.name,
             },
             legend: {
               display: false,
             },
           },
           elements: {
-              arc: {
-                borderWidth: 0,
-              },
+            arc: {
+              borderWidth: 0,
             },
+          },
         },
       });
     },
     highlight() {
-      var self = this;
-
       var payload = {};
-      payload["category"] = self.maincategory;
-      payload["subcategory"] = self.name;
+      payload["category"] = this.maincategory;
+      payload["subcategory"] = this.name;
       this.$store.commit("highlight", payload);
+    },
+    updateChart(data) {
+      this.myChart.data.datasets.forEach((dataset) => {
+        dataset.data.pop();
+      });
+      let progressColor = data["todo"] === 0 ? "#28A744" : "#17A2B7";
+      let mainColor = this.name === "Required" ? "#9fa7aa" : "#b4b7b8";
+      this.myChart.data.datasets = [
+        {
+          backgroundColor: [progressColor, mainColor],
+          data: [data["completed"], data["todo"]],
+        },
+      ];
+      this.myChart.update();
     },
   },
   watch: {
     totals: function (n) {
+      // this.updateChart(n);
+      this.myChart.destroy();
       this.visualize();
     },
     shouldHighlight: function (h) {
@@ -85,15 +95,6 @@ export default {
   },
   mounted: function () {
     this.visualize();
-    console.log("UNIQUE", this.unique);
-    tippy(".fa-highlighter", {
-      maxWidth: "200px",
-      placement: "top",
-      content:
-        '<div class="text-muted m-0" style="border-radius:none">Highlight All</div>',
-      animation: "fade",
-      theme: "light",
-    });
   },
 };
 </script>

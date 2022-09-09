@@ -10,9 +10,10 @@
             <div class="pb-3">
               <div class="col-sm-12 p-0 d-flex justify-content-start">
                 <small v-if="isRequired && !userInput && userInput !== false"
-                  ><i
-                    class="fas fa-asterisk fa-xs text-danger required pointer unselectable mr-1"
-                  ></i
+                  ><font-awesome-icon
+                    icon="fas fa-asterisk"
+                    class="fa-xs text-danger required pointer unselectable mr-1"
+                  ></font-awesome-icon
                 ></small>
                 <h6
                   class="m-0"
@@ -31,7 +32,10 @@
                 </h6>
               </div>
               <h6 v-show="loading" class="text-primary">
-                Loading <i class="fas fa-spinner fa-pulse"></i>
+                Loading
+                <font-awesome-icon
+                  icon="fas fa-spinner fa-pulse"
+                ></font-awesome-icon>
               </h6>
               <div class="ml-3">
                 <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
@@ -59,7 +63,9 @@
                       <div class="input-group">
                         <div class="input-group-prepend">
                           <div class="input-group-text bg-secondary text-light">
-                            <i class="fas fa-search"></i>
+                            <font-awesome-icon
+                              icon="fas fa-search"
+                            ></font-awesome-icon>
                           </div>
                         </div>
                         <input
@@ -115,10 +121,11 @@
                             />
                             <label class="form-check-label" :for="i">
                               <span v-text="item.label"></span>
-                              <i
+                              <font-awesome-icon
                                 v-if="userInput && userInput === item.iri"
-                                class="fas fa-check text-success"
-                              ></i>
+                                icon="fas fa-check"
+                                class="text-success"
+                              ></font-awesome-icon>
                             </label>
                           </div>
                         </template>
@@ -421,7 +428,9 @@
                             class="d-inline"
                             @click.prevent="removeItem($event, text)"
                           >
-                            <i class="fas fa-times"></i
+                            <font-awesome-icon
+                              icon="fas fa-times"
+                            ></font-awesome-icon
                           ></span>
                         </span>
                       </template>
@@ -568,7 +577,7 @@
                   <small
                     v-text="category.category"
                     class="tip pointer mr-2"
-                    :data-tippy-info="[
+                    :data-tippy-content="[
                       category.subcategory === 'Required'
                         ? 'Required'
                         : 'Recommended',
@@ -588,7 +597,9 @@
                 :key="i"
               >
                 <small class="ml-3 d-block" style="color: salmon">
-                  <i class="fas fa-exclamation-circle"></i>
+                  <font-awesome-icon
+                    icon="fas fa-exclamation-circle"
+                  ></font-awesome-icon>
                   <span v-text="issue"></span>
                 </small>
               </template>
@@ -600,20 +611,34 @@
         class="col-sm-2 p-2 alert-dark actions d-flex align-items-center justify-content-around"
       >
         <span
-          class="fa-stack fa-1x pointer save"
+          class="fa-stack fa-1x pointer tip"
+          data-tippy-content="Done"
           @click="markCompleted(name)"
           v-show="userInput || userInput === false"
         >
-          <i class="fas fa-circle text-success back fa-stack-2x"></i>
-          <i class="fas fa-check fa-stack-1x text-light"></i>
+          <font-awesome-icon
+            icon="fas fa-circle"
+            class="text-success back fa-stack-2x"
+          ></font-awesome-icon>
+          <font-awesome-icon
+            icon="fas fa-check"
+            class="fa-stack-1x text-light"
+          ></font-awesome-icon>
         </span>
         <span
-          class="fa-stack fa-1x pointer delete"
+          class="fa-stack fa-1x pointer tip"
+          data-tippy-content="Clear"
           @click="clearFieldFor(name)"
           v-show="(info && info.value) || (info && info.value === false)"
         >
-          <i class="fas fa-circle text-muted fa-stack-2x"></i>
-          <i class="fas fa-times fa-stack-1x text-light"></i>
+          <font-awesome-icon
+            icon="fas fa-circle"
+            class="text-muted fa-stack-2x"
+          ></font-awesome-icon>
+          <font-awesome-icon
+            icon="fas fa-times"
+            class="fa-stack-1x text-light"
+          ></font-awesome-icon>
         </span>
       </div>
     </div>
@@ -848,9 +873,9 @@ export default {
                           ` +
           label +
           `
-                          <i class="fa fa-info-circle text-info modaltip" data-tippy-info='` +
+                          <i class="modaltip" data-tippy-info='` +
           JSON.stringify(docs[i]) +
-          `'></i>
+          `'>ℹ️</i>
                       </label>
                   </div>`;
       }
@@ -1170,7 +1195,7 @@ export default {
               "</b>";
             if (propInfo && propInfo.required) {
               if (propInfo.required.includes(key)) {
-                title = title + ' <i class="fas fa-asterisk text-danger"></i>';
+                title = title + " 🔴";
               }
             }
 
@@ -1895,55 +1920,6 @@ export default {
       }
     }
     // self.checkForConstantKey(self.info,'const')
-    tippy(".save", {
-      placement: "top",
-      maxWidth: "200px",
-      content:
-        '<div class="text-success m-0" style="border-radius:none">Done</div>',
-      animation: "fade",
-      theme: "light",
-    });
-    tippy(".required", {
-      maxWidth: "200px",
-      placement: "top",
-      content:
-        '<div class="text-danger m-0" style="border-radius:none">This field is required</div>',
-      animation: "fade",
-      theme: "light",
-    });
-    tippy(".delete", {
-      maxWidth: "200px",
-      placement: "top",
-      content:
-        '<div class="text-danger m-0" style="border-radius:none">Clear</div>',
-      animation: "fade",
-      theme: "light",
-    });
-    tippy(".inputpreview", {
-      content: "Loading...",
-      maxWidth: "200px",
-      placement: "left",
-      animation: "fade",
-      theme: "light",
-      onShow(instance) {
-        let info = instance.reference.dataset.tippyInfo;
-        instance.setContent(
-          "<div class='text-muted m-0 text-left wraptext'><pre>" +
-            info +
-            "</pre></div>"
-        );
-      },
-    });
-    tippy(".info", {
-      maxWidth: "200px",
-      placement: "left",
-      animation: "fade",
-      theme: "light",
-      onShow(instance) {
-        let info = instance.reference.dataset.tippyInfo;
-        instance.setContent("<div class='text-muted m-0'>" + info + "</div>");
-      },
-    });
   },
   computed: {
     ...mapGetters({

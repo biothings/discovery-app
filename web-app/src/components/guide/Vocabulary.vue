@@ -44,20 +44,31 @@
               @click="addResult(result)"
               class="alert alert-light border-bottom p-1 m-0 rounded-0 pointer"
             >
-              <th><i class="fas fa-plus text-success"></i></th>
+              <th>
+                <font-awesome-icon
+                  icon="fas fa-plus"
+                  class="text-success"
+                ></font-awesome-icon>
+              </th>
               <td><small v-text="result.label"></small></td>
               <td>
-                <i
-                  class="fas fa-info-circle text-info vocabTip"
+                <font-awesome-icon
+                  icon="fas fa-info-circle"
+                  class="text-info vocabTip"
                   :data-tippy-info="JSON.stringify(result, null, 2)"
-                ></i>
+                ></font-awesome-icon>
               </td>
             </tr>
           </template>
         </tbody>
       </table>
       <template v-if="!results.length">
-        <h1 class="text-center"><i class="fas fa-search text-muted"></i></h1>
+        <h1 class="text-center">
+          <font-awesome-icon
+            icon="fas fa-search"
+            class="text-muted"
+          ></font-awesome-icon>
+        </h1>
         <div v-if="query" class="text-center alert alert-light">
           <!-- 🍏 CUSTOM NON STRICT 🍏-->
           <template v-if="vocabInfo && !vocabInfo.strict">

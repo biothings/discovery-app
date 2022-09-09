@@ -2,8 +2,14 @@
   <div>
     <div class="d-flex p-2" v-if="editingID">
       <span class="fa-stack mr-2">
-        <i class="fas fa-circle fa-stack-2x text-info"></i>
-        <i class="fas fa-lock fa-stack-1x fa-inverse"></i>
+        <font-awesome-icon
+          icon="fas fa-circle"
+          class="fa-stack-2x text-info"
+        ></font-awesome-icon>
+        <font-awesome-icon
+          icon="fas fa-lock"
+          class="fa-stack-1x fa-inverse"
+        ></font-awesome-icon>
       </span>
       <small class="text-primary"
         ><b class="text-danger">Edit Mode:</b> This field is disabled in order
@@ -27,8 +33,11 @@
       </div>
       <div class="col-sm-12" style="max-height: 200px; overflow-y: scroll">
         <h6 class="text-muted mt-2">
-          <i class="fas fa-exclamation-circle text-danger"></i> Looks like a
-          dataset with this identifier already exists:
+          <font-awesome-icon
+            icon="fas fa-exclamation-circle"
+            class="text-danger"
+          ></font-awesome-icon>
+          Looks like a dataset with this identifier already exists:
         </h6>
         <table class="table table-sm table-striped">
           <tbody>
@@ -38,7 +47,10 @@
                   <small>
                     <span class="text-dark" v-text="hit.name"></span>.
                     <a :href="'/dataset/' + hit['_id']" target="_blank"
-                      >Show me this dataset <i class="fas fa-chevron-right"></i
+                      >Show me this dataset
+                      <font-awesome-icon
+                        icon="fas fa-chevron-right"
+                      ></font-awesome-icon
                     ></a>
                   </small>
                 </b>

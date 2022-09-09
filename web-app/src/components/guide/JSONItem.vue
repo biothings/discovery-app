@@ -107,13 +107,18 @@
       }"
     >
       <span class="d-block text-light">
-        <i v-if="loading" class="fas fa-spinner fa-pulse mainTextDark"></i>
+        <font-awesome-icon
+          v-if="loading"
+          icon="fas fa-spinner"
+          class="fa-pulse mainTextDark"
+        ></font-awesome-icon>
         <small v-if="errMSG">FAILED <i class="fas fa-poo"></i></small>
         <small v-if="successMSG"
-          >REGISTERED <i class="fas fa-registered"></i
+          >REGISTERED
+          <font-awesome-icon icon="fas fa-registered"></font-awesome-icon
         ></small>
         <small v-if="successMSGUpdate"
-          >UPDATED <i class="fas fa-check"></i
+          >UPDATED <font-awesome-icon icon="fas fa-check"></font-awesome-icon
         ></small>
 
         <small
@@ -294,7 +299,7 @@ export default {
             self.successMSG =
               `<a class="btn btn-sm alert-success" href="/dataset/` +
               res.data.id +
-              `" target="_blank" rel="nonreferrer"><i class="fa fa-check-circle" aria-hidden="true"></i> 
+              `" target="_blank" rel="nonreferrer"> 
               View Registration</a>`;
             self.errMSG = "";
             store.commit("addBulkReport", {
@@ -322,7 +327,7 @@ export default {
             </ul>`;
           self.help = `<a class="btn btn-sm alert-danger"
               href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&template=bulk-registration-issue.md&title=Issue+registering+some+metadata"
-              target="_blank"  rel="nonreferrer"><i class="fa fa-exclamation-circle" aria-hidden="true"></i> Get help!</a>`;
+              target="_blank"  rel="nonreferrer"> Get help!</a>`;
         });
     },
     updateJSONItem() {
@@ -347,7 +352,7 @@ export default {
               `<a class="btn btn-sm alert-info" href="/dataset/` +
               self.exists +
               `" target="_blank" rel="nonreferrer">
-              <i class="fa fa-check-circle" aria-hidden="true"></i> View Update</a>`;
+               View Update</a>`;
             self.errMSG = "";
           }
         })
@@ -370,7 +375,7 @@ export default {
             </ul>`;
           self.help = `<a class="btn btn-sm alert-danger"
               href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&template=bulk-registration-issue.md&title=Issue+registering+some+metadata"
-              target="_blank"  rel="nonreferrer"><i class="fa fa-exclamation-circle" aria-hidden="true"></i> Get help!</a>`;
+              target="_blank"  rel="nonreferrer">Get help!</a>`;
         });
     },
     editItem(item) {
