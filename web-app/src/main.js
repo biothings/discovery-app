@@ -85,6 +85,9 @@ import {
   faEllipsisH,
   faMinus,
   faFileImport,
+  faLink,
+  faCalendarAlt,
+  faHashtag,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub, faGithubAlt } from "@fortawesome/free-brands-svg-icons";
 
@@ -148,7 +151,10 @@ library.add(
   faEllipsisH,
   faMinus,
   faTimesCircle,
-  faFileImport
+  faFileImport,
+  faLink,
+  faCalendarAlt,
+  faHashtag
 );
 
 const app = createApp(App);

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="p-1">
     <div class="text-center">
       <small :class="[name === 'Required' ? 'text-danger' : 'text-muted']">
         <span v-text="name"></span>
@@ -43,20 +43,22 @@ export default {
           ],
         },
         options: {
-          animation: false,
-          responsive: true,
-          title: {
-            display: false,
-            text: self.name,
-          },
-          legend: {
-            display: false,
-          },
-          elements: {
-            arc: {
-              borderWidth: 0,
+          plugins:{
+            animation: false,
+            responsive: true,
+            title: {
+              display: false,
+              text: self.name,
+            },
+            legend: {
+              display: false,
             },
           },
+          elements: {
+              arc: {
+                borderWidth: 0,
+              },
+            },
         },
       });
     },

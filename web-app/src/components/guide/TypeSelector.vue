@@ -16,10 +16,10 @@
               ]"
             >
               <h6 class="m-0" v-if="!isChild">
-                <i class="fas fa-plus"></i> <span v-text="name"></span>
+                <font-awesome-icon icon="fas fa-plus"></font-awesome-icon> <span v-text="name"></span>
               </h6>
               <h6 class="m-0" v-else>
-                <i class="fas fa-plus"></i> <span v-text="name"></span>
+                <font-awesome-icon icon="fas fa-plus"></font-awesome-icon> <span v-text="name"></span>
               </h6>
             </div>
           </template>
@@ -40,10 +40,10 @@
             <div class="col-sm-12 py-2">
               <template v-if="!isChild">
                 <small class="text-muted m-2"
-                  ><i class="fas fa-circle text-danger"></i> = required</small
+                  ><font-awesome-icon icon="fas fa-circle" class="text-danger"></font-awesome-icon> = required</small
                 >
                 <small class="text-muted"
-                  ><i class="fas fa-circle text-info"></i> = recommended</small
+                  ><font-awesome-icon icon="fas fa-circle" class="text-info"></font-awesome-icon> = recommended</small
                 >
               </template>
             </div>
@@ -75,7 +75,7 @@
                 class="btn btn-danger m-auto"
                 @click.prevent="handleEnum(main_name, value)"
               >
-                <i class="fas fa-plus"></i> <span v-text="main_name"></span>
+                <font-awesome-icon icon="fas fa-plus"></font-awesome-icon> <span v-text="main_name"></span>
               </button>
             </div>
 
@@ -136,14 +136,15 @@
               >
                 <small>
                   <b v-if="value && value.required">
-                    <i
-                      class="fas fa-circle text-info"
+                    <font-awesome-icon
+                      icon="fas fa-circle"
+                      class="text-info"
                       :class="[
                         isRequired(value.required, propName)
                           ? 'text-danger'
                           : 'text-info',
                       ]"
-                    ></i>
+                    ></font-awesome-icon>
                     <span v-text="propName"></span>
                   </b>
                   <b v-else class="text-info" v-text="propName"></b>
@@ -169,7 +170,7 @@
                         class="btn btn-danger m-auto"
                         @click.prevent="handleVocab(main_name, value)"
                       >
-                        <i class="fas fa-plus"></i>
+                        <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
                         <span v-text="main_name + '(s)'"></span>
                       </button>
                     </template>
@@ -179,7 +180,7 @@
                       <div class="input-group">
                         <div class="input-group-prepend">
                           <span class="input-group-text" id="basic-addon1"
-                            ><i class="fas fa-link"></i
+                            ><font-awesome-icon icon="fas fa-link"></font-awesome-icon
                           ></span>
                         </div>
                         <input
@@ -195,7 +196,7 @@
                       <div class="input-group">
                         <div class="input-group-prepend">
                           <span class="input-group-text" id="basic-addon1"
-                            ><i class="fas fa-calendar-alt"></i
+                            ><font-awesome-icon icon="fas fa-calendar-alt"></font-awesome-icon
                           ></span>
                         </div>
                         <input
@@ -219,7 +220,7 @@
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon1"
-                          ><i class="fas fa-hashtag"></i
+                          ><font-awesome-icon icon="fas fa-hashtag"></font-awesome-icon
                         ></span>
                       </div>
                       <input
@@ -551,9 +552,9 @@ export default {
                           ` +
           label +
           `
-                          <i class="fa fa-info-circle text-info modaltip" data-tippy-info='` +
+                          <i class="modaltip" data-tippy-info='` +
           JSON.stringify(docs[i]) +
-          `'></i>
+          `'>ℹ️</i>
                       </label>
                   </div>`;
       }

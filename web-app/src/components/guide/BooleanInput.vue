@@ -27,7 +27,7 @@ export default {
   props: ["name", "info"],
   methods: {
     markCompletedBoolean(val) {
-      payload = { name: this.name, info: this.info, value: val };
+      let payload = { name: this.name, info: this.info, value: val };
       this.$store.commit("addValue", payload);
       this.$store.dispatch("saveProgress");
     },
