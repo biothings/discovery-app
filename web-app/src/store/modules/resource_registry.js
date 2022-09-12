@@ -16,6 +16,9 @@ export const resource_registry = {
     toggleDownloadMode(state) {
       state.downloadMode = !state.downloadMode;
     },
+    setDownloadMode(state, payload) {
+      state.downloadMode = payload.value;
+    },
     clearDownloadList(state) {
       state.downloadList = [];
       $.notify("Download Mode OFF", {

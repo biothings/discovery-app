@@ -30,7 +30,7 @@
                 <RouterLink
                   class="tip"
                   :to="{ path: '/portal/' + portal.linkname }"
-                  data-tippy-info="Learn More"
+                  data-tippy-content="Learn More"
                 >
                   <h4 class="d-inline">
                     <span v-text="portal.name"></span>

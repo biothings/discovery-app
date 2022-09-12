@@ -636,7 +636,7 @@ export default {
             self.userSchemaURL = url;
             var payload = {};
             payload["schema"] = res.data;
-            self.$store.commit("saveSchema", payload);
+            self.$store.commit("saveSchemaForViewer", payload);
             self.orderAlphabetically();
             if (self.query) {
               self.handleQuery();
@@ -660,7 +660,7 @@ export default {
         // CHECK IF LS ITEM EXISTS AT ALL
         if (localStorage.getItem("user-schema-classes") !== null) {
           // console.log('LS loaded')
-          self.$store.commit("saveSchema", payload);
+          self.$store.commit("saveSchemaForViewer", payload);
           this.orderAlphabetically();
 
           if (self.query) {
@@ -865,7 +865,7 @@ export default {
           .then((res) => {
             var payload = {};
             payload["schema"] = res.data;
-            self.$store.commit("saveSchema", payload);
+            self.$store.commit("saveSchemaForViewer", payload);
             this.userSchema = res.data;
             for (var i = 0; i < self.userSchema["hits"].length; i++) {
               if (self.userSchema["hits"][i]["label"] === query) {
@@ -1221,10 +1221,6 @@ export default {
   },
   mounted: function () {
     let self = this;
-    tippy(".tip", {
-      placement: "top",
-      theme: "light",
-    });
     tippy("#showButton", {
       content: `<div class='m-0'><table class='table'>
               <tr>

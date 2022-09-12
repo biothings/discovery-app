@@ -50,7 +50,7 @@
                     :style="{ background: portal.colors[0].hex }"
                     class="btn text-light btn-lg nd mt-2 tip"
                     to="/guide/n3c/dataset"
-                    :data-tippy-info="'Add a dtaset for ' + portal.name"
+                    :data-tippy-content="'Add a dataset for ' + portal.name"
                   >
                     Submit Request
                   </RouterLink>
@@ -112,7 +112,7 @@
               target="_blank"
               rel="noreferrer"
               class="nd mt-2 tip text-info"
-              :data-tippy-info="'Explore the ' + portal.name + ' website'"
+              :data-tippy-content="'Explore the ' + portal.name + ' website'"
             >
               <h5>Site <font-awesome-icon icon="fas fa-chevron-right" /></h5>
             </a>
@@ -131,7 +131,7 @@
             <RouterLink
               :to="{ path: portal.schema }"
               class="nd mt-2 tip text-info"
-              :data-tippy-info="'Explore the schema used in ' + portal.name"
+              :data-tippy-content="'Explore the schema used in ' + portal.name"
             >
               <h5>Schema <font-awesome-icon icon="fas fa-chevron-right" /></h5>
             </RouterLink>
@@ -152,7 +152,7 @@
             <RouterLink
               :to="{ path: g.registry }"
               class="nd mt-2 tip text-info"
-              :data-tippy-info="
+              :data-tippy-content="
                 'Browse metadata in Data Discovery Engine for ' + g.name
               "
             >
@@ -179,7 +179,7 @@
               target="_blank"
               rel="noreferrer"
               class="nd mt-2 tip text-info"
-              :data-tippy-info="'Explore API for ' + portal.name"
+              :data-tippy-content="'Explore API for ' + portal.name"
             >
               <h5>API <font-awesome-icon icon="fas fa-chevron-right" /></h5>
             </a>
@@ -199,7 +199,7 @@
             <RouterLink
               :to="{ path: portal.faq_link }"
               class="nd mt-2 tip text-info"
-              data-tippy-info="Frequently Asked Questions"
+              data-tippy-content="Frequently Asked Questions"
             >
               <h5>FAQ <font-awesome-icon icon="fas fa-chevron-right" /></h5>
             </RouterLink>
@@ -213,7 +213,6 @@
 
 <script>
 import Vivus from "vivus";
-import tippy from "tippy.js";
 import site from "../assets/img/site.svg";
 import api from "../assets/img/api-01.svg";
 import schema from "../assets/img/sp1-01.svg";
@@ -266,7 +265,7 @@ export default {
             "AN AGGREGATOR OF OPEN DATASETS, WITH A PARTICULAR FOCUS ON ALLERGY AND INFECTIOUS DISEASES",
           linkname: "niaid",
           description: `<p>
-            The NIAID (National Institute of Allergy and Infectious Diseases) Data Portal aggregates <b class="tip text-info" data-tippy-info="Omics DI,NCBI GEO, Zenodo, Harvard Dataverse, NYU Data Catalog, ImmPort, Data Discovery Engine">7 different data sources</b> together in a searchable platform, making it easier to find datasets.
+            The NIAID (National Institute of Allergy and Infectious Diseases) Data Portal aggregates <b class="tip text-info" data-tippy-content="Omics DI,NCBI GEO, Zenodo, Harvard Dataverse, NYU Data Catalog, ImmPort, Data Discovery Engine">7 different data sources</b> together in a searchable platform, making it easier to find datasets.
             </p><p>
             We also standardize the dataset metadata to a common form, increasing the findability of these datasets. Schema.org provides a widely accepted format regonizable by major search engines and data portals.
             </p><p>
@@ -405,18 +404,6 @@ export default {
         this.colors = this.portal["colors"];
       },
     },
-  },
-  mounted: function () {
-    tippy("[data-tippy-info]", {
-      placement: "bottom",
-      theme: "light",
-      content: "loading",
-      interactive: true,
-      animation: "fade",
-      onShow(instance) {
-        instance.setContent(instance.reference.dataset.tippyInfo);
-      },
-    });
   },
   computed: {
     gradient() {

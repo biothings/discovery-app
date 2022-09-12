@@ -3,7 +3,7 @@
     <h6 class="font-weight-bold mainTextDark">
       <i
         class="fas fa-tiny fa-code text-muted float-right"
-        :data-tippy-info="JSON.stringify(propinfo, null, 2)"
+        :data-tippy-content="JSON.stringify(propinfo, null, 2)"
       ></i>
       <span v-text="propname"></span>
       <span v-if="isRequired" class="text-danger caps" style="zoom: 0.5"
@@ -29,35 +29,35 @@
           <div
             class="circle m-1"
             v-if="propinfo['type'] == 'array'"
-            data-tippy-info="Array"
+            data-tippy-content="Array"
           >
             [ ]
           </div>
           <div
             class="badge badge-pill badge-dark m-1"
             v-if="propinfo['type'] == 'string'"
-            data-tippy-info="String"
+            data-tippy-content="String"
           >
             A String
           </div>
           <div
             class="badge badge-pill badge-dark m-1"
             v-if="propinfo['type'] == 'object'"
-            data-tippy-info="Object"
+            data-tippy-content="Object"
           >
             An Object
           </div>
           <div
             class="badge badge-pill badge-dark m-1"
             v-if="propinfo['type'] == 'number'"
-            data-tippy-info="Number"
+            data-tippy-content="Number"
           >
             A Number
           </div>
           <div
             class="badge badge-pill badge-dark m-1"
             v-if="propinfo['type'] == 'boolean'"
-            data-tippy-info="Boolean"
+            data-tippy-content="Boolean"
           >
             A Boolean T/F
           </div>
@@ -121,7 +121,7 @@
               <template v-for="option in propinfo['oneOf']" :key="option">
                 <div class="border-left border-primary my-4 pl-2">
                   <a
-                    data-tippy-info="To Definition"
+                    data-tippy-content="To Definition"
                     v-if="option && option['$ref']"
                     :href="'#' + getText(option['$ref'])"
                     ><i class="fas fa-info-circle fa-xs"></i>
@@ -134,7 +134,7 @@
                       <div
                         class="badge badge-pill badge-dark m-1"
                         v-if="option['type'] == 'array'"
-                        data-tippy-info="Array"
+                        data-tippy-content="Array"
                       >
                         A List Of
                       </div>
@@ -152,7 +152,7 @@
                         :key="key"
                       >
                         <a
-                          data-tippy-info="To Definition"
+                          data-tippy-content="To Definition"
                           v-if="key == '$ref'"
                           :href="'#' + getText(val)"
                           ><i class="fas fa-info-circle fa-xs"></i>

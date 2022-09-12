@@ -53,7 +53,7 @@
               <td>
                 <small
                   v-text="example.label"
-                  :data-tippy-info="JSON.stringify(example, null, 2)"
+                  :data-tippy-content="JSON.stringify(example, null, 2)"
                 ></small>
               </td>
             </tr>

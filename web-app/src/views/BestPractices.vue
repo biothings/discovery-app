@@ -15,16 +15,14 @@
           This guide provides an easy way to create discoverable structured
           dataset metadata with little to no
           <a
-            data-tippy-theme="light"
-            data-tippy="Learn More About Schema.org"
+            data-tippy-content="Learn More About Schema.org"
             href="https://schema.org/"
             target="_blank"
             >Schema.org</a
           >
           microdata markup or
           <a
-            data-tippy="Learn More About FAIR Principles"
-            data-tippy-theme="light"
+            data-tippy-content="Learn More About FAIR Principles"
             target="_blank"
             href="https://www.go-fair.org/fair-principles/"
             >FAIR</a
@@ -61,8 +59,7 @@
                   <h6 class="text-muted caps">
                     Produce
                     <a
-                      data-tippy="Learn More About FAIR Principles"
-                      data-tippy-theme="light"
+                      data-tippy-content="Learn More About FAIR Principles"
                       class="bold"
                       target="_blank"
                       href="https://www.go-fair.org/fair-principles/"
@@ -198,8 +195,7 @@
                 structure.
                 <small
                   class="text-info more"
-                  data-tippy-info="You can choose data portals you are interested in and add their requirements"
-                  data-tippy-theme="light"
+                  data-tippy-content="You can choose data portals you are interested in and add their requirements"
                   >Customizable</small
                 >
               </p>
@@ -549,8 +545,6 @@
 </template>
 
 <script>
-import tippy from "tippy.js";
-
 export default {
   name: "BestPractices",
   data: function () {
@@ -559,18 +553,6 @@ export default {
     };
   },
   mounted: function () {
-    tippy("*[data-tippy-info]", {
-      placement: "top",
-      theme: "light",
-      content: "loading",
-      interactive: true,
-      allowHTML: true,
-      animation: "fade",
-      onShow(instance) {
-        let info = instance.reference.dataset.tippyInfo;
-        instance.setContent("<div class='bg-light'>" + info + "</div>");
-      },
-    });
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
       anchor.addEventListener("click", function (e) {
         e.preventDefault();

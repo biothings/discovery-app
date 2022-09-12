@@ -3,7 +3,7 @@
     <div class="">
       <i
         class="fas fa-tiny fa-code text-muted float-right"
-        :data-tippy-info="JSON.stringify(info, null, 2)"
+        :data-tippy-content="JSON.stringify(info, null, 2)"
       ></i>
       <a :href="'#' + name">
         <h6 v-text="name" class="font-weight-bold d-inline"></h6>
@@ -33,35 +33,35 @@
                 <div
                   class="badge badge-pill badge-dark m-1"
                   v-if="info['type'] == 'array'"
-                  data-tippy-info="Array"
+                  data-tippy-content="Array"
                 >
                   A List
                 </div>
                 <div
                   class="badge badge-pill badge-dark m-1"
                   v-if="info['type'] == 'string'"
-                  data-tippy-info="String"
+                  data-tippy-content="String"
                 >
                   A String
                 </div>
                 <div
                   class="badge badge-pill badge-dark m-1"
                   v-if="info['type'] == 'object'"
-                  data-tippy-info="Object"
+                  data-tippy-content="Object"
                 >
                   An Object
                 </div>
                 <div
                   class="badge badge-pill badge-dark m-1"
                   v-if="info['type'] == 'number'"
-                  data-tippy-info="Number"
+                  data-tippy-content="Number"
                 >
                   A Number
                 </div>
                 <div
                   class="badge badge-pill badge-dark m-1"
                   v-if="info['type'] == 'boolean'"
-                  data-tippy-info="Boolean"
+                  data-tippy-content="Boolean"
                 >
                   A Boolean T/F
                 </div>
@@ -140,7 +140,7 @@
             <div class="d-flex justify-content-center align-items-center">
               <div
                 class="badge badge-pill badge-dark m-1"
-                data-tippy-info="Object"
+                data-tippy-content="Object"
               >
                 An Object
               </div>
@@ -291,7 +291,7 @@ export default {
                           ` +
                 label +
                 `
-                          <i class="fa fa-info-circle text-info modaltip" data-tippy-info='` +
+                          <i class="fa fa-info-circle text-info modaltip" data-tippy-content='` +
                 JSON.stringify(result.value.response.docs[i]) +
                 `'></i>
                       </label>

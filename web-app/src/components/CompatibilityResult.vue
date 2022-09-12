@@ -54,7 +54,7 @@
       <div>
         <a
           class="mr-2 tip"
-          :data-tippy-info="'Last tested: ' + r.dateTested"
+          :data-tippy-content="'Last tested: ' + r.dateTested"
           :href="r.test"
           target="_blank"
           ><i class="fas fa-vial"></i> test</a
@@ -197,8 +197,5 @@ export default {
     };
   },
   props: ["r"],
-  mounted: function () {
-    // this.expand = this.r['schemaorgCompliant'] ? false : true;
-  },
 };
 </script>

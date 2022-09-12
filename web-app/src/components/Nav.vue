@@ -143,7 +143,6 @@
 
 <script>
 import tippy from "tippy.js";
-
 import Login from "./Login.vue";
 
 export default {
@@ -153,9 +152,7 @@ export default {
   },
   mounted: function () {
     tippy(".headTip", {
-      placement: "bottom",
       theme: "light",
-      animation: "fade",
     });
   },
 };

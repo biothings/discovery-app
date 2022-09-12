@@ -79,7 +79,6 @@
             class="fa-stack fa-1x pointer tip mr-2 ml-2"
             @click.prevent="saveDataAndRedirect(item)"
             :data-tippy-content="'Visualize ' + item.label"
-            :id="'viz' + itemID"
           >
             <font-awesome-icon
               icon="fas fa-circle"
@@ -96,7 +95,6 @@
             class="fa-stack fa-1x pointer tip mr-2 ml-2"
             @click.prevent="saveDataAndRedirect(item, 'editor')"
             :data-tippy-content="'Extend ' + item.label"
-            :id="'ext' + itemID"
           >
             <font-awesome-icon
               icon="fas fa-circle"
@@ -127,7 +125,6 @@
 </template>
 
 <script>
-import tippy from "tippy.js";
 import axios from "axios";
 import "@/assets/js/notify.min.js";
 import DynamicImage from "../components/DynamicImage.vue";
@@ -266,14 +263,6 @@ export default {
     maxReached() {
       return this.$store.getters.getMaxReached;
     },
-  },
-  mounted: function () {
-    tippy("#viz" + this.itemID, {
-      theme: "light",
-    });
-    tippy("#ext" + this.itemID, {
-      theme: "light",
-    });
   },
   watch: {
     picked: function (picked) {

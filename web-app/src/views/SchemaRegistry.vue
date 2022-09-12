@@ -412,12 +412,9 @@
 </template>
 
 <script>
-import tippy from "tippy.js";
 import Mark from "mark.js";
 import axios from "axios";
 import { orderBy } from "lodash";
-import "@/assets/js/notify.min.js";
-
 import { mapGetters } from "vuex";
 import SchemaRegistryItem from "../components/SchemaRegistryItem.vue";
 
@@ -721,55 +718,6 @@ export default {
   mounted: function () {
     this.highlighter = new Mark(document.querySelector(".context"));
     this.search();
-
-    tippy(".tip", {
-      theme: "light",
-    });
-
-    $.notify.addStyle("success", {
-      html: "<div><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#28a745",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("danger", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#dc3545",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("warning", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#ffc107",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("info", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#17a2b8",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
   },
 };
 </script>

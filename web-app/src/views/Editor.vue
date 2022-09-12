@@ -224,7 +224,7 @@
                 </template>
                 <div
                   @click="addValidationOption()"
-                  data-tippy="ADD NEW"
+                  data-tippy-content="ADD NEW"
                   class="badge m-1 badge-secondary text-light pointer"
                 >
                   <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
@@ -269,7 +269,7 @@
                 </template>
                 <div
                   @click="addDefinitionOption()"
-                  data-tippy="ADD NEW"
+                  data-tippy-content="ADD NEW"
                   class="badge m-1 badge-secondary text-light pointer"
                 >
                   <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
@@ -583,7 +583,6 @@
 </template>
 
 <script>
-import tippy from "tippy.js";
 import { mapGetters, mapState } from "vuex";
 import axios from "axios";
 import moment from "moment";
@@ -1449,69 +1448,6 @@ export default {
     this.checkForData();
     this.checkCustomValidation();
     this.checkCustomDefinitions();
-
-    tippy(".tip", {
-      animation: "fade",
-      theme: "light bg-light",
-    });
-
-    $.notify.addStyle("success", {
-      html: "<div><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#28a745",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("danger", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#dc3545",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("warning", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#ffc107",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("info", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#17a2b8",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("trophy", {
-      html: `<div class="bg-dark p-1 text-light"> <span data-notify-text/>
-      </div>`,
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#343a40",
-          padding: "5px",
-          color: "white",
-          "border-radius": "5px",
-        },
-      },
-    });
   },
 };
 </script>
