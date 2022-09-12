@@ -124,8 +124,7 @@
                   <small
                     >- Learn about
                     <a
-                      data-tippy="Learn More About FAIR Principles"
-                      data-tippy-theme="light"
+                      data-tippy-content="Learn More About FAIR Principles"
                       target="_blank"
                       href="https://www.go-fair.org/fair-principles/"
                       >FAIR</a

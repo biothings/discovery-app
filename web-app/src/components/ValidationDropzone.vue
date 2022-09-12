@@ -8,7 +8,7 @@
             icon="fa fa-times-circle"
             class="pointer text-warning ml-1"
             @click="resetValidation()"
-            data-tippy-info="Clear Validation"
+            data-tippy-content="Clear Validation"
           ></font-awesome-icon>
         </div>
         <div class="col-sm-12">

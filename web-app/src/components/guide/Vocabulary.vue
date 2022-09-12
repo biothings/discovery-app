@@ -55,7 +55,7 @@
                 <font-awesome-icon
                   icon="fas fa-info-circle"
                   class="text-info vocabTip"
-                  :data-tippy-info="JSON.stringify(result, null, 2)"
+                  :data-tippy-content="JSON.stringify(result, null, 2)"
                 ></font-awesome-icon>
               </td>
             </tr>
@@ -95,7 +95,7 @@
             <span
               class="badge badge-success m-1 vocabTip"
               @click="removeResult(item)"
-              :data-tippy-info="JSON.stringify(item, null, 2)"
+              :data-tippy-content="JSON.stringify(item, null, 2)"
             >
               <span v-text="item.label || item.name || item"></span>
               <b class="text-danger">&times;</b>

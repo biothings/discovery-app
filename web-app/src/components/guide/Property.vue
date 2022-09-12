@@ -137,7 +137,7 @@
                   @click="selectProp(index)"
                   v-if="(prop && prop.value) || prop.value === false"
                   :class="{ highlight: prop.highlighted }"
-                  data-tippy-info="Edit"
+                  data-tippy-content="Edit"
                 >
                   <font-awesome-icon
                     icon="fas fa-check-circle"
@@ -162,7 +162,7 @@
                   @click="selectProp(index)"
                   v-if="(prop && prop.value) || prop.value === false"
                   :class="{ highlight: prop.highlighted }"
-                  data-tippy-info="Edit"
+                  data-tippy-content="Edit"
                 >
                   <font-awesome-icon
                     icon="fas fa-check-circle"

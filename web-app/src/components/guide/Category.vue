@@ -1,7 +1,7 @@
 <template>
   <div
     class="m-1 text-center p-2 tip rounded"
-    :data-tippy-info="cat"
+    :data-tippy-content="cat"
     style="max-height: 109px; outline: none !important"
   >
     <small class="bold text-info d-block">
@@ -15,7 +15,7 @@
         v-if="canRemove"
         icon="fas fa-minus-square"
         class="text-danger pointer desc"
-        data-tippy-info="Remove"
+        data-tippy-content="Remove"
         @click="removeCat()"
       ></font-awesome-icon>
     </small>

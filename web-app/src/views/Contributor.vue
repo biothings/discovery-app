@@ -84,7 +84,6 @@
 
 <script>
 import axios from "axios";
-import tippy from "tippy.js";
 
 export default {
   name: "Contributor",
@@ -131,17 +130,8 @@ export default {
         });
     },
   },
-  updated: function () {
-    tippy(".tip", {
-      placement: "top",
-      maxWidth: "200px",
-      animation: "fade",
-      theme: "light",
-    });
-  },
   created: function () {
     var self = this;
-    console.log(this.$apiUrl);
     if (self.username) {
       self.query = self.username;
       self.getAll(self.query);

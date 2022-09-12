@@ -504,9 +504,9 @@
 <script>
 import axios from "axios";
 import tippy from "tippy.js";
+import Papa from "papaparse";
 import { mapGetters } from "vuex";
 import { isArray, isPlainObject, isString } from "lodash";
-import "@/assets/js/notify.min.js";
 
 import popSound from "@/assets/img/pop.wav";
 import metaPic from "@/assets/img/metadata.png";
@@ -906,6 +906,7 @@ export default {
       }
     },
     restartBulk() {
+      let self = this;
       self.$swal
         .fire({
           title: "Are you sure?",
@@ -1750,65 +1751,6 @@ export default {
     }
     this.checkAutoLoad();
 
-    $.notify.addStyle("success", {
-      html: "<div><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#28a745",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("danger", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#dc3545",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("warning", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#ffc107",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("info", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#17a2b8",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("trophy", {
-      html: `<div class="bg-dark p-1 text-light">
-         <span data-notify-text/>
-      </div>`,
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#343a40",
-          padding: "5px",
-          color: "white",
-          "border-radius": "5px",
-        },
-      },
-    });
-
     tippy(".bar", {
       content: "Loading...",
       maxWidth: "200px",
@@ -1824,10 +1766,6 @@ export default {
             "% Completed</div>"
         );
       },
-    });
-
-    tippy(".tip", {
-      theme: "light",
     });
     tippy(".required", {
       maxWidth: "200px",

@@ -31,7 +31,7 @@
           The biomedical and informatics communities have largely endorsed the
           spirit and basic components of the
           <a
-            class="fair"
+            data-tippy-content="Findable, Accessible, Interoperable, & Reusable"
             href="https://www.go-fair.org/fair-principles/"
             target="_blank"
             >FAIR</a
@@ -89,17 +89,7 @@
 </template>
 
 <script>
-import tippy from "tippy.js";
-
 export default {
   name: "About",
-  mounted: function () {
-    tippy(".fair", {
-      interactive: true,
-      content: `(Findable,Accessible,Interoperable,Reusable)`,
-      animation: "fade",
-      theme: "light",
-    });
-  },
 };
 </script>

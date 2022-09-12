@@ -41,7 +41,7 @@
             <span v-text="section.sectionName.replace('_', ' ')"></span>
             <a
               :href="'#' + section.sectionName"
-              data-tippy="Copy link"
+              data-tippy-content="Copy link"
               class="tip anchor"
             >
               <CopyBtn
@@ -64,7 +64,7 @@
                     <span v-text="item.question"></span>
                     <a
                       :href="'#' + item.anchor"
-                      data-tippy="Copy link"
+                      data-tippy-content="Copy link"
                       class="tip anchor"
                     >
                       <CopyBtn

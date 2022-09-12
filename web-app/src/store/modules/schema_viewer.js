@@ -14,7 +14,7 @@ export const schema_viewer = {
     toggleShowAll(state) {
       state.showAll = !state.showAll;
     },
-    saveSchema(state, payload) {
+    saveSchemaForViewer(state, payload) {
       state.userSchema = payload["schema"];
       // console.log('saved schema 🦄 ...',state.userSchema)
     },

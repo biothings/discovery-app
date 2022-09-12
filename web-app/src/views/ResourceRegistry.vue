@@ -317,9 +317,7 @@
 
 <script>
 import axios from "axios";
-import tippy from "tippy.js";
 import Mark from "mark.js";
-import "@/assets/js/notify.min.js";
 
 import { mapGetters } from "vuex";
 
@@ -906,7 +904,15 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["loading", "downloadMode", "downloadList"]),
+    ...mapGetters(["loading", "downloadList"]),
+    downloadMode: {
+      get() {
+        return this.$store.getters.downloadMode;
+      },
+      set(v) {
+        this.$store.commit("setDownloadMode", { value: v });
+      },
+    },
   },
   mounted: function () {
     this.highlighter = new Mark(document.querySelector(".context"));
@@ -916,35 +922,6 @@ export default {
     window.onpopstate = () => {
       this.search();
     };
-    $.notify.addStyle("success", {
-      html: "<div><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#28a745",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-    $.notify.addStyle("danger", {
-      html: "<div class='bg-danger text-light p-1'><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#dc3545",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-
-    tippy(".tip", {
-      placement: "top",
-      maxWidth: "200px",
-      animation: "fade",
-      theme: "light",
-    });
   },
   updated: function () {
     // Highlight matches in results

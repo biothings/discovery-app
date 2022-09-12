@@ -14,7 +14,6 @@
           class="text-light font-weight-bold"
           v-text="name"
           :data-tippy-content="JSON.stringify(fullInfo, null, 2)"
-          :id="'tipped' + itemID"
         ></span>
       </small>
     </div>
@@ -141,8 +140,6 @@
 </template>
 
 <script>
-import tippy from "tippy.js";
-
 export default {
   name: "PropertyBox",
   data: function () {
@@ -195,16 +192,12 @@ export default {
     },
   },
   mounted: function () {
-    var self = this;
-    tippy("#tipped" + this.itemID, {
-      theme: "light",
-    });
-    if (self.parent) {
-      self.textColor = "mainTextLight";
-      self.backColor = "mainBackLight";
+    if (this.parent) {
+      this.textColor = "mainTextLight";
+      this.backColor = "mainBackLight";
     } else {
-      self.textColor = "mainTextDark";
-      self.backColor = "mainBackDark";
+      this.textColor = "mainTextDark";
+      this.backColor = "mainBackDark";
     }
   },
 };

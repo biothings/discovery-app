@@ -36,8 +36,7 @@
           <font-awesome-icon
             icon="fas fa-info-circle"
             class="text-info cTip pointer"
-            :data-tippy-description="item.description"
-            :data-tippy-label="item.label"
+            :data-tippy-content="item.description"
           ></font-awesome-icon
         ></small>
         <!-- 🌈 prop totals 🌈 -->
@@ -157,8 +156,7 @@
                   <font-awesome-icon
                     icon="fas fa-info-circle"
                     class="cTip pointer text-info"
-                    :data-tippy-description="prop.description"
-                    :data-tippy-label="prop.label"
+                    :data-tippy-content="prop.description"
                   ></font-awesome-icon>
                   <template v-if="showDesc">
                     <small
@@ -227,8 +225,7 @@
                 <font-awesome-icon
                   icon="fas fa-info-circle"
                   class="cTip pointer text-info"
-                  :data-tippy-description="prop.description"
-                  :data-tippy-label="prop.label"
+                  :data-tippy-content="prop.description"
                 ></font-awesome-icon>
                 <template v-if="showDesc">
                   <small
@@ -245,14 +242,14 @@
                 v-show="item.special"
                 icon="fas fa-minus-circle"
                 class="pointer text-muted unselectable tip"
-                data-tippy-info="Delete"
+                data-tippy-content="Delete"
                 @click="removeProp(prop.label)"
               ></font-awesome-icon>
               <font-awesome-icon
                 v-show="item.special"
                 icon="fas fa-pen-square"
                 class="pointer text-muted unselectable tip mr-3"
-                data-tippy-info="Edit"
+                data-tippy-content="Edit"
                 @click="editCustomProp(prop)"
               ></font-awesome-icon>
               <font-awesome-icon
@@ -1106,20 +1103,6 @@ export default {
     }
 
     this.updateTotals();
-
-    tippy(".cTip", {
-      interactive: "true",
-      placement: "right",
-      animation: "fade",
-      trigger: "click",
-      theme: "light",
-      onShow(instance) {
-        let desc = instance.reference.dataset.tippyDescription;
-        instance.setContent(
-          "<div class='text-muted m-0 text-left wraptext'>" + desc + "</div>"
-        );
-      },
-    });
 
     tippy(".expand", {
       maxWidth: "200px",

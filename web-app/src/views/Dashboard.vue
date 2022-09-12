@@ -302,7 +302,7 @@
                       <router-link :to="{ path: '/dataset/' + item._id }">
                         <span
                           class="fa-stack fa-1x pointer tip"
-                          :data-tippy-content="'View Dataset'"
+                          data-tippy-content="View Dataset"
                         >
                           <font-awesome-icon
                             icon="fas fa-circle"
@@ -319,7 +319,7 @@
                       <span
                         class="fa-stack fa-1x pointer tip"
                         @click="edit(item._id)"
-                        :data-tippy-content="'Quick Edit'"
+                        data-tippy-content="Quick Edit"
                       >
                         <font-awesome-icon
                           icon="fas fa-circle"
@@ -361,7 +361,7 @@
                       <span
                         class="fa-stack fa-1x pointer tip"
                         @click="deleteSelected('metadata', item._id)"
-                        :data-tippy-content="'Delete'"
+                        data-tippy-content="Delete"
                       >
                         <font-awesome-icon
                           icon="fas fa-circle"
@@ -493,7 +493,6 @@
 
 <script>
 import axios from "axios";
-import tippy from "tippy.js";
 import moment from "moment";
 import "@/assets/js/notify.min.js";
 
@@ -698,7 +697,7 @@ export default {
               "_id",
               "_meta",
             ];
-            for (key in self.meta) {
+            for (let key in self.meta) {
               if (!notAllowed.includes(key)) {
                 list[key] = key;
               }
@@ -714,8 +713,8 @@ export default {
                 inputOptions: list,
                 inputPlaceholder: "Select a field to edit",
                 showCancelButton: true,
-                confirmButtonColor: "{{color_main}}",
-                cancelButtonColor: "{{color_sec}}",
+                confirmButtonColor: "#5C3069",
+                cancelButtonColor: "#006476",
                 confirmButtonText: "Edit",
                 inputValidator: (value) => {
                   return new Promise((resolve) => {
@@ -746,9 +745,9 @@ export default {
                       title: "Edit: " + keyname.value,
                       input: "textarea",
                       footer: `<small>Make sure to close all: {},[] and quotes</small>`,
-                      confirmButtonColor: "{{color_main}}",
-                      cancelButtonColor: "{{color_sec}}",
-                      animation: false,
+                      confirmButtonColor: "#5C3069",
+                      cancelButtonColor: "#006476",
+
                       customClass: "scale-in-center",
                       inputPlaceholder: self.meta[keyname.value],
                       inputValue: iValue,
@@ -803,9 +802,9 @@ export default {
                               this.$swal
                                 .fire({
                                   title: "Make other changes?",
-                                  confirmButtonColor: "{{color_main}}",
-                                  cancelButtonColor: "{{color_sec}}",
-                                  animation: false,
+                                  confirmButtonColor: "#5C3069",
+                                  cancelButtonColor: "#006476",
+
                                   showCancelButton: true,
                                   customClass: "scale-in-center",
                                   confirmButtonText: "Yes",
@@ -886,7 +885,7 @@ export default {
     updateSelected(type, namespace) {
       var self = this;
 
-      options = {
+      let options = {
         "Refresh URL": "Refresh URL",
         "Change URL": "Change URL",
       };
@@ -900,9 +899,9 @@ export default {
           input: "select",
           inputOptions: options,
           showCancelButton: true,
-          confirmButtonColor: "{{color_main}}",
-          cancelButtonColor: "{{color_sec}}",
-          animation: false,
+          confirmButtonColor: "#5C3069",
+          cancelButtonColor: "#006476",
+
           customClass: "scale-in-center",
           confirmButtonText: "Go",
         })
@@ -1001,9 +1000,9 @@ export default {
           title: "<h4>Are you sure you want to delete this item?</h4>",
           text: "You won't be able to revert this!",
           showCancelButton: true,
-          confirmButtonColor: "{{color_main}}",
-          cancelButtonColor: "{{color_sec}}",
-          animation: false,
+          confirmButtonColor: "#5C3069",
+          cancelButtonColor: "#006476",
+
           customClass: "scale-in-center",
           confirmButtonText: "Yes, delete it!",
         })
@@ -1154,9 +1153,9 @@ export default {
           title: title(),
           footer: "<small>You can change the privacy settings anytime.</small>",
           showCancelButton: true,
-          confirmButtonColor: "{{color_main}}",
-          cancelButtonColor: "{{color_sec}}",
-          animation: false,
+          confirmButtonColor: "#5C3069",
+          cancelButtonColor: "#006476",
+
           customClass: "scale-in-center",
           confirmButtonText: "Yes",
           cancelButtonText: "No",
@@ -1209,30 +1208,10 @@ export default {
     ...mapActions(["checkUser"]),
   },
   mounted: function () {
-    $.notify.addStyle("success", {
-      html: "<div><span data-notify-text/></div>",
-      classes: {
-        base: {
-          "white-space": "nowrap",
-          "background-color": "#28a745",
-          padding: "5px",
-          color: "white",
-        },
-      },
-    });
-
     this.getAll();
   },
   created: function () {
     this.checkUser();
-  },
-  updated: function () {
-    tippy(".tip", {
-      placement: "top",
-      maxWidth: "200px",
-      animation: "fade",
-      theme: "light",
-    });
   },
 };
 </script>

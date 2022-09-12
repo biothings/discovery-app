@@ -53,7 +53,7 @@
               <td>
                 <small
                   v-text="example.label"
-                  :data-tippy-info="JSON.stringify(example, null, 2)"
+                  :data-tippy-content="JSON.stringify(example, null, 2)"
                 ></small>
               </td>
             </tr>
@@ -82,6 +82,7 @@
 
 <script>
 import axios from "axios";
+import tippy from "tippy.js";
 import Enumeration from "./Enumeration.vue";
 import ObjectBox from "./ObjectBox.vue";
 
@@ -184,7 +185,7 @@ export default {
                             ` +
                 label +
                 `
-                            <i class="fa fa-info-circle text-info modaltip" data-tippy-info='` +
+                            <i class="fa fa-info-circle text-info modaltip" data-tippy-content='` +
                 JSON.stringify(result.value.response.docs[i]) +
                 `'></i>
                         </label>

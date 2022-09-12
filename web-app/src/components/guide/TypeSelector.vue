@@ -345,6 +345,7 @@
 </template>
 
 <script>
+import tippy from "tippy.js";
 import Vocabulary from "./Vocabulary.vue";
 
 export default {

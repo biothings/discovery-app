@@ -90,7 +90,6 @@
 
 <script>
 import axios from "axios";
-import tippy from "tippy.js";
 
 import DefinitionBox from "../components/JS_DefinitionBox.vue";
 import JS_PropertyBox from "../components/JS_PropertyBox.vue";
@@ -416,24 +415,6 @@ export default {
           });
       }
     },
-  },
-  mounted: function () {
-    tippy("*[data-tippy-info]", {
-      placement: "left",
-      content: "loading",
-      animation: "fade",
-      interactive: true,
-      theme: "light",
-      onShow(instance) {
-        let info = instance.reference.dataset.tippyInfo;
-
-        instance.setContent(
-          "<div class='text-muted m-0 wraptext'><pre class='text-left text-muted wraptext d-block'>" +
-            info +
-            "</pre></div>"
-        );
-      },
-    });
   },
 };
 </script>
