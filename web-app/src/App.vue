@@ -30,7 +30,6 @@ export default {
   mounted: function () {
     delegate("#tippyRoot", {
       target: "[data-tippy-content]",
-      maxWidth: "200px",
       animation: "fade",
       theme: "light",
       allowHTML: true,

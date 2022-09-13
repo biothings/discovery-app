@@ -172,7 +172,8 @@
                 <font-awesome-icon
                   v-show="item.special"
                   icon="fas fa-minus-circle"
-                  class="pointer text-muted unselectable remove"
+                  class="pointer text-muted unselectable"
+                  data-tippy-content="Delete Property"
                   @click="removeProp(prop.label)"
                 ></font-awesome-icon>
                 <font-awesome-icon
@@ -186,7 +187,8 @@
                 ></font-awesome-icon>
                 <font-awesome-icon
                   icon="fas fa-asterisk"
-                  class="required pointer unselectable"
+                  class="pointer unselectable"
+                  data-tippy-content="Mark as required"
                   @click="markRequired(prop.label)"
                   :class="{
                     'text-muted': !prop.isRequired,
@@ -195,7 +197,8 @@
                 ></font-awesome-icon>
                 <font-awesome-icon
                   icon="fas fa-circle"
-                  class="recommended pointer unselectable"
+                  class="pointer unselectable"
+                  data-tippy-content="Mark as recommended"
                   @click="markRecommended(prop.label)"
                   :class="{
                     'text-muted': !prop.isRecommended,
@@ -204,7 +207,8 @@
                 ></font-awesome-icon>
                 <font-awesome-icon
                   icon="fas fa-square"
-                  class="optional pointer unselectable"
+                  class="pointer unselectable"
+                  data-tippy-content="Mark as optional"
                   @click="markOptional(prop.label)"
                   :class="{
                     'text-muted': !prop.isOptional,
@@ -254,7 +258,8 @@
               ></font-awesome-icon>
               <font-awesome-icon
                 icon="fas fa-check-circle"
-                class="pointer unselectable select"
+                class="pointer unselectable"
+                data-tippy-content="Select (Re-use) property"
                 @click="markSelected(prop.label)"
                 :class="{
                   'text-muted': !prop.selected,
@@ -263,7 +268,8 @@
               ></font-awesome-icon>
               <font-awesome-icon
                 icon="fas fa-asterisk"
-                class="required pointer unselectable"
+                class="pointer unselectable"
+                data-tippy-content="Mark As Required"
                 @click="markRequired(prop.label)"
                 :class="{
                   'text-muted': !prop.isRequired,
@@ -273,6 +279,7 @@
               <font-awesome-icon
                 icon="fas fa-circle"
                 class="recommended pointer unselectable"
+                data-tippy-content="Mark As Recommended"
                 @click="markRecommended(prop.label)"
                 :class="{
                   'text-muted': !prop.isRecommended,
@@ -281,7 +288,8 @@
               ></font-awesome-icon>
               <font-awesome-icon
                 icon="fas fa-square"
-                class="optional pointer unselectable"
+                class="pointer unselectable"
+                data-tippy-content="Mark As Optional"
                 @click="markOptional(prop.label)"
                 :class="{
                   'text-muted': !prop.isOptional,
@@ -357,7 +365,8 @@
     >
       <span
         v-if="item.special"
-        class="fa-stack fa-1x pointer addprop unselectable tip"
+        class="fa-stack fa-1x pointer unselectable tip"
+        data-tippy-content="Add New Property"
         @click="
           addPropMode = !addPropMode;
           (newPropDomain = item.label), populateInputOptions();
@@ -380,7 +389,8 @@
         ></font-awesome-icon>
       </span>
       <span
-        class="fa-stack fa-1x pointer expand unselectable"
+        class="fa-stack fa-1x pointer unselectable"
+        data-tippy-content="Show/Hide Properties"
         @click="expand = !expand"
         v-if="item && item.properties"
       >
@@ -588,7 +598,7 @@ export default {
   },
   watch: {
     newPropName: function (v) {
-      this.propExists = self.$store.getters.isDuplicateProp(v);
+      this.propExists = this.$store.getters.isDuplicateProp(v);
     },
     query: function (q) {
       if (q) {
@@ -1101,64 +1111,7 @@ export default {
     } else {
       this.item.properties = [];
     }
-
     this.updateTotals();
-
-    tippy(".expand", {
-      maxWidth: "200px",
-      placement: "top",
-      content: "Show/Hide Properties",
-      animation: "fade",
-      theme: "light",
-    });
-
-    tippy(".addprop", {
-      maxWidth: "200px",
-      placement: "top",
-      content: "Add New Property",
-      animation: "fade",
-      theme: "light",
-    });
-
-    tippy(".required", {
-      maxWidth: "200px",
-      placement: "top",
-      content: "Mark As Required",
-      animation: "fade",
-      theme: "light",
-    });
-
-    tippy(".recommended", {
-      maxWidth: "200px",
-      placement: "top",
-      content: "Mark As Recommended",
-      animation: "fade",
-      theme: "light",
-    });
-
-    tippy(".optional", {
-      maxWidth: "200px",
-      placement: "top",
-      content: "Mark As Optional",
-      animation: "fade",
-      theme: "light",
-    });
-
-    tippy(".select", {
-      maxWidth: "200px",
-      placement: "top",
-      content: "Select (Re-Use) This Property",
-      animation: "fade",
-      theme: "light",
-    });
-
-    tippy(".remove", {
-      maxWidth: "200px",
-      placement: "top",
-      content: "Delete Property",
-      animation: "fade",
-      theme: "light",
-    });
   },
 };
 </script>
