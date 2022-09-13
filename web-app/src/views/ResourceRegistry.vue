@@ -318,6 +318,7 @@
 <script>
 import axios from "axios";
 import Mark from "mark.js";
+import Papa from "papaparse";
 
 import { mapGetters } from "vuex";
 
@@ -420,7 +421,6 @@ export default {
           footer: "Note: Documents will be flattened for CSV file.",
           inputPlaceholder: "Select Output",
           showCancelButton: true,
-          animation: false,
           confirmButtonColor: "#63296b",
           cancelButtonColor: "#4a7d8f",
           customClass: "scale-in-center",
@@ -430,14 +430,17 @@ export default {
             return method;
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
+          backdrop: true
         })
         .then((result) => {
           if (result.value) {
             switch (result.value) {
               case "json":
                 self.downloadJSON();
+                break;
               case "csv":
                 self.downloadCSV();
+                break;
               default:
                 return false;
             }
@@ -502,7 +505,6 @@ export default {
         .fire({
           title: "Name your file",
           input: "text",
-          animation: false,
           customClass: "scale-in-center",
           footer: "Note: First row is column names.",
           inputAttributes: {
@@ -511,6 +513,7 @@ export default {
           showCancelButton: true,
           confirmButtonText: "Download CSV",
           allowOutsideClick: () => !self.$swal.isLoading(),
+          backdrop: true
         })
         .then((result) => {
           if (result.value) {
@@ -523,7 +526,7 @@ export default {
               .join(" OR ");
 
             axios
-              .get("/api/dataset/query?q=" + string)
+              .get(self.$apiUrl + "/api/dataset/query?q=" + string)
               .then(function (response) {
                 docs = response.data.hits;
                 docs = docs.map((doc) => {
@@ -557,7 +560,6 @@ export default {
         .fire({
           title: "Name your file",
           input: "text",
-          animation: false,
           customClass: "scale-in-center",
           inputAttributes: {
             autocapitalize: "off",
@@ -565,6 +567,7 @@ export default {
           showCancelButton: true,
           confirmButtonText: "Download JSON",
           allowOutsideClick: () => !self.$swal.isLoading(),
+          backdrop: true
         })
         .then((result) => {
           if (result.value) {
@@ -577,7 +580,7 @@ export default {
               .join(" OR ");
 
             axios
-              .get("/api/dataset/query?q=" + string)
+              .get(self.$apiUrl + "/api/dataset/query?q=" + string)
               .then(function (response) {
                 docs = response.data.hits;
                 docs = docs.map((doc) => {

@@ -45,6 +45,9 @@ export const editor = {
   },
   strict: true,
   mutations: {
+    setRemoveValidation(state, payload) {
+      state.removeValidation = payload.value;
+    },
     toggleCardinality(state) {
       state.addCardinality = !state.addCardinality;
       //remove all marginality in validation
