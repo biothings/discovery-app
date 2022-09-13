@@ -1241,6 +1241,7 @@ export default {
               </tr>
             </table></div>`,
       placement: "left",
+      allowHTML: true,
       theme: "light",
     });
     // self.query = self.q;

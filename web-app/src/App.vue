@@ -33,6 +33,24 @@ export default {
       animation: "fade",
       theme: "light",
       allowHTML: true,
+      onShown(instance) {
+        let html = '<table class="table table-sm table-striped table-secondary m-0">'
+        try {
+          if (instance.reference.dataset.tippyContent.includes("{")) {
+          let json = JSON.parse(instance.reference.dataset.tippyContent);
+          for (const k in json) {
+            html += `<tr>
+              <td>${k}</td>
+              <td>${json[k]}</td>
+              </tr>`
+          }
+          html += '</table>'
+          instance.setContent(html)
+        }
+        } catch (error) {
+          instance.setContent(instance.reference.dataset.tippyContent)
+        }
+      },
     });
 
     $.notify.addStyle("success", {

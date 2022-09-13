@@ -175,8 +175,8 @@ export default {
       var copyText = document.getElementById(id);
       copyText.select();
       document.execCommand("Copy");
-      self.$swal.fire({
-        type: "success",
+      this.$swal.fire({
+        icon: "success",
         toast: true,
         title: "Copied",
         showConfirmButton: false,
