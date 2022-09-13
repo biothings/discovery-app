@@ -20,7 +20,7 @@
         </button>
         <div v-show="viewSettings">
           <input
-            class="form-check-input slider"
+            class="form-check-input slider mr-2"
             type="checkbox"
             :checked="allMode"
             id="customControlInline2"
@@ -86,9 +86,9 @@
             <template v-if="type === 'REQUIRED'">
               <template
                 v-for="(prop, index) in validation.properties"
-                v-if="isRequired(index)"
               >
-                <span
+                <template v-if="isRequired(index)">
+                  <span
                   class="badge badge-dark m-1 pointer badgeDesc font-weight-normal slit-in-vertical"
                   @click="selectProp(index)"
                   v-if="prop && !prop.value && prop.value !== false"
@@ -101,6 +101,7 @@
                     v-if="isRequired(index)"
                   ></font-awesome-icon>
                 </span>
+                </template>
               </template>
             </template>
             <template v-if="type === 'RECOMMENDED'">
@@ -130,9 +131,10 @@
             <template v-if="type === 'REQUIRED'">
               <template
                 v-for="(prop, index) in validation.properties"
-                v-if="isRequired(index)"
+                
               >
-                <small
+                <template v-if="isRequired(index)">
+                  <small
                   class="m-1 text-success pointer desc"
                   @click="selectProp(index)"
                   v-if="(prop && prop.value) || prop.value === false"
@@ -150,6 +152,7 @@
                     v-if="isRequired(index)"
                   ></font-awesome-icon>
                 </small>
+                </template>
               </template>
             </template>
             <template v-if="type === 'RECOMMENDED'">
