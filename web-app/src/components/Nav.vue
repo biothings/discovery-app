@@ -152,7 +152,7 @@ export default {
   },
   mounted: function () {
     tippy(".headTip", {
-      theme: "light",
+      theme: "ddeDark",
     });
   },
 };

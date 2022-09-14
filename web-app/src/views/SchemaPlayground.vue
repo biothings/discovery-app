@@ -14,33 +14,33 @@
         <div class="pt-2 pb-2 text-center">
           <h1 class="mainTextDark text-center">GET STARTED</h1>
           <h4 class="text-muted text-center">What would you like to do?</h4>
-          <button
+          <RouterLink
             type="button"
+            :to="{ name: 'SchemaPlayground', query: { action: 'register' } }"
             class="btn themeButton text-light m-2 px-3 py-3 btn-lg"
-            :class="[choice == 'visualize' ? 'bg-dark' : '']"
-            @click.prevent="choice = 'visualize'"
+            :class="{ 'bg-success': choice == 'register' }"
           >
             <font-awesome-icon icon="fas fa-eye" class="text-light" /> Register
             Schema
-          </button>
-          <button
+          </RouterLink>
+          <RouterLink
             type="button"
+            :to="{ name: 'SchemaPlayground', query: { action: 'create' } }"
             class="btn themeButton text-light m-2 px-3 py-3 btn-lg"
-            :class="[choice == 'create' ? 'bg-dark' : '']"
-            @click.prevent="choice = 'create'"
+            :class="{ 'bg-success': choice == 'create' }"
           >
             <font-awesome-icon icon="fas fa-code-branch" class="text-light" />
             Create Schema
-          </button>
-          <button
+          </RouterLink>
+          <RouterLink
             type="button"
+            :to="{ name: 'SchemaPlayground', query: { action: 'search' } }"
             class="btn themeButton text-light m-2 px-3 py-3 btn-lg"
-            :class="[choice == 'search' ? 'bg-dark' : '']"
-            @click.prevent="choice = 'search'"
+            :class="{ 'bg-success': choice == 'search' }"
           >
             <font-awesome-icon icon="fas fa-search" class="text-light" /> Search
             Existing
-          </button>
+          </RouterLink>
         </div>
       </div>
     </div>
@@ -140,7 +140,7 @@
     </div>
 
     <div
-      v-if="choice == 'visualize'"
+      v-if="choice == 'register'"
       class="m-0 p-2 alert-secondary row fade-in"
       style="min-height: 50vh"
     >
@@ -154,7 +154,7 @@
             <div>
               <img
                 src="@/assets/img/paper.gif"
-                alt="visualize"
+                alt="register"
                 width="200px"
                 style="border-radius: 50%"
               />
@@ -494,11 +494,17 @@ export default {
         });
       }
     },
+    "$route.query.action": {
+      immediate: true,
+      handler: function (v) {
+        this.choice = v;
+      },
+    },
   },
   methods: {
     handleChoice(choice) {
       var self = this;
-      if (choice === "visualize") {
+      if (choice === "register") {
         this.$swal
           .fire({
             title: "Visualize a schema",

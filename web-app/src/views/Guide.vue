@@ -505,7 +505,7 @@
 import axios from "axios";
 import tippy from "tippy.js";
 import Papa from "papaparse";
-import renderjson from 'renderjson'
+import renderjson from "renderjson";
 import { mapGetters } from "vuex";
 import { isArray, isPlainObject, isString } from "lodash";
 
@@ -953,7 +953,6 @@ export default {
             .getElementById("previewJSON")
             .appendChild(renderjson(self.$store.getters.getPreview));
         },
-
       });
     },
     handleRegistration() {
@@ -1727,12 +1726,12 @@ export default {
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
           html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox bg-dark"><pre id="previewJSON2"></pre></div>`,
-        didOpen: function () {
-          renderjson.set_show_to_level(5);
-          document
-            .getElementById("previewJSON2")
-            .appendChild(renderjson(self.errors));
-        },
+          didOpen: function () {
+            renderjson.set_show_to_level(5);
+            document
+              .getElementById("previewJSON2")
+              .appendChild(renderjson(self.errors));
+          },
         });
       } else {
         self.$swal.fire({

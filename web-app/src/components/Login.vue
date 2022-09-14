@@ -7,7 +7,7 @@
   <template v-else>
     <li class="nav-item">
       <router-link
-        class="nav-link pulse headTip"
+        class="nav-link pulse headTip bg-info"
         id="navPhotoLink"
         to="/dashboard/"
         data-tippy-content="Manage your contributions"

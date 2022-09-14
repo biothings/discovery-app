@@ -1,6 +1,10 @@
 <template>
   <section id="dashboard">
-    <div class="container" style="min-height: 100vh; padding-top: 80px">
+    <div
+      class="container"
+      style="min-height: 100vh; padding-top: 80px"
+      v-if="userInfo?.login"
+    >
       <h1 class="text-muted caps">My Dashboard</h1>
       <div class="dashboard">
         <div class="row mb-5">
@@ -488,6 +492,11 @@
         </div>
       </div>
     </div>
+    <div v-else>
+      <a class="nav-link" :href="$apiUrl + '/login?next=' + nextPath"
+        >Please Login</a
+      >
+    </div>
   </section>
 </template>
 
@@ -562,6 +571,14 @@ export default {
             throw error;
           });
       }
+    },
+    loggedIn: {
+      immediate: true,
+      handler: function (v) {
+        if (!v) {
+          this.$router.push({ name: "Home" });
+        }
+      },
     },
   },
   computed: {
