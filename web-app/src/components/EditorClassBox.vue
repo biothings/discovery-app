@@ -603,7 +603,7 @@ export default {
     query: function (q) {
       if (q) {
         this.filtered = this.item.properties.filter((prop) =>
-          prop["label"].includes(q)
+          prop["label"].toLocaleLowerCase().includes(q.toLocaleLowerCase())
         );
       } else {
         this.filtered = [];

@@ -210,7 +210,7 @@
               width="200px"
               alt="logo"
             />
-            <p class="text-muted w-75 m-auto lighter">
+            <p class="text-muted w-75 m-auto">
               The CD2H project uses the onboarding form to track community
               interest and engagement in CD2H projects and working groups. You
               are welcome to participate at any level, whether contributing
@@ -254,7 +254,7 @@
                   Reusable data best practice portal (rdp-portal)</a
                 >
               </dt>
-              <dd class="lighter">Learn more about our project on GitHub</dd>
+              <dd class="text-muted">Learn more about our project on GitHub</dd>
               <dt>
                 <font-awesome-icon
                   icon="fab fa-github fa-2x"
@@ -269,7 +269,7 @@
                   Data Discovery Engine Github</a
                 >
               </dt>
-              <dd class="lighter">
+              <dd class="text-muted">
                 Contribute to the development of this site on GitHub
               </dd>
             </dl>

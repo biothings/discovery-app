@@ -20,6 +20,11 @@ export const routes = [
     component: () => import("../views/Dashboard.vue"),
   },
   {
+    path: "/login",
+    name: "LoginPage",
+    component: () => import("../views/LoginPage.vue"),
+  },
+  {
     path: "/faq/:portal?",
     name: "FAQ",
     props: true,

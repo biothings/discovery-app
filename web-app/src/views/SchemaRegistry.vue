@@ -5,38 +5,25 @@
         <h1 class="text-center logoText mb-1 mt-2">Schema Registry</h1>
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
-            <a
-              class="nav-link active mainTextLight"
-              id="class-tab"
-              data-toggle="tab"
-              href="#classes"
-              role="tab"
-              aria-controls="classes"
-              aria-selected="true"
-              >Search By Class Name</a
+            <RouterLink
+              class="nav-link"
+              :class="{ 'bg-dark text-light': choice == 'classes' }"
+              :to="{ name: 'SchemaRegistry', query: { search: 'classes' } }"
+              >Search By Class Name</RouterLink
             >
           </li>
           <li class="nav-item" role="presentation" @click="getNameSpaces()">
-            <a
-              class="nav-link mainTextDark"
-              id="namespace-tab"
-              data-toggle="tab"
-              href="#namespaces"
-              role="tab"
-              aria-controls="namespaces"
-              aria-selected="false"
-              >Browse By Namespace</a
+            <RouterLink
+              class="nav-link"
+              :class="{ 'bg-dark text-light': choice == 'namespaces' }"
+              :to="{ name: 'SchemaRegistry', query: { search: 'namespaces' } }"
+              >Browse By Namespace</RouterLink
             >
           </li>
         </ul>
         <div class="tab-content p-0 m-0" id="myTabContent">
           <!-- 🌈  CLASS SEARCH 🌈 -->
-          <div
-            class="tab-pane fade show active"
-            id="classes"
-            role="tabpanel"
-            aria-labelledby="class-tab"
-          >
+          <div v-if="choice == 'classes'">
             <div class="p-2 alert-secondary">
               <div class="alert alert-light jumbotron">
                 <h2 class="logoText">Classes</h2>
@@ -264,12 +251,7 @@
             </div>
           </div>
           <!-- 🌈  NAMESPACE 🌈 -->
-          <div
-            class="tab-pane fade"
-            id="namespaces"
-            role="tabpanel"
-            aria-labelledby="namespace-tab"
-          >
+          <div v-if="choice == 'namespaces'">
             <div class="p-2 alert-dark">
               <div class="alert alert-light jumbotron">
                 <h2 class="logoText">Namespaces</h2>
@@ -291,7 +273,7 @@
                 </li>
               </ul>
               <div style="overflow-y: scroll; max-height: 600px">
-                <ul class="list-group mt-3">
+                <ul class="list-group mt-3" v-if="classesGroupByLetter">
                   <li
                     class="list-group-item list-group-item-action"
                     v-for="(item, i) in classesGroupByLetter"
@@ -437,6 +419,8 @@ export default {
   },
   data: function () {
     return {
+      choice: "",
+      finalQ: "",
       alphabet: [
         "ALL",
         "A",
@@ -506,6 +490,31 @@ export default {
       endCapLimitReached: false,
     };
   },
+  watch: {
+    "$route.query.search": {
+      immediate: true,
+      handler: function (v) {
+        this.choice = v;
+        if (!v) {
+          this.choice = "classes";
+        }
+      },
+    },
+    "$route.query.q": {
+      immediate: true,
+      handler: function (v) {
+        if (v) {
+          this.query = v;
+        }
+      },
+    },
+    finalQ: function (v) {
+      this.$router.push({
+        name: "SchemaRegistry",
+        query: { search: this.$route.query.search, q: v },
+      });
+    },
+  },
   methods: {
     getNameSpaces() {
       var self = this;
@@ -536,7 +545,7 @@ export default {
       this.highlighter.mark(keyword);
     },
     sendGAEvent(type, query) {
-      this.$gtag("event", "click", {
+      this.$gtag.event("click", {
         event_category: type,
         event_label: query,
         event_value: 1,
@@ -568,6 +577,9 @@ export default {
       var self = this;
 
       let query = self.query || "__all__";
+      if (query !== "__all__") {
+        self.finalQ = query;
+      }
       let url = self.$apiUrl + `/api/registry/query?q=${query}`;
 
       self.$store.commit("setLoading", { value: true });
@@ -716,8 +728,12 @@ export default {
     this.mark(this.query);
   },
   mounted: function () {
+    let self = this;
     this.highlighter = new Mark(document.querySelector(".context"));
     this.search();
+    window.onpopstate = function () {
+      self.search();
+    };
   },
 };
 </script>

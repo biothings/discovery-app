@@ -652,7 +652,7 @@ export default {
           }
           return false;
         } else {
-          return false
+          return false;
         }
       },
     }),
@@ -830,7 +830,7 @@ export default {
             "<small>Note: This feature will use your <a href='https://www.w3schools.com/html/html5_webstorage.asp' target='_blank'>browser's local storage</a>, <b>clearing it will delete all your progress records</b>. To manage your local storage: <code>right click > inspect > click on the Application tab > Storage > Local Storage</code></small>",
           inputPlaceholder: "Select Action",
           showCancelButton: true,
-          
+
           confirmButtonColor: "#63296b",
           cancelButtonColor: "#4a7d8f",
           customClass: "scale-in-center",
@@ -840,7 +840,7 @@ export default {
             return method;
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -882,7 +882,7 @@ export default {
             footer: "Note: There is no way to recover anything once trashed.",
             inputPlaceholder: "Select Option",
             showCancelButton: true,
-            
+
             confirmButtonColor: "#63296b",
             cancelButtonColor: "#4a7d8f",
             customClass: "scale-in-center",
@@ -892,7 +892,7 @@ export default {
               return method;
             },
             allowOutsideClick: () => !self.$swal.isLoading(),
-            backdrop: true
+            backdrop: true,
           })
           .then((result) => {
             if (result.value) {
@@ -968,7 +968,7 @@ export default {
               "Note: There is no way to recover old saves once saved over.",
             inputPlaceholder: "Select Option",
             showCancelButton: true,
-            
+
             confirmButtonColor: "#63296b",
             cancelButtonColor: "#4a7d8f",
             customClass: "scale-in-center",
@@ -978,7 +978,7 @@ export default {
               return method;
             },
             allowOutsideClick: () => !self.$swal.isLoading(),
-            backdrop: true
+            backdrop: true,
           })
           .then((result) => {
             if (result.value) {
@@ -1005,7 +1005,7 @@ export default {
             return {
               description: found.description,
               date: moment().format("MM-DD-YYYY, h:mm:ss A"),
-              schema: this.$store.state['editor'],
+              schema: this.$store.state["editor"],
               // 'startingPoint': this.$store.getters.getStartingPoint,
               // 'parentInfo': this.$store.getters.getSchema.find(cls => cls.name == this.$store.getters.getStartingPoint)
             };
@@ -1029,7 +1029,7 @@ export default {
       }
     },
     async saveNewEntry(schema) {
-      let self = this
+      let self = this;
       var progress = localStorage.getItem("EditorProgress");
       if (progress) {
         progress = JSON.parse(progress);
@@ -1039,7 +1039,7 @@ export default {
           input: "text",
           inputLabel: "Enter description",
           inputPlaceholder: "Type here",
-          
+
           confirmButtonColor: "#63296b",
           cancelButtonColor: "#4a7d8f",
           customClass: "scale-in-center",
@@ -1049,7 +1049,7 @@ export default {
           let item = {
             description: desc,
             date: moment().format("MM-DD-YYYY, h:mm:ss A"),
-            schema: this.$store.state['editor'],
+            schema: this.$store.state["editor"],
             // 'startingPoint': this.$store.getters.getStartingPoint,
             // 'parentInfo': this.$store.getters.getSchema.find(cls => cls.name == this.$store.getters.getStartingPoint)
           };
@@ -1074,7 +1074,7 @@ export default {
           let item = {
             description: desc,
             date: moment().format("MM-DD-YYYY, h:mm:ss A"),
-            schema: this.$store.state['editor'],
+            schema: this.$store.state["editor"],
             // 'startingPoint': this.$store.getters.getStartingPoint,
             // 'parentInfo': this.$store.getters.getSchema.find(cls => cls.name == this.$store.getters.getStartingPoint)
           };
@@ -1103,7 +1103,7 @@ export default {
           inputOptions: options,
           inputPlaceholder: "Select item",
           showCancelButton: true,
-          
+
           confirmButtonColor: "#63296b",
           cancelButtonColor: "#4a7d8f",
           customClass: "scale-in-center",
@@ -1113,7 +1113,7 @@ export default {
             return method;
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -1190,7 +1190,7 @@ export default {
           position: "center",
           confirmButtonColor: "#63296b",
           cancelButtonColor: "#4a7d8f",
-          
+
           customClass: "scale-in-center",
           html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox bg-dark"><pre id="previewJSON"></pre></div>`,
           didOpen: function () {
@@ -1239,7 +1239,7 @@ export default {
           .fire({
             title: "Name your file",
             input: "text",
-            
+
             customClass: "scale-in-center",
             inputAttributes: {
               autocapitalize: "off",
@@ -1247,7 +1247,7 @@ export default {
             showCancelButton: true,
             confirmButtonText: "Download JSON-LD",
             allowOutsideClick: () => !self.$swal.isLoading(),
-            backdrop: true
+            backdrop: true,
           })
           .then((result) => {
             if (result.value) {
@@ -1270,7 +1270,7 @@ export default {
     showHelp() {
       this.$swal.fire({
         title: "Editor",
-        
+
         customClass: "scale-in-center",
         html: `<p>
                     After choosing a namespace and creating your class you will be able to edit the schema you decided to extend. It's really easy and fast! Here's a quick introduction to the layout:
@@ -1389,7 +1389,7 @@ export default {
               });
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (!result.dismiss) {
@@ -1433,7 +1433,7 @@ export default {
           showCancelButton: true,
           confirmButtonColor: "#63296b",
           cancelButtonColor: "#4a7d8f",
-          
+
           customClass: "scale-in-center",
           confirmButtonText: "Delete",
         })
@@ -1452,7 +1452,7 @@ export default {
           showCancelButton: true,
           confirmButtonColor: "#63296b",
           cancelButtonColor: "#4a7d8f",
-          
+
           customClass: "scale-in-center",
           confirmButtonText: "Yes, Delete",
         })

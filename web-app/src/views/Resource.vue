@@ -2,7 +2,7 @@
   <div class="alert-secondary">
     <div v-if="metadata && metadata.name" class="container">
       <div class="text-left" style="margin: auto">
-        <div class="text-light" style="background-color: #0b566f">
+        <div class="text-light mainBackLight">
           <div class="p-5">
             <h1 class="text-center mt-5">
               <span v-text="metadata.name"></span>

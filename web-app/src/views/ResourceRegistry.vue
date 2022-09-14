@@ -3,7 +3,7 @@
     <div class="col-md-10 col-sm-12 m-auto p-0">
       <div class="">
         <h1 class="text-center logoText mb-1 mt-2">
-          <span v-if="N3CView">N3C</span> Metadata Registry
+          <span v-if="N3CView">N3C</span> Resource Registry
         </h1>
         <p class="text-center text-muted" v-if="N3CView">
           For more general information about PPRL datasets, such as what this
@@ -330,6 +330,7 @@ export default {
   data: function () {
     return {
       perPage: 10,
+      finalQ: "",
       page: 1,
       pages: 1,
       startCap: 0,
@@ -430,7 +431,7 @@ export default {
             return method;
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -513,7 +514,7 @@ export default {
           showCancelButton: true,
           confirmButtonText: "Download CSV",
           allowOutsideClick: () => !self.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -567,7 +568,7 @@ export default {
           showCancelButton: true,
           confirmButtonText: "Download JSON",
           allowOutsideClick: () => !self.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -736,6 +737,7 @@ export default {
       //query analytics
       if (self.query !== "__all__") {
         self.sendGAEvent("dataset_search", self.query);
+        self.finalQ = self.query;
       }
       //look for existing active filters and
       let filters = self.getFilters();
@@ -861,7 +863,6 @@ export default {
       if (self.page < self.pages) self.page += 1;
     },
     checkURLQuery() {
-      let self = this;
       let url_string = window.location.href;
       let url = new URL(url_string);
 
@@ -904,6 +905,9 @@ export default {
       if (!v) {
         this.$store.commit("clearDownloadList");
       }
+    },
+    finalQ: function (v) {
+      this.$router.push({ name: "ResourceRegistry", query: { q: v } });
     },
   },
   computed: {

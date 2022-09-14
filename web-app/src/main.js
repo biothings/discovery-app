@@ -18,6 +18,7 @@ import TypeSelector from "./components/guide/TypeSelector.vue";
 import "./assets/main.css";
 import "./assets/css/styles.css";
 import "tippy.js/dist/tippy.css";
+import "tippy.js/animations/scale.css";
 import "tippy.js/themes/light.css";
 import "sweetalert2/dist/sweetalert2.min.css";
 import "tabulator-tables/dist/css/tabulator.min.css";

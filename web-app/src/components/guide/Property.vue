@@ -84,23 +84,21 @@
               ></font-awesome-icon>
             </span>
             <template v-if="type === 'REQUIRED'">
-              <template
-                v-for="(prop, index) in validation.properties"
-              >
+              <template v-for="(prop, index) in validation.properties">
                 <template v-if="isRequired(index)">
                   <span
-                  class="badge badge-dark m-1 pointer badgeDesc font-weight-normal slit-in-vertical"
-                  @click="selectProp(index)"
-                  v-if="prop && !prop.value && prop.value !== false"
-                  :class="{ highlight: prop.highlighted }"
-                >
-                  <span v-text="index"></span>
-                  <font-awesome-icon
-                    icon="fas fa-asterisk"
-                    class="text-danger required pointer unselectable"
-                    v-if="isRequired(index)"
-                  ></font-awesome-icon>
-                </span>
+                    class="badge badge-dark m-1 pointer badgeDesc font-weight-normal slit-in-vertical"
+                    @click="selectProp(index)"
+                    v-if="prop && !prop.value && prop.value !== false"
+                    :class="{ highlight: prop.highlighted }"
+                  >
+                    <span v-text="index"></span>
+                    <font-awesome-icon
+                      icon="fas fa-asterisk"
+                      class="text-danger required pointer unselectable"
+                      v-if="isRequired(index)"
+                    ></font-awesome-icon>
+                  </span>
                 </template>
               </template>
             </template>
@@ -129,29 +127,26 @@
               ></font-awesome-icon>
             </span>
             <template v-if="type === 'REQUIRED'">
-              <template
-                v-for="(prop, index) in validation.properties"
-                
-              >
+              <template v-for="(prop, index) in validation.properties">
                 <template v-if="isRequired(index)">
                   <small
-                  class="m-1 text-success pointer desc"
-                  @click="selectProp(index)"
-                  v-if="(prop && prop.value) || prop.value === false"
-                  :class="{ highlight: prop.highlighted }"
-                  data-tippy-content="Edit"
-                >
-                  <font-awesome-icon
-                    icon="fas fa-check-circle"
-                    class="text-success"
-                  ></font-awesome-icon>
-                  <span v-text="index"></span>
-                  <font-awesome-icon
-                    icon="fas fa-asterisk"
-                    class="text-danger required pointer unselectable"
-                    v-if="isRequired(index)"
-                  ></font-awesome-icon>
-                </small>
+                    class="m-1 text-success pointer desc"
+                    @click="selectProp(index)"
+                    v-if="(prop && prop.value) || prop.value === false"
+                    :class="{ highlight: prop.highlighted }"
+                    data-tippy-content="Edit"
+                  >
+                    <font-awesome-icon
+                      icon="fas fa-check-circle"
+                      class="text-success"
+                    ></font-awesome-icon>
+                    <span v-text="index"></span>
+                    <font-awesome-icon
+                      icon="fas fa-asterisk"
+                      class="text-danger required pointer unselectable"
+                      v-if="isRequired(index)"
+                    ></font-awesome-icon>
+                  </small>
                 </template>
               </template>
             </template>
