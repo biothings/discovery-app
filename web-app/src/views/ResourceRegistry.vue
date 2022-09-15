@@ -74,7 +74,7 @@
             <span
               class="badge pointer m-1 fade-in"
               @click="toggleFilter(filter)"
-              :class="[filter.active ? 'badge-info' : 'badge-secondary']"
+              :class="[filter.active ? 'btn-info' : 'btn-secondary']"
             >
               <DynamicImage
                 :imagePath="filter.icon"
@@ -100,7 +100,7 @@
               <span
                 class="badge pointer m-1 fade-in"
                 @click="toggleFilter(filter)"
-                :class="[filter.active ? 'badge-info' : 'badge-secondary']"
+                :class="[filter.active ? 'btn-info' : 'btn-secondary']"
               >
                 <font-awesome-icon
                   icon="fas fa-circle"
@@ -122,7 +122,7 @@
               <span
                 class="badge pointer m-1 fade-in"
                 @click="toggleFilter(filter)"
-                :class="[filter.active ? 'badge-info' : 'badge-secondary']"
+                :class="[filter.active ? 'btn-info' : 'btn-secondary']"
                 :title="filter.tip"
               >
                 <a
@@ -799,7 +799,7 @@ export default {
         .then(function (response) {
           self.hits = response.data.hits;
           console.log("%c Query executed", "color:hotpink");
-          console.log("%c " + JSON.stringify(config, null, 2), "color:cyan");
+          console.log("%c " + JSON.stringify(config, null, 2), "color:blue");
           console.log("%c hits: " + response.data.total, "color:limegreen");
           self.$store.commit("setLoading", { value: false });
           self.total = response.data.total;

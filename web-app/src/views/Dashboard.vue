@@ -46,7 +46,7 @@
           <div class="col-sm-10" id="dashTippyParent">
             <div class="alert-dark p-2">
               <div class="mt-3 mainTextDark">
-                <div class="numberCircle mainBackDark" v-text="total_NS"></div>
+                ({{total_NS}})
                 Registered Schema Namespaces
               </div>
               <div v-if="dashboard && dashboard.length">
@@ -236,10 +236,7 @@
 
             <div class="alert-info p-2">
               <div class="mt-3 mainTextLight">
-                <div
-                  class="numberCircle mainBackLight"
-                  v-text="datasetsTotal"
-                ></div>
+                ({{datasetsTotal}})
                 Registered Datasets
               </div>
               <form
