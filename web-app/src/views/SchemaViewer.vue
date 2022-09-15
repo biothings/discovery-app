@@ -683,21 +683,23 @@ export default {
             // DATA DOES NOT EXIST AT All
             let timerInterval;
             self.$swal.fire({
-              type: "error",
+              icon: "error",
               title: "Page Does Not Exist",
-              html: "Taking you to the Schema Playground in <strong></strong> seconds...",
+              html: "Taking you to the Schema Playground in <b></b> seconds...",
+
               timer: 3000,
-              onBeforeOpen: () => {
-                const content = self.$swal.getContent();
-                const $ = content.querySelector.bind(content);
+              didClose: () => {
+                self.$router.push({ path: "/schema-playground" });
+              },
+              didOpen: () => {
                 self.$swal.showLoading();
+                const b = self.$swal.getHtmlContainer().querySelector("b");
                 timerInterval = setInterval(() => {
-                  self.$swal.getContent().querySelector("strong").textContent =
-                    (self.$swal.getTimerLeft() / 1000).toFixed(0);
+                  b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000);
                 }, 100);
               },
-              onClose: () => {
-                self.$router.push({ path: "/schema-playground" });
+              willClose: () => {
+                clearInterval(timerInterval);
               },
             });
           }
@@ -1013,7 +1015,7 @@ export default {
       if (self.userInfo && self.userInfo.login) {
         self.$swal
           .fire({
-            animation: false,
+            
             customClass: "scale-in-center",
             title: "Why should I register my schema?",
             html: `<ul class="text-muted text-left">
@@ -1050,7 +1052,7 @@ export default {
                 .fire({
                   title: "Registration",
                   input: "text",
-                  animation: false,
+                  
                   customClass: "scale-in-center",
                   text: "Choose a namespace (a-z,0-9)",
                   footer: `<small>Namespace must be unique and cannot be 'metadata','dataset' or 'schema'</small>`,
@@ -1104,6 +1106,7 @@ export default {
                       });
                   },
                   allowOutsideClick: () => !self.$swal.isLoading(),
+                  backdrop: true
                 })
                 .then((result) => {
                   if (result.value) {
@@ -1125,7 +1128,7 @@ export default {
                       self.$swal.fire({
                         type: "success",
                         title: "Registration Successful",
-                        animation: false,
+                        
                         customClass: "scale-in-center",
                         html: "Taking you to your schema homepage in <strong></strong> seconds.",
                         timer: 3000,
@@ -1188,7 +1191,7 @@ export default {
           showCancelButton: true,
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
-          animation: false,
+          
           customClass: "scale-in-center",
           confirmButtonText: "Extend",
         })
@@ -1244,8 +1247,6 @@ export default {
       allowHTML: true,
       theme: "light",
     });
-    // self.query = self.q;
-    // self.namespace = self.ns;
     console.log(
       "%c NAMESPACe: " + this.namespace,
       "background: hotpink; color:white; padding:4px;"

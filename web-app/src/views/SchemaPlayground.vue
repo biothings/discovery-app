@@ -547,6 +547,7 @@ export default {
               }
             },
             allowOutsideClick: () => !this.$swal.isLoading(),
+            backdrop: true
           })
           .then((result) => {
             if (result.value) {
@@ -789,6 +790,7 @@ export default {
           showCancelButton: true,
           confirmButtonText: "Download Report",
           allowOutsideClick: () => !this.$swal.isLoading(),
+          backdrop: true
         })
         .then((result) => {
           if (result.value) {

@@ -5,7 +5,7 @@
         v-if="downloadMode"
         class="p-1 d-flex justify-content-center align-items-center"
         :class="[
-          inDownloadCart ? 'bg-success text-light' : 'bg-light text-info',
+          inDownloadCart ? 'btn-success text-light' : 'btn-light text-info',
         ]"
         @click="handleDownload()"
       >
