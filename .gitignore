@@ -4,12 +4,14 @@ __pycache__/
 *$py.class
 *.pyc
 .DS_Store
+.lock
 
 # C extensions
 *.so
 
 # Editors
 .vscode
+.idea
 
 # Credentials
 discovery/handlers/saml/certs/*.crt

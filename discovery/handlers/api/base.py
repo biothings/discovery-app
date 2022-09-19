@@ -100,12 +100,15 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
         if not self.settings.get('debug'):
 
             for request in requests:
-
+                if not request:
+                    continue
                 if isinstance(request, (
                     N3CChannel.N3CPreflightRequest,
                     N3CChannel.N3CHTTPRequest
                 )):
                     response = await client.fetch(request, raise_error=False)
+                    # this func will call requests.__next__ so it should be received empty yield result
+                    # to make sure the next request will be return on for loop
                     requests.send(response)
                     log_response(response)
 
