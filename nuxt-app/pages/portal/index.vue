@@ -1,0 +1,125 @@
+<template>
+  <div
+    id="portals"
+    class="container-fluid alert-secondary py-5"
+    style="min-height: 80vh"
+  >
+    <div class="jumbotron bg-none mb-0 text-center">
+      <h1 class="logoText">Data Portals</h1>
+      <p class="w-75 m-auto text-muted">
+        Explore data portals and learn how you can contribute and access their
+        data.
+      </p>
+    </div>
+    <div class="container">
+      <ul class="list-group">
+        <template v-for="portal in portals" :key="portal.name">
+          <li
+            class="list-group-item mb-1"
+            :style="{ borderLeft: portal.colors[1].hex + ' solid 10px' }"
+          >
+            <div>
+              <div class="d-flex justify-content-start align-items-center">
+                <DynamicImage
+                  :imagePath="portal.portalicon"
+                  :id="portal.name"
+                  :alt="portal.name"
+                  width="50"
+                  class="mr-2"
+                ></DynamicImage>
+                <RouterLink
+                  class="tip"
+                  :to="{ path: '/portal/' + portal.linkname }"
+                  data-tippy-content="Learn More"
+                >
+                  <h4 class="d-inline">
+                    <span v-text="portal.name"></span>
+                    <font-awesome-icon icon="fas fa-chevron-right" />
+                  </h4>
+                </RouterLink>
+              </div>
+              <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
+            </div>
+          </li>
+        </template>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script>
+import DynamicImage from "~~/components/DynamicImage.vue";
+
+export default {
+  name: "Portals",
+  components: {
+    DynamicImage,
+  },
+  data: function () {
+    return {
+      portals: [
+        {
+          name: "CTSA National Center for Data to Health",
+          header:
+            "A CD2H project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs",
+          linkname: "cd2h",
+          description: `<p>
+              Informatics advancements, coupled with a shift towards open science, are in the process of fundamentally transforming how we approach translational research and clinical care. The CTSA Program is poised to help realize precision medicine by leveraging informatics tools and expertise within CTSA hubs to solve key informatics challenges across the translational spectrum.
+            </p><p>
+            The CD2H was funded in fall 2017 to coordinate and integrate informatics for the CTSA Program by promoting data reuse and interoperability, tool sharing, informatics fluency, and collaboration. We are here to serve the CTSA Program by creating additional resources, building impactful infrastructure, and further coalescing the community to develop and implement innovative solutions.
+            </p><p>
+            Towards these goals, CD2H seeks input from, and collaboration with, the CTSA Program. We convene the community through our CORES and Community Projects focused on data, software, and people; and partner with the community to iteratively develop solutions through CD2H Labs and our DREAM Challenges. The ultimate goal of the CD2H is to help CTSA Hubs thrive, accelerate advancements in informatics, and improve patient care.
+            </p>`,
+          image: "cd2h-logo.png",
+          portalicon: "dde-logo-o.svg",
+          site: "https://ctsa.ncats.nih.gov/cd2h/",
+          schema: "/view/biomedical",
+          guide: "/guide",
+          colors: [{ hex: "#63296B" }, { hex: "#4A7D8F" }],
+        },
+        {
+          name: "The National COVID Cohort Collaborative (N3C)",
+          header:
+            "The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.",
+          linkname: "n3c",
+          description: `<p>
+              The National COVID Cohort Collaborative (N3C) is a complementary and synergistic partnership among the Clinical and Translational Science Awards (CTSA) Program hubs, the National Center for Data to Health (CD2H), distributed clinical data networks (PCORnet, OHDSI, ACT/i2b2, TriNetX), and other partner organizations, with overall stewardship by NIH’s National Center for Advancing Translational Sciences (NCATS).
+            </p><p>
+              The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.
+            </p>`,
+          image: "cd2h-logo.png",
+          portalicon: "N3Co.png",
+          site: "https://covid.cd2h.org/N3C",
+          schema: "/view/n3c",
+          guide: "/guide/n3c/dataset",
+          colors: [{ hex: "#4B7E8F" }, { hex: "#64296B" }],
+        },
+        {
+          name: "Outbreak.info",
+          header:
+            "During outbreaks of emerging diseases such as COVID-19, efficiently collecting, sharing, and integrating data is critical to scientific research. Outbreak.info is a resource to aggregate all this information into a single location.",
+          linkname: "outbreak",
+          description: `<p>
+            In response to the current outbreak of SARS-CoV-2 (the virus that causes COVID-19), researchers worldwide have been generating and openly sharing data, publications, reagents, code, protocols, and more. Broad sharing of these research resources improves the speed and efficiency of science. Unfortunately, there are no uniform standards and repositories for collecting all this information in one place.
+            </p><p>
+            Outbreak.info focuses on aggregating all SARS-CoV-2 / COVID-19 information into a single site. We focus on making the metadata about these resources more standardized, on creating web interfaces to make the resources more findable, and on a few focused data integration efforts to make data more usable.
+            </p>`,
+          image: "outbreak.svg",
+          portalicon: "icon-01.svg",
+          colors: [{ hex: "#D13B62" }, { hex: "#0A253D" }],
+        },
+        {
+          name: "NIAID Data Portal",
+          header:
+            "An aggregator of open datasets, with a particular focus on allergy and infectious diseases.",
+          linkname: "niaid",
+          description: `<b>National Institute of Allergy and Infectious Diseases (<a href="https://www.niaid.nih.gov/" target="_blank" rel="nonreferrer">NIAID &gt;</a>)</b> (<a href="https://discovery.biothings.io/niaid/" target="_blank" rel="nonreferrer">NIAID Data Portal &gt;</a>) dataset metadata based on this <a href="/view/niaid/" target="_blank" rel="nonreferrer">schema &gt;</a> structure.`,
+          image: "niaid/logo.svg",
+          portalicon: "niaid/icon.svg",
+          colors: [{ hex: "#369AC1" }, { hex: "#113B56" }],
+        },
+      ],
+    };
+  },
+};
+</script>
