@@ -923,7 +923,6 @@ export default {
     },
   },
   mounted: function () {
-    console.log('registry mounted')
     const runtimeConfig = useRuntimeConfig()
     this.apiUrl = runtimeConfig.public.apiUrl;
     this.highlighter = new Mark(document.querySelector(".context"));

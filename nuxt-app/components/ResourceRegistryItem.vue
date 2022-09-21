@@ -28,9 +28,9 @@
           class="mb-1 mainTextDark d-inline gaText d-inline pointer"
           @click="goTo(item)"
         >
-          <router-link :to="{ path: '/resource/' + item._id }">{{
+          <nuxt-link :to="{ path: '/dataset/' + item._id }">{{
             item.name
-          }}</router-link>
+          }}</nuxt-link>
           <span
             v-if="item && item.name.includes('PPRL')"
             class="ml-2 badge smallBadge"

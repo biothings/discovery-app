@@ -126,6 +126,12 @@
               'rel': 'canonical',
               'href': metadata.value.url
             }
+          ],
+          script:[
+            {
+              'type': 'application/ld+json',
+              children: JSON.stringify(metadata.value, null, 2)
+            }
           ]
         })
         store.commit('setLoading', {value: false});
