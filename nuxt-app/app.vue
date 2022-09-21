@@ -4,6 +4,7 @@
     <div v-if="loading" class="loader">
       <img src="@/assets/img/ripple.svg" />
     </div>
+    <NuxtLoadingIndicator color="#63286b"/>
     <NuxtPage></NuxtPage>
     <Footer></Footer>
   </div>
@@ -23,8 +24,9 @@
       ...mapGetters(["loading"]),
     },
     mounted: function () {
-    delegate("#tippyRoot", {
+    delegate("main", {
       target: "[data-tippy-content]",
+      content: 'loading',
       animation: "scale",
       theme: "ddeDark",
       allowHTML: true,
@@ -81,6 +83,11 @@
             type:"text/css",
             rel:"stylesheet",
             href:"https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css"
+          }
+        ],
+        'script':[
+          {
+            src: '@/assets/js/codemirror.js'
           }
         ]
       }

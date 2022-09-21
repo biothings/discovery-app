@@ -14,7 +14,6 @@
 </template>
 
 <script>
-import "@/assets/js/codemirror.js";
 import { mapGetters } from "vuex";
 
 export default {
