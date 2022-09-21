@@ -1,7 +1,7 @@
 import { defineNuxtPlugin } from '#app'
   
-import VueSweetalert2 from "vue-sweetalert2";
+import Swal from 'sweetalert2'
  
 export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.use(VueSweetalert2)
+  nuxtApp.provide('swal', Swal)
 })

@@ -30,6 +30,7 @@
     "renderjson": "^1.4.0",
     "showdown": "^2.1.0",
     "simple-notify": "^0.5.5",
+    "sweetalert2": "^11.4.33",
     "tabulator-tables": "^5.3.2",
     "tippy.js": "^6.3.7",
     "vivus": "^0.4.6",
