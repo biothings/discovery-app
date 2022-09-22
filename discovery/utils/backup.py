@@ -100,59 +100,31 @@ def daily_backup_routine():
         logger.error(str(exc))
 
 
-def _restore(ddeapis):
-    if indices.exists():
-        logging.error("Cannot write to an existing index.")
-        return
-    indices.reset()
-    for key in ddeapis:
-        if key == "discover_dataset":
-            dde_dataset = ddeapis[key]
-        elif key == "discover_schema":
-            dde_schema = ddeapis[key]
-        elif key == "discover_schema_class":
-            dde_schema_class = ddeapis[key]
+def backup_from_file(api):
+    """Restore index data from file
+    """
+    logger = logging.getLogger('backup_from_file')
+    if not api:
+        logger.error("failure to restore from file, no json object passed.")
+    else:
+        indices.reset()
+        api_schema = api['discover_schema']
+        api_schema_class = api['discover_schema_class']
+        api_dataset = api['discover_dataset']
 
-    # Restore discovery document: schema class, schema, and dataset
-    # need to clarify the @id key in the schema
-    for doc in dde_schema_class['docs']:
-        try:
-            schema_class_api = SchemaClass(doc)
-            schema_class_api.namespace = doc['namespace']
-            schema_class_api.name = doc['name']
-            schema_class_api.description = doc['description']
-            schema_class_api.prefix = doc['prefix']
-            schema_class_api.label = doc['label']
-            schema_class_api.uri = doc['uri']
-            schema_class_api.parent_classes = doc['parent_classes']
-            schema_class_api.validation = doc['validation']
-            schema_class_api.ref = doc['ref']
-            schema_class_api.save()
-        except Exception as e:
-            logging.error("error restoring schema class, ", e)
+        for doc in api_schema['docs']:
+            file = Schema(**doc)
+            file.meta.id = doc['_id']
+            file.save()
 
-    for doc in dde_schema['docs']:
-        try:
-            schema_api = Schema(doc)
-            if '@id' in doc.keys():
-                schema_api.meta.id = doc['@id']
-            else:
-                schema_api.meta.id = "Null"
-            schema_api._meta = doc['_meta']
-            schema_api.save()
-        except Exception as e:
-            logging.error("error restoring schema class, ", e)
+        for doc in api_schema_class['docs']:
+            file = SchemaClass(**doc)
+            file.save()
 
-    for doc in dde_dataset['docs']:
-        try:
-            _api = Dataset(doc)
-            _api.identifier = doc['identifier']
-            _api.description = doc['description']
-            _api.name = doc['name']
-            _api._meta = doc['_meta']
-            _api.save()
-        except Exception as e:
-            logging.error("error restoring dataset, ", e)
+        for doc in api_dataset['docs']:
+            file = Dataset(**doc)
+            file.save()
+
 
 def restore_from_s3(filename=None,bucket='dde'):
 
@@ -167,17 +139,15 @@ def restore_from_s3(filename=None,bucket='dde'):
 
     logging.info("GET s3://%s/%s", bucket, filename)
 
-    obj = s3.get_object(
-        Bucket=bucket,
-        Key=filename
-    )
-    dddeapis = json.loads(obj['Body'].read())
-    _restore(dddeapis)
+#    obj = s3.get_object(
+#        Bucket=bucket,
+#        Key=filename
+#    )
+#    dddeapis = json.loads(obj['Body'].read())
+#    _restore(dddeapis)
 
 
 def restore_from_file(filename=None):
     with open(filename) as file:
         ddeapis = json.load(file)
-        _restore(ddeapis)
-
-
+        backup_from_file(ddeapis)
