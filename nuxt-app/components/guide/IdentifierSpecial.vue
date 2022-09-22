@@ -111,9 +111,10 @@ export default {
   methods: {
     look_existing(q) {
       let self = this;
+      const runtimeConfig = useRuntimeConfig()
       axios
         .get(
-          self.$apiUrl +
+          runtimeConfig.public.apiUrl +
             `/api/dataset/query?size=100&q=identifier:"${encodeURIComponent(
               q
             )}"&meta=true`

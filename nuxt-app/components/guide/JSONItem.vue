@@ -167,8 +167,9 @@ export default {
       let self = this;
       if (Object.hasOwnProperty.call(this.item, "identifier")) {
         let id = this.item.identifier.replace("&", "%26");
+        const runtimeConfig = useRuntimeConfig()
         axios
-          .get(self.$apiUrl + `/api/dataset/query?q=(identifier:"${id}")`)
+          .get(runtimeConfig.public.apiUrl + `/api/dataset/query?q=(identifier:"${id}")`)
           .then((res) => {
             if (res.data.total == 1) {
               self.exists = res.data.hits[0]["_id"];
@@ -278,10 +279,11 @@ export default {
           "content-type": "application/json",
         },
       };
+      const runtimeConfig = useRuntimeConfig()
 
       axios
         .post(
-          self.$apiUrl +
+          runtimeConfig.public.apiUrl +
             "/api/dataset?schema=" +
             schema["namespace"] +
             "::" +
@@ -338,9 +340,10 @@ export default {
           "content-type": "application/json",
         },
       };
+      const runtimeConfig = useRuntimeConfig()
 
       axios
-        .put(self.$apiUrl + "/api/dataset/" + self.exists, self.item, config)
+        .put(runtimeConfig.public.apiUrl + "/api/dataset/" + self.exists, self.item, config)
         .then((res) => {
           self.loading = false;
           if (res.data.success) {

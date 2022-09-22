@@ -189,9 +189,10 @@ export default {
       //add param v for verbose definition including all parents
       var self = this;
       self.adding = true;
+      const runtimeConfig = useRuntimeConfig()
       axios
         .get(
-          self.$apiUrl +
+          runtimeConfig.public.apiUrl +
             "/api/registry/" +
             item.namespace +
             "/" +
