@@ -18,7 +18,7 @@ export default {
     return {
       shouldHighlight: false,
       myChart: null,
-      uniqueID: Date.now()
+      uniqueID: Math.floor(Math.random()*90000) + 10000,
     };
   },
   props: ["name", "totals", "unique", "maincategory"],
