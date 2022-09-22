@@ -55,7 +55,7 @@
                     class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-between"
                   >
                     <nuxt-link
-                      :to="'/view/' + item.namespace"
+                      :to="'/ns/' + item.namespace"
                       v-text="item.namespace"
                       class="d-inline m-2 text-light"
                     ></nuxt-link>
@@ -82,7 +82,7 @@
                     </div>
                     <div>
                       <nuxt-link
-                        :to="'/view/' + item.namespace"
+                        :to="'/ns/' + item.namespace"
                       >
                         <span
                           class="fa-stack fa-1x pointer tip"
