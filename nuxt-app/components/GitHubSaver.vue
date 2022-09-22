@@ -281,6 +281,7 @@ export default {
       number: 0,
       input: "",
       data: [],
+      apiUrl: ''
     };
   },
   methods: {
@@ -302,7 +303,7 @@ export default {
       let self = this;
       this.$store.commit("setLoading", { state: true });
       axios
-        .get(self.$apiUrl + "/api/gh/" + self.repoName)
+        .get(self.apiUrl + "/api/gh/" + self.repoName)
         .then((res) => {
           this.$store.commit("setLoading", { state: false });
           if (res.data.success) {
@@ -329,7 +330,7 @@ export default {
       var self = this;
       this.$store.commit("setLoading", { state: true });
       axios
-        .get(self.$apiUrl + "/api/gh")
+        .get(self.apiUrl + "/api/gh")
         .then((res) => {
           this.$store.commit("setLoading", { state: false });
           if (res.data.success) {
@@ -373,7 +374,7 @@ export default {
       this.$store.commit("setLoading", { state: true });
 
       return axios
-        .put(self.$apiUrl + "/api/gh", data, config)
+        .put(self.apiUrl + "/api/gh", data, config)
         .then((res) => {
           this.$store.commit("setLoading", { state: false });
           if (res.data.success) {
@@ -423,7 +424,7 @@ export default {
         this.$store.commit("setLoading", { state: true });
 
         return axios
-          .post(self.$apiUrl + "/api/gh", data, config)
+          .post(self.apiUrl + "/api/gh", data, config)
           .then((res) => {
             this.$store.commit("setLoading", { state: false });
             if (res.data.success) {
@@ -471,7 +472,7 @@ export default {
       let self = this;
       this.$store.commit("setLoading", { state: true });
       axios
-        .get(self.$apiUrl + "/api/view?url=" + url)
+        .get(self.apiUrl + "/api/view?url=" + url)
         .then((res) => {
           console.log(res.data);
           self.data = res.data;
@@ -614,7 +615,7 @@ export default {
       if (self.repos.length && self.repos.includes(name)) {
         this.$store.commit("setLoading", { state: true });
         return axios
-          .get(self.$apiUrl + "/api/gh/" + name)
+          .get(self.apiUrl + "/api/gh/" + name)
           .then((res) => {
             this.$store.commit("setLoading", { state: false });
             if (res.data.success) {
@@ -645,5 +646,9 @@ export default {
       }
     },
   },
+  mounted: function(){
+    const runtimeConfig = useRuntimeConfig()
+    this.apiUrl = runtimeConfig.public.apiUrl;
+  }
 };
 </script>

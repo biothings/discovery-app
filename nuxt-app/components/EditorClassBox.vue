@@ -678,8 +678,9 @@ export default {
       options += '<option value="schema:Boolean" />';
       options += '<option value="schema:DateTime" />';
       options += '<option value="schema:Time" />';
+      const runtimeConfig = useRuntimeConfig()
       axios
-        .get(self.$apiUrl + "/api/registry/schema?field=name")
+        .get(runtimeConfig.public.apiUrl + "/api/registry/schema?field=name")
         .then((res) => {
           self.$swal.hideLoading();
           if (res.data.hits) {
@@ -898,8 +899,9 @@ export default {
     getRangeOptions() {
       var self = this;
       let options = [];
+      const runtimeConfig = useRuntimeConfig()
       axios
-        .get(self.$apiUrl + "/api/registry/schema?field=name")
+        .get(runtimeConfig.public.apiUrl + "/api/registry/schema?field=name")
         .then((res) => {
           if (res.data.hits) {
             for (var i = 0; i < res.data.hits.length; i++) {
@@ -1029,8 +1031,9 @@ export default {
               options += '<option value="schema:DateTime" />';
               options += '<option value="schema:Time" />';
               self.$swal.isLoading();
+              const runtimeConfig = useRuntimeConfig()
               axios
-                .get(self.$apiUrl + "/api/registry/schema?field=name")
+                .get(runtimeConfig.public.apiUrl + "/api/registry/schema?field=name")
                 .then((res) => {
                   self.$swal.hideLoading();
                   if (res.data.hits) {
