@@ -33,14 +33,17 @@ class N3CChannel(Channel):
         self.profile = profile  # project related info
 
     def send(self, message):
-        yield from [self.N3CHTTPRequest(
+        result = yield self.N3CHTTPRequest(
             "https://n3c-help.atlassian.net/rest/api/3/issue", method="POST",
             headers={"Content-Type": "application/json"},
             auth_username=self.user,
             auth_password=self.password,
             body=json.dumps(message.to_jira_payload(self.profile)),
             ca_certs=certifi.where()  # for Windows compatibility
-        )]
+        )
+        # this result is sent from requests.send(response)
+        # so it should be return to outer stack by yield from call
+        return result
 
     def sends_query(self, user):
         return self.N3CPreflightRequest(
@@ -246,12 +249,14 @@ class DatasetNotifier(Notifier):
                         userid = results[0]["accountId"]
                     elif "@" in user:
                         # register this user by email if not registered yet
+                        yield
                         userid = yield channel.sends_signup(user)
                         userid = json.loads(userid.body)
                         userid = userid["accountId"]
 
                     else:  # no email address, cannot register
                         userid = None
+                    yield  # this will return None for requests.send(response)
                     response = yield from channel.send(DatasetMessage({
                         "title": "External Dataset Request",  # customized title
                         "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
@@ -274,9 +279,9 @@ class DatasetNotifier(Notifier):
                             dataset.update(_n3c={"url": url})
                         except Exception as exc:
                             logging.error(str(exc))
-
+                    yield # this will return None for requests.send(response)
             else:  # all other channels
-                yield from channel.send(DatasetMessage({
+                result = yield from channel.send(DatasetMessage({
                     "title": "New Dataset Registered",
                     "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
                     "url": f"http://discovery.biothings.io/dataset/{_id}",
@@ -284,6 +289,7 @@ class DatasetNotifier(Notifier):
                     "image": DatasetNotifier.get_portal_image(meta.get('guide', '')),
                     "image_altext": "DDE_PORTAL_IMG",
                 }))
+                yield  # this will return None for requests.send(response)
 
     def delete(self, _id, name, user):
 
