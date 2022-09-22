@@ -119,9 +119,9 @@
               Classes
             </li>
             <li v-for="item in searchResults">
-              <router-link :to="'/' + item['label']"
+              <nuxt-link :to="'/' + item['label']"
                 ><small v-text="item['label']"></small
-              ></router-link>
+              ></nuxt-link>
             </li>
           </ul>
         </div>
@@ -135,9 +135,9 @@
               Properties
             </li>
             <li v-for="item in searchResultsProps">
-              <router-link :to="'/' + item['label']"
+              <nuxt-link :to="'/' + item['label']"
                 ><small v-text="item['label']"></small
-              ></router-link>
+              ></nuxt-link>
             </li>
           </ul>
         </div>
@@ -200,12 +200,12 @@
                     v-for="def in item.children"
                     class="d-flex justify-content-between align-item-center p-1"
                   >
-                    <router-link
-                      :to="{ path: '/view/' + namespace + '/' + def }"
+                    <nuxt-link
+                      :to="{ path: '/ns/' + namespace + '/' + def }"
                     >
                       <span v-text="def.split(':')[1]"></span>
                       <font-awesome-icon icon="fas fa-chevron-right" />
-                    </router-link>
+                    </nuxt-link>
                     <font-awesome-icon
                       icon="fas fa-code-branch"
                       class="pointer tip text-light btn btn-info p-1"
@@ -248,117 +248,117 @@
             </ul>
             <ul class="tree" v-if="!treeBuildErr">
               <li>
-                <router-link
+                <nuxt-link
                   class="text-0"
-                  :to="'/view/' + namespace + '/' + rootNode"
+                  :to="'/ns/' + namespace + '/' + rootNode"
                   v-text="rootNode"
-                ></router-link>
+                ></nuxt-link>
                 <ul>
                   <li v-for="item in getNeighbors(rootNode)">
-                    <router-link
+                    <nuxt-link
                       class="text-1"
-                      :to="'/view/' + namespace + '/' + item"
+                      :to="'/ns/' + namespace + '/' + item"
                       v-text="item"
-                    ></router-link>
+                    ></nuxt-link>
                     <ul>
                       <li v-for="item2 in getNeighbors(item)">
-                        <router-link
+                        <nuxt-link
                           class="text-2"
-                          :to="'/view/' + namespace + '/' + item2"
+                          :to="'/ns/' + namespace + '/' + item2"
                           v-text="item2"
-                        ></router-link>
+                        ></nuxt-link>
                         <ul>
                           <li v-for="item3 in getNeighbors(item2)">
-                            <router-link
+                            <nuxt-link
                               class="text-3"
-                              :to="'/view/' + namespace + '/' + item3"
+                              :to="'/ns/' + namespace + '/' + item3"
                               v-text="item3"
-                            ></router-link>
+                            ></nuxt-link>
                             <ul>
                               <li v-for="item4 in getNeighbors(item3)">
-                                <router-link
+                                <nuxt-link
                                   class="text-4"
-                                  :to="'/view/' + namespace + '/' + item4"
+                                  :to="'/ns/' + namespace + '/' + item4"
                                   v-text="item4"
-                                ></router-link>
+                                ></nuxt-link>
                                 <ul>
                                   <li v-for="item5 in getNeighbors(item4)">
-                                    <router-link
+                                    <nuxt-link
                                       class="text-5"
-                                      :to="'/view/' + namespace + '/' + item5"
+                                      :to="'/ns/' + namespace + '/' + item5"
                                       v-text="item5"
-                                    ></router-link>
+                                    ></nuxt-link>
                                     <ul>
                                       <li v-for="item6 in getNeighbors(item5)">
-                                        <router-link
+                                        <nuxt-link
                                           class="text-6"
                                           :to="
-                                            '/view/' + namespace + '/' + item6
+                                            '/ns/' + namespace + '/' + item6
                                           "
                                           v-text="item6"
-                                        ></router-link>
+                                        ></nuxt-link>
                                         <ul>
                                           <li
                                             v-for="item7 in getNeighbors(item6)"
                                           >
-                                            <router-link
+                                            <nuxt-link
                                               class="text-7"
                                               :to="
-                                                '/view/' +
+                                                '/ns/' +
                                                 namespace +
                                                 '/' +
                                                 item7
                                               "
                                               v-text="item7"
-                                            ></router-link>
+                                            ></nuxt-link>
                                             <ul>
                                               <li
                                                 v-for="item8 in getNeighbors(
                                                   item7
                                                 )"
                                               >
-                                                <router-link
+                                                <nuxt-link
                                                   class="text-8"
                                                   :to="
-                                                    '/view/' +
+                                                    '/ns/' +
                                                     namespace +
                                                     '/' +
                                                     item8
                                                   "
                                                   v-text="item8"
-                                                ></router-link>
+                                                ></nuxt-link>
                                                 <ul>
                                                   <li
                                                     v-for="item9 in getNeighbors(
                                                       item8
                                                     )"
                                                   >
-                                                    <router-link
+                                                    <nuxt-link
                                                       class="text-9"
                                                       :to="
-                                                        '/view/' +
+                                                        '/ns/' +
                                                         namespace +
                                                         '/' +
                                                         item9
                                                       "
                                                       v-text="item9"
-                                                    ></router-link>
+                                                    ></nuxt-link>
                                                     <ul>
                                                       <li
                                                         v-for="item10 in getNeighbors(
                                                           item9
                                                         )"
                                                       >
-                                                        <router-link
+                                                        <nuxt-link
                                                           class="text-10"
                                                           :to="
-                                                            '/view/' +
+                                                            '/ns/' +
                                                             namespace +
                                                             '/' +
                                                             item10
                                                           "
                                                           v-text="item10"
-                                                        ></router-link>
+                                                        ></nuxt-link>
                                                       </li>
                                                     </ul>
                                                   </li>
@@ -394,7 +394,7 @@
           <span
             class="fa-stack fa-1x pointer unselectable tip"
             data-tippy-content="Back to namespace home"
-            @click.prevent="$router.push('/view/' + namespace)"
+            @click.prevent="$router.push('/ns/' + namespace)"
           >
             <font-awesome-icon
               icon="fas fa-circle"
@@ -1091,9 +1091,9 @@ export default {
                           .head(self.apiUrl + `/api/registry/` + input)
                           .then(function (res) {
                             resolve(
-                              '<small>Sorry, that namespace is already taken: <a href="/view/' +
+                              '<small>Sorry, that namespace is already taken: <a href="/ns/' +
                                 input +
-                                '/" target="_blank">http://discovery.biothings.io/view/' +
+                                '/" target="_blank">http://discovery.biothings.io/ns/' +
                                 input +
                                 "</a></small>"
                             );
@@ -1167,7 +1167,7 @@ export default {
                         },
                         onClose: () => {
                           clearInterval(timerInterval);
-                          self.$router.push({ path: "/view/" + name + "/" });
+                          navigateTo({ path: "/ns/" + name + "/" });
                         },
                       });
                     } else {
