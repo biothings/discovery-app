@@ -11,6 +11,9 @@ export const schema_viewer = {
     toggleView(state) {
       state.validationView = !state.validationView;
     },
+    setValidationView(state, payload){
+      state.validationView = payload.value;
+    },
     toggleShowAll(state) {
       state.showAll = !state.showAll;
     },

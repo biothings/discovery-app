@@ -524,7 +524,15 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["loading", "userInfo", "queryContent", "validationView"]),
+    ...mapGetters(["loading", "userInfo", "queryContent"]),
+    validationView:{
+      get(){
+        return this.$store.getters.validationView
+      },
+      set(v){
+        this.$store.commit('setValidationView', {value: v})
+      }
+    },
     schemaFilters() {
       let letters = [];
       let self = this;
@@ -996,7 +1004,7 @@ export default {
       //   console.log('ALL PARENTS INFO', self.userSchemaParents)
     },
     changeView() {
-      this.$store.commit("toggleView");
+      console.log('changing view...')
     },
     drawGraph(g, container) {
       jsnx.draw(g, {
