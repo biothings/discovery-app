@@ -1,5 +1,6 @@
 import axios from "axios";
 import { orderBy, isPlainObject, isArray, isString } from "lodash";
+import Notify from 'simple-notify'
 // editor default options
 import { validation_options } from "./editor_options/validation_options";
 import { definition_options } from "./editor_options/definition_options";
@@ -52,11 +53,23 @@ export const editor = {
       state.addCardinality = !state.addCardinality;
       //remove all marginality in validation
       if (!state.addCardinality) {
-        $.notify("Removing cardinality", {
-          globalPosition: "right",
-          style: "info",
-          showDuration: 200,
-        });
+        new Notify({
+          status: 'warning',
+          title: 'Editor',
+          text: 'Removing cardinality',
+          effect: 'fade',
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 2000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: 'right top'
+        })
         for (const name in state.finalschema["@graph"][0]["$validation"][
           "properties"
         ]) {
@@ -78,17 +91,41 @@ export const editor = {
     toggleRemoveValidation(state) {
       state.removeValidation = !state.removeValidation;
       if (state.removeValidation) {
-        $.notify("Validation OFF", {
-          globalPosition: "right",
-          style: "warning",
-          showDuration: 200,
-        });
+        new Notify({
+          status: 'warning',
+          title: 'Editor',
+          text: 'Validation OFF',
+          effect: 'fade',
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 2000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: 'right top'
+        })
       } else {
-        $.notify("Validation ON", {
-          globalPosition: "right",
-          style: "success",
-          showDuration: 200,
-        });
+        new Notify({
+          status: 'success',
+          title: 'Editor',
+          text: 'Validation ON',
+          effect: 'fade',
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 2000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: 'right top'
+        })
       }
     },
     restoreStore(state, payload) {
@@ -527,19 +564,43 @@ export const editor = {
       let label = payload["label"];
       for (var i = 0; i < state.schema.length; i++) {
         if (state.schema[i].special) {
-          $.notify(label + " deleted", {
-            globalPosition: "right",
-            style: "info",
-            showDuration: 200,
-          });
+          new Notify({
+            status: 'warning',
+            title: 'Editor',
+            text: label + " deleted",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
           for (var x = 0; x < state.schema[i].properties.length; x++) {
             if (state.schema[i].properties[x].label === label) {
               state.schema[i].properties.splice(x, 1);
-              $.notify(label + " deleted", {
-                globalPosition: "right",
-                style: "info",
-                showDuration: 200,
-              });
+              new Notify({
+                status: 'warning',
+                title: 'Editor',
+                text: label + " deleted",
+                effect: 'fade',
+                speed: 300,
+                customClass: null,
+                customIcon: null,
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: true,
+                autotimeout: 2000,
+                gap: 20,
+                distance: 20,
+                type: 1,
+                position: 'right top'
+              })
             }
           }
         }
@@ -774,11 +835,23 @@ export const editor = {
           }
         }
         if (incomplete && !state.removeValidation) {
-          $.notify(incomplete + " properties still need validation rules", {
-            globalPosition: "right",
-            style: "warning",
-            showDuration: 200,
-          });
+          new Notify({
+            status: 'warning',
+            title: 'Editor',
+            text: incomplete + " properties still need validation rules",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
         }
       }
       // REMOVE VALIDATION
@@ -958,11 +1031,23 @@ export const editor = {
         console.log(error);
         commit("setLoading", { value: false });
         console.warn("Failed query for parent class");
-        $.notify("Error loading schema, contact us.", {
-          globalPosition: "right",
-          style: "danger",
-          showDuration: 200,
-        });
+        new Notify({
+          status: 'error',
+          title: 'Editor',
+          text: "Error loading schema, contact us",
+          effect: 'fade',
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 2000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: 'right top'
+        })
       }
     },
   },

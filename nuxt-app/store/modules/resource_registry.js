@@ -1,3 +1,5 @@
+import Notify from 'simple-notify'
+
 export const resource_registry = {
   state: {
     downloadMode: false,
@@ -21,36 +23,85 @@ export const resource_registry = {
     },
     clearDownloadList(state) {
       state.downloadList = [];
-      $.notify("Download Mode OFF", {
-        globalPosition: "right",
-        style: "danger",
-        showDuration: 40,
-      });
+      new Notify({
+        status: 'warning',
+        title: 'Metadata Registry',
+        text: "Download Mode OFF",
+        effect: 'fade',
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: 'right top'
+      })
     },
     addDownload(state, payload) {
       try {
         let existingIndex = state.downloadList.indexOf(payload.value.id);
         if (existingIndex > -1) {
           state.downloadList.splice(existingIndex, 1);
-          $.notify("Item Removed", {
-            globalPosition: "right",
-            style: "danger",
-            showDuration: 40,
-          });
+
+          new Notify({
+            status: 'error',
+            title: 'Metadata',
+            text: "Item removed",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
         } else {
           state.downloadList.unshift(payload.value.id);
-          $.notify("Item Added", {
-            globalPosition: "right",
-            style: "success",
-            showDuration: 40,
-          });
+          new Notify({
+            status: 'success',
+            title: 'Metadata',
+            text: "Item added",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
         }
       } catch (error) {
-        $.notify("Failed to add download", {
-          globalPosition: "right",
-          style: "danger",
-          showDuration: 40,
-        });
+        new Notify({
+          status: 'error',
+          title: 'Metadata',
+          text: "Failed to add download",
+          effect: 'fade',
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 2000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: 'right top'
+        })
       }
     },
   },

@@ -1,6 +1,7 @@
 import { isArray, isPlainObject, isEqual } from "lodash";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
+import Notify from 'simple-notify'
 
 export const guide = {
   state: {
@@ -206,11 +207,23 @@ export const guide = {
             selection.name + "s"
           ].hasOwnProperty("duplicate")
         ) {
-          $.notify(selection.name + "s < similar found and filled out", {
-            globalPosition: "right",
-            style: "info",
-            showDuration: 40,
-          });
+          new Notify({
+            status: 'warning',
+            title: 'Guide',
+            text: selection.name + "s < similar found and filled out",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
           state.schema.validation.properties[selection.name + "s"]["value"] =
             selection.value;
         }
@@ -224,20 +237,45 @@ export const guide = {
         delete state.schema.validation.properties[selection]["value"];
         state.schema.validation.properties[selection]["selected"] = false;
       } else {
-        $.notify(selection + ": no value detected", {
-          globalPosition: "right",
-          style: "danger",
-          showDuration: 40,
-        });
+
+        new Notify({
+          status: 'error',
+          title: 'Guide',
+          text: selection + ": no value detected",
+          effect: 'fade',
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 2000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: 'right top'
+        })
       }
       if (
         !state.schema.validation.properties[selection].hasOwnProperty("value")
       ) {
-        $.notify(selection + " was cleared", {
-          globalPosition: "right",
-          style: "success",
-          showDuration: 40,
-        });
+        new Notify({
+          status: 'success',
+          title: 'Guide',
+          text: selection + " was cleared",
+          effect: 'fade',
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 2000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: 'right top'
+        })
       }
     },
     removeArrayItemFrom(state, payload) {
@@ -249,11 +287,23 @@ export const guide = {
           if (isEqual(props[field].value, item)) {
             delete props[field]["value"];
           } else {
-            $.notify("[OBJ] does not match value", {
-              globalPosition: "right",
-              style: "danger",
-              showDuration: 40,
-            });
+            new Notify({
+              status: 'error',
+              title: 'Guide',
+              text: "[OBJ] does not match value",
+              effect: 'fade',
+              speed: 300,
+              customClass: null,
+              customIcon: null,
+              showIcon: true,
+              showCloseButton: true,
+              autoclose: true,
+              autotimeout: 2000,
+              gap: 20,
+              distance: 20,
+              type: 1,
+              position: 'right top'
+            })
           }
           break;
         case Array:
@@ -264,21 +314,45 @@ export const guide = {
                 case String:
                   if (arr_item === item) {
                     delete props[field].value[i];
-                    $.notify(item + " removed", {
-                      globalPosition: "right",
-                      style: "success",
-                      showDuration: 40,
-                    });
+                    new Notify({
+                      status: 'success',
+                      title: 'Guide',
+                      text: item + " removed",
+                      effect: 'fade',
+                      speed: 300,
+                      customClass: null,
+                      customIcon: null,
+                      showIcon: true,
+                      showCloseButton: true,
+                      autoclose: true,
+                      autotimeout: 2000,
+                      gap: 20,
+                      distance: 20,
+                      type: 1,
+                      position: 'right top'
+                    })
                   }
                   break;
                 case Object:
                   if (isEqual(arr_item, item)) {
                     delete props[field].value[i];
-                    $.notify("Item removed", {
-                      globalPosition: "right",
-                      style: "success",
-                      showDuration: 40,
-                    });
+                    new Notify({
+                      status: 'success',
+                      title: 'Guide',
+                      text: "Item removed",
+                      effect: 'fade',
+                      speed: 300,
+                      customClass: null,
+                      customIcon: null,
+                      showIcon: true,
+                      showCloseButton: true,
+                      autoclose: true,
+                      autotimeout: 2000,
+                      gap: 20,
+                      distance: 20,
+                      type: 1,
+                      position: 'right top'
+                    })
                   }
                   break;
                 default:
@@ -294,11 +368,23 @@ export const guide = {
             let prop_val = props[field].value[i];
             if (prop_val === item) {
               delete props[field].value[i];
-              $.notify(item + " removed", {
-                globalPosition: "right",
-                style: "success",
-                showDuration: 40,
-              });
+              new Notify({
+                status: 'success',
+                title: 'Guide',
+                text: item + " removed",
+                effect: 'fade',
+                speed: 300,
+                customClass: null,
+                customIcon: null,
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: true,
+                autotimeout: 2000,
+                gap: 20,
+                distance: 20,
+                type: 1,
+                position: 'right top'
+              })
             }
           }
           break;
@@ -483,20 +569,44 @@ export const guide = {
           state.schema.validation.properties[prop] = newProp;
         }
       }
-      $.notify(origin + " added", {
-        globalPosition: "right",
-        style: "success",
-        showDuration: 40,
-      });
+      new Notify({
+        status: 'success',
+        title: 'Guide',
+        text: origin + " added",
+        effect: 'fade',
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: 'right top'
+      })
     },
     removeCategory(state, payload) {
       let origin = payload["origin"];
       let catpropsrequired = [];
-      $.notify(origin + " removed", {
-        globalPosition: "right",
-        style: "info",
-        showDuration: 40,
-      });
+      new Notify({
+        status: 'warning',
+        title: 'Guide',
+        text: origin + " removed",
+        effect: 'fade',
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: 'right top'
+      })
       for (var i = 0; i < state.selectedPortals.length; i++) {
         if (state.selectedPortals[i]["label"] === origin) {
           catpropsrequired = state.selectedPortals[i]["validation"]["required"];
@@ -657,12 +767,23 @@ export const guide = {
       }
     },
     setEditMode(state, payload) {
-      $.notify("Edit Mode: ON", {
-        style: "success",
-        globalPosition: "top center",
-        style: "success",
-        showDuration: 40,
-      });
+      new Notify({
+        status: 'success',
+        title: 'Guide',
+        text: "Edit Mode: ON",
+        effect: 'fade',
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: 'right top'
+      })
       state.editingID = payload["id"];
     },
   },

@@ -1,5 +1,6 @@
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { remove } from "lodash";
+import Notify from 'simple-notify'
 
 export const schema_registry = {
   state: {
@@ -13,11 +14,23 @@ export const schema_registry = {
   mutations: {
     resetItems(state, payload) {
       state.compareItems = [];
-      $.notify("Cleared", {
-        globalPosition: "right",
-        showDuration: 40,
-        style: "success",
-      });
+      new Notify({
+        status: 'success',
+        title: 'Schema Registry',
+        text: "Cleared",
+        effect: 'fade',
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: 'right top'
+      })
     },
     addItem(state, payload) {
       let item = payload["item"];
@@ -38,20 +51,45 @@ export const schema_registry = {
             }
             state.compareItems.push(item);
           } else {
-            $.notify("Duplicate item ignored", {
-              globalPosition: "right",
-              showDuration: 40,
-              style: "danger",
-            });
+
+            new Notify({
+              status: 'error',
+              title: 'Schema Registry',
+              text: "Duplicate ignored",
+              effect: 'fade',
+              speed: 300,
+              customClass: null,
+              customIcon: null,
+              showIcon: true,
+              showCloseButton: true,
+              autoclose: true,
+              autotimeout: 2000,
+              gap: 20,
+              distance: 20,
+              type: 1,
+              position: 'right top'
+            })
           }
         }
       }
       if (state.compareItems.length == state.maxComparisons) {
-        $.notify("Max items reached", {
-          globalPosition: "right",
-          style: "warning",
-          showDuration: 40,
-        });
+        new Notify({
+          status: 'warning',
+          title: 'Schema Registry',
+          text: "Max items reached",
+          effect: 'fade',
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 2000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: 'right top'
+        })
         state.maxReached = true;
       }
     },
@@ -184,7 +222,6 @@ export const schema_registry = {
                   }
                 }
               } else if (other[o].hasOwnProperty("properties")) {
-                // $.notify(other[o]['name']+" does not specify props used, using ALL",{ globalPosition: 'right',style:"info", showDuration: 40, });
                 // iter other props
                 //set to false by default but will change to true if match found
                 tableRow[other[o]["name"]] = false;
@@ -205,11 +242,23 @@ export const schema_registry = {
             }
           }
         } else if (main.hasOwnProperty("properties")) {
-          $.notify(main["name"] + " does not specify props used, using ALL", {
-            globalPosition: "right",
-            style: "info",
-            showDuration: 40,
-          });
+          new Notify({
+            status: 'warning',
+            title: 'Schema Registry',
+            text: main["name"] + " does not specify props used, using ALL",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
           for (var i = 0; i < main.properties.length; i++) {
             let propName = main.properties[i]["curie"];
             let propLabel = main.properties[i]["label"];
