@@ -10,7 +10,15 @@ import os
 SAML_PATH = os.path.dirname(__file__)
 
 try:
-    from .handlers import *
+    from .handlers import (
+        MetadataHandler,
+        SAMLACSHandler,
+        SAMLBaseHandler,
+        SAMLLoginHandler,
+        SAMLLogOutHandler,
+        SAMLSLSHandler,
+        SAMLUserHandler,
+    )
 except ImportError:
     HANDLERS = []
 else:
