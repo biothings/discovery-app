@@ -1,3 +1,3 @@
-from .dataset import *
-from .schema import *
-from .github import *
+from .dataset import DatasetMetadataHandler
+from .github import GHHandler
+from .schema import SchemaRegistryHandler, SchemaViewHandler
