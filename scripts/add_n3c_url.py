@@ -1,7 +1,8 @@
 import logging
 
-import config
 import requests
+
+import config
 from discovery.model import Dataset
 
 logging.basicConfig(level="DEBUG")
@@ -16,12 +17,14 @@ def get_titles():
             "jql": 'project = "10016"',
             "fields": ["description"],
             "maxResults": 20,  # we know there are only 19 records
-            "startAt": 0
-        }
+            "startAt": 0,
+        },
     ).json()
     for issue in response["issues"]:
         try:
-            title = issue["fields"]["description"]["content"][3]["content"][0]["content"][0]["content"][1]["text"]
+            title = issue["fields"]["description"]["content"][3]["content"][0]["content"][0][
+                "content"
+            ][1]["text"]
         except (KeyError, IndexError):
             pass
         else:
