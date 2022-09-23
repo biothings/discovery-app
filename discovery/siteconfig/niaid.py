@@ -1,4 +1,3 @@
-
 # DO NOT comment out
 #  (REQ) REQUIRED
 
@@ -18,7 +17,7 @@ CONTACT_EMAIL = "cd2h-metadata@googlegroups.com"
 # *****************************************************************************
 
 METADATA_CONTENT_URL = "http://discovery.biothings.io/"
-METADATA_DESC = 'A CD2H PROJECT TO PROMPT FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS'
+METADATA_DESC = "A CD2H PROJECT TO PROMPT FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS"
 METADATA_FEATURED_IMAGE = "https://i.postimg.cc/zvRMbPSs/featured.jpg"
 METADATA_MAIN_COLOR = "#113B56"
 
@@ -35,7 +34,7 @@ DARK_MODE = False
 # *****************************************************************************
 
 # create a folder with <name> and put all icons there
-STATIC_IMAGE_FOLDER = 'dde'
+STATIC_IMAGE_FOLDER = "dde"
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - METADATA
@@ -49,18 +48,18 @@ GUIDE_PRESETS = [
     # 'description':'A schema describing Dataset from CTSA center'
     # },
     {
-        'namespace': 'niaid',
-        'prefix': 'niaid',
-        'name': 'Dataset',
-        'guide': '/guide/niaid',
-        'description': 'A schema describing a minimal Dataset for the National Institute of Allergy and Infectious Disease (NIAID). A dataset is a collection of data of a particular experimental type. Additional schema.org and/or custom properties could be added.'
+        "namespace": "niaid",
+        "prefix": "niaid",
+        "name": "Dataset",
+        "guide": "/guide/niaid",
+        "description": "A schema describing a minimal Dataset for the National Institute of Allergy and Infectious Disease (NIAID). A dataset is a collection of data of a particular experimental type. Additional schema.org and/or custom properties could be added.",
     },
     {
-        'namespace': 'niaid',
-        'prefix': 'niaid',
-        'name': 'ComputationalTool',
-        'guide': '/guide/niaid/ComputationalTool',
-        'description': 'A schema describing a minimal ComputationalTool for the National Institute of Allergy and Infectious Disease (NIAID). A ComputationalTool is a software used for the collection, processing, distribution, analysis, visualization, interpretation, etc. of data. Additional schema.org and/or custom properties could be added.'
+        "namespace": "niaid",
+        "prefix": "niaid",
+        "name": "ComputationalTool",
+        "guide": "/guide/niaid/ComputationalTool",
+        "description": "A schema describing a minimal ComputationalTool for the National Institute of Allergy and Infectious Disease (NIAID). A ComputationalTool is a software used for the collection, processing, distribution, analysis, visualization, interpretation, etc. of data. Additional schema.org and/or custom properties could be added.",
     },
 ]
 
@@ -68,9 +67,7 @@ GUIDE_SETTINGS = {
     "form-mode": 1,
 }
 
-GUIDE_PREFILLED = {
-
-}
+GUIDE_PREFILLED = {}
 
 GUIDE_PORTALS = [
     # {
@@ -95,10 +92,10 @@ GUIDE_PORTALS = [
 # also used in registry shortcuts
 STARTING_POINTS = [
     {
-        'namespace': 'schema',
-        'prefix': 'schema',
-        'name': 'Dataset',
-        'description': 'A body of structured information describing some topic(s) of interest.'
+        "namespace": "schema",
+        "prefix": "schema",
+        "name": "Dataset",
+        "description": "A body of structured information describing some topic(s) of interest.",
     },
 ]
 
@@ -107,19 +104,13 @@ STARTING_POINTS = [
 # *****************************************************************************
 
 REGISTRY_SHORTCUTS = [
-    {
-        "name": "Schema.org",
-        "registered_namespace": 'schema'
-    },
-    {
-        "name": "BioLink",
-        "registered_namespace": 'bts'
-    }
+    {"name": "Schema.org", "registered_namespace": "schema"},
+    {"name": "BioLink", "registered_namespace": "bts"},
 ]
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - DATASET PAGE
 # *****************************************************************************
 
-#replace underscored of abbreviated names for more readable labels
+# replace underscored of abbreviated names for more readable labels
 READABLE_LABEL_MAPPINGS = {}
