@@ -1,5 +1,3 @@
-
-
 import tornado.httpserver
 import tornado.httputil
 import tornado.ioloop
@@ -12,11 +10,7 @@ from discovery.handlers.saml import SAML_HANDLERS
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = SAML_HANDLERS
-        settings = {
-            "autorealod": True,
-            "debug": True,
-            "cookie_secret": "secret"
-        }
+        settings = {"autorealod": True, "debug": True, "cookie_secret": "secret"}
         tornado.web.Application.__init__(self, handlers, **settings)
 
 
