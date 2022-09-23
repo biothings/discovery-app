@@ -1,3 +1,3 @@
-from .dataset import DatasetMetadataHandler
-from .github import GHHandler
-from .schema import SchemaRegistryHandler, SchemaViewHandler
+from .dataset import DatasetMetadataHandler  # noqa
+from .github import GHHandler  # noqa
+from .schema import SchemaRegistryHandler, SchemaViewHandler  # noqa
