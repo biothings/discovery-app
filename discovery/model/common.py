@@ -1,4 +1,4 @@
-from elasticsearch_dsl import Document, Keyword, InnerDoc, Object, MetaField
+from elasticsearch_dsl import Document, InnerDoc, Keyword, MetaField, Object
 
 
 class DiscoveryDoc(Document):
@@ -18,7 +18,7 @@ class DiscoveryDoc(Document):
         """
         search = cls.search()
         for field, query in match.items():
-            search = search.query('match', **{field: {"query": query}})
+            search = search.query("match", **{field: {"query": query}})
 
         return bool(search.source(False).execute().hits)
 
@@ -28,6 +28,7 @@ class DiscoveryMeta(InnerDoc):
     A metadata field to store application level metadata.
     Ignored by elasticsearch in query by default when named _meta.
     """
+
     username = Keyword(required=True)
 
 
@@ -44,6 +45,7 @@ class DiscoveryUserDoc(DiscoveryDoc):
         Use explicit data schema.
         Additional fields are stored but not indexed.
         """
+
         dynamic = MetaField(False)
 
     @classmethod
