@@ -1,5 +1,4 @@
-
-from config_key import *
+from config_key import *    # noqa
 
 # *****************************************************************************
 # Credentials
@@ -14,8 +13,8 @@ from config_key import *
 # *****************************************************************************
 ES_INDICES = {
     # INTERNAL: 'discover_schema',
-    'schema': 'discover_schema_class',
-    'dataset': 'discover_dataset'
+    "schema": "discover_schema_class",
+    "dataset": "discover_dataset",
 }
 
 # *****************************************************************************
@@ -36,10 +35,10 @@ APP_LIST = [
 ]
 
 # biothings web tester will read this
-API_VERSION = ''
-API_PREFIX = 'api'
+API_VERSION = ""
+API_PREFIX = "api"
 
-STATIC_PATH = 'static'
+STATIC_PATH = "static"
 
 # *****************************************************************************
 # Search Pipeline

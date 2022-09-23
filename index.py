@@ -1,16 +1,15 @@
-''' Tornado Web Server Starting Script - Application Entry Point '''
+""" Tornado Web Server Starting Script - Application Entry Point """
 
-from threading import Thread
 import logging
+from threading import Thread
 
 from aiocron import crontab
-from filelock import FileLock, Timeout
 from biothings.web.launcher import main
+from filelock import FileLock, Timeout
 
 from discovery.handlers import HANDLERS, TemplateHandler
 from discovery.notify import update_n3c_routine
 from discovery.utils.backup import daily_backup_routine
-
 
 # Create a lock can only be acquired by one process.
 # Make sure only one process should perform backup routines
@@ -19,6 +18,7 @@ try:  # it will be released upon exit
     _lock.acquire()
 except Timeout:
     pass
+
 
 def routine():
     logger = logging.getLogger("routine")
@@ -39,13 +39,14 @@ def run_routine():
     thread.start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    crontab('0 0 * * *', func=run_routine, start=True)   # run daily at mid-night
-    main(HANDLERS, {
-        "default_handler_class": TemplateHandler,
-        "default_handler_args": {
-            "filename": "404.html",
-            "status_code": 404
-        }
-    }, use_curl=True)
+    crontab("0 0 * * *", func=run_routine, start=True)  # run daily at mid-night
+    main(
+        HANDLERS,
+        {
+            "default_handler_class": TemplateHandler,
+            "default_handler_args": {"filename": "404.html", "status_code": 404},
+        },
+        use_curl=True,
+    )
