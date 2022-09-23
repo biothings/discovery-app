@@ -1,4 +1,3 @@
-
 # DO NOT comment out
 #  (REQ) REQUIRED
 
@@ -8,7 +7,7 @@
 
 # name also used on metadata
 SITE_NAME = "Outbreak.info"
-SITE_DESC = 'During outbreaks of emerging diseases such as COVID-19, efficiently collecting, sharing, and integrating data is critical to scientific research. Outbreak.info is a resource to aggregate all this information into a single location.'
+SITE_DESC = "During outbreaks of emerging diseases such as COVID-19, efficiently collecting, sharing, and integrating data is critical to scientific research. Outbreak.info is a resource to aggregate all this information into a single location."
 
 CONTACT_REPO = "https://github.com/SuLab/outbreak.info"
 CONTACT_EMAIL = "blog@sulab.org"
@@ -18,7 +17,7 @@ CONTACT_EMAIL = "blog@sulab.org"
 # *****************************************************************************
 
 METADATA_CONTENT_URL = "http://discovery.biothings.io/"
-METADATA_DESC = 'A CD2H PROJECT TO PROMPT FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS'
+METADATA_DESC = "A CD2H PROJECT TO PROMPT FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS"
 METADATA_FEATURED_IMAGE = "https://i.postimg.cc/zvRMbPSs/featured.jpg"
 METADATA_MAIN_COLOR = "#113B56"
 
@@ -35,7 +34,7 @@ DARK_MODE = False
 # *****************************************************************************
 
 # create a folder with <name> and put all icons there
-STATIC_IMAGE_FOLDER = 'outbreak'
+STATIC_IMAGE_FOLDER = "outbreak"
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - METADATA
@@ -49,11 +48,11 @@ GUIDE_PRESETS = [
     # 'description':'A schema describing Dataset from CTSA center'
     # },
     {
-        'namespace': 'outbreak',
-        'prefix': 'outbreak',
-        'name': 'Dataset',
-        'guide': '/guide/outbreak/dataset',
-        'description': 'This is the schema for describing the Dataset schema used for outbreak.info.'
+        "namespace": "outbreak",
+        "prefix": "outbreak",
+        "name": "Dataset",
+        "guide": "/guide/outbreak/dataset",
+        "description": "This is the schema for describing the Dataset schema used for outbreak.info.",
     },
 ]
 
@@ -61,9 +60,7 @@ GUIDE_SETTINGS = {
     "form-mode": 1,
 }
 
-GUIDE_PREFILLED = {
-
-}
+GUIDE_PREFILLED = {}
 
 GUIDE_PORTALS = [
     # {
@@ -88,10 +85,10 @@ GUIDE_PORTALS = [
 # also used in registry shortcuts
 STARTING_POINTS = [
     {
-        'namespace': 'schema',
-        'prefix': 'schema',
-        'name': 'Dataset',
-        'description': 'A body of structured information describing some topic(s) of interest.'
+        "namespace": "schema",
+        "prefix": "schema",
+        "name": "Dataset",
+        "description": "A body of structured information describing some topic(s) of interest.",
     },
 ]
 
@@ -100,19 +97,13 @@ STARTING_POINTS = [
 # *****************************************************************************
 
 REGISTRY_SHORTCUTS = [
-    {
-        "name": "Schema.org",
-        "registered_namespace": 'schema'
-    },
-    {
-        "name": "BioLink",
-        "registered_namespace": 'bts'
-    }
+    {"name": "Schema.org", "registered_namespace": "schema"},
+    {"name": "BioLink", "registered_namespace": "bts"},
 ]
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - DATASET PAGE
 # *****************************************************************************
 
-#replace underscored of abbreviated names for more readable labels
+# replace underscored of abbreviated names for more readable labels
 READABLE_LABEL_MAPPINGS = {}
