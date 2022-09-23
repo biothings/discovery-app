@@ -1,15 +1,10 @@
+import requests
 from jsonschema import Draft7Validator, validators
 from jsonschema.exceptions import SchemaError, ValidationError
 
-import requests
+data = {"measurementTechnique": "Whole genome sequencing"}
 
-data = {
-    "measurementTechnique": "Whole genome sequencing"
-}
-
-data_2 = {
-    "measurementTechnique": "Gene Knockout"
-}
+data_2 = {"measurementTechnique": "Gene Knockout"}
 
 
 schema = {
@@ -19,11 +14,11 @@ schema = {
         "measurementTechnique": {
             "type": "string",
             "vocabulary": {
-                "ontology": "edam",   # must be a ontology_id from supported ontology in EBI OLS
-                "children_of": "http://edamontology.org/topic_3361"   # IRI of an ontology term. The entire ontology is used if not specified
-            }
+                "ontology": "edam",  # must be a ontology_id from supported ontology in EBI OLS
+                "children_of": "http://edamontology.org/topic_3361",  # IRI of an ontology term. The entire ontology is used if not specified
+            },
         }
-    }
+    },
 }
 
 schema_multiple = {
@@ -33,14 +28,14 @@ schema_multiple = {
         "measurementTechnique": {
             "type": "string",
             "vocabulary": {
-                "ontology": ["edam", "ncit"],    # mutliple ontology ids are supported
+                "ontology": ["edam", "ncit"],  # mutliple ontology ids are supported
                 "children_of": [
                     "http://edamontology.org/topic_3361",
-                    "http://purl.obolibrary.org/obo/NCIT_C20368"    # multiple ontology terms are supported
-                ]
-            }
+                    "http://purl.obolibrary.org/obo/NCIT_C20368",  # multiple ontology terms are supported
+                ],
+            },
         }
-    }
+    },
 }
 
 schema_not_strict = {
@@ -52,10 +47,10 @@ schema_not_strict = {
             "vocabulary": {
                 "ontology": "edam",
                 "children_of": "http://edamontology.org/topic_3361",
-                "strict": False    # optional, if False, valiator only print out a warning msg, instead of an ValidationError
-            }
+                "strict": False,  # optional, if False, valiator only print out a warning msg, instead of an ValidationError
+            },
         }
-    }
+    },
 }
 
 
@@ -66,32 +61,32 @@ def term_found_in_ontology(term, ontology, children_of=None):
         "fieldList": "id,iri,label",
         "type": "class",
         "queryFields": "label",
-        "exact": True
+        "exact": True,
     }
     if children_of:
-        ols_params['childrenOf'] = children_of
+        ols_params["childrenOf"] = children_of
 
     for param in ols_params:
         # join list input as comma-sep string
-        if param in ['ontology', 'childrenOf'] and isinstance(ols_params[param], list):
-            ols_params[param] = ','.join(ols_params[param])
+        if param in ["ontology", "childrenOf"] and isinstance(ols_params[param], list):
+            ols_params[param] = ",".join(ols_params[param])
 
     # EBI OLS API Doc here: https://www.ebi.ac.uk/ols/docs/api
     ols_url = "http://www.ebi.ac.uk/ols/api/search"
     res = requests.get(ols_url, params=ols_params)
     ols_data = res.json()
-    return ols_data['response']["numFound"] > 0
+    return ols_data["response"]["numFound"] > 0
 
 
 def is_controlled_vocabulary(validator, value, instance, schema):
     if not isinstance(instance, str):
         yield ValidationError("%r is not a string" % instance)
 
-    ontology = value.get('ontology', None)
+    ontology = value.get("ontology", None)
     if not ontology:
         yield SchemaError('must provide "ontology" for "vocabulary" in schema')
-    children_of = value.get('children_of', None)
-    is_strict = value.get('strict', True)
+    children_of = value.get("children_of", None)
+    is_strict = value.get("strict", True)
     if not term_found_in_ontology(instance, ontology, children_of):
         err_msg = f'value "{instance}" not found in "{ontology}" ontology'
         if children_of:
@@ -106,13 +101,13 @@ def is_controlled_vocabulary(validator, value, instance, schema):
 
 def get_validator(schema, default=False):
     """return a validator supporting "vocabulary" rule,
-       return a default validator if default is True.
+    return a default validator if default is True.
     """
     if default:
         return Draft7Validator(schema)
 
     all_validators = dict(Draft7Validator.VALIDATORS)
-    all_validators['vocabulary'] = is_controlled_vocabulary
+    all_validators["vocabulary"] = is_controlled_vocabulary
 
     VocabularyValidator = validators.create(
         meta_schema=Draft7Validator.META_SCHEMA, validators=all_validators
@@ -134,17 +129,13 @@ def test_data():
 
 
 def test_error():
-    data = {
-        "measurementTechnique": "invalid string"
-    }
+    data = {"measurementTechnique": "invalid string"}
     vocab_validator = get_validator(schema_multiple)
     vocab_validator.validate(data)
 
 
 def test_not_strict():
-    data = {
-        "measurementTechnique": "invalid string"
-    }
+    data = {"measurementTechnique": "invalid string"}
     vocab_validator = get_validator(schema_not_strict)
     vocab_validator.validate(data)
 

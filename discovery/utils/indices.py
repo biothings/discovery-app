@@ -1,11 +1,12 @@
 from elasticsearch_dsl import Index
 
-from  discovery.model.dataset import Dataset
+from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
 
 
 def exists():
     return Index(Dataset.Index.name).exists()
+
 
 def setup():
 

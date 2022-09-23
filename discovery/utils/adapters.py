@@ -27,13 +27,14 @@
 import logging
 
 from biothings_schema import Schema as SchemaParser
-from discovery.model import Schema as ESSchema
+
+# from discovery.model import Schema as ESSchema
 
 # the underlying package uses warnings
 logging.captureWarnings(True)
 
 
-class SchemaClassWrapper():
+class SchemaClassWrapper:
     """
     Wraps a biothings_schema.SchemaClass instance.
     Wrapper to provde native type attribute access.
@@ -64,8 +65,9 @@ class SchemaClassWrapper():
             ...
         }
         """
-        return [', '.join(map(str, parent_line))
-                for parent_line in self._parser_class.parent_classes]
+        return [
+            ", ".join(map(str, parent_line)) for parent_line in self._parser_class.parent_classes
+        ]
 
     @property
     def properties(self):
@@ -86,21 +88,19 @@ class SchemaClassWrapper():
             ...
         ]
         """
-        properties = self._parser_class.list_properties(
-            class_specific=True,
-            group_by_class=False)
+        properties = self._parser_class.list_properties(class_specific=True, group_by_class=False)
 
         for property_ in properties:
-            property_.pop('object')
-            _desc = property_.get('description', None)
+            property_.pop("object")
+            _desc = property_.get("description", None)
             if isinstance(_desc, dict):
                 _desc = _desc.get("@value", "")
-                property_['description'] = _desc
+                property_["description"] = _desc
 
         return properties
 
 
-class SchemaAdapter():
+class SchemaAdapter:
     """
     Manage a biothings_schema.Schema instance.
     Provide native type custom format schema class lists.
@@ -118,17 +118,17 @@ class SchemaAdapter():
 
     def get_class_defs(self):
         """get only classes defined in this schema
-           each {} will have a field ref: false"""
+        each {} will have a field ref: false"""
         return list(self._get_class_defs().values())
 
     def get_class_refs(self):
         """get only classes referenced outside this schema
-           each {} will have a field ref: true"""
+        each {} will have a field ref: true"""
         return list(self._get_class_refs().values())
 
     def get_classes(self, include_ref=True):
         """get all classes and label them if they are referenced
-           if include_ref is False, only "defined" classes are included.
+        if include_ref is False, only "defined" classes are included.
         """
         defs = self._get_class_defs()
         ans = {}
@@ -142,13 +142,21 @@ class SchemaAdapter():
     def _get_class_info(schema_class):
         ans = {}  # biothings_schema.SchemaClass -> { ... }
         schema_class = SchemaClassWrapper(schema_class)
-        for key in ('name', 'uri', 'prefix', 'label', 'description',
-                    'parent_classes', 'properties', 'validation'):
+        for key in (
+            "name",
+            "uri",
+            "prefix",
+            "label",
+            "description",
+            "parent_classes",
+            "properties",
+            "validation",
+        ):
             try:
                 ans[key] = getattr(schema_class, key)
             except AttributeError:
                 pass
-        logging.info(ans['name'])
+        logging.info(ans["name"])
         return ans
 
     def _get_class_defs(self):
@@ -156,7 +164,7 @@ class SchemaAdapter():
         for schema_class in self._classes_defs:
             if schema_class.name not in ans:
                 _schema_class = self._get_class_info(schema_class)
-                _schema_class['ref'] = False
+                _schema_class["ref"] = False
                 ans[schema_class.name] = _schema_class
         return ans
 
@@ -165,7 +173,7 @@ class SchemaAdapter():
         for schema_class in self._classes_refs:
             if schema_class.name not in ans:
                 _schema_class = self._get_class_info(schema_class)
-                _schema_class['ref'] = True
+                _schema_class["ref"] = True
                 ans[schema_class.name] = _schema_class
         return ans
 
