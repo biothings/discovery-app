@@ -34,15 +34,18 @@ import elasticsearch
 import elasticsearch_dsl
 import jsonschema
 import requests
-from discovery.model import Dataset as ESDataset
-from discovery.model import SchemaClass as ESSchemaClass
+
+from discovery.model import Dataset as ESDataset, SchemaClass as ESSchemaClass
 
 from .common import (
-    RegistryError, DatasetValidationError, DatasetJsonSchemaValidationError,
-    ConflictError, NoEntityError,
-    ValidatedDict, RegistryDocument
+    ConflictError,
+    DatasetJsonSchemaValidationError,
+    DatasetValidationError,
+    NoEntityError,
+    RegistryDocument,
+    RegistryError,
+    ValidatedDict,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +56,8 @@ logger = logging.getLogger(__name__)
 
 def ensure_document(doclike):
     """
-        ensure document is in dict type.
-        download json document at a url.
+    ensure document is in dict type.
+    download json document at a url.
     """
     if isinstance(doclike, dict):
         return doclike
@@ -72,8 +75,8 @@ def ensure_document(doclike):
 
 def ensure_schema(schemalike, must_have_constraints=True):
     """
-        schema here refers to a json schema,
-        usually attached to a discovery app schema class
+    schema here refers to a json schema,
+    usually attached to a discovery app schema class
     """
     if isinstance(schemalike, dict):
         schema = schemalike
@@ -85,10 +88,11 @@ def ensure_schema(schemalike, must_have_constraints=True):
     else:
         raise TypeError("the json schema should be a dict or an id to locate it.")
 
-    if 'type' not in schema and must_have_constraints:
+    if "type" not in schema and must_have_constraints:
         raise ValueError("the schema specified does not support validation.")
 
     return schema
+
 
 # ----------------
 #   utilities
@@ -110,8 +114,7 @@ def exists(anyid=None, **multi_match):  # TODO multimatch
         raise RegistryError("specify at least one condition.")
 
     if anyid:
-        return ESDataset.exists(_id=anyid) or \
-            ESDataset.exists(identifier=anyid)
+        return ESDataset.exists(_id=anyid) or ESDataset.exists(identifier=anyid)
 
     return ESDataset.exists(**multi_match)
 
@@ -139,8 +142,7 @@ def validate(document, schema="ctsa::bts:CTSADataset"):
 
     try:
         jsonschema.validate(
-            instance=document, schema=schema,
-            format_checker=jsonschema.FormatChecker()
+            instance=document, schema=schema, format_checker=jsonschema.FormatChecker()
         )
     except jsonschema.exceptions.ValidationError as err:
         raise DatasetJsonSchemaValidationError(err)
@@ -154,6 +156,7 @@ def validate(document, schema="ctsa::bts:CTSADataset"):
 #    C R U D
 # ----------------
 
+
 def _clean(metadict, defdict=None):
 
     defdict = defdict or {}  # defaults
@@ -162,7 +165,7 @@ def _clean(metadict, defdict=None):
 
     # declared fields in database
 
-    _meta = ESDataset._ObjectBase__get_field('_meta')._doc_class()
+    _meta = ESDataset._ObjectBase__get_field("_meta")._doc_class()
     fields = {field for field, _, _ in _meta._ObjectBase__list_fields()}
 
     # auto-correct
@@ -204,7 +207,6 @@ def _clean(metadict, defdict=None):
     # result
 
     class AliasDict(ValidatedDict):
-
         def __getitem__(self, key):
             if key in alias_to_field:  # alias
                 key = alias_to_field[key]
@@ -213,7 +215,7 @@ def _clean(metadict, defdict=None):
     return AliasDict(_metadata)
 
 
-def _index(doc, metadata, op_type='index', _addon=MappingProxyType({})):
+def _index(doc, metadata, op_type="index", _addon=MappingProxyType({})):
 
     assert isinstance(doc, ValidatedDict)
     assert isinstance(metadata, ValidatedDict)
@@ -221,15 +223,13 @@ def _index(doc, metadata, op_type='index', _addon=MappingProxyType({})):
     _now = datetime.now(timezone.utc)
 
     dataset = ESDataset(**doc)
-    dataset['_meta'] = metadata
-    dataset['_n3c'] = {
+    dataset["_meta"] = metadata
+    dataset["_n3c"] = {
         "url": _addon.get("n3c_url"),
         "status": _addon.get("n3c_status"),
-        "timestamp": _addon.get("n3c_timestamp")}
-    dataset['_ts'] = {
-        "date_created": _addon.get("date_created") or _now,
-        "last_updated": _now
+        "timestamp": _addon.get("n3c_timestamp"),
     }
+    dataset["_ts"] = {"date_created": _addon.get("date_created") or _now, "last_updated": _now}
 
     try:
         dataset.save(op_type=op_type)
@@ -246,14 +246,14 @@ def _build(metafilter):
     assert isinstance(metafilter, ValidatedDict)
 
     # special consideration for field 'private'
-    private = metafilter.pop('private', None)
+    private = metafilter.pop("private", None)
     # pass the rest as _meta field filters
     search = ESDataset.find(**metafilter)
 
     if private:  # if explicitly want private datasets, only return private ones
-        search = search.filter('match', _meta__private=True)
+        search = search.filter("match", _meta__private=True)
     else:  # if not, only return public datasets of that criterion
-        search = search.exclude('match', _meta__private=True)
+        search = search.exclude("match", _meta__private=True)
     # private datasets and public ones are never returned together
 
     return search
@@ -266,9 +266,9 @@ def add(doc, **metadata):
     Default type is a CTSA dataset. Schema type must be in database.
     Validate against schema before index. Raise on conflict.
     """
-    metadata = _clean(metadata, defdict={'schema': 'ctsa::bts:CTSADataset'})
-    doc = validate(doc, metadata['schema'])
-    dataset = _index(doc, metadata, 'create')
+    metadata = _clean(metadata, defdict={"schema": "ctsa::bts:CTSADataset"})
+    doc = validate(doc, metadata["schema"])
+    dataset = _index(doc, metadata, "create")
     return dataset.meta.id
 
 
@@ -293,7 +293,7 @@ def get_all(start=0, size=10, **metafilter):
     search = _build(metafilter)
 
     if size:
-        search = search[start: start + size]
+        search = search[start : start + size]
     else:
         search.params(from_=start)
         search = search.scan()
@@ -362,26 +362,30 @@ def update(_id, new_doc, **metadata):
 
     # Cannot change the identifier field, because it would result
     # in changing the document _id. Delete and add again instead.
-    if new_doc.get('identifier') != dataset.identifier:
+    if new_doc.get("identifier") != dataset.identifier:
         raise ConflictError("cannot change identifier field.")
 
     # NOTE **important**
     # Patch the original document metadata with the partial update.
-    _meta = dataset['_meta'].to_dict()
-    _meta.update(_clean(new_doc.pop('_meta', {})))
+    _meta = dataset["_meta"].to_dict()
+    _meta.update(_clean(new_doc.pop("_meta", {})))
     _meta.update(_clean(metadata))
     _meta = _clean(_meta)
 
-    new_doc = validate(new_doc, _meta['schema'])
+    new_doc = validate(new_doc, _meta["schema"])
 
-    dataset = _index(new_doc, _meta, _addon={
-        # Carry over our internal metadata like
-        # N3C ticket info and creation timestamp.
-        "date_created": dataset._ts.date_created,
-        "n3c_url": dataset._n3c.url,
-        "n3c_status": dataset._n3c.status,
-        "n3c_timestamp": dataset._n3c.timestamp
-    })
+    dataset = _index(
+        new_doc,
+        _meta,
+        _addon={
+            # Carry over our internal metadata like
+            # N3C ticket info and creation timestamp.
+            "date_created": dataset._ts.date_created,
+            "n3c_url": dataset._n3c.url,
+            "n3c_status": dataset._n3c.status,
+            "n3c_timestamp": dataset._n3c.timestamp,
+        },
+    )
 
     return dataset.meta.version
 

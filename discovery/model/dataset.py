@@ -7,22 +7,18 @@
 """
 import hashlib
 
-from elasticsearch_dsl import Date, Keyword, Object, InnerDoc, Text, Boolean, normalizer
+from elasticsearch_dsl import Boolean, Date, InnerDoc, Keyword, Object, Text, normalizer
 
 from .common import DiscoveryMeta, DiscoveryUserDoc
-
 
 # def below didn't work as expected, should be default feature
 # used hardcoded mappings with request
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/normalizer.html
-lowercase = normalizer(
-    'lowercase',
-    filter=['lowercase']
-)
+lowercase = normalizer("lowercase", filter=["lowercase"])
 
 
 class DatasetMeta(DiscoveryMeta):
-    """ Modifiable Metadata Fields """
+    """Modifiable Metadata Fields"""
 
     # username also required through inheritance
     class_id = Keyword(required=True)  # like ctsa::bts:CTSADataset
@@ -34,15 +30,15 @@ class TimestampMeta(InnerDoc):
 
     # recorded by registry module
     # not modifiable elsewhere
-    date_created = Date(default_timezone='UTC')
-    last_updated = Date(default_timezone='UTC')
+    date_created = Date(default_timezone="UTC")
+    last_updated = Date(default_timezone="UTC")
 
 
 class N3CMeta(InnerDoc):
 
     url = Keyword()  # "https://n3c-help.atlassian.net/rest/api/3/issue/10668"
     status = Keyword()  # "Backlog", "In Progress", "Done", "Done/Rejected" # TODO CONFIRM THIS
-    timestamp = Date(default_timezone='UTC')  # corresponds to "status"
+    timestamp = Date(default_timezone="UTC")  # corresponds to "status"
 
 
 class Dataset(DiscoveryUserDoc):
@@ -59,22 +55,24 @@ class Dataset(DiscoveryUserDoc):
         ...
     }
     """
+
     _meta = Object(DatasetMeta, required=True)
     _n3c = Object(N3CMeta)
     _ts = Object(TimestampMeta)
     identifier = Keyword(required=True)
     description = Text(required=True)
-    name = Text(required=True, fields={'raw': Keyword(normalizer=lowercase)})
+    name = Text(required=True, fields={"raw": Keyword(normalizer=lowercase)})
     keywords = Keyword(normalizer=lowercase)
 
     class Index:
         """
         Associated ES index
         """
-        name = 'discover_dataset'
+
+        name = "discover_dataset"
         settings = {
             "number_of_shards": 1,
-            "number_of_replicas": 0
+            "number_of_replicas": 0,
         }
 
     def save(self, *args, **kwargs):
@@ -86,6 +84,5 @@ class Dataset(DiscoveryUserDoc):
 
     def encode_id(self):
         if self.identifier:
-            self.meta.id = hashlib.blake2b(
-                self.identifier.encode(), digest_size=8).hexdigest()
+            self.meta.id = hashlib.blake2b(self.identifier.encode(), digest_size=8).hexdigest()
         return self.meta.id
