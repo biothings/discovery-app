@@ -13,7 +13,6 @@ try:
     from .handlers import (
         MetadataHandler,
         SAMLACSHandler,
-        SAMLBaseHandler,
         SAMLLoginHandler,
         SAMLLogOutHandler,
         SAMLSLSHandler,

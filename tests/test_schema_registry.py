@@ -34,7 +34,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
             if hit["namespace"] == "bts":
                 break
         else:  # bts schema not found
-            assert False
+            raise AssertionError("failed to find matching schema")
 
     def test_11_get(self):
         """GET /registry/<prefix>
