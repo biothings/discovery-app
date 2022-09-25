@@ -57,7 +57,7 @@ def log_response(http_response):
 class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
 
     cache = 0
-    notifier = None
+    notifier = None  # will be set in its subclasses
 
     def get_current_user(self):  # discovery-app user ID
         return (self.get_current_userinfo() or {}).get("login")
@@ -91,9 +91,10 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                     self.current_user = user.get("email") or user["login"]
 
     def report(self, action, **details):
-        notifier = self.notifier(self.biothings.config)
-        requests = getattr(notifier, action)(**details)
-        IOLoop.current().add_callback(partial(self._report, requests))
+        if self.notifier:
+            notifier = self.notifier(self.biothings.config)
+            requests = getattr(notifier, action)(**details)
+            IOLoop.current().add_callback(partial(self._report, requests))
 
     async def _report(self, requests):
 

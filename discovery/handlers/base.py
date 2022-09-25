@@ -27,7 +27,7 @@ class DiscoveryBaseHandler(BaseHandler):
             saml_cookie = self.get_secure_cookie("session")
             return SAMLCookie(json.loads(saml_cookie)).standardize()
         except Exception:
-            ...
+            pass
 
         return None
 

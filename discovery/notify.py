@@ -180,7 +180,7 @@ class DatasetMessage(Message):
         return doc
 
     # override
-    def to_ADF(self):
+    def to_ADF(self):   # noqa N802
         """
         Attach dataset metadata details at the end of the message.
         Use pyadf to build complex document structures. See documentation:
@@ -293,7 +293,7 @@ class DatasetNotifier(Notifier):
                             logging.error(str(exc))
                     yield  # this will return None for requests.send(response)
             else:  # all other channels
-                result = yield from channel.send(
+                yield from channel.send(
                     DatasetMessage(
                         {
                             "title": "New Dataset Registered",
@@ -390,11 +390,9 @@ def update_n3c_status(_id):
 
 
 def update_n3c_routine():
-    from discovery.model.dataset import Dataset
-
     logger = logging.getLogger("update_n3c")
     logger.info("Updating status for all N3C datasets...")
-    datasets = Dataset.search().query("exists", field="_n3c.url")
+    datasets = ESDataset.search().query("exists", field="_n3c.url")
     datasets = datasets.source(False).scan()
 
     _cnt = 0
@@ -471,6 +469,7 @@ def test_flatlist():
 
 
 if __name__ == "__main__":
-    test_schema()
-    test_dataset()
-    test_flatlist()
+    pass
+    # test_schema()
+    # test_dataset()
+    # test_flatlist()
