@@ -21,7 +21,7 @@ TEMPLATE_ENV_N3C = Environment(loader=TEMPLATE_LOADER, cache_size=0)
 TEMPLATE_ENV = TEMPLATE_ENV_DSC  # COMPATIBILITY
 
 
-def createStyles():
+def create_styles():
     # Compile site specific minified css
     sass.compile(
         dirname=("static/scss", "static/css"),
@@ -87,7 +87,7 @@ setEnvVars(TEMPLATE_ENV_DSC, siteconfig)
 setEnvVars(TEMPLATE_ENV_NIA, siteconfigniaid)
 setEnvVars(TEMPLATE_ENV_OUT, siteconfigoutbreak)
 setEnvVars(TEMPLATE_ENV_N3C, siteconfign3c)
-createStyles()
+create_styles()
 
 
 class TemplateHandler(RequestHandler):
