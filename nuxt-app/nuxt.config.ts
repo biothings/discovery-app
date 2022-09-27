@@ -17,5 +17,15 @@ export default defineNuxtConfig({
       public: {
         apiUrl: 'https://discovery.biothings.io'
       }
-    }
+    },
+    // https://github.com/nuxt/framework/discussions/3823
+    build: {
+      transpile: [
+          '@fortawesome/vue-fontawesome',
+          '@fortawesome/fontawesome-svg-core',
+          '@fortawesome/free-regular-svg-icons',
+          '@fortawesome/free-solid-svg-icons',
+          '@fortawesome/free-brands-svg-icons'
+      ]
+  }
   })
