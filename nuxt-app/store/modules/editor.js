@@ -140,7 +140,7 @@ export const editor = {
         "Adios!",
         "Bye!",
         "See Ya!",
-        "Deleted!",
+        "Hasta la vista!",
         "Gone",
         "Poof!",
         "So Long!",
@@ -153,13 +153,23 @@ export const editor = {
             "custom_validation",
             JSON.stringify(state.validation_options)
           );
-          Swal.fire({
-            type: "success",
-            toast: true,
-            title: msg[random],
-            showConfirmButton: false,
-            timer: 1000,
-          });
+          new Notify({
+            status: 'success',
+            title: 'Deleted!',
+            text: msg[random],
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
         }
       }
     },
@@ -181,13 +191,23 @@ export const editor = {
             "custom_definitions",
             JSON.stringify(state.definition_options)
           );
-          Swal.fire({
-            type: "success",
-            toast: true,
-            title: msg[random],
-            showConfirmButton: false,
-            timer: 1000,
-          });
+          new Notify({
+            status: 'success',
+            title: 'Deleted!',
+            text: msg[random],
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
         }
       }
     },
@@ -242,13 +262,23 @@ export const editor = {
         obj = {};
       }
       state.finalschema["@graph"][0]["$validation"]["properties"][name] = obj;
-      Swal.fire({
-        type: "success",
-        toast: true,
-        title: "Validation Cleared",
-        showConfirmButton: false,
-        timer: 1000,
-      });
+      new Notify({
+        status: 'success',
+        title: 'Editor',
+        text: "Validation cleared",
+        effect: 'fade',
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: 'right top'
+      })
     },
     addValidationOption(state, payload) {
       let item = payload["validation"];
@@ -257,14 +287,23 @@ export const editor = {
         "custom_validation",
         JSON.stringify(state.validation_options)
       );
-
-      Swal.fire({
-        type: "success",
-        toast: true,
-        title: "Option Added",
-        showConfirmButton: false,
-        timer: 1000,
-      });
+      new Notify({
+        status: 'success',
+        title: 'Editor',
+        text: "Option added",
+        effect: 'fade',
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: 'right top'
+      })
     },
     addDefinitionOption(state, payload) {
       function makeID(length) {
@@ -332,13 +371,23 @@ export const editor = {
         JSON.stringify(state.validation_options)
       );
 
-      Swal.fire({
-        type: "success",
-        toast: true,
-        title: "Definition Added",
-        showConfirmButton: false,
-        timer: 1000,
-      });
+      new Notify({
+        status: 'success',
+        title: 'Editor',
+        text: item.title + " definition added",
+        effect: 'fade',
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: 'right top'
+      })
     },
     editValidationItem(state, payload) {
       let itemID = payload["item"]["_id"];
@@ -348,13 +397,23 @@ export const editor = {
         if (item["_id"] == itemID) {
           state.validation_options[i] = newItem;
           state.editThis = "";
-          Swal.fire({
-            type: "success",
-            toast: true,
-            title: "Edits Saved",
-            showConfirmButton: false,
-            timer: 1000,
-          });
+          new Notify({
+            status: 'success',
+            title: 'Editor',
+            text: "Edits saved",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
         }
       }
       localStorage.setItem(
@@ -370,13 +429,23 @@ export const editor = {
         if (item["_id"] == itemID) {
           state.definition_options[i] = newItem;
           state.editThisDefinition = "";
-          Swal.fire({
-            type: "success",
-            toast: true,
-            title: "Edits Saved",
-            showConfirmButton: false,
-            timer: 1000,
-          });
+          new Notify({
+            status: 'success',
+            title: 'Editor',
+            text: "Edits saved",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
         }
       }
       localStorage.setItem(

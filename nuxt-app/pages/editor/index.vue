@@ -194,7 +194,7 @@
               <div class="border rounded p-2 bg-light mb-2">
                 <template v-for="item in validation_options" :key="item.title">
                   <div
-                    class="badge drag-el m-1"
+                    class="badge drag-el m-1 tip"
                     :data-tippy-content="
                       JSON.stringify(item.validation, null, 2)
                     "
@@ -202,10 +202,10 @@
                     draggable
                     @dragstart="startDrag($event, item)"
                   >
-                    <span v-text="item.title"></span>
+                    <span v-text="item.title" class="mr-1"></span>
                     <span
                       data-tippy-content="EDIT"
-                      class="badge badge-light pointer"
+                      class="badge badge-light pointer mr-1 tip"
                       @click="editValidationOption(item)"
                       ><font-awesome-icon
                         icon="fas fa-pen-square"
@@ -241,16 +241,16 @@
               <div class="border rounded p-2 alert-info mb-2">
                 <template v-for="item in definition_options" :key="item.title">
                   <div
-                    class="badge m-1 text-light"
+                    class="badge m-1 text-light tip"
                     :data-tippy-content="
                       JSON.stringify(item.validation, null, 2)
                     "
                     :style="{ 'background-color': item.color }"
                   >
-                    <span v-text="item.title"></span>
+                    <span v-text="item.title" class="mr-1"></span>
                     <span
                       data-tippy-content="EDIT"
-                      class="badge badge-light pointer"
+                      class="badge badge-light pointer mr-1"
                       @click="editDefinitionOption(item)"
                       ><font-awesome-icon
                         icon="fas fa-pen-square"
@@ -683,7 +683,8 @@ export default {
           });
           self.availableNamespace = false;
         } else {
-          let url = self.$apiUrl + "/api/registry/" + value;
+          const runtimeConfig = useRuntimeConfig()
+          let url = runtimeConfig.public.apiUrl + "/api/registry/" + value;
           self.$store.commit("setLoading", { value: true });
           axios
             .head(url)
@@ -723,7 +724,6 @@ export default {
       this.$store.commit("formPreview");
     },
     getRandomColor() {
-      let self = this;
       var letters = "0123456789ABCDEF";
       var color = "#";
       for (var i = 0; i < 6; i++) {
@@ -1366,9 +1366,10 @@ export default {
                 "content-type": "application/json",
               },
             };
+            const runtimeConfig = useRuntimeConfig()
 
             return axios
-              .post(self.$apiUrl + "/api/gh", data, config)
+              .post(runtimeConfig.public.apiUrl + "/api/gh", data, config)
               .then((res) => {
                 if (res.data.success) {
                   return "https://github.com/" + res.data.msg;
@@ -1396,7 +1397,7 @@ export default {
           if (!result.dismiss) {
             self.$swal.fire({
               icon: "success",
-              title: "Sucess!",
+              title: "Success!",
               html:
                 `<h2>Repository created!</h2>
                 <p>
@@ -1427,6 +1428,7 @@ export default {
       }
     },
     deleteValidationOption(item) {
+      let self = this;
       self.$swal
         .fire({
           title: "Are you sure?",
@@ -1440,7 +1442,7 @@ export default {
         })
         .then((res) => {
           if (res.value) {
-            this.$store.commit("deleteValidationOption", { id: item._id });
+            self.$store.commit("deleteValidationOption", { id: item._id });
           }
         });
     },
@@ -1459,7 +1461,7 @@ export default {
         })
         .then((res) => {
           if (res.value) {
-            this.$store.commit("deleteDefinitionOption", { id: item._id });
+            self.$store.commit("deleteDefinitionOption", { id: item._id });
           }
         });
     },
@@ -1469,5 +1471,8 @@ export default {
     this.checkCustomValidation();
     this.checkCustomDefinitions();
   },
+  updated: function(){
+    this.$store.dispatch('setUpTips');
+  }
 };
 </script>
