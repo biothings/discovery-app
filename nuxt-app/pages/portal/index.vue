@@ -52,6 +52,41 @@ import DynamicImage from "~~/components/DynamicImage.vue";
 
 export default {
   name: "Portals",
+  head(){
+    return {
+      'title': "DDE | Data Portals",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/portal'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/portal'
+        },
+        {
+          'property': 'og:description',
+          'content': 'Explore data portals and learn how you can contribute and access their data.'
+        },
+        {
+          'name': 'description',
+          'content': 'Explore data portals and learn how you can contribute and access their data.'
+        },
+        {
+          'name': 'twitter:card',
+          'content': 'Explore data portals and learn how you can contribute and access their data.'
+        },
+      ]
+    }
+  },
   components: {
     DynamicImage,
   },

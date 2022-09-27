@@ -20,5 +20,40 @@
 <script>
 export default {
   name: "NotFound",
+  head(){
+    return {
+      'title': "DDE | Not Found",
+      'meta':[
+      {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io'
+        },
+        {
+          'property': 'og:description',
+          'content': 'A project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.'
+        },
+        {
+          'name': 'description',
+          'content': 'A project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.'
+        },
+        {
+          'name': 'twitter:card',
+          'content': 'A project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.'
+        },
+      ]
+    }
+  },
 };
 </script>

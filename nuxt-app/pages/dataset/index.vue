@@ -327,6 +327,41 @@ import DynamicImage from "~~/components/DynamicImage.vue";
 
 export default {
   name: "ResourceRegistry",
+  head(){
+    return {
+      'title': "DDE | Resource Registry",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/sDvbMVVR/dataset.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/sDvbMVVR/dataset.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/dataset'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/dataset'
+        },
+        {
+          'property': 'og:description',
+          'content': "Browse biomedical schema.org structured resource metadata"
+        },
+        {
+          'name': 'description',
+          'content': "Browse biomedical schema.org structured resource metadata"
+        },
+        {
+          'name': 'twitter:card',
+          'content': "Browse biomedical schema.org structured resource metadata"
+        },
+      ]
+    }
+  },
   data: function () {
     return {
       perPage: 10,

@@ -519,6 +519,41 @@ import JSONItem from "~~/components/guide/JSONItem.vue";
 
 export default {
   name: "Guide",
+  head(){
+    return {
+      'title': "DDE | Resource Discovery Guide",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/m2HH6cYD/guide.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/m2HH6cYD/guide.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/guide'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/guide'
+        },
+        {
+          'property': 'og:description',
+          'content': "Follow best practices to make your metadata more findable"
+        },
+        {
+          'name': 'description',
+          'content': "Follow best practices to make your metadata more findable"
+        },
+        {
+          'name': 'twitter:card',
+          'content': "Follow best practices to make your metadata more findable"
+        },
+      ]
+    }
+  },
   props: ["guide_query", "presets"],
   components: {
     Property,

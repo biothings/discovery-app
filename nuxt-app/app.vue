@@ -14,7 +14,103 @@ onMounted(()=>{
 })
 
 useHead({
+        'meta':[
+          {
+            'property': 'og:site_name',
+            'content': 'Data Discovery Engine'
+          },
+          {
+            'property': 'og:title',
+            'content': 'Data Discovery Engine'
+          },
+          {
+            'name': 'twitter:title',
+            'content': 'Data Discovery Engine'
+          },
+          {
+            'name': 'HandheldFriendly',
+            'content': 'True'
+          },
+          {
+            'name': 'author',
+            'content': 'WuLab @ Scripps Research'
+          },
+          {
+            'name': 'robots',
+            'content': 'follow'
+          },
+          {
+            'name': 'copyright',
+            'content': 'https://creativecommons.org/licenses/by/4.0/'
+          },
+          {
+            'name': 'keywords',
+            'content': 'metadata, schema, discovery'
+          },
+          {
+            'name': 'msapplication-config',
+            'content': '@/assets/img/dde/browserconfig.xml'
+          },
+          {
+            'name': 'theme-color',
+            'content': '#63296b'
+          },
+          {
+            'name': 'msapplication-TileColor',
+            'content': '#63296b'
+          },
+          {
+            'property': 'og:image:type',
+            'content': 'image/jpg'
+          },
+          {
+            'property': 'og:image:width',
+            'content': '1200'
+          },
+          {
+            'property': 'og:image:height',
+            'content': '630'
+          },
+          {
+            'property': 'og:locale',
+            'content': 'en_US'
+          },
+          {
+            'property': 'og:type',
+            'content': 'website'
+          },
+        ],
         'link': [
+          {
+            rel: "apple-touch-icon", 
+            sizes: "180x180",
+            href: "@/assets/img/dde/apple-touch-icon.png"
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "32x32",
+            href: "@/assets/img/dde/favicon-32x32.png"
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "16x16",
+            href: "@/assets/img/dde/favicon-16x16.png"
+          },
+          {
+            rel: "mask-icon",
+            color: "#8824a3",
+            href: "@/assets/img/dde/safari-pinned-tab.svg"
+          },
+          {
+            rel: "shortcut icon",
+            href: "@/assets/img/dde/favicon.ico"
+          },
+          {
+            rel: "manifest",
+            href: "@/assets/img/dde/site.webmanifest"
+          },
           {
             rel:"stylesheet",
             href:"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css",
