@@ -213,8 +213,8 @@ export default {
           var payload = {};
           payload["item"] = self.getItem(item);
           payload["from"] = self.main_name;
-          store.commit("addToArrayFrom", payload);
-          store.dispatch("saveProgress");
+          self.$store.commit("addToArrayFrom", payload);
+          self.$store.dispatch("saveProgress");
         });
         self.selected = [];
         self.results = [];

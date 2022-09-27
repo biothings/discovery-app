@@ -8,9 +8,7 @@ const store = useStore();
 let isLoading = computed(()=> store.getters.loading)
 
 onMounted(()=>{
-  setTimeout(() => {
-    store.dispatch('setUpTips');
-  }, 2000);
+  store.dispatch('setUpTips');
 })
 
 useHead({
