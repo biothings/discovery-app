@@ -2,7 +2,7 @@
 import Nav from './components/Nav.vue';
 import Footer from './components/Footer.vue';
 import { useStore } from 'vuex';
-import { onMounted, computed } from 'vue';
+import { onMounted, computed} from 'vue';
 
 const store = useStore();
 let isLoading = computed(()=> store.getters.loading)
@@ -145,7 +145,7 @@ useHead({
       })
 </script>
 <template>
-  <div class="bg-light" id="#tippyRoot">
+  <div class="bg-light" id="tippyRoot">
     <Nav></Nav>
     <div v-if="isLoading" class="loader">
       <img src="@/assets/img/ripple.svg" />
