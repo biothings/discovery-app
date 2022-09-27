@@ -137,7 +137,7 @@
                 <small>Compare (Max 4)</small>
                 <small
                   >Details |
-                  <img src="@/assets/img/cube.svg" width="15px" /> (validation
+                  <img src="@/assets/img/cube.svg" width="15" /> (validation
                   available)</small
                 >
                 <small>View/Extend</small>

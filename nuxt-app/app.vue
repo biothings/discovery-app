@@ -12,7 +12,6 @@
 <script>
   import Nav from './components/Nav.vue';
   import Footer from './components/Footer.vue';
-  import { delegate } from 'tippy.js';
   import { mapGetters } from "vuex";
 
   export default{
@@ -24,32 +23,7 @@
       ...mapGetters(["loading"]),
     },
     mounted: function () {
-    delegate("main", {
-      target: "[data-tippy-content]",
-      content: 'loading',
-      animation: "scale",
-      theme: "ddeDark",
-      allowHTML: true,
-      onShown(instance) {
-        let html =
-          '<table class="table table-sm table-striped table-secondary m-0">';
-        try {
-          if (instance.reference.dataset.tippyContent.includes("{")) {
-            let json = JSON.parse(instance.reference.dataset.tippyContent);
-            for (const k in json) {
-              html += `<tr>
-              <td>${k}</td>
-              <td>${json[k]}</td>
-              </tr>`;
-            }
-            html += "</table>";
-            instance.setContent(html);
-          }
-        } catch (error) {
-          instance.setContent(instance.reference.dataset.tippyContent);
-        }
-      },
-    });
+      this.$store.dispatch('setUpTips');
   },
     head(){
       return {
@@ -83,11 +57,6 @@
             type:"text/css",
             rel:"stylesheet",
             href:"https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css"
-          }
-        ],
-        'script':[
-          {
-            src: '@/assets/js/codemirror.js'
           }
         ]
       }

@@ -78,13 +78,23 @@ export const guide = {
         ) {
           state.bulkJSONItems[i][field] = change;
 
-          Swal.fire({
-            type: "success",
-            toast: true,
-            title: "Updated",
-            showConfirmButton: false,
-            timer: 1000,
-          });
+          new Notify({
+            status: 'success',
+            title: 'Guide',
+            text: "Updated",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
         }
       }
     },

@@ -71,6 +71,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.swal-xl{
+  width:80vw !important;
+}
+
 .route-active {
   font-weight: bold;
 }
