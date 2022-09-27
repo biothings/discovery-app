@@ -2,12 +2,11 @@
   <div>
     <template v-if="type == 'obj'">
       <span
-        :data-tippy-info="JSON.stringify(userInput, null, 2)"
-        :data-tippy-id="0"
+        :data-tippy-content="JSON.stringify(userInput, null, 2)"
         class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc"
         title="remove"
       >
-        <font-awesome-icon icon="fas fa-check"></font-awesome-icon>
+        <font-awesome-icon icon="fas fa-check" class="mr-1"></font-awesome-icon>
         <template v-if="userInput && userInput.name">
           <span v-text="userInput.name"></span>
         </template>
@@ -23,14 +22,13 @@
           class="d-inline"
           @click="removeItem($event, userInput)"
         >
-          <font-awesome-icon icon="fas fa-times"></font-awesome-icon
+          <font-awesome-icon icon="fas fa-times" class="ml-1"></font-awesome-icon
         ></span>
       </span>
     </template>
     <template v-else-if="type == 'arr'" v-for="(person, i) in userInput">
       <span
-        :data-tippy-info="JSON.stringify(person, null, 2)"
-        :data-tippy-id="i"
+        :data-tippy-content="JSON.stringify(person, null, 2)"
         class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc"
         title="remove"
       >

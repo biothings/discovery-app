@@ -523,6 +523,7 @@
                           style="overflow: hidden; max-width: 100%"
                           class="badge badge-success text-light"
                           v-text="userInput"
+                          :data-tippy-content="userInput"
                         ></span>
                       </template>
                     </div>
