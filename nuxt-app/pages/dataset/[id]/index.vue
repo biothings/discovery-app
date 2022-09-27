@@ -102,6 +102,16 @@
     });
   }
 
+  function getFeatured(meta){
+    if (meta.value?._meta?.guide.includes('n3c')) {
+      return "https://i.postimg.cc/bY9q3pMn/n3c.jpg"
+    }
+    if (meta.value?._meta?.guide.includes('outbreak')) {
+      return "https://i.postimg.cc/PJr96spb/outbreak.jpg"
+    }
+    return 'https://i.postimg.cc/sDvbMVVR/dataset.jpg'
+  }
+
   function getMetadata(id) {
     id = id.replace("/", "");
     generateScriptText(id);
@@ -114,23 +124,43 @@
       .then((data) => {
         metadata.value = data;
         useHead({
-          title: metadata.value.name,
+          title: "DDE | " + metadata.value.name,
           meta:[
+            {
+              'property': 'og:description',
+              'content': metadata.value.description
+            },
             {
               'name': 'description',
               'content': metadata.value.description
-            }
+            },
+            {
+              'name': 'twitter:card',
+              'content': metadata.value.description
+            },
+            {
+              'name': 'og:url',
+              'content': "https://discovery.biothings.io/dataset/" + id
+            },
+            {
+              'name': 'og:image',
+              'content': getFeatured(metadata)
+            },
+            {
+              'name': 'twitter:image',
+              'content': getFeatured(metadata)
+            },
           ],
           link:[
             {
               'rel': 'canonical',
-              'href': metadata.value.url
+              'href': metadata.value.url || 'https://discovery.biothings.io/dataset' + id
             }
           ],
           script:[
             {
               'type': 'application/ld+json',
-              children: JSON.stringify(metadata.value, null, 2)
+              'children': JSON.stringify(metadata.value, null, 2)
             }
           ]
         })

@@ -601,6 +601,41 @@ import EditorClassBox from "~~/components/EditorClassBox.vue";
 
 export default {
   name: "SchemaEditor",
+  head(){
+    return {
+      'title': "DDE | Schema Editor",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/rssJ788J/editor.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/rssJ788J/editor.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/editor'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/editor'
+        },
+        {
+          'property': 'og:description',
+          'content': "Extend an existing schema to create your own."
+        },
+        {
+          'name': 'description',
+          'content': "Extend an existing schema to create your own."
+        },
+        {
+          'name': 'twitter:card',
+          'content': "Extend an existing schema to create your own."
+        },
+      ]
+    }
+  },
   components: {
     NGXGraph,
     DefinitionEditor,

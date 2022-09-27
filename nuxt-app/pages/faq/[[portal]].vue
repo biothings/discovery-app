@@ -97,6 +97,41 @@ import DynamicImage from "~~/components/DynamicImage.vue";
 
 export default {
   name: "FAQ",
+  head(){
+    return {
+      'title': "DDE | FAQ",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/Kj9MSL9k/faq.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/Kj9MSL9k/faq.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/faq'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/faq'
+        },
+        {
+          'property': 'og:description',
+          'content': "Get help with some of our most frequently asked questions"
+        },
+        {
+          'name': 'description',
+          'content': "Get help with some of our most frequently asked questions"
+        },
+        {
+          'name': 'twitter:card',
+          'content': "Get help with some of our most frequently asked questions"
+        },
+      ]
+    }
+  },
   data: function () {
     return {
       faq: [],

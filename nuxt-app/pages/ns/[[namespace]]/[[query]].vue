@@ -487,6 +487,41 @@ import "@/assets/js/networkx.js";
 
 export default {
   name: "SchemaViewer",
+  head(){
+    return {
+      'title': "DDE | Namespace Viewer",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/xdfr4zzV/schemav.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/xdfr4zzV/schemav.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/ns'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/ns'
+        },
+        {
+          'property': 'og:description',
+          'content': "Visualize and share your schema definition with the biomedical research community"
+        },
+        {
+          'name': 'description',
+          'content': "Visualize and share your schema definition with the biomedical research community"
+        },
+        {
+          'name': 'twitter:card',
+          'content': "Visualize and share your schema definition with the biomedical research community"
+        },
+      ]
+    }
+  },
   //namespace argument and query argument
   components: {
     QueryBox,

@@ -506,6 +506,41 @@ import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "Dashboard",
+  head(){
+    return {
+      'title': "DDE | My Dashboard",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/dashboard'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/dashboard'
+        },
+        {
+          'property': 'og:description',
+          'content': "My metadata and schema namespace contributions"
+        },
+        {
+          'name': 'description',
+          'content': "My metadata and schema namespace contributions"
+        },
+        {
+          'name': 'twitter:card',
+          'content': "My metadata and schema namespace contributions"
+        },
+      ]
+    }
+  },
   data: function () {
     return {
       apiUrl:'',

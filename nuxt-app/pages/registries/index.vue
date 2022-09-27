@@ -35,5 +35,40 @@
 <script>
 export default {
   name: "Registries",
+  head(){
+    return {
+      'title': "DDE | Registries",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/registries'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/registries'
+        },
+        {
+          'property': 'og:description',
+          'content': 'Browse structured resource metadata or available namespaces and schemas on the DDE'
+        },
+        {
+          'name': 'description',
+          'content': 'Browse structured resource metadata or available namespaces and schemas on the DDE'
+        },
+        {
+          'name': 'twitter:card',
+          'content': 'Browse structured resource metadata or available namespaces and schemas on the DDE'
+        },
+      ]
+    }
+  },
 };
 </script>

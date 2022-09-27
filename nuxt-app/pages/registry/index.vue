@@ -402,6 +402,41 @@ import SchemaRegistryItem from "~~/components/SchemaRegistryItem.vue";
 
 export default {
   name: "SchemaRegistry",
+  head(){
+    return {
+      'title': "DDE | Schema Registry",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/B62zg5S0/registry.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/B62zg5S0/registry.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/registry'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/registry'
+        },
+        {
+          'property': 'og:description',
+          'content': 'Browse registered namespaces and classes on the DDE. Easily visualize or extend any class to create your own schema.'
+        },
+        {
+          'name': 'description',
+          'content': 'Browse registered namespaces and classes on the DDE. Easily visualize or extend any class to create your own schema.'
+        },
+        {
+          'name': 'twitter:card',
+          'content': 'Browse registered namespaces and classes on the DDE. Easily visualize or extend any class to create your own schema.'
+        },
+      ]
+    }
+  },
   components: {
     SchemaRegistryItem,
   },

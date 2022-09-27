@@ -137,5 +137,40 @@ export default {
       self.getAll(self.query);
     }
   },
+  head(){
+    return {
+      'title': "DDE | User contributions",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/contributor'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/contributor'
+        },
+        {
+          'property': 'og:description',
+          'content': "User metadata and schema namespace contributions"
+        },
+        {
+          'name': 'description',
+          'content': "User metadata and schema namespace contributions"
+        },
+        {
+          'name': 'twitter:card',
+          'content': "User metadata and schema namespace contributions"
+        },
+      ]
+    }
+  },
 };
 </script>

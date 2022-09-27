@@ -44,6 +44,41 @@
 <script>
 export default {
   name: "LoginPage",
+  head(){
+    return {
+      'title': "DDE | Login Page",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/login'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/login'
+        },
+        {
+          'property': 'og:description',
+          'content': "Log in to start using the Data Discovery Engine"
+        },
+        {
+          'name': 'description',
+          'content': "Log in to start using the Data Discovery Engine"
+        },
+        {
+          'name': 'twitter:card',
+          'content': "Log in to start using the Data Discovery Engine"
+        },
+      ]
+    }
+  },
   mounted: function () {
     document
       .getElementById("samlLink")

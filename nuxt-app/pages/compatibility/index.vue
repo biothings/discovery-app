@@ -129,6 +129,41 @@ import Flowchart from "~~/components/Flowchart.vue";
 
 export default {
   name: "Compatibility",
+  head(){
+    return {
+      'title': "DDE | Data Portal Compatibility",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/YCQ2ZNL0/compatibility.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/YCQ2ZNL0/compatibility.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/compatibility'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/compatibility'
+        },
+        {
+          'property': 'og:description',
+          'content': 'Check data portal compatibility with schema.org structured metadata'
+        },
+        {
+          'name': 'description',
+          'content': 'Check data portal compatibility with schema.org structured metadata'
+        },
+        {
+          'name': 'twitter:card',
+          'content': 'Check data portal compatibility with schema.org structured metadata'
+        },
+      ]
+    }
+  },
   components: {
     Flowchart,
     CompatibilityResult,
