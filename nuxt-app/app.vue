@@ -1,32 +1,19 @@
-<template>
-  <div class="bg-light" id="#tippyRoot">
-    <Nav></Nav>
-    <div v-if="loading" class="loader">
-      <img src="@/assets/img/ripple.svg" />
-    </div>
-    <NuxtLoadingIndicator color="#63286b"/>
-    <NuxtPage></NuxtPage>
-    <Footer></Footer>
-  </div>
-</template>
-<script>
-  import Nav from './components/Nav.vue';
-  import Footer from './components/Footer.vue';
-  import { mapGetters } from "vuex";
+<script setup>
+import Nav from './components/Nav.vue';
+import Footer from './components/Footer.vue';
+import { useStore } from 'vuex';
+import { onMounted, computed } from 'vue';
 
-  export default{
-    components:{
-      Nav,
-      Footer
-    },
-    computed: {
-      ...mapGetters(["loading"]),
-    },
-    mounted: function () {
-      this.$store.dispatch('setUpTips');
-  },
-    head(){
-      return {
+const store = useStore();
+let isLoading = computed(()=> store.getters.loading)
+
+onMounted(()=>{
+  setTimeout(() => {
+    store.dispatch('setUpTips');
+  }, 2000);
+})
+
+useHead({
         'link': [
           {
             rel:"stylesheet",
@@ -59,7 +46,16 @@
             href:"https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css"
           }
         ]
-      }
-    },
-  }
+      })
 </script>
+<template>
+  <div class="bg-light" id="#tippyRoot">
+    <Nav></Nav>
+    <div v-if="isLoading" class="loader">
+      <img src="@/assets/img/ripple.svg" />
+    </div>
+    <NuxtLoadingIndicator color="#63286b"/>
+    <NuxtPage></NuxtPage>
+    <Footer></Footer>
+  </div>
+</template>
