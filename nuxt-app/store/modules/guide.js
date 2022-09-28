@@ -1,7 +1,8 @@
-import { isArray, isPlainObject, isEqual } from "lodash";
+import { isArray, isPlainObject, isEqual, isString } from "lodash";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import Notify from 'simple-notify'
+import { isObject } from "@vue/shared";
 
 export const guide = {
   state: {
@@ -292,15 +293,17 @@ export const guide = {
       let field = payload["from"]; //name of prop
       let item = payload["item"]; //full info
       let props = state.schema.validation.properties;
-      switch (props[field].value.constructor) {
-        case Object:
-          if (isEqual(props[field].value, item)) {
-            delete props[field]["value"];
-          } else {
+
+      if (isString(props[field]?.value)) {
+        console.log('remove from string')
+        for (var i = 0; i < props[field].value.length; i++) {
+          let prop_val = props[field].value[i];
+          if (prop_val === item) {
+            delete props[field].value[i];
             new Notify({
-              status: 'error',
+              status: 'success',
               title: 'Guide',
-              text: "[OBJ] does not match value",
+              text: item + " removed",
               effect: 'fade',
               speed: 300,
               customClass: null,
@@ -315,91 +318,86 @@ export const guide = {
               position: 'right top'
             })
           }
-          break;
-        case Array:
-          if (props[field] && props[field].value) {
-            for (var i = 0; i < props[field].value.length; i++) {
-              let arr_item = props[field].value[i];
-              switch (arr_item.constructor) {
-                case String:
-                  if (arr_item === item) {
-                    delete props[field].value[i];
-                    new Notify({
-                      status: 'success',
-                      title: 'Guide',
-                      text: item + " removed",
-                      effect: 'fade',
-                      speed: 300,
-                      customClass: null,
-                      customIcon: null,
-                      showIcon: true,
-                      showCloseButton: true,
-                      autoclose: true,
-                      autotimeout: 2000,
-                      gap: 20,
-                      distance: 20,
-                      type: 1,
-                      position: 'right top'
-                    })
-                  }
-                  break;
-                case Object:
-                  if (isEqual(arr_item, item)) {
-                    delete props[field].value[i];
-                    new Notify({
-                      status: 'success',
-                      title: 'Guide',
-                      text: "Item removed",
-                      effect: 'fade',
-                      speed: 300,
-                      customClass: null,
-                      customIcon: null,
-                      showIcon: true,
-                      showCloseButton: true,
-                      autoclose: true,
-                      autotimeout: 2000,
-                      gap: 20,
-                      distance: 20,
-                      type: 1,
-                      position: 'right top'
-                    })
-                  }
-                  break;
-                default:
-                  console.log("not handled");
-              }
-            }
-          } else {
-            console.log("NO VALUE", props[field]);
-          }
-          break;
-        case String:
+        }
+      } else if (isArray(props[field]?.value)) {
+        console.log('remove from array')
+        if (props[field] && props[field].value) {
           for (var i = 0; i < props[field].value.length; i++) {
-            let prop_val = props[field].value[i];
-            if (prop_val === item) {
-              delete props[field].value[i];
-              new Notify({
-                status: 'success',
-                title: 'Guide',
-                text: item + " removed",
-                effect: 'fade',
-                speed: 300,
-                customClass: null,
-                customIcon: null,
-                showIcon: true,
-                showCloseButton: true,
-                autoclose: true,
-                autotimeout: 2000,
-                gap: 20,
-                distance: 20,
-                type: 1,
-                position: 'right top'
-              })
+            let arr_item = props[field].value[i];
+            if (isString(arr_item)) {
+              if (arr_item === item) {
+                props[field].value.splice(i, 1);
+                new Notify({
+                  status: 'success',
+                  title: 'Guide',
+                  text: item + " removed from value array",
+                  effect: 'fade',
+                  speed: 300,
+                  customClass: null,
+                  customIcon: null,
+                  showIcon: true,
+                  showCloseButton: true,
+                  autoclose: true,
+                  autotimeout: 2000,
+                  gap: 20,
+                  distance: 20,
+                  type: 1,
+                  position: 'right top'
+                })
+              }
+            } else if(isObject(arr_item)){
+              if (isEqual(arr_item, item)) {
+                props[field].value.splice(i, 1);
+                new Notify({
+                  status: 'success',
+                  title: 'Guide',
+                  text: "Item removed from value array",
+                  effect: 'fade',
+                  speed: 300,
+                  customClass: null,
+                  customIcon: null,
+                  showIcon: true,
+                  showCloseButton: true,
+                  autoclose: true,
+                  autotimeout: 2000,
+                  gap: 20,
+                  distance: 20,
+                  type: 1,
+                  position: 'right top'
+                })
+              }
+            }else{
+              console.log("not handled, cannot remove item from Array");
             }
           }
-          break;
-        default:
-          console.log("not handled");
+        } else {
+          console.log("NO VALUE", props[field]);
+        }
+      }else if(isPlainObject(props[field]?.value)){
+        console.log('remove from object')
+        if (isEqual(props[field].value, item)) {
+          delete props[field]["value"];
+        } else {
+          new Notify({
+            status: 'error',
+            title: 'Guide',
+            text: "[OBJ] does not match value",
+            effect: 'fade',
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 2000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: 'right top'
+          })
+        }
+      }else{
+        console.log("not handled, cannot remove item");
       }
 
       if (props[field].hasOwnProperty("value")) {

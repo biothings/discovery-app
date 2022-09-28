@@ -730,15 +730,15 @@ export default {
 
       var x = e.pageX - 130;
       var y = e.pageY - 20;
-      var el = $("#puff");
-      el.show();
+      var el = document.querySelector("#puff");
+      el.classList.add('d-inline')
       let audio = document.getElementById("pop-sound");
       audio.play();
-      el.css("position", "absolute");
-      el.css("left", x);
-      el.css("top", y);
+      el.style.position = 'absolute'
+      el.style.left = x
+      el.style.top = y
       setTimeout(() => {
-        el.hide();
+        el.classList.remove('d-inline')
       }, 500);
 
       var payload = {};
@@ -760,8 +760,8 @@ export default {
           title: propName,
           text: "Search for an existing term here:",
           input: "text",
-          confirmButtonColor: "{{color_main}}",
-          cancelButtonColor: "{{color_sec}}",
+          confirmButtonColor: "#5C3069",
+        cancelButtonColor: "#006476",
           animation: false,
           customClass: "scale-in-center",
           inputAttributes: {
@@ -815,8 +815,8 @@ export default {
               .fire({
                 title: propName + "(s):",
                 html: html,
-                confirmButtonColor: "{{color_main}}",
-                cancelButtonColor: "{{color_sec}}",
+                confirmButtonColor: "#5C3069",
+        cancelButtonColor: "#006476",
                 animation: false,
                 customClass: "scale-in-center",
                 preConfirm: () => {
@@ -954,8 +954,8 @@ export default {
                 id: "hideThis",
               },
               animation: false,
-              confirmButtonColor: "{{color_main}}",
-              cancelButtonColor: "{{color_sec}}",
+              confirmButtonColor: "#5C3069",
+              cancelButtonColor: "#006476",
               customClass: "scale-in-center",
               html: html,
               onOpen: () => {
@@ -1103,8 +1103,8 @@ export default {
                 inputOptions: options,
                 inputPlaceholder: "Select one",
                 animation: false,
-                confirmButtonColor: "{{color_main}}",
-                cancelButtonColor: "{{color_sec}}",
+                confirmButtonColor: "#5C3069",
+              cancelButtonColor: "#006476",
                 customClass: "scale-in-center",
                 showCancelButton: true,
                 inputValidator: (value) => {
@@ -1154,8 +1154,8 @@ export default {
             inputOptions: options,
             inputPlaceholder: "Select one",
             animation: false,
-            confirmButtonColor: "{{color_main}}",
-            cancelButtonColor: "{{color_sec}}",
+            confirmButtonColor: "#5C3069",
+              cancelButtonColor: "#006476",
             customClass: "scale-in-center",
             showCancelButton: true,
             inputValidator: (value) => {
@@ -1648,8 +1648,8 @@ export default {
             input: "text",
             confirmButtonText: "Next &rarr;",
             showCancelButton: true,
-            confirmButtonColor: "{{color_main}}",
-            cancelButtonColor: "{{color_sec}}",
+            confirmButtonColor: "#5C3069",
+              cancelButtonColor: "#006476",
             animation: false,
             customClass: "scale-in-center",
             progressSteps: arr,

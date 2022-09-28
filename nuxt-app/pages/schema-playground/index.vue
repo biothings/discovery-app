@@ -847,8 +847,9 @@ export default {
     sendRequest() {
       let self = this;
       self.$store.commit("setLoading", { value: true });
+      const runtimeConfig = useRuntimeConfig()
       axios
-        .get(self.$apiUrl + "/api/view?url=" + self.input)
+        .get(runtimeConfig.public.apiUrl + "/api/view?url=" + self.input)
         .then((res) => {
           self.$store.commit("setLoading", { value: false });
           if (res.data.validation.valid && !res.data.validation.errors.length) {

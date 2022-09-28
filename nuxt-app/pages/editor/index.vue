@@ -678,7 +678,6 @@ export default {
     },
     ...mapState({
       newClassAdded: (state) => {
-        console.log("STATE", state);
         if (state?.editor?.schema?.length) {
           for (var i = 0; i < state.editor.schema.length; i++) {
             if (state.editor.schema[i].special) {
@@ -1246,7 +1245,7 @@ export default {
         var payload = {};
         payload["schema"] = JSON.parse(schema);
         payload["start"] = startingPoint;
-        this.$store.commit("saveSchema", payload);
+        this.$store.commit("saveSchemaForEditor", payload);
       } else {
         self.$swal({
           title: "No Schema Selected",
