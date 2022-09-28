@@ -1,8 +1,8 @@
 import logging
 
-from tornado.httputil import url_concat
-from tornado.escape import json_encode
 from biothings.web.auth.oauth_mixins import GithubOAuth2Mixin
+from tornado.escape import json_encode
+from tornado.httputil import url_concat
 
 from .base import DiscoveryBaseHandler
 
@@ -56,20 +56,22 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
         _redirect = self.get_argument("next", "/")
         redirect_uri = url_concat(
             self.request.protocol + "://" + self.request.host + GITHUB_CALLBACK_PATH,
-            {"next": _redirect}
+            {"next": _redirect},
         )
         # if we have a code, we have been authorized so we can log in
-        code = self.get_argument('code', False)
+        code = self.get_argument("code", False)
         if code:
             token = await self.github_get_oauth2_token(
                 client_id=self.biothings.config.GITHUB_CLIENT_ID,
                 client_secret=self.biothings.config.GITHUB_CLIENT_SECRET,
-                code=code
+                code=code,
             )
-            user = await self.github_get_authenticated_user(token['access_token'])
+            user = await self.github_get_authenticated_user(token["access_token"])
             if user:
-                logging.info('logged in user from github: %s', user)
-                user['access_token'] = token['access_token']         # save access_token for future use in handlers.api.github
+                logging.info("logged in user from github: %s", user)
+                user["access_token"] = token[
+                    "access_token"
+                ]  # save access_token for future use in handlers.api.github
                 self.set_secure_cookie("user", json_encode(user))
             else:
                 self.clear_cookie("user")
@@ -89,5 +91,5 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
 
 
 HANDLERS = [
-    (GITHUB_CALLBACK_PATH + '/?', GithubLoginHandler),
+    (GITHUB_CALLBACK_PATH + "/?", GithubLoginHandler),
 ]

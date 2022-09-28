@@ -9,10 +9,10 @@
 import functools
 from datetime import datetime
 
-from elasticsearch_dsl import Date, Keyword, Object, InnerDoc, Text, Boolean
+from elasticsearch_dsl import Boolean, Date, InnerDoc, Keyword, Object, Text
 from elasticsearch_dsl.exceptions import ValidationException
 
-from .common import DiscoveryMeta, DiscoveryUserDoc, DiscoveryDoc
+from .common import DiscoveryDoc, DiscoveryMeta, DiscoveryUserDoc
 
 
 def mergeDict(d1, d2):
@@ -55,10 +55,11 @@ class Schema(DiscoveryUserDoc):
         """
         Associated ES Index
         """
-        name = 'discover_schema'
+
+        name = "discover_schema"
         settings = {
             "number_of_shards": 1,
-            "number_of_replicas": 0
+            "number_of_replicas": 0,
         }
 
     def save(self, *args, **kwargs):
@@ -95,10 +96,11 @@ class SchemaClassProp(InnerDoc):
         "uri": "http://schema.org/healthPlanNetworkTier"
     }
     """
-    uri = Text(fields={'raw': Keyword()})
-    curie = Text(required=True, fields={'raw': Keyword()})
-    label = Text(boost=1.5, fields={'raw': Keyword()})
-    range = Text(multi=True, fields={'raw': Keyword()})
+
+    uri = Text(fields={"raw": Keyword()})
+    curie = Text(required=True, fields={"raw": Keyword()})
+    label = Text(boost=1.5, fields={"raw": Keyword()})
+    range = Text(multi=True, fields={"raw": Keyword()})
     description = Text()
 
 
@@ -126,9 +128,9 @@ class SchemaClass(DiscoveryDoc):
     name = Keyword()  # curie
 
     description = Text()
-    prefix = Text(required=True, fields={'raw': Keyword()})
-    label = Text(required=True, boost=2, fields={'raw': Keyword()})
-    uri = Text(fields={'raw': Keyword()})
+    prefix = Text(required=True, fields={"raw": Keyword()})
+    label = Text(required=True, boost=2, fields={"raw": Keyword()})
+    uri = Text(fields={"raw": Keyword()})
     parent_classes = Text(multi=True, analyzer="simple")  # immediate ones only
     properties = Object(SchemaClassProp)  # immediate ones only
     validation = Object(enabled=False)
@@ -138,10 +140,11 @@ class SchemaClass(DiscoveryDoc):
         """
         Associated ES index
         """
-        name = 'discover_schema_class'
+
+        name = "discover_schema_class"
         settings = {
             "number_of_shards": 1,
-            "number_of_replicas": 0
+            "number_of_replicas": 0,
         }
 
     def save(self, **kwargs):

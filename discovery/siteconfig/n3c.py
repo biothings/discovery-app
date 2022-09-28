@@ -1,4 +1,3 @@
-
 # DO NOT comment out
 #  (REQ) REQUIRED
 
@@ -8,7 +7,7 @@
 
 # name also used on metadata
 SITE_NAME = "The National COVID Cohort Collaborative"
-SITE_DESC = 'The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.'
+SITE_DESC = "The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing."
 
 CONTACT_REPO = "https://github.com/data2health/rdp-portal"
 CONTACT_EMAIL = "cd2h-metadata@googlegroups.com"
@@ -18,7 +17,7 @@ CONTACT_EMAIL = "cd2h-metadata@googlegroups.com"
 # *****************************************************************************
 
 METADATA_CONTENT_URL = "http://discovery.biothings.io/"
-METADATA_DESC = 'The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.'
+METADATA_DESC = "The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing."
 METADATA_FEATURED_IMAGE = "https://i.postimg.cc/zvRMbPSs/featured.jpg"
 METADATA_MAIN_COLOR = "#113B56"
 
@@ -35,7 +34,7 @@ DARK_MODE = False
 # *****************************************************************************
 
 # create a folder with <name> and put all icons there
-STATIC_IMAGE_FOLDER = 'dde'
+STATIC_IMAGE_FOLDER = "dde"
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - METADATA
@@ -49,19 +48,16 @@ GUIDE_PRESETS = [
     # 'description':'A schema describing Dataset from CTSA center'
     # },
     {
-        'namespace': 'n3c',
-        'prefix': 'n3c',
-        'name': 'Dataset',
-        'guide': '/guide/n3c/dataset',
-        'description': 'This is the schema for describing the Dataset schema used for N3C.'
+        "namespace": "n3c",
+        "prefix": "n3c",
+        "name": "Dataset",
+        "guide": "/guide/n3c/dataset",
+        "description": "This is the schema for describing the Dataset schema used for N3C.",
     },
 ]
 
 GUIDE_PREFILLED = {
-    "includedInDataCatalog":{
-        "name": "N3C Datasets",
-        "url": "https://ncats.nih.gov/n3c/"
-    }
+    "includedInDataCatalog": {"name": "N3C Datasets", "url": "https://ncats.nih.gov/n3c/"}
 }
 
 GUIDE_SETTINGS = {
@@ -84,10 +80,10 @@ GUIDE_PORTALS = [
 # also used in registry shortcuts
 STARTING_POINTS = [
     {
-        'namespace': 'schema',
-        'prefix': 'schema',
-        'name': 'Dataset',
-        'description': 'A body of structured information describing some topic(s) of interest.'
+        "namespace": "schema",
+        "prefix": "schema",
+        "name": "Dataset",
+        "description": "A body of structured information describing some topic(s) of interest.",
     },
 ]
 
@@ -96,22 +92,16 @@ STARTING_POINTS = [
 # *****************************************************************************
 
 REGISTRY_SHORTCUTS = [
-    {
-        "name": "Schema.org",
-        "registered_namespace": 'schema'
-    },
-    {
-        "name": "BioLink",
-        "registered_namespace": 'bts'
-    }
+    {"name": "Schema.org", "registered_namespace": "schema"},
+    {"name": "BioLink", "registered_namespace": "bts"},
 ]
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - DATASET PAGE
 # *****************************************************************************
 
-#replace underscored of abbreviated names for more readable labels
+# replace underscored of abbreviated names for more readable labels
 READABLE_LABEL_MAPPINGS = {
-    "contain_phi" : "Contains PHI",
-    "contain_geo_codes" : "Contain Geological Codes",
+    "contain_phi": "Contains PHI",
+    "contain_geo_codes": "Contain Geological Codes",
 }

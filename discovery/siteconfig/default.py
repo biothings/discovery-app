@@ -1,4 +1,3 @@
-
 # DO NOT comment out
 #  (REQ) REQUIRED
 
@@ -18,7 +17,7 @@ CONTACT_EMAIL = "cd2h-metadata@googlegroups.com"
 # *****************************************************************************
 
 METADATA_CONTENT_URL = "http://discovery.biothings.io/"
-METADATA_DESC = 'A CD2H PROJECT TO PROMPT FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS'
+METADATA_DESC = "A CD2H PROJECT TO PROMPT FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS"
 METADATA_FEATURED_IMAGE = "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg"
 METADATA_MAIN_COLOR = "#63296b"
 
@@ -35,7 +34,7 @@ DARK_MODE = False
 # *****************************************************************************
 
 # create a folder with <name> and put all icons there
-STATIC_IMAGE_FOLDER = 'dde'
+STATIC_IMAGE_FOLDER = "dde"
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - METADATA
@@ -43,11 +42,11 @@ STATIC_IMAGE_FOLDER = 'dde'
 
 GUIDE_PRESETS = [
     {
-        'namespace': 'biomedical',
-        'prefix': 'bts',
-        'name': 'BioMedicalDataset',
-        'guide': '/guide',
-        'description': 'A schema describing a BioMedical Dataset'
+        "namespace": "biomedical",
+        "prefix": "bts",
+        "name": "BioMedicalDataset",
+        "guide": "/guide",
+        "description": "A schema describing a BioMedical Dataset",
     },
 ]
 
@@ -55,24 +54,26 @@ GUIDE_SETTINGS = {
     "form-mode": 1,
 }
 
-GUIDE_PREFILLED = {
-
-}
+GUIDE_PREFILLED = {}
 
 GUIDE_PORTALS = [
-                 {'namespace': 'google',
-                  'prefix': 'bts',
-                  'name': 'Google',
-                  'displayName': 'Google Dataset Search',
-                  'description': 'A list of metadata fields required and recommended by Google Dataset Search Engine. <a target="_blank" href="https://developers.google.com/search/docs/data-types/dataset">Learn More<a/>',
-                  'selected': 1},
-                 {'namespace': 'datacite',
-                  'prefix': 'bts',
-                  'name': 'DataCite',
-                  'displayName': 'DataCite',
-                  'description': 'A list of core metadata properties chosen for an accurate and consistent identification of a resource for citation and retrieval purposes by DataCite. <a target="_blank" href="https://schema.datacite.org/">Learn More<a/>',
-                  'selected': 0},
-                 ]
+    {
+        "namespace": "google",
+        "prefix": "bts",
+        "name": "Google",
+        "displayName": "Google Dataset Search",
+        "description": 'A list of metadata fields required and recommended by Google Dataset Search Engine. <a target="_blank" href="https://developers.google.com/search/docs/data-types/dataset">Learn More<a/>',
+        "selected": 1,
+    },
+    {
+        "namespace": "datacite",
+        "prefix": "bts",
+        "name": "DataCite",
+        "displayName": "DataCite",
+        "description": 'A list of core metadata properties chosen for an accurate and consistent identification of a resource for citation and retrieval purposes by DataCite. <a target="_blank" href="https://schema.datacite.org/">Learn More<a/>',
+        "selected": 0,
+    },
+]
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - SCHEMA PLAYGROUND
 # *****************************************************************************
@@ -80,10 +81,10 @@ GUIDE_PORTALS = [
 # also used in registry shortcuts
 STARTING_POINTS = [
     {
-        'namespace': 'schema',
-        'prefix': 'schema',
-        'name': 'Dataset',
-        'description': 'A body of structured information describing some topic(s) of interest.'
+        "namespace": "schema",
+        "prefix": "schema",
+        "name": "Dataset",
+        "description": "A body of structured information describing some topic(s) of interest.",
     },
 ]
 
@@ -92,23 +93,17 @@ STARTING_POINTS = [
 # *****************************************************************************
 
 REGISTRY_SHORTCUTS = [
-    {
-        "name": "Schema.org",
-        "registered_namespace": 'schema'
-    },
-    {
-        "name": "BioLink",
-        "registered_namespace": 'bts'
-    }
+    {"name": "Schema.org", "registered_namespace": "schema"},
+    {"name": "BioLink", "registered_namespace": "bts"},
 ]
 
 # *****************************************************************************
 # DATA DISCOVERY ENGINE - DATASET PAGE
 # *****************************************************************************
 
-#replace underscored of abbreviated names for more readable labels
+# replace underscored of abbreviated names for more readable labels
 READABLE_LABEL_MAPPINGS = {
-    "contain_phi" : "Contains PHI",
-    "contain_geo_codes" : "Contain Geological Codes",
+    "contain_phi": "Contains PHI",
+    "contain_geo_codes": "Contain Geological Codes",
     "url": "URL",
 }

@@ -1,4 +1,4 @@
-git+https://github.com/biothings/biothings_schema.py@e469593#egg=biothings_schema
+git+https://github.com/biothings/biothings_schema.py@eb794ac#egg=biothings_schema
 git+https://github.com/biothings/biothings.api.git#egg=biothings
 #biothings==0.10.0
 #PyLD>=0.7.1
@@ -13,5 +13,7 @@ certifi
 pyadf==0.2.29       # create rich text in Jira
 aiocron==1.8
 
+# use in index.routine to lock file
+filelock
 # s3 backup
 boto3>=1.21.0

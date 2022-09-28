@@ -36,7 +36,7 @@ class SAMLCookie(UserDict):
 
         def _get_val(data, k):
             _val = data["samlUserdata"].get(k, [])
-            return _val[0] if _val else ''
+            return _val[0] if _val else ""
 
         _first_name = _get_val(self.data, FIRST_NAME_KEY)
         _last_name = _get_val(self.data, LAST_NAME_KEY)
@@ -46,11 +46,13 @@ class SAMLCookie(UserDict):
             # if both first name and last name are empty,
             # set name to the username ("samlNameId")
             _name = self.data["samlNameId"]
-        return UserInfo({
-            "login": self.data["samlNameId"],  # or retrieve from samlUserData
-            "name": _name,
-            "avatar_url": None
-        })
+        return UserInfo(
+            {
+                "login": self.data["samlNameId"],  # or retrieve from samlUserData
+                "name": _name,
+                "avatar_url": None,
+            }
+        )
 
 
 class GHCookie(UserDict):
@@ -64,11 +66,13 @@ class GHCookie(UserDict):
     """
 
     def standardize(self):
-        return UserInfo({
-            "login": self.get("email") or self.get("login"),
-            "avatar_url": self.get("avatar_url"),
-            "name": self.get("name")
-        })
+        return UserInfo(
+            {
+                "login": self.get("email") or self.get("login"),
+                "avatar_url": self.get("avatar_url"),
+                "name": self.get("name"),
+            }
+        )
 
 
 class UserInfo(UserDict):

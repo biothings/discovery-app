@@ -1,17 +1,15 @@
-
 import json
 import logging
 from functools import partial
 
 import certifi
 from biothings.web.handlers import BaseAPIHandler
-from discovery.notify import N3CChannel
-from discovery.registry import (
-    DatasetValidationError, NoEntityError, ConflictError, RegistryError
-)
 from tornado.httpclient import AsyncHTTPClient
 from tornado.ioloop import IOLoop
 from tornado.web import Finish, HTTPError
+
+from discovery.notify import N3CChannel
+from discovery.registry import ConflictError, DatasetValidationError, NoEntityError, RegistryError
 
 from ..base import DiscoveryBaseHandler
 
@@ -25,6 +23,7 @@ def authenticated(func):
             raise HTTPError(401)
 
         return func(self, *args, **kwargs)
+
     return _  # decorator
 
 
@@ -58,7 +57,7 @@ def log_response(http_response):
 class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
 
     cache = 0
-    notifier = None
+    notifier = None  # will be set in its subclasses
 
     def get_current_user(self):  # discovery-app user ID
         return (self.get_current_userinfo() or {}).get("login")
@@ -70,42 +69,48 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
         # Additionally support GitHub Token Login
         # Mainly for debug and admin purposes
 
-        if 'Authorization' in self.request.headers:
-            if self.request.headers['Authorization'].startswith('Bearer '):
-                token = self.request.headers['Authorization'].split(' ', 1)[1]
+        if "Authorization" in self.request.headers:
+            if self.request.headers["Authorization"].startswith("Bearer "):
+                token = self.request.headers["Authorization"].split(" ", 1)[1]
                 http_client = AsyncHTTPClient()
                 try:
                     response = await http_client.fetch(
-                        "https://api.github.com/user", request_timeout=10,
-                        headers={'Authorization': 'token ' + token}, ca_certs=certifi.where())
+                        "https://api.github.com/user",
+                        request_timeout=10,
+                        headers={"Authorization": "token " + token},
+                        ca_certs=certifi.where(),
+                    )
                     user = json.loads(response.body)
                 except Exception as e:  # TODO
                     logging.warning(e)
                 else:
-                    if 'login' not in user:
+                    if "login" not in user:
                         return
-                    logging.info('logged in user from github token: %s', user)
+                    logging.info("logged in user from github token: %s", user)
                     self.set_secure_cookie("user", json.dumps(user))
-                    self.current_user = user.get('email') or user['login']
+                    self.current_user = user.get("email") or user["login"]
 
     def report(self, action, **details):
-        notifier = self.notifier(self.biothings.config)
-        requests = getattr(notifier, action)(**details)
-        IOLoop.current().add_callback(partial(self._report, requests))
+        if self.notifier:
+            notifier = self.notifier(self.biothings.config)
+            requests = getattr(notifier, action)(**details)
+            IOLoop.current().add_callback(partial(self._report, requests))
 
     async def _report(self, requests):
 
         # do not run in debug mode
         client = AsyncHTTPClient()
-        if not self.settings.get('debug'):
+        if not self.settings.get("debug"):
 
             for request in requests:
-
-                if isinstance(request, (
-                    N3CChannel.N3CPreflightRequest,
-                    N3CChannel.N3CHTTPRequest
-                )):
+                if not request:
+                    continue
+                if isinstance(
+                    request, (N3CChannel.N3CPreflightRequest, N3CChannel.N3CHTTPRequest)
+                ):
                     response = await client.fetch(request, raise_error=False)
+                    # this func will call requests.__next__ so it should be received empty yield result
+                    # to make sure the next request will be return on for loop
                     requests.send(response)
                     log_response(response)
 

@@ -20,7 +20,6 @@ from discovery.utils import indices
 
 
 class N3CChannel(Channel):
-
     class N3CPreflightRequest(HTTPRequest):
         pass
 
@@ -33,21 +32,25 @@ class N3CChannel(Channel):
         self.profile = profile  # project related info
 
     def send(self, message):
-        yield from [self.N3CHTTPRequest(
-            "https://n3c-help.atlassian.net/rest/api/3/issue", method="POST",
+        result = yield self.N3CHTTPRequest(
+            "https://n3c-help.atlassian.net/rest/api/3/issue",
+            method="POST",
             headers={"Content-Type": "application/json"},
             auth_username=self.user,
             auth_password=self.password,
             body=json.dumps(message.to_jira_payload(self.profile)),
-            ca_certs=certifi.where()  # for Windows compatibility
-        )]
+            ca_certs=certifi.where(),  # for Windows compatibility
+        )
+        # this result is sent from requests.send(response)
+        # so it should be return to outer stack by yield from call
+        return result
 
     def sends_query(self, user):
         return self.N3CPreflightRequest(
             "https://n3c-help.atlassian.net/rest/api/3/user/search?query=" + user,
             auth_username=self.user,
             auth_password=self.password,
-            ca_certs=certifi.where()  # for Windows compatibility
+            ca_certs=certifi.where(),  # for Windows compatibility
         )
         # Response
         # [
@@ -63,15 +66,13 @@ class N3CChannel(Channel):
         # https://developer.atlassian.com/cloud/jira/service-desk/rest/api-group-customer/
 
         return self.N3CPreflightRequest(
-            "https://n3c-help.atlassian.net/rest/servicedeskapi/customer", method="POST",
+            "https://n3c-help.atlassian.net/rest/servicedeskapi/customer",
+            method="POST",
             headers={"Content-Type": "application/json"},
             auth_username=self.user,
             auth_password=self.password,
-            body=json.dumps({
-                "displayName": user,
-                "email": user
-            }),
-            ca_certs=certifi.where()  # for Windows compatibility
+            body=json.dumps({"displayName": user, "email": user}),
+            ca_certs=certifi.where(),  # for Windows compatibility
         )
         # Response
         # {
@@ -85,7 +86,8 @@ class Strong(Mark):
     """
     PyADF Text Marking
     """
-    type = 'strong'
+
+    type = "strong"
 
 
 class DatasetMessage(Message):
@@ -120,7 +122,13 @@ class DatasetMessage(Message):
         """
         doc = ADF().bullet_list()
         doc.add_item(ADF().paragraph().text("Name: ").text(self["doc"].get("name")))
-        doc.add_item(ADF().paragraph().text("URL: ").text(self["doc"].get("url")).link(self["doc"].get("url")))
+        doc.add_item(
+            ADF()
+            .paragraph()
+            .text("URL: ")
+            .text(self["doc"].get("url"))
+            .link(self["doc"].get("url"))
+        )
         return doc
 
     def _doc_to_flattened(self):
@@ -133,6 +141,7 @@ class DatasetMessage(Message):
         • author.orcid: https://orcid.org/0000-0001-9779-1512
 
         """
+
         def keep(item):
             (path, val) = item
             if not path or not str(val):
@@ -152,11 +161,11 @@ class DatasetMessage(Message):
         def adfy(item):
             (key, strs) = item
             paragraph = ADF().paragraph()
-            paragraph.text(key + ': ')
+            paragraph.text(key + ": ")
             paragraph.content[-1].add_mark(Strong())
-            text = ', '.join(strs)
+            text = ", ".join(strs)
             paragraph.text(text)
-            if ' ' not in text and urlparse(text).scheme:
+            if " " not in text and urlparse(text).scheme:
                 paragraph.link(text)
             return paragraph
 
@@ -171,14 +180,14 @@ class DatasetMessage(Message):
         return doc
 
     # override
-    def to_ADF(self):
+    def to_ADF(self):   # noqa N802
         """
         Attach dataset metadata details at the end of the message.
         Use pyadf to build complex document structures. See documentation:
         https://developer.atlassian.com/cloud/jira/platform/apis/document/libs/
         """
         adf = super().to_ADF()
-        if 'doc' in self:
+        if "doc" in self:
             adf["content"].append(ADF().heading(4).text("Overview").to_doc())
             adf["content"].append(self._doc_to_flattened().to_doc())
         return adf
@@ -189,7 +198,7 @@ class DatasetMessage(Message):
 
         # appending dataset name to the title, capped at max 50-chars
         _name = self.get("doc", {}).get("name", "Untitled")
-        _summary = f'{self.title} - {_name[:50]}'
+        _summary = f"{self.title} - {_name[:50]}"
         payload["fields"]["summary"] = _summary
 
         if self.get("reporter"):  # use N3C JIRA registered user id
@@ -207,27 +216,29 @@ class DatasetNotifier(Notifier):
     def __init__(self, settings):
         super().__init__(settings)
 
-        if hasattr(settings, 'N3C_AUTH_USER') and \
-                hasattr(settings, 'N3C_AUTH_PASSWORD'):
+        if hasattr(settings, "N3C_AUTH_USER") and hasattr(settings, "N3C_AUTH_PASSWORD"):
             profile = SimpleNamespace()
-            profile.project_id = "10016"    # External Dataset project
+            profile.project_id = "10016"  # External Dataset project
             profile.issuetype_id = "10024"
-            profile.assignee_id = "5c708335e1bcdf6294d0c85e"    # Liz
-            profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"   # cwu
+            profile.assignee_id = "5c708335e1bcdf6294d0c85e"  # Liz
+            profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"  # cwu
             profile.label = "DATASET"
-            self.channels.append(N3CChannel(
-                getattr(settings, 'N3C_AUTH_USER'),
-                getattr(settings, 'N3C_AUTH_PASSWORD'),
-                profile))
+            self.channels.append(
+                N3CChannel(
+                    getattr(settings, "N3C_AUTH_USER"),
+                    getattr(settings, "N3C_AUTH_PASSWORD"),
+                    profile,
+                )
+            )
 
     @staticmethod
     def get_portal_image(guide=""):
 
         for portal, url in {
-                "outbreak": "https://discovery.biothings.io/static/img/outbreak.png",
-                "niaid": "https://discovery.biothings.io/static/img/niaid.png",
-                "n3c": "https://discovery.biothings.io/static/img/N3Co.png",
-                "": "https://discovery.biothings.io/static/img/dde-logo-o.png"  # default
+            "outbreak": "https://discovery.biothings.io/static/img/outbreak.png",
+            "niaid": "https://discovery.biothings.io/static/img/niaid.png",
+            "n3c": "https://discovery.biothings.io/static/img/N3Co.png",
+            "": "https://discovery.biothings.io/static/img/dde-logo-o.png",  # default
         }.items():
             if portal in guide:
                 return url
@@ -237,7 +248,7 @@ class DatasetNotifier(Notifier):
         for channel in self.channels:
 
             if isinstance(channel, N3CChannel):
-                if meta.get('class_id') == 'n3c::n3c:Dataset':
+                if meta.get("class_id") == "n3c::n3c:Dataset":
                     # check if the user has a registered account first
                     results = yield channel.sends_query(user)
                     results = json.loads(results.body)
@@ -246,20 +257,26 @@ class DatasetNotifier(Notifier):
                         userid = results[0]["accountId"]
                     elif "@" in user:
                         # register this user by email if not registered yet
+                        yield
                         userid = yield channel.sends_signup(user)
                         userid = json.loads(userid.body)
                         userid = userid["accountId"]
 
                     else:  # no email address, cannot register
                         userid = None
-                    response = yield from channel.send(DatasetMessage({
-                        "title": "External Dataset Request",  # customized title
-                        "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
-                        "url": f"http://discovery.biothings.io/dataset/{_id}",
-                        "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
-                        "reporter": userid,  # registered user id basing on email
-                        "doc": doc  # produce additional jira ticket content
-                    }))
+                    yield  # this will return None for requests.send(response)
+                    response = yield from channel.send(
+                        DatasetMessage(
+                            {
+                                "title": "External Dataset Request",  # customized title
+                                "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+                                "url": f"http://discovery.biothings.io/dataset/{_id}",
+                                "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
+                                "reporter": userid,  # registered user id basing on email
+                                "doc": doc,  # produce additional jira ticket content
+                            }
+                        )
+                    )
 
                     if response.code == 201:
                         try:
@@ -274,33 +291,42 @@ class DatasetNotifier(Notifier):
                             dataset.update(_n3c={"url": url})
                         except Exception as exc:
                             logging.error(str(exc))
-
+                    yield  # this will return None for requests.send(response)
             else:  # all other channels
-                yield from channel.send(DatasetMessage({
-                    "title": "New Dataset Registered",
-                    "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
-                    "url": f"http://discovery.biothings.io/dataset/{_id}",
-                    "url_text": "View details about this dataset",
-                    "image": DatasetNotifier.get_portal_image(meta.get('guide', '')),
-                    "image_altext": "DDE_PORTAL_IMG",
-                }))
+                yield from channel.send(
+                    DatasetMessage(
+                        {
+                            "title": "New Dataset Registered",
+                            "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+                            "url": f"http://discovery.biothings.io/dataset/{_id}",
+                            "url_text": "View details about this dataset",
+                            "image": DatasetNotifier.get_portal_image(meta.get("guide", "")),
+                            "image_altext": "DDE_PORTAL_IMG",
+                        }
+                    )
+                )
+                yield  # this will return None for requests.send(response)
 
     def delete(self, _id, name, user):
 
-        message = DatasetMessage({
-            "title": "Dataset Metadata Deleted",
-            "body": f'Dataset "{name}" is deleted by {user}.',
-        })
+        message = DatasetMessage(
+            {
+                "title": "Dataset Metadata Deleted",
+                "body": f'Dataset "{name}" is deleted by {user}.',
+            }
+        )
         return self.broadcast(message)
 
     def update(self, _id, name, version, user):
 
-        message = DatasetMessage({
-            "title": "Dataset Metadata Updated",
-            "body": f'Dataset {name} is updated by {user}. Current version is {version}.',
-            "url": f"http://discovery.biothings.io/dataset/{_id}",
-            "url_text": "View details",
-        })
+        message = DatasetMessage(
+            {
+                "title": "Dataset Metadata Updated",
+                "body": f"Dataset {name} is updated by {user}. Current version is {version}.",
+                "url": f"http://discovery.biothings.io/dataset/{_id}",
+                "url_text": "View details",
+            }
+        )
         return self.broadcast(message)
 
     def broadcast(self, message):
@@ -311,50 +337,62 @@ class DatasetNotifier(Notifier):
 
 
 class SchemaNotifier(Notifier):
-
     def add(self, namespace, num_classes):
-        return self.broadcast(Message({
-            "title": "New Schema Registration",
-            "body": f'{num_classes} classes have been registered under namespace "{namespace}".',
-            "url": f"https://discovery.biothings.io/view/{namespace}",
-            "url_text": "Visualize Schema"
-        }))
+        return self.broadcast(
+            Message(
+                {
+                    "title": "New Schema Registration",
+                    "body": f'{num_classes} classes have been registered under namespace "{namespace}".',
+                    "url": f"https://discovery.biothings.io/view/{namespace}",
+                    "url_text": "Visualize Schema",
+                }
+            )
+        )
 
     def delete(self, namespace, num_classes):
-        return self.broadcast(Message({
-            "title": "Schema Deleted",
-            "body": f'{num_classes} classes have been deleted under namespace "{namespace}".'
-        }))
+        return self.broadcast(
+            Message(
+                {
+                    "title": "Schema Deleted",
+                    "body": f'{num_classes} classes have been deleted under namespace "{namespace}".',
+                }
+            )
+        )
 
     def update(self, namespace, num_classes):
-        return self.broadcast(Message({
-            "title": "Schema Updated",
-            "body": f'Schema "{namespace}" updated. {num_classes} current classes.',
-            "url": f"https://discovery.biothings.io/view/{namespace}",
-            "url_text": "Visualize Schema"
-        }))
+        return self.broadcast(
+            Message(
+                {
+                    "title": "Schema Updated",
+                    "body": f'Schema "{namespace}" updated. {num_classes} current classes.',
+                    "url": f"https://discovery.biothings.io/view/{namespace}",
+                    "url_text": "Visualize Schema",
+                }
+            )
+        )
 
 
 def update_n3c_status(_id):
     import requests
-    logger = logging.getLogger('update_n3c')
+
+    logger = logging.getLogger("update_n3c")
     try:
         dataset = ESDataset.get(_id)
-        dataset.update(_n3c={
-            "url": dataset._n3c.url,
-            "status": requests.get(dataset._n3c.url).json()["fields"]["status"]["name"],
-            "timestamp": datetime.now(timezone.utc)
-        })
+        dataset.update(
+            _n3c={
+                "url": dataset._n3c.url,
+                "status": requests.get(dataset._n3c.url).json()["fields"]["status"]["name"],
+                "timestamp": datetime.now(timezone.utc),
+            }
+        )
     except Exception as exc:
         logger.warning('Failed to update N3C dataset "%s" status:\n%s', _id, exc)
 
 
 def update_n3c_routine():
-    from discovery.model.dataset import Dataset
-
-    logger = logging.getLogger('update_n3c')
+    logger = logging.getLogger("update_n3c")
     logger.info("Updating status for all N3C datasets...")
-    datasets = Dataset.search().query("exists", field="_n3c.url")
+    datasets = ESDataset.search().query("exists", field="_n3c.url")
     datasets = datasets.source(False).scan()
 
     _cnt = 0
@@ -390,37 +428,48 @@ def test_dataset():
     # settings.N3C_AUTH_USER = input("n3c user: ")
     # settings.N3C_AUTH_PASSWORD = input("n3c password: ")
     import config_key as settings
+
     # dataset.configure(settings)
     dataset = DatasetNotifier(settings)
-    test_on(dataset.add("0x0000", {
-        "identifier": "grandtest",
-        "description": "learn everything there is to know.",
-        "name": "lorem ipsum",
-        "url": "http://example.com/"
-    }, "wethepeople", **{
-        "schema": "n3c::n3c:Dataset",
-    }))
+    test_on(
+        dataset.add(
+            "0x0000",
+            {
+                "identifier": "grandtest",
+                "description": "learn everything there is to know.",
+                "name": "lorem ipsum",
+                "url": "http://example.com/",
+            },
+            "wethepeople",
+            **{
+                "schema": "n3c::n3c:Dataset",
+            },
+        )
+    )
     test_on(dataset.update("0x0000", "lorem ipsum", "v2", "wethepeople"))
     test_on(dataset.delete("0x0000", "lorem ipsum", "wethepeople"))
 
 
 def test_flatlist():
-    message = DatasetMessage({
-        "doc": {
-            "@type": "n3c:Dataset",
-            "includedInDataCatalog": {
-                "name": "N3C Datasets",
-                "url": "https://ncats.nih.gov/n3c/"
-            },
-            "name": "Wellderly Blood Genetics",
-            "description": "Wellderly Blood Genetics",
-            "justification": ""  # Test empty field
+    message = DatasetMessage(
+        {
+            "doc": {
+                "@type": "n3c:Dataset",
+                "includedInDataCatalog": {
+                    "name": "N3C Datasets",
+                    "url": "https://ncats.nih.gov/n3c/",
+                },
+                "name": "Wellderly Blood Genetics",
+                "description": "Wellderly Blood Genetics",
+                "justification": "",  # Test empty field
+            }
         }
-    })
+    )
     print(json.dumps(message.to_ADF()))
 
 
-if __name__ == '__main__':
-    test_schema()
-    test_dataset()
-    test_flatlist()
+if __name__ == "__main__":
+    pass
+    # test_schema()
+    # test_dataset()
+    # test_flatlist()
