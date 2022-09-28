@@ -11,12 +11,12 @@
         <font-awesome-icon
           v-if="item.special"
           icon="fas fa-star"
-          class="text-warning"
+          class="text-warning mr-1"
         ></font-awesome-icon>
         <font-awesome-icon
           v-else
           icon="fas fa-circle"
-          class="text-primary"
+          class="text-primary mr-1"
         ></font-awesome-icon>
         <template v-if="item?.parent_classes?.length">
           <template v-for="tree in item?.parent_classes">
@@ -35,7 +35,7 @@
           ><span v-text="item.label"></span>
           <font-awesome-icon
             icon="fas fa-info-circle"
-            class="text-info cTip pointer"
+            class="text-info cTip pointer ml-1"
             :data-tippy-content="item.description"
           ></font-awesome-icon
         ></small>
