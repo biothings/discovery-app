@@ -65,7 +65,7 @@
             v-if="fullInfo && fullInfo.properties"
             class="d-flex justify-content-center align-items-center"
           >
-            <font-awesome-icon icon="fas fa-chevron-right" class="text-muted" />
+            <font-awesome-icon icon="fas fa-chevron-right" class="text-muted mr-1" />
           </div>
           <div
             v-if="fullInfo && fullInfo.properties"
@@ -74,16 +74,16 @@
             <div class="border-left border-info pl-3">
               <template
                 v-for="(value, name) in fullInfo['properties']"
-                :key="option"
+                :key="name"
               >
                 <div class="border-left border-primary my-4 pl-2">
                   <small class="mainTextDark"
-                    ><font-awesome-icon icon="fas fa-circle" />
+                    ><font-awesome-icon icon="fas fa-circle" class="mr-1"/>
                     <b v-text="name"></b
                   ></small>
                   <span
                     v-if="isPropRequired(name)"
-                    class="text-danger caps"
+                    class="text-danger caps mx-1"
                     style="zoom: 0.5"
                     >is required</span
                   >

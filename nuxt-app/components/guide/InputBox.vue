@@ -725,19 +725,20 @@ export default {
       }
     },
     removeItem(e, name) {
+      console.log(e)
       let self = this;
 
       var x = e.pageX - 130;
       var y = e.pageY - 20;
-      var el = $("#puff");
-      el.show();
+      var el = document.querySelector("#puff");
+      el.classList.add('d-inline')
       let audio = document.getElementById("pop-sound");
       audio.play();
-      el.css("position", "absolute");
-      el.css("left", x);
-      el.css("top", y);
+      el.style.position = 'absolute'
+      el.style.left = x
+      el.style.top = y
       setTimeout(() => {
-        el.hide();
+        el.classList.remove('d-inline')
       }, 500);
 
       var payload = {};

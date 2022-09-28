@@ -32,7 +32,7 @@
         class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc"
         title="remove"
       >
-        <font-awesome-icon icon="fas fa-check"></font-awesome-icon>
+        <font-awesome-icon icon="fas fa-check" class="mr-1"></font-awesome-icon>
         <template v-if="person && person.name">
           <span v-text="person.name"></span>
         </template>
@@ -45,7 +45,7 @@
           class="d-inline"
           @click="removeItem($event, person)"
         >
-          <font-awesome-icon icon="fas fa-times"></font-awesome-icon
+          <font-awesome-icon icon="fas fa-times" class="ml-1"></font-awesome-icon
         ></span>
       </span>
     </template>

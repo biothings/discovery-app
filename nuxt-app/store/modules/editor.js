@@ -214,7 +214,7 @@ export const editor = {
     toggleDesc(state) {
       state.showDescriptions = !state.showDescriptions;
     },
-    saveSchema(state, payload) {
+    saveSchemaForEditor(state, payload) {
       let names = state.schema.map((cls) => cls.name);
       // console.log(names)
       if (!names.includes(payload["schema"].name)) {
@@ -469,7 +469,7 @@ export const editor = {
     saveParent(state, payload) {
       let parent = payload["parent"];
       // sort props alphabetically
-      if (parent.hasOwnProperty("properties")) {
+      if (Object.hasOwnProperty.call(parent, "properties")) {
         parent.properties = orderBy(parent.properties, ["label"], ["asc"]);
       }
       let names = state.schema.map((cls) => cls.name);
@@ -503,9 +503,9 @@ export const editor = {
 
       for (var i = 0; i < state.schema.length; i++) {
         if (state.schema[i].special) {
-          if (state.schema[i].hasOwnProperty("properties")) {
+          if (Object.hasOwnProperty.call(state.schema[i], "properties")) {
             state.schema[i].properties.push(newProp);
-          } else if (!state.schema[i].hasOwnProperty("properties")) {
+          } else if (!Object.hasOwnProperty.call(state.schema[i], "properties")) {
             state.schema[i]["properties"] = [];
             state.schema[i].properties.push(newProp);
           }
@@ -515,7 +515,7 @@ export const editor = {
     selectProp(state, payload) {
       let label = payload["label"];
       for (var i = 0; i < state.schema.length; i++) {
-        if (state.schema[i].hasOwnProperty("properties")) {
+        if (Object.hasOwnProperty.call(state.schema[i], "properties")) {
           for (var x = 0; x < state.schema[i]["properties"].length; x++) {
             if (
               state.schema[i]["properties"][x].hasOwnProperty("label") &&
@@ -542,7 +542,7 @@ export const editor = {
     requireProp(state, payload) {
       let label = payload["label"];
       for (var i = 0; i < state.schema.length; i++) {
-        if (state.schema[i].hasOwnProperty("properties")) {
+        if (Object.hasOwnProperty.call(state.schema[i], "properties")) {
           for (var x = 0; x < state.schema[i]["properties"].length; x++) {
             if (
               state.schema[i]["properties"][x].hasOwnProperty("label") &&
@@ -572,7 +572,7 @@ export const editor = {
     optionalProp(state, payload) {
       let label = payload["label"];
       for (var i = 0; i < state.schema.length; i++) {
-        if (state.schema[i].hasOwnProperty("properties")) {
+        if (Object.hasOwnProperty.call(state.schema[i], "properties")) {
           for (var x = 0; x < state.schema[i]["properties"].length; x++) {
             if (
               state.schema[i]["properties"][x].hasOwnProperty("label") &&
@@ -602,7 +602,7 @@ export const editor = {
     recommendProp(state, payload) {
       let label = payload["label"];
       for (var i = 0; i < state.schema.length; i++) {
-        if (state.schema[i].hasOwnProperty("properties")) {
+        if (Object.hasOwnProperty.call(state.schema[i], "properties")) {
           for (var x = 0; x < state.schema[i]["properties"].length; x++) {
             if (
               state.schema[i]["properties"][x].hasOwnProperty("label") &&
@@ -699,7 +699,7 @@ export const editor = {
           //Add New Class
           state.finalschema["@graph"].push(mainClass);
           //Handle main Class Properties
-          if (state.schema[i].properties) {
+          if (state.schema[i]?.properties) {
             for (var x = 0; x < state.schema[i].properties.length; x++) {
               let mainProp = {};
               mainProp["@id"] = state.schema[i].properties[x]["name"];
@@ -770,7 +770,7 @@ export const editor = {
           }
         } else {
           //Handle Parent Classes
-          if (state.schema[i].hasOwnProperty("properties")) {
+          if (Object.hasOwnProperty.call(state.schema[i], "properties")) {
             let myLabel = "";
             for (let y = 0; y < state.schema[i].properties.length; y++) {
               if (state.schema[i].properties[y].selected) {
@@ -806,7 +806,7 @@ export const editor = {
                 }
               }
               //pre populate validation from inherited if available
-              if (state.top_class_validation.hasOwnProperty("properties")) {
+              if (Object.hasOwnProperty.call(state.top_class_validation, "properties")) {
                 // console.log('pre-populating validation... ')
                 for (const propName in state.top_class_validation.properties) {
                   if (
@@ -896,7 +896,7 @@ export const editor = {
       }
       // Check validation is complete
       let incomplete = 0;
-      if (state.validation.hasOwnProperty("properties")) {
+      if (Object.hasOwnProperty.call(state?.validation, "properties")) {
         for (let key in state.validation["properties"]) {
           let keys = Object.keys(state.validation["properties"][key]).length;
           if (keys <= 1) {
@@ -959,7 +959,7 @@ export const editor = {
       return state.editThisDefinition;
     },
     getValidationProps: (state) => {
-      return state.validation["properties"];
+      return state.validation?.["properties"];
       // return state.val_test
     },
     getValidationOptions: (state) => {
