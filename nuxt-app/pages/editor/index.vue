@@ -56,7 +56,7 @@
               Preview
             </span>
             <span
-              class="badge bg-success text-light pointer tip mr-2"
+              class="badge btn-success text-light pointer tip mr-2"
               data-tippy-content="Download your schema"
               @click="downloadSchema()"
             >
@@ -67,7 +67,7 @@
               Download
             </span>
             <span
-              class="badge bg-primary text-light pointer tip mr-2"
+              class="badge btn-primary text-light pointer tip mr-2"
               data-tippy-content="Requires GitHub Login"
               @click.prevent="githubOptions()"
             >
@@ -78,7 +78,7 @@
               Save to GitHub*
             </span>
             <span
-              class="badge bg-secondary text-light pointer tip mr-2"
+              class="badge btn-secondary text-light pointer tip mr-2"
               data-tippy-content="Learn about this editor"
               @click.prevent="showHelp()"
             >
@@ -91,7 +91,7 @@
           </template>
           <span
             v-if="userInfo && userInfo.login"
-            class="badge bg-primary text-light pointer tip mr-2"
+            class="badge btn-primary text-light pointer tip mr-2"
             data-tippy-content="Save Progress Locally"
             @click.prevent="handleProgress()"
           >
@@ -99,7 +99,7 @@
           </span>
           <small class="text-light"
             >Extending
-            <font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon>
+            <font-awesome-icon icon="fas fa-chevron-right" class="mr-1"></font-awesome-icon>
             <b v-text="startingPoint"></b
           ></small>
         </div>
