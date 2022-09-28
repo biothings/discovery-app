@@ -2,6 +2,7 @@ import json
 
 import tornado.template
 import tornado.web
+from tornado.web import RedirectHandler
 from biothings.web.handlers import BaseHandler
 
 from discovery.registry import datasets
@@ -72,5 +73,7 @@ class DatasetSitemapHandler(tornado.web.RequestHandler):
 HANDLERS = [
     (r"/user/?", UserInfoHandler),
     (r"/logout/?", LogoutHandler),
+    (r"/sitemap.xml", RedirectHandler, {"url": "/static/sitemap.xml"}),
     (r"/sitemap/dataset.xml", DatasetSitemapHandler),
+    (r"/dataset/(geo/.+)", RedirectHandler, {"url": "http://metadataplus.biothings.io/{0}"}),
 ]
