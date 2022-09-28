@@ -16,19 +16,20 @@
 
 import json
 import logging
-from datetime import datetime, date
+from datetime import date, datetime
 
 import certifi
-from discovery.registry import schemas
-from discovery.utils.adapters import SchemaAdapter
-from discovery.notify import SchemaNotifier
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import Finish, HTTPError
 
-from .base import APIBaseHandler, registryOperation, authenticated
+from discovery.notify import SchemaNotifier
+from discovery.registry import schemas
+from discovery.utils.adapters import SchemaAdapter
 
-CORE_SCHEMA_NS = ('schema', 'biomedical', 'datacite', 'google')
-RESERVED_SCHEMA_NS = ('metadata')
+from .base import APIBaseHandler, authenticated, registryOperation
+
+CORE_SCHEMA_NS = ("schema", "biomedical", "datacite", "google")
+RESERVED_SCHEMA_NS = ("metadata",)
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +60,8 @@ def to_api_doc_repr(regdoc):
 
     api_doc = {}
     # api_doc['url'] = regdoc.meta.url if 'url' in regdoc.meta else None
-    api_doc['namespace'] = regdoc.pop('_id', None)
-    for key in ['url', 'username', 'timestamp']:
+    api_doc["namespace"] = regdoc.pop("_id", None)
+    for key in ["url", "username", "timestamp"]:
         if key in regdoc.meta:
             v = regdoc.meta[key]
             if isinstance(v, (datetime, date)):
@@ -68,7 +69,7 @@ def to_api_doc_repr(regdoc):
             api_doc[key] = v
 
     if regdoc:
-        api_doc['source'] = regdoc
+        api_doc["source"] = regdoc
 
     return api_doc
 
@@ -83,10 +84,9 @@ def trace_root(klass):
     queue = [klass]
     index = 0
     while index < len(queue):
-        for parent_line_string in klass.get('parent_classes', []):
-            parents = parent_line_string.split(', ')
-            ids = [(parent.split(':')[0], parent)
-                   for parent in parents if ':' in parent][::-1]
+        for parent_line_string in klass.get("parent_classes", []):
+            parents = parent_line_string.split(", ")
+            ids = [(parent.split(":")[0], parent) for parent in parents if ":" in parent][::-1]
             for _id in ids:
                 klass = schemas.get_class(_id[0], _id[1])
                 if klass and klass not in queue:
@@ -97,37 +97,38 @@ def trace_root(klass):
 
 class SchemaRegistryHandler(APIBaseHandler):
     """
-        Registered Schema Repository
+    Registered Schema Repository
 
-        Check  - HEAD ./api/registry/<namespace>
-        Create - POST ./api/registry
-        Fetch  - GET ./api/registry
-        Fetch  - GET ./api/registry?user=<email>
-        Fetch  - GET ./api/registry/<namespace>
-        Fetch  - GET ./api/registry/<namespace>/<curie>
-        Remove - DELETE ./api/registry/<namespace>
+    Check  - HEAD ./api/registry/<namespace>
+    Create - POST ./api/registry
+    Fetch  - GET ./api/registry
+    Fetch  - GET ./api/registry?user=<email>
+    Fetch  - GET ./api/registry/<namespace>
+    Fetch  - GET ./api/registry/<namespace>/<curie>
+    Remove - DELETE ./api/registry/<namespace>
     """
-    name = 'registry'
+
+    name = "registry"
     kwargs = {
-        'POST': {
-            'url': {'type': str, 'required': True},
-            'namespace': {'type': str, 'required': True},
-            'source': {'type': dict}
+        "POST": {
+            "url": {"type": str, "required": True},
+            "namespace": {"type": str, "required": True},
+            "source": {"type": dict},
         },
-        'PUT': {
-            'url': {'type': str, 'required': False},
-            'namespace': {'type': str},  # implied from api call url
-            'source': {'type': dict}
+        "PUT": {
+            "url": {"type": str, "required": False},
+            "namespace": {"type": str},  # implied from api call url
+            "source": {"type": dict},
         },
-        'GET': {
-            'user': {'type': str},
-            'field': {'type': str, 'default': '*', 'aslias': 'fields'},
-            'verbose': {'type': bool, 'default': False, 'alias': ['v']},
-            'start': {'type': int, 'default': 0, 'alias': ['from', 'skip']},
-            'size': {'type': int, 'default': 10, 'max': 20, 'alias': 'skip'},
-            'context': {'type': bool, 'default': True},  # consider not default in future
-            'source': {'type': bool, 'default': True}
-        }
+        "GET": {
+            "user": {"type": str},
+            "field": {"type": str, "default": "*", "aslias": "fields"},
+            "verbose": {"type": bool, "default": False, "alias": ["v"]},
+            "start": {"type": int, "default": 0, "alias": ["from", "skip"]},
+            "size": {"type": int, "default": 10, "max": 20, "alias": "skip"},
+            "context": {"type": bool, "default": True},  # consider not default in future
+            "source": {"type": bool, "default": True},
+        },
     }
     notifier = SchemaNotifier
 
@@ -179,17 +180,19 @@ class SchemaRegistryHandler(APIBaseHandler):
 
         count = schemas.add(namespace, url, self.current_user, doc)
 
-        self.finish({
-            'success': True,
-            'result': 'created',
-            'total': count,
-            'url': self.request.full_url() + '/' + namespace,
-        })
+        self.finish(
+            {
+                "success": True,
+                "result": "created",
+                "total": count,
+                "url": self.request.full_url() + "/" + namespace,
+            }
+        )
 
         self.report(
             "add",
             namespace=namespace,
-            num_classes=count
+            num_classes=count,
         )
 
     @registryOperation
@@ -219,37 +222,41 @@ class SchemaRegistryHandler(APIBaseHandler):
             else:
                 _fields = [x.strip() for x in self.args.field.split(",")]
                 if not ("_meta" in _fields or "_meta.url" in _fields):
-                    _fields.append("_meta.url")    # always include _meta.url in the response
+                    _fields.append("_meta.url")  # always include _meta.url in the response
             hits = [
                 to_api_doc_repr(schema)
                 for schema in schemas.get_all(
                     start=self.args.start,
                     size=self.args.size,
                     user=self.args.user,
-                    fields=_fields
+                    fields=_fields,
                 )
             ]
-            raise Finish({
-                "total": schemas.total(user=self.args.user),
-                "start": self.args.start,
-                "size": self.args.size,
-                "context": schemas.get_all_contexts(),
-                "count": len(hits),
-                "hits": hits
-            })
+            raise Finish(
+                {
+                    "total": schemas.total(user=self.args.user),
+                    "start": self.args.start,
+                    "size": self.args.size,
+                    "context": schemas.get_all_contexts(),
+                    "count": len(hits),
+                    "hits": hits,
+                }
+            )
 
         schema = schemas.get(namespace)
 
         # /api/registry/<namespace>
         if curie is None:
             classes = list(schemas.get_classes(namespace, self.args.field))
-            raise Finish({
-                "name": schema.pop('_id'),
-                "url": schema.meta.url,  # pylint: disable=no-member
-                "source": schema if self.args.source else None,
-                "total": len(classes),
-                "hits": classes
-            })
+            raise Finish(
+                {
+                    "name": schema.pop("_id"),
+                    "url": schema.meta.url,  # pylint: disable=no-member
+                    "source": schema if self.args.source else None,
+                    "total": len(classes),
+                    "hits": classes,
+                }
+            )
 
         # /api/registry/<namespace>/<curie>
         klass = schemas.get_class(namespace, curie)
@@ -258,12 +265,12 @@ class SchemaRegistryHandler(APIBaseHandler):
             klasses = trace_root(klass)
             klass = {
                 "total": len(klasses),
-                "names": [klass['_id'].split('::')[1] for klass in klasses],
-                "hits": klasses
+                "names": [klass["_id"].split("::")[1] for klass in klasses],
+                "hits": klasses,
             }
 
         if self.args.context:
-            klass['@context'] = schema.get('@context')
+            klass["@context"] = schema.get("@context")
 
         self.finish(klass)
 
@@ -304,17 +311,19 @@ class SchemaRegistryHandler(APIBaseHandler):
 
         count = schemas.update(namespace, self.current_user, url, doc)
 
-        self.finish({
-            'success': True,
-            'result': 'updated',
-            'total': count,
-            'url': self.request.full_url() + '/' + namespace,
-        })
+        self.finish(
+            {
+                "success": True,
+                "result": "updated",
+                "total": count,
+                "url": self.request.full_url() + "/" + namespace,
+            }
+        )
 
         self.report(
             "update",
             namespace=namespace,
-            num_classes=count
+            num_classes=count,
         )
 
     @authenticated
@@ -335,17 +344,23 @@ class SchemaRegistryHandler(APIBaseHandler):
         self.report(
             "delete",
             namespace=namespace,
-            num_classes=count
+            num_classes=count,
         )
 
 
 class SchemaViewHandler(APIBaseHandler):
 
-    name = 'view'
-    kwargs = {'GET': {
-        'url': {'type': str},      # pass schema as an url, alternatively can pass schema content in body
-        'ns': {'type': str}        # indicates the special target namespace of the schema, e.g. schema.org or bioschemas.
-    }}
+    name = "view"
+    kwargs = {
+        "GET": {
+            "url": {
+                "type": str
+            },  # pass schema as an url, alternatively can pass schema content in body
+            "ns": {
+                "type": str
+            },  # indicates the special target namespace of the schema, e.g. schema.org or bioschemas.
+        }
+    }
 
     async def get(self):
         """
@@ -370,8 +385,7 @@ class SchemaViewHandler(APIBaseHandler):
             doc = None
             if self.args.url:
                 # load doc from url
-                response = await AsyncHTTPClient().fetch(
-                    self.args.url, ca_certs=certifi.where())
+                response = await AsyncHTTPClient().fetch(self.args.url, ca_certs=certifi.where())
                 doc = response.body
             elif self.request.body:
                 # load doc from request body
@@ -380,12 +394,16 @@ class SchemaViewHandler(APIBaseHandler):
                 doc = json.loads(doc)
                 validator_options = {"validation_merge": False, "raise_on_validation_error": False}
                 if self.args.ns:
-                    if self.args.ns == 'schema.org':
+                    if self.args.ns == "schema.org":
                         # do no load any base schemas
-                        schema = SchemaAdapter(doc, base_schema=[], validator_options=validator_options)
-                    elif self.args.ns == 'bioschemas':
+                        schema = SchemaAdapter(
+                            doc, base_schema=[], validator_options=validator_options
+                        )
+                    elif self.args.ns == "bioschemas":
                         # do not load bioschemas, only schema.org
-                        schema = SchemaAdapter(doc, base_schema=['schema.org'], validator_options=validator_options)
+                        schema = SchemaAdapter(
+                            doc, base_schema=["schema.org"], validator_options=validator_options
+                        )
                     else:
                         schema = SchemaAdapter(doc, validator_options=validator_options)
                 else:
@@ -398,22 +416,19 @@ class SchemaViewHandler(APIBaseHandler):
 
         if schema.has_validation_error():
             classes = []
-            validation = {
-                "valid": False,
-                "errors": schema.get_validation_errors()
-            }
+            validation = {"valid": False, "errors": schema.get_validation_errors()}
         else:
             classes = schema.get_classes()
             validation = {
                 "valid": True,
-                "errors": schema.get_validation_errors()       # could still be some warnings even "valid" is True
+                "errors": schema.get_validation_errors(),  # could still be some warnings even "valid" is True
             }
 
         response = {
             "total": len(classes),
             "context": schema.context,
             "hits": classes,
-            "validation": validation
+            "validation": validation,
         }
 
         self.finish(response)

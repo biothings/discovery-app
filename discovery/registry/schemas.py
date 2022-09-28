@@ -11,14 +11,11 @@ import json
 import logging
 
 import requests
-from discovery.model import Schema as ESSchemaFile
-from discovery.model import SchemaClass as ESSchemaClass
+
+from discovery.model import Schema as ESSchemaFile, SchemaClass as ESSchemaClass
 from discovery.utils.adapters import SchemaAdapter
 
-from .common import (
-    RegistryError, NoEntityError, ConflictError,
-    ValidatedDict, RegistryDocument
-)
+from .common import ConflictError, NoEntityError, RegistryDocument, RegistryError, ValidatedDict
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +24,7 @@ SCHEMAS = {
     "datacite": "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/DataCite/DataCite.json",
     "biomedical": "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/BioMedical/BioMedicalDataset.json",
     "ctsa": "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json",
-    "n3c": "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
+    "n3c": "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json",
 }
 
 EXTENSION_OWNER = "cwu@scripps.edu"
@@ -41,27 +38,31 @@ def _add_schema_class(schema, namespace, dryrun=False):
 
     assert isinstance(schema, (ValidatedDict, type(None)))
 
-    if schema is None and namespace == 'schema':
+    if schema is None and namespace == "schema":
         # handling "schema" namespace (from schema.org) differently
         # since it's the pre-loaded default base/core schema
-        schema = SchemaAdapter(base_schema=['schema.org'])     # load only schema.org
+        schema = SchemaAdapter(base_schema=["schema.org"])  # load only schema.org
         # set defined class list as all schema.org classes
         schema._classes_defs = schema._schema.list_all_classes(include_base=True)
         schema_classes = schema.get_classes()
     else:
         try:
-            if namespace == 'bioschemas':
-                schema = SchemaAdapter(schema, base_schema=['schema.org'])
+            if namespace == "bioschemas":
+                schema = SchemaAdapter(schema, base_schema=["schema.org"])
             else:
                 schema = SchemaAdapter(schema)
-            schema_classes = schema.get_classes(include_ref=False)    # only get those defined classes
+            schema_classes = schema.get_classes(
+                include_ref=False
+            )  # only get those defined classes
         except Exception as exc:  # TODO not sure what could go wrong
             raise RegistryError(str(exc))
 
     # TODO: validate all classes first before deleting the namespace
     # delete the existing classes under the namespace
     if dryrun:
-        logger.info(f'Deleting existing "{namespace}" classes... (Dryrun only, not actually deleting anything.')
+        logger.info(
+            f'Deleting existing "{namespace}" classes... (Dryrun only, not actually deleting anything.'
+        )
     else:
         delete_classes(namespace)
         logger.debug(f'"{namespace}" classes were deleted.')
@@ -70,10 +71,10 @@ def _add_schema_class(schema, namespace, dryrun=False):
         cls = ESSchemaClass(namespace=namespace, **schema_class)
         if dryrun:
             try:
-                cls.full_clean()    # This validates all class fields
+                cls.full_clean()  # This validates all class fields
             except AttributeError:
                 logger.error(f'Failed to validate "{cls.name}" class')
-                logger.error(f'\n{json.dumps(schema_class, indent=2)}')
+                logger.error(f"\n{json.dumps(schema_class, indent=2)}")
                 raise
         else:
             cls.save()
@@ -87,6 +88,7 @@ def _add_schema_class(schema, namespace, dryrun=False):
 #    C R U D
 # ----------------
 
+
 def exists(anyid):
     """
     Check if a document exists by its _id or url field.
@@ -94,11 +96,11 @@ def exists(anyid):
     if not anyid:
         raise RegistryError("specify at least one condition.")
 
-    if anyid == 'schema':
+    if anyid == "schema":
         # core schema does not have file record
         # have to search schema class index instead
         search = ESSchemaClass.search()
-        search = search.query("term", namespace='schema')
+        search = search.query("term", namespace="schema")
         return bool(search.count())
 
     # consider url and namespace as identifiers
@@ -173,11 +175,11 @@ def get(namespace):
     dict_keys(['url', 'username', 'timestamp'])
 
     """
-    if namespace == 'schema':
-        schema = RegistryDocument(_id='schema')
-        schema.meta.url = 'https://schema.org/docs/tree.jsonld'
-        schema['$comment'] = 'internally provided by biothings.schema'
-        schema['@context'] = {"schema": "http://schema.org/"}
+    if namespace == "schema":
+        schema = RegistryDocument(_id="schema")
+        schema.meta.url = "https://schema.org/docs/tree.jsonld"
+        schema["$comment"] = "internally provided by biothings.schema"
+        schema["@context"] = {"schema": "http://schema.org/"}
         return schema
 
     schema = ESSchemaFile.get(id=namespace, ignore=404)
@@ -200,7 +202,7 @@ def get_meta(namespace):
     raise NoEntityError(f"schema '{namespace}' does not exist.")
 
 
-def get_all(start=0, size=10, user=None, fields='_meta.url'):
+def get_all(start=0, size=10, user=None, fields="_meta.url"):
     """
     Retrieve all schema files. See usage of fields parameter here:
     https://elasticsearch-dsl.readthedocs.io/en/latest/api.html#elasticsearch_dsl.Search.source
@@ -227,7 +229,7 @@ def get_all(start=0, size=10, user=None, fields='_meta.url'):
     search = search.source(fields)
 
     if size:
-        search = search[start: start + size]
+        search = search[start : start + size]
     else:
         search.params(from_=start).scan()
 
@@ -270,8 +272,9 @@ def delete(namespace):
 #    Utilities
 # ----------------
 
+
 def total(user=None):
-    """ Return the total number of documents. """
+    """Return the total number of documents."""
 
     if user:
         search = ESSchemaFile.find(username=user)
@@ -282,13 +285,13 @@ def total(user=None):
 
 
 def add_core(update=False):
-    """ add schema.org main schema. """
-    if not exists('schema') or update:
+    """add schema.org main schema."""
+    if not exists("schema") or update:
         _add_schema_class(None, "schema")
 
 
 def add_core_extension(schema, update=False):
-    """ add a widely used schema we know. """
+    """add a widely used schema we know."""
 
     if schema not in SCHEMAS:
         raise RegistryError("extension schema not supported.")
@@ -298,7 +301,7 @@ def add_core_extension(schema, update=False):
 
 
 def add_core_extensions(update=False):
-    """ add all common schemas we know. """
+    """add all common schemas we know."""
     for schema in SCHEMAS:
         add_core_extension(schema, update)
 
@@ -331,7 +334,7 @@ def get_classes(namespace, fields=None):
 
 
 def get_class(namespace, curie, raise_on_error=True):
-    """ Find a specific schema class. """
+    """Find a specific schema class."""
 
     _id = f"{namespace}::{curie}"
     klass = ESSchemaClass.get(id=_id, ignore=404)
@@ -374,7 +377,7 @@ def get_all_contexts():
     }
     """
     # retrieve the context from each schema file
-    contexts = ESSchemaFile.gather_field('@context')
+    contexts = ESSchemaFile.gather_field("@context")
 
     # do this last to make sure it's not override
     contexts.update(schema="http://schema.org/")
