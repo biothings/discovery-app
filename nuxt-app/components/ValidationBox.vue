@@ -29,14 +29,10 @@
 </template>
 
 <script>
-import PropertyBox from "./PropertyBox.vue";
 
 export default {
   name: "ValidationBox",
   props: ["validation"],
-  components: {
-    PropertyBox,
-  },
   data: function () {
     return {
       sorted_props: {},

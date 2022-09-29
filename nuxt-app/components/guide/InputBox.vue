@@ -651,9 +651,9 @@ import axios from "axios";
 import tippy from "tippy.js";
 
 import BooleanInput from "./BooleanInput.vue";
-import NameSpecial from "./NameSpecial.vue";
 import IdentifierSpecial from "./IdentifierSpecial.vue";
 import InputPreview from "./InputPreview.vue";
+import NameSpecial from "./NameSpecial.vue";
 
 export default {
   name: "InputBox",
@@ -677,9 +677,9 @@ export default {
   },
   components: {
     BooleanInput,
-    NameSpecial,
     IdentifierSpecial,
     InputPreview,
+    NameSpecial
   },
   props: ["name", "info"],
   methods: {
@@ -1949,21 +1949,22 @@ export default {
       },
     },
     datePreset: function () {
+      let schema = this.$store.getters.schema;
       if (
-        this.$store.state.schema.validation.properties.hasOwnProperty(
+        schema.validation.properties.hasOwnProperty(
           "datePublished"
         ) &&
-        this.$store.state.schema.validation.properties["datePublished"].value
+        schema.validation.properties["datePublished"].value
       ) {
-        return this.$store.state.schema.validation.properties["datePublished"]
+        return schema.validation.properties["datePublished"]
           .value;
       } else if (
-        this.$store.state.schema.validation.properties.hasOwnProperty(
+        schema.validation.properties.hasOwnProperty(
           "dateModified"
         ) &&
-        this.$store.state.schema.validation.properties["dateModified"].value
+        schema.validation.properties["dateModified"].value
       ) {
-        return this.$store.state.schema.validation.properties["dateModified"]
+        return schema.validation.properties["dateModified"]
           .value;
       } else {
         return false;

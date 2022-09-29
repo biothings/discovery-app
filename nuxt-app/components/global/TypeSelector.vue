@@ -346,7 +346,7 @@
 
 <script>
 import tippy from "tippy.js";
-import Vocabulary from "./Vocabulary.vue";
+import Vocabulary from "~~/components/guide/Vocabulary.vue";
 
 export default {
   name: "TypeSelector",

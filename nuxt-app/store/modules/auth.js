@@ -23,18 +23,18 @@ export const auth = {
   actions: {
     checkUser({ commit }) {
       if (process.env.NODE_ENV == "development") {
-        // for dev only
         commit("saveUser", {
           user: {
             name: "Marco Cano",
             email: "artofmarco@gmail.com",
-            login: "flaneuse",
+            login: "marcodarko",
             avatar_url: "https://avatars.githubusercontent.com/u/23092057?v=4",
           },
         });
-      } else {
+      }else{
+        let config = useRuntimeConfig();
         axios
-          .get("/user")
+          .get(config.public.apiUrl + "/user")
           .then((response) => {
             commit("saveUser", { user: response.data });
           })
