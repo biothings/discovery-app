@@ -80,12 +80,13 @@ export default {
     }
   },
   mounted: function () {
+    let config = useRuntimeConfig();
     document
       .getElementById("samlLink")
-      .setAttribute("href", "/saml/login/" + window.location.search);
+      .setAttribute("href", config.public.apiUrl + "/saml/login/" + window.location.search);
     document
       .getElementById("ghButton")
-      .setAttribute("href", "/oauth/" + window.location.search);
+      .setAttribute("href", config.public.apiUrl + "/oauth/" + window.location.search);
     if (this.$route.fullPath.includes("n3c")) {
       var btn = document.getElementById("ghButton");
       btn.href = "#";

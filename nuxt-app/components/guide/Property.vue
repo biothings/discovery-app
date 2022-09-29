@@ -231,13 +231,13 @@
           </template>
 
           <template v-if="type === 'RECOMMENDED'">
-            <small v-show="fieldsleft !== 0" class="text-info"
+            <small v-show="fieldsLeft !== 0" class="text-info"
               >Complete as many recommended fields as possible
               <b class="text-danger"
-                >ONLY <span v-text="fieldsleft"></span> LEFT!</b
+                >ONLY <span v-text="fieldsLeft"></span> LEFT!</b
               ></small
             >
-            <small v-show="fieldsleft === 0" class="text-success bold"
+            <small v-show="fieldsLeft === 0" class="text-success bold"
               >Great job! Ready to proceed!</small
             >
             <button

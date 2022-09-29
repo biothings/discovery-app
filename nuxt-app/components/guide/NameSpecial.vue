@@ -92,9 +92,9 @@ export default {
   methods: {
     look_existing(q) {
       let self = this;
-      const runtimeConfig = useRuntimeConfig()
+      let config = useRuntimeConfig();
       axios
-        .get(runtimeConfig.public.apiUrl + `/api/dataset/query?size=100&q=name:${q}&meta=true`)
+        .get(config.public.apiUrl + `/api/dataset/query?size=100&q=name:${q}&meta=true`)
         .then((res) => {
           let portal_hits = [];
           res.data.hits.forEach((hit) => {
