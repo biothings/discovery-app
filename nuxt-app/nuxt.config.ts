@@ -15,7 +15,7 @@ export default defineNuxtConfig({
       apiSecret: '123',
       // Keys within public, will be also exposed to the client-side
       public: {
-        apiUrl: 'http://dev.discovery.biothings.io'
+        apiUrl: 'http://localhost:8000'
       }
     },
     // https://github.com/nuxt/framework/discussions/3823
