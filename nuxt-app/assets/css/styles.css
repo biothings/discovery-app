@@ -2177,6 +2177,7 @@ progress[value]::-webkit-progress-value {
   background: #dedede;
   overflow: scroll;
   border: inset 2px grey;
+  font-size: .7em;
 }
 .tip:hover i:first-child {
   color: #7c868f !important;
