@@ -10,6 +10,7 @@ from filelock import FileLock, Timeout
 from discovery.handlers import HANDLERS
 from discovery.notify import update_n3c_routine
 from discovery.utils.backup import daily_backup_routine
+from discovery.handlers.proxy import ProxyHandler
 
 # Create a lock can only be acquired by one process.
 # Make sure only one process should perform backup routines
@@ -44,5 +45,8 @@ if __name__ == "__main__":
     crontab("0 0 * * *", func=run_routine, start=True)  # run daily at mid-night
     main(
         HANDLERS,
+        {
+            "default_handler_class": ProxyHandler
+        },
         use_curl=True,
     )
