@@ -1,11 +1,9 @@
 <script setup>
-  import Vivus from "vivus";
   import web_pic from "@/assets/img/site.svg";
   import api_pic from "@/assets/img/api-01.svg";
   import schema_pic from "@/assets/img/sp1-01.svg";
   import faq_pic from "@/assets/img/faq-01.svg";
   import dataset_pic from "@/assets/img/dataset-01.svg";
-  import DynamicImage from "~~/components/DynamicImage.vue";
   import Notify from "simple-notify";
 
   import { computed, ref } from 'vue'
@@ -161,10 +159,6 @@
       return color;
   })
 
-  function hover(id) {
-    new Vivus(id, { duration: 100 });
-  }
-
   function redirect() {
     new Notify({
       status: 'Error',
@@ -229,12 +223,9 @@
           :style="{ background: gradient }"
         >
           <div class="lines p-5">
-            <DynamicImage
-              class="mt-4"
-              :imagePath="portal.image"
-              :alt="portal.name"
-              width="300"
-            ></DynamicImage>
+            <h1 class="text-light my-3">
+              {{portal.name}}
+            </h1>
             <nuxt-link to="/portal" class="d-block text-info"
               ><font-awesome-icon icon="fas fa-chevron-left" /> Back to
               Portals</nuxt-link
@@ -246,12 +237,6 @@
         >
           <div>
             <div class="d-flex justify-content-start align-items-center">
-              <DynamicImage
-                :imagePath="portal.portalicon"
-                :alt="portal.name"
-                width="100"
-                class="mr-2"
-              ></DynamicImage>
               <h1 :style="{ color: portal.colors[1].hex }">
                 <span v-text="portal.name"></span>
               </h1>
@@ -320,15 +305,12 @@
         >
           <div
             class="text-center p-2 m-1 rounded p-3"
-            @mouseenter="hover('web')"
           >
-            <object
-              id="web"
-              type="image/svg+xml"
-              :data="web_pic"
+            <img
+              :src="web_pic"
               width="100"
               alt="WEBSITE"
-            ></object>
+            />
             <a
               :href="portal.site"
               target="_blank"
@@ -341,15 +323,12 @@
           </div>
           <div
             class="text-center p-2 m-1 rounded p-3"
-            @mouseenter="hover('schema')"
           >
-            <object
-              id="schema"
-              type="image/svg+xml"
-              :data="schema_pic"
+            <img
+              :src="schema_pic"
               width="100"
               alt="SCHEMA"
-            ></object>
+            />
             <nuxt-link
               :to="{ path: portal.schema }"
               class="nd mt-2 tip text-info"
@@ -362,15 +341,12 @@
             v-for="(g, i) in portal.guides"
             :key="i + 'gg'"
             class="text-center p-2 m-1 rounded p-3"
-            @mouseenter="hover(i + 'data')"
           >
-            <object
-              :id="i + 'data'"
-              type="image/svg+xml"
-              :data="dataset_pic"
+            <img
+              :src="dataset_pic"
               width="100"
               :alt="g.name"
-            ></object>
+            />
             <nuxt-link
               :to="{ path: g.registry }"
               class="nd mt-2 tip text-info"
@@ -387,15 +363,12 @@
           <div
             v-if="portal && portal.api"
             class="text-center p-2 m-1 rounded p-3"
-            @mouseenter="hover('api')"
           >
-            <object
-              id="api"
-              type="image/svg+xml"
-              :data="api_pic"
+            <img
+              :src="api_pic"
               width="100"
               alt="API"
-            ></object>
+            />
             <a
               :href="portal.api"
               target="_blank"
@@ -409,15 +382,12 @@
           <div
             v-if="portal && portal.faq_link"
             class="text-center p-2 m-1 rounded p-3"
-            @mouseenter="hover('api')"
           >
-            <object
-              id="api"
-              type="image/svg+xml"
-              :data="faq_pic"
+            <img
+              :src="faq_pic"
               width="100px"
               alt="API"
-            ></object>
+            />
             <nuxt-link
               :to="{ path: portal.faq_link }"
               class="nd mt-2 tip text-info"
