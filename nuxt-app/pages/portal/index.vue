@@ -20,13 +20,6 @@
           >
             <div>
               <div class="d-flex justify-content-start align-items-center">
-                <DynamicImage
-                  :imagePath="portal.portalicon"
-                  :id="portal.name"
-                  :alt="portal.name"
-                  width="50"
-                  class="mr-2"
-                ></DynamicImage>
                 <RouterLink
                   class="tip"
                   :to="{ path: '/portal/' + portal.linkname }"
@@ -48,8 +41,6 @@
 </template>
 
 <script>
-import DynamicImage from "~~/components/DynamicImage.vue";
-
 export default {
   name: "Portals",
   head(){
@@ -86,9 +77,6 @@ export default {
         },
       ]
     }
-  },
-  components: {
-    DynamicImage,
   },
   data: function () {
     return {

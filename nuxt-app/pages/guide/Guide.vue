@@ -505,7 +505,7 @@
 import axios from "axios";
 import tippy from "tippy.js";
 import Papa from "papaparse";
-import renderjson from "renderjson";
+import "../../node_modules/renderjson/renderjson.js"
 import { mapGetters } from "vuex";
 import { isArray, isPlainObject, isString } from "lodash";
 import Notify from "simple-notify";

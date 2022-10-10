@@ -46,7 +46,7 @@
             >
               <CopyBtn
                 class="btn ml-1 btn-sm btn-secondary"
-                :copy_this="window.location.href + '#' + section.sectionName"
+                :copy_this="$route.fullPath + '#' + section.sectionName"
               >
                 copy
               </CopyBtn>
@@ -59,7 +59,7 @@
                   <div
                     class="mainTextDark bold anchorParent"
                     :id="item.anchor"
-                    :value="window.location + item.anchor"
+                    :value="$route.fullPath + item.anchor"
                   >
                     <span v-text="item.question"></span>
                     <a
@@ -69,7 +69,7 @@
                     >
                       <CopyBtn
                         class="btn ml-1 btn-sm btn-secondary"
-                        :copy_this="window.location.href + '#' + item.anchor"
+                        :copy_this="$route.fullPath.href + '#' + item.anchor"
                       >
                         copy
                       </CopyBtn>
@@ -136,13 +136,13 @@ export default {
     return {
       faq: [],
       name: "",
-      window: window,
     };
   },
   components: {
     DynamicImage,
   },
   mounted: function () {
+    console.log('ROUTE',this.$route)
     switch (this.$route.params.portal) {
       case "n3c":
         this.name = "FAQ for N3C PPRL Datasets";
