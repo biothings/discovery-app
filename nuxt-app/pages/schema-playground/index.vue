@@ -439,40 +439,40 @@ import not_right from "@/assets/img/not_right-01.svg";
 
 export default {
   name: "SchemaPlayground",
-  head(){
+  head() {
     return {
-      'title': "DDE | Schema Playground",
-      'meta':[
+      title: "DDE | Schema Playground",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/7hf2495v/playground.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/7hf2495v/playground.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/7hf2495v/playground.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/7hf2495v/playground.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/schema-playground'
+          property: "og:url",
+          content: "http://discovery.biothings.io/schema-playground",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/schema-playground'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/schema-playground",
         },
         {
-          'property': 'og:description',
-          'content': 'Create, Visualize and Register Your Own Schema'
+          property: "og:description",
+          content: "Create, Visualize and Register Your Own Schema",
         },
         {
-          'name': 'description',
-          'content': 'Create, Visualize and Register Your Own Schema'
+          name: "description",
+          content: "Create, Visualize and Register Your Own Schema",
         },
         {
-          'name': 'twitter:card',
-          'content': 'Create, Visualize and Register Your Own Schema'
+          name: "twitter:card",
+          content: "Create, Visualize and Register Your Own Schema",
         },
-      ]
-    }
+      ],
+    };
   },
   data: function () {
     return {
@@ -582,7 +582,7 @@ export default {
               }
             },
             allowOutsideClick: () => !this.$swal.isLoading(),
-            backdrop: true
+            backdrop: true,
           })
           .then((result) => {
             if (result.value) {
@@ -825,7 +825,7 @@ export default {
           showCancelButton: true,
           confirmButtonText: "Download Report",
           allowOutsideClick: () => !this.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -847,7 +847,7 @@ export default {
     sendRequest() {
       let self = this;
       self.$store.commit("setLoading", { value: true });
-      const runtimeConfig = useRuntimeConfig()
+      const runtimeConfig = useRuntimeConfig();
       axios
         .get(runtimeConfig.public.apiUrl + "/api/view?url=" + self.input)
         .then((res) => {
@@ -932,7 +932,7 @@ export default {
           if (result.dismiss === self.$swal.DismissReason.timer) {
             this.number = Math.floor(Math.random() * 90000) + 10000;
             this.setLastViewed();
-            navigateTo({ path: "/ns/" + this.slug + this.number })
+            navigateTo({ path: "/ns/" + this.slug + this.number });
           }
         });
     },

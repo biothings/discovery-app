@@ -94,7 +94,10 @@ export default {
       let self = this;
       let config = useRuntimeConfig();
       axios
-        .get(config.public.apiUrl + `/api/dataset/query?size=100&q=name:${q}&meta=true`)
+        .get(
+          config.public.apiUrl +
+            `/api/dataset/query?size=100&q=name:${q}&meta=true`
+        )
         .then((res) => {
           let portal_hits = [];
           res.data.hits.forEach((hit) => {

@@ -1,6 +1,6 @@
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { remove } from "lodash";
-import Notify from 'simple-notify'
+import Notify from "simple-notify";
 
 export const schema_registry = {
   state: {
@@ -15,10 +15,10 @@ export const schema_registry = {
     resetItems(state, payload) {
       state.compareItems = [];
       new Notify({
-        status: 'success',
-        title: 'Schema Registry',
+        status: "success",
+        title: "Schema Registry",
         text: "Cleared",
-        effect: 'fade',
+        effect: "fade",
         speed: 300,
         customClass: null,
         customIcon: null,
@@ -29,8 +29,8 @@ export const schema_registry = {
         gap: 20,
         distance: 20,
         type: 1,
-        position: 'right top'
-      })
+        position: "right top",
+      });
     },
     addItem(state, payload) {
       let item = payload["item"];
@@ -51,12 +51,11 @@ export const schema_registry = {
             }
             state.compareItems.push(item);
           } else {
-
             new Notify({
-              status: 'error',
-              title: 'Schema Registry',
+              status: "error",
+              title: "Schema Registry",
               text: "Duplicate ignored",
-              effect: 'fade',
+              effect: "fade",
               speed: 300,
               customClass: null,
               customIcon: null,
@@ -67,17 +66,17 @@ export const schema_registry = {
               gap: 20,
               distance: 20,
               type: 1,
-              position: 'right top'
-            })
+              position: "right top",
+            });
           }
         }
       }
       if (state.compareItems.length == state.maxComparisons) {
         new Notify({
-          status: 'warning',
-          title: 'Schema Registry',
+          status: "warning",
+          title: "Schema Registry",
           text: "Max items reached",
-          effect: 'fade',
+          effect: "fade",
           speed: 300,
           customClass: null,
           customIcon: null,
@@ -88,8 +87,8 @@ export const schema_registry = {
           gap: 20,
           distance: 20,
           type: 1,
-          position: 'right top'
-        })
+          position: "right top",
+        });
         state.maxReached = true;
       }
     },
@@ -243,10 +242,10 @@ export const schema_registry = {
           }
         } else if (main.hasOwnProperty("properties")) {
           new Notify({
-            status: 'warning',
-            title: 'Schema Registry',
+            status: "warning",
+            title: "Schema Registry",
             text: main["name"] + " does not specify props used, using ALL",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -257,8 +256,8 @@ export const schema_registry = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
           for (var i = 0; i < main.properties.length; i++) {
             let propName = main.properties[i]["curie"];
             let propLabel = main.properties[i]["label"];

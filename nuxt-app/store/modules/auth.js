@@ -32,17 +32,17 @@ export const auth = {
       //     },
       //   });
       // }else{
-        let config = useRuntimeConfig();
-        axios
-          .get(config.public.apiUrl + "/user")
-          .then((response) => {
-            commit("saveUser", { user: response.data });
-          })
-          .catch((err) => {
-            commit("resetUser");
-            throw err;
-          });
-      }
+      let config = useRuntimeConfig();
+      axios
+        .get(config.public.apiUrl + "/user")
+        .then((response) => {
+          commit("saveUser", { user: response.data });
+        })
+        .catch((err) => {
+          commit("resetUser");
+          throw err;
+        });
+    },
     // },
   },
   getters: {

@@ -200,9 +200,7 @@
                     v-for="def in item.children"
                     class="d-flex justify-content-between align-item-center p-1"
                   >
-                    <nuxt-link
-                      :to="{ path: '/ns/' + namespace + '/' + def }"
-                    >
+                    <nuxt-link :to="{ path: '/ns/' + namespace + '/' + def }">
                       <span v-text="def.split(':')[1]"></span>
                       <font-awesome-icon icon="fas fa-chevron-right" />
                     </nuxt-link>
@@ -292,9 +290,7 @@
                                       <li v-for="item6 in getNeighbors(item5)">
                                         <nuxt-link
                                           class="text-6"
-                                          :to="
-                                            '/ns/' + namespace + '/' + item6
-                                          "
+                                          :to="'/ns/' + namespace + '/' + item6"
                                           v-text="item6"
                                         ></nuxt-link>
                                         <ul>
@@ -304,10 +300,7 @@
                                             <nuxt-link
                                               class="text-7"
                                               :to="
-                                                '/ns/' +
-                                                namespace +
-                                                '/' +
-                                                item7
+                                                '/ns/' + namespace + '/' + item7
                                               "
                                               v-text="item7"
                                             ></nuxt-link>
@@ -487,40 +480,43 @@ import "@/assets/js/networkx.js";
 
 export default {
   name: "SchemaViewer",
-  head(){
+  head() {
     return {
-      'title': "DDE | Namespace Viewer",
-      'meta':[
+      title: "DDE | Namespace Viewer",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/xdfr4zzV/schemav.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/xdfr4zzV/schemav.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/xdfr4zzV/schemav.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/xdfr4zzV/schemav.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/ns'
+          property: "og:url",
+          content: "http://discovery.biothings.io/ns",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/ns'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/ns",
         },
         {
-          'property': 'og:description',
-          'content': "Visualize and share your schema definition with the biomedical research community"
+          property: "og:description",
+          content:
+            "Visualize and share your schema definition with the biomedical research community",
         },
         {
-          'name': 'description',
-          'content': "Visualize and share your schema definition with the biomedical research community"
+          name: "description",
+          content:
+            "Visualize and share your schema definition with the biomedical research community",
         },
         {
-          'name': 'twitter:card',
-          'content': "Visualize and share your schema definition with the biomedical research community"
+          name: "twitter:card",
+          content:
+            "Visualize and share your schema definition with the biomedical research community",
         },
-      ]
-    }
+      ],
+    };
   },
   //namespace argument and query argument
   components: {
@@ -555,18 +551,18 @@ export default {
       queryContentParents: [],
       checkbox: null,
       treeBuildErr: false,
-      apiUrl: ''
+      apiUrl: "",
     };
   },
   computed: {
     ...mapGetters(["loading", "userInfo", "queryContent"]),
-    validationView:{
-      get(){
-        return this.$store.getters.validationView
+    validationView: {
+      get() {
+        return this.$store.getters.validationView;
       },
-      set(v){
-        this.$store.commit('setValidationView', {value: v})
-      }
+      set(v) {
+        this.$store.commit("setValidationView", { value: v });
+      },
     },
     schemaFilters() {
       let letters = [];
@@ -889,10 +885,10 @@ export default {
         self.$store.commit("checkIFValidationView", payload);
       } else {
         new Notify({
-          status: 'error',
-          title: 'Visualization Error',
-          text: 'No match found',
-          effect: 'fade',
+          status: "error",
+          title: "Visualization Error",
+          text: "No match found",
+          effect: "fade",
           speed: 300,
           customClass: null,
           customIcon: null,
@@ -903,8 +899,8 @@ export default {
           gap: 20,
           distance: 20,
           type: 1,
-          position: 'right top'
-        })
+          position: "right top",
+        });
       }
     },
     findClass(query) {
@@ -1039,7 +1035,7 @@ export default {
       //   console.log('ALL PARENTS INFO', self.userSchemaParents)
     },
     changeView() {
-      console.log('changing view...')
+      console.log("changing view...");
     },
     drawGraph(g, container) {
       jsnx.draw(g, {
@@ -1071,7 +1067,6 @@ export default {
       if (self.userInfo && self.userInfo.login) {
         self.$swal
           .fire({
-            
             customClass: "scale-in-center",
             title: "Why should I register my schema?",
             html: `<ul class="text-muted text-left">
@@ -1108,7 +1103,7 @@ export default {
                 .fire({
                   title: "Registration",
                   input: "text",
-                  
+
                   customClass: "scale-in-center",
                   text: "Choose a namespace (a-z,0-9)",
                   footer: `<small>Namespace must be unique and cannot be 'metadata','dataset' or 'schema'</small>`,
@@ -1162,7 +1157,7 @@ export default {
                       });
                   },
                   allowOutsideClick: () => !self.$swal.isLoading(),
-                  backdrop: true
+                  backdrop: true,
                 })
                 .then((result) => {
                   if (result.value) {
@@ -1184,7 +1179,7 @@ export default {
                       self.$swal.fire({
                         type: "success",
                         title: "Registration Successful",
-                        
+
                         customClass: "scale-in-center",
                         html: "Taking you to your schema homepage in <strong></strong> seconds.",
                         timer: 3000,
@@ -1247,7 +1242,7 @@ export default {
           showCancelButton: true,
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
-          
+
           customClass: "scale-in-center",
           confirmButtonText: "Extend",
         })
@@ -1280,7 +1275,7 @@ export default {
   },
   mounted: function () {
     let self = this;
-    const runtimeConfig = useRuntimeConfig()
+    const runtimeConfig = useRuntimeConfig();
     this.apiUrl = runtimeConfig.public.apiUrl;
     const route = useRoute();
     this.namespace = route.params.namespace;

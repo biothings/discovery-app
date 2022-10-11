@@ -546,7 +546,6 @@ import { orderBy } from "lodash";
 
 import Notify from "simple-notify";
 
-
 export default {
   name: "EditorClassBox",
   props: ["item"],
@@ -678,7 +677,7 @@ export default {
       options += '<option value="schema:Boolean" />';
       options += '<option value="schema:DateTime" />';
       options += '<option value="schema:Time" />';
-      const runtimeConfig = useRuntimeConfig()
+      const runtimeConfig = useRuntimeConfig();
       axios
         .get(runtimeConfig.public.apiUrl + "/api/registry/schema?field=name")
         .then((res) => {
@@ -827,11 +826,11 @@ export default {
           !self.item.properties[i].selected
         ) {
           new Notify({
-            status: 'error',
-            title: 'Order Error',
-            text: 'You must mark as selected first',
-            position: 'right'
-          })
+            status: "error",
+            title: "Order Error",
+            text: "You must mark as selected first",
+            position: "right",
+          });
         }
       }
       this.updateTotals();
@@ -851,11 +850,11 @@ export default {
           !self.item.properties[i].selected
         ) {
           new Notify({
-            status: 'error',
-            title: 'Order Error',
-            text: 'You must mark as selected first',
-            position: 'right'
-          })
+            status: "error",
+            title: "Order Error",
+            text: "You must mark as selected first",
+            position: "right",
+          });
         }
       }
       this.updateTotals();
@@ -875,11 +874,11 @@ export default {
           !self.item.properties[i].selected
         ) {
           new Notify({
-            status: 'error',
-            title: 'Order Error',
-            text: 'You must mark as selected first',
-            position: 'right'
-          })
+            status: "error",
+            title: "Order Error",
+            text: "You must mark as selected first",
+            position: "right",
+          });
         }
       }
       this.updateTotals();
@@ -887,11 +886,11 @@ export default {
     resetAddPropForm() {
       var self = this;
       new Notify({
-            status: 'success',
-            title: 'New Property',
-            text: "Added: " + self.newPropName,
-            position: 'right'
-          })
+        status: "success",
+        title: "New Property",
+        text: "Added: " + self.newPropName,
+        position: "right",
+      });
       self.newPropName = "";
       self.newPropDescription = "";
       self.newPropRange = [];
@@ -899,7 +898,7 @@ export default {
     getRangeOptions() {
       var self = this;
       let options = [];
-      const runtimeConfig = useRuntimeConfig()
+      const runtimeConfig = useRuntimeConfig();
       axios
         .get(runtimeConfig.public.apiUrl + "/api/registry/schema?field=name")
         .then((res) => {
@@ -929,7 +928,6 @@ export default {
       self.$store.commit("addProperty", payload);
       self.addPropMode = false;
       self.resetAddPropForm();
-
     },
     addInputType() {
       var self = this;
@@ -1031,9 +1029,12 @@ export default {
               options += '<option value="schema:DateTime" />';
               options += '<option value="schema:Time" />';
               self.$swal.isLoading();
-              const runtimeConfig = useRuntimeConfig()
+              const runtimeConfig = useRuntimeConfig();
               axios
-                .get(runtimeConfig.public.apiUrl + "/api/registry/schema?field=name")
+                .get(
+                  runtimeConfig.public.apiUrl +
+                    "/api/registry/schema?field=name"
+                )
                 .then((res) => {
                   self.$swal.hideLoading();
                   if (res.data.hits) {
@@ -1084,11 +1085,11 @@ export default {
               .then((res) => {
                 if (res.value) {
                   new Notify({
-                    status: 'success',
-                    title: 'Success',
+                    status: "success",
+                    title: "Success",
                     text: result.value[0] + " added",
-                    position: 'right'
-                  })
+                    position: "right",
+                  });
                   let payload = {};
                   payload["name"] = result.value[0];
                   payload["range"] = result.value[1];

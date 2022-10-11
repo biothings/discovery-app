@@ -1,7 +1,7 @@
 import { isArray, isPlainObject, isEqual, isString } from "lodash";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import Notify from 'simple-notify'
+import Notify from "simple-notify";
 import { isObject } from "@vue/shared";
 
 export const guide = {
@@ -80,10 +80,10 @@ export const guide = {
           state.bulkJSONItems[i][field] = change;
 
           new Notify({
-            status: 'success',
-            title: 'Guide',
+            status: "success",
+            title: "Guide",
             text: "Updated",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -94,8 +94,8 @@ export const guide = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
         }
       }
     },
@@ -219,10 +219,10 @@ export const guide = {
           ].hasOwnProperty("duplicate")
         ) {
           new Notify({
-            status: 'warning',
-            title: 'Guide',
+            status: "warning",
+            title: "Guide",
             text: selection.name + "s < similar found and filled out",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -233,8 +233,8 @@ export const guide = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
           state.schema.validation.properties[selection.name + "s"]["value"] =
             selection.value;
         }
@@ -248,12 +248,11 @@ export const guide = {
         delete state.schema.validation.properties[selection]["value"];
         state.schema.validation.properties[selection]["selected"] = false;
       } else {
-
         new Notify({
-          status: 'error',
-          title: 'Guide',
+          status: "error",
+          title: "Guide",
           text: selection + ": no value detected",
-          effect: 'fade',
+          effect: "fade",
           speed: 300,
           customClass: null,
           customIcon: null,
@@ -264,17 +263,17 @@ export const guide = {
           gap: 20,
           distance: 20,
           type: 1,
-          position: 'right top'
-        })
+          position: "right top",
+        });
       }
       if (
         !state.schema.validation.properties[selection].hasOwnProperty("value")
       ) {
         new Notify({
-          status: 'success',
-          title: 'Guide',
+          status: "success",
+          title: "Guide",
           text: selection + " was cleared",
-          effect: 'fade',
+          effect: "fade",
           speed: 300,
           customClass: null,
           customIcon: null,
@@ -285,8 +284,8 @@ export const guide = {
           gap: 20,
           distance: 20,
           type: 1,
-          position: 'right top'
-        })
+          position: "right top",
+        });
       }
     },
     removeArrayItemFrom(state, payload) {
@@ -295,16 +294,16 @@ export const guide = {
       let props = state.schema.validation.properties;
 
       if (isString(props[field]?.value)) {
-        console.log('remove from string')
+        console.log("remove from string");
         for (var i = 0; i < props[field].value.length; i++) {
           let prop_val = props[field].value[i];
           if (prop_val === item) {
             delete props[field].value[i];
             new Notify({
-              status: 'success',
-              title: 'Guide',
+              status: "success",
+              title: "Guide",
               text: item + " removed",
-              effect: 'fade',
+              effect: "fade",
               speed: 300,
               customClass: null,
               customIcon: null,
@@ -315,12 +314,12 @@ export const guide = {
               gap: 20,
               distance: 20,
               type: 1,
-              position: 'right top'
-            })
+              position: "right top",
+            });
           }
         }
       } else if (isArray(props[field]?.value)) {
-        console.log('remove from array')
+        console.log("remove from array");
         if (props[field] && props[field].value) {
           for (var i = 0; i < props[field].value.length; i++) {
             let arr_item = props[field].value[i];
@@ -328,10 +327,10 @@ export const guide = {
               if (arr_item === item) {
                 props[field].value.splice(i, 1);
                 new Notify({
-                  status: 'success',
-                  title: 'Guide',
+                  status: "success",
+                  title: "Guide",
                   text: item + " removed from value array",
-                  effect: 'fade',
+                  effect: "fade",
                   speed: 300,
                   customClass: null,
                   customIcon: null,
@@ -342,17 +341,17 @@ export const guide = {
                   gap: 20,
                   distance: 20,
                   type: 1,
-                  position: 'right top'
-                })
+                  position: "right top",
+                });
               }
-            } else if(isObject(arr_item)){
+            } else if (isObject(arr_item)) {
               if (isEqual(arr_item, item)) {
                 props[field].value.splice(i, 1);
                 new Notify({
-                  status: 'success',
-                  title: 'Guide',
+                  status: "success",
+                  title: "Guide",
                   text: "Item removed from value array",
-                  effect: 'fade',
+                  effect: "fade",
                   speed: 300,
                   customClass: null,
                   customIcon: null,
@@ -363,26 +362,26 @@ export const guide = {
                   gap: 20,
                   distance: 20,
                   type: 1,
-                  position: 'right top'
-                })
+                  position: "right top",
+                });
               }
-            }else{
+            } else {
               console.log("not handled, cannot remove item from Array");
             }
           }
         } else {
           console.log("NO VALUE", props[field]);
         }
-      }else if(isPlainObject(props[field]?.value)){
-        console.log('remove from object')
+      } else if (isPlainObject(props[field]?.value)) {
+        console.log("remove from object");
         if (isEqual(props[field].value, item)) {
           delete props[field]["value"];
         } else {
           new Notify({
-            status: 'error',
-            title: 'Guide',
+            status: "error",
+            title: "Guide",
             text: "[OBJ] does not match value",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -393,10 +392,10 @@ export const guide = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
         }
-      }else{
+      } else {
         console.log("not handled, cannot remove item");
       }
 
@@ -578,10 +577,10 @@ export const guide = {
         }
       }
       new Notify({
-        status: 'success',
-        title: 'Guide',
+        status: "success",
+        title: "Guide",
         text: origin + " added",
-        effect: 'fade',
+        effect: "fade",
         speed: 300,
         customClass: null,
         customIcon: null,
@@ -592,17 +591,17 @@ export const guide = {
         gap: 20,
         distance: 20,
         type: 1,
-        position: 'right top'
-      })
+        position: "right top",
+      });
     },
     removeCategory(state, payload) {
       let origin = payload["origin"];
       let catpropsrequired = [];
       new Notify({
-        status: 'warning',
-        title: 'Guide',
+        status: "warning",
+        title: "Guide",
         text: origin + " removed",
-        effect: 'fade',
+        effect: "fade",
         speed: 300,
         customClass: null,
         customIcon: null,
@@ -613,8 +612,8 @@ export const guide = {
         gap: 20,
         distance: 20,
         type: 1,
-        position: 'right top'
-      })
+        position: "right top",
+      });
       for (var i = 0; i < state.selectedPortals.length; i++) {
         if (state.selectedPortals[i]["label"] === origin) {
           catpropsrequired = state.selectedPortals[i]["validation"]["required"];
@@ -776,10 +775,10 @@ export const guide = {
     },
     setEditMode(state, payload) {
       new Notify({
-        status: 'success',
-        title: 'Guide',
+        status: "success",
+        title: "Guide",
         text: "Edit Mode: ON",
-        effect: 'fade',
+        effect: "fade",
         speed: 300,
         customClass: null,
         customIcon: null,
@@ -790,8 +789,8 @@ export const guide = {
         gap: 20,
         distance: 20,
         type: 1,
-        position: 'right top'
-      })
+        position: "right top",
+      });
       state.editingID = payload["id"];
     },
   },

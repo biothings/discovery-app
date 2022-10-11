@@ -1,4 +1,4 @@
-import Notify from 'simple-notify'
+import Notify from "simple-notify";
 
 export const resource_registry = {
   state: {
@@ -24,10 +24,10 @@ export const resource_registry = {
     clearDownloadList(state) {
       state.downloadList = [];
       new Notify({
-        status: 'warning',
-        title: 'Metadata Registry',
+        status: "warning",
+        title: "Metadata Registry",
         text: "Download Mode OFF",
-        effect: 'fade',
+        effect: "fade",
         speed: 300,
         customClass: null,
         customIcon: null,
@@ -38,8 +38,8 @@ export const resource_registry = {
         gap: 20,
         distance: 20,
         type: 1,
-        position: 'right top'
-      })
+        position: "right top",
+      });
     },
     addDownload(state, payload) {
       try {
@@ -48,10 +48,10 @@ export const resource_registry = {
           state.downloadList.splice(existingIndex, 1);
 
           new Notify({
-            status: 'error',
-            title: 'Metadata',
+            status: "error",
+            title: "Metadata",
             text: "Item removed",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -62,15 +62,15 @@ export const resource_registry = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
         } else {
           state.downloadList.unshift(payload.value.id);
           new Notify({
-            status: 'success',
-            title: 'Metadata',
+            status: "success",
+            title: "Metadata",
             text: "Item added",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -81,15 +81,15 @@ export const resource_registry = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
         }
       } catch (error) {
         new Notify({
-          status: 'error',
-          title: 'Metadata',
+          status: "error",
+          title: "Metadata",
           text: "Failed to add download",
-          effect: 'fade',
+          effect: "fade",
           speed: 300,
           customClass: null,
           customIcon: null,
@@ -100,8 +100,8 @@ export const resource_registry = {
           gap: 20,
           distance: 20,
           type: 1,
-          position: 'right top'
-        })
+          position: "right top",
+        });
       }
     },
   },

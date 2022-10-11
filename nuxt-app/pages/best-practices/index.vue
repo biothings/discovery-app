@@ -547,40 +547,43 @@
 <script>
 export default {
   name: "BestPractices",
-  head(){
+  head() {
     return {
-      'title': "DDE | Data Discovery Best Practices",
-      'meta':[
+      title: "DDE | Data Discovery Best Practices",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/Kj1nFptt/bestpractices.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/Kj1nFptt/bestpractices.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/Kj1nFptt/bestpractices.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/Kj1nFptt/bestpractices.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/best-practices'
+          property: "og:url",
+          content: "http://discovery.biothings.io/best-practices",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/best-practices'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/best-practices",
         },
         {
-          'property': 'og:description',
-          'content': 'The DDE metadata forms provide an easy way to create discoverable structured dataset metadata with little to no Schema.org microdata markup or FAIR data-sharing best-practices knowledge.'
+          property: "og:description",
+          content:
+            "The DDE metadata forms provide an easy way to create discoverable structured dataset metadata with little to no Schema.org microdata markup or FAIR data-sharing best-practices knowledge.",
         },
         {
-          'name': 'description',
-          'content': 'The DDE metadata forms provide an easy way to create discoverable structured dataset metadata with little to no Schema.org microdata markup or FAIR data-sharing best-practices knowledge.'
+          name: "description",
+          content:
+            "The DDE metadata forms provide an easy way to create discoverable structured dataset metadata with little to no Schema.org microdata markup or FAIR data-sharing best-practices knowledge.",
         },
         {
-          'name': 'twitter:card',
-          'content': 'The DDE metadata forms provide an easy way to create discoverable structured dataset metadata with little to no Schema.org microdata markup or FAIR data-sharing best-practices knowledge.'
+          name: "twitter:card",
+          content:
+            "The DDE metadata forms provide an easy way to create discoverable structured dataset metadata with little to no Schema.org microdata markup or FAIR data-sharing best-practices knowledge.",
         },
-      ]
-    }
+      ],
+    };
   },
 };
 </script>

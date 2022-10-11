@@ -281,7 +281,7 @@ export default {
       number: 0,
       input: "",
       data: [],
-      apiUrl: ''
+      apiUrl: "",
     };
   },
   methods: {
@@ -646,9 +646,9 @@ export default {
       }
     },
   },
-  mounted: function(){
-    const runtimeConfig = useRuntimeConfig()
+  mounted: function () {
+    const runtimeConfig = useRuntimeConfig();
     this.apiUrl = runtimeConfig.public.apiUrl;
-  }
+  },
 };
 </script>

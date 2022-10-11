@@ -44,49 +44,55 @@
 <script>
 export default {
   name: "LoginPage",
-  head(){
+  head() {
     return {
-      'title': "DDE | Login Page",
-      'meta':[
+      title: "DDE | Login Page",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/login'
+          property: "og:url",
+          content: "http://discovery.biothings.io/login",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/login'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/login",
         },
         {
-          'property': 'og:description',
-          'content': "Log in to start using the Data Discovery Engine"
+          property: "og:description",
+          content: "Log in to start using the Data Discovery Engine",
         },
         {
-          'name': 'description',
-          'content': "Log in to start using the Data Discovery Engine"
+          name: "description",
+          content: "Log in to start using the Data Discovery Engine",
         },
         {
-          'name': 'twitter:card',
-          'content': "Log in to start using the Data Discovery Engine"
+          name: "twitter:card",
+          content: "Log in to start using the Data Discovery Engine",
         },
-      ]
-    }
+      ],
+    };
   },
   mounted: function () {
     let config = useRuntimeConfig();
     document
       .getElementById("samlLink")
-      .setAttribute("href", config.public.apiUrl + "/saml/login/" + window.location.search);
+      .setAttribute(
+        "href",
+        config.public.apiUrl + "/saml/login/" + window.location.search
+      );
     document
       .getElementById("ghButton")
-      .setAttribute("href", config.public.apiUrl + "/oauth/" + window.location.search);
+      .setAttribute(
+        "href",
+        config.public.apiUrl + "/oauth/" + window.location.search
+      );
     if (this.$route.fullPath.includes("n3c")) {
       var btn = document.getElementById("ghButton");
       btn.href = "#";

@@ -24,12 +24,12 @@ export default {
   props: ["preset"],
   methods: {
     handleClick() {
-      const runtimeConfig = useRuntimeConfig()
+      const runtimeConfig = useRuntimeConfig();
       var self = this;
       axios
         .get(
-          runtimeConfig.public.apiUrl + 
-          "/api/registry/" +
+          runtimeConfig.public.apiUrl +
+            "/api/registry/" +
             self.preset.namespace +
             "/" +
             self.preset.prefix +

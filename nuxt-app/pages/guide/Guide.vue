@@ -505,7 +505,7 @@
 import axios from "axios";
 import tippy from "tippy.js";
 import Papa from "papaparse";
-import "../../node_modules/renderjson/renderjson.js"
+import "../../node_modules/renderjson/renderjson.js";
 import { mapGetters } from "vuex";
 import { isArray, isPlainObject, isString } from "lodash";
 import Notify from "simple-notify";
@@ -519,40 +519,40 @@ import JSONItem from "~~/components/guide/JSONItem.vue";
 
 export default {
   name: "Guide",
-  head(){
+  head() {
     return {
-      'title': "DDE | Resource Discovery Guide",
-      'meta':[
+      title: "DDE | Resource Discovery Guide",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/m2HH6cYD/guide.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/m2HH6cYD/guide.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/m2HH6cYD/guide.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/m2HH6cYD/guide.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/guide'
+          property: "og:url",
+          content: "http://discovery.biothings.io/guide",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/guide'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/guide",
         },
         {
-          'property': 'og:description',
-          'content': "Follow best practices to make your metadata more findable"
+          property: "og:description",
+          content: "Follow best practices to make your metadata more findable",
         },
         {
-          'name': 'description',
-          'content': "Follow best practices to make your metadata more findable"
+          name: "description",
+          content: "Follow best practices to make your metadata more findable",
         },
         {
-          'name': 'twitter:card',
-          'content': "Follow best practices to make your metadata more findable"
+          name: "twitter:card",
+          content: "Follow best practices to make your metadata more findable",
         },
-      ]
-    }
+      ],
+    };
   },
   props: ["guide_query", "presets"],
   components: {
@@ -580,7 +580,7 @@ export default {
       portals: [],
       guideQuery: "",
       bulkMode: false,
-      apiUrl: ''
+      apiUrl: "",
     };
   },
   computed: {
@@ -777,10 +777,10 @@ export default {
         .catch((err) => {
           self.$store.commit("setLoading", { value: false });
           new Notify({
-            status: 'error',
-            title: 'Guide Error',
-            text: 'Failed to load schema',
-            effect: 'fade',
+            status: "error",
+            title: "Guide Error",
+            text: "Failed to load schema",
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -791,8 +791,8 @@ export default {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
           throw err;
         });
     },
@@ -872,7 +872,7 @@ export default {
     parseData(data) {
       let self = this;
       let schemaName = self.$store.getters.getSchemaName;
-      console.log('SN', schemaName)
+      console.log("SN", schemaName);
 
       if (data.hits) {
         for (var i = 0; i < data.hits.length; i++) {
@@ -1746,22 +1746,22 @@ export default {
       let p = sessionStorage.getItem("guideProgress");
       if (p) {
         new Notify({
-            status: 'success',
-            title: 'Guide Progress',
-            text: 'Progress recovered',
-            effect: 'fade',
-            speed: 300,
-            customClass: null,
-            customIcon: null,
-            showIcon: true,
-            showCloseButton: true,
-            autoclose: true,
-            autotimeout: 3000,
-            gap: 20,
-            distance: 20,
-            type: 1,
-            position: 'right top'
-          })
+          status: "success",
+          title: "Guide Progress",
+          text: "Progress recovered",
+          effect: "fade",
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 3000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: "right top",
+        });
         let selected = JSON.parse(p);
 
         for (let key in selected) {
@@ -1805,7 +1805,7 @@ export default {
     },
   },
   mounted: function () {
-    const runtimeConfig = useRuntimeConfig()
+    const runtimeConfig = useRuntimeConfig();
     this.apiUrl = runtimeConfig.public.apiUrl;
     if (this.guide_query) {
       this.guideQuery = this.guide_query;

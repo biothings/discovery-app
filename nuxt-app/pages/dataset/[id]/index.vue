@@ -1,272 +1,266 @@
 <script setup>
-  import showdown from "showdown";
-  import { computed, ref } from 'vue'
-  import { useStore } from "vuex";
-  import Notify from "simple-notify";
+import showdown from "showdown";
+import { computed, ref } from "vue";
+import { useStore } from "vuex";
+import Notify from "simple-notify";
 
-  const { $swal } = useNuxtApp()
+const { $swal } = useNuxtApp();
 
-  const route = useRoute();
-  const store = useStore();
-  const id = route.params.id;
-  let metadata = ref({});
-  let isN3C = ref(false);
-  let meta_id = ref("");
-  let n3c_status = ref("");
-  let scriptText = ref("");
-  let color = ref("badge-light");
+const route = useRoute();
+const store = useStore();
+const id = route.params.id;
+let metadata = ref({});
+let isN3C = ref(false);
+let meta_id = ref("");
+let n3c_status = ref("");
+let scriptText = ref("");
+let color = ref("badge-light");
 
-  function processMarkdown(txt) {
-    var conv = new showdown.Converter();
-    txt = conv.makeHtml(txt);
-    return txt.replace(/(?:\r\n|\r|\n)/g, "<br>");
-  }
+function processMarkdown(txt) {
+  var conv = new showdown.Converter();
+  txt = conv.makeHtml(txt);
+  return txt.replace(/(?:\r\n|\r|\n)/g, "<br>");
+}
 
-  function generateScriptText(id) {
-    scriptText.value =
+function generateScriptText(id) {
+  scriptText.value =
+    "<sc" +
+    'ript src="' +
+    "https://discovery.biothings.io/api/dataset/" +
+    id +
+    '.js"/></scr' +
+    "ipt>";
+}
+
+function formatDate(timestamp) {
+  // Create a date object from the timestamp
+  var date = new Date(timestamp);
+  // Create a list of names for the months
+  var months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  // return a formatted date
+  return (
+    months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear()
+  );
+}
+
+function download() {
+  var a = document.createElement("a");
+  var file = new Blob(
+    [
       "<sc" +
-      'ript src="' +
-      "https://discovery.biothings.io/api/dataset/" +
-      id +
-      '.js"/></scr' +
-      "ipt>";
-  }
+        'ript type="application/ld+json" >' +
+        JSON.stringify(metadata, null, 2) +
+        "</scr" +
+        "ipt>",
+    ],
+    { type: "text/plain" }
+  );
+  a.href = URL.createObjectURL(file);
+  a.download = "meta-download";
+  a.click();
+}
 
-  function formatDate(timestamp) {
-    // Create a date object from the timestamp
-    var date = new Date(timestamp);
-    // Create a list of names for the months
-    var months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    // return a formatted date
-    return (
-      months[date.getMonth()] +
-      " " +
-      date.getDate() +
-      ", " +
-      date.getFullYear()
-    );
-  }
-
-  function download() {
-    var a = document.createElement("a");
-    var file = new Blob(
-      [
-        "<sc" +
-          'ript type="application/ld+json" >' +
-          JSON.stringify(metadata, null, 2) +
-          "</scr" +
-          "ipt>",
-      ],
-      { type: "text/plain" }
-    );
-    a.href = URL.createObjectURL(file);
-    a.download = "meta-download";
-    a.click();
-  }
-
-  function getPreview() {
-    let txt =
-      "&lt;sc" +
-      'ript type="application/ld+json" &gt;' +
-      JSON.stringify(metadata.value, null, 2) +
-      "&lt;/scr" +
-      "ipt&gt;";
-    $swal.fire({
-      position: "center",
-      confirmButtonColor: "#63296b",
-      cancelButtonColor: "#4a7d8f",
-      customClass: "scale-in-center",
-      html:
-        `<h6 class="text-center mainTextDark">Copy this code</h6><div class="text-left alert-secondary">
+function getPreview() {
+  let txt =
+    "&lt;sc" +
+    'ript type="application/ld+json" &gt;' +
+    JSON.stringify(metadata.value, null, 2) +
+    "&lt;/scr" +
+    "ipt&gt;";
+  $swal.fire({
+    position: "center",
+    confirmButtonColor: "#63296b",
+    cancelButtonColor: "#4a7d8f",
+    customClass: "scale-in-center",
+    html:
+      `<h6 class="text-center mainTextDark">Copy this code</h6><div class="text-left alert-secondary">
                   <div>
                     <small>
                       <pre>` +
-        txt +
-        `</pre>
+      txt +
+      `</pre>
                     </small>
                   </div>
                 </div>`,
-    });
+  });
+}
+
+function getFeatured(meta) {
+  if (meta.value?._meta?.guide.includes("n3c")) {
+    return "https://i.postimg.cc/bY9q3pMn/n3c.jpg";
   }
-
-  function getFeatured(meta){
-    if (meta.value?._meta?.guide.includes('n3c')) {
-      return "https://i.postimg.cc/bY9q3pMn/n3c.jpg"
-    }
-    if (meta.value?._meta?.guide.includes('outbreak')) {
-      return "https://i.postimg.cc/PJr96spb/outbreak.jpg"
-    }
-    return 'https://i.postimg.cc/sDvbMVVR/dataset.jpg'
+  if (meta.value?._meta?.guide.includes("outbreak")) {
+    return "https://i.postimg.cc/PJr96spb/outbreak.jpg";
   }
+  return "https://i.postimg.cc/sDvbMVVR/dataset.jpg";
+}
 
-  function getMetadata(id) {
-    id = id.replace("/", "");
-    generateScriptText(id);
-    meta_id.value = id;
-    const runtimeConfig = useRuntimeConfig()
-    store.commit('setLoading', {value: true});
+function getMetadata(id) {
+  id = id.replace("/", "");
+  generateScriptText(id);
+  meta_id.value = id;
+  const runtimeConfig = useRuntimeConfig();
+  store.commit("setLoading", { value: true });
 
-    fetch(runtimeConfig.public.apiUrl + "/api/dataset/" + id + "?meta=true")
-      .then((response) => response.json())
-      .then((data) => {
-        metadata.value = data;
-        useHead({
-          title: "DDE | " + metadata.value.name,
-          meta:[
-            {
-              'property': 'og:description',
-              'content': metadata.value.description
-            },
-            {
-              'name': 'description',
-              'content': metadata.value.description
-            },
-            {
-              'name': 'twitter:card',
-              'content': metadata.value.description
-            },
-            {
-              'name': 'og:url',
-              'content': "https://discovery.biothings.io/dataset/" + id
-            },
-            {
-              'name': 'og:image',
-              'content': getFeatured(metadata)
-            },
-            {
-              'name': 'twitter:image',
-              'content': getFeatured(metadata)
-            },
-          ],
-          link:[
-            {
-              'rel': 'canonical',
-              'href': metadata.value.url || 'https://discovery.biothings.io/dataset' + id
-            }
-          ],
-          script:[
-            {
-              'type': 'application/ld+json',
-              'children': JSON.stringify(metadata.value, null, 2)
-            }
-          ]
-        })
-        store.commit('setLoading', {value: false});
-        if (
-          Object.prototype.hasOwnProperty.call(
-            metadata.value["_meta"],
-            "n3c"
-          ) &&
-          Object.keys(metadata.value["_meta"]["n3c"]).length
-        ) {
-          isN3C.value = true;
-          n3c_status.value = Object.prototype.hasOwnProperty.call(
-            metadata.value["_meta"]["n3c"],
-            "status"
-          )
-            ? metadata.value["_meta"]["n3c"]["status"]
-            : "Not Available";
-          switch (n3c_status.value) {
-            case "Done/Imported":
-              color.value = "badge-success";
-              break;
-            case "Available":
-              color.value = "badge-success";
-              break;
-            case "Done/Rejected":
-              color.value = "badge-danger";
-              break;
-            case "Ready for Import":
-              color.value = "badge-purple";
-              break;
-            case "In Review":
-              color.value = "badge-info";
-              break;
-            default:
-              color.value = "badge-secondary";
-              break;
-          }
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-        $swal.fire({
-          icon: "error",
-          title: "Page does not exist",
-          html: "<a href='/dataset' rel='nonreferrer'>Go To Registry</a>",
-        });
-        store.commit('setLoading', {value: false});
-        throw err;
+  fetch(runtimeConfig.public.apiUrl + "/api/dataset/" + id + "?meta=true")
+    .then((response) => response.json())
+    .then((data) => {
+      metadata.value = data;
+      useHead({
+        title: "DDE | " + metadata.value.name,
+        meta: [
+          {
+            property: "og:description",
+            content: metadata.value.description,
+          },
+          {
+            name: "description",
+            content: metadata.value.description,
+          },
+          {
+            name: "twitter:card",
+            content: metadata.value.description,
+          },
+          {
+            name: "og:url",
+            content: "https://discovery.biothings.io/dataset/" + id,
+          },
+          {
+            name: "og:image",
+            content: getFeatured(metadata),
+          },
+          {
+            name: "twitter:image",
+            content: getFeatured(metadata),
+          },
+        ],
+        link: [
+          {
+            rel: "canonical",
+            href:
+              metadata.value.url ||
+              "https://discovery.biothings.io/dataset" + id,
+          },
+        ],
+        script: [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify(metadata.value, null, 2),
+          },
+        ],
       });
-  }
-
-  function copyScript(id) {
-    var copyText = document.getElementById(id);
-    copyText.select();
-    document.execCommand("Copy");
-    new Notify({
-      status: 'success',
-      title: 'Copied!',
-      autoclose: true,
-      autotimeout: 2000
-    })
-  }
-
-  const last_updated = computed(() => {
+      store.commit("setLoading", { value: false });
       if (
-          metadata.value.hasOwnProperty("_meta") &&
-          metadata.value["_meta"].hasOwnProperty("last_updated")
-        ) {
-          return formatDate(metadata.value["_meta"]["last_updated"]);
-        } else {
-          return false;
-        }
-  })
-
-  const viewMetadata = computed(() => {
-      let chosen_only = {};
-      const ignore = [
-        "_id",
-        "@type",
-        "@context",
-        "name",
-        "description",
-        "keywords",
-      ];
-      Object.keys(metadata.value).forEach(function (v, i) {
-        if (!ignore.includes(v)) {
-          chosen_only[v] = metadata.value[v];
-        }
-      });
-      return chosen_only;
-  })
-
-  const schemaLink = computed(() => {
-    if (
-        metadata.value.hasOwnProperty("@type") &&
-        metadata.value["@type"].includes(":")
+        Object.prototype.hasOwnProperty.call(metadata.value["_meta"], "n3c") &&
+        Object.keys(metadata.value["_meta"]["n3c"]).length
       ) {
-        let parts = metadata.value["@type"].split(":");
-        return "/view/" + parts[0] + "/" + parts[1];
+        isN3C.value = true;
+        n3c_status.value = Object.prototype.hasOwnProperty.call(
+          metadata.value["_meta"]["n3c"],
+          "status"
+        )
+          ? metadata.value["_meta"]["n3c"]["status"]
+          : "Not Available";
+        switch (n3c_status.value) {
+          case "Done/Imported":
+            color.value = "badge-success";
+            break;
+          case "Available":
+            color.value = "badge-success";
+            break;
+          case "Done/Rejected":
+            color.value = "badge-danger";
+            break;
+          case "Ready for Import":
+            color.value = "badge-purple";
+            break;
+          case "In Review":
+            color.value = "badge-info";
+            break;
+          default:
+            color.value = "badge-secondary";
+            break;
+        }
       }
-      return false;
-  })
+    })
+    .catch((err) => {
+      console.log(err);
+      $swal.fire({
+        icon: "error",
+        title: "Page does not exist",
+        html: "<a href='/dataset' rel='nonreferrer'>Go To Registry</a>",
+      });
+      store.commit("setLoading", { value: false });
+      throw err;
+    });
+}
 
-  getMetadata(id);
+function copyScript(id) {
+  var copyText = document.getElementById(id);
+  copyText.select();
+  document.execCommand("Copy");
+  new Notify({
+    status: "success",
+    title: "Copied!",
+    autoclose: true,
+    autotimeout: 2000,
+  });
+}
 
+const last_updated = computed(() => {
+  if (
+    metadata.value.hasOwnProperty("_meta") &&
+    metadata.value["_meta"].hasOwnProperty("last_updated")
+  ) {
+    return formatDate(metadata.value["_meta"]["last_updated"]);
+  } else {
+    return false;
+  }
+});
+
+const viewMetadata = computed(() => {
+  let chosen_only = {};
+  const ignore = [
+    "_id",
+    "@type",
+    "@context",
+    "name",
+    "description",
+    "keywords",
+  ];
+  Object.keys(metadata.value).forEach(function (v, i) {
+    if (!ignore.includes(v)) {
+      chosen_only[v] = metadata.value[v];
+    }
+  });
+  return chosen_only;
+});
+
+const schemaLink = computed(() => {
+  if (
+    metadata.value.hasOwnProperty("@type") &&
+    metadata.value["@type"].includes(":")
+  ) {
+    let parts = metadata.value["@type"].split(":");
+    return "/view/" + parts[0] + "/" + parts[1];
+  }
+  return false;
+});
+
+getMetadata(id);
 </script>
 
 <template>

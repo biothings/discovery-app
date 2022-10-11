@@ -1,9 +1,9 @@
 <script setup>
-import {useStore} from 'vuex'
+import { useStore } from "vuex";
 let store = useStore();
 let route = useRoute();
 let faq = store.getters.getFAQ(route.params.portal);
-let name = ref('');
+let name = ref("");
 switch (route.params.portal) {
   case "n3c":
     name.value = "FAQ for N3C PPRL Datasets";
@@ -13,39 +13,38 @@ switch (route.params.portal) {
 }
 
 useHead({
-      'title': "DDE | FAQ",
-      'meta':[
-        {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/Kj9MSL9k/faq.jpg'
-        },
-        {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/Kj9MSL9k/faq.jpg'
-        },
-        {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/faq'
-        },
-        {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/faq'
-        },
-        {
-          'property': 'og:description',
-          'content': "Get help with some of our most frequently asked questions"
-        },
-        {
-          'name': 'description',
-          'content': "Get help with some of our most frequently asked questions"
-        },
-        {
-          'name': 'twitter:card',
-          'content': "Get help with some of our most frequently asked questions"
-        },
-      ]
-    })
-
+  title: "DDE | FAQ",
+  meta: [
+    {
+      name: "twitter:image",
+      content: "https://i.postimg.cc/Kj9MSL9k/faq.jpg",
+    },
+    {
+      property: "og:image",
+      content: "https://i.postimg.cc/Kj9MSL9k/faq.jpg",
+    },
+    {
+      property: "og:url",
+      content: "http://discovery.biothings.io/faq",
+    },
+    {
+      name: "twitter:url",
+      content: "http://discovery.biothings.io/faq",
+    },
+    {
+      property: "og:description",
+      content: "Get help with some of our most frequently asked questions",
+    },
+    {
+      name: "description",
+      content: "Get help with some of our most frequently asked questions",
+    },
+    {
+      name: "twitter:card",
+      content: "Get help with some of our most frequently asked questions",
+    },
+  ],
+});
 </script>
 
 <template>
@@ -69,7 +68,7 @@ useHead({
           class="text-dark my-1"
           v-text="section.sectionName.replace('_', ' ')"
         ></h6>
-        
+
         <div class="ml-3">
           <template v-for="item in section.questions" :key="item">
             <div>
@@ -127,7 +126,7 @@ useHead({
                     </a>
                   </div>
                   <div v-if="item.image">
-                    <img :src="item.image" class="w-100"/>
+                    <img :src="item.image" class="w-100" />
                   </div>
                   <div class="text-muted p-2" v-html="item.answer"></div>
                 </li>

@@ -679,7 +679,7 @@ export default {
     BooleanInput,
     IdentifierSpecial,
     InputPreview,
-    NameSpecial
+    NameSpecial,
   },
   props: ["name", "info"],
   methods: {
@@ -725,20 +725,20 @@ export default {
       }
     },
     removeItem(e, name) {
-      console.log(e)
+      console.log(e);
       let self = this;
 
       var x = e.pageX - 130;
       var y = e.pageY - 20;
       var el = document.querySelector("#puff");
-      el.classList.add('d-inline')
+      el.classList.add("d-inline");
       let audio = document.getElementById("pop-sound");
       audio.play();
-      el.style.position = 'absolute'
-      el.style.left = x
-      el.style.top = y
+      el.style.position = "absolute";
+      el.style.left = x;
+      el.style.top = y;
       setTimeout(() => {
-        el.classList.remove('d-inline')
+        el.classList.remove("d-inline");
       }, 500);
 
       var payload = {};
@@ -1951,21 +1951,15 @@ export default {
     datePreset: function () {
       let schema = this.$store.getters.schema;
       if (
-        schema.validation.properties.hasOwnProperty(
-          "datePublished"
-        ) &&
+        schema.validation.properties.hasOwnProperty("datePublished") &&
         schema.validation.properties["datePublished"].value
       ) {
-        return schema.validation.properties["datePublished"]
-          .value;
+        return schema.validation.properties["datePublished"].value;
       } else if (
-        schema.validation.properties.hasOwnProperty(
-          "dateModified"
-        ) &&
+        schema.validation.properties.hasOwnProperty("dateModified") &&
         schema.validation.properties["dateModified"].value
       ) {
-        return schema.validation.properties["dateModified"]
-          .value;
+        return schema.validation.properties["dateModified"].value;
       } else {
         return false;
       }

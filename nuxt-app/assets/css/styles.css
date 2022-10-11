@@ -71,8 +71,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.swal-xl{
-  width:80vw !important;
+.swal-xl {
+  width: 80vw !important;
 }
 
 .route-active {
@@ -424,7 +424,6 @@ span.fa-stack:hover > svg:nth-child(1) {
 .zoom-2 {
   zoom: 2;
 }
-
 
 .text-0 {
   color: #099 !important;
@@ -2177,7 +2176,7 @@ progress[value]::-webkit-progress-value {
   background: #dedede;
   overflow: scroll;
   border: inset 2px grey;
-  font-size: .7em;
+  font-size: 0.7em;
 }
 .tip:hover i:first-child {
   color: #7c868f !important;

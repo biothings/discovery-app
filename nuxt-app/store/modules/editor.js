@@ -1,6 +1,6 @@
 import axios from "axios";
 import { orderBy, isPlainObject, isArray, isString } from "lodash";
-import Notify from 'simple-notify'
+import Notify from "simple-notify";
 // editor default options
 import { validation_options } from "./editor_options/validation_options";
 import { definition_options } from "./editor_options/definition_options";
@@ -54,10 +54,10 @@ export const editor = {
       //remove all marginality in validation
       if (!state.addCardinality) {
         new Notify({
-          status: 'warning',
-          title: 'Editor',
-          text: 'Removing cardinality',
-          effect: 'fade',
+          status: "warning",
+          title: "Editor",
+          text: "Removing cardinality",
+          effect: "fade",
           speed: 300,
           customClass: null,
           customIcon: null,
@@ -68,8 +68,8 @@ export const editor = {
           gap: 20,
           distance: 20,
           type: 1,
-          position: 'right top'
-        })
+          position: "right top",
+        });
         for (const name in state.finalschema["@graph"][0]["$validation"][
           "properties"
         ]) {
@@ -92,10 +92,10 @@ export const editor = {
       state.removeValidation = !state.removeValidation;
       if (state.removeValidation) {
         new Notify({
-          status: 'warning',
-          title: 'Editor',
-          text: 'Validation OFF',
-          effect: 'fade',
+          status: "warning",
+          title: "Editor",
+          text: "Validation OFF",
+          effect: "fade",
           speed: 300,
           customClass: null,
           customIcon: null,
@@ -106,14 +106,14 @@ export const editor = {
           gap: 20,
           distance: 20,
           type: 1,
-          position: 'right top'
-        })
+          position: "right top",
+        });
       } else {
         new Notify({
-          status: 'success',
-          title: 'Editor',
-          text: 'Validation ON',
-          effect: 'fade',
+          status: "success",
+          title: "Editor",
+          text: "Validation ON",
+          effect: "fade",
           speed: 300,
           customClass: null,
           customIcon: null,
@@ -124,8 +124,8 @@ export const editor = {
           gap: 20,
           distance: 20,
           type: 1,
-          position: 'right top'
-        })
+          position: "right top",
+        });
       }
     },
     restoreStore(state, payload) {
@@ -154,10 +154,10 @@ export const editor = {
             JSON.stringify(state.validation_options)
           );
           new Notify({
-            status: 'success',
-            title: 'Deleted!',
+            status: "success",
+            title: "Deleted!",
             text: msg[random],
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -168,8 +168,8 @@ export const editor = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
         }
       }
     },
@@ -192,10 +192,10 @@ export const editor = {
             JSON.stringify(state.definition_options)
           );
           new Notify({
-            status: 'success',
-            title: 'Deleted!',
+            status: "success",
+            title: "Deleted!",
             text: msg[random],
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -206,8 +206,8 @@ export const editor = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
         }
       }
     },
@@ -263,10 +263,10 @@ export const editor = {
       }
       state.finalschema["@graph"][0]["$validation"]["properties"][name] = obj;
       new Notify({
-        status: 'success',
-        title: 'Editor',
+        status: "success",
+        title: "Editor",
         text: "Validation cleared",
-        effect: 'fade',
+        effect: "fade",
         speed: 300,
         customClass: null,
         customIcon: null,
@@ -277,8 +277,8 @@ export const editor = {
         gap: 20,
         distance: 20,
         type: 1,
-        position: 'right top'
-      })
+        position: "right top",
+      });
     },
     addValidationOption(state, payload) {
       let item = payload["validation"];
@@ -288,10 +288,10 @@ export const editor = {
         JSON.stringify(state.validation_options)
       );
       new Notify({
-        status: 'success',
-        title: 'Editor',
+        status: "success",
+        title: "Editor",
         text: "Option added",
-        effect: 'fade',
+        effect: "fade",
         speed: 300,
         customClass: null,
         customIcon: null,
@@ -302,8 +302,8 @@ export const editor = {
         gap: 20,
         distance: 20,
         type: 1,
-        position: 'right top'
-      })
+        position: "right top",
+      });
     },
     addDefinitionOption(state, payload) {
       function makeID(length) {
@@ -372,10 +372,10 @@ export const editor = {
       );
 
       new Notify({
-        status: 'success',
-        title: 'Editor',
+        status: "success",
+        title: "Editor",
         text: item.title + " definition added",
-        effect: 'fade',
+        effect: "fade",
         speed: 300,
         customClass: null,
         customIcon: null,
@@ -386,8 +386,8 @@ export const editor = {
         gap: 20,
         distance: 20,
         type: 1,
-        position: 'right top'
-      })
+        position: "right top",
+      });
     },
     editValidationItem(state, payload) {
       let itemID = payload["item"]["_id"];
@@ -398,10 +398,10 @@ export const editor = {
           state.validation_options[i] = newItem;
           state.editThis = "";
           new Notify({
-            status: 'success',
-            title: 'Editor',
+            status: "success",
+            title: "Editor",
             text: "Edits saved",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -412,8 +412,8 @@ export const editor = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
         }
       }
       localStorage.setItem(
@@ -430,10 +430,10 @@ export const editor = {
           state.definition_options[i] = newItem;
           state.editThisDefinition = "";
           new Notify({
-            status: 'success',
-            title: 'Editor',
+            status: "success",
+            title: "Editor",
             text: "Edits saved",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -444,8 +444,8 @@ export const editor = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
         }
       }
       localStorage.setItem(
@@ -505,7 +505,9 @@ export const editor = {
         if (state.schema[i].special) {
           if (Object.hasOwnProperty.call(state.schema[i], "properties")) {
             state.schema[i].properties.push(newProp);
-          } else if (!Object.hasOwnProperty.call(state.schema[i], "properties")) {
+          } else if (
+            !Object.hasOwnProperty.call(state.schema[i], "properties")
+          ) {
             state.schema[i]["properties"] = [];
             state.schema[i].properties.push(newProp);
           }
@@ -634,10 +636,10 @@ export const editor = {
       for (var i = 0; i < state.schema.length; i++) {
         if (state.schema[i].special) {
           new Notify({
-            status: 'warning',
-            title: 'Editor',
+            status: "warning",
+            title: "Editor",
             text: label + " deleted",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -648,16 +650,16 @@ export const editor = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
           for (var x = 0; x < state.schema[i].properties.length; x++) {
             if (state.schema[i].properties[x].label === label) {
               state.schema[i].properties.splice(x, 1);
               new Notify({
-                status: 'warning',
-                title: 'Editor',
+                status: "warning",
+                title: "Editor",
                 text: label + " deleted",
-                effect: 'fade',
+                effect: "fade",
                 speed: 300,
                 customClass: null,
                 customIcon: null,
@@ -668,8 +670,8 @@ export const editor = {
                 gap: 20,
                 distance: 20,
                 type: 1,
-                position: 'right top'
-              })
+                position: "right top",
+              });
             }
           }
         }
@@ -806,7 +808,12 @@ export const editor = {
                 }
               }
               //pre populate validation from inherited if available
-              if (Object.hasOwnProperty.call(state.top_class_validation, "properties")) {
+              if (
+                Object.hasOwnProperty.call(
+                  state.top_class_validation,
+                  "properties"
+                )
+              ) {
                 // console.log('pre-populating validation... ')
                 for (const propName in state.top_class_validation.properties) {
                   if (
@@ -905,10 +912,10 @@ export const editor = {
         }
         if (incomplete && !state.removeValidation) {
           new Notify({
-            status: 'warning',
-            title: 'Editor',
+            status: "warning",
+            title: "Editor",
             text: incomplete + " properties still need validation rules",
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -919,8 +926,8 @@ export const editor = {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
         }
       }
       // REMOVE VALIDATION
@@ -1101,10 +1108,10 @@ export const editor = {
         commit("setLoading", { value: false });
         console.warn("Failed query for parent class");
         new Notify({
-          status: 'error',
-          title: 'Editor',
+          status: "error",
+          title: "Editor",
           text: "Error loading schema, contact us",
-          effect: 'fade',
+          effect: "fade",
           speed: 300,
           customClass: null,
           customIcon: null,
@@ -1115,8 +1122,8 @@ export const editor = {
           gap: 20,
           distance: 20,
           type: 1,
-          position: 'right top'
-        })
+          position: "right top",
+        });
       }
     },
   },

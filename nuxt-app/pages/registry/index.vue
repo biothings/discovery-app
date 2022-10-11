@@ -402,40 +402,43 @@ import SchemaRegistryItem from "~~/components/SchemaRegistryItem.vue";
 
 export default {
   name: "SchemaRegistry",
-  head(){
+  head() {
     return {
-      'title': "DDE | Schema Registry",
-      'meta':[
+      title: "DDE | Schema Registry",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/B62zg5S0/registry.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/B62zg5S0/registry.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/B62zg5S0/registry.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/B62zg5S0/registry.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/registry'
+          property: "og:url",
+          content: "http://discovery.biothings.io/registry",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/registry'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/registry",
         },
         {
-          'property': 'og:description',
-          'content': 'Browse registered namespaces and classes on the DDE. Easily visualize or extend any class to create your own schema.'
+          property: "og:description",
+          content:
+            "Browse registered namespaces and classes on the DDE. Easily visualize or extend any class to create your own schema.",
         },
         {
-          'name': 'description',
-          'content': 'Browse registered namespaces and classes on the DDE. Easily visualize or extend any class to create your own schema.'
+          name: "description",
+          content:
+            "Browse registered namespaces and classes on the DDE. Easily visualize or extend any class to create your own schema.",
         },
         {
-          'name': 'twitter:card',
-          'content': 'Browse registered namespaces and classes on the DDE. Easily visualize or extend any class to create your own schema.'
+          name: "twitter:card",
+          content:
+            "Browse registered namespaces and classes on the DDE. Easily visualize or extend any class to create your own schema.",
         },
-      ]
-    }
+      ],
+    };
   },
   components: {
     SchemaRegistryItem,
@@ -556,10 +559,11 @@ export default {
       let res = [];
       // TODO:
       // change this to use https://discovery.biothings.io/api/registry?field=_id&size=20
-      const runtimeConfig = useRuntimeConfig()
+      const runtimeConfig = useRuntimeConfig();
       axios
         .get(
-          runtimeConfig.public.apiUrl + "/api/registry/query?facets=namespace&facet_size=100"
+          runtimeConfig.public.apiUrl +
+            "/api/registry/query?facets=namespace&facet_size=100"
         )
         .then((res) => {
           res = res.data.facets.namespace.terms.map((r) => r.term);
@@ -616,7 +620,7 @@ export default {
       if (query !== "__all__") {
         self.finalQ = query;
       }
-      const runtimeConfig = useRuntimeConfig()
+      const runtimeConfig = useRuntimeConfig();
 
       let url = runtimeConfig.public.apiUrl + `/api/registry/query?q=${query}`;
 

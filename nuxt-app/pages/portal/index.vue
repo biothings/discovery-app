@@ -1,42 +1,45 @@
 <script setup>
-import { useStore } from 'vuex'
+import { useStore } from "vuex";
 
 let store = useStore();
 let portals = store.getters.getPortals;
 
 useHead({
-      'title': "DDE | Data Portals",
-      'meta':[
-        {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
-        },
-        {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
-        },
-        {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/portal'
-        },
-        {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/portal'
-        },
-        {
-          'property': 'og:description',
-          'content': 'Explore data portals and learn how you can contribute and access their data.'
-        },
-        {
-          'name': 'description',
-          'content': 'Explore data portals and learn how you can contribute and access their data.'
-        },
-        {
-          'name': 'twitter:card',
-          'content': 'Explore data portals and learn how you can contribute and access their data.'
-        },
-      ]
-    })
+  title: "DDE | Data Portals",
+  meta: [
+    {
+      name: "twitter:image",
+      content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+    },
+    {
+      property: "og:image",
+      content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+    },
+    {
+      property: "og:url",
+      content: "http://discovery.biothings.io/portal",
+    },
+    {
+      name: "twitter:url",
+      content: "http://discovery.biothings.io/portal",
+    },
+    {
+      property: "og:description",
+      content:
+        "Explore data portals and learn how you can contribute and access their data.",
+    },
+    {
+      name: "description",
+      content:
+        "Explore data portals and learn how you can contribute and access their data.",
+    },
+    {
+      name: "twitter:card",
+      content:
+        "Explore data portals and learn how you can contribute and access their data.",
+    },
+  ],
+});
 </script>
 
 <template>
@@ -61,7 +64,12 @@ useHead({
           >
             <div>
               <div class="d-flex justify-content-start align-items-center">
-                <img :src="portal.portalicon" :alt="portal.name" width="50px" class="mr-2"/>
+                <img
+                  :src="portal.portalicon"
+                  :alt="portal.name"
+                  width="50px"
+                  class="mr-2"
+                />
                 <RouterLink
                   class="tip"
                   :to="{ path: '/portal/' + portal.linkname }"

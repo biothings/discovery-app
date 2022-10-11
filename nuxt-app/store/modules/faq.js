@@ -1,14 +1,13 @@
-import diagram from  "~~/assets/img/diagram.png"
-import schemagraph from  "~~/assets/img/schemagraph.png"
-import dashhelp from  "~~/assets/img/dashhelp.png"
-import editor from  "~~/assets/img/editor.png"
-import guides from  "~~/assets/img/guides.png"
-import metadata from  "~~/assets/img/metadata.png"
-import metahelp from  "~~/assets/img/metahelp.png"
-import deletehelp from  "~~/assets/img/deletehelp.png"
-import privacy from  "~~/assets/img/privacy.png"
-import editmeta from  "~~/assets/img/editmeta.png"
-
+import diagram from "~~/assets/img/diagram.png";
+import schemagraph from "~~/assets/img/schemagraph.png";
+import dashhelp from "~~/assets/img/dashhelp.png";
+import editor from "~~/assets/img/editor.png";
+import guides from "~~/assets/img/guides.png";
+import metadata from "~~/assets/img/metadata.png";
+import metahelp from "~~/assets/img/metahelp.png";
+import deletehelp from "~~/assets/img/deletehelp.png";
+import privacy from "~~/assets/img/privacy.png";
+import editmeta from "~~/assets/img/editmeta.png";
 
 export const faq = {
   state: () => ({
