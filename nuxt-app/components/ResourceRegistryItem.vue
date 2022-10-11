@@ -17,6 +17,7 @@
           class="mb-1 mainTextDark d-inline gaText d-inline pointer"
           @click="goTo(item)"
         >
+          <img :src="imgIcon" width="20" :alt="item.name" class="mr-1" />
           <nuxt-link :to="{ path: '/dataset/' + item._id }">{{
             item.name
           }}</nuxt-link>
@@ -60,6 +61,10 @@
 
 <script>
 import moment from "moment";
+import dde from "~~/assets/img/dde-logo-o.svg";
+import n3cLogo from "~~/assets/img/N3Co.png";
+import niaidIcon from "~~/assets/img/niaid/icon.svg";
+import outbreakIcon from "~~/assets/img/icon-01.svg";
 
 export default {
   name: "ResourceRegistryItem",
@@ -104,6 +109,26 @@ export default {
     },
   },
   computed: {
+    imgIcon: function () {
+      let self = this;
+      let guide = Object.prototype.hasOwnProperty.call(
+        self.item["_meta"],
+        "guide"
+      )
+        ? self.item["_meta"]["guide"]
+        : "";
+      if (guide == "/guide") {
+        return dde;
+      } else if (guide.includes("niaid")) {
+        return niaidIcon;
+      } else if (guide.includes("outbreak")) {
+        return outbreakIcon;
+      } else if (guide.includes("n3c")) {
+        return n3cLogo;
+      } else {
+        return dde;
+      }
+    },
     text: function () {
       if (this.item.description.length > 150) {
         return this.item.description.substring(0, 150) + "...";
