@@ -11,7 +11,10 @@
       class="btn btn-sm d-block w-100 rounded-0"
     >
       <b v-text="optionName"></b>
-      <small class="text-warning ml-1" v-text="!expand ? 'show' : 'hide'"></small>
+      <small
+        class="text-warning ml-1"
+        v-text="!expand ? 'show' : 'hide'"
+      ></small>
     </button>
     <template v-if="expand">
       <div class="alert-light" v-if="!option.items">

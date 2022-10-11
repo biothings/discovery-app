@@ -99,7 +99,10 @@
           </span>
           <small class="text-light"
             >Extending
-            <font-awesome-icon icon="fas fa-chevron-right" class="mr-1"></font-awesome-icon>
+            <font-awesome-icon
+              icon="fas fa-chevron-right"
+              class="mr-1"
+            ></font-awesome-icon>
             <b v-text="startingPoint"></b
           ></small>
         </div>
@@ -586,7 +589,7 @@
 import { mapGetters, mapState } from "vuex";
 import axios from "axios";
 import moment from "moment";
-import "../../node_modules/renderjson/renderjson.js"
+import "../../node_modules/renderjson/renderjson.js";
 
 import cubeImg from "@/assets/img/cubeplus.svg";
 import editorImg from "@/assets/img/editor.png";
@@ -601,40 +604,40 @@ import EditorClassBox from "~~/components/EditorClassBox.vue";
 
 export default {
   name: "SchemaEditor",
-  head(){
+  head() {
     return {
-      'title': "DDE | Schema Editor",
-      'meta':[
+      title: "DDE | Schema Editor",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/rssJ788J/editor.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/rssJ788J/editor.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/rssJ788J/editor.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/rssJ788J/editor.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/editor'
+          property: "og:url",
+          content: "http://discovery.biothings.io/editor",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/editor'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/editor",
         },
         {
-          'property': 'og:description',
-          'content': "Extend an existing schema to create your own."
+          property: "og:description",
+          content: "Extend an existing schema to create your own.",
         },
         {
-          'name': 'description',
-          'content': "Extend an existing schema to create your own."
+          name: "description",
+          content: "Extend an existing schema to create your own.",
         },
         {
-          'name': 'twitter:card',
-          'content': "Extend an existing schema to create your own."
+          name: "twitter:card",
+          content: "Extend an existing schema to create your own.",
         },
-      ]
-    }
+      ],
+    };
   },
   components: {
     NGXGraph,
@@ -717,7 +720,7 @@ export default {
           });
           self.availableNamespace = false;
         } else {
-          const runtimeConfig = useRuntimeConfig()
+          const runtimeConfig = useRuntimeConfig();
           let url = runtimeConfig.public.apiUrl + "/api/registry/" + value;
           self.$store.commit("setLoading", { value: true });
           axios
@@ -1400,7 +1403,7 @@ export default {
                 "content-type": "application/json",
               },
             };
-            const runtimeConfig = useRuntimeConfig()
+            const runtimeConfig = useRuntimeConfig();
 
             return axios
               .post(runtimeConfig.public.apiUrl + "/api/gh", data, config)
@@ -1505,8 +1508,8 @@ export default {
     this.checkCustomValidation();
     this.checkCustomDefinitions();
   },
-  updated: function(){
-    this.$store.dispatch('setUpTips');
-  }
+  updated: function () {
+    this.$store.dispatch("setUpTips");
+  },
 };
 </script>

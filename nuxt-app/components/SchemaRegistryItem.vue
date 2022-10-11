@@ -19,8 +19,7 @@
       </div>
       <div class="flex-grow-1 d-flex align-items-center">
         <div class="d-inline mr-1">
-          <div class="mr-1 d-none d-md-inline">
-          </div>
+          <div class="mr-1 d-none d-md-inline"></div>
           <h6 class="m-1 mainTextDark d-inline">
             {{ item.label }}
             <small
@@ -179,7 +178,7 @@ export default {
       //add param v for verbose definition including all parents
       var self = this;
       self.adding = true;
-      const runtimeConfig = useRuntimeConfig()
+      const runtimeConfig = useRuntimeConfig();
       axios
         .get(
           runtimeConfig.public.apiUrl +
@@ -215,10 +214,10 @@ export default {
         .catch((err) => {
           self.adding = false;
           new Notify({
-            status: 'error',
-            title: 'Registry Error',
+            status: "error",
+            title: "Registry Error",
             text: "Could not add item " + item.name,
-            effect: 'fade',
+            effect: "fade",
             speed: 300,
             customClass: null,
             customIcon: null,
@@ -229,8 +228,8 @@ export default {
             gap: 20,
             distance: 20,
             type: 1,
-            position: 'right top'
-          })
+            position: "right top",
+          });
           throw err;
         });
     },

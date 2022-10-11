@@ -5,12 +5,8 @@
         <div class="p-2">
           <h6 class="text-light">Data Discovery Engine</h6>
           <nuxt-link class="d-block text-light" to="/">Home</nuxt-link>
-          <nuxt-link class="d-block text-light" to="/about"
-            >About</nuxt-link
-          >
-          <nuxt-link class="d-block text-light" to="/faq/dde"
-            >FAQ</nuxt-link
-          >
+          <nuxt-link class="d-block text-light" to="/about">About</nuxt-link>
+          <nuxt-link class="d-block text-light" to="/faq/dde">FAQ</nuxt-link>
           <nuxt-link class="d-block text-light" to="/best-practices"
             >Discovery Guide</nuxt-link
           >

@@ -46,8 +46,7 @@
           <div class="col-sm-10" id="dashTippyParent">
             <div class="alert-dark p-2">
               <div class="mt-3 mainTextDark">
-                ({{total_NS}})
-                Registered Schema Namespaces
+                ({{ total_NS }}) Registered Schema Namespaces
               </div>
               <div v-if="dashboard && dashboard.length">
                 <div v-for="item in dashboard" class="row m-1">
@@ -81,9 +80,7 @@
                       </a>
                     </div>
                     <div>
-                      <nuxt-link
-                        :to="'/ns/' + item.namespace"
-                      >
+                      <nuxt-link :to="'/ns/' + item.namespace">
                         <span
                           class="fa-stack fa-1x pointer tip"
                           data-tippy-content="Visualize"
@@ -236,8 +233,7 @@
 
             <div class="alert-info p-2">
               <div class="mt-3 mainTextLight">
-                ({{datasetsTotal}})
-                Registered Datasets
+                ({{ datasetsTotal }}) Registered Datasets
               </div>
               <form
                 @submit.prevent="getDatasets()"
@@ -286,7 +282,7 @@
                     class="col-sm-12 col-md-8 p-1 mainBackLight d-flex align-items-center justify-content-between"
                   >
                     <nuxt-link
-                      :to="'/dataset/' + item._id "
+                      :to="'/dataset/' + item._id"
                       class="m-2 text-light d-block"
                       :title="item.name"
                     >
@@ -500,50 +496,50 @@
 <script>
 import axios from "axios";
 import moment from "moment";
-import Notify from 'simple-notify';
+import Notify from "simple-notify";
 
 import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "Dashboard",
-  head(){
+  head() {
     return {
-      'title': "DDE | My Dashboard",
-      'meta':[
+      title: "DDE | My Dashboard",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/dashboard'
+          property: "og:url",
+          content: "http://discovery.biothings.io/dashboard",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/dashboard'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/dashboard",
         },
         {
-          'property': 'og:description',
-          'content': "My metadata and schema namespace contributions"
+          property: "og:description",
+          content: "My metadata and schema namespace contributions",
         },
         {
-          'name': 'description',
-          'content': "My metadata and schema namespace contributions"
+          name: "description",
+          content: "My metadata and schema namespace contributions",
         },
         {
-          'name': 'twitter:card',
-          'content': "My metadata and schema namespace contributions"
+          name: "twitter:card",
+          content: "My metadata and schema namespace contributions",
         },
-      ]
-    }
+      ],
+    };
   },
   data: function () {
     return {
-      apiUrl:'',
+      apiUrl: "",
       dashboard: [],
       privateDatasets: [],
       datasets: [],
@@ -609,7 +605,7 @@ export default {
       immediate: true,
       handler: function (v) {
         if (!v) {
-          console.log('loggedIn', v)
+          console.log("loggedIn", v);
           navigateTo({ path: "/" });
         }
       },
@@ -846,11 +842,11 @@ export default {
                             this.$swal.hideLoading();
                             if (res.data.success) {
                               new Notify({
-                                status: 'success',
-                                title: 'Success!',
-                                text: 'Field Updated',
-                                position: 'right'
-                              })
+                                status: "success",
+                                title: "Success!",
+                                text: "Field Updated",
+                                position: "right",
+                              });
                               this.$swal
                                 .fire({
                                   title: "Make other changes?",
@@ -1260,10 +1256,9 @@ export default {
     ...mapActions(["checkUser"]),
   },
   mounted: function () {
-    const runtimeConfig = useRuntimeConfig()
+    const runtimeConfig = useRuntimeConfig();
     this.apiUrl = runtimeConfig.public.apiUrl;
     this.getAll();
-    
   },
   created: function () {
     this.checkUser();

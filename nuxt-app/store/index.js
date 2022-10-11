@@ -9,8 +9,8 @@ import { schema_viewer } from "./modules/schema_viewer";
 import { editor } from "./modules/editor";
 import { guide } from "./modules/guide";
 import { portals } from "./modules/portals";
-import { delegate } from 'tippy.js';
-import axios from 'axios'
+import { delegate } from "tippy.js";
+import axios from "axios";
 
 export default createStore({
   modules: {
@@ -23,7 +23,7 @@ export default createStore({
     schema_viewer,
     editor,
     guide,
-    portals
+    portals,
   },
   state: () => ({
     loading: false,
@@ -38,55 +38,65 @@ export default createStore({
       return state.loading;
     },
   },
-  actions:{
-    setUpTips(){
-      console.log('Setting up Tippy');
+  actions: {
+    setUpTips() {
+      console.log("Setting up Tippy");
       delegate("#tippyRoot", {
         target: "[data-tippy-content]",
-        content: 'loading',
+        content: "loading",
         animation: "scale",
         theme: "ddeDark",
-        trigger:'mouseenter',
+        trigger: "mouseenter",
         allowHTML: true,
         onShow(instance) {
           let info = instance.reference.dataset.tippyContent;
-              if (info.substring(0, 4) == 'http') {
-                info = info.replace(/['"]+/g, '')
-                // EBI API LOOKUP TIP DESCRIPTION
-                axios.get("https://www.ebi.ac.uk/ols/api/search?q="+encodeURI(info)+"&exact=1").then(res=>{
-                  if (res.data.response.hasOwnProperty('docs')&& res.data.response.docs.length >= 1) {
-                    for (var i = 0; i < res.data.response.docs.length; i++) {
-                      if (res.data.response.docs[i]['iri']===info) {
-                        instance.setContent(res.data.response.docs[i]['label'])
-                      }
+          if (info.substring(0, 4) == "http") {
+            info = info.replace(/['"]+/g, "");
+            // EBI API LOOKUP TIP DESCRIPTION
+            axios
+              .get(
+                "https://www.ebi.ac.uk/ols/api/search?q=" +
+                  encodeURI(info) +
+                  "&exact=1"
+              )
+              .then((res) => {
+                if (
+                  res.data.response.hasOwnProperty("docs") &&
+                  res.data.response.docs.length >= 1
+                ) {
+                  for (var i = 0; i < res.data.response.docs.length; i++) {
+                    if (res.data.response.docs[i]["iri"] === info) {
+                      instance.setContent(res.data.response.docs[i]["label"]);
                     }
-                  }else{
-                    instance.setContent(info)
                   }
-                }).catch(err=>{
-                  instance.setContent(info)
-                });
-              }else{
-                let html =
-                  '<table class="table table-sm table-striped table-dark m-0">';
-                try {
-                  if (instance.reference.dataset.tippyContent.includes("{")) {
-                    let json = JSON.parse(instance.reference.dataset.tippyContent);
-                    for (const k in json) {
-                      html += `<tr>
+                } else {
+                  instance.setContent(info);
+                }
+              })
+              .catch((err) => {
+                instance.setContent(info);
+              });
+          } else {
+            let html =
+              '<table class="table table-sm table-striped table-dark m-0">';
+            try {
+              if (instance.reference.dataset.tippyContent.includes("{")) {
+                let json = JSON.parse(instance.reference.dataset.tippyContent);
+                for (const k in json) {
+                  html += `<tr>
                       <td>${k}</td>
                       <td>${json[k]}</td>
                       </tr>`;
-                    }
-                    html += "</table>";
-                    instance.setContent(html);
-                  }
-                } catch (error) {
-                  instance.setContent(instance.reference.dataset.tippyContent);
                 }
+                html += "</table>";
+                instance.setContent(html);
               }
+            } catch (error) {
+              instance.setContent(instance.reference.dataset.tippyContent);
+            }
+          }
         },
       });
-    }
-  }
+    },
+  },
 });

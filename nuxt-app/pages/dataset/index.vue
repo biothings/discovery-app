@@ -319,40 +319,40 @@ import ResourceRegistryItem from "~~/components/ResourceRegistryItem.vue";
 
 export default {
   name: "ResourceRegistry",
-  head(){
+  head() {
     return {
-      'title': "DDE | Resource Registry",
-      'meta':[
+      title: "DDE | Resource Registry",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/sDvbMVVR/dataset.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/sDvbMVVR/dataset.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/sDvbMVVR/dataset.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/sDvbMVVR/dataset.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/dataset'
+          property: "og:url",
+          content: "http://discovery.biothings.io/dataset",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/dataset'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/dataset",
         },
         {
-          'property': 'og:description',
-          'content': "Browse biomedical schema.org structured resource metadata"
+          property: "og:description",
+          content: "Browse biomedical schema.org structured resource metadata",
         },
         {
-          'name': 'description',
-          'content': "Browse biomedical schema.org structured resource metadata"
+          name: "description",
+          content: "Browse biomedical schema.org structured resource metadata",
         },
         {
-          'name': 'twitter:card',
-          'content': "Browse biomedical schema.org structured resource metadata"
+          name: "twitter:card",
+          content: "Browse biomedical schema.org structured resource metadata",
         },
-      ]
-    }
+      ],
+    };
   },
   data: function () {
     return {
@@ -367,7 +367,7 @@ export default {
       startCapLimitReached: true,
       endCapLimitReached: false,
       total: Number,
-      apiUrl: '',
+      apiUrl: "",
       registry_api_url: "/api/dataset/query?",
       hits: [],
       query: "",
@@ -949,7 +949,7 @@ export default {
     },
   },
   mounted: function () {
-    const runtimeConfig = useRuntimeConfig()
+    const runtimeConfig = useRuntimeConfig();
     this.apiUrl = runtimeConfig.public.apiUrl;
     this.highlighter = new Mark(document.querySelector(".context"));
     this.checkURLQuery();

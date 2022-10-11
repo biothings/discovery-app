@@ -111,7 +111,7 @@ export default {
   methods: {
     look_existing(q) {
       let self = this;
-      const runtimeConfig = useRuntimeConfig()
+      const runtimeConfig = useRuntimeConfig();
       axios
         .get(
           runtimeConfig.public.apiUrl +

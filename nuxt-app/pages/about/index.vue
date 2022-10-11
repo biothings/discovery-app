@@ -91,40 +91,43 @@
 <script>
 export default {
   name: "About",
-  head(){
+  head() {
     return {
-      'title': "DDE | About",
-      'meta':[
+      title: "DDE | About",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/about'
+          property: "og:url",
+          content: "http://discovery.biothings.io/about",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/about'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/about",
         },
         {
-          'property': 'og:description',
-          'content': 'The biomedical and informatics communities have largely endorsed the spirit and basic components of the FAIR Data Principles. Biomedical data producers, including CTSA hubs, need actionable best-practice guidance on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole'
+          property: "og:description",
+          content:
+            "The biomedical and informatics communities have largely endorsed the spirit and basic components of the FAIR Data Principles. Biomedical data producers, including CTSA hubs, need actionable best-practice guidance on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole",
         },
         {
-          'name': 'description',
-          'content': 'The biomedical and informatics communities have largely endorsed the spirit and basic components of the FAIR Data Principles. Biomedical data producers, including CTSA hubs, need actionable best-practice guidance on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole'
+          name: "description",
+          content:
+            "The biomedical and informatics communities have largely endorsed the spirit and basic components of the FAIR Data Principles. Biomedical data producers, including CTSA hubs, need actionable best-practice guidance on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole",
         },
         {
-          'name': 'twitter:card',
-          'content': 'The biomedical and informatics communities have largely endorsed the spirit and basic components of the FAIR Data Principles. Biomedical data producers, including CTSA hubs, need actionable best-practice guidance on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole'
+          name: "twitter:card",
+          content:
+            "The biomedical and informatics communities have largely endorsed the spirit and basic components of the FAIR Data Principles. Biomedical data producers, including CTSA hubs, need actionable best-practice guidance on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole",
         },
-      ]
-    }
+      ],
+    };
   },
 };
 </script>

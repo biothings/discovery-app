@@ -18,11 +18,11 @@ export default {
         hasDesc = true;
       } else {
         new Notify({
-          status: 'warning',
-          title: 'Editing',
-          text: 'Adding new description',
-          position: 'right'
-        })
+          status: "warning",
+          title: "Editing",
+          text: "Adding new description",
+          position: "right",
+        });
       }
       self.$swal
         .fire({

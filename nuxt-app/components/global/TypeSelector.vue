@@ -455,7 +455,7 @@ export default {
           text: "Search for an existing term here:",
           input: "text",
           confirmButtonColor: "#5C3069",
-              cancelButtonColor: "#006476",
+          cancelButtonColor: "#006476",
           animation: false,
           customClass: "scale-in-center",
           inputAttributes: {
@@ -510,7 +510,7 @@ export default {
                 title: propName + "(s):",
                 html: html,
                 confirmButtonColor: "#5C3069",
-              cancelButtonColor: "#006476",
+                cancelButtonColor: "#006476",
                 animation: false,
                 customClass: "scale-in-center",
                 preConfirm: () => {
@@ -656,7 +656,7 @@ export default {
       return check;
     },
     handleEnum(propName, propInfo) {
-      console.log('handleEnum')
+      console.log("handleEnum");
       let self = this;
       let e = propInfo["enum"];
       let html = "";
@@ -680,7 +680,8 @@ export default {
         `</form>
                 </div>`;
 
-      self.$swal.fire({
+      self.$swal
+        .fire({
           title: propName,
           inputAttributes: {
             id: "hideThis",

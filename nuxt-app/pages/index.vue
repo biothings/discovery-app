@@ -138,10 +138,7 @@
         </h5>
         <div class="m-0 p-5 text-center col-sm-12">
           <h3 class="logoText">Browse Registered Schemas & Metadata</h3>
-          <nuxt-link
-            class="btn btn-outline-info"
-            role="button"
-            to="/registries"
+          <nuxt-link class="btn btn-outline-info" role="button" to="/registries"
             >Continue</nuxt-link
           >
         </div>
@@ -292,40 +289,43 @@ import tippy from "tippy.js";
 
 export default {
   name: "Home",
-  head(){
+  head() {
     return {
-      'title': "DDE | Home",
-      'meta':[
+      title: "DDE | Home",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/'
+          property: "og:url",
+          content: "http://discovery.biothings.io/",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/",
         },
         {
-          'property': 'og:description',
-          'content': 'A project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.'
+          property: "og:description",
+          content:
+            "A project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.",
         },
         {
-          'name': 'description',
-          'content': 'A project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.'
+          name: "description",
+          content:
+            "A project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.",
         },
         {
-          'name': 'twitter:card',
-          'content': 'A project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.'
+          name: "twitter:card",
+          content:
+            "A project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.",
         },
-      ]
-    }
+      ],
+    };
   },
   data: function () {
     return {

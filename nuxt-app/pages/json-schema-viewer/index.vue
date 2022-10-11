@@ -96,40 +96,43 @@ import JS_PropertyBox from "~~/components/JS_PropertyBox.vue";
 
 export default {
   name: "JSONSchemaViewer",
-  head(){
+  head() {
     return {
-      'title': "DDE | JSON Schema Viewer",
-      'meta':[
+      title: "DDE | JSON Schema Viewer",
+      meta: [
         {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          name: "twitter:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg'
+          property: "og:image",
+          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
         },
         {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/json-schema-viewer'
+          property: "og:url",
+          content: "http://discovery.biothings.io/json-schema-viewer",
         },
         {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/json-schema-viewer'
+          name: "twitter:url",
+          content: "http://discovery.biothings.io/json-schema-viewer",
         },
         {
-          'property': 'og:description',
-          'content': "Test DDE compatibility before registering a schema namespace"
+          property: "og:description",
+          content:
+            "Test DDE compatibility before registering a schema namespace",
         },
         {
-          'name': 'description',
-          'content': "Test DDE compatibility before registering a schema namespace"
+          name: "description",
+          content:
+            "Test DDE compatibility before registering a schema namespace",
         },
         {
-          'name': 'twitter:card',
-          'content': "Test DDE compatibility before registering a schema namespace"
+          name: "twitter:card",
+          content:
+            "Test DDE compatibility before registering a schema namespace",
         },
-      ]
-    }
+      ],
+    };
   },
   data: function () {
     return {
