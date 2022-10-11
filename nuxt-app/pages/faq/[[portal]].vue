@@ -1,3 +1,53 @@
+<script setup>
+import {useStore} from 'vuex'
+let store = useStore();
+let route = useRoute();
+let faq = store.getters.getFAQ(route.params.portal);
+let name = ref('');
+switch (route.params.portal) {
+  case "n3c":
+    name.value = "FAQ for N3C PPRL Datasets";
+    break;
+  default:
+    name.value = "FAQ";
+}
+
+useHead({
+      'title': "DDE | FAQ",
+      'meta':[
+        {
+          'name': 'twitter:image',
+          'content': 'https://i.postimg.cc/Kj9MSL9k/faq.jpg'
+        },
+        {
+          'property': 'og:image',
+          'content': 'https://i.postimg.cc/Kj9MSL9k/faq.jpg'
+        },
+        {
+          'property': 'og:url',
+          'content': 'http://discovery.biothings.io/faq'
+        },
+        {
+          'name': 'twitter:url',
+          'content': 'http://discovery.biothings.io/faq'
+        },
+        {
+          'property': 'og:description',
+          'content': "Get help with some of our most frequently asked questions"
+        },
+        {
+          'name': 'description',
+          'content': "Get help with some of our most frequently asked questions"
+        },
+        {
+          'name': 'twitter:card',
+          'content': "Get help with some of our most frequently asked questions"
+        },
+      ]
+    })
+
+</script>
+
 <template>
   <main class="bg-light" style="min-height: 100vh">
     <div class="jumbotron bg-light text-center pt-5" style="margin-top: 40px">
@@ -19,6 +69,7 @@
           class="text-dark my-1"
           v-text="section.sectionName.replace('_', ' ')"
         ></h6>
+        
         <div class="ml-3">
           <template v-for="item in section.questions" :key="item">
             <div>
@@ -75,12 +126,9 @@
                       </CopyBtn>
                     </a>
                   </div>
-                  <DynamicImage
-                    v-if="item?.image"
-                    :imagePath="item.image"
-                    :alt="section"
-                    class="w-100"
-                  ></DynamicImage>
+                  <div v-if="item.image">
+                    <img :src="item.image" class="w-100"/>
+                  </div>
                   <div class="text-muted p-2" v-html="item.answer"></div>
                 </li>
               </template>
@@ -91,67 +139,3 @@
     </div>
   </main>
 </template>
-
-<script>
-import DynamicImage from "~~/components/DynamicImage.vue";
-
-export default {
-  name: "FAQ",
-  head(){
-    return {
-      'title': "DDE | FAQ",
-      'meta':[
-        {
-          'name': 'twitter:image',
-          'content': 'https://i.postimg.cc/Kj9MSL9k/faq.jpg'
-        },
-        {
-          'property': 'og:image',
-          'content': 'https://i.postimg.cc/Kj9MSL9k/faq.jpg'
-        },
-        {
-          'property': 'og:url',
-          'content': 'http://discovery.biothings.io/faq'
-        },
-        {
-          'name': 'twitter:url',
-          'content': 'http://discovery.biothings.io/faq'
-        },
-        {
-          'property': 'og:description',
-          'content': "Get help with some of our most frequently asked questions"
-        },
-        {
-          'name': 'description',
-          'content': "Get help with some of our most frequently asked questions"
-        },
-        {
-          'name': 'twitter:card',
-          'content': "Get help with some of our most frequently asked questions"
-        },
-      ]
-    }
-  },
-  data: function () {
-    return {
-      faq: [],
-      name: "",
-    };
-  },
-  components: {
-    DynamicImage,
-  },
-  mounted: function () {
-    console.log('ROUTE',this.$route)
-    switch (this.$route.params.portal) {
-      case "n3c":
-        this.name = "FAQ for N3C PPRL Datasets";
-        break;
-      default:
-        this.name = "FAQ";
-    }
-
-    this.faq = this.$store.getters.getFAQ(this.$route.params.portal);
-  },
-};
-</script>

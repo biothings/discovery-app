@@ -20,12 +20,6 @@
       <div class="flex-grow-1 d-flex align-items-center">
         <div class="d-inline mr-1">
           <div class="mr-1 d-none d-md-inline">
-            <DynamicImage
-              :imagePath="imgLink"
-              :id="imgLink"
-              :alt="imgLink"
-              width="30"
-            ></DynamicImage>
           </div>
           <h6 class="m-1 mainTextDark d-inline">
             {{ item.label }}
@@ -126,7 +120,6 @@
 
 <script>
 import axios from "axios";
-import DynamicImage from "../components/DynamicImage.vue";
 import { sortBy } from "lodash";
 import Notify from "simple-notify";
 
@@ -140,9 +133,6 @@ export default {
       adding: false,
       itemID: Math.floor(Math.random() * 90000) + 10000,
     };
-  },
-  components: {
-    DynamicImage,
   },
   props: ["item"],
   methods: {

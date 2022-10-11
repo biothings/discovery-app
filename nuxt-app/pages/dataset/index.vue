@@ -76,13 +76,6 @@
               @click="toggleFilter(filter)"
               :class="[filter.active ? 'btn-info' : 'btn-secondary']"
             >
-              <DynamicImage
-                :imagePath="filter.icon"
-                :id="filter.name"
-                :alt="filter.name"
-                width="20"
-                class="mr-2"
-              ></DynamicImage>
               <span v-text="filter.name" class="gaText"></span>
             </span>
           </template>
@@ -323,7 +316,6 @@ import Papa from "papaparse";
 import { mapGetters } from "vuex";
 
 import ResourceRegistryItem from "~~/components/ResourceRegistryItem.vue";
-import DynamicImage from "~~/components/DynamicImage.vue";
 
 export default {
   name: "ResourceRegistry",
@@ -438,7 +430,6 @@ export default {
   },
   components: {
     ResourceRegistryItem,
-    DynamicImage,
   },
   methods: {
     toggleDownloadMode() {

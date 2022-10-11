@@ -12,17 +12,6 @@
         <font-awesome-icon v-if="!inDownloadCart" icon="fas fa-plus fa-2x" />
         <font-awesome-icon v-else icon="fas fa-check fa-2x" />
       </div>
-      <div
-        class="col-sm-1 d-flex justify-items-center align-items-center alert-secondary"
-        v-if="imgIcon"
-      >
-        <DynamicImage
-          :imagePath="imgIcon"
-          :id="imgIcon"
-          :alt="imgIcon"
-          width="50"
-        ></DynamicImage>
-      </div>
       <div class="col-sm-7">
         <h5
           class="mb-1 mainTextDark d-inline gaText d-inline pointer"
@@ -72,8 +61,6 @@
 <script>
 import moment from "moment";
 
-import DynamicImage from "~~/components/DynamicImage.vue";
-
 export default {
   name: "ResourceRegistryItem",
   data: function () {
@@ -83,9 +70,6 @@ export default {
       n3c_status: "",
       color: "badge-light",
     };
-  },
-  components: {
-    DynamicImage,
   },
   props: ["item"],
   methods: {
@@ -125,26 +109,6 @@ export default {
         return this.item.description.substring(0, 150) + "...";
       } else {
         return this.item.description;
-      }
-    },
-    imgIcon: function () {
-      let self = this;
-      let guide = Object.prototype.hasOwnProperty.call(
-        self.item["_meta"],
-        "guide"
-      )
-        ? self.item["_meta"]["guide"]
-        : "";
-      if (guide == "/guide") {
-        return "dde-logo-o.svg";
-      } else if (guide.includes("niaid")) {
-        return "niaid/icon.svg";
-      } else if (guide.includes("outbreak")) {
-        return "outbreak.png";
-      } else if (guide.includes("n3c")) {
-        return "N3Co.png";
-      } else {
-        return "dde-logo-o.svg";
       }
     },
     detailLink: function () {
