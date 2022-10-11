@@ -22,19 +22,19 @@
   if (pn) {
     switch (pn) {
       case "niaid":
-        portal = portals[1];
+      portal = portals.find(item => item.keyName == pn);
         featuredImg = "https://i.postimg.cc/zf6HqKY4/niaidportal.jpg";
         break;
       case "outbreak":
-        portal = portals[0];
+        portal = portals.find(item => item.keyName == pn);
         featuredImg = "https://i.postimg.cc/3w4WfN01/outportal.jpg";
         break;
       case "cd2h":
-        portal = portals[2];
+        portal = portals.find(item => item.keyName == pn);
         featuredImg = 'https://i.postimg.cc/Dz2bCndY/cd2hportal.jpg';
         break;
       case "n3c":
-        portal = portals[3];
+        portal = portals.find(item => item.keyName == pn);
         featuredImg = "https://i.postimg.cc/y87FGm7P/n3cportal.jpg";
         break;
       default:

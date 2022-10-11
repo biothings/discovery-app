@@ -152,7 +152,7 @@
         </div>
       </div>
       <div class="container px-5" id="choose">
-        <h1 class="logoText">Choose a Guide</h1>
+        <h1 class="logoText">Choose a Template</h1>
         <div class="container">
           <p class="text-muted">
             Learn how this metadata will be available via our
@@ -449,7 +449,7 @@
               width="150px"
             />
             <div class="card-body d-flex flex-column justify-content-around">
-              <h5 class="card-title">NIAID Data Portal</h5>
+              <h5 class="card-title">NIAID Systems Biology</h5>
               <p class="card-text">
                 <b
                   >National Institute of Allergy and Infectious Diseases (<a
@@ -464,7 +464,7 @@
                   href="https://discovery.biothings.io/niaid/"
                   target="_blank"
                   rel="nonreferrer"
-                  >NIAID Data Portal
+                  >NIAID Systems Biology
                   <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) dataset metadata based on this
                 <nuxt-link to="/view/niaid/" rel="nonreferrer"

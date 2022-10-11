@@ -3,7 +3,6 @@ import dde from  "~~/assets/img/dde-logo-o.svg"
 import n3c from  "~~/assets/img/N3Co.png"
 import n3cLogo from  "~~/assets/img/N3Cwhite.png"
 import outbreak from  "~~/assets/img/outbreak_white.svg"
-import niaid from  "~~/assets/img/niaid/logo.svg"
 import niaidIcon from  "~~/assets/img/niaid/icon.svg"
 import outbreakIcon from  "~~/assets/img/icon-01.svg"
 
@@ -13,6 +12,7 @@ export const portals = {
     portals: [
         {
           name: "Outbreak.info",
+          keyName: 'outbreak',
           header:
             "During outbreaks of emerging diseases such as COVID-19, efficiently collecting, sharing, and integrating data is critical to scientific research. Outbreak.info is a resource to aggregate all this information into a single location.",
           linkname: "outbreak",
@@ -37,18 +37,19 @@ export const portals = {
           colors: [{ hex: "#D13B62" }, { hex: "#0A253D" }],
         },
         {
-          name: "NIAID Data Portal",
-          header:
-            "AN AGGREGATOR OF OPEN DATASETS, WITH A PARTICULAR FOCUS ON ALLERGY AND INFECTIOUS DISEASES",
-          linkname: "niaid",
+          name: "NIAID Systems Biology",
+          keyName: 'niaid',
+          header:'The NIAID Systems Biology Consortium for Infectious Diseases Data Dissemination Working Group works to make our research outputs more FAIR.',
+          linkname:'niaid',
           description: `<p>
-            The NIAID (National Institute of Allergy and Infectious Diseases) Data Portal aggregates <b class="tip text-info" data-tippy-content="Omics DI,NCBI GEO, Zenodo, Harvard Dataverse, NYU Data Catalog, ImmPort, Data Discovery Engine">7 different data sources</b> together in a searchable platform, making it easier to find datasets.
-            </p><p>
-            We also standardize the dataset metadata to a common form, increasing the findability of these datasets. Schema.org provides a widely accepted format regonizable by major search engines and data portals.
-            </p><p>
-            While some dataset providers already use this format to describe their datasets, others provide structured metadata in their own format. Learn more about our efforts to encapsulate non-standard dataset metdata in schema.org's format.
-            </p>`,
-          image: niaid,
+          The NIAID (National Institute of Allergy and Infectious Diseases) Systems Biology Consortium for Infectious Diseases Data Dissemination Working Group works to make our research outputs more FAIR.
+          </p><p>
+          We developed a Dataset and ComputationalTool schema tailored for research outputs in the infectious disease research space to increase their findability and discoverability.
+          </p>
+          <p>
+          To help researchers easily collect and publish these metadata, the DDE registry allows researchers to easily collect dataset metadata based on our standards when no community repository exists.
+          </p>`,
+          image: niaidIcon,
           portalicon: niaidIcon,
           site: "https://discovery.biothings.io/niaid/",
           schema: "/view/niaid",
@@ -65,10 +66,11 @@ export const portals = {
             },
           ],
           datasets: "/dataset?guide=/guide/niaid",
-          colors: [{ hex: "#369AC1" }, { hex: "#113B56" }],
+          colors: [{ hex: "#369AC1" }, { hex: "#087ca9" }],
         },
         {
           name: "CTSA National Center for Data to Health",
+          keyName: 'cd2h',
           header:
             "A CD2H PROJECT TO PROMOTE FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS",
           linkname: "cd2h",
@@ -96,6 +98,7 @@ export const portals = {
         },
         {
           name: "The National COVID Cohort Collaborative (N3C)",
+          keyName: 'n3c',
           header:
             "The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.",
           linkname: "n3c",

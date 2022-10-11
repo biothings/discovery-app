@@ -15,7 +15,9 @@ export default defineNuxtConfig({
       apiSecret: '123',
       // Keys within public, will be also exposed to the client-side
       public: {
-        apiUrl: ''
+        // to test CRUD operations you must use a proxy server, a localhost will only work
+        //with GET calls, for prod a proxy server/handler must be used.
+        apiUrl: process.env.NODE_ENV == 'development' ? 'http://localhost:8000' : ''
       }
     },
     // https://github.com/nuxt/framework/discussions/3823

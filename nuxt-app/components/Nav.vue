@@ -125,7 +125,7 @@
               <nuxt-link
                 class="dropdown-item mainTextLight text-left"
                 to="/dataset"
-                >Metadata Registry <i class="fas fa-chevron-right"></i
+                >Resource Registry <i class="fas fa-chevron-right"></i
               ></nuxt-link>
               <nuxt-link
                 class="dropdown-item mainTextDark text-left"
