@@ -76,6 +76,12 @@
               @click="toggleFilter(filter)"
               :class="[filter.active ? 'btn-info' : 'btn-secondary']"
             >
+              <img
+                :src="filter.icon"
+                width="20"
+                :alt="filter.name"
+                class="mr-1"
+              />
               <span v-text="filter.name" class="gaText"></span>
             </span>
           </template>
@@ -156,7 +162,7 @@
             <option value="recent">Recently Updated</option>
           </select>
         </div>
-        <div class="d-flex justify-content-start align-items-center">
+        <div class="d-flex justify-content-start align-items-center m-1">
           <!-- Download -->
           <input
             type="checkbox"
@@ -313,6 +319,11 @@ import axios from "axios";
 import Mark from "mark.js";
 import Papa from "papaparse";
 
+import dde from "~~/assets/img/dde-logo-o.svg";
+import n3cLogo from "~~/assets/img/N3Co.png";
+import niaidIcon from "~~/assets/img/niaid/icon.svg";
+import outbreakIcon from "~~/assets/img/icon-01.svg";
+
 import { mapGetters } from "vuex";
 
 import ResourceRegistryItem from "~~/components/ResourceRegistryItem.vue";
@@ -380,36 +391,42 @@ export default {
           {
             name: "N3C:Dataset",
             value: "/guide/n3c/dataset",
+            // works wth 'template' url parameter
+            template_aliases: ["n3c", "n3c:dataset"],
             active: false,
-            icon: "N3Co.png",
+            icon: n3cLogo,
             type: "_meta.guide",
           },
           {
             name: "Outbreak:Dataset",
             value: "/guide/outbreak/dataset",
+            template_aliases: ["outbreak", "outbreak:dataset"],
             active: false,
-            icon: "icon-01.svg",
+            icon: outbreakIcon,
             type: "_meta.guide",
           },
           {
             name: "NIAID:Dataset",
             value: "/guide/niaid",
+            template_aliases: ["niaid:dataset"],
             active: false,
-            icon: "niaid/icon.svg",
+            icon: niaidIcon,
             type: "_meta.guide",
           },
           {
             name: "NIAID:ComputationalTool",
             value: "/guide/niaid/ComputationalTool",
+            template_aliases: ["niaid:computationaltool"],
             active: false,
-            icon: "niaid/icon.svg",
+            icon: niaidIcon,
             type: "_meta.guide",
           },
           {
             name: "CD2H:Dataset",
+            template_aliases: ["cd2h", "cd2h:dataset"],
             value: "/guide",
             active: false,
-            icon: "dde-logo-o.svg",
+            icon: dde,
             type: "_meta.guide",
           },
         ],
@@ -692,9 +709,12 @@ export default {
     toggleFilter(item) {
       let self = this;
       self.all_filters[item.type].forEach((gf) => {
-        if (gf.value == item.value) {
+        if (
+          gf.value == item.value ||
+          gf.template_aliases.includes(item.value.toLowerCase())
+        ) {
           gf.active = !gf.active;
-          console.log(gf);
+          // console.log(gf);
           if (gf.name.includes("N3C") && gf.active == true) {
             self.N3CView = true;
           }
@@ -713,22 +733,23 @@ export default {
       let pprl_active = [];
 
       url.searchParams.delete("guide");
+      url.searchParams.delete("template");
       url.searchParams.delete("dataset_type");
 
       this.all_filters["_meta.guide"].forEach((item) => {
         if (item.active) {
-          active_list.push(item.value);
+          active_list.push(item.template_aliases[0]);
         }
       });
 
       this.all_filters["name"].forEach((item) => {
         if (item.active) {
-          pprl_active.push(item.value);
+          pprl_active.push(item.template_aliases[0]);
         }
       });
 
       if (active_list.length) {
-        url = url + "?guide=" + active_list.toString();
+        url = url + "?template=" + active_list.toString();
       }
       if (pprl_active.length) {
         if (active_list.length) {
@@ -898,26 +919,17 @@ export default {
         this.query = q;
       }
       this.searchForFilterAndToggle(url, "guide", "_meta.guide");
+      this.searchForFilterAndToggle(url, "template", "_meta.guide");
       this.searchForFilterAndToggle(url, "dataset_type", "name");
     },
     searchForFilterAndToggle(url, param, filter_name) {
       let self = this;
       let items = url.searchParams.get(param);
-      let item_paths = [];
 
       if (items) {
-        if (items.includes(",")) {
-          items = items.split(",");
-        } else {
-          items = [items];
-        }
-        // console.log('items found',items)
-        for (var i = 0; i < items.length; i++) {
-          let item_url = items[i];
-          item_paths.push(item_url);
-        }
-        if (item_paths.length) {
-          item_paths.forEach((item) => {
+        items = items.includes(",") ? items.split(",") : [items];
+        if (items.length) {
+          items.forEach((item) => {
             let obj = {};
             obj.type = filter_name;
             obj.value = item;
