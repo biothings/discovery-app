@@ -28,7 +28,7 @@ export default defineNuxtConfig({
           '@fortawesome/free-brands-svg-icons',
           'chart.js',
           'tabulator-tables',
-          'lodash'
+          // 'lodash'
       ]
   }
   })

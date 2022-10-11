@@ -1,3 +1,15 @@
+import diagram from  "~~/assets/img/diagram.png"
+import schemagraph from  "~~/assets/img/schemagraph.png"
+import dashhelp from  "~~/assets/img/dashhelp.png"
+import editor from  "~~/assets/img/editor.png"
+import guides from  "~~/assets/img/guides.png"
+import metadata from  "~~/assets/img/metadata.png"
+import metahelp from  "~~/assets/img/metahelp.png"
+import deletehelp from  "~~/assets/img/deletehelp.png"
+import privacy from  "~~/assets/img/privacy.png"
+import editmeta from  "~~/assets/img/editmeta.png"
+
+
 export const faq = {
   state: () => ({
     faqs: {
@@ -8,7 +20,7 @@ export const faq = {
             {
               anchor: "what-is-dde",
               question: "What is the Data Discovery Engine?",
-              image: "diagram.png",
+              image: diagram,
               answer: `<p>
                                 The Data Discovery Engine is a website that provides guidance for researchers on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole.
                             </p>
@@ -21,7 +33,7 @@ export const faq = {
             {
               anchor: "what-is-schema",
               question: "What is a schema?",
-              image: "schemagraph.png",
+              image: schemagraph,
               answer: `<p>
                                 Schemas can be thought of as a set of 'types', each associated with a set of properties that further define that type. The types are arranged in a hierarchy and each type inherits the properties of all its parents.
                                 </p>
@@ -66,7 +78,7 @@ export const faq = {
             {
               anchor: "dashboard",
               question: "How do I access my dashboard?",
-              image: "dashhelp.png",
+              image: dashhelp,
               answer: `<p>
                                 Your user <a href="/dashboard">dashboard</a> is place where you can easily manage and quickly access your registered schemas and registered metadata. To view your dashboard you must log in using a valid <a href='https://github.com/' target="_blank">GitHub</a> account then click on your user image on the menu.
                                 </p>
@@ -131,7 +143,7 @@ export const faq = {
             {
               anchor: "how-to-use-editor",
               question: "How do I use the schema editor?",
-              image: "editor.png",
+              image: editor,
               answer: `
                             <p>
                             Once you find a Class you wish to extend, you will be asked to choose a unique namespace that hasn't been registered before.  This will be the prefix attached to each new definition you provide.
@@ -221,7 +233,7 @@ export const faq = {
             {
               anchor: "what-is-a-guide",
               question: "What is a guide?",
-              image: "guides.png",
+              image: guides,
               answer: `<p>
                                 Guides allow you to contribute metadata to particular Data Portal. The generated metadata will be structured to that Data Portal's schema meaning that your metadata will be able to be integrated into that Data Portal.
                                 </p>
@@ -233,7 +245,7 @@ export const faq = {
             {
               anchor: "how-to-use-guide",
               question: "How do I use the discovery guide?",
-              image: "metadata.png",
+              image: metadata,
               answer: `<p class="text-center">
                                 <p>
                                     Select the portal you wish to contribute based on your interests and click on it's Add Dataset Metadata button. You will be taken to a form that will guide you through required and recommended fields by that portal.
@@ -269,7 +281,7 @@ export const faq = {
             {
               anchor: "access-contributions",
               question: "How do I access my contributions?",
-              image: "metahelp.png",
+              image: metahelp,
               answer: `<p>
                                 After successfully contributing an item whether it is a schema or metadata you will be able to manage it via your <a href="/dashboard">dashboard</a>. To view your dashboard you must log in using a valid <a href='https://github.com/' target="_blank">GitHub</a> account or approved organization.
                                 </p>
@@ -286,7 +298,7 @@ export const faq = {
             {
               anchor: "delete-item",
               question: "How do I delete a registered schema or dataset?",
-              image: "deletehelp.png",
+              image: deletehelp,
               answer: `<p>
                                 Your user <a href="/dashboard">dashboard</a> is the place to do that. If you are the user that registered that item you will see it listed in your dashboard.
                                 </p>
@@ -297,7 +309,7 @@ export const faq = {
             {
               anchor: "edit-privacy",
               question: "How do I make my dataset private/public?",
-              image: "privacy.png",
+              image: privacy,
               answer: `<p>
                                 All new entries are set to <b>PUBLIC</b> as default. You can change this anytime in your <a href="/dashboard">dashboard</a>.  Note: Making any changes to the metadata will revert its status to PUBLIC but you can change the setting once your are done.
                                 </p>
@@ -308,7 +320,7 @@ export const faq = {
             {
               anchor: "edit-metadata",
               question: "How do I edit registered metadata?",
-              image: "editmeta.png",
+              image: editmeta,
               answer: `<p>
                                 Each metadata entry is generated via a guide, so to properly edit an already registered item you will need to load it back into it's guide.
                                 </p>

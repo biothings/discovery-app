@@ -8,6 +8,7 @@ import { schema_registry } from "./modules/schema_registry";
 import { schema_viewer } from "./modules/schema_viewer";
 import { editor } from "./modules/editor";
 import { guide } from "./modules/guide";
+import { portals } from "./modules/portals";
 import { delegate } from 'tippy.js';
 import axios from 'axios'
 
@@ -22,6 +23,7 @@ export default createStore({
     schema_viewer,
     editor,
     guide,
+    portals
   },
   state: () => ({
     loading: false,
