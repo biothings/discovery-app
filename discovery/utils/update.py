@@ -1,34 +1,36 @@
 import logging
+import time
 
-from discovery.registry import datasets, schemas
+from discovery.registry import schemas
+from discovery.model import Schema
 
 logging.basicConfig(level="INFO")
+logger = logging.getLogger("daily-schema-update")
+
+def schema_update(namespace):
+    """ Update registered schemas by namespace.
+    """
+    logger.info(f"starting updating process for {namespace} schema")
+    meta = schemas.get_meta(namespace)
+    try:
+        schemas.update(namespace, meta['username'], meta["url"])
+        logger.info(f'update of {namespace} schema complete')
+    except Exception as e:
+        logger.error(e)
 
 
-schema_name_list = [
-    "https://discovery.biothings.io/view/n3c/"
-]  # user defined list to be included through dashboard
-# only input required namespace
-def refresh_document(namespace):
-    # """
-    # automatically update (daily) registered schema
-    # """
-    # logger = logging.getLogger("refresh")
-    # for z in schemas.get_all(2):
-    # need name and url -- use URL to update
-    for schema_id in schema_id_list:
-        # logger.info(schema_id)
-
-        # direct CRUD operation from registry.schemas
-        _schema = schemas.get(schema_id)  # retrieves the schema file
-        response = _schema.update(namespace, url)
-        print(response)
-
-        # utils.indices has a refresh function, similar to smartAPI,
-        # should we use this instead of update() above?
-        # uses es_dsl function refresh on index -- need to pass specific index though?
-        # #x = indices.refresh()
-
-    # dataset not included, only schema?
-    # for z in datasets.get_all(2):
-    #   print(z)
+def daily_schema_update():
+    """ Daily schema updates.
+    Gather a list of schemas, and update schemas
+    by namespace
+    """
+    all_schemas = Schema.search()
+    excluded_namespace = ['schema']
+    start = time.process_time()
+    schema_count = 0
+    for schema in all_schemas.scan():
+        if schema.meta.id not in excluded_namespace:
+            schema_update(schema.meta.id)
+            schema_count += 1
+    total_time = time.process_time() - start
+    logger.info(f'update process complete, total processing time was {total_time} seconds for {schema_count} schemas')
