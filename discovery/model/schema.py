@@ -99,7 +99,7 @@ class SchemaClassProp(InnerDoc):
 
     uri = Text(fields={"raw": Keyword()})
     curie = Text(required=True, fields={"raw": Keyword()})
-    label = Text(boost=1.5, fields={"raw": Keyword()})
+    label = Text(fields={"raw": Keyword()})
     range = Text(multi=True, fields={"raw": Keyword()})
     description = Text()
 
@@ -129,7 +129,7 @@ class SchemaClass(DiscoveryDoc):
 
     description = Text()
     prefix = Text(required=True, fields={"raw": Keyword()})
-    label = Text(required=True, boost=2, fields={"raw": Keyword()})
+    label = Text(required=True, fields={"raw": Keyword()})
     uri = Text(fields={"raw": Keyword()})
     parent_classes = Text(multi=True, analyzer="simple")  # immediate ones only
     properties = Object(SchemaClassProp)  # immediate ones only
