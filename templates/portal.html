@@ -206,6 +206,32 @@
             "colors": [{"hex":"#4B7E8F"},{"hex":"#64296B"}],
             "faq_link" : "/faq/n3c"
           },
+          {
+            'name':'NIAID Data Ecosystem',
+            'header':'Find, access and understand datasets and tools across infectious disease and immune-mediated data repositories',
+            'linkname':'nde',
+            'description': `<p>
+            The NIAID Data Ecosystem is a secure environment to find, access and analyze immune-mediated and infectious disease data and computational tools to speed the development of diagnostics, therapeutics, and vaccines. The NIAID Data Ecosystem Discovery Portal harvests metadata from dataset repositories and harmonizes them to this schema to enable easy cross-platform dataset searching and filtering.
+            </p>`,
+            'image':'/static/img/nde/logo.svg',
+            'portalicon': "/static/img/nde/icon.svg",
+            // "site": 'https://discovery.biothings.io/nde/',
+            'schema': '/view/nde',
+            "guides": [
+              {
+                guide: "/guide/nde/Dataset",
+                name: 'Dataset',
+                registry: "/dataset?guide=/guide/nde/Dataset",
+              },
+              {
+                guide: "/guide/nde/ComputationalTool",
+                name: 'Computational Tool',
+                registry: "/dataset?guide=/guide/nde/ComputationalTool",
+              },
+            ],
+            "datasets": "/dataset?guide=/guide/nde/Dataset",
+            "colors": [{"hex":"#0B8484"},{"hex":"#321EB5"}]
+          }
         ]
   	  }
     },
@@ -252,6 +278,9 @@
                break;
            case 'n3c':
                self.portal = self.portals[3]
+               break;
+           case 'nde':
+               self.portal = self.portals[4]
                break;
            default:
              self.redirect()
