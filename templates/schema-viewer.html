@@ -18,7 +18,7 @@
     <div class="grad d-flex justify-content-center align-items-center flex-wrap pt-5">
       <div>
         <template v-if='namespaceRegistered'>
-          <div class="text-center p-5">
+          <div class="text-left p-5">
             <h1 style="font-size:3em" class="text-light" v-if='namespace === "schema"' >Schema.org</h1>
             <h1 style="font-size:3em" class="text-light" v-else-if='namespace === "bts"' >BioLink Schema</h1>
             <h1 style="font-size:3em" class="text-light" v-else-if='namespace === "ctsa"' >CTSA</h1>
@@ -29,6 +29,10 @@
             to people from the founding companies (Google, Microsoft, Yahoo and Yandex), there is  substantial participation by the
             larger Web community, through public mailing lists such as <a target="_blank" href="https://lists.w3.org/Archives/Public/public-vocabs/">public-vocabs@w3.org</a>
             and through <a target="_blank" href="http://github.com/schemaorg/schemaorg">GitHub</a>. <a target="_blank" href="https://schema.org/">Learn More.</a>
+             </p>
+             <p class="text-light" v-if='namespace === "nde"'>
+              The NIAID Data Ecosystem is a secure environment to find, access and analyze immune-mediated and infectious disease data and computational tools to speed the development of diagnostics, therapeutics, and vaccines. 
+              The NIAID Data Ecosystem Discovery Portal harvests metadata from dataset repositories and harmonizes them to this schema to enable easy cross-platform dataset searching and filtering. <a href="/portal/niaid">Learn more about NDE</a>.
              </p>
             <p class="text-light" v-if='namespace === "bts"'>
               A high level datamodel of biological entities (genes, diseases, phenotypes, pathways, individuals, substances, etc) and their associations. Maintained by <a target="_blank" rel="noreferrer" href="https://github.com/biolink">biolink</a>.
@@ -102,10 +106,15 @@
               <h3 :id="item.group" class="text-dark" v-text="item.group " v-show="classesGroupByLetter.length>5"></h3>
               <ul style="list-style:none;" class="stripedList">
                 <li v-for="def in item.children" class="d-flex justify-content-between align-item-center p-1">
-                  <a  :href="'/view/'+namespace+'/'+def">
-                    <span v-text="def.split(':')[1]"></span> <i class="fas fa-chevron-right"></i>
-                  </a>
-                  <i class="fas fa-code-branch pointer tip text-light btn btn-info p-1" @click.prevent="saveDataAndRedirect(def)" :data-tippy-info="'Extend '+def"></i>
+                  <div>
+                    <a  :href="'/view/'+namespace+'/'+def['name']">
+                      <b v-text="def['name'].split(':')[1]"></b> <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <p class="text-muted"><small v-html="def['description']"></small></p>
+                  </div>
+                  <div>
+                    <i class="fas fa-code-branch pointer tip text-light btn btn-info p-1" @click.prevent="saveDataAndRedirect(def['name'])" :data-tippy-info="'Extend '+def['name']"></i>
+                  </div>
                 </li>
               </ul>
             </li>
@@ -1771,12 +1780,12 @@
           for (var i = 0; i < self.userSchema['hits'].length; i++) {
             //only order classes not referenced
             if (!self.userSchema['hits'][i]['ref']) {
-              res.push(self.userSchema['hits'][i]['name']);
+              res.push(self.userSchema['hits'][i]);
             }
           }
 
           let data = res.reduce((r, e) => {
-            let group = e.split(":")[1][0];
+            let group = e['name'].split(":")[1][0];
             if(!r[group]) r[group] = {group, children: [e]}
             else r[group].children.push(e);
             return r;
@@ -1784,6 +1793,7 @@
 
           res = Object.values(data)
           self.classesGroupByLetter= _.orderBy(res, ['group'], ['asc']);
+          console.log(self.classesGroupByLetter)
           self.makeHierarchyTree();
           self.getAllProps();
         },
