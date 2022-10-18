@@ -16,7 +16,7 @@
             <img :src="portal.portalicon" :alt="portal.name" width="100px" class="mr-2"/>
             <h1 :style="{color: portal.colors[1].hex}"><span v-text="portal.name"></span></h1>
           </div>
-          <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
+          <h5 class="mt-3" v-text="portal.header"></h5>
           <div class="text-muted" v-html="portal.description"></div>
           <div class="border-top text-left text-muted p-2" v-if="portal.publications">
             <h4>Publications</h4>
