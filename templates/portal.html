@@ -18,8 +18,17 @@
           </div>
           <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
           <div class="text-muted" v-html="portal.description"></div>
+          <div class="border-top text-left text-muted p-2" v-if="portal.publications">
+            <h4>Publications</h4>
+            <ul>
+              <li v-for="pub in portal.publications" :key="pub.name">
+                <a :href="pub.link"
+                target="_blank" rel="nonreferrer" v-text="pub.name"></a>
+              </li>
+            </ul>
+          </div>
           <template v-if="window.location.pathname == '/portal/n3c' ">
-            <div class="border-top text-center text-muted p-2">
+            <div class="border-top text-left text-muted p-2">
               <h4>External Dataset Request</h4>
               <p>
                 To enable some integrated analysis with the N3C dataset, you can request to include an external dataset in the N3C Enclave environment.
@@ -32,7 +41,7 @@
             </div>
           </template>
           <template v-else>
-            <div class="border-top text-center text-muted p-2">
+            <div class="border-top text-left text-muted p-2">
               <h4>Contribute</h4>
               <p>
                 Follow an easy-to-follow guide to help you contribute metadata for <span v-text=portal.name></span> following this schema's <a :href="portal.schema" target="_blank">structure</a>:
@@ -51,7 +60,7 @@
         </div>
       </div>
       <div class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-secondary p-5">
-        <div class="text-center p-2 m-1 rounded p-3" @mouseenter="hover('web')">
+        <div class="text-center p-2 m-1 rounded p-3" @mouseenter="hover('web')" v-if="portal.site">
           <object id="web" type="image/svg+xml" data="/static/img/site.svg" width="100px" alt="WEBSITE"></object>
           <a :href="portal.site" target="_blank" rel="noreferrer" class="nd mt-2 tip text-info" :data-tippy-info="'Explore the '+portal.name+' website'">
             <h5>Site <i class="fas fa-chevron-right"></i></h5>
@@ -139,7 +148,7 @@
             </p>`,
             'image':'/static/img/niaid/logo.svg',
             'portalicon': "/static/img/niaid/icon.svg",
-            "site": 'https://discovery.biothings.io/niaid/',
+            "site": '',
             'schema': '/view/niaid',
             "guides": [
               {
@@ -154,7 +163,13 @@
               },
             ],
             "datasets": "/dataset?guide=/guide/niaid",
-            "colors": [{"hex":"#369AC1"},{"hex":"#113B56"}]
+            "colors": [{"hex":"#369AC1"},{"hex":"#113B56"}],
+            "publications":[
+              {
+                name: 'Developing a standardized but extendable framework to increase the findability of infectious disease datasets',
+                link: 'https://www.biorxiv.org/content/10.1101/2022.10.10.511492v1'
+              }
+            ]
           },
           {
             'name':'CTSA National Center for Data to Health',
