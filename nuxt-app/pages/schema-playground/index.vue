@@ -481,7 +481,6 @@ export default {
       suggestedURL: "",
       slug: "",
       number: "",
-      choice: "",
       loading: false,
       startingPoints: [
         {
@@ -493,9 +492,6 @@ export default {
         },
       ],
     };
-  },
-  components: {
-    PresetBox,
   },
   watch: {
     input: function (value) {
