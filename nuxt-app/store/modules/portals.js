@@ -11,6 +11,7 @@ export const portals = {
     portals: [
       {
         name: "Outbreak.info",
+        shortName: "Outbreak.info",
         keyName: "outbreak",
         header:
           "During outbreaks of emerging diseases such as COVID-19, efficiently collecting, sharing, and integrating data is critical to scientific research. Outbreak.info is a resource to aggregate all this information into a single location.",
@@ -37,6 +38,7 @@ export const portals = {
       },
       {
         name: "NIAID Systems Biology",
+        shortName: "NIAID",
         keyName: "niaid",
         header:
           "The NIAID Systems Biology Consortium for Infectious Diseases Data Dissemination Working Group works to make our research outputs more FAIR.",
@@ -51,7 +53,7 @@ export const portals = {
           </p>`,
         image: niaidIcon,
         portalicon: niaidIcon,
-        site: "https://discovery.biothings.io/niaid/",
+        site: "",
         schema: "/view/niaid",
         guides: [
           {
@@ -66,10 +68,17 @@ export const portals = {
           },
         ],
         datasets: "/dataset?guide=/guide/niaid",
-        colors: [{ hex: "#369AC1" }, { hex: "#087ca9" }],
+        colors: [{ hex: "#369AC1" }, { hex: "#113B56" }],
+        publications: [
+          {
+            name: "Developing a standardized but extendable framework to increase the findability of infectious disease datasets",
+            link: "https://www.biorxiv.org/content/10.1101/2022.10.10.511492v1",
+          },
+        ],
       },
       {
         name: "CTSA National Center for Data to Health",
+        shortName: "CD2H",
         keyName: "cd2h",
         header:
           "A CD2H PROJECT TO PROMOTE FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS",
@@ -98,6 +107,7 @@ export const portals = {
       },
       {
         name: "The National COVID Cohort Collaborative (N3C)",
+        shortName: "N3C",
         keyName: "n3c",
         header:
           "The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.",

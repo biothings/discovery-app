@@ -225,6 +225,22 @@ export const editor = {
           //save on initial load as state.schema will change
           //later on validation will not be available.
           state.top_class_validation = payload["schema"].validation;
+          // check existing cardinality and toggle ON
+          let cardinalityPresent = false;
+          for (const k in payload["schema"].validation.properties) {
+            if (
+              Object.hasOwnProperty.call(
+                payload["schema"].validation.properties[k],
+                "owl:cardinality"
+              )
+            ) {
+              cardinalityPresent = true;
+              break;
+            }
+          }
+          if (cardinalityPresent) {
+            state.addCardinality = true;
+          }
         }
         console.log("✅ saved schema...", state.schema);
       } else {

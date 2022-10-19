@@ -81,7 +81,7 @@ useHead({
                   </h4>
                 </RouterLink>
               </div>
-              <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
+              <h5 class="mt-3" v-text="portal.header"></h5>
             </div>
           </li>
         </template>

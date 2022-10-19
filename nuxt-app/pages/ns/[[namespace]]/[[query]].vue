@@ -7,7 +7,7 @@
       >
         <div>
           <template v-if="namespaceRegistered">
-            <div class="text-center p-5">
+            <div class="text-left p-5">
               <h1
                 style="font-size: 3em"
                 class="text-light"
@@ -35,6 +35,16 @@
                 v-else
                 v-text="namespace"
               ></h1>
+              <p class="text-light" v-if="namespace === 'nde'">
+                The NIAID Data Ecosystem is a secure environment to find, access
+                and analyze immune-mediated and infectious disease data and
+                computational tools to speed the development of diagnostics,
+                therapeutics, and vaccines. The NIAID Data Ecosystem Discovery
+                Portal harvests metadata from dataset repositories and
+                harmonizes them to this schema to enable easy cross-platform
+                dataset searching and filtering.
+                <a href="/portal/niaid">Learn more about NDE</a>.
+              </p>
               <p class="text-light" v-if="namespace === 'schema'">
                 Schema.org is a collaborative, community activity with a mission
                 to create, maintain, and promote schemas for structured data on
@@ -66,7 +76,7 @@
             </div>
           </template>
           <template v-else>
-            <div class="text-center p-5">
+            <div class="text-left p-5">
               <h1
                 style="font-size: 3em"
                 class="text-light"
@@ -200,16 +210,23 @@
                     v-for="def in item.children"
                     class="d-flex justify-content-between align-item-center p-1"
                   >
-                    <nuxt-link :to="{ path: '/ns/' + namespace + '/' + def }">
-                      <span v-text="def.split(':')[1]"></span>
-                      <font-awesome-icon icon="fas fa-chevron-right" />
-                    </nuxt-link>
-                    <font-awesome-icon
-                      icon="fas fa-code-branch"
-                      class="pointer tip text-light btn btn-info p-1"
-                      @click.prevent="saveDataAndRedirect(def)"
-                      :data-tippy-content="'Extend ' + def"
-                    />
+                    <div>
+                      <nuxt-link :to="'/ns/' + namespace + '/' + def['name']">
+                        <b v-text="def['name'].split(':')[1]"></b>
+                        <font-awesome-icon icon="fas fa-chevron-right" />
+                      </nuxt-link>
+                      <p class="text-muted">
+                        <small v-html="def['description']"></small>
+                      </p>
+                    </div>
+                    <div>
+                      <font-awesome-icon
+                        icon="fas fa-code-branch"
+                        class="pointer tip text-light btn btn-info p-1"
+                        @click.prevent="saveDataAndRedirect(def['name'])"
+                        :data-tippy-content="'Extend ' + def['name']"
+                      />
+                    </div>
                   </li>
                 </ul>
               </li>
@@ -752,12 +769,12 @@ export default {
       for (var i = 0; i < self.userSchema["hits"].length; i++) {
         //only order classes not referenced
         if (!self.userSchema["hits"][i]["ref"]) {
-          res.push(self.userSchema["hits"][i]["name"]);
+          res.push(self.userSchema["hits"][i]);
         }
       }
 
       let data = res.reduce((r, e) => {
-        let group = e.split(":")[1][0];
+        let group = e["name"].split(":")[1][0];
         if (!r[group]) r[group] = { group, children: [e] };
         else r[group].children.push(e);
         return r;

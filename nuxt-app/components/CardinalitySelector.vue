@@ -26,6 +26,11 @@ export default {
       selection: "",
     };
   },
+  mounted: function () {
+    if (Object.hasOwnProperty.call(this.val, "owl:cardinality")) {
+      this.selection = this.val["owl:cardinality"];
+    }
+  },
   methods: {
     handleChange() {
       let self = this;
