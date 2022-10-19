@@ -1,3 +1,10 @@
+<script setup>
+import Login from "./Login.vue";
+import { useStore } from "vuex";
+
+let store = useStore();
+let portals = store.getters.getPortals;
+</script>
 <template>
   <header id="header">
     <title>Data Discovery Engine</title>
@@ -35,7 +42,7 @@
       >
         <ul class="navbar-nav" id="user_link">
           <li
-            class="nav-item headTip"
+            class="nav-item"
             data-tippy-content="Create discoverable metadata"
           >
             <nuxt-link
@@ -46,7 +53,7 @@
           </li>
           <li class="nav-item">
             <nuxt-link
-              class="nav-link h-link mainTextDark headTip"
+              class="nav-link h-link mainTextDark"
               to="/schema-playground"
               data-tippy-content="Create and Visualize a Schema"
               >Schema Playground</nuxt-link
@@ -64,46 +71,22 @@
               Data Portals
             </nuxt-link>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <nuxt-link class="dropdown-item" to="/portal/cd2h">
-                <img
-                  src="@/assets/img/dde-logo-o.svg"
-                  width="20"
-                  height="20"
-                  alt="CTSA"
-                  title="CTSA Portal"
-                />
-                CD2H <i class="fas fa-chevron-right mainTextLight"></i>
-              </nuxt-link>
-              <nuxt-link class="dropdown-item" to="/portal/n3c">
-                <img
-                  src="@/assets/img/N3Co.png"
-                  width="20"
-                  height="20"
-                  alt="N3C"
-                  title="N3C"
-                />
-                N3C <i class="fas fa-chevron-right mainTextLight"></i>
-              </nuxt-link>
-              <nuxt-link class="dropdown-item" to="/portal/outbreak">
-                <img
-                  src="@/assets/img/outbreak.png"
-                  width="20"
-                  height="20"
-                  alt="Outbreak.info"
-                  title="Outbreak.info"
-                />
-                Outbreak.info <i class="fas fa-chevron-right mainTextLight"></i>
-              </nuxt-link>
-              <nuxt-link class="dropdown-item" to="/portal/niaid">
-                <img
-                  src="@/assets/img/niaid/icon.svg"
-                  width="20"
-                  height="20"
-                  alt="NIAID"
-                  title="NIAID Data Portal"
-                />
-                NIAID <i class="fas fa-chevron-right mainTextLight"></i>
-              </nuxt-link>
+              <template v-for="portal in portals" :key="portal.keyName">
+                <nuxt-link
+                  class="dropdown-item"
+                  :to="'/portal/' + portal.keyName"
+                >
+                  <img
+                    :src="portal.portalicon"
+                    width="20"
+                    height="20"
+                    :alt="portal.name"
+                    :title="portal.name"
+                  />
+                  {{ portal.shortName }}
+                  <i class="fas fa-chevron-right mainTextLight"></i>
+                </nuxt-link>
+              </template>
             </div>
           </li>
           <li class="nav-item dropdown d-inline">
@@ -140,20 +123,3 @@
     </nav>
   </header>
 </template>
-
-<script>
-import tippy from "tippy.js";
-import Login from "./Login.vue";
-
-export default {
-  name: "Nav",
-  components: {
-    Login,
-  },
-  mounted: function () {
-    tippy(".headTip", {
-      theme: "ddeDark",
-    });
-  },
-};
-</script>

@@ -143,8 +143,22 @@ useHead({
                 <span v-text="portal.name"></span>
               </h1>
             </div>
-            <h5 class="text-capitalize mt-3" v-text="portal.header"></h5>
+            <h5 class="mt-3" v-text="portal.header"></h5>
             <div class="text-muted" v-html="portal.description"></div>
+            <div
+              class="border-top text-left text-muted p-2"
+              v-if="portal.publications"
+            >
+              <h4>Publications</h4>
+              <ul>
+                <li v-for="pub in portal.publications" :key="pub.name">
+                  <a :href="pub.link" target="_blank" rel="nonreferrer">
+                    {{ pub.name }}
+                    <font-awesome-icon icon="fas fa-external-link-alt" />
+                  </a>
+                </li>
+              </ul>
+            </div>
             <template v-if="route.fullPath == '/portal/n3c'">
               <div class="border-top text-center text-muted p-2">
                 <h4>External Dataset Request</h4>
@@ -204,7 +218,7 @@ useHead({
         <div
           class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-secondary p-5"
         >
-          <div class="text-center p-2 m-1 rounded p-3">
+          <div class="text-center p-2 m-1 rounded p-3" v-if="portal.site">
             <img :src="web_pic" width="100" alt="WEBSITE" />
             <a
               :href="portal.site"
