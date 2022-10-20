@@ -1,4 +1,3 @@
-import { isArray, isPlainObject, isEqual, isString } from "lodash";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import Notify from "simple-notify";
@@ -293,7 +292,7 @@ export const guide = {
       let item = payload["item"]; //full info
       let props = state.schema.validation.properties;
 
-      if (isString(props[field]?.value)) {
+      if ($_.isString(props[field]?.value)) {
         console.log("remove from string");
         for (var i = 0; i < props[field].value.length; i++) {
           let prop_val = props[field].value[i];
@@ -318,12 +317,12 @@ export const guide = {
             });
           }
         }
-      } else if (isArray(props[field]?.value)) {
+      } else if ($_.isArray(props[field]?.value)) {
         console.log("remove from array");
         if (props[field] && props[field].value) {
           for (var i = 0; i < props[field].value.length; i++) {
             let arr_item = props[field].value[i];
-            if (isString(arr_item)) {
+            if ($_.isString(arr_item)) {
               if (arr_item === item) {
                 props[field].value.splice(i, 1);
                 new Notify({
@@ -345,7 +344,7 @@ export const guide = {
                 });
               }
             } else if (isObject(arr_item)) {
-              if (isEqual(arr_item, item)) {
+              if ($_.isEqual(arr_item, item)) {
                 props[field].value.splice(i, 1);
                 new Notify({
                   status: "success",
@@ -372,9 +371,9 @@ export const guide = {
         } else {
           console.log("NO VALUE", props[field]);
         }
-      } else if (isPlainObject(props[field]?.value)) {
+      } else if ($_.isPlainObject(props[field]?.value)) {
         console.log("remove from object");
-        if (isEqual(props[field].value, item)) {
+        if ($_.isEqual(props[field].value, item)) {
           delete props[field]["value"];
         } else {
           new Notify({
@@ -448,7 +447,7 @@ export const guide = {
         if (props[key].hasOwnProperty("value")) {
           if (props[key]["value"] || props[key]["value"] === false) {
             if (
-              isArray(props[key]["value"]) &&
+              $_.isArray(props[key]["value"]) &&
               props[key]["value"].length === 1
             ) {
               state.output[key] = props[key].value[0];
@@ -698,7 +697,7 @@ export const guide = {
                 // CAN BE ARRAY
                 if (props[name].value) {
                   let val = props[name].value;
-                  if (isPlainObject(val)) {
+                  if ($_.isPlainObject(val)) {
                     // will replace
                     Swal.fire({
                       title: "Value Exists",
@@ -710,7 +709,7 @@ export const guide = {
                         props[name]["value"] = value;
                       }
                     });
-                  } else if (isArray(val)) {
+                  } else if ($_.isArray(val)) {
                     //push to existing array
                     props[name]["value"].push(value);
                   } else {
@@ -738,7 +737,7 @@ export const guide = {
                 // CAN BE ARRAY
                 if (props[name].value) {
                   let val = props[name].value;
-                  if (isPlainObject(val)) {
+                  if ($_.isPlainObject(val)) {
                     // will replace
                     Swal.fire({
                       title: "Value Exists",
@@ -750,7 +749,7 @@ export const guide = {
                         props[name]["value"] = value;
                       }
                     });
-                  } else if (isArray(val)) {
+                  } else if ($_.isArray(val)) {
                     //push to exisiting array
                     props[name]["value"].push(value);
                   } else {

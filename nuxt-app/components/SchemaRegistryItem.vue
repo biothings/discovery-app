@@ -119,7 +119,6 @@
 
 <script>
 import axios from "axios";
-import { sortBy } from "lodash";
 import Notify from "simple-notify";
 
 export default {
@@ -198,7 +197,7 @@ export default {
             }
           }
           // console.log('All props for '+item.label+" are "+allProps.length)
-          let sorted = sortBy(allProps, [
+          let sorted = $_.sortBy(allProps, [
             function (o) {
               return o.label;
             },
