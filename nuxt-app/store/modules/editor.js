@@ -1,5 +1,4 @@
 import axios from "axios";
-import { orderBy, isPlainObject, isArray, isString } from "lodash";
 import Notify from "simple-notify";
 // editor default options
 import { validation_options } from "./editor_options/validation_options";
@@ -486,7 +485,7 @@ export const editor = {
       let parent = payload["parent"];
       // sort props alphabetically
       if (Object.hasOwnProperty.call(parent, "properties")) {
-        parent.properties = orderBy(parent.properties, ["label"], ["asc"]);
+        parent.properties = $_.orderBy(parent.properties, ["label"], ["asc"]);
       }
       let names = state.schema.map((cls) => cls.name);
       // console.log(names)
@@ -863,19 +862,19 @@ export const editor = {
               let defs_found = new Set();
 
               function addRefsMentioned(obj) {
-                if (isPlainObject(obj)) {
+                if ($_.isPlainObject(obj)) {
                   if ("$ref" in obj) {
                     return obj["$ref"].split("#/definitions/")[1];
                   } else {
                     for (const key in obj) {
-                      if (isArray(obj[key])) {
+                      if ($_.isArray(obj[key])) {
                         for (let i = 0; i < obj[key].length; i++) {
                           const element = obj[key][i];
                           return addRefsMentioned(element);
                         }
-                      } else if (isPlainObject(obj[key])) {
+                      } else if ($_.isPlainObject(obj[key])) {
                         return addRefsMentioned(obj[key]);
-                      } else if (isString(obj[key])) {
+                      } else if ($_.isString(obj[key])) {
                         continue;
                       } else {
                         return false;

@@ -1,5 +1,4 @@
 import { TabulatorFull as Tabulator } from "tabulator-tables";
-import { remove } from "lodash";
 import Notify from "simple-notify";
 
 export const schema_registry = {
@@ -94,7 +93,7 @@ export const schema_registry = {
     },
     removeItem(state, payload) {
       let item = payload["item"];
-      remove(state.compareItems, function (n) {
+      $_.remove(state.compareItems, function (n) {
         return n["name"] == item["name"];
       });
     },

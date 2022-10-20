@@ -542,7 +542,6 @@
 <script>
 import axios from "axios";
 import { mapGetters } from "vuex";
-import { orderBy } from "lodash";
 
 import Notify from "simple-notify";
 
@@ -745,7 +744,7 @@ export default {
     sortedList() {
       var self = this;
       try {
-        return orderBy(self.item.properties, ["label"], ["asc"]);
+        return $_.orderBy(self.item.properties, ["label"], ["asc"]);
       } catch (e) {
         return self.item.properties;
       }

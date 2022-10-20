@@ -396,7 +396,6 @@
 <script>
 import Mark from "mark.js";
 import axios from "axios";
-import { orderBy } from "lodash";
 import { mapGetters } from "vuex";
 import SchemaRegistryItem from "~~/components/SchemaRegistryItem.vue";
 
@@ -574,7 +573,7 @@ export default {
             return r;
           }, {});
           res = Object.values(data);
-          self.classesGroupByLetter = orderBy(data, ["group"], ["asc"]);
+          self.classesGroupByLetter = $_.orderBy(data, ["group"], ["asc"]);
         })
         .catch((err) => {
           throw err;

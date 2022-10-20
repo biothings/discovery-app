@@ -507,7 +507,6 @@ import tippy from "tippy.js";
 import Papa from "papaparse";
 import "../../node_modules/renderjson/renderjson.js";
 import { mapGetters } from "vuex";
-import { isArray, isPlainObject, isString } from "lodash";
 import Notify from "simple-notify";
 
 import popSound from "@/assets/img/pop.wav";
@@ -1569,7 +1568,7 @@ export default {
                               self.checkOverriddenID(selected[key]);
                             }
                             var payload = {};
-                            if (isPlainObject(selected[key])) {
+                            if ($_.isPlainObject(selected[key])) {
                               //look at keys and check for dates
                               let obj = selected[key];
                               for (var k in obj) {
@@ -1585,12 +1584,12 @@ export default {
                                 value: [obj],
                               };
                               self.$store.commit("markCompleted", payload);
-                            } else if (isArray(selected[key])) {
+                            } else if ($_.isArray(selected[key])) {
                               let list = selected[key];
 
                               for (var i = 0; i < list.length; i++) {
                                 let item = list[i];
-                                if (isPlainObject(item)) {
+                                if ($_.isPlainObject(item)) {
                                   let arrObj = item;
 
                                   for (var k in arrObj) {
@@ -1606,7 +1605,7 @@ export default {
                                     }
                                   }
                                 } else if (
-                                  isString(item) &&
+                                  $_.isString(item) &&
                                   item.includes("date")
                                 ) {
                                   item = moment(item).format("YYYY-MM-DD");
