@@ -36,6 +36,13 @@
   --section-gap: 160px;
 }
 
+/* CodeMirror */
+.cm-editor {
+  height: 600px;
+  max-height: 800px;
+  overflow-y: scroll;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: var(--vt-c-black);

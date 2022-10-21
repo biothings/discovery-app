@@ -141,8 +141,6 @@
 import { mapGetters } from "vuex";
 import axios from "axios";
 
-import "@/assets/css/codemirror.css";
-
 export default {
   name: "JSONItem",
   data: function () {
