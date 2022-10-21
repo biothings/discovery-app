@@ -912,7 +912,7 @@ export default {
       if (schema.hasOwnProperty("validation")) {
         for (prop in schema["validation"]["properties"]) {
           //assign if found
-          Vue.set(schema["validation"]["properties"][prop], "categories", []);
+          schema["validation"]["properties"][prop]["categories"] = [];
           for (category in self.categories) {
             for (var subcategory in self.categories[category]) {
               if (self.categories[category][subcategory].includes(prop)) {
@@ -1467,7 +1467,7 @@ export default {
                         list = list.concat(privateres.data.hits);
                         let options = {};
                         for (var i = 0; i < list.length; i++) {
-                          Vue.set(options, list[i]["name"], list[i]["name"]);
+                          options[list[i]["name"]] = list[i]["name"];
                         }
                         self.$swal
                           .fire({

@@ -1662,18 +1662,14 @@ export default {
               //check for const @type or @type of input
               if ("@type" in propInfo) {
                 console.log("has @type ", propInfo);
-                Vue.set(obj, "@type", propInfo["@type"]);
+                obj["@type"] = propInfo["@type"];
               } else if (
                 "properties" in propInfo &&
                 "@type" in propInfo["properties"]
               ) {
                 if ("const" in propInfo["properties"]["@type"]) {
                   console.log("@type COST", propInfo);
-                  Vue.set(
-                    obj,
-                    "@type",
-                    propInfo["properties"]["@type"]["cost"]
-                  );
+                  obj["@type"] = propInfo["properties"]["@type"]["cost"];
                 }
               }
 
@@ -1685,10 +1681,10 @@ export default {
                   if (result.value[i] == "keywords") {
                     try {
                       let val = result.value[i].split(",");
-                      Vue.set(obj, progressSteps[i], val);
+                      obj[progressSteps[i]] = val;
                     } catch (e) {
                       let val = result.value[i];
-                      Vue.set(obj, progressSteps[i], val);
+                      obj[progressSteps[i]] = val;
                     }
                   } else {
                     if (
@@ -1696,10 +1692,10 @@ export default {
                       props[progressSteps[i]]["type"] === "integer"
                     ) {
                       let val = parseInt(result.value[i]);
-                      Vue.set(obj, progressSteps[i], val);
+                      obj[progressSteps[i]] = val;
                     } else {
                       let val = result.value[i];
-                      Vue.set(obj, progressSteps[i], val);
+                      obj[progressSteps[i]] = val;
                     }
                   }
                 }
@@ -1734,10 +1730,6 @@ export default {
       _.mapKeys(obj, function (value, key) {
         if (key === keyname) {
           self.constFound = true;
-          // console.log('%c from '+self.name,'color:limegreen')
-          // console.log(key,value)
-          //CONST ISSUE
-          // Vue.set(self.constObj, parentkey, value)
         }
         if (typeof value === "object") {
           self.checkForConstantKey(value, keyname, key);
