@@ -1,16 +1,11 @@
-""" Namespace APIs
+""" Namespace Endpoint Metadata Handler
 
     Support for rendering schemas based on their namespace, providing unique properties.
 
 """
 
-import sys
-from xml.sax.handler import all_properties
-sys.path.append('/Users/nacosta/Documents/DDE/namespace_endpoint/discovery-app')
-
 from .base import APIBaseHandler
 from discovery.registry import schemas
-from discovery.model import Schema as ESSchemaFile
 
 
 class NamespaceHandler(APIBaseHandler):
@@ -50,8 +45,8 @@ class NamespaceHandler(APIBaseHandler):
         #schema_properties = list(map(lambda d: d, filter(lambda d: f"{self.ns}:Dataset" in d["schema:domainIncludes"]["@id"], all_properties)))
         return schema_property_list, schema_property_dict
 
-    def get(self,  namespace=None, class_or_prop=None):
-        """ Get schema dataset
+    def get(self,  namespace=None, curie=None):
+        """ Get schema dataset and properties
             
         """
         name = "ns"
@@ -65,8 +60,8 @@ class NamespaceHandler(APIBaseHandler):
                 "guide": {"type": str},
             },
         }
-        if not namespace:
-            pass # return error
+        if namespace is None or curie is None:
+            raise HTTPError(400, reason="A namespace and curie is required")
         else:
             self.ns = namespace
             _schema = schemas.get(namespace)
@@ -76,7 +71,7 @@ class NamespaceHandler(APIBaseHandler):
             property_list = [ data for data in graph_data if data["@type"] == "rdf:Property" ]          # all properties
             schema_property_list, schema_property_dict = self.extract_schema_properties(property_list)  # schema specific properties
             # /api/ns/<namespace>/<namespace>:Dataset
-            if class_or_prop == f"{namespace}:Dataset":
+            if curie == f"{namespace}:Dataset":
                 schema_dataset = [_schema]
                 schema_classes = [d for d in graph_data if d['@id'] ==  f"{namespace}:Dataset"]
                 schema_dataset += schema_classes + schema_property_list
@@ -84,6 +79,6 @@ class NamespaceHandler(APIBaseHandler):
             # /api/ns/<namespace>/<property_id>
             else:
                 output = [_schema]
-                properties  = self.property_search(class_or_prop, schema_property_dict)
+                properties  = self.property_search(curie, schema_property_dict)
                 output += properties
                 self.finish(output)
