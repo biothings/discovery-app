@@ -42,7 +42,6 @@ class NamespaceHandler(APIBaseHandler):
             _id = _dict["@id"]
             if _id not in schema_property_dict: 
                 schema_property_dict[_id] = _dict
-        #schema_properties = list(map(lambda d: d, filter(lambda d: f"{self.ns}:Dataset" in d["schema:domainIncludes"]["@id"], all_properties)))
         return schema_property_list, schema_property_dict
 
     def get(self,  namespace=None, curie=None):
