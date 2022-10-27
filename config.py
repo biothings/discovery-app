@@ -32,6 +32,8 @@ APP_LIST = [
     (r"/api/view/?", "discovery.handlers.api.SchemaViewHandler"),
     (r"/api/gh/([^/]+)/?", "discovery.handlers.api.GHHandler"),
     (r"/api/gh/?", "discovery.handlers.api.GHHandler"),
+    (r"/api/ns/([^/]+)/?", "discovery.handlers.api.NamespaceHandler"),
+    (r"/api/ns/([^/]+)/([^/]+)/?", "discovery.handlers.api.NamespaceHandler")
 ]
 
 # biothings web tester will read this
