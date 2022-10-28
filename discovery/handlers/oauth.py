@@ -54,8 +54,10 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
         # we can append next to the redirect uri, so the user gets the
         # correct URL on login
         _redirect = self.get_argument("next", "/")
+        # take first HOST header when multiple hosts due to configuration
+        host = self.request.host.split(",")[0]
         redirect_uri = url_concat(
-            self.request.protocol + "://" + self.request.host + GITHUB_CALLBACK_PATH,
+            self.request.protocol + "://" + host + GITHUB_CALLBACK_PATH,
             {"next": _redirect},
         )
         # if we have a code, we have been authorized so we can log in
