@@ -17,6 +17,7 @@
 import json
 import logging
 from datetime import date, datetime
+#from msilib import schema
 
 import certifi
 from tornado.httpclient import AsyncHTTPClient
@@ -432,3 +433,79 @@ class SchemaViewHandler(APIBaseHandler):
         }
 
         self.finish(response)
+
+class SchemaHandler(APIBaseHandler):
+    """ Schema Handler
+        Fetch  - GET ./api/schema/n3c
+        Fetch  - GET ./api/schema/n3c:Dataset
+        Fetch  - GET ./api/schema/n3c:Dataset/validation
+        Fetch  - GET ./api/schema/n3c:funding
+    """
+
+    def make_property_dict(self, metadata, schema_id):
+        property_dict = {schema_id: {}}
+        data_copy = metadata
+        for dict_ in [dict_ for dict_ in data_copy['@graph'] if dict_['@type'] == 'rdf:Property']:
+            if dict_['schema:domainIncludes']['@id'] == schema_id:
+                property_id = dict_['@id']
+                if property_id not in property_dict[schema_id]:
+                    property_dict[schema_id][property_id] = dict_
+        return property_dict
+
+    def property_search(self, curie, property_dict, schema_id):
+        try:
+            return property_dict[schema_id][curie]
+        except:
+            return False
+
+    def filter_properties(self, metadata, schema_id):
+        """ Filter Schema Properties
+            Given schema class metadata, filter out the properties that do not
+            belong to the schema class and return a "cleaned" data set
+        """
+        data_copy = metadata
+        for dict_ in [dict_ for dict_ in data_copy['@graph'] if dict_['@type'] == 'rdf:Property']:
+            if dict_['schema:domainIncludes']['@id'] != schema_id:
+                data_copy.pop(dict_)
+        return data_copy
+
+    def get_values(self):
+        pass
+
+    def get(self, curie=None, validation=None):
+        if curie is None:
+            raise HTTPError(400, reason="A curie with a prefix is required, i.e 'n3c:Dataset'")
+        else:
+            if "," in curie:
+                ns = curie.split(",")[0].split(":")[0]
+            else:
+                ns = curie.split(":")[0]
+            schema_metadata = schemas.get(ns)
+            schema_metadata.pop("_id")
+            schema_id = schema_metadata["@graph"][0]["@id"]
+            # /api/schema/{ns}:Dataset/validation
+            if validation:
+                schema_validation = schema_metadata["@graph"][0]["$validation"]
+                metadata_copy = schema_metadata.copy()
+                metadata_copy.pop("@graph")
+                metadata_copy.update({"validation": schema_validation})
+                self.finish(metadata_copy)
+            # /api/schema/{ns}:Dataset
+            elif "Dataset" in curie and validation == None:
+                schema_cleaned = self.filter_properties(schema_metadata, schema_id)
+                self.finish(schema_cleaned)
+            # /api/schema/{ns}:property_id
+            else:
+                property_dict = self.make_property_dict(schema_metadata, schema_id)
+                metadata_copy = schema_metadata.copy()
+                metadata_copy.pop("@graph")
+                properties = []
+                if "," in curie:
+                    for value in curie.split(","):
+                        property = self.property_search(value, property_dict, schema_id)
+                        properties.append(property)
+                else:
+                    property = self.property_search(curie, property_dict, schema_id)
+                    properties.append(property)
+                metadata_copy.update({"@graph": properties})
+                self.finish(metadata_copy)
