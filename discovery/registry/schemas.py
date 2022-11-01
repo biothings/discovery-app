@@ -47,10 +47,7 @@ def _add_schema_class(schema, namespace, dryrun=False):
         schema_classes = schema.get_classes()
     else:
         try:
-            if namespace == "bioschemas":
-                schema = SchemaAdapter(schema, base_schema=["schema.org"])
-            else:
-                schema = SchemaAdapter(schema)
+            schema = SchemaAdapter(schema)
             schema_classes = schema.get_classes(
                 include_ref=False
             )  # only get those defined classes
