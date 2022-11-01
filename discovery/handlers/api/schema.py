@@ -17,7 +17,7 @@
 import json
 import logging
 from datetime import date, datetime
-#from msilib import schema
+from msilib import schema
 
 import certifi
 from tornado.httpclient import AsyncHTTPClient
@@ -434,6 +434,7 @@ class SchemaViewHandler(APIBaseHandler):
 
         self.finish(response)
 
+
 class SchemaHandler(APIBaseHandler):
     """ Schema Handler
         Fetch  - GET ./api/schema/n3c
@@ -455,7 +456,7 @@ class SchemaHandler(APIBaseHandler):
     def property_search(self, curie, property_dict, schema_id):
         try:
             return property_dict[schema_id][curie]
-        except:
+        except Exception as error:
             return False
 
     def filter_properties(self, metadata, schema_id):
@@ -468,9 +469,6 @@ class SchemaHandler(APIBaseHandler):
             if dict_['schema:domainIncludes']['@id'] != schema_id:
                 data_copy.pop(dict_)
         return data_copy
-
-    def get_values(self):
-        pass
 
     def get(self, curie=None, validation=None):
         if curie is None:
@@ -491,7 +489,7 @@ class SchemaHandler(APIBaseHandler):
                 metadata_copy.update({"validation": schema_validation})
                 self.finish(metadata_copy)
             # /api/schema/{ns}:Dataset
-            elif "Dataset" in curie and validation == None:
+            elif "Dataset" in curie and validation is None:
                 schema_cleaned = self.filter_properties(schema_metadata, schema_id)
                 self.finish(schema_cleaned)
             # /api/schema/{ns}:property_id
@@ -502,10 +500,10 @@ class SchemaHandler(APIBaseHandler):
                 properties = []
                 if "," in curie:
                     for value in curie.split(","):
-                        property = self.property_search(value, property_dict, schema_id)
-                        properties.append(property)
+                        schema_property = self.property_search(value, property_dict, schema_id)
+                        properties.append(schema_property)
                 else:
-                    property = self.property_search(curie, property_dict, schema_id)
-                    properties.append(property)
+                    schema_property = self.property_search(curie, property_dict, schema_id)
+                    properties.append(schema_property)
                 metadata_copy.update({"@graph": properties})
                 self.finish(metadata_copy)
