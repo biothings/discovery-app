@@ -14,13 +14,13 @@
 
 """
 
-from curses import meta
-from importlib.metadata import metadata
+#from curses import meta
+#from importlib.metadata import metadata
 import json
 import logging
 from datetime import date, datetime
 #from time import clock_settime
-from aiohttp import request
+#from aiohttp import request
 
 import certifi
 from tornado.httpclient import AsyncHTTPClient
@@ -440,13 +440,11 @@ class SchemaViewHandler(APIBaseHandler):
 
 class SchemaHandler(APIBaseHandler):
     """ Schema Handler
-        Fetch  - GET ./api/schema/n3c:Dataset
-        Fetch  - GET ./api/schema/n3c:Dataset/validation
-        Fetch  - GET ./api/schema/n3c:funding
+        Given a request curie with a namespace, search the schema
     """
 
 
-    def property_filter(self, metadata, curie, schema_id):
+    def property_filter(self, metadata, curie):
         new_list = []
         for d in metadata["@graph"]:
             if d.get('@id') in curie:
@@ -456,15 +454,12 @@ class SchemaHandler(APIBaseHandler):
         else:
             raise HTTPError(400, reason=f"No matches found for curie request: {''.join(curie)}")
 
-            pass #return error
-
 
     def get(self, curie=None, validation=None):
         """
-            - update curie request for class (class varies, property varies, single namespace)
-            - add error catching for each error with return request
-            
-
+            Fetch  - GET ./api/schema/{ns}:{class_id}
+            Fetch  - GET ./api/schema/{ns}:{class_id}/validation
+            Fetch  - GET ./api/schema/{ns}:{property_id}
         """
         if curie is None or ":" not in curie:
             raise HTTPError(400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'")
@@ -480,8 +475,6 @@ class SchemaHandler(APIBaseHandler):
             except Exception as ns_error:
                 raise HTTPError(400, reason=f"Error retrieving namespace, {ns}, with exception {ns_error}")
 
-            schema_id = schema_metadata.pop("_id")
-
             if validation:
                 try:
                     schema_validation = schema_metadata["@graph"][0]["$validation"]
@@ -491,10 +484,8 @@ class SchemaHandler(APIBaseHandler):
                     self.finish(metadata_copy)
                 except Exception as validation_error:
                     raise HTTPError(400, reason=f"Error retrieving validation, {validation_error}")
-
             else:
                 if "," not in curie:
                     curie = [curie]
-                self.property_filter(schema_metadata, curie, schema_id)
+                self.property_filter(schema_metadata, curie)
                 self.finish(schema_metadata)
-
