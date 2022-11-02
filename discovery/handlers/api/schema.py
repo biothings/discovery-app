@@ -488,4 +488,5 @@ class SchemaHandler(APIBaseHandler):
                 if "," not in curie:
                     curie = [curie]
                 self.property_filter(schema_metadata, curie)
+                schema_metadata.pop("_id")
                 self.finish(schema_metadata)
