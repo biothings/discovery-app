@@ -399,11 +399,11 @@ class SchemaViewHandler(APIBaseHandler):
                         schema = SchemaAdapter(
                             doc, base_schema=[], validator_options=validator_options
                         )
-                    elif self.args.ns == "bioschemas":
-                        # do not load bioschemas, only schema.org
-                        schema = SchemaAdapter(
-                            doc, base_schema=["schema.org"], validator_options=validator_options
-                        )
+                    # elif self.args.ns == "bioschemas":
+                    #     # do not load bioschemas, only schema.org
+                    #     schema = SchemaAdapter(
+                    #         doc, base_schema=["schema.org"], validator_options=validator_options
+                    #     )
                     else:
                         schema = SchemaAdapter(doc, validator_options=validator_options)
                 else:
