@@ -443,12 +443,21 @@ class SchemaHandler(APIBaseHandler):
         Given a request curie with a namespace, search the schema
     """
 
+    def property_filter(self, metadata, list_, curie):
+        ns = curie[0].split(":")[0]
+        print("here**")
+        for dict_ in metadata["@graph"]:
+            if dict_["@type"] == "rdf:Property" and ns in dict_["schema:domainIncludes"]["@id"]:
+                list_.append(dict_)
+        return list_
 
-    def property_filter(self, metadata, curie):
+    def graph_filter(self, metadata, curie):
         new_list = []
         for d in metadata["@graph"]:
-            if d.get('@id') in curie:
+            if d['@id'] in curie:
                 new_list.append(d)
+                if d["@type"] == "rdfs:Class":
+                    new_list = self.property_filter(metadata, new_list, curie)
         if new_list:
             metadata["@graph"] = new_list
         else:
@@ -457,24 +466,35 @@ class SchemaHandler(APIBaseHandler):
 
     def get(self, curie=None, validation=None):
         """
+            Fetch  - GET ./api/schema/{ns}
             Fetch  - GET ./api/schema/{ns}:{class_id}
             Fetch  - GET ./api/schema/{ns}:{class_id}/validation
             Fetch  - GET ./api/schema/{ns}:{property_id}
+
+            ../{ns}?meta=1
         """
-        if curie is None or ":" not in curie:
+        if curie is None:
             raise HTTPError(400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'")
+        # ./api/schema/{ns}
+        elif ":" not in curie:
+            try:
+                schema_metadata = schemas.get(curie)
+                schema_metadata.pop("_id")
+            except Exception as ns_error:
+                raise HTTPError(400, reason=f"Error retrieving namespace, {curie}, with exception {ns_error}")
+            self.finish(schema_metadata)
         else:
             # get namespace from user request -- expect only one
             if "," in curie:
                 ns = curie.split(",")[0].split(":")[0]
             else:
                 ns = curie.split(":")[0]
-            # validate namespace exists
             try:
+                #schema_metadata = ESSchemaFile.get(id=ns, ignore=404)
                 schema_metadata = schemas.get(ns)
             except Exception as ns_error:
                 raise HTTPError(400, reason=f"Error retrieving namespace, {ns}, with exception {ns_error}")
-
+            # ./api/schema/{ns}:{class_id}/validation
             if validation:
                 try:
                     schema_validation = schema_metadata["@graph"][0]["$validation"]
@@ -487,6 +507,6 @@ class SchemaHandler(APIBaseHandler):
             else:
                 if "," not in curie:
                     curie = [curie]
-                self.property_filter(schema_metadata, curie)
+                self.graph_filter(schema_metadata, curie)
                 schema_metadata.pop("_id")
                 self.finish(schema_metadata)
