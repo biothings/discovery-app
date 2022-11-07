@@ -500,7 +500,10 @@ class SchemaHandler(APIBaseHandler):
                     schema_validation = schema_metadata["@graph"][0]["$validation"]
                     metadata_copy = schema_metadata.copy()
                     metadata_copy.pop("@graph")
-                    metadata_copy.update({"validation": schema_validation})
+                    metadata_copy.pop("_id")
+                    metadata_copy.pop("@context")
+                    metadata_copy.pop("@id")
+                    metadata_copy.update({"$validation": schema_validation})
                     self.finish(metadata_copy)
                 except Exception as validation_error:
                     raise HTTPError(400, reason=f"Error retrieving validation, {validation_error}")
