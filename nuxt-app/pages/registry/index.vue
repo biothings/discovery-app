@@ -573,7 +573,7 @@ export default {
             return r;
           }, {});
           res = Object.values(data);
-          self.classesGroupByLetter = $_.orderBy(data, ["group"], ["asc"]);
+          self.classesGroupByLetter = self.$_.orderBy(data, ["group"], ["asc"]);
         })
         .catch((err) => {
           throw err;

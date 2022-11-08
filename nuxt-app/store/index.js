@@ -9,6 +9,7 @@ import { schema_viewer } from "./modules/schema_viewer";
 import { editor } from "./modules/editor";
 import { guide } from "./modules/guide";
 import { portals } from "./modules/portals";
+import { validator } from "./modules/validator";
 import { delegate } from "tippy.js";
 import axios from "axios";
 
@@ -24,6 +25,7 @@ export default createStore({
     editor,
     guide,
     portals,
+    validator,
   },
   state: () => ({
     loading: false,
