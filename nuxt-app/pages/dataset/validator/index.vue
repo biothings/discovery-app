@@ -11,8 +11,10 @@ let metadataSelected = reactive({});
 let optionSelected = reactive({});
 const runtimeConfig = useRuntimeConfig();
 let errors = ref(false);
+let valid = ref(false);
 
 let userInfo = computed(() => store.getters.userInfo);
+let metaToValidate = computed(() => store.getters.getValidationMetadata);
 
 useHead({
   title: "DDE | Metadata Validator",
@@ -67,7 +69,7 @@ function validateMetadata() {
   if (
     !optionSelected.value?.["name"] ||
     !schemaSelected.value ||
-    !metadataSelected.value
+    !metaToValidate
   ) {
     $swal.fire("Error!", "Missing required data to perform validation", "error");
   } else {
@@ -76,13 +78,13 @@ function validateMetadata() {
       "Content-Type": "application/json",
     };
     axios
-      .get(
+      .post(
         runtimeConfig.public.apiUrl +
           "/api/schema/validate/" +
           optionSelected.value["name"].split(":")[0] +
           "/" +
           optionSelected.value["name"],
-        metadataSelected.value,
+        metaToValidate.value,
         {
           headers: headers,
         }
@@ -91,9 +93,11 @@ function validateMetadata() {
         store.commit("setLoading", { value: false });
         if (Object.hasOwnProperty.call(res.data, "valid")) {
           if (res.data?.valid) {
-            $swal.fire("Yay!", "Everything looks good!", "success");
+            errors.value = false;
+            valid.value = true;
           } else {
             errors.value = res.data?.details;
+            valid.value = false;
             new Notify({
               status: "error",
               title: "Invalid metadata",
@@ -113,10 +117,12 @@ function validateMetadata() {
             });
           }
         } else {
+          valid.value = false;
           $swal.fire("Oh no!", "Cannot validate this metadata", "error");
         }
       })
       .catch((err) => {
+        valid.value = false;
         store.commit("setLoading", { value: false });
         $swal.fire("Oh no!", "Cannot validate this metadata", "error");
         throw err;
@@ -128,6 +134,7 @@ function reset() {
   schemaSelected.value = {};
   metadataSelected.value = {};
   errors.value = false;
+  valid.value = false;
 }
 
 function loadRegistered() {
@@ -143,7 +150,7 @@ function loadRegistered() {
       }
       $swal
         .fire({
-          title: "Select Metadata To Load",
+          title: "Select metadata to load",
           input: "select",
           inputOptions: options,
           confirmButtonColor: "#5C3069",
@@ -204,46 +211,46 @@ function loadRegistered() {
     });
 }
 
-function getFromURL(){
-  $swal.fire({
-    title: 'Enter URL',
-    footer:"<small>Enter URL where metadata could be found, we will look for metadata imbedded in a script tag</small>",
-    input: 'text',
-    inputAttributes: {
-      autocapitalize: 'off'
-    },
-    showCancelButton: true,
-    confirmButtonText: 'Look up',
-    showLoaderOnConfirm: true,
-    preConfirm: (url) => {
-      return fetch(url)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(response.statusText)
-          }
-          return response.toString()
-        })
-        .catch(error => {
-          $swal.showValidationMessage(
-            `Request failed: ${error}`
-          )
-        })
-    },
-    allowOutsideClick: () => !$swal.isLoading(),
-    backdrop: true
-  }).then((result) => {
-    if (result.isConfirmed) {
-      console.log('RESULT URL', result.value)
-      var doc = new DOMParser().parseFromString(result.value, "text/html");
-      var links = doc.querySelectorAll("h1");
-      console.log('H!', links)
-      var els = document.createElement('div');
-      els.innerHTML = result.value;
-      let found = els.querySelectorAll('h1')
-      console.log('FOUND', found)
-    }
-  })
-}
+// function getFromURL(){
+//   $swal.fire({
+//     title: 'Enter URL',
+//     footer:"<small>Enter URL where metadata could be found, we will look for metadata imbedded in a script tag</small>",
+//     input: 'text',
+//     inputAttributes: {
+//       autocapitalize: 'off'
+//     },
+//     showCancelButton: true,
+//     confirmButtonText: 'Look up',
+//     showLoaderOnConfirm: true,
+//     preConfirm: (url) => {
+//       return fetch(url)
+//         .then(response => {
+//           if (!response.ok) {
+//             throw new Error(response.statusText)
+//           }
+//           return response.toString()
+//         })
+//         .catch(error => {
+//           $swal.showValidationMessage(
+//             `Request failed: ${error}`
+//           )
+//         })
+//     },
+//     allowOutsideClick: () => !$swal.isLoading(),
+//     backdrop: true
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       console.log('RESULT URL', result.value)
+//       var doc = new DOMParser().parseFromString(result.value, "text/html");
+//       var links = doc.querySelectorAll("h1");
+//       console.log('H!', links)
+//       var els = document.createElement('div');
+//       els.innerHTML = result.value;
+//       let found = els.querySelectorAll('h1')
+//       console.log('FOUND', found)
+//     }
+//   })
+// }
 
 async function getFile() {
   const { value: file } = await $swal.fire({
@@ -264,8 +271,7 @@ async function getFile() {
       const blob = new Blob([file], { type: "application/json" });
       const fr = new FileReader();
 
-      fr.addEventListener("load", (e) => {
-        var payload = {};
+      fr.addEventListener("load", () => {
         metadataSelected.value = JSON.parse(fr.result);
       });
       fr.readAsText(blob);
@@ -289,10 +295,11 @@ async function getFile() {
         <div
           class="bg-info p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
         >
+        <div class="numberCircle mainBackDark m-0 mr-2">1</div>
         <strong class="text-light mr-2">Schema:</strong>
           <select
             name="schema-selector"
-            class="form-control form-control-sm alert-info col-sm-4"
+            class="form-control form-control-sm col-sm-4"
             @change="getSchema($event)"
           >
             <option value="" disabled selected>Select Schema</option>
@@ -302,68 +309,98 @@ async function getFile() {
               </option>
             </template>
           </select>
+          <font-awesome-icon
+          icon="fas fa-info-circle"
+          class="mx-2 text-warning"
+          data-tippy-content="Load the json-schema validation from a registered class and use it to validate against some metadata. Changes will not have an effect on results."
+        ></font-awesome-icon>
         </div>
         <JSONEditor
           name="validatorSchema"
           :content="schemaSelected"
         ></JSONEditor>
       </div>
-      <div class="col-sm-12 col-md-6 alert-primary p-0">
+      <div class="col-sm-12 col-md-7 alert-primary p-0">
         <div
           class="bg-primary p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
         >
+          <div class="numberCircle mainBackDark m-0 mr-2">2</div>
           <strong class="text-light mr-2">Metadata:</strong>
           <button
             data-tippy-content="Open local file"
             type="button"
-            class="btn btn-sm btn-primary mr-2"
+            class="btn btn-sm btn-dark mr-2"
             @click="getFile()"
           >
+          <font-awesome-icon
+          icon="fas fa-file-download"
+          class="mr-1 text-info"
+        ></font-awesome-icon>
             Load File
           </button>
-          <button
+          <!-- <button
             data-tippy-content="GitHub or web page"
             type="button"
             class="btn btn-sm btn-primary mr-2"
             @click="getFromURL()"
           >
             Load from URL
-          </button>
+          </button> -->
           <button
             data-tippy-content="Load metadata from your dashboard"
             type="button"
-            class="btn btn-sm btn-primary mr-2"
+            class="btn btn-sm btn-dark mr-2"
             @click="loadRegistered()"
           >
+            <font-awesome-icon
+            icon="fas fa-registered"
+            class="mr-1 text-info"
+          ></font-awesome-icon>
             Load Registered
           </button>
+          <font-awesome-icon
+          icon="fas fa-info-circle"
+          class="mx-2 text-warning"
+          data-tippy-content="Load metadata in json format to validate against the selected schema validation above. Changes can be made and will have an effect on results."
+        ></font-awesome-icon>
         </div>
         <JSONEditor
           name="validatorMetadata"
           :content="metadataSelected"
         ></JSONEditor>
       </div>
-      <div class="col-sm-12 col-md-6 p-0 alert-light">
+      <div class="col-sm-12 col-md-5 p-0 alert-light">
         <div
           class="p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
-          :class="[!errors.length ? 'bg-secondary' : 'bg-danger']"
+          :class="[!errors.length ? 'bg-success' : 'bg-danger']"
         >
-          <button
-            data-tippy-content="Validate Metadata against schema selected"
-            type="button"
-            class="btn btn-sm btn-success mr-2"
-            @click="validateMetadata()"
-          >
-            Validate Metadata
-          </button>
-          <button
-            data-tippy-content="Clear all fields"
-            type="button"
-            class="btn btn-sm btn-danger mr-2"
-            @click="reset()"
-          >
-            Reset
-          </button>
+        <div class="numberCircle mainBackDark m-0 mr-2">3</div>
+          <div>
+            <button
+              data-tippy-content="Validate Metadata against schema selected"
+              type="button"
+              class="btn btn-sm btn-dark mr-2"
+              @click="validateMetadata()"
+            >
+            <font-awesome-icon
+            icon="fas fa-check"
+            class="mr-1 text-success"
+          ></font-awesome-icon>
+              Validate Metadata
+            </button>
+            <button
+              data-tippy-content="Clear all fields"
+              type="button"
+              class="btn btn-sm btn-dark mr-2"
+              @click="reset()"
+            >
+            <font-awesome-icon
+            icon="fas fa-retweet"
+            class="mr-1 text-danger"
+          ></font-awesome-icon>
+              Reset
+            </button>
+          </div>
         </div>
         <div class="m-2" v-if="errors">
           <p>Details:</p>
@@ -378,6 +415,9 @@ async function getFile() {
               <code>{{ err }}</code>
             </div>
           </template>
+        </div>
+        <div class="m-2 text-success" v-if="valid">
+          <h4><strong> Valid metadata!</strong></h4>
         </div>
       </div>
     </div>
