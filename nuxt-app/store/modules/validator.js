@@ -20,10 +20,14 @@ export const validator = {
         url: "/api/schema/outbreak:Dataset/validation",
       },
     ],
+    validationMetadata: {},
   }),
   mutations: {
     saveValidationSchema(state, payload) {
       state.validationSchema = payload["value"];
+    },
+    saveValidationMetadata(state, payload) {
+      state.validationMetadata = payload["value"];
     },
     saveValidationOption(state, payload) {
       state.optionSelected = payload["value"];
@@ -31,12 +35,16 @@ export const validator = {
     },
     resetValidation(state) {
       state.validationSchema = {};
+      state.validationMetadata = {};
       state.optionSelected = false;
     },
   },
   getters: {
     getValidationSchema: (state) => {
       return state.validationSchema;
+    },
+    getValidationMetadata: (state) => {
+      return state.validationMetadata;
     },
     getValidationOption: (state) => {
       return state.optionSelected;

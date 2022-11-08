@@ -4,6 +4,7 @@ import { basicSetup, EditorView } from "codemirror";
 import { EditorState, Compartment } from "@codemirror/state";
 import { json } from "@codemirror/lang-json";
 import { autocompletion } from "@codemirror/autocomplete";
+import { useStore } from "vuex";
 import {
   defaultHighlightStyle,
   syntaxHighlighting,
@@ -11,6 +12,7 @@ import {
 import { history } from "@codemirror/commands";
 
 let editor;
+const store = useStore();
 
 const props = defineProps({
   name: {
@@ -19,7 +21,7 @@ const props = defineProps({
   },
   content: {
     type: Object,
-    default: { name: "Data Discovery Engine" },
+    default: { "name": "Data Discovery Engine" },
   },
 });
 
@@ -36,17 +38,19 @@ function loadContent(target) {
       language.of(json()),
       tabSize.of(EditorState.tabSize.of(8)),
       syntaxHighlighting(defaultHighlightStyle),
+      // watch for changes
+      EditorView.updateListener.of(function(e) {
+        if (props.name == 'validatorMetadata') {
+          // console.log('change', e.state.doc.toString())
+          store.commit('saveValidationMetadata', {value: e.state.doc.toString()})
+        }
+      }),
     ],
   });
 
   editor = new EditorView({
     state,
     parent: document.body.querySelector(target),
-    extensions: [
-      EditorView.updateListener.of(function (e) {
-        console.log(props.name + " value changed:", e.state.doc.toString());
-      }),
-    ],
   });
 
   // let value = editor.state.doc;
