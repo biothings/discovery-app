@@ -463,15 +463,13 @@ class SchemaHandler(APIBaseHandler):
         else:
             raise HTTPError(400, reason=f"No matches found for curie request: {''.join(curie)}")
 
-
     def get(self, curie=None, validation=None):
         """
             Fetch  - GET ./api/schema/{ns}
             Fetch  - GET ./api/schema/{ns}:{class_id}
             Fetch  - GET ./api/schema/{ns}:{class_id}/validation
             Fetch  - GET ./api/schema/{ns}:{property_id}
-
-            ../{ns}?meta=1
+            (../{ns}?meta=1)
         """
         if curie is None:
             raise HTTPError(400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'")
@@ -498,13 +496,7 @@ class SchemaHandler(APIBaseHandler):
             if validation:
                 try:
                     schema_validation = schema_metadata["@graph"][0]["$validation"]
-                    metadata_copy = schema_metadata.copy()
-                    metadata_copy.pop("@graph")
-                    metadata_copy.pop("_id")
-                    metadata_copy.pop("@context")
-                    metadata_copy.pop("@id")
-                    metadata_copy.update({"$validation": schema_validation})
-                    self.finish(metadata_copy)
+                    self.finish(schema_validation)
                 except Exception as validation_error:
                     raise HTTPError(400, reason=f"Error retrieving validation, {validation_error}")
             else:
