@@ -8,9 +8,9 @@ const { $swal } = useNuxtApp();
 const store = useStore();
 let schemaSelected = reactive({});
 let metadataSelected = reactive({});
+let optionSelected = reactive({});
 const runtimeConfig = useRuntimeConfig();
-let schemaLoaded = ref("");
-let validationAvailable = ref(false);
+let errors = ref(false);
 
 let userInfo = computed(() => store.getters.userInfo);
 
@@ -44,51 +44,17 @@ useHead({
   ],
 });
 
-let schemas = [
-  {
-    name: "n3c:Dataset",
-    url: "/api/registry/n3c",
-  },
-  {
-    name: "niaid:Dataset",
-    url: "/api/registry/niaid",
-  },
-  {
-    name: "niaid:ComputationalTool",
-    url: "/api/registry/niaid",
-  },
-  {
-    name: "outbreak:Dataset",
-    url: "/api/registry/outbreak",
-  },
-];
+let schemas = store.getters.getValidationSchemaOptions;
 
 function getSchema(e) {
   store.commit("setLoading", { value: true });
+  optionSelected.value = schemas.find((opt) => opt.url == e.target.value);
+  console.log(optionSelected.value);
   axios
-    .get(runtimeConfig.public.apiUrl + e.target.value)
+    .get(runtimeConfig.public.apiUrl + optionSelected.value["url"])
     .then((res) => {
       store.commit("setLoading", { value: false });
-      if (Object.hasOwnProperty.call(res.data, "source")) {
-        schemaSelected.value = res.data.source["@graph"].find(
-          (cls) => cls["rdfs:label"] == "Dataset"
-        );
-        if (
-          typeof schemaSelected.value === "object" &&
-          schemaSelected.value !== null
-        ) {
-          schemaLoaded.value = schemaSelected.value["@id"];
-        } else {
-          schemaLoaded.value = "";
-        }
-        if (Object.hasOwnProperty.call(schemaSelected.value, "$validation")) {
-          validationAvailable.value = true;
-        } else {
-          validationAvailable.value = false;
-        }
-      } else {
-        $swal.fire("Oh no!", "No schema found", "error");
-      }
+      schemaSelected.value = res.data;
     })
     .catch((err) => {
       store.commit("setLoading", { value: false });
@@ -97,11 +63,71 @@ function getSchema(e) {
     });
 }
 
+function validateMetadata() {
+  if (
+    !optionSelected.value?.["name"] ||
+    !schemaSelected.value ||
+    !metadataSelected.value
+  ) {
+    $swal.fire("Error!", "Missing required data to perform validation", "error");
+  } else {
+    store.commit("setLoading", { value: true });
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    axios
+      .get(
+        runtimeConfig.public.apiUrl +
+          "/api/schema/validate/" +
+          optionSelected.value["name"].split(":")[0] +
+          "/" +
+          optionSelected.value["name"],
+        metadataSelected.value,
+        {
+          headers: headers,
+        }
+      )
+      .then((res) => {
+        store.commit("setLoading", { value: false });
+        if (Object.hasOwnProperty.call(res.data, "valid")) {
+          if (res.data?.valid) {
+            $swal.fire("Yay!", "Everything looks good!", "success");
+          } else {
+            errors.value = res.data?.details;
+            new Notify({
+              status: "error",
+              title: "Invalid metadata",
+              text: errors.value.length + "issues found",
+              effect: "fade",
+              speed: 300,
+              customClass: null,
+              customIcon: null,
+              showIcon: true,
+              showCloseButton: true,
+              autoclose: true,
+              autotimeout: 3000,
+              gap: 20,
+              distance: 20,
+              type: 1,
+              position: "right top",
+            });
+          }
+        } else {
+          $swal.fire("Oh no!", "Cannot validate this metadata", "error");
+        }
+      })
+      .catch((err) => {
+        store.commit("setLoading", { value: false });
+        $swal.fire("Oh no!", "Cannot validate this metadata", "error");
+        throw err;
+      });
+  }
+}
+
 function reset() {
   schemaSelected.value = {};
   metadataSelected.value = {};
-  schemaLoaded.value = false;
-  validationAvailable.value = false;
+  errors.value = false;
 }
 
 function loadRegistered() {
@@ -178,7 +204,48 @@ function loadRegistered() {
     });
 }
 
-async function getFile(type) {
+function getFromURL(){
+  $swal.fire({
+    title: 'Enter URL',
+    footer:"<small>Enter URL where metadata could be found, we will look for metadata imbedded in a script tag</small>",
+    input: 'text',
+    inputAttributes: {
+      autocapitalize: 'off'
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Look up',
+    showLoaderOnConfirm: true,
+    preConfirm: (url) => {
+      return fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(response.statusText)
+          }
+          return response.toString()
+        })
+        .catch(error => {
+          $swal.showValidationMessage(
+            `Request failed: ${error}`
+          )
+        })
+    },
+    allowOutsideClick: () => !$swal.isLoading(),
+    backdrop: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      console.log('RESULT URL', result.value)
+      var doc = new DOMParser().parseFromString(result.value, "text/html");
+      var links = doc.querySelectorAll("h1");
+      console.log('H!', links)
+      var els = document.createElement('div');
+      els.innerHTML = result.value;
+      let found = els.querySelectorAll('h1')
+      console.log('FOUND', found)
+    }
+  })
+}
+
+async function getFile() {
   const { value: file } = await $swal.fire({
     title: "Open File",
     html: `<p>Select JSON file to start.</p>`,
@@ -218,13 +285,14 @@ async function getFile(type) {
       <h1 class="logoText logoFont">Metadata Validator</h1>
     </div>
     <div class="row p-2 alert-secondary rounded mb-5">
-      <div class="col-sm-12 col-md-6 alert-info p-0">
+      <div class="col-sm-12 alert-info p-0">
         <div
           class="bg-info p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
         >
+        <strong class="text-light mr-2">Schema:</strong>
           <select
             name="schema-selector"
-            class="form-control form-control-sm alert-info"
+            class="form-control form-control-sm alert-info col-sm-4"
             @change="getSchema($event)"
           >
             <option value="" disabled selected>Select Schema</option>
@@ -235,55 +303,6 @@ async function getFile(type) {
             </template>
           </select>
         </div>
-        <h5 class="m-1">
-          Schema:
-          <small
-            class="text-success btn btn-sm alert-info"
-            data-tippy-content="Schema loaded"
-            v-if="schemaLoaded"
-          >
-            <font-awesome-icon
-              icon="fas fa-file-download"
-              class="text-primary"
-            />
-            {{ schemaLoaded }}
-          </small>
-          <small
-            class="text-muted btn btn-sm alert-secondary"
-            data-tippy-content="No schema selected"
-            v-else
-          >
-            <font-awesome-icon
-              icon="fas fa-file-download"
-              class="text-primary"
-            />
-            NO
-          </small>
-          <small
-            class="text-success btn btn-sm mr-1 alert-info"
-            data-tippy-content="Schema validation available"
-            v-if="validationAvailable"
-          >
-            <img
-              src="@/assets/img/cube.svg"
-              width="15"
-              title="validation available"
-            />
-            OK
-          </small>
-          <small
-            class="text-muted btn btn-sm mr-1 alert-secondary"
-            data-tippy-content="No validation available"
-            v-else
-          >
-            <img
-              src="@/assets/img/cube.svg"
-              width="15"
-              title="validation available"
-            />
-            NO
-          </small>
-        </h5>
         <JSONEditor
           name="validatorSchema"
           :content="schemaSelected"
@@ -293,6 +312,7 @@ async function getFile(type) {
         <div
           class="bg-primary p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
         >
+          <strong class="text-light mr-2">Metadata:</strong>
           <button
             data-tippy-content="Open local file"
             type="button"
@@ -305,6 +325,7 @@ async function getFile(type) {
             data-tippy-content="GitHub or web page"
             type="button"
             class="btn btn-sm btn-primary mr-2"
+            @click="getFromURL()"
           >
             Load from URL
           </button>
@@ -316,6 +337,25 @@ async function getFile(type) {
           >
             Load Registered
           </button>
+        </div>
+        <JSONEditor
+          name="validatorMetadata"
+          :content="metadataSelected"
+        ></JSONEditor>
+      </div>
+      <div class="col-sm-12 col-md-6 p-0 alert-light">
+        <div
+          class="p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
+          :class="[!errors.length ? 'bg-secondary' : 'bg-danger']"
+        >
+          <button
+            data-tippy-content="Validate Metadata against schema selected"
+            type="button"
+            class="btn btn-sm btn-success mr-2"
+            @click="validateMetadata()"
+          >
+            Validate Metadata
+          </button>
           <button
             data-tippy-content="Clear all fields"
             type="button"
@@ -325,11 +365,20 @@ async function getFile(type) {
             Reset
           </button>
         </div>
-        <h5 class="m-1">Metadata:</h5>
-        <JSONEditor
-          name="validatorMetadata"
-          :content="metadataSelected"
-        ></JSONEditor>
+        <div class="m-2" v-if="errors">
+          <p>Details:</p>
+          <template v-for="(err, i) in errors" :key="i + '-error'">
+            <div
+              class="d-flex justify-items-start align-items-center text-danger"
+            >
+              <font-awesome-icon
+                icon="fas fa-exclamation-circle"
+                class="text-danger mr-1"
+              ></font-awesome-icon>
+              <code>{{ err }}</code>
+            </div>
+          </template>
+        </div>
       </div>
     </div>
   </div>

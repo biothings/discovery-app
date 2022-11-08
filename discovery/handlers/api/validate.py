@@ -24,7 +24,7 @@ class MetadataValidationHandler(APIBaseHandler):
 
     name = "validator"
 
-    def post(self, namespace=None, curie=None):
+    def get(self, namespace=None, curie=None):
         """
         Validate metadata in request body against a schema class' $validation
         """
