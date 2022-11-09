@@ -69,6 +69,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.pRelative {
+  position: relative;
+}
+.pAbsolute {
+  position: absolute;
+}
+
 .swal-xl {
   width: 80vw !important;
 }
