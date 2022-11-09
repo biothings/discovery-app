@@ -12,6 +12,7 @@ let optionSelected = reactive({});
 const runtimeConfig = useRuntimeConfig();
 let errors = ref(false);
 let valid = ref(false);
+let expanded = ref(false);
 
 let userInfo = computed(() => store.getters.userInfo);
 let metaToValidate = computed(() => store.getters.getValidationMetadata);
@@ -314,8 +315,23 @@ async function getFile() {
           class="mx-2 text-warning"
           data-tippy-content="Load the json-schema validation from a registered class and use it to validate against some metadata. Changes will not have an effect on results."
         ></font-awesome-icon>
+        <div class="float-right">
+          <font-awesome-icon
+          v-if="!expanded"
+          icon="fas fa-chevron-up"
+          class="mx-2 text-warning pointer"
+          @click="expanded = !expanded"
+        ></font-awesome-icon>
+        <font-awesome-icon
+          v-if="expanded"
+          icon="fas fa-chevron-down"
+          class="mx-2 text-warning pointer"
+          @click="expanded = !expanded"
+        ></font-awesome-icon>
+        </div>
         </div>
         <JSONEditor
+          v-if="expanded"
           name="validatorSchema"
           :content="schemaSelected"
         ></JSONEditor>

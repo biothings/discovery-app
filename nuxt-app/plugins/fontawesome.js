@@ -63,6 +63,8 @@ import {
   faCalendarAlt,
   faHashtag,
   faCog,
+  faChevronDown,
+  faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faGithub,
@@ -136,7 +138,9 @@ library.add(
   faCalendarAlt,
   faHashtag,
   faGoogle,
-  faCog
+  faCog,
+  faChevronDown,
+  faChevronUp
 );
 
 // This is important, we are going to let Nuxt worry about the CSS

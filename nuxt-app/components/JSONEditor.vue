@@ -52,6 +52,7 @@ function loadContent(target) {
     state,
     parent: document.body.querySelector(target),
   });
+  
 
   // let value = editor.state.doc;
   // console.log(value);
@@ -77,3 +78,8 @@ onMounted(() => {
 <template>
   <div :id="props.name"></div>
 </template>
+<style>
+.cm-cursor {
+  margin-left: 1px;
+}
+</style>
