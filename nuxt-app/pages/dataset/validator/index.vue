@@ -39,11 +39,11 @@ useHead({
     },
     {
       name: "og:image",
-      content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+      content: "https://i.postimg.cc/ZRm0nQ0h/dde-Validator.jpg",
     },
     {
       name: "twitter:image",
-      content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+      content: "https://i.postimg.cc/ZRm0nQ0h/dde-Validator.jpg",
     },
   ],
 });
