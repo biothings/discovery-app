@@ -445,18 +445,18 @@ class SchemaHandler(APIBaseHandler):
 
     def property_filter(self, metadata, list_, curie):
         ns = curie[0].split(":")[0]
-        print("here**")
         for dict_ in metadata["@graph"]:
+            print("\n", dict_)
             if dict_["@type"] == "rdf:Property" and ns in dict_["schema:domainIncludes"]["@id"]:
                 list_.append(dict_)
         return list_
 
     def graph_filter(self, metadata, curie):
         new_list = []
-        for d in metadata["@graph"]:
-            if d['@id'] in curie:
-                new_list.append(d)
-                if d["@type"] == "rdfs:Class":
+        for dict_ in metadata["@graph"]:
+            if dict_['@id'] in curie:
+                new_list.append(dict_)
+                if dict_["@type"] == "rdfs:Class":
                     new_list = self.property_filter(metadata, new_list, curie)
         if new_list:
             metadata["@graph"] = new_list
@@ -495,8 +495,11 @@ class SchemaHandler(APIBaseHandler):
             # ./api/schema/{ns}:{class_id}/validation
             if validation:
                 try:
-                    schema_validation = schema_metadata["@graph"][0]["$validation"]
-                    self.finish(schema_validation)
+                    
+                    for data_dict in schema_metadata["@graph"]:
+                        if data_dict["@id"] == curie:
+                            validation_dict = data_dict
+                    self.finish(validation_dict["$validation"])
                 except Exception as validation_error:
                     raise HTTPError(400, reason=f"Error retrieving validation, {validation_error}")
             else:
