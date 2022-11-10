@@ -197,7 +197,7 @@ export default {
             }
           }
           // console.log('All props for '+item.label+" are "+allProps.length)
-          let sorted = $_.sortBy(allProps, [
+          let sorted = self.$_.sortBy(allProps, [
             function (o) {
               return o.label;
             },

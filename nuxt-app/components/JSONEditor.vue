@@ -21,7 +21,7 @@ const props = defineProps({
   },
   content: {
     type: Object,
-    default: { "name": "Data Discovery Engine" },
+    default: { name: "Data Discovery Engine" },
   },
 });
 
@@ -39,10 +39,12 @@ function loadContent(target) {
       tabSize.of(EditorState.tabSize.of(8)),
       syntaxHighlighting(defaultHighlightStyle),
       // watch for changes
-      EditorView.updateListener.of(function(e) {
-        if (props.name == 'validatorMetadata') {
+      EditorView.updateListener.of(function (e) {
+        if (props.name == "validatorMetadata") {
           // console.log('change', e.state.doc.toString())
-          store.commit('saveValidationMetadata', {value: e.state.doc.toString()})
+          store.commit("saveValidationMetadata", {
+            value: e.state.doc.toString(),
+          });
         }
       }),
     ],
@@ -52,7 +54,6 @@ function loadContent(target) {
     state,
     parent: document.body.querySelector(target),
   });
-  
 
   // let value = editor.state.doc;
   // console.log(value);

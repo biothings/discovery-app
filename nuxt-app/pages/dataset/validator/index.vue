@@ -72,7 +72,11 @@ function validateMetadata() {
     !schemaSelected.value ||
     !metaToValidate
   ) {
-    $swal.fire("Error!", "Missing required data to perform validation", "error");
+    $swal.fire(
+      "Error!",
+      "Missing required data to perform validation",
+      "error"
+    );
   } else {
     store.commit("setLoading", { value: true });
     const headers = {
@@ -296,8 +300,8 @@ async function getFile() {
         <div
           class="bg-info p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
         >
-        <div class="numberCircle mainBackDark m-0 mr-2">1</div>
-        <strong class="text-light mr-2">Schema:</strong>
+          <div class="numberCircle mainBackDark m-0 mr-2">1</div>
+          <strong class="text-light mr-2">Schema:</strong>
           <select
             name="schema-selector"
             class="form-control form-control-sm col-sm-4"
@@ -311,24 +315,24 @@ async function getFile() {
             </template>
           </select>
           <font-awesome-icon
-          icon="fas fa-info-circle"
-          class="mx-2 text-warning"
-          data-tippy-content="Load the json-schema validation from a registered class and use it to validate against some metadata. Changes will not have an effect on results."
-        ></font-awesome-icon>
-        <div class="float-right">
-          <font-awesome-icon
-          v-if="!expanded"
-          icon="fas fa-chevron-up"
-          class="mx-2 text-warning pointer"
-          @click="expanded = !expanded"
-        ></font-awesome-icon>
-        <font-awesome-icon
-          v-if="expanded"
-          icon="fas fa-chevron-down"
-          class="mx-2 text-warning pointer"
-          @click="expanded = !expanded"
-        ></font-awesome-icon>
-        </div>
+            icon="fas fa-info-circle"
+            class="mx-2 text-warning"
+            data-tippy-content="Load the json-schema validation from a registered class and use it to validate against some metadata. Changes will not have an effect on results."
+          ></font-awesome-icon>
+          <div class="float-right">
+            <font-awesome-icon
+              v-if="!expanded"
+              icon="fas fa-chevron-up"
+              class="mx-2 text-warning pointer"
+              @click="expanded = !expanded"
+            ></font-awesome-icon>
+            <font-awesome-icon
+              v-if="expanded"
+              icon="fas fa-chevron-down"
+              class="mx-2 text-warning pointer"
+              @click="expanded = !expanded"
+            ></font-awesome-icon>
+          </div>
         </div>
         <JSONEditor
           v-if="expanded"
@@ -348,10 +352,10 @@ async function getFile() {
             class="btn btn-sm btn-dark mr-2"
             @click="getFile()"
           >
-          <font-awesome-icon
-          icon="fas fa-file-download"
-          class="mr-1 text-info"
-        ></font-awesome-icon>
+            <font-awesome-icon
+              icon="fas fa-file-download"
+              class="mr-1 text-info"
+            ></font-awesome-icon>
             Load File
           </button>
           <!-- <button
@@ -369,16 +373,16 @@ async function getFile() {
             @click="loadRegistered()"
           >
             <font-awesome-icon
-            icon="fas fa-registered"
-            class="mr-1 text-info"
-          ></font-awesome-icon>
+              icon="fas fa-registered"
+              class="mr-1 text-info"
+            ></font-awesome-icon>
             Load Registered
           </button>
           <font-awesome-icon
-          icon="fas fa-info-circle"
-          class="mx-2 text-warning"
-          data-tippy-content="Load metadata in json format to validate against the selected schema validation above. Changes can be made and will have an effect on results."
-        ></font-awesome-icon>
+            icon="fas fa-info-circle"
+            class="mx-2 text-warning"
+            data-tippy-content="Load metadata in json format to validate against the selected schema validation above. Changes can be made and will have an effect on results."
+          ></font-awesome-icon>
         </div>
         <JSONEditor
           name="validatorMetadata"
@@ -390,7 +394,7 @@ async function getFile() {
           class="p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
           :class="[!errors.length ? 'bg-success' : 'bg-danger']"
         >
-        <div class="numberCircle mainBackDark m-0 mr-2">3</div>
+          <div class="numberCircle mainBackDark m-0 mr-2">3</div>
           <div>
             <button
               data-tippy-content="Validate Metadata against schema selected"
@@ -398,10 +402,10 @@ async function getFile() {
               class="btn btn-sm btn-dark mr-2"
               @click="validateMetadata()"
             >
-            <font-awesome-icon
-            icon="fas fa-check"
-            class="mr-1 text-success"
-          ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-check"
+                class="mr-1 text-success"
+              ></font-awesome-icon>
               Validate Metadata
             </button>
             <button
@@ -410,10 +414,10 @@ async function getFile() {
               class="btn btn-sm btn-dark mr-2"
               @click="reset()"
             >
-            <font-awesome-icon
-            icon="fas fa-retweet"
-            class="mr-1 text-danger"
-          ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-retweet"
+                class="mr-1 text-danger"
+              ></font-awesome-icon>
               Reset
             </button>
           </div>

@@ -93,9 +93,13 @@ export const schema_registry = {
     },
     removeItem(state, payload) {
       let item = payload["item"];
-      $_.remove(state.compareItems, function (n) {
-        return n["name"] == item["name"];
+      let i = "";
+      state.compareItems.find((n, index) => {
+        if (n["name"] == item["name"]) {
+          i = index;
+        }
       });
+      state.compareItems.splice(i, 1);
     },
     reset(state) {
       state.compareItems = [];

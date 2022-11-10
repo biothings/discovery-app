@@ -193,17 +193,17 @@ export default {
     getType: function (data) {
       let types = [];
       if (data.hasOwnProperty("schema:rangeIncludes")) {
-        if ($_.isString(data["schema:rangeIncludes"])) {
+        if (this.$_.isString(data["schema:rangeIncludes"])) {
           let type = data["schema:rangeIncludes"].split(":");
           type = type[type.length - 1];
           types.push(type);
-        } else if ($_.isArray(data["schema:rangeIncludes"])) {
+        } else if (this.$_.isArray(data["schema:rangeIncludes"])) {
           for (var i = 0; i < data["schema:rangeIncludes"].length; i++) {
             let type = data["schema:rangeIncludes"][i]["@id"].split(":");
             type = type[type.length - 1];
             types.push(type);
           }
-        } else if ($_.isObject(data["schema:rangeIncludes"])) {
+        } else if (this.$_.isObject(data["schema:rangeIncludes"])) {
           let type = data["schema:rangeIncludes"]["@id"].split(":");
           type = type[type.length - 1];
           types.push(type);

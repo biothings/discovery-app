@@ -597,12 +597,12 @@ export default {
   watch: {
     searchQuery: function (newQ) {
       if (newQ.length) {
-        let result = $_.filter(this.userSchema.hits, function (o) {
+        let result = this.$_.filter(this.userSchema.hits, function (o) {
           if (o["label"].toLowerCase().includes(newQ.toLowerCase())) {
             return o;
           }
         });
-        let resultProps = $_.filter(this.userSchemaAllProps, function (o) {
+        let resultProps = this.$_.filter(this.userSchemaAllProps, function (o) {
           if (o["label"].toLowerCase().includes(newQ.toLowerCase())) {
             return o;
           }
@@ -642,7 +642,7 @@ export default {
   methods: {
     saveDataAndRedirect(item) {
       var self = this;
-      let found = $_.find(self.userSchema.hits, (o) => o.name == item);
+      let found = this.$_.find(self.userSchema.hits, (o) => o.name == item);
       if (found) {
         let data = JSON.stringify(found);
         localStorage.setItem("EditorData", data);
@@ -780,7 +780,7 @@ export default {
       }, {});
 
       res = Object.values(data);
-      self.classesGroupByLetter = $_.orderBy(res, ["group"], ["asc"]);
+      self.classesGroupByLetter = this.$_.orderBy(res, ["group"], ["asc"]);
       self.makeHierarchyTree();
       self.getAllProps();
     },
@@ -994,7 +994,7 @@ export default {
           results = fullList.filter(
             (word) => word["name"].split(":")[1][0] === target
           );
-          this.filterResults = $_.sortBy(
+          this.filterResults = this.$_.sortBy(
             results,
             [(q) => q["name"].split(":")[1]],
             ["asc"]

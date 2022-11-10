@@ -292,7 +292,10 @@ export const guide = {
       let item = payload["item"]; //full info
       let props = state.schema.validation.properties;
 
-      if ($_.isString(props[field]?.value)) {
+      if (
+        typeof props[field]?.value === "object" &&
+        !Array.isArray(props[field]?.value)
+      ) {
         console.log("remove from string");
         for (var i = 0; i < props[field].value.length; i++) {
           let prop_val = props[field].value[i];
@@ -317,12 +320,12 @@ export const guide = {
             });
           }
         }
-      } else if ($_.isArray(props[field]?.value)) {
+      } else if (Array.isArray(props[field]?.value)) {
         console.log("remove from array");
         if (props[field] && props[field].value) {
           for (var i = 0; i < props[field].value.length; i++) {
             let arr_item = props[field].value[i];
-            if ($_.isString(arr_item)) {
+            if (typeof arr_item == "string") {
               if (arr_item === item) {
                 props[field].value.splice(i, 1);
                 new Notify({
@@ -343,8 +346,11 @@ export const guide = {
                   position: "right top",
                 });
               }
-            } else if (isObject(arr_item)) {
-              if ($_.isEqual(arr_item, item)) {
+            } else if (
+              typeof arr_item == "object" &&
+              !Array.isArray(arr_item)
+            ) {
+              if (JSON.stringify(arr_item) == JSON.stringify(item)) {
                 props[field].value.splice(i, 1);
                 new Notify({
                   status: "success",
@@ -371,9 +377,12 @@ export const guide = {
         } else {
           console.log("NO VALUE", props[field]);
         }
-      } else if ($_.isPlainObject(props[field]?.value)) {
+      } else if (
+        typeof props[field]?.value == "object" &&
+        !Array.isArray(props[field]?.value)
+      ) {
         console.log("remove from object");
-        if ($_.isEqual(props[field].value, item)) {
+        if (JSON.stringify(props[field].value) == JSON.stringify(item)) {
           delete props[field]["value"];
         } else {
           new Notify({
@@ -447,7 +456,7 @@ export const guide = {
         if (props[key].hasOwnProperty("value")) {
           if (props[key]["value"] || props[key]["value"] === false) {
             if (
-              $_.isArray(props[key]["value"]) &&
+              Array.isArray(props[key]["value"]) &&
               props[key]["value"].length === 1
             ) {
               state.output[key] = props[key].value[0];
@@ -697,7 +706,7 @@ export const guide = {
                 // CAN BE ARRAY
                 if (props[name].value) {
                   let val = props[name].value;
-                  if ($_.isPlainObject(val)) {
+                  if (typeof val == "object" && !Array.isArray(val)) {
                     // will replace
                     Swal.fire({
                       title: "Value Exists",
@@ -709,7 +718,7 @@ export const guide = {
                         props[name]["value"] = value;
                       }
                     });
-                  } else if ($_.isArray(val)) {
+                  } else if (Array.isArray(val)) {
                     //push to existing array
                     props[name]["value"].push(value);
                   } else {
@@ -737,7 +746,7 @@ export const guide = {
                 // CAN BE ARRAY
                 if (props[name].value) {
                   let val = props[name].value;
-                  if ($_.isPlainObject(val)) {
+                  if (typeof val == "object" && !Array.isArray(val)) {
                     // will replace
                     Swal.fire({
                       title: "Value Exists",
@@ -749,8 +758,8 @@ export const guide = {
                         props[name]["value"] = value;
                       }
                     });
-                  } else if ($_.isArray(val)) {
-                    //push to exisiting array
+                  } else if (Array.isArray(val)) {
+                    //push to existing array
                     props[name]["value"].push(value);
                   } else {
                     //no value yet
