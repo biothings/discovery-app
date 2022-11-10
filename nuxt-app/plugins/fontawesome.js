@@ -65,6 +65,8 @@ import {
   faCog,
   faChevronDown,
   faChevronUp,
+  faExpand,
+  faIndent,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faGithub,
@@ -140,7 +142,9 @@ library.add(
   faGoogle,
   faCog,
   faChevronDown,
-  faChevronUp
+  faChevronUp,
+  faExpand,
+  faIndent
 );
 
 // This is important, we are going to let Nuxt worry about the CSS
