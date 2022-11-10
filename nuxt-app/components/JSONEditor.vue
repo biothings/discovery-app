@@ -13,7 +13,6 @@ import { history } from "@codemirror/commands";
 
 let editor;
 const store = useStore();
-
 const props = defineProps({
   name: {
     type: String,
@@ -42,9 +41,17 @@ function loadContent(target) {
       EditorView.updateListener.of(function (e) {
         if (props.name == "validatorMetadata") {
           // console.log('change', e.state.doc.toString())
-          store.commit("saveValidationMetadata", {
-            value: e.state.doc.toString(),
-          });
+          try {
+            //valid JSON
+            store.commit("saveValidationMetadata", {
+              value: JSON.parse(e.state.doc.toString()),
+            });
+          } catch (error) {
+            // not yet valid JSON
+            store.commit("saveValidationMetadata", {
+              value: e.state.doc.toString(),
+            });
+          }
         }
       }),
     ],

@@ -13,6 +13,7 @@ const runtimeConfig = useRuntimeConfig();
 let errors = ref(false);
 let valid = ref(false);
 let expanded = ref(false);
+let expandedWide = ref(false);
 
 let userInfo = computed(() => store.getters.userInfo);
 let metaToValidate = computed(() => store.getters.getValidationMetadata);
@@ -48,6 +49,11 @@ useHead({
 });
 
 let schemas = store.getters.getValidationSchemaOptions;
+
+function format() {
+  //trigger a change, will be handled on JSONEditor
+  metadataSelected.value = { ...metaToValidate.value };
+}
 
 function getSchema(e) {
   store.commit("setLoading", { value: true });
@@ -291,7 +297,10 @@ async function getFile() {
 }
 </script>
 <template>
-  <div class="container mt-5 p-0">
+  <div
+    class="mt-5 p-0"
+    :class="[!expandedWide ? 'container' : 'container-fluid px-3']"
+  >
     <div class="jumbotron bg-light text-center p-2">
       <h1 class="logoText logoFont">Metadata Validator</h1>
     </div>
@@ -319,20 +328,41 @@ async function getFile() {
             class="mx-2 text-warning"
             data-tippy-content="Load the json-schema validation from a registered class and use it to validate against some metadata. Changes will not have an effect on results."
           ></font-awesome-icon>
-          <div class="float-right">
+          <button
+            class="btn btn-sm rounded btn-info mr-2"
+            @click="expanded = !expanded"
+          >
             <font-awesome-icon
               v-if="!expanded"
-              icon="fas fa-chevron-up"
-              class="mx-2 text-warning pointer"
-              @click="expanded = !expanded"
+              icon="fas fa-chevron-down"
             ></font-awesome-icon>
             <font-awesome-icon
               v-if="expanded"
-              icon="fas fa-chevron-down"
-              class="mx-2 text-warning pointer"
-              @click="expanded = !expanded"
+              icon="fas fa-chevron-up"
             ></font-awesome-icon>
-          </div>
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-info"
+            @click="expandedWide = !expandedWide"
+          >
+            <template v-if="!expandedWide">
+              <font-awesome-icon
+                icon="fas fa-chevron-left"
+                class="mr-1"
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-chevron-right"
+              ></font-awesome-icon>
+            </template>
+            <template v-if="expandedWide">
+              <font-awesome-icon
+                icon="fas fa-chevron-right"
+                class="mr-1"
+              ></font-awesome-icon>
+              <font-awesome-icon icon="fas fa-chevron-left"></font-awesome-icon>
+            </template>
+          </button>
         </div>
         <JSONEditor
           v-if="expanded"
@@ -377,6 +407,18 @@ async function getFile() {
               class="mr-1 text-info"
             ></font-awesome-icon>
             Load Registered
+          </button>
+          <button
+            data-tippy-content="prettify JSON"
+            type="button"
+            class="btn btn-sm btn-primary mr-2"
+            @click="format()"
+          >
+            <font-awesome-icon
+              icon="fas fa-indent"
+              class="mr-1"
+            ></font-awesome-icon>
+            Format
           </button>
           <font-awesome-icon
             icon="fas fa-info-circle"
