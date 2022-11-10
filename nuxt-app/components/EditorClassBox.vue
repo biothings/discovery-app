@@ -744,7 +744,7 @@ export default {
     sortedList() {
       var self = this;
       try {
-        return $_.orderBy(self.item.properties, ["label"], ["asc"]);
+        return self.$_.orderBy(self.item.properties, ["label"], ["asc"]);
       } catch (e) {
         return self.item.properties;
       }

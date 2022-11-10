@@ -485,7 +485,17 @@ export const editor = {
       let parent = payload["parent"];
       // sort props alphabetically
       if (Object.hasOwnProperty.call(parent, "properties")) {
-        parent.properties = $_.orderBy(parent.properties, ["label"], ["asc"]);
+        // parent.properties = $_.orderBy(parent.properties, ["label"], ["asc"]);
+        function compare(a, b) {
+          if (a["label"] < b["label"]) {
+            return -1;
+          }
+          if (a["label"] > b["label"]) {
+            return 1;
+          }
+          return 0;
+        }
+        parents.properties.sort(compare);
       }
       let names = state.schema.map((cls) => cls.name);
       // console.log(names)
@@ -862,19 +872,22 @@ export const editor = {
               let defs_found = new Set();
 
               function addRefsMentioned(obj) {
-                if ($_.isPlainObject(obj)) {
+                if (typeof obj === "object" && !Array.isArray(obj)) {
                   if ("$ref" in obj) {
                     return obj["$ref"].split("#/definitions/")[1];
                   } else {
                     for (const key in obj) {
-                      if ($_.isArray(obj[key])) {
+                      if (Array.isArray(obj[key])) {
                         for (let i = 0; i < obj[key].length; i++) {
                           const element = obj[key][i];
                           return addRefsMentioned(element);
                         }
-                      } else if ($_.isPlainObject(obj[key])) {
+                      } else if (
+                        typeof obj[key] === "object" &&
+                        !Array.isArray(obj[key])
+                      ) {
                         return addRefsMentioned(obj[key]);
-                      } else if ($_.isString(obj[key])) {
+                      } else if (typeof obj === "string") {
                         continue;
                       } else {
                         return false;

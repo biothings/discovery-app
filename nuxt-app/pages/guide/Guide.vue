@@ -1568,7 +1568,7 @@ export default {
                               self.checkOverriddenID(selected[key]);
                             }
                             var payload = {};
-                            if ($_.isPlainObject(selected[key])) {
+                            if (self.$_.isPlainObject(selected[key])) {
                               //look at keys and check for dates
                               let obj = selected[key];
                               for (var k in obj) {
@@ -1584,12 +1584,12 @@ export default {
                                 value: [obj],
                               };
                               self.$store.commit("markCompleted", payload);
-                            } else if ($_.isArray(selected[key])) {
+                            } else if (self.$_.isArray(selected[key])) {
                               let list = selected[key];
 
                               for (var i = 0; i < list.length; i++) {
                                 let item = list[i];
-                                if ($_.isPlainObject(item)) {
+                                if (self.$_.isPlainObject(item)) {
                                   let arrObj = item;
 
                                   for (var k in arrObj) {
@@ -1605,7 +1605,7 @@ export default {
                                     }
                                   }
                                 } else if (
-                                  $_.isString(item) &&
+                                  self.$_.isString(item) &&
                                   item.includes("date")
                                 ) {
                                   item = moment(item).format("YYYY-MM-DD");
