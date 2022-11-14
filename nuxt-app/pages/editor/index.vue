@@ -589,7 +589,7 @@
 import { mapGetters, mapState } from "vuex";
 import axios from "axios";
 import moment from "moment";
-import "../../node_modules/renderjson/renderjson.js";
+import "@/assets/js/renderjson";
 
 import cubeImg from "@/assets/img/cubeplus.svg";
 import editorImg from "@/assets/img/editor.png";

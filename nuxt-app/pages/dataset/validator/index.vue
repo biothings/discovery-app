@@ -112,7 +112,7 @@ function validateMetadata() {
             new Notify({
               status: "error",
               title: "Invalid metadata",
-              text: errors.value.length + "issues found",
+              text: errors.value.length + " issues found",
               effect: "fade",
               speed: 300,
               customClass: null,
