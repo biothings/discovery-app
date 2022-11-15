@@ -1,7 +1,6 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import Notify from "simple-notify";
-import { isObject } from "@vue/shared";
 
 export const guide = {
   state: {
@@ -144,7 +143,6 @@ export const guide = {
       state.step = "1";
       state.selectedPortals = [];
       state.startingPoint = null;
-      window.location.reload();
     },
     markSelected(state, payload) {
       let selection = payload["select"];

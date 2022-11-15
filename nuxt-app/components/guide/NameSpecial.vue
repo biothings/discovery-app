@@ -15,7 +15,7 @@
         >
       </div>
       <div class="col-sm-12" style="max-height: 200px; overflow-y: scroll">
-        <h6 v-if="window.location.href.includes('n3c')" class="text-muted mt-2">
+        <h6 v-if="$route.fullPath.includes('n3c')" class="text-muted mt-2">
           <font-awesome-icon
             icon="fas fa-exclamation-circle"
             class="text-info"
@@ -103,7 +103,7 @@ export default {
           res.data.hits.forEach((hit) => {
             if (
               hit["_meta"].hasOwnProperty("guide") &&
-              hit["_meta"]["guide"] == window.location.pathname
+              hit["_meta"]["guide"] == self.$route.fullPath
             ) {
               portal_hits.push(hit);
             }

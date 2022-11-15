@@ -43,7 +43,7 @@ export default {
             "EditorStartingPoint",
             self.preset.prefix + ":" + self.preset.name
           );
-          window.location.href = "/editor";
+          self.$router.push({'path': '/editor'})
         })
         .catch((err) => {
           throw err;

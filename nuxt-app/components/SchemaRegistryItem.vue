@@ -144,14 +144,14 @@ export default {
             "EditorStartingPoint",
             item.prefix + ":" + item.label
           );
-          window.location.href = goesToEditor;
+          this.$router.push({'path': '/editor'})
         } else {
           this.$swal.fire("Oops!", "Action not available for this item");
         }
       } else {
         // View and send analytics
         if (item && item.namespace && item.label) {
-          window.location.href = "/view/" + item.namespace + "/" + item.label;
+          this.$router.push("/view/" + item.namespace + "/" + item.label)
         } else {
           this.$swal.fire("Oops!", "Action not available for this item");
         }
