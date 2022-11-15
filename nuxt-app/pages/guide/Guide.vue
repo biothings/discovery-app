@@ -949,6 +949,7 @@ export default {
             if (result.value) {
               self.$store.dispatch("reset");
               sessionStorage.removeItem("guideProgress");
+              self.$router.go();
             }
           });
       }
@@ -1077,6 +1078,7 @@ export default {
                           </div>`,
                   onClose: () => {
                     self.$store.dispatch("reset");
+                    self.$router.push('/dataset');
                   },
                 });
               } else {
