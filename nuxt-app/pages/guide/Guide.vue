@@ -1078,7 +1078,7 @@ export default {
                           </div>`,
                   didClose: () => {
                     self.$store.dispatch("reset");
-                    self.$router.push('/dataset');
+                    self.$router.push("/dataset");
                   },
                 });
               } else {

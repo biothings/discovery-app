@@ -264,6 +264,7 @@
 import { mapGetters } from "vuex";
 import Category from "./Category.vue";
 import InputBox from "./InputBox.vue";
+import Notify from "simple-notify";
 
 export default {
   name: "Property",
@@ -300,10 +301,22 @@ export default {
           payload["step"] = 5;
           this.$store.commit("changeStep", payload);
         } else {
-          $.notify("Incomplete", {
-            globalPosition: "right",
-            style: "danger",
-            showDuration: 40,
+          new Notify({
+            status: "error",
+            title: "Error",
+            text: "Incomplete",
+            effect: "fade",
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: false,
+            autotimeout: 3000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: "right top",
           });
         }
       }

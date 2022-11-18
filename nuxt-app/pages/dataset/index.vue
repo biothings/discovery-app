@@ -318,6 +318,7 @@
 import axios from "axios";
 import Mark from "mark.js";
 import Papa from "papaparse";
+import Notify from "simple-notify";
 
 import dde from "~~/assets/img/dde-logo-o.svg";
 import n3cLogo from "~~/assets/img/N3Co.png";
@@ -589,10 +590,22 @@ export default {
                 self.download(csv, result.value + ".csv", "text/plain");
               })
               .catch((err) => {
-                $.notify("Failed to download items", {
-                  globalPosition: "right",
-                  style: "danger",
-                  showDuration: 40,
+                new Notify({
+                  status: "error",
+                  title: "Oh no!",
+                  text: "Failed to download items",
+                  effect: "fade",
+                  speed: 300,
+                  customClass: null,
+                  customIcon: null,
+                  showIcon: true,
+                  showCloseButton: true,
+                  autoclose: false,
+                  autotimeout: 3000,
+                  gap: 20,
+                  distance: 20,
+                  type: 1,
+                  position: "right top",
                 });
                 throw err;
               });
@@ -641,10 +654,22 @@ export default {
                 );
               })
               .catch((err) => {
-                $.notify("Failed to download items", {
-                  globalPosition: "right",
-                  style: "danger",
-                  showDuration: 40,
+                new Notify({
+                  status: "error",
+                  title: "Oh no!",
+                  text: "Failed to download items",
+                  effect: "fade",
+                  speed: 300,
+                  customClass: null,
+                  customIcon: null,
+                  showIcon: true,
+                  showCloseButton: true,
+                  autoclose: false,
+                  autotimeout: 3000,
+                  gap: 20,
+                  distance: 20,
+                  type: 1,
+                  position: "right top",
                 });
                 throw err;
               });
