@@ -589,6 +589,7 @@
 import { mapGetters, mapState } from "vuex";
 import axios from "axios";
 import moment from "moment";
+import Notify from "simple-notify";
 
 import cubeImg from "@/assets/img/cubeplus.svg";
 import editorImg from "@/assets/img/editor.png";
@@ -712,10 +713,22 @@ export default {
         self.availableNamespace = false;
       } else {
         if (!re.test(value)) {
-          $.notify("[" + value + "] cannot contain non-alphanumeric values", {
-            globalPosition: "right",
-            style: "error",
-            showDuration: 100,
+          new Notify({
+            status: "error",
+            title: "Oh no!",
+            text: "[" + value + "] cannot contain non-alphanumeric values",
+            effect: "fade",
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: false,
+            autotimeout: 3000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: "right top",
           });
           self.availableNamespace = false;
         } else {
@@ -935,10 +948,22 @@ export default {
               switch (result.value) {
                 case "all":
                   localStorage.removeItem("EditorProgress");
-                  $.notify("Done! All gone", {
-                    globalPosition: "right",
-                    style: "info",
-                    showDuration: 200,
+                  new Notify({
+                    status: "success",
+                    title: "Done!",
+                    text: "All gone!",
+                    effect: "fade",
+                    speed: 300,
+                    customClass: null,
+                    customIcon: null,
+                    showIcon: true,
+                    showCloseButton: true,
+                    autoclose: false,
+                    autotimeout: 3000,
+                    gap: 20,
+                    distance: 20,
+                    type: 1,
+                    position: "right top",
                   });
                   break;
                 default:
@@ -953,16 +978,40 @@ export default {
                       "EditorProgress",
                       JSON.stringify(newEntries)
                     );
-                    $.notify("Gone!", {
-                      globalPosition: "right",
-                      style: "success",
-                      showDuration: 200,
+                    new Notify({
+                      status: "success",
+                      title: "Done!",
+                      text: "All gone!",
+                      effect: "fade",
+                      speed: 300,
+                      customClass: null,
+                      customIcon: null,
+                      showIcon: true,
+                      showCloseButton: true,
+                      autoclose: false,
+                      autotimeout: 3000,
+                      gap: 20,
+                      distance: 20,
+                      type: 1,
+                      position: "right top",
                     });
                   } else {
-                    $.notify("Not Found, nothing happened", {
-                      globalPosition: "right",
-                      style: "danger",
-                      showDuration: 200,
+                    new Notify({
+                      status: "error",
+                      title: "Oh no!",
+                      text: "Not found, nothing happened...",
+                      effect: "fade",
+                      speed: 300,
+                      customClass: null,
+                      customIcon: null,
+                      showIcon: true,
+                      showCloseButton: true,
+                      autoclose: false,
+                      autotimeout: 3000,
+                      gap: 20,
+                      distance: 20,
+                      type: 1,
+                      position: "right top",
                     });
                   }
                   break;
@@ -970,10 +1019,22 @@ export default {
             }
           });
       } else {
-        $.notify("Nothing to delete", {
-          globalPosition: "right",
-          style: "info",
-          showDuration: 200,
+        new Notify({
+          status: "warning",
+          title: "Hmmm",
+          text: "Nothing to delete",
+          effect: "fade",
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: false,
+          autotimeout: 3000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: "right top",
         });
       }
     },
@@ -1050,16 +1111,40 @@ export default {
           }
         });
         localStorage.setItem("EditorProgress", JSON.stringify(newEntries));
-        $.notify("Save Complete!", {
-          globalPosition: "right",
-          style: "success",
-          showDuration: 200,
+        new Notify({
+          status: "success",
+          title: "Done!",
+          text: "Save complete!",
+          effect: "fade",
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: false,
+          autotimeout: 3000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: "right top",
         });
       } else {
-        $.notify("Not Found, saving as new", {
-          globalPosition: "right",
-          style: "danger",
-          showDuration: 200,
+        new Notify({
+          status: "warning",
+          title: "Done!",
+          text: "Not found, saving as NEW!",
+          effect: "fade",
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: false,
+          autotimeout: 3000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: "right top",
         });
         this.saveNewEntry(schema);
       }
@@ -1091,10 +1176,22 @@ export default {
           };
           progress.push(item);
           localStorage.setItem("EditorProgress", JSON.stringify(progress));
-          $.notify(desc + " SAVED", {
-            globalPosition: "right",
-            style: "success",
-            showDuration: 200,
+          new Notify({
+            status: "success",
+            title: "Done!",
+            text: desc + " SAVED!",
+            effect: "fade",
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: false,
+            autotimeout: 3000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: "right top",
           });
         }
       } else {
@@ -1115,10 +1212,22 @@ export default {
             // 'parentInfo': this.$store.getters.getSchema.find(cls => cls.name == this.$store.getters.getStartingPoint)
           };
           localStorage.setItem("EditorProgress", JSON.stringify([item]));
-          $.notify(desc + " SAVED", {
-            globalPosition: "right",
-            style: "success",
-            showDuration: 200,
+          new Notify({
+            status: "success",
+            title: "Done!",
+            text: desc + " SAVED!",
+            effect: "fade",
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: false,
+            autotimeout: 3000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: "right top",
           });
         }
       }
@@ -1156,21 +1265,40 @@ export default {
             let found = progress.find((entry) => entry.date == result.value);
             if (found) {
               self.loadDataIntoEditor(found);
-              $.notify("PLEASE WAIT...", {
-                globalPosition: "right",
-                style: "info",
-                showDuration: 200,
-              });
-              $.notify("Loading: " + found.date, {
-                globalPosition: "right",
-                style: "success",
-                showDuration: 200,
+              new Notify({
+                status: "success",
+                title: "Done!",
+                text: "Loading: " + found.date,
+                effect: "fade",
+                speed: 300,
+                customClass: null,
+                customIcon: null,
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: false,
+                autotimeout: 3000,
+                gap: 20,
+                distance: 20,
+                type: 1,
+                position: "right top",
               });
             } else {
-              $.notify("Oh no! We can't find this item!", {
-                globalPosition: "right",
-                style: "danger",
-                showDuration: 200,
+              new Notify({
+                status: "error",
+                title: "Oh no!",
+                text: "Oh no! We can't find this item...",
+                effect: "fade",
+                speed: 300,
+                customClass: null,
+                customIcon: null,
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: false,
+                autotimeout: 3000,
+                gap: 20,
+                distance: 20,
+                type: 1,
+                position: "right top",
               });
             }
           }
@@ -1193,10 +1321,22 @@ export default {
       let desc = this.$refs.clsDesc.value;
 
       if (!name.match(/^(?=.*[a-z])[A-Z]+[a-z]*(?:\d*(?:[A-Z]+[a-z]*)?)*$/)) {
-        $.notify("Class name should be PascalCased", {
-          globalPosition: "right",
-          style: "danger",
-          showDuration: 200,
+        new Notify({
+          status: "warning",
+          title: "Oops!",
+          text: "Class name should be PascalCased",
+          effect: "fade",
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: false,
+          autotimeout: 3000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: "right top",
         });
       } else {
         if (name && desc) {
