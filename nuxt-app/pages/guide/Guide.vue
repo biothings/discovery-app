@@ -677,7 +677,7 @@ export default {
                 customClass: "scale-in-center",
                 html: "Taking you to your dataset page in <strong></strong> seconds.",
                 timer: 3000,
-                onBeforeOpen: () => {
+                willOpen: () => {
                   const content = self.$swal.getContent();
                   const $ = content.querySelector.bind(content);
                   self.$swal.showLoading();
@@ -689,7 +689,7 @@ export default {
                     ).toFixed(0);
                   }, 100);
                 },
-                onClose: () => {
+                didClose: () => {
                   clearInterval(timerInterval);
                   self.$store.dispatch("reset");
                   self.$router.push({ path: "/dataset/" + self.editingID });
@@ -1076,7 +1076,7 @@ export default {
                               </h5>
                             </div>
                           </div>`,
-                  onClose: () => {
+                  didClose: () => {
                     self.$store.dispatch("reset");
                     self.$router.push('/dataset');
                   },
@@ -1092,7 +1092,7 @@ export default {
                   customClass: "scale-in-center",
                   html: "Taking you to your dataset page in <strong></strong> seconds.",
                   timer: 3000,
-                  onBeforeOpen: () => {
+                  willOpen: () => {
                     const content = self.$swal.getContent();
                     const $ = content.querySelector.bind(content);
                     self.$swal.showLoading();
@@ -1104,7 +1104,7 @@ export default {
                       ).toFixed(0);
                     }, 100);
                   },
-                  onClose: () => {
+                  didClose: () => {
                     clearInterval(timerInterval);
                     self.$store.dispatch("reset");
                     self.$router.push({ path: "/dataset/" + res.data.id });
