@@ -874,7 +874,7 @@ export default {
                           ` +
           label +
           `
-                          <i class="modaltip" data-tippy-info='` +
+                          <i class="modaltip" data-tippy-content='` +
           JSON.stringify(docs[i]) +
           `'>ℹ️</i>
                       </label>

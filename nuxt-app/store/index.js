@@ -86,8 +86,8 @@ export default createStore({
                 let json = JSON.parse(instance.reference.dataset.tippyContent);
                 for (const k in json) {
                   html += `<tr>
-                      <td>${k}</td>
-                      <td>${json[k]}</td>
+                      <td><small><b>${k}</b></small></td>
+                      <td><small>${JSON.stringify(json[k])}</small></td>
                       </tr>`;
                 }
                 html += "</table>";
