@@ -1199,7 +1199,7 @@ export default {
                         customClass: "scale-in-center",
                         html: "Taking you to your schema homepage in <strong></strong> seconds.",
                         timer: 3000,
-                        onBeforeOpen: () => {
+                        willOpen: () => {
                           const content = self.$swal.getContent();
                           const $ = content.querySelector.bind(content);
                           self.$swal.showLoading();
@@ -1211,7 +1211,7 @@ export default {
                             ).toFixed(0);
                           }, 100);
                         },
-                        onClose: () => {
+                        didClose: () => {
                           clearInterval(timerInterval);
                           navigateTo({ path: "/ns/" + name + "/" });
                         },

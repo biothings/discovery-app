@@ -495,7 +495,7 @@ export const editor = {
           }
           return 0;
         }
-        parents.properties.sort(compare);
+        parent.properties.sort(compare);
       }
       let names = state.schema.map((cls) => cls.name);
       // console.log(names)
