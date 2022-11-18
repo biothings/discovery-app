@@ -189,7 +189,7 @@ export default {
                             ` +
                 label +
                 `
-                            <i class="fa fa-info-circle text-info modaltip" data-tippy-info='` +
+                            <i class="fa fa-info-circle text-info modaltip" data-tippy-content='` +
                 JSON.stringify(result.value.response.docs[i]) +
                 `'></i>
                         </label>
