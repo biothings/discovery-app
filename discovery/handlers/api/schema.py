@@ -14,9 +14,8 @@
 
 """
 
-#from curses import meta
-#from importlib.metadata import metadata
-from curses import meta
+# from curses import meta
+# from importlib.metadata import metadata
 import json
 import logging
 from datetime import date, datetime
@@ -445,48 +444,66 @@ class SchemaHandler(APIBaseHandler):
     """
 
     def class_property_filter(self, metadata, class_id):
+        """Filter Schema Properties by class(domain)
+        Extract the properties that belong to the requested (schema)class,
+        and append that to a property list to return.
+        """
         property_list=[]
         for data_dict in metadata["@graph"]:
             if data_dict["@type"] == "rdf:Property":
                 if 'schema:domainIncludes' in data_dict:
-                    if type(data_dict['schema:domainIncludes']) is dict:
+                    if isinstance(data_dict['schema:domainIncludes'], dict):
                         if data_dict['schema:domainIncludes']['@id'] == class_id:
                             property_list.append(data_dict)
-                    elif type(data_dict['schema:domainIncludes']) is list:
+                    elif isinstance(data_dict['schema:domainIncludes'], list):
                         for domain_dict in data_dict['schema:domainIncludes']:
                             if domain_dict['@id'] == class_id:
                                 property_list.append(data_dict)
-            else:
-                pass
+                                break
+                    elif 'schema:domainIncludes' not in data_dict:
+                        raise HTTPError(400, reason="No key 'schema:domainIncludes' found.")
+                    else:
+                        # odd case -- error exception case
+                        raise HTTPError(400, reason="error retrieving property list from 'schema:domainIncludes'")
         return property_list
 
-    def graph_data_filter(self, metadata, curie):
+    def graph_data_filter(self, metadata, curie, property_list):
+        """Filter the requested schema(namespace) metadata
+        Traverse the `@graph` data and filter data based on requested query
         """
-        Filter the schema graph data and assign properties to their classes 
-        """
-        if len(curie) == 1:
-            for i in range(len(metadata["@graph"])):
-                if curie[0] in metadata["@graph"][i]["@id"]:
+        for i in range(len(metadata["@graph"])):
+            try:
+                if curie in metadata["@graph"][i]["@id"]:
                     # property search
                     if metadata["@graph"][i]["@type"] == "rdf:Property":
-                        metadata["@graph"] = metadata["@graph"][i]
+                        print(metadata["@graph"][i])
+                        property_list.append(metadata["@graph"][i])
                         break
                     # class search
                     elif metadata["@graph"][i]["@type"] == "rdfs:Class":
                         class_dict = metadata["@graph"][i]
-                        property_list = self.class_property_filter(metadata, curie[0])
-                        metadata["@graph"] =  property_list
-                        metadata["@graph"].insert(0, class_dict)
+                        property_list = self.class_property_filter(metadata, curie)
+                        property_list.insert(0, class_dict)
                         break
-        else:
-            property_list = []
+            except Exception as error:
+                raise HTTPError(400, reason=f"{error}")
+        return property_list
+
+    def get_curie(self, metadata, curie):
+        """
+        Take input curie and initiate metadata search request
+        """
+        property_list = []
+        if isinstance(curie, str):
             for curie_str in curie.split(","):
-                for data_dict in metadata["@graph"]:
-                    if data_dict["@type"] == "rdf:Property":
-                        if data_dict["@id"] == curie_str:
-                            property_list.append(data_dict)
-                            break
-            metadata["@graph"] = property_list        
+                property_list = self.graph_data_filter(metadata, curie_str, property_list)
+        elif isinstance(curie, list):
+            for curie_str in curie:
+                property_list = self.graph_data_filter(metadata, curie_str, property_list)
+        #elif isinstance(curie, tuple): -- may need to add expection for tuple input? (discussed vaguely w/ Dr. Wu)
+        else:
+            raise HTTPError(400, reason="Unidentified curie input request")
+        metadata["@graph"] = property_list
         return metadata
 
     def get(self, curie=None, validation=None):
@@ -510,8 +527,10 @@ class SchemaHandler(APIBaseHandler):
         else:
             # get namespace from user request -- expect only one
             if "," in curie:
-                ns = curie.split(",")[0].split(":")[0] # n3c:prop1, n3c:prop2 
-                # add error
+                ns = curie.split(",")[0].split(":")[0] # n3c:prop1, n3c:prop2
+                ns_list = list(set([x.split(":")[0] for x in curie.split(",")]))
+                if len(ns_list) > 1:
+                    raise HTTPError(400, reason="Too many schemas(namespaces) requested")
             else:
                 ns = curie.split(":")[0]
             try:
@@ -522,13 +541,10 @@ class SchemaHandler(APIBaseHandler):
             if validation:
                 for data_dict in schema_metadata["@graph"]:
                     if data_dict["@id"] == curie:
-                        #data_dict.get("$validation", {})
                         validation_dict = data_dict.get("$validation", {})
                         break
                 self.finish(validation_dict)
             # ./api/schema/{ns}:{search_key}
             else:
-                if "," not in curie:
-                    curie = [curie]
                 schema_metadata.pop("_id")
-                self.finish(self.graph_data_filter(schema_metadata, curie))
+                self.finish(self.get_curie(schema_metadata, curie))
