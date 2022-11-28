@@ -153,7 +153,7 @@
         </div>
       </div>
 
-      <div class="flipcard container my-5">
+      <div class="container my-5 flipcard" id="FC">
         <div class="face front">
           <!-- alphabetical view -->
           <div
@@ -785,10 +785,11 @@ export default {
       self.getAllProps();
     },
     flipView() {
-      if ($(".flipcard").hasClass("flipped")) {
-        $(".flipcard").removeClass("flipped");
+      let el = document.getElementById('FC');
+      if (el.classList.contains("flipped")) {
+        el.classList.remove('flipped')
       } else {
-        $(".flipcard").addClass("flipped");
+        el.classList.add('flipped')
       }
     },
     makeHierarchyTree() {
