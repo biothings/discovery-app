@@ -14,8 +14,8 @@
 
 """
 
-#from curses import meta
-#from importlib.metadata import metadata
+# from curses import meta
+# from importlib.metadata import metadata
 import json
 import logging
 from datetime import date, datetime
@@ -30,7 +30,7 @@ from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
 from discovery.utils.adapters import SchemaAdapter
 
-from .base import APIBaseHandler, authenticated, registryOperation
+from .base import L, APIBaseHandler, authenticated, registryOperation
 
 CORE_SCHEMA_NS = ("schema", "biomedical", "datacite", "google")
 RESERVED_SCHEMA_NS = ("metadata",)
@@ -443,26 +443,68 @@ class SchemaHandler(APIBaseHandler):
         Given a request curie with a namespace, search the schema
     """
 
-    def property_filter(self, metadata, list_, curie):
-        ns = curie[0].split(":")[0]
-        print("here**")
-        for dict_ in metadata["@graph"]:
-            if dict_["@type"] == "rdf:Property" and ns in dict_["schema:domainIncludes"]["@id"]:
-                list_.append(dict_)
-        return list_
+    def class_property_filter(self, metadata, class_id):
+        """Filter Schema Properties by class(domain)
+        Extract the properties that belong to the requested (schema)class,
+        and append that to a property list to return.
+        """
+        property_list=[]
+        for data_dict in metadata["@graph"]:
+            if data_dict["@type"] == "rdf:Property":
+                if 'schema:domainIncludes' in data_dict:
+                    if isinstance(data_dict['schema:domainIncludes'], dict):
+                        if data_dict['schema:domainIncludes']['@id'] == class_id:
+                            property_list.append(data_dict)
+                    elif isinstance(data_dict['schema:domainIncludes'], list):
+                        for domain_dict in data_dict['schema:domainIncludes']:
+                            if domain_dict['@id'] == class_id:
+                                property_list.append(data_dict)
+                                break
+                    elif 'schema:domainIncludes' not in data_dict:
+                        raise HTTPError(400, reason="No key 'schema:domainIncludes' found.")
+                    else:
+                        # odd case -- error exception case
+                        raise HTTPError(400, reason="error retrieving property list from 'schema:domainIncludes'")
+        return property_list
 
-    def graph_filter(self, metadata, curie):
-        new_list = []
-        for d in metadata["@graph"]:
-            if d['@id'] in curie:
-                new_list.append(d)
-                if d["@type"] == "rdfs:Class":
-                    new_list = self.property_filter(metadata, new_list, curie)
-        if new_list:
-            metadata["@graph"] = new_list
+    def graph_data_filter(self, metadata, curie, property_list):
+        """Filter the requested schema(namespace) metadata
+        Traverse the `@graph` data and filter data based on requested query
+        """
+        for i in range(len(metadata["@graph"])):
+            try:
+                if curie in metadata["@graph"][i]["@id"]:
+                    # property search
+                    if metadata["@graph"][i]["@type"] == "rdf:Property":
+                        print(metadata["@graph"][i])
+                        property_list.append(metadata["@graph"][i])
+                        break
+                    # class search
+                    elif metadata["@graph"][i]["@type"] == "rdfs:Class":
+                        class_dict = metadata["@graph"][i]
+                        property_list = self.class_property_filter(metadata, curie)
+                        property_list.insert(0, class_dict)
+                        break
+            except Exception as error:
+                raise HTTPError(400, reason=f"{error}")
+        return property_list
+
+    def get_curie(self, metadata, curie):
+        """
+        Take input curie and initiate metadata search request
+        """
+        property_list = []
+        if isinstance(curie, str):
+            for curie_str in curie.split(","):
+                property_list = self.graph_data_filter(metadata, curie_str, property_list)
+        elif isinstance(curie, list):
+            for curie_str in curie:
+                property_list = self.graph_data_filter(metadata, curie_str, property_list)
+        #elif isinstance(curie, tuple): -- may need to add expection for tuple input? (discussed vaguely w/ Dr. Wu)
         else:
-            raise HTTPError(400, reason=f"No matches found for curie request: {''.join(curie)}")
-
+            raise HTTPError(400, reason="Unidentified curie input request")
+        metadata["@graph"] = property_list
+        return metadata
 
     def get(self, curie=None, validation=None):
         """
@@ -470,8 +512,7 @@ class SchemaHandler(APIBaseHandler):
             Fetch  - GET ./api/schema/{ns}:{class_id}
             Fetch  - GET ./api/schema/{ns}:{class_id}/validation
             Fetch  - GET ./api/schema/{ns}:{property_id}
-
-            ../{ns}?meta=1
+            (../{ns}?meta=1)
         """
         if curie is None:
             raise HTTPError(400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'")
@@ -486,30 +527,24 @@ class SchemaHandler(APIBaseHandler):
         else:
             # get namespace from user request -- expect only one
             if "," in curie:
-                ns = curie.split(",")[0].split(":")[0]
+                ns = curie.split(",")[0].split(":")[0] # n3c:prop1, n3c:prop2
+                ns_list = list(set([x.split(":")[0] for x in curie.split(",")]))
+                if len(ns_list) > 1:
+                    raise HTTPError(400, reason="Too many schemas(namespaces) requested")
             else:
                 ns = curie.split(":")[0]
             try:
-                #schema_metadata = ESSchemaFile.get(id=ns, ignore=404)
                 schema_metadata = schemas.get(ns)
             except Exception as ns_error:
                 raise HTTPError(400, reason=f"Error retrieving namespace, {ns}, with exception {ns_error}")
             # ./api/schema/{ns}:{class_id}/validation
             if validation:
-                try:
-                    schema_validation = schema_metadata["@graph"][0]["$validation"]
-                    metadata_copy = schema_metadata.copy()
-                    metadata_copy.pop("@graph")
-                    metadata_copy.pop("_id")
-                    metadata_copy.pop("@context")
-                    metadata_copy.pop("@id")
-                    metadata_copy.update(schema_validation)
-                    self.finish(metadata_copy)
-                except Exception as validation_error:
-                    raise HTTPError(400, reason=f"Error retrieving validation, {validation_error}")
+                for data_dict in schema_metadata["@graph"]:
+                    if data_dict["@id"] == curie:
+                        validation_dict = data_dict.get("$validation", {})
+                        break
+                self.finish(validation_dict)
+            # ./api/schema/{ns}:{search_key}
             else:
-                if "," not in curie:
-                    curie = [curie]
-                self.graph_filter(schema_metadata, curie)
                 schema_metadata.pop("_id")
-                self.finish(schema_metadata)
+                self.finish(self.get_curie(schema_metadata, curie))
