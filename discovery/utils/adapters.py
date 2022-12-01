@@ -26,7 +26,8 @@
 
 import logging
 
-from biothings_schema import Schema as SchemaParser, BaseSchemaLoader
+from biothings_schema import Schema as SchemaParser
+from biothings_schema.dataload import BaseSchemaLoader
 
 
 from discovery.registry import schemas
