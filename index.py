@@ -10,6 +10,7 @@ from filelock import FileLock, Timeout
 from discovery.handlers import HANDLERS, TemplateHandler
 from discovery.notify import update_n3c_routine
 from discovery.utils.backup import daily_backup_routine
+from discovery.utils.update import daily_schema_update
 
 # Create a lock can only be acquired by one process.
 # Make sure only one process should perform backup routines
@@ -32,6 +33,8 @@ def routine():
         update_n3c_routine()
         logger.info("daily_backup_routine()")
         daily_backup_routine()
+        logger.info("daily_schema_update()")
+        daily_schema_update()
 
 
 def run_routine():
