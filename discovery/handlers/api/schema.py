@@ -14,13 +14,10 @@
 
 """
 
-# from curses import meta
-# from importlib.metadata import metadata
+
 import json
 import logging
 from datetime import date, datetime
-#from time import clock_settime
-#from aiohttp import request
 
 import certifi
 from tornado.httpclient import AsyncHTTPClient
@@ -30,7 +27,7 @@ from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
 from discovery.utils.adapters import SchemaAdapter
 
-from .base import L, APIBaseHandler, authenticated, registryOperation
+from .base import APIBaseHandler, authenticated, registryOperation
 
 CORE_SCHEMA_NS = ("schema", "biomedical", "datacite", "google")
 RESERVED_SCHEMA_NS = ("metadata",)
