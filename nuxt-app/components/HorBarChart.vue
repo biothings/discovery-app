@@ -29,11 +29,11 @@ export default {
         return v == 100
           ? "#52bf5d"
           : v >= 50
-          ? "#c8e856"
+          ? "#BCE42D"
           : v >= 30
-          ? "#d6c45c"
+          ? "#F5DE5E"
           : v >= 20
-          ? "#e89f56"
+          ? "#FFA244"
           : "#f44335";
       });
     },
@@ -45,6 +45,7 @@ export default {
           labels: Object.keys(this.totals.coverage),
           datasets: [
             {
+              barThickness: 10,
               backgroundColor: this.getColors(
                 Object.values(this.totals.coverage)
               ),
@@ -80,6 +81,7 @@ export default {
               color: "#63296b",
               font: {
                 size: 22,
+                weight: 'normal'
               },
             },
             tooltip: {
@@ -93,6 +95,21 @@ export default {
         },
       });
     },
+    sortObj(obj){
+      let sortable = [];
+      for (var key in obj) {
+          sortable.push([key, obj[key]]);
+      }
+      sortable.sort(function(a, b) {
+          return a[1] - b[1];
+      });
+      sortable = sortable.reverse();
+      let objSorted = {}
+      sortable.forEach(function(item){
+          objSorted[item[0]]=item[1]
+      })
+      return objSorted;
+    }
   },
   watch: {
     totals: function (n) {
@@ -101,6 +118,7 @@ export default {
     },
   },
   mounted: function () {
+    this.totals.coverage = this.sortObj(this.totals.coverage)
     this.visualize();
   },
 };

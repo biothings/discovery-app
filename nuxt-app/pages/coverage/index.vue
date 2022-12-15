@@ -18,31 +18,31 @@ useHead({
   meta: [
     {
       name: "twitter:image",
-      content: "https://i.postimg.cc/Kj9MSL9k/faq.jpg",
+      content: "https://i.postimg.cc/FsGxPZJG/coverage.jpg",
     },
     {
       property: "og:image",
-      content: "https://i.postimg.cc/Kj9MSL9k/faq.jpg",
+      content: "https://i.postimg.cc/FsGxPZJG/coverage.jpg",
     },
     {
       property: "og:url",
-      content: "http://discovery.biothings.io/faq",
+      content: "http://discovery.biothings.io/coverage",
     },
     {
       name: "twitter:url",
-      content: "http://discovery.biothings.io/faq",
+      content: "http://discovery.biothings.io/coverage",
     },
     {
       property: "og:description",
-      content: "Get help with some of our most frequently asked questions",
+      content: "View complete metadata coverage across resources available on the Data Discovery Engine",
     },
     {
       name: "description",
-      content: "Get help with some of our most frequently asked questions",
+      content: "View complete metadata coverage across resources available on the Data Discovery Engine",
     },
     {
       name: "twitter:card",
-      content: "Get help with some of our most frequently asked questions",
+      content: "View complete metadata coverage across resources available on the Data Discovery Engine",
     },
   ],
 });
@@ -53,7 +53,19 @@ useHead({
     <div class="jumbotron mt-4 text-center bg-dark text-light lines">
       <h1>Resource Coverage</h1>
     </div>
-    <hr />
+    <div class="d-flex justify-content-start align-items-center">
+        <figure>
+          <img
+          class="rounded"
+          src="/assets/img/coverage-grad.png"
+          alt="coverage legend"
+          width="100px"
+        />
+        <figcaption class="text-muted">
+          <small>Indicates percentage property full coverage (0-100%)</small>
+        </figcaption>
+      </figure>
+    </div>
     <h1 class="text-muted">Datasets</h1>
     <div
       class="mainBackLight py-2 px-2 d-flex flex-wrap justify-content-around align-items-center row"
