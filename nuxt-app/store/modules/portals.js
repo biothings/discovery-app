@@ -26,6 +26,7 @@ export const portals = {
         api: "https://api.outbreak.info/",
         site: "https://outbreak.info/",
         schema: "/view/outbreak",
+        coverage: ["Dataset"],
         guides: [
           {
             guide: "/guide/outbreak/dataset",
@@ -55,6 +56,7 @@ export const portals = {
         portalicon: niaidIcon,
         site: "",
         schema: "/view/niaid",
+        coverage: ["Dataset", "ComputationalTool"],
         guides: [
           {
             guide: "/guide/niaid",
@@ -94,6 +96,7 @@ export const portals = {
         portalicon: dde,
         site: "https://ctsa.ncats.nih.gov/cd2h/",
         schema: "/view/biomedical",
+        coverage: ["Dataset"],
         guides: [
           {
             guide: "/guide",
@@ -121,6 +124,7 @@ export const portals = {
         portalicon: n3c,
         site: "https://covid.cd2h.org/N3C",
         schema: "/view/n3c",
+        coverage: ["Dataset"],
         guides: [
           {
             guide: "/guide/n3c/dataset",

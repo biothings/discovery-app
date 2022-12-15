@@ -785,11 +785,11 @@ export default {
       self.getAllProps();
     },
     flipView() {
-      let el = document.getElementById('FC');
+      let el = document.getElementById("FC");
       if (el.classList.contains("flipped")) {
-        el.classList.remove('flipped')
+        el.classList.remove("flipped");
       } else {
-        el.classList.add('flipped')
+        el.classList.add("flipped");
       }
     },
     makeHierarchyTree() {

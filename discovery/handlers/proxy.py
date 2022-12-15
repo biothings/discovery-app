@@ -17,7 +17,7 @@ class ProxyHandler(tornado.web.RequestHandler):
     def initialize(self, proxy_url, **kwargs):
         super(ProxyHandler, self).initialize(**kwargs)
         self.proxy_url = proxy_url
-        if not self.proxy_url.endswith('/'): 
+        if not self.proxy_url.endswith('/'):
             self.proxy_url + '/'
 
     @tornado.gen.coroutine
