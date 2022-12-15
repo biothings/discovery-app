@@ -10,6 +10,7 @@ import functools
 from datetime import datetime
 
 from elasticsearch_dsl import Boolean, Date, InnerDoc, Keyword, Object, Text
+from elasticsearch_dsl import Index as ESIndex
 from elasticsearch_dsl.exceptions import ValidationException
 
 from .common import DiscoveryDoc, DiscoveryMeta, DiscoveryUserDoc
@@ -61,6 +62,26 @@ class Schema(DiscoveryUserDoc):
             "number_of_shards": 1,
             "number_of_replicas": 0,
         }
+
+
+    def update_index_meta(self, meta):
+        allowed_keys = {"_meta"}
+        if isinstance(meta, dict) and len(set(meta) - allowed_keys) == 0:
+            es_index = ESIndex(self.Index.name)
+            es_index.put_mapping(body=meta)
+        else:
+            raise ValueError('Input "meta" should have and only have "_meta" field.')
+
+    def get_index_meta(self):
+        es_index = ESIndex(self.Index.name)
+        meta = es_index.get_mapping()
+        meta = meta[self.Index.name]["mappings"]
+        if meta is None:
+            raise ValueError(f"Index {self.Index.name} meta does not exist")
+        if isinstance(meta, dict) and "_meta" in meta:
+            return meta["_meta"]
+        else:
+            raise KeyError(f"Index {self.Index.name} missing _meta field required")
 
     def save(self, *args, **kwargs):
         """

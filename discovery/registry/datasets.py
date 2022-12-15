@@ -141,10 +141,15 @@ def validate(document, schema="ctsa::bts:CTSADataset"):
         raise DatasetValidationError(err)
 
     try:
-        jsonschema.validate(
-            instance=document, schema=schema, format_checker=jsonschema.FormatChecker()
-        )
-    except jsonschema.exceptions.ValidationError as err:
+        validator = jsonschema.Draft7Validator(schema)
+        if not validator.is_valid(document):
+            errors = []
+            for error in sorted(validator.iter_errors(document), key=str):
+                errors.append(error.message)
+            raise DatasetJsonSchemaValidationError(errors)
+    except jsonschema.exceptions.SchemaError  as err: #Invalid Schema
+        raise DatasetJsonSchemaValidationError(err)
+    except jsonschema.exceptions.ValidationError as err: #Invalid Doc
         raise DatasetJsonSchemaValidationError(err)
     except Exception as exc:  # unexpected errors
         raise DatasetValidationError(str(exc))

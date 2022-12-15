@@ -29,8 +29,9 @@ from tornado.web import Finish, HTTPError
 from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
 from discovery.utils.adapters import SchemaAdapter
+from discovery.model.schema import Schema
 
-from .base import L, APIBaseHandler, authenticated, registryOperation
+from .base import APIBaseHandler, authenticated, registryOperation
 
 CORE_SCHEMA_NS = ("schema", "biomedical", "datacite", "google")
 RESERVED_SCHEMA_NS = ("metadata",)
@@ -548,3 +549,33 @@ class SchemaHandler(APIBaseHandler):
             else:
                 schema_metadata.pop("_id")
                 self.finish(self.get_curie(schema_metadata, curie))
+
+
+class CoverageHandler(APIBaseHandler):
+    """
+        Fetch  - GET ./api/coverage
+        Fetch  - GET ./api/coverage/{curie}
+    """
+
+    name = "metadata_coverage"
+
+    def get(self, curie=None):
+        """
+            Fetch  - GET ./api/coverage
+            Fetch  - GET ./api/coverage/{curie}
+        """
+        try:
+            s = Schema()
+            coverage = s.get_index_meta()
+            if curie is not None:
+                if curie in coverage["metadata_coverage"]:
+                    coverage = coverage["metadata_coverage"][curie]
+                else:
+                    raise HTTPError(404, reason=f"No coverage found for class: {curie}")
+            else:
+                coverage = coverage["metadata_coverage"]
+        except (ValueError, KeyError) as error:
+            raise HTTPError(400, reason=f"No coverage found because: {error}")
+        except Exception as error:
+            raise HTTPError(400, reason=f"Error retrieving coverage with exception {error}")
+        self.finish(coverage)
