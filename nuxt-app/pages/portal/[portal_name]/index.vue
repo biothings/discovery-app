@@ -1,5 +1,5 @@
 <script setup>
-import axios from "axios";
+// import axios from "axios";
 
 import web_pic from "@/assets/img/site.svg";
 import api_pic from "@/assets/img/api-01.svg";
@@ -8,12 +8,12 @@ import faq_pic from "@/assets/img/faq-01.svg";
 import dataset_pic from "@/assets/img/dataset-01.svg";
 import Notify from "simple-notify";
 
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "vuex";
 
 let store = useStore();
 let portals = store.getters.getPortals;
-const runtimeConfig = useRuntimeConfig();
+// const runtimeConfig = useRuntimeConfig();
 
 let portal = {};
 let featuredImg = "";
@@ -52,7 +52,6 @@ const gradient = computed(() => {
     color += "," + e.hex;
   });
   color += " 30%)";
-  //   console.log(colors);
   return color;
 });
 
@@ -165,7 +164,7 @@ useHead({
           class="text-center col-sm-12 p-0"
           :style="{ background: gradient }"
         >
-          <div class="lines p-5">
+          <div class="lines p-5" style="min-height: 250px;">
             <img
               class="mt-4"
               :src="portal.image"
