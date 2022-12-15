@@ -14,13 +14,10 @@
 
 """
 
-# from curses import meta
-# from importlib.metadata import metadata
+
 import json
 import logging
 from datetime import date, datetime
-#from time import clock_settime
-#from aiohttp import request
 
 import certifi
 from tornado.httpclient import AsyncHTTPClient
