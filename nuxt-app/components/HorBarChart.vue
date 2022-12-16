@@ -30,9 +30,9 @@ export default {
           ? "#52bf5d"
           : v >= 50
           ? "#BCE42D"
-          : v >= 30
-          ? "#F5DE5E"
           : v >= 20
+          ? "#F5DE5E"
+          : v >= 10
           ? "#FFA244"
           : "#f44335";
       });
@@ -45,7 +45,7 @@ export default {
           labels: Object.keys(this.totals.coverage),
           datasets: [
             {
-              barThickness: 10,
+              barThickness: 8,
               backgroundColor: this.getColors(
                 Object.values(this.totals.coverage)
               ),
@@ -59,14 +59,14 @@ export default {
           // In this case, we are setting the border of each horizontal bar to be 2px wide
           elements: {
             bar: {
-              borderWidth: 2,
+              borderWidth: 0,
             },
           },
           scales: {
             x: {
               title: {
                 display: true,
-                text: "Coverage %",
+                text: "Field Coverage %",
               },
             },
           },
@@ -76,12 +76,12 @@ export default {
               display: false,
             },
             title: {
-              display: true,
-              text: `${this.name} (${this.totals.count || "N/A"})`,
+              display: false,
+              text: `${this.name} (N=${this.totals.count || "N/A"})`,
               color: "#63296b",
               font: {
                 size: 22,
-                weight: 'normal'
+                weight: "normal",
               },
             },
             tooltip: {
@@ -95,21 +95,21 @@ export default {
         },
       });
     },
-    sortObj(obj){
+    sortObj(obj) {
       let sortable = [];
       for (var key in obj) {
-          sortable.push([key, obj[key]]);
+        sortable.push([key, obj[key]]);
       }
-      sortable.sort(function(a, b) {
-          return a[1] - b[1];
+      sortable.sort(function (a, b) {
+        return a[1] - b[1];
       });
       sortable = sortable.reverse();
-      let objSorted = {}
-      sortable.forEach(function(item){
-          objSorted[item[0]]=item[1]
-      })
+      let objSorted = {};
+      sortable.forEach(function (item) {
+        objSorted[item[0]] = item[1];
+      });
       return objSorted;
-    }
+    },
   },
   watch: {
     totals: function (n) {
@@ -118,7 +118,7 @@ export default {
     },
   },
   mounted: function () {
-    this.totals.coverage = this.sortObj(this.totals.coverage)
+    this.totals.coverage = this.sortObj(this.totals.coverage);
     this.visualize();
   },
 };

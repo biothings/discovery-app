@@ -164,7 +164,7 @@ useHead({
           class="text-center col-sm-12 p-0"
           :style="{ background: gradient }"
         >
-          <div class="lines p-5" style="min-height: 250px;">
+          <div class="lines p-5" style="min-height: 250px">
             <img
               class="mt-4"
               :src="portal.image"
