@@ -103,7 +103,7 @@ useHead({
     <template v-if="curie">
       <h4 class="p-1">
         <NuxtLink :to="{ path: '/coverage/' + curie }">
-          {{ curie }} (N={{ coverage.value.count }})
+          {{ curie }} (N={{ coverage.value?.count }})
           <font-awesome-icon icon="fas fa-chevron-right" />
         </NuxtLink>
       </h4>
