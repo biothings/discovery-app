@@ -79,7 +79,8 @@ useHead({
   <main class="bg-light p-4 container">
     <div class="jumbotron mt-4 text-center bg-dark text-light lines">
       <h1>
-        <span class="badge badge-info" v-if="curie">{{ curie }}</span> Resource
+        <span class="badge badge-info" v-if="curie">{{ curie }}</span>
+        <span v-else>Resource</span>
         Metadata Coverage
       </h1>
       <p>
@@ -132,7 +133,7 @@ useHead({
         <template v-for="(props, cls) in coverage.value" :key="cls">
           <div
             v-if="cls.includes('Dataset')"
-            class="shadow bg-light col-sm-12 col-md-6"
+            class="bg-light col-sm-12 col-md-6"
           >
             <h4 class="p-1">
               <NuxtLink :to="{ path: '/coverage/' + cls }">
@@ -164,7 +165,7 @@ useHead({
         <template v-for="(props, cls) in coverage.value" :key="cls">
           <div
             v-if="!cls.includes('Dataset')"
-            class="shadow bg-light col-sm12 col-md-6"
+            class="bg-light col-sm12 col-md-6"
           >
             <h4 class="p-1">
               <NuxtLink :to="{ path: '/coverage/' + cls }">
