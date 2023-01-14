@@ -526,7 +526,7 @@ span.fa-stack:hover > svg:nth-child(1) {
   background: #000 !important;
 }
 .logoFont {
-  font-family: "Sulphur Point", sans-serif !important;
+  font-family: sans-serif !important;
 }
 .hero {
   background-image: url("../img/back.svg");
