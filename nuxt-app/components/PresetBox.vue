@@ -1,18 +1,32 @@
 <template>
-  <div class="message text-center text-muted p-4">
-    <h4 class="m-1">
-      <i class="fas fa-circle text-info"></i>
-      <span v-text="preset.name"></span>
-    </h4>
-    <small><span v-text="preset.description"></span></small>
-    <br />
-    <a
-      role="button"
-      @click="handleClick()"
-      class="btn btn-lg themeButton text-light pulse m-1"
-      href="javascript:void(0)"
-      ><i class="fas fa-code-branch"></i> Extend</a
+  <div class="row m-0 m-1 shadow">
+    <div class="col-sm-10 alert-dark text-muted p-2 rounded-left border-dark">
+      <h5>
+        <font-awesome-icon icon="fas fa-circle" class="text-info mr-2" />
+        <nuxt-link :to="{ path: '/ns/' + preset.prefix + '/' + preset.name }">
+          {{ preset.prefix }}:{{ preset.name }}
+        </nuxt-link>
+      </h5>
+      <p class="m-0">{{ preset.description }}</p>
+    </div>
+    <div
+      class="col-sm-2 p-1 bg-dark d-flex align-items-center justify-content-around rounded-right"
     >
+      <span
+        class="fa-stack fa-1x pointer tip mr-2 ml-2"
+        @click="handleClick()"
+        :data-tippy-content="'Extend ' + preset.name"
+      >
+        <font-awesome-icon
+          icon="fas fa-circle"
+          class="fa-stack-2x mainTextLight"
+        />
+        <font-awesome-icon
+          icon="fas fa-code-branch"
+          class="fa-stack-1x text-light"
+        />
+      </span>
+    </div>
   </div>
 </template>
 

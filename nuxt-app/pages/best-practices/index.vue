@@ -5,12 +5,17 @@
     style="min-height: 100vh; padding-top: 60px"
   >
     <div class="bg-light text-center mt-1 p-1">
-      <h1 class="logoText">DATASET DISCOVERY BEST PRACTICES</h1>
+      <h1 class="mainTextLight">DATASET DISCOVERY BEST PRACTICES</h1>
     </div>
     <div class="text-center mb-5">
       <div
         class="col-md-8 col-sm-12 m-auto p-3 container text-center text-muted"
       >
+        <p class="d-flex justify-content-center align-items-center">
+          <nuxt-link to="/dataset">Metadata Registry</nuxt-link>
+          <span class="mx-2">|</span>
+          <nuxt-link to="/coverage">Metadata Coverage</nuxt-link>
+        </p>
         <p>
           This guide provides an easy way to create discoverable structured
           dataset metadata with little to no
@@ -32,10 +37,6 @@
         <p class="text-muted">
           Let the guided wizard do all the hard work and just fill out the
           fields provided and register your metadata.
-        </p>
-        <p>
-          See examples of registered dataset metadata
-          <nuxt-link to="/resource">here</nuxt-link>.
         </p>
       </div>
       <div class="text-center mb-5">
@@ -132,8 +133,7 @@
             </div>
           </div>
           <div
-            class="jumbotron rounded-0 col-sm-12 col-md-8 m-0 d-flex justify-content-center align-items-center discoveryIntroBack"
-            style="background-color: #0b5570"
+            class="jumbotron rounded-0 col-sm-12 col-md-8 m-0 d-flex justify-content-center align-items-center grad-light"
           >
             <div class="col-sm-12 col-md-8">
               <img

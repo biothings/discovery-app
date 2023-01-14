@@ -77,15 +77,15 @@ useHead({
 
 <template>
   <main class="bg-light p-4 container">
-    <div class="jumbotron mt-4 text-center bg-dark text-light lines">
+    <div class="jumbotron mt-4 text-center grad-light text-light">
       <h1>
         <span class="badge badge-info" v-if="curie">{{ curie }}</span>
         <span v-else>Resource</span>
         Metadata Coverage
       </h1>
       <p>
-        Display the metadata field usage for each registered resource metadata
-        type
+        Display the metadata field usage for each resource metadata type
+        registered on the Data Discovery Engine
       </p>
     </div>
     <div class="d-flex justify-content-start align-items-center">
@@ -102,12 +102,12 @@ useHead({
       </figure>
     </div>
     <template v-if="curie">
-      <h4 class="p-1">
+      <h4 class="p-1 d-inline">
         <NuxtLink :to="{ path: '/coverage/' + curie }">
-          {{ curie }} (N={{ coverage.value?.count }})
-          <font-awesome-icon icon="fas fa-chevron-right" />
+          {{ curie }}
         </NuxtLink>
       </h4>
+      <small class="text-muted ml-2">(N={{ coverage.value?.count }})</small>
       <p>
         <NuxtLink
           :to="{
@@ -135,12 +135,12 @@ useHead({
             v-if="cls.includes('Dataset')"
             class="bg-light col-sm-12 col-md-6"
           >
-            <h4 class="p-1">
+            <h4 class="p-1 d-inline">
               <NuxtLink :to="{ path: '/coverage/' + cls }">
-                {{ cls }} (N={{ props.count }})
-                <font-awesome-icon icon="fas fa-chevron-right" />
+                {{ cls }}
               </NuxtLink>
             </h4>
+            <small class="text-muted ml-2">(N={{ props?.count }})</small>
             <p>
               <NuxtLink
                 :to="{
@@ -167,12 +167,12 @@ useHead({
             v-if="!cls.includes('Dataset')"
             class="bg-light col-sm12 col-md-6"
           >
-            <h4 class="p-1">
+            <h4 class="p-1 d-inline">
               <NuxtLink :to="{ path: '/coverage/' + cls }">
-                {{ cls }} (N={{ props.count }})
-                <font-awesome-icon icon="fas fa-chevron-right" />
+                {{ cls }}
               </NuxtLink>
             </h4>
+            <small class="text-muted ml-2">(N={{ props?.count }})</small>
             <p>
               <NuxtLink
                 :to="{

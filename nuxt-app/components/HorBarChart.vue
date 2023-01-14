@@ -1,5 +1,17 @@
 <template>
   <div class="p-1">
+    <div class="d-flex justify-content-start align-items-center">
+      <input
+        class="form-check-input slider mx-2"
+        type="checkbox"
+        :checked="fullView"
+        @click="fullView = !fullView"
+        :id="name + 'check'"
+      />
+      <label :for="name + 'check'" class="m-0 text-muted">
+        <small>Show properties with zero coverage</small>
+      </label>
+    </div>
     <canvas :id="name"></canvas>
   </div>
 </template>
@@ -12,6 +24,8 @@ export default {
   data: function () {
     return {
       myChart: null,
+      chartData: {},
+      fullView: false,
     };
   },
   props: ["name", "totals"],
@@ -39,17 +53,26 @@ export default {
     },
     visualize() {
       Chart.register(...registerables);
+      if (this.fullView) {
+        this.chartData = this.totals.coverage;
+      } else {
+        let nonZero = {};
+        for (const key in this.totals.coverage) {
+          if (this.totals.coverage[key] > 0) {
+            nonZero[key] = this.totals.coverage[key];
+          }
+        }
+        this.chartData = this.sortObj(nonZero);
+      }
       this.myChart = new Chart(document.getElementById(this.name), {
         type: "bar",
         data: {
-          labels: Object.keys(this.totals.coverage),
+          labels: Object.keys(this.chartData),
           datasets: [
             {
               barThickness: 8,
-              backgroundColor: this.getColors(
-                Object.values(this.totals.coverage)
-              ),
-              data: Object.values(this.totals.coverage),
+              backgroundColor: this.getColors(Object.values(this.chartData)),
+              data: Object.values(this.chartData),
             },
           ],
         },
@@ -67,6 +90,14 @@ export default {
               title: {
                 display: true,
                 text: "Field Coverage %",
+              },
+              ticks: {
+                autoSkip: false,
+              },
+            },
+            y: {
+              ticks: {
+                autoSkip: false,
               },
             },
           },
@@ -113,6 +144,10 @@ export default {
   },
   watch: {
     totals: function (n) {
+      this.myChart.destroy();
+      this.visualize();
+    },
+    fullView: function () {
       this.myChart.destroy();
       this.visualize();
     },

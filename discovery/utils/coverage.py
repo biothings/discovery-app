@@ -7,6 +7,7 @@ import logging
 
 from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema
+from discovery.registry import schemas
 
 class DocumentCoverageChecker():
 
@@ -23,7 +24,12 @@ class DocumentCoverageChecker():
             if not prop in ["_score", "_meta", "_ts", "_id", "@context", "@type"]:
                 # ignore internal fields not relevant
                 if not prop in self.classes_found[meta_type]:
-                    self.classes_found[meta_type][prop] = 1
+                    # property comes from schema not metadata
+                    # property exists but not found yet
+                    if value == "SCHEMA PROPERTY":
+                        self.classes_found[meta_type][prop] = 0
+                    else:
+                        self.classes_found[meta_type][prop] = 1
                 else:
                     self.classes_found[meta_type][prop] += 1
             else:
@@ -38,6 +44,14 @@ class DocumentCoverageChecker():
             if not meta_type in self.classes_found:
                 # will be the 100% #
                 self.classes_found[meta_type] = {'_count': 1}
+                # get schema for this meta type class
+                try:
+                    schema_class = schemas.get_class(meta_type.split(":")[0], meta_type)
+                    schema_properties = schema_class["properties"]
+                    for prop in schema_properties:
+                        self.check_field(meta_type, prop["label"], "SCHEMA PROPERTY")
+                except:
+                    logging.info('schema for this class does not exist:', meta_type)
             else:
                 self.classes_found[meta_type]['_count'] += 1
             for prop, value in doc.items():
@@ -76,4 +90,4 @@ def get_coverage():
     }
     s = Schema()
     s.update_index_meta(new_meta)
-    logging.info('Coverage update complete')
+    print('Coverage update complete')

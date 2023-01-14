@@ -1,9 +1,9 @@
 <template>
   <div id="viewer" v-cloak>
     <!-- HOMEPAGE MODE -->
-    <div class="bg-light" v-if="!query">
+    <div class="alert-secondary" v-if="!query">
       <div
-        class="grad d-flex justify-content-center align-items-center flex-wrap pt-5"
+        class="grad-dark d-flex justify-content-center align-items-center flex-wrap pt-5"
       >
         <div>
           <template v-if="namespaceRegistered">
@@ -153,7 +153,7 @@
         </div>
       </div>
 
-      <div class="container my-5 flipcard" id="FC">
+      <div class="container my-5 flipcard p-0" id="FC">
         <div class="face front">
           <!-- alphabetical view -->
           <div
@@ -163,7 +163,7 @@
             <h3 class="text-muted d-inline mr-2 logoText">Definitions</h3>
             <a
               role="button"
-              class="btn btn-sm btn-info pointer ml-2"
+              class="btn btn-sm mainBackDark pointer ml-2"
               @click="flipView()"
               >Change View <font-awesome-icon icon="fas fa-retweet"
             /></a>
@@ -222,7 +222,7 @@
                     <div>
                       <font-awesome-icon
                         icon="fas fa-code-branch"
-                        class="pointer tip text-light btn btn-info p-1"
+                        class="pointer tip text-light btn mainBackDark p-1"
                         @click.prevent="saveDataAndRedirect(def['name'])"
                         :data-tippy-content="'Extend ' + def['name']"
                       />
@@ -244,7 +244,7 @@
             </h3>
             <a
               role="button"
-              class="btn btn-sm btn-info pointer ml-2"
+              class="btn btn-sm mainBackDark pointer ml-2"
               @click="flipView()"
               >Change View <font-awesome-icon icon="fas fa-retweet"
             /></a>
@@ -901,23 +901,7 @@ export default {
         payload["queryContent"] = prop;
         self.$store.commit("checkIFValidationView", payload);
       } else {
-        new Notify({
-          status: "error",
-          title: "Visualization Error",
-          text: "No match found",
-          effect: "fade",
-          speed: 300,
-          customClass: null,
-          customIcon: null,
-          showIcon: true,
-          showCloseButton: true,
-          autoclose: true,
-          autotimeout: 3000,
-          gap: 20,
-          distance: 20,
-          type: 1,
-          position: "right top",
-        });
+        console.log("NO MATCH: " + self.query);
       }
     },
     findClass(query) {

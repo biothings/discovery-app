@@ -105,6 +105,12 @@
             ></font-awesome-icon>
             <b v-text="startingPoint"></b
           ></small>
+          <nuxt-link
+            class="mx-2 text-warning"
+            data-tippy-content="Click here to go to the schema registry and select a starting point or choose a new one."
+            to="/registry"
+            >change starting point</nuxt-link
+          >
         </div>
         <div
           v-if="newClassAdded && !removeValidation"

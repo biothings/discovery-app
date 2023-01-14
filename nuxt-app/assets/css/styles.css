@@ -69,11 +69,40 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.min-h-100 {
+  min-height: 100vh;
+}
+
+.grad-dark {
+  background: rgb(48, 19, 69);
+  background: linear-gradient(
+    157deg,
+    rgba(48, 19, 69, 1) 0%,
+    rgba(99, 41, 107, 1) 60%,
+    rgba(161, 71, 173, 1) 99%
+  );
+}
+
+.grad-light {
+  background: rgb(5, 62, 83);
+  background: linear-gradient(
+    157deg,
+    rgba(5, 62, 83, 1) 2%,
+    rgba(7, 86, 111, 1) 60%,
+    rgba(34, 163, 204, 1) 100%
+  );
+}
+
 .pRelative {
   position: relative;
 }
 .pAbsolute {
   position: absolute;
+}
+
+.border-circle {
+  border-radius: 20%;
+  border: rgb(153, 153, 153) 2px solid;
 }
 
 .swal-xl {
@@ -597,7 +626,7 @@ span.fa-stack:hover > svg:nth-child(1) {
 }
 .themeButton:hover {
   border: 1px white solid !important;
-  background: #4a7d8f;
+  background: #2f91b5;
 }
 .mainBackLight {
   background: #297895 !important;
@@ -606,7 +635,7 @@ span.fa-stack:hover > svg:nth-child(1) {
   color: #63296b !important;
 }
 .mainTextLight {
-  color: #4a7d8f !important;
+  color: #2f91b5 !important;
 }
 .gradientVertical {
   background: #63296b;

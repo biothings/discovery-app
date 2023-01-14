@@ -138,11 +138,11 @@ useHead({
         "sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy",
       crossorigin: "anonymous",
     },
-    {
-      type: "text/css",
-      rel: "stylesheet",
-      href: "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css",
-    },
+    // {
+    //   type: "text/css",
+    //   rel: "stylesheet",
+    //   href: "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css",
+    // },
   ],
   script: [
     {
