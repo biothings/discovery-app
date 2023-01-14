@@ -2,7 +2,7 @@
   <div class="container mt-5">
     <div class="text-center jumbotron bg-light">
       <h1 class="mainTextDark">SCHEMA PLAYGROUND</h1>
-      <div class="d-flex justify-content-center align-items-center">
+      <div class="d-flex justify-content-center align-items-center flex-wrap">
         <nuxt-link to="/registry">Schema Registry</nuxt-link>
         <span class="mx-2">|</span>
         <nuxt-link to="/ns">Schema Viewer</nuxt-link>
@@ -35,7 +35,7 @@
       </div>
       <div class="jumbotron d-flex justify-content-center m-3 p-2">
         <div class="col-sm-12 col-md-8">
-          <h4 class="mt-3 mb-3">
+          <h4 class="mt-3 mb-3 text-dark">
             Find a specific schema that meets the requirements for your project
             or application.
           </h4>
@@ -84,7 +84,7 @@
           />
         </div>
         <div class="col-sm-10 p-2 text-light">
-          <h2 class="font-weight-bold">
+          <h2 class="font-weight-bold ">
             Visualize and Register Your Own Schema
           </h2>
           <p>
@@ -96,7 +96,7 @@
       </div>
       <div class="jumbotron d-flex justify-content-center m-3 p-2">
         <div class="col-sm-12 col-md-8">
-          <h4 class="mt-3 mb-3">Get started:</h4>
+          <h4 class="mt-3 mb-3 text-dark">Get started:</h4>
           <SchemaViewerForm></SchemaViewerForm>
         </div>
       </div>
@@ -122,13 +122,13 @@
       </div>
       <div class="jumbotron d-flex justify-content-center m-3 p-2">
         <div class="col-sm-12">
-          <h4>Common starting points:</h4>
+          <h4 class="text-dark">Common starting points:</h4>
           <div class="col-sm-8">
             <template v-for="item in startingPoints" :key="item">
               <PresetBox :preset="item"></PresetBox>
             </template>
           </div>
-          <h4 class="mt-3 mb-3">Search for a starting point:</h4>
+          <h4 class="mt-3 mb-3 text-dark">Search for a starting point:</h4>
           <nuxt-link
             role="button"
             class="btn btn-lg btn-info text-light m-3"
