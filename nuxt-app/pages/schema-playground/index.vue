@@ -39,7 +39,7 @@
             Find a specific schema that meets the requirements for your project
             or application.
           </h4>
-          <p>
+          <p class="text-dark">
             Visualize (<font-awesome-icon
               icon="fas fa-eye"
               class="text-info"
@@ -51,7 +51,7 @@
               class="mainTextDark"
             />) from available schema classes.
           </p>
-          <p>
+          <p class="text-dark">
             Identify schema classes that provide metadata validation rules (<img
               src="@/assets/img/cube.svg"
               width="15"
@@ -146,11 +146,11 @@
       <div
         class="jumbotron container bg-light row m-auto d-flex justify-content-center align-items-center p-1"
       >
-        <div class="col-sm-12 pt-5 pb-5">
+        <div class="col-sm-12 pt-5 pb-5 text-dark">
           <h2 class="text-center text-muted mb-4 mt-4">
-            The reasons why schemas are important
+            Reasons why schemas are important
           </h2>
-          <p>
+          <p class="text-dark">
             Schemas are useful for a variety of reasons. Firstly, they provide a
             clear and consistent structure for data, which helps to ensure that
             data is accurate, complete, and easily understood by both humans and
@@ -158,23 +158,23 @@
             environments, where data is being shared and used by multiple
             parties or systems.
           </p>
-          <p>
+          <p class="text-dark">
             Secondly, Schemas help to validate data and ensure that it adheres
             to certain rules or constraints. This can help to identify and
             prevent errors, and can also help to ensure that data is consistent
             across different systems or applications.
           </p>
-          <p>
+          <p class="text-dark">
             Thirdly, Schemas can also be used to enforce security and access
             controls. Since data is organized in a specific way, it is easier to
             control who has access to it and what they can do with it.
           </p>
-          <p>
+          <p class="text-dark">
             Finally, Schemas can also be useful for optimizing data storage and
             retrieval. By defining the structure of data in advance, it can be
             stored in a more efficient way and searched or queried more quickly.
           </p>
-          <p>
+          <p class="text-dark">
             Overall, Schemas provide a way to organize and manage data in a
             structured and consistent way, which can help to ensure data
             quality, security, and performance.
