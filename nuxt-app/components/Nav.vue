@@ -8,7 +8,7 @@ let portals = store.getters.getPortals;
 <template>
   <header id="header">
     <title>Data Discovery Engine</title>
-    <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+    <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top shadow">
       <nuxt-link class="navbar-brand" to="/">
         <img
           src="@/assets/img/dde-logo-o.svg"
@@ -57,6 +57,14 @@ let portals = store.getters.getPortals;
               to="/schema-playground"
               data-tippy-content="Create and Visualize a Schema"
               >Schema Playground</nuxt-link
+            >
+          </li>
+          <li class="nav-item">
+            <nuxt-link
+              class="nav-link h-link"
+              to="/validator"
+              data-tippy-content="Validate metadata against a chosen schema"
+              >Metadata Validator</nuxt-link
             >
           </li>
           <li class="nav-item dropdown">

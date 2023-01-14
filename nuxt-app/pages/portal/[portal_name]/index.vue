@@ -1,11 +1,4 @@
 <script setup>
-// import axios from "axios";
-
-import web_pic from "@/assets/img/site.svg";
-import api_pic from "@/assets/img/api-01.svg";
-import schema_pic from "@/assets/img/sp1-01.svg";
-import faq_pic from "@/assets/img/faq-01.svg";
-import dataset_pic from "@/assets/img/dataset-01.svg";
 import Notify from "simple-notify";
 
 import { computed, ref } from "vue";
@@ -13,7 +6,6 @@ import { useStore } from "vuex";
 
 let store = useStore();
 let portals = store.getters.getPortals;
-// const runtimeConfig = useRuntimeConfig();
 
 let portal = {};
 let featuredImg = "";
@@ -265,19 +257,14 @@ useHead({
           </div>
         </div>
         <div
-          class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-secondary p-5"
+          class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-dark p-5"
         >
           <div class="text-center p-2 m-1 rounded p-3">
-            <img
-              src="/assets/img/coverage.png"
-              class="rounded shadow mb-2"
-              width="100"
-              alt="WEBSITE"
-            />
+            <CoverageIcon :color="portal?.colors[0]?.hex"></CoverageIcon>
             <nuxt-link
               :to="{ path: '/coverage' }"
               rel="noreferrer"
-              class="nd mt-2 tip text-info"
+              class="nd mt-2 tip text-info rounded"
               data-tippy-content="Explore and visualize metadata coverage"
             >
               <h5>
@@ -286,7 +273,7 @@ useHead({
             </nuxt-link>
           </div>
           <div class="text-center p-2 m-1 rounded p-3" v-if="portal.site">
-            <img :src="web_pic" width="100" alt="WEBSITE" />
+            <WebsiteIcon :color="portal?.colors[0]?.hex"></WebsiteIcon>
             <a
               :href="portal.site"
               target="_blank"
@@ -298,7 +285,7 @@ useHead({
             </a>
           </div>
           <div class="text-center p-2 m-1 rounded p-3">
-            <img :src="schema_pic" width="100" alt="SCHEMA" />
+            <SchemaIcon :color="portal?.colors[0]?.hex"></SchemaIcon>
             <nuxt-link
               :to="{ path: portal.schema }"
               class="nd mt-2 tip text-info"
@@ -312,7 +299,7 @@ useHead({
             :key="i + 'gg'"
             class="text-center p-2 m-1 rounded p-3"
           >
-            <img :src="dataset_pic" width="100" :alt="g.name" />
+            <MetadataIcon :color="portal?.colors[0]?.hex"></MetadataIcon>
             <nuxt-link
               :to="{ path: g.registry }"
               class="nd mt-2 tip text-info"
@@ -330,7 +317,7 @@ useHead({
             v-if="portal && portal.api"
             class="text-center p-2 m-1 rounded p-3"
           >
-            <img :src="api_pic" width="100" alt="API" />
+            <APIIcon :color="portal?.colors[0]?.hex"></APIIcon>
             <a
               :href="portal.api"
               target="_blank"
@@ -345,7 +332,7 @@ useHead({
             v-if="portal && portal.faq_link"
             class="text-center p-2 m-1 rounded p-3"
           >
-            <img :src="faq_pic" width="100px" alt="API" />
+            <FAQIcon :color="portal?.colors[0]?.hex"></FAQIcon>
             <nuxt-link
               :to="{ path: portal.faq_link }"
               class="nd mt-2 tip text-info"
@@ -355,16 +342,6 @@ useHead({
             </nuxt-link>
           </div>
         </div>
-        <!-- <div class="text-center p-5 col-sm-12 mainBackLight p-2" v-if="visualize">
-          <h2>Coverage</h2>
-          <div class="alert-info py-5 px-2 d-flex flex-wrap justify-content-around align-items-center">
-              <template v-for="props, cls in coverage.value" :key="cls">
-                  <div class="shadow bg-light m-1" style="width: 40vw;">
-                      <HorBarChart :name="cls" :totals="props"></HorBarChart>
-                  </div>
-              </template>
-          </div>
-        </div> -->
       </div>
     </template>
   </div>

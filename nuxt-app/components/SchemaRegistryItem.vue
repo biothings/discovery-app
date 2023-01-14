@@ -5,9 +5,11 @@
         <input
           v-model="picked"
           @change="handlePick"
-          class="tip m-auto"
+          class="tip m-auto slider"
           :data-tippy-content="
-            maxReached ? 'Max Comparison Items Reached' : 'Compare This Item'
+            maxReached
+              ? 'Max Comparison Items Reached'
+              : 'Choose For Comparison'
           "
           type="checkbox"
         />
