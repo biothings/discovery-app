@@ -31,10 +31,10 @@ export const portals = {
           {
             guide: "/guide/outbreak/dataset",
             name: "Dataset",
-            registry: "/dataset?guide=/guide/outbreak/dataset",
+            registry: "/dataset?template=/guide/outbreak/dataset",
           },
         ],
-        datasets: "/dataset?guide=/guide/outbreak/dataset",
+        datasets: "/dataset?template=/guide/outbreak/dataset",
         colors: [{ hex: "#D13B62" }, { hex: "#0A253D" }],
       },
       {
@@ -61,15 +61,15 @@ export const portals = {
           {
             guide: "/guide/niaid",
             name: "Dataset",
-            registry: "/dataset?guide=/guide/niaid",
+            registry: "/dataset?template=niaid:dataset",
           },
           {
             guide: "/guide/niaid/ComputationalTool",
             name: "Computational Tool",
-            registry: "/dataset?guide=/guide/niaid/ComputationalTool",
+            registry: "/dataset?template=niaid:computationaltool",
           },
         ],
-        datasets: "/dataset?guide=/guide/niaid",
+        datasets: "/dataset?template=niaid:dataset",
         colors: [{ hex: "#369AC1" }, { hex: "#113B56" }],
         publications: [
           {
@@ -101,11 +101,11 @@ export const portals = {
           {
             guide: "/guide",
             name: "Dataset",
-            registry: "/dataset?guide=/guide",
+            registry: "/dataset?template=/guide",
           },
         ],
         api: "https://crawler.biothings.io/",
-        datasets: "/dataset?guide=/guide",
+        datasets: "/dataset?template=/guide",
         colors: [{ hex: "#63296B" }, { hex: "#4A7D8F" }],
       },
       {
@@ -129,10 +129,10 @@ export const portals = {
           {
             guide: "/guide/n3c/dataset",
             name: "Dataset",
-            registry: "/dataset?guide=/guide/n3c/dataset",
+            registry: "/dataset?template=/guide/n3c/dataset",
           },
         ],
-        datasets: "/dataset?guide=/guide/n3c/dataset",
+        datasets: "/dataset?template=/guide/n3c/dataset",
         colors: [{ hex: "#4B7E8F" }, { hex: "#64296B" }],
         faq_link: "/faq/n3c",
       },

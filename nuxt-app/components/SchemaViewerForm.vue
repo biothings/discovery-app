@@ -37,19 +37,19 @@
       class="badge badge-dark pointer mr-1"
       @click="
         input =
-          'https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie_kevin.jsonld'
+          'https://raw.githubusercontent.com/NIAID-Data-Ecosystem/nde-schemas/main/combined_schema_DO_NOT_EDIT/NIAID_schema.json'
       "
     >
-      BioLink Schema
+    NIAID Data Ecosystem Schema
     </small>
     <small
       class="badge badge-dark pointer mr-1"
       @click="
         input =
-          'https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json'
+          'https://raw.githubusercontent.com/NIAID-Data-Ecosystem/nde-schemas/main/NDE_schema.jsonld'
       "
     >
-      CTSA Dataset Schema
+      NDE Dataset & ComputationalTool
     </small>
   </form>
 </template>

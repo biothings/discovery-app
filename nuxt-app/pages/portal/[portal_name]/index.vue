@@ -7,6 +7,7 @@ import { useStore } from "vuex";
 let store = useStore();
 let portals = store.getters.getPortals;
 
+
 let portal = {};
 let featuredImg = "";
 let colors = ref([]);
@@ -150,7 +151,7 @@ useHead({
 
 <template>
   <div id="portal" class="container-fluid p-0" style="min-height: 80vh">
-    <template v-if="portal && portal.name">
+    <template v-if="portal?.name">
       <div class="row m-0">
         <div
           class="text-center col-sm-12 p-0"
@@ -159,9 +160,9 @@ useHead({
           <div class="lines p-5" style="min-height: 250px">
             <img
               class="mt-4"
-              :src="portal.image"
-              :alt="portal.name"
-              width="300px"
+              :src="portal?.image"
+              :alt="portal?.name"
+              width="300"
             />
             <nuxt-link to="/portal" class="d-block text-info"
               ><font-awesome-icon icon="fas fa-chevron-left" /> Back to
@@ -177,7 +178,7 @@ useHead({
               <img
                 :src="portal.portalicon"
                 :alt="portal.name"
-                width="100px"
+                width="100"
                 class="mr-2"
               />
               <h1 :style="{ color: portal.colors[1].hex }">
@@ -301,7 +302,7 @@ useHead({
           >
             <MetadataIcon :color="portal?.colors[0]?.hex"></MetadataIcon>
             <nuxt-link
-              :to="{ path: g.registry }"
+              :to="g.registry"
               class="nd mt-2 tip text-info"
               :data-tippy-content="
                 'Browse metadata in Data Discovery Engine for ' + g.name
