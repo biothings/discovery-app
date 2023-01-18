@@ -16,6 +16,34 @@
       <div class="row m-0">
         <div class="col-sm-2">
           <img
+            src="@/assets/img/paper.gif"
+            alt="register"
+            class="w-100"
+            style="border-radius: 50%"
+          />
+        </div>
+        <div class="col-sm-10 p-2 text-light">
+          <h2 class="font-weight-bold ">
+            Visualize and Register Your Own Schema
+          </h2>
+          <p>
+            Validate and visualize your schema online. Register your schema on
+            the Data Discovery Engine to share, maintain, and easily visualize
+            your schema anytime.
+          </p>
+        </div>
+      </div>
+      <div class="jumbotron d-flex justify-content-center m-3 p-2">
+        <div class="col-sm-12 col-md-8">
+          <h4 class="mt-3 mb-3 text-dark">Get started:</h4>
+          <SchemaViewerForm></SchemaViewerForm>
+        </div>
+      </div>
+    </section>
+    <section class="my-5 grad-dark p-4 rounded shadow">
+      <div class="row m-0">
+        <div class="col-sm-2">
+          <img
             src="@/assets/img/wave.gif"
             alt="register"
             class="w-100"
@@ -77,34 +105,6 @@
       <div class="row m-0">
         <div class="col-sm-2">
           <img
-            src="@/assets/img/paper.gif"
-            alt="register"
-            class="w-100"
-            style="border-radius: 50%"
-          />
-        </div>
-        <div class="col-sm-10 p-2 text-light">
-          <h2 class="font-weight-bold ">
-            Visualize and Register Your Own Schema
-          </h2>
-          <p>
-            Validate and visualize your schema online. Register your schema on
-            the Data Discovery Engine to share, maintain, and easily visualize
-            your schema anytime.
-          </p>
-        </div>
-      </div>
-      <div class="jumbotron d-flex justify-content-center m-3 p-2">
-        <div class="col-sm-12 col-md-8">
-          <h4 class="mt-3 mb-3 text-dark">Get started:</h4>
-          <SchemaViewerForm></SchemaViewerForm>
-        </div>
-      </div>
-    </section>
-    <section class="my-5 grad-dark p-4 rounded shadow">
-      <div class="row m-0">
-        <div class="col-sm-2">
-          <img
             src="@/assets/img/computer.gif"
             alt="register"
             class="w-100"
@@ -131,7 +131,7 @@
           <h4 class="mt-3 mb-3 text-dark">Search for a starting point:</h4>
           <nuxt-link
             role="button"
-            class="btn btn-lg btn-info text-light m-3"
+            class="btn btn-lg btn-info text-light"
             to="/registry"
             >To Schema Registry
             <font-awesome-icon
@@ -316,14 +316,7 @@ export default {
       number: "",
       loading: false,
       startingPoints: [
-        {
-          namespace: "biomedical",
-          prefix: "bts",
-          name: "BioMedicalDataset",
-          guide: "/guide",
-          description: "A schema describing a BioMedical Dataset",
-        },
-        {
+      {
           namespace: "schema",
           prefix: "schema",
           name: "Dataset",
@@ -331,6 +324,14 @@ export default {
           description:
             "A body of structured information describing some topic(s) of interest.",
         },
+        {
+          namespace: "niaid",
+          prefix: "niaid",
+          name: "ComputationalTool",
+          guide: "/guide/niaid/ComputationalTool",
+          description: "A schema describing a minimal ComputationalTool for the National Institute of Allergy and Infectious Disease (NIAID). A ComputationalTool is a software used for the collection, processing, distribution, analysis, visualization, interpretation, etc. of data. Additional schema.org and/or custom properties could be added.",
+        },
+        
       ],
     };
   },
