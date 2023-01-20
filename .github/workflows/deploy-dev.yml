@@ -14,8 +14,6 @@ jobs:
     steps:
       - name: Step 1 - Checkout the files
         uses: actions/checkout@v3
-        with:
-          ref: development
       - name: Step 2 - Install Node.js
         uses: actions/setup-node@v1
         with:
