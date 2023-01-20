@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '17.9.1'
       - name: Step 2 - Build backend
-        run: /home/ubuntu/discovery/.env/bin/pip install -Ur /home/ubuntu/discovery/requirements.txt
+        run: pip install -Ur requirements.txt
         # run: /home/ubuntu/discovery/.env/bin/pip install -Ur /home/ubuntu/discovery/requirements.txt
       # - name: Step 3 - Build frontend
       #   run: cd /home/ubuntu/discovery/nuxt-app 
