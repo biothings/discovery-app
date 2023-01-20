@@ -57,6 +57,7 @@ jobs:
             sudo systemctl restart discovery-frontend@3080
             set +x
             echo "Discovery service restarted!!!"
+            echo $RSYNC_STDOUT
       - name: Setup tmate debug session on failure
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
