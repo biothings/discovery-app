@@ -1,0 +1,48 @@
+name: Deploy-to-EC2-Dev
+
+# Trigger deployment only on push to master branch
+on:
+  push:
+    branches:
+      - vue3-app
+
+jobs:
+  deploy:
+    name: Deploy to EC2 on vue3-app branch push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Step 1 - Checkout the files
+        uses: actions/checkout@v3
+        with:
+          ref: development
+      - name: Step 2 - Build backend
+        run: /home/ubuntu/discovery/.env/bin/pip install -Ur /home/ubuntu/discovery/requirements.txt
+      - name: Step 3 - Build frontend
+        run: cd /home/ubuntu/discovery/nuxt-app 
+             /home/ubuntu/.nvm/versions/node/v17.9.1/bin/npm install
+             NODE_OPTIONS="--max-old-space-size=1512" /home/ubuntu/.nvm/versions/node/v17.9.1/bin/npm run build
+      - name: Step 4 - Deploy to Dev Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.AWS_DEV_EC2_SSH_KEY }}
+          ARGS: "-rlgoDzvc -i --delete"
+          SOURCE: "/"
+          REMOTE_HOST: ${{ secrets.AWS_DEV_HOST_DNS }}
+          REMOTE_USER: ${{ secrets.AWS_DEV_USERNAME }}
+          TARGET: ${{ secrets.AWS_DEV_TARGET_DIR }}
+          SCRIPT_AFTER: |
+            echo "Restarting discovery service..."
+            set -x
+            sudo systemctl restart discovery@8000
+            sleep 10
+            sudo systemctl restart discovery@8080
+            sleep 10
+            sudo systemctl restart discovery-frontend@3000
+            sleep 10
+            sudo systemctl restart discovery-frontend@3080
+            set +x
+            echo "Discovery service restarted!!!"
+      - name: Setup tmate debug session on failure
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
