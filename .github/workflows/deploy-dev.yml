@@ -4,7 +4,7 @@ name: Deploy-to-EC2-Dev
 on:
   push:
     branches:
-      - vue3-app
+      - vue3-app-auto-deploy
 
 jobs:
   deploy:
@@ -16,18 +16,22 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: development
-      - name: Step 2 - Build backend
-        run: /home/ubuntu/discovery/.env/bin/pip install -Ur /home/ubuntu/discovery/requirements.txt
-      - name: Step 3 - Build frontend
-        run: cd /home/ubuntu/discovery/nuxt-app 
-             /home/ubuntu/.nvm/versions/node/v17.9.1/bin/npm install
-             NODE_OPTIONS="--max-old-space-size=1512" /home/ubuntu/.nvm/versions/node/v17.9.1/bin/npm run build
+      - name: Step 2 - Install Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '17.9.1'
+      # - name: Step 2 - Build backend
+      #   run: /home/ubuntu/discovery/.env/bin/pip install -Ur /home/ubuntu/discovery/requirements.txt
+      # - name: Step 3 - Build frontend
+      #   run: cd /home/ubuntu/discovery/nuxt-app 
+      #        /home/ubuntu/.nvm/versions/node/v17.9.1/bin/npm install
+      #        NODE_OPTIONS="--max-old-space-size=1512" /home/ubuntu/.nvm/versions/node/v17.9.1/bin/npm run build
       - name: Step 4 - Deploy to Dev Server
         uses: easingthemes/ssh-deploy@main
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.AWS_DEV_EC2_SSH_KEY }}
           ARGS: "-rlgoDzvc -i --delete"
           SOURCE: "/"
+          SSH_PRIVATE_KEY: ${{ secrets.AWS_DEV_EC2_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.AWS_DEV_HOST_DNS }}
           REMOTE_USER: ${{ secrets.AWS_DEV_USERNAME }}
           TARGET: ${{ secrets.AWS_DEV_TARGET_DIR }}
