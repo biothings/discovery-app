@@ -12,12 +12,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Step 0 - Install apt Dependences
+        run: sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libxml2-dev libxmlsec1-dev libxmlsec1-openssl libxml2 libxmlsec1 pkg-config
+
       - name: Step 1 - Checkout the files
         uses: actions/checkout@v3
+
       - name: Step 2 - Install Node.js
         uses: actions/setup-node@v1
         with:
           node-version: '17.9.1'
+
       - name: Step 2 - Build backend
         run: pip install -Ur requirements.txt
         # run: /home/ubuntu/discovery/.env/bin/pip install -Ur /home/ubuntu/discovery/requirements.txt
