@@ -27,7 +27,7 @@ jobs:
       - name: Step 4 - Deploy to Dev Server
         uses: easingthemes/ssh-deploy@main
         env:
-          ARGS: "-rlgoDzvc -i --delete"
+          # ARGS: "-rlgoDzvc -i --delete"
           SOURCE: "/"
           SSH_PRIVATE_KEY: ${{ secrets.AWS_DEV_EC2_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.AWS_DEV_HOST_DNS }}
