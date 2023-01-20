@@ -26,10 +26,16 @@ jobs:
       - name: Step 2 - Build backend
         run: pip install -Ur requirements.txt
         # run: /home/ubuntu/discovery/.env/bin/pip install -Ur /home/ubuntu/discovery/requirements.txt
-      # - name: Step 3 - Build frontend
+
+      - name: Step 3 - Build frontend
+        run: |
+          cd nuxt-app
+          npm install
+          NODE_OPTIONS="--max-old-space-size=1512" npm run build
       #   run: cd /home/ubuntu/discovery/nuxt-app 
       #        /home/ubuntu/.nvm/versions/node/v17.9.1/bin/npm install
       #        NODE_OPTIONS="--max-old-space-size=1512" /home/ubuntu/.nvm/versions/node/v17.9.1/bin/npm run build
+
       - name: Step 4 - Deploy to Dev Server
         uses: easingthemes/ssh-deploy@main
         env:
