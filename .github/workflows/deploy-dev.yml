@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Step 0 - Install APT Dependences
-        run: sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libxml2-dev libxmlsec1-dev libxmlsec1-openssl libxml2 libxmlsec1 pkg-config
+        run: sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libxmlsec1-dev libxmlsec1-openssl libxml2 libxmlsec1 pkg-config
 
       - name: Step 1 - Checkout the Files
         uses: actions/checkout@v3
@@ -21,9 +21,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '17.9.1'
-
-      - name: Step 2 - Build Backend
-        run: pip install -Ur requirements.txt
 
       - name: Step 3 - Build Frontend
         run: |
@@ -40,6 +37,7 @@ jobs:
           REMOTE_USER: ${{ secrets.AWS_DEV_USERNAME }}
           TARGET: ${{ secrets.AWS_DEV_TARGET_DIR }}
           SCRIPT_AFTER: |
+            pip install -Ur requirements.txt
             echo "Restarting discovery service..."
             set -x
             sudo systemctl restart discovery@8000
@@ -52,7 +50,3 @@ jobs:
             set +x
             echo "Discovery service restarted!!!"
             echo $RSYNC_STDOUT
-
-      - name: Setup tmate Debug Session on Failure
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
