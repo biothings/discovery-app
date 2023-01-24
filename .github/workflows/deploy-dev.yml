@@ -3,7 +3,7 @@ name: Deploy-to-EC2-Dev
 on:
   push:
     branches:
-      - vue3-app
+      - vue3-app-update-deploy-002
 
 jobs:
   deploy:
@@ -37,6 +37,7 @@ jobs:
           REMOTE_USER: ${{ secrets.AWS_DEV_USERNAME }}
           TARGET: ${{ secrets.AWS_DEV_TARGET_DIR }}
           SCRIPT_AFTER: |
+            cd /home/ubuntu/discovery
             pip install -Ur requirements.txt
             echo "Restarting discovery service..."
             set -x
