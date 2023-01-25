@@ -22,16 +22,16 @@ export const auth = {
   },
   actions: {
     checkUser({ commit }) {
-      // if (process.env.NODE_ENV == "development") {
-      //   commit("saveUser", {
-      //     user: {
-      //       name: "Marco Cano",
-      //       email: "artofmarco@gmail.com",
-      //       login: "marcodarko",
-      //       avatar_url: "https://avatars.githubusercontent.com/u/23092057?v=4",
-      //     },
-      //   });
-      // }else{
+      if (process.env.NODE_ENV == "development") {
+        commit("saveUser", {
+          user: {
+            name: "Marco Cano",
+            email: "artofmarco@gmail.com",
+            login: "marcodarko",
+            avatar_url: "https://avatars.githubusercontent.com/u/23092057?v=4",
+          },
+        });
+      }else{
       let config = useRuntimeConfig();
       axios
         .get(config.public.apiUrl + "/user")
@@ -42,7 +42,7 @@ export const auth = {
           commit("resetUser");
           throw err;
         });
-      // }
+      }
     },
   },
   getters: {

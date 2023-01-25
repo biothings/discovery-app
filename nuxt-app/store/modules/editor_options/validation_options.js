@@ -5,7 +5,7 @@ export const validation_options = [
   {
     _id: "01233",
     title: "string",
-    color: "#0263fd",
+    color: "#5D3FD3",
     validation: {
       type: "string",
     },
@@ -13,7 +13,7 @@ export const validation_options = [
   {
     _id: "01432",
     title: "string(s)",
-    color: "#2717a1",
+    color: "#5D3FD3",
     validation: {
       oneOf: [
         {
@@ -31,7 +31,7 @@ export const validation_options = [
   {
     _id: "14325",
     title: "boolean",
-    color: "#d62979",
+    color: "#5D3FD3",
     validation: {
       type: "boolean",
     },
@@ -39,7 +39,7 @@ export const validation_options = [
   {
     _id: "3543",
     title: "integer",
-    color: "#6e3ac5",
+    color: "#5D3FD3",
     validation: {
       type: "integer",
     },
@@ -47,7 +47,7 @@ export const validation_options = [
   {
     _id: "4654",
     title: "url",
-    color: "#fc6903",
+    color: "#5D3FD3",
     validation: {
       type: "string",
       format: "uri",
@@ -56,7 +56,7 @@ export const validation_options = [
   {
     _id: "5867",
     title: "keywords",
-    color: "#28908c",
+    color: "#5D3FD3",
     validation: {
       oneOf: [
         {
@@ -74,7 +74,7 @@ export const validation_options = [
   {
     _id: "6876",
     title: "date",
-    color: "#9bbf06",
+    color: "#5D3FD3",
     validation: {
       format: "date",
       type: "string",
@@ -83,7 +83,7 @@ export const validation_options = [
   {
     _id: "7645",
     title: "enumeration",
-    color: "#5a71a5",
+    color: "#5D3FD3",
     validation: {
       oneOf: [
         {
@@ -103,7 +103,7 @@ export const validation_options = [
   {
     _id: "8567",
     title: "constant",
-    color: "#d8272a",
+    color: "#5D3FD3",
     validation: {
       const: "Edit const value",
     },
@@ -111,7 +111,7 @@ export const validation_options = [
   {
     _id: "9654",
     title: "object|Person",
-    color: "#49414b",
+    color: "#5D3FD3",
     validation: {
       "@type": "Person",
       type: "object",
@@ -125,7 +125,7 @@ export const validation_options = [
   {
     _id: "1065",
     title: "ontology",
-    color: "#a37d00",
+    color: "#5D3FD3",
     validation: {
       "@type": "CreativeWork",
       type: "string",
@@ -142,7 +142,7 @@ export const validation_options = [
   {
     _id: "1062",
     title: "(DEF) citation(s)",
-    color: "#5a064d",
+    color: "#191970",
     validation: {
       description: "A citation to the dataset",
       oneOf: [

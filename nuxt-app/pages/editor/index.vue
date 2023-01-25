@@ -17,6 +17,7 @@
         <div
           class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start rounded-0"
         >
+
           <span
             class="badge bg-success text-light tip mr-2"
             :data-tippy-content="'Logged in as ' + userInfo.login"
@@ -195,20 +196,40 @@
                   type="checkbox"
                 />
               </div>
-              <h5 class="text-left m-0 text-muted pt-2">Common Validation</h5>
+              <h5 class="text-left m-0 text-muted pt-2">
+                Common Validation <small 
+                data-tippy-content="Change between preset validation options"
+                class="pointer text-warning ml-3" 
+                @click="toggleVOptions">
+                  <font-awesome-icon v-if="toggleValOptions"
+                        icon="fas fa-chevron-left"
+                      ></font-awesome-icon
+                    >
+                  <font-awesome-icon
+                        icon="fas fa-circle"
+                        :style="{'color': toggleValOptions ? '#097969' : '#5D3FD3'}"
+                      ></font-awesome-icon
+                    >
+                  {{toggleValOptions ? 'Bioschemas' : 'JSON Schema'}}
+                  <font-awesome-icon v-if="!toggleValOptions"
+                        icon="fas fa-chevron-right"
+                      ></font-awesome-icon
+                    >
+                </small>
+              </h5>
               <small class="text-info text-left d-block"
                 >Drag & drop common validation options to merge into each
                 property.</small
               >
               <div class="border rounded p-2 bg-light mb-2">
-                <template v-for="item in validation_options" :key="item.title">
+                <template v-for="item in validation_options" :key="item._id">
                   <div
                     class="badge drag-el m-1 tip"
                     :data-tippy-content="
                       JSON.stringify(item.validation, null, 2)
                     "
                     :style="{ 'background-color': item.color }"
-                    draggable
+                    draggable="true"
                     @dragstart="startDrag($event, item)"
                   >
                     <span v-text="item.title" class="mr-1"></span>
@@ -685,6 +706,14 @@ export default {
         this.$store.commit("setRemoveValidation", { value: v });
       },
     },
+    toggleValOptions: {
+      get() {
+        return this.$store.getters.getToggleValidationOptions;
+      },
+      set(v) {
+        this.$store.commit("toggleValOptions");
+      },
+    },
     ...mapState({
       newClassAdded: (state) => {
         if (state?.editor?.schema?.length) {
@@ -772,6 +801,9 @@ export default {
   methods: {
     toggleCardinality() {
       this.$store.commit("toggleCardinality");
+    },
+    toggleVOptions() {
+      this.$store.commit("toggleValOptions");
     },
     editValidation() {
       let self = this;
