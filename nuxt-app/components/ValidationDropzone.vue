@@ -67,7 +67,8 @@ export default {
   },
   methods: {
     allowDrop(ev) {
-      $(ev.target).attr("drop-active", true);
+      console.log(ev)
+      // $(ev.target).attr("drop-active", true);
       ev.preventDefault();
     },
     startDrag: (evt, item) => {
@@ -99,11 +100,11 @@ export default {
       });
     },
     allowDrop(ev) {
-      $(ev.target).attr("drop-active", true);
+      // $(ev.target).attr("drop-active", true);
       ev.preventDefault();
     },
     leaveDrag(ev) {
-      $(ev.target).removeAttr("drop-active");
+      // $(ev.target).removeAttr("drop-active");
       ev.preventDefault();
     },
     resetValidation() {

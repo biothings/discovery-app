@@ -1,10 +1,10 @@
 <template>
   <form class="my-1">
-    <label class="text-info" for="cardinalitys"
+    <label class="text-info m-0" for="cardinalitys"
       ><small>Choose cardinality:</small></label
     >
     <select
-      class="px-2 py-1"
+      class="px-2 py-1 font-weight-bold"
       :class="[selection == 'many' ? 'text-primary' : 'text-info']"
       name="cardinality"
       id="cardinality"

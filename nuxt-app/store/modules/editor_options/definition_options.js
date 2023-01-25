@@ -5,7 +5,7 @@ export const definition_options = [
   {
     _id: "def001",
     title: "citation",
-    color: "#0263fd",
+    color: "#008080",
     validation: {
       description:
         "A citation object for a resource which is cited by the dataset (ie- is a derivative of the dataset) , related to the dataset, or from which the dataset was based on (ie- is derived from).",

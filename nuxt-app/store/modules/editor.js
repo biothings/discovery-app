@@ -2,6 +2,7 @@ import axios from "axios";
 import Notify from "simple-notify";
 // editor default options
 import { validation_options } from "./editor_options/validation_options";
+import { bioschemas_options } from "./editor_options/bioschemas_options";
 import { definition_options } from "./editor_options/definition_options";
 
 export const editor = {
@@ -42,6 +43,8 @@ export const editor = {
     top_class_validation: {},
     definition_options: definition_options,
     addCardinality: false,
+    toggleValidationOptions: false,
+    bioschemas_options: bioschemas_options
   },
   strict: true,
   mutations: {
@@ -973,6 +976,9 @@ export const editor = {
           "https://discovery.biothings.io/view/bioschemas/";
       }
     },
+    toggleValOptions(state) {
+      state.toggleValidationOptions = !state.toggleValidationOptions
+    }
   },
   getters: {
     addCardinality: (state) => {
@@ -998,7 +1004,14 @@ export const editor = {
       // return state.val_test
     },
     getValidationOptions: (state) => {
-      return state.validation_options;
+      if (!state.toggleValidationOptions) {
+        return state.validation_options;
+      } else {
+        return state.bioschemas_options;
+      }
+    },
+    getToggleValidationOptions: (state) => {
+      return state.toggleValidationOptions;
     },
     getStartingPoint: (state) => {
       return state.startingPoint;
