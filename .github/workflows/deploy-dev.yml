@@ -37,7 +37,6 @@ jobs:
           REMOTE_USER: ${{ secrets.AWS_DEV_USERNAME }}
           TARGET: ${{ secrets.AWS_DEV_TARGET_DIR }}
           SCRIPT_AFTER: |
-            set -x
             cd /home/ubuntu/discovery
             pip install -Ur requirements.txt
             echo "Restarting discovery service..."
@@ -49,5 +48,4 @@ jobs:
             sleep 10
             sudo systemctl restart discovery-frontend@3080
             echo "Discovery service restarted!!!"
-            set +x
             echo $RSYNC_STDOUT
