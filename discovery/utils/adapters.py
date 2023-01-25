@@ -27,11 +27,32 @@
 import logging
 
 from biothings_schema import Schema as SchemaParser
+from biothings_schema.dataload import BaseSchemaLoader
 
-# from discovery.model import Schema as ESSchema
+
+from discovery.registry import schemas
 
 # the underlying package uses warnings
 logging.captureWarnings(True)
+
+
+class DDEBaseSchemaLoader(BaseSchemaLoader):
+    """This is a customized class for biothings_schema package to load base schemas
+       within the DDE app. By default biothings_schema load base schemas via DDE API,
+       but within the DDE app itself, we can load them directly from model.schema module.
+    """
+    @property
+    def registered_dde_schemas(self):
+        """Return a list of schema namespaces registered in DDE"""
+        return [s["_id"] for s in schemas.get_all(size=100)]
+
+    def load_dde_schemas(self, schema):
+        """Load a registered schema"""
+        if self.verbose:
+            print(f'Loading registered DDE schema "{schema}"')
+        schema_source = schemas.get(schema)
+        schema_source.pop("_id")
+        return schema_source
 
 
 class SchemaClassWrapper:
@@ -109,6 +130,8 @@ class SchemaAdapter:
     def __init__(self, doc=None, **kwargs):
         # contexts = ESSchema.gather_field('@context')
         # self._schema = SchemaParser(schema=doc, context=contexts, **kwargs)
+        if "base_schema_loader" not in kwargs:
+            kwargs["base_schema_loader"] = DDEBaseSchemaLoader()
         self._schema = SchemaParser(schema=doc, **kwargs)
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
