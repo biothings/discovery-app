@@ -26,6 +26,12 @@ class SchemaMeta(DiscoveryMeta):
     url = Keyword(required=True)
     timestamp = Date()  # when this document is updated
 
+class SchemaStatusMeta(InnerDoc):
+
+    refresh_status = Integer()
+    refresh_ts = Date()
+    refresh_msg = Text(index=False)
+
 
 class Schema(DiscoveryUserDoc):
     """
@@ -47,6 +53,7 @@ class Schema(DiscoveryUserDoc):
     """
 
     _meta = Object(SchemaMeta, required=True)
+    _status = Object(SchemaStatusMeta)
 
     # _id : schema namespace, provided by the front-end when registering
     #       accessible through constructor argument 'id' or schema.meta.id
