@@ -132,9 +132,15 @@ def add(namespace, url, user, doc=None, overwrite=False):
 
     if not doc:
         try:
-            doc = requests.get(url, timeout=10).json()
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            doc = response.json()
         except requests.RequestException as exc:
-            raise RegistryError(str(exc))
+            registry_error = RegistryError(str(exc))
+            # verify that the status code exists in the exception and set Registry_Error().status_code
+            if exc.response.status_code:                              
+                registry_error.status_code = exc.response.status_code 
+            raise registry_error
         except json.decoder.JSONDecodeError as exc:
             raise RegistryError(str(exc))
 
@@ -150,6 +156,8 @@ def add(namespace, url, user, doc=None, overwrite=False):
     file.meta.id = namespace
     file._meta.url = url
     file._meta.username = user
+    file._status.refresh_status = 200
+    file._status.refresh_ts = datetime.now().astimezone()
     file.save()
 
     # save schema classes
@@ -245,7 +253,21 @@ def update(namespace, user, url, doc=None):
     if not exists(namespace):
         raise NoEntityError(f"namespace '{namespace}'' does not exist.")
 
-    return add(namespace, url, user, doc, overwrite=True)
+    try:
+        return add(namespace, url, user, doc, overwrite=True)
+    except RegistryError as exc:
+        schema = ESSchemaFile.get(id=namespace)
+        if schema:
+            # if exception has a `status_code` attribute, set it as the status, else use default case(400)
+            if hasattr(exc, 'status_code'):
+                schema._status.refresh_status = exc.status_code
+            else:
+                schema._status.refresh_status = 400
+            schema._status.refresh_ts = datetime.now().astimezone()
+            schema._status.refresh_msg = str(exc)
+            schema.save()
+
+            return RegistryError
 
 
 def delete(namespace):
