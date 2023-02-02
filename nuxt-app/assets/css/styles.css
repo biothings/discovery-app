@@ -43,6 +43,13 @@
   overflow-y: scroll;
 }
 
+.code-overflow {
+  background-color: rgba(0, 0, 0, 0.2);
+  overflow: scroll;
+  max-height: 150px;
+  max-width: 200px;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: var(--vt-c-black);

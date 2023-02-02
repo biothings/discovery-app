@@ -40,7 +40,7 @@
           'https://raw.githubusercontent.com/NIAID-Data-Ecosystem/nde-schemas/main/combined_schema_DO_NOT_EDIT/NIAID_schema.json'
       "
     >
-    NIAID Data Ecosystem Schema
+      NIAID Data Ecosystem Schema
     </small>
     <small
       class="badge badge-dark pointer mr-1"

@@ -17,7 +17,6 @@
         <div
           class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start rounded-0"
         >
-
           <span
             class="badge bg-success text-light tip mr-2"
             :data-tippy-content="'Logged in as ' + userInfo.login"
@@ -161,9 +160,9 @@
               class="col-sm-12 col-md-6 bg-secondary border-right"
               style="max-height: 800px; overflow-y: scroll"
             >
-              <h5 class="text-light text-center m-0 text-dark pt-2">
+              <h4 class="text-light text-center m-0 pt-2">
                 Your Validation
-              </h5>
+              </h4>
               <template
                 v-for="(val, propname) in validation_props"
                 :key="propname"
@@ -174,140 +173,31 @@
                 ></ValidationDropzone>
               </template>
             </div>
-            <div class="col-sm-12 col-md-6 bg-dark border-left">
+            <div class="col-sm-12 col-md-6 bg-dark border-left pb-2">
               <h4 class="text-light text-left m-0 pt-2">Options</h4>
               <!-- CARDINALITY -->
-              <h5 class="text-left m-0 text-muted pt-2">Cardinality</h5>
-              <small class="text-info text-left d-block"
-                >Refers to the number of elements in a set or other grouping, as
-                a property of that grouping.</small
-              >
               <div
-                class="my-1 alert alert-primary justify-content-start d-flex align-items-center"
+                class="my-1 alert alert-primary"
               >
-                <label class="text-muted m-0" for="ac"
-                  >Enable Cardinality</label
+                <h6 class="text-left font-weight-bold">Cardinality</h6>
+                <small class="text-dark text-left d-block"
+                  >Refers to the number of elements in a set or other grouping, as
+                  a property of that grouping.</small
                 >
-                <input
-                  v-model="addCardinality"
-                  id="ac"
-                  class="slider ml-2"
-                  @click="toggleCardinality()"
-                  type="checkbox"
-                />
-              </div>
-              <h5 class="text-left m-0 text-muted pt-2">
-                Common Validation <small 
-                data-tippy-content="Change between preset validation options"
-                class="pointer text-warning ml-3" 
-                @click="toggleVOptions">
-                  <font-awesome-icon v-if="toggleValOptions"
-                        icon="fas fa-chevron-left"
-                      ></font-awesome-icon
-                    >
-                  <font-awesome-icon
-                        icon="fas fa-circle"
-                        :style="{'color': toggleValOptions ? '#097969' : '#5D3FD3'}"
-                      ></font-awesome-icon
-                    >
-                  {{toggleValOptions ? 'Bioschemas' : 'JSON Schema'}}
-                  <font-awesome-icon v-if="!toggleValOptions"
-                        icon="fas fa-chevron-right"
-                      ></font-awesome-icon
-                    >
-                </small>
-              </h5>
-              <small class="text-info text-left d-block"
-                >Drag & drop common validation options to merge into each
-                property.</small
-              >
-              <div class="border rounded p-2 bg-light mb-2">
-                <template v-for="item in validation_options" :key="item._id">
-                  <div
-                    class="badge drag-el m-1 tip"
-                    :data-tippy-content="
-                      JSON.stringify(item.validation, null, 2)
-                    "
-                    :style="{ 'background-color': item.color }"
-                    draggable="true"
-                    @dragstart="startDrag($event, item)"
+                <div class="py-1">
+                  <label class="text-muted m-0" for="ac"
+                    >Enable Cardinality</label
                   >
-                    <span v-text="item.title" class="mr-1"></span>
-                    <span
-                      data-tippy-content="EDIT"
-                      class="badge badge-light pointer mr-1 tip"
-                      @click="editValidationOption(item)"
-                      ><font-awesome-icon
-                        icon="fas fa-pen-square"
-                      ></font-awesome-icon
-                    ></span>
-                    <span
-                      v-if="item && item.can_delete"
-                      data-tippy-content="DELETE"
-                      class="badge badge-danger pointer"
-                      @click="deleteValidationOption(item)"
-                      ><font-awesome-icon
-                        icon="fas fa-times"
-                      ></font-awesome-icon
-                    ></span>
-                  </div>
-                </template>
-                <div
-                  @click="addValidationOption()"
-                  data-tippy-content="ADD NEW"
-                  class="badge m-1 badge-secondary text-light pointer"
-                >
-                  <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
+                  <input
+                    v-model="addCardinality"
+                    id="ac"
+                    class="slider ml-2"
+                    @click="toggleCardinality()"
+                    type="checkbox"
+                  />
                 </div>
               </div>
-              <div class="bg-dark p-1" v-if="item">
-                <CodeEditor></CodeEditor>
-              </div>
-              <h5 class="text-left m-0 text-muted pt-2">Definitions</h5>
-              <small class="text-info text-left d-block"
-                >Create reusable validation definitions to use in your
-                schema.</small
-              >
-              <div class="border rounded p-2 alert-info mb-2">
-                <template v-for="item in definition_options" :key="item.title">
-                  <div
-                    class="badge m-1 text-light tip"
-                    :data-tippy-content="
-                      JSON.stringify(item.validation, null, 2)
-                    "
-                    :style="{ 'background-color': item.color }"
-                  >
-                    <span v-text="item.title" class="mr-1"></span>
-                    <span
-                      data-tippy-content="EDIT"
-                      class="badge badge-light pointer mr-1"
-                      @click="editDefinitionOption(item)"
-                      ><font-awesome-icon
-                        icon="fas fa-pen-square"
-                      ></font-awesome-icon
-                    ></span>
-                    <span
-                      v-if="item && item.can_delete"
-                      data-tippy-content="DELETE"
-                      class="badge badge-danger pointer"
-                      @click="deleteDefinitionOption(item)"
-                      ><font-awesome-icon
-                        icon="fas fa-times"
-                      ></font-awesome-icon
-                    ></span>
-                  </div>
-                </template>
-                <div
-                  @click="addDefinitionOption()"
-                  data-tippy-content="ADD NEW"
-                  class="badge m-1 badge-secondary text-light pointer"
-                >
-                  <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
-                </div>
-              </div>
-              <div class="bg-dark p-1" v-if="definition_item">
-                <DefinitionEditor></DefinitionEditor>
-              </div>
+              <ValidationOptions></ValidationOptions>
             </div>
           </div>
         </div>
@@ -618,13 +508,10 @@ import axios from "axios";
 import moment from "moment";
 import Notify from "simple-notify";
 
-import cubeImg from "@/assets/img/cubeplus.svg";
 import editorImg from "@/assets/img/editor.png";
 import dropSound from "@/assets/img/tinybutton.wav";
 
 import NGXGraph from "~~/components/NGXGraph.vue";
-import DefinitionEditor from "~~/components/DefinitionEditor.vue";
-import CodeEditor from "~~/components/CodeEditor.vue";
 import ValidationDropzone from "~~/components/ValidationDropzone.vue";
 import GitHubSaver from "~~/components/GitHubSaver.vue";
 import EditorClassBox from "~~/components/EditorClassBox.vue";
@@ -668,8 +555,6 @@ export default {
   },
   components: {
     NGXGraph,
-    DefinitionEditor,
-    CodeEditor,
     ValidationDropzone,
     GitHubSaver,
     EditorClassBox,
@@ -687,14 +572,10 @@ export default {
   computed: {
     ...mapGetters({
       userInfo: "userInfo",
-      definition_options: "getDefinitionOptions",
       validation_props: "getValidationProps",
-      validation_options: "getValidationOptions",
       startingPoint: "getStartingPoint",
       prefix: "getPrefix",
       classesAvailable: "getSchema",
-      item: "getEditItem",
-      definition_item: "getEditDefinitionItem",
       loading: "loading",
       addCardinality: "addCardinality",
     }),
@@ -704,14 +585,6 @@ export default {
       },
       set(v) {
         this.$store.commit("setRemoveValidation", { value: v });
-      },
-    },
-    toggleValOptions: {
-      get() {
-        return this.$store.getters.getToggleValidationOptions;
-      },
-      set(v) {
-        this.$store.commit("toggleValOptions");
       },
     },
     ...mapState({
@@ -809,87 +682,6 @@ export default {
       let self = this;
       self.validationView = !self.validationView;
       this.$store.commit("formPreview");
-    },
-    getRandomColor() {
-      var letters = "0123456789ABCDEF";
-      var color = "#";
-      for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      return color;
-    },
-    editValidationOption(item) {
-      let copy = Object.assign({}, item);
-      this.$store.commit("editThis", { item: copy });
-    },
-    editDefinitionOption(item) {
-      let copy = Object.assign({}, item);
-      this.$store.commit("editThisDefinition", { item: copy });
-    },
-    makeid(length) {
-      var result = "";
-      var characters =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      var charactersLength = characters.length;
-      for (var i = 0; i < length; i++) {
-        result += characters.charAt(
-          Math.floor(Math.random() * charactersLength)
-        );
-      }
-      return result;
-    },
-    async addValidationOption() {
-      let self = this;
-      const { value: name } = await self.$swal.fire({
-        title: "Name of new validation option",
-        input: "text",
-        inputPlaceholder: "Name this option",
-      });
-
-      if (name) {
-        let payload = {
-          validation: {
-            _id: self.makeid(4),
-            title: name,
-            color: self.getRandomColor(),
-            list: 2,
-            validation: { type: "EDIT to define" },
-            can_delete: true,
-          },
-        };
-        this.$store.commit("addValidationOption", payload);
-      }
-    },
-    async addDefinitionOption() {
-      let self = this;
-      const { value: name } = await self.$swal.fire({
-        title: "Name of new definition (must be unique)",
-        input: "text",
-        inputPlaceholder: "Name this option",
-      });
-
-      if (name) {
-        let payload = {
-          definition: {
-            _id: self.makeid(6),
-            title: name,
-            color: self.getRandomColor(),
-            list: 2,
-            validation: { type: "EDIT to define" },
-            can_delete: true,
-          },
-        };
-        this.$store.commit("addDefinitionOption", payload);
-      }
-    },
-    startDrag: (evt, item) => {
-      let img = new Image();
-      img.src = cubeImg;
-      evt.dataTransfer.setDragImage(img, 10, 10);
-
-      evt.dataTransfer.dropEffect = "move";
-      evt.dataTransfer.effectAllowed = "move";
-      evt.dataTransfer.setData("itemID", item._id);
     },
     githubOptions() {
       // show modal
@@ -1625,65 +1417,9 @@ export default {
           }
         });
     },
-    checkCustomValidation() {
-      let v = localStorage.getItem("custom_validation");
-      if (v) {
-        this.$store.commit("updateValidationOptions", {
-          validation: JSON.parse(v),
-        });
-      }
-    },
-    checkCustomDefinitions() {
-      let v = localStorage.getItem("custom_definitions");
-      if (v) {
-        this.$store.commit("updateDefinitionOptions", {
-          definitions: JSON.parse(v),
-        });
-      }
-    },
-    deleteValidationOption(item) {
-      let self = this;
-      self.$swal
-        .fire({
-          title: "Are you sure?",
-          text: `You are deleting "${item.title}" permanently.`,
-          showCancelButton: true,
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
-
-          customClass: "scale-in-center",
-          confirmButtonText: "Delete",
-        })
-        .then((res) => {
-          if (res.value) {
-            self.$store.commit("deleteValidationOption", { id: item._id });
-          }
-        });
-    },
-    deleteDefinitionOption(item) {
-      let self = this;
-      self.$swal
-        .fire({
-          title: "Are you sure?",
-          html: `<b>Warning</b>: deleting this definition will remove it from your library entirely. <br>Definitions that are not referenced will not appear in your json schema validation. Continue?`,
-          showCancelButton: true,
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
-
-          customClass: "scale-in-center",
-          confirmButtonText: "Yes, Delete",
-        })
-        .then((res) => {
-          if (res.value) {
-            self.$store.commit("deleteDefinitionOption", { id: item._id });
-          }
-        });
-    },
   },
   mounted: function () {
     this.checkForData();
-    this.checkCustomValidation();
-    this.checkCustomDefinitions();
   },
   updated: function () {
     this.$store.dispatch("setUpTips");
