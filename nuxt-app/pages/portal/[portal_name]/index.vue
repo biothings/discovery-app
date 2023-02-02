@@ -7,7 +7,6 @@ import { useStore } from "vuex";
 let store = useStore();
 let portals = store.getters.getPortals;
 
-
 let portal = {};
 let featuredImg = "";
 let colors = ref([]);

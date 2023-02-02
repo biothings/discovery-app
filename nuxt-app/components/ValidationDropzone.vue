@@ -67,7 +67,7 @@ export default {
   },
   methods: {
     allowDrop(ev) {
-      console.log(ev)
+      console.log(ev);
       // $(ev.target).attr("drop-active", true);
       ev.preventDefault();
     },

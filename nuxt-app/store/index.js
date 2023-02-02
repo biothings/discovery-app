@@ -7,6 +7,7 @@ import { resource_registry } from "./modules/resource_registry";
 import { schema_registry } from "./modules/schema_registry";
 import { schema_viewer } from "./modules/schema_viewer";
 import { editor } from "./modules/editor";
+import { editor_validation } from "./modules/editor_validation";
 import { guide } from "./modules/guide";
 import { portals } from "./modules/portals";
 import { validator } from "./modules/validator";
@@ -26,6 +27,7 @@ export default createStore({
     guide,
     portals,
     validator,
+    editor_validation,
   },
   state: () => ({
     loading: false,
@@ -49,6 +51,7 @@ export default createStore({
         animation: "scale",
         theme: "ddeDark",
         trigger: "mouseenter",
+        interactive: true,
         allowHTML: true,
         onShow(instance) {
           let info = instance.reference.dataset.tippyContent;
@@ -79,15 +82,18 @@ export default createStore({
                 instance.setContent(info);
               });
           } else {
-            let html =
-              '<table class="table table-sm table-striped table-dark m-0">';
+            let html = '<table class="table table-sm table-borderless m-0">';
             try {
               if (instance.reference.dataset.tippyContent.includes("{")) {
                 let json = JSON.parse(instance.reference.dataset.tippyContent);
                 for (const k in json) {
                   html += `<tr>
                       <td><small><b>${k}</b></small></td>
-                      <td><small>${JSON.stringify(json[k])}</small></td>
+                      <td><small class='text-light'><pre class='code-overflow text-light p-1 rounded m-0'>${JSON.stringify(
+                        json[k],
+                        null,
+                        2
+                      )}</pre></small></td>
                       </tr>`;
                 }
                 html += "</table>";
