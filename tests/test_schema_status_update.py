@@ -1,10 +1,7 @@
 """
-    Testing for the schema status updates
-    # class method 
-    # saving to classes, want to check parameters
+    Tests for updating the schema status.
 """
-import sys 
-sys.path.append('/Users/nacosta/Documents/DDE/schema-update-status/discovery-app')
+
 import pytest # for testing ?
 
 from discovery.registry import schemas
@@ -35,7 +32,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
         Success case: 
         {
             'refresh_status': 200,
-            'refresh_ts': datetime.datetime())
+            'refresh_ts': datetime.datetime(...)
         }
         --
         """
@@ -50,7 +47,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
         Fail Case 1: URL failure
                 {
             'refresh_status': 400,
-            'refresh_ts': datetime.datetime(),
+            'refresh_ts': datetime.datetime(...),
             'refresh_msg': 'invalid url or protocol'
         }
         """
@@ -65,7 +62,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
         Fail Case 2: Username failure
         {
             'refresh_status': 400,
-            'refresh_ts': datetime.datetime(),
+            'refresh_ts': datetime.datetime(...),
             'refresh_msg': 'user name is required'
         }
         """
@@ -81,8 +78,8 @@ class DiscoveryAPITest(DiscoveryTestCase):
         Fail Case 3: 404 Error
         {
             'refresh_status': 404,
-            'refresh_ts': datetime.datetime(),
-            'refresh_msg': ''404 Client Error: Not Found for url: URL'
+            'refresh_ts': datetime.datetime(...),
+            'refresh_msg': ''404 Client Error: Not Found for url: [URL]'
         }
         """
         fail_url = 'https://www.google.com/gjreoghjerioe'
