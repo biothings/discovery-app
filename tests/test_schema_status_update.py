@@ -19,7 +19,7 @@ def setup():                                    # setting up sample schema here 
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
 
 
-class DiscoveryAPITest(DiscoveryTestCase):
+class TestSchemaStatus(DiscoveryTestCase):
     test_user = "minions@example.com"
     test_namespace = "n3c"
     test_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
