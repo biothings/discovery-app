@@ -439,7 +439,14 @@ class SchemaHandler(APIBaseHandler):
     """ Schema Handler
         Given a request curie with a namespace, search the schema
     """
-
+    name = 'schema'
+    kwargs = {
+        "GET": {
+            "meta": {
+                "type": bool
+            }, # meta field used to display metadata and status
+        }
+    }
     def class_property_filter(self, metadata, class_id):
         """Filter Schema Properties by class(domain)
         Extract the properties that belong to the requested (schema)class,
@@ -509,18 +516,21 @@ class SchemaHandler(APIBaseHandler):
             Fetch  - GET ./api/schema/{ns}:{class_id}
             Fetch  - GET ./api/schema/{ns}:{class_id}/validation
             Fetch  - GET ./api/schema/{ns}:{property_id}
-            (../{ns}?meta=1)
+            Fetch  - GET ./api/schema/{ns}?meta=1
         """
         if curie is None:
             raise HTTPError(400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'")
         # ./api/schema/{ns}
         elif ":" not in curie:
             try:
-                schema_metadata = schemas.get(curie)
+                schema_metadata = schemas.get(curie)    # use registry to get schema
+                # when the meta arg is passed, ?meta=1, display the _status
+                if self.args.meta == 1:
+                    schema_metadata["_meta"] = schema_metadata.meta
                 schema_metadata.pop("_id")
             except Exception as ns_error:
                 raise HTTPError(400, reason=f"Error retrieving namespace, {curie}, with exception {ns_error}")
-            self.finish(schema_metadata)
+            self.finish(json.dumps(schema_metadata, indent=4, default=str))
         else:
             # get namespace from user request -- expect only one
             if "," in curie:
