@@ -9,7 +9,7 @@
 import functools
 from datetime import datetime
 
-from elasticsearch_dsl import Boolean, Date, InnerDoc, Keyword, Object, Text
+from elasticsearch_dsl import Boolean, Date, InnerDoc, Keyword, Object, Text, Integer
 from elasticsearch_dsl.exceptions import ValidationException
 
 from .common import DiscoveryDoc, DiscoveryMeta, DiscoveryUserDoc
@@ -25,6 +25,8 @@ class SchemaMeta(DiscoveryMeta):
 
     url = Keyword(required=True)
     timestamp = Date()  # when this document is updated
+    last_updated = Date()
+    date_created = Date()
 
 class SchemaStatusMeta(InnerDoc):
 
@@ -75,7 +77,14 @@ class Schema(DiscoveryUserDoc):
         """
         if not self.meta.id:
             raise ValidationException("namespace/_id is a required field.")
-        self._meta.timestamp = datetime.now()
+
+        if not self._meta.date_created:
+            self._meta.date_created = datetime.now().astimezone().isoformat()
+            self._meta.last_updated = datetime.now().astimezone().isoformat()
+        else:
+            self._meta.last_updated = datetime.now().astimezone().isoformat()
+        
+        # self._meta.timestamp = datetime.now()
         return super().save(*args, **kwargs)
 
     @classmethod

@@ -9,8 +9,8 @@
 
 import json
 import logging
-
 import requests
+from datetime import datetime
 
 from discovery.model import Schema as ESSchemaFile, SchemaClass as ESSchemaClass
 from discovery.utils.adapters import SchemaAdapter
@@ -157,7 +157,7 @@ def add(namespace, url, user, doc=None, overwrite=False):
     file._meta.url = url
     file._meta.username = user
     file._status.refresh_status = 200
-    file._status.refresh_ts = datetime.now().astimezone()
+    file._status.refresh_ts = datetime.now().astimezone().isoformat()
     file.save()
 
     # save schema classes
@@ -254,8 +254,10 @@ def update(namespace, user, url, doc=None):
         raise NoEntityError(f"namespace '{namespace}'' does not exist.")
 
     try:
+        # try to successfully run the add() function on the given input
         return add(namespace, url, user, doc, overwrite=True)
     except RegistryError as exc:
+        # respond to schema update error with an update to _status meta fields with error message
         schema = ESSchemaFile.get(id=namespace)
         if schema:
             # if exception has a `status_code` attribute, set it as the status, else use default case(400)
@@ -263,7 +265,7 @@ def update(namespace, user, url, doc=None):
                 schema._status.refresh_status = exc.status_code
             else:
                 schema._status.refresh_status = 400
-            schema._status.refresh_ts = datetime.now().astimezone()
+            schema._status.refresh_ts = datetime.now().astimezone().isoformat()
             schema._status.refresh_msg = str(exc)
             schema.save()
 
