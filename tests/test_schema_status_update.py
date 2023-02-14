@@ -79,7 +79,7 @@ class TestSchemaStatus(DiscoveryTestCase):
         {
             'refresh_status': 404,
             'refresh_ts': datetime.datetime(...),
-            'refresh_msg': ''404 Client Error: Not Found for url: [URL]'
+            'refresh_msg': '404 Client Error: Not Found for url: [URL]'
         }
         """
         fail_url = 'https://www.google.com/gjreoghjerioe'
