@@ -76,6 +76,24 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.drag-el > .edit-val-btn {
+  opacity: 0;
+  transition: all 0.5s;
+}
+
+.drag-el:hover > .edit-val-btn {
+  opacity: 1;
+}
+
+.drag-el > .del-val-btn {
+  opacity: 0;
+  transition: all 0.5s;
+}
+
+.drag-el:hover > .del-val-btn {
+  opacity: 1;
+}
+
 .min-h-100 {
   min-height: 100vh;
 }
@@ -226,6 +244,10 @@ span.fa-stack:hover > svg:nth-child(1) {
 .stripedList li:nth-child(even) {
   background-color: rgb(243, 243, 243);
 }
+.val-options-container {
+  max-height: 500px;
+  overflow-y: scroll;
+}
 .drag-el {
   color: white;
   transition: all 0.3s;
@@ -234,6 +256,11 @@ span.fa-stack:hover > svg:nth-child(1) {
 }
 .drag-el:hover {
   cursor: grab;
+}
+
+.drag-el:active {
+  background-color: rgb(0, 172, 69) !important;
+  cursor: grabbing;
 }
 .v-container {
   position: relative;

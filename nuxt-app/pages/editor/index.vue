@@ -160,9 +160,7 @@
               class="col-sm-12 col-md-6 bg-secondary border-right"
               style="max-height: 800px; overflow-y: scroll"
             >
-              <h4 class="text-light text-center m-0 pt-2">
-                Your Validation
-              </h4>
+              <h4 class="text-light text-center m-0 pt-2">Your Validation</h4>
               <template
                 v-for="(val, propname) in validation_props"
                 :key="propname"
@@ -176,13 +174,11 @@
             <div class="col-sm-12 col-md-6 bg-dark border-left pb-2">
               <h4 class="text-light text-left m-0 pt-2">Options</h4>
               <!-- CARDINALITY -->
-              <div
-                class="my-1 alert alert-primary"
-              >
+              <div class="my-1 alert alert-primary">
                 <h6 class="text-left font-weight-bold">Cardinality</h6>
                 <small class="text-dark text-left d-block"
-                  >Refers to the number of elements in a set or other grouping, as
-                  a property of that grouping.</small
+                  >Refers to the number of elements in a set or other grouping,
+                  as a property of that grouping.</small
                 >
                 <div class="py-1">
                   <label class="text-muted m-0" for="ac"

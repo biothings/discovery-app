@@ -96,6 +96,7 @@ export default {
           let audio = document.getElementById("dropsound");
           audio.play();
           self.$store.commit("setValidation", payload);
+          self.$store.commit("addRecentlyUsed", payload);
         }
       });
     },

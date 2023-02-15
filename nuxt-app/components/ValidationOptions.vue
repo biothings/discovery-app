@@ -2,31 +2,37 @@
 import { watch, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 
-import cubeImg from "@/assets/img/cubeplus.svg";
-
 let store = useStore();
-const { $swal } = useNuxtApp();
+const { $swal, $_ } = useNuxtApp();
 let search_query = ref("");
 let filter_selected = ref("by_name");
 let search_active = ref(false);
 let filter_options = ref([]);
 let valSelect = ref("default");
+let ordered_options = ref([]);
 
 let editItem = computed(() => store.getters.getEditItem);
 let editDefintionItem = computed(() => store.getters.getEditDefinitionItem);
 let valOps = computed(() => store.getters.getValidationOptions);
 let defOps = computed(() => store.getters.getDefinitionOptions);
+let bioschemasMostUsed = computed(() => store.getters.getBioschemasMostUsed);
+let recentlyUsed = computed(() => store.getters.getRecentlyUsed);
+
+function filterBioSchemasMostUsed() {
+  filter_options.value = valOps.value.filter((item) =>
+    bioschemasMostUsed.value.includes(item.title)
+  );
+}
 
 function filterAllOptions(filter) {
   if (filter == "bioschemas") {
-    filter_options.value = valOps.value.filter((item) => {
-      if (item.belongs_to == "bioschemas" || item.belongs_to == "both") {
-        return true;
-      }
-    });
+    filter_options.value = valOps.value.filter(
+      (item) => item.belongs_to == "bioschemas"
+    );
+    filterBioSchemasMostUsed();
   } else {
     filter_options.value = valOps.value.filter(
-      (item) => item.belongs_to !== "bioschemas"
+      (item) => item.belongs_to == "default"
     );
   }
 }
@@ -78,6 +84,7 @@ function handleSubmit() {
   } else {
     if (!search_query.value) {
       filter_options.value = valOps.value;
+      filterBioSchemasMostUsed();
     } else {
       //reset all options first
       filter_options.value = valOps.value;
@@ -110,24 +117,45 @@ watch(search_active, function (v) {
   }
 });
 
+watch(filter_options, function (v) {
+  orderAlphabetically(v);
+});
+
+function orderAlphabetically(items) {
+  let res = [];
+  if (items.length < 25) {
+    ordered_options.value = [
+      { group: "⭐ Recently used", children: recentlyUsed },
+      {
+        group: "All",
+        children: items,
+      },
+    ];
+  } else {
+    let data = items.reduce((r, e) => {
+      let group = e["title"][0].toLocaleLowerCase();
+      if (!r[group]) r[group] = { group, children: [e] };
+      else r[group].children.push(e);
+      return r;
+    }, {});
+    res = Object.values(data);
+    ordered_options.value = $_.orderBy(res, ["group"], ["asc"]);
+    // console.log(ordered_options.value)
+    // add frequently used to beginning
+    if (recentlyUsed.value?.length) {
+      ordered_options.value.unshift({
+        group: "⭐ Recently used",
+        children: recentlyUsed,
+      });
+    }
+  }
+}
+
 function reset() {
   search_query.value = "";
   filter_selected.value = "by_name";
   filter_options.value = valOps.value;
   filterAllOptions(valSelect.value);
-}
-
-function startDrag(evt, item) {
-  let img = new Image();
-  img.src = cubeImg;
-  evt.dataTransfer.setDragImage(img, 10, 10);
-  evt.dataTransfer.dropEffect = "move";
-  evt.dataTransfer.effectAllowed = "move";
-  evt.dataTransfer.setData("itemID", item._id);
-}
-
-function editValidationOption(item) {
-  store.commit("editThis", { item: Object.assign({}, item) });
 }
 
 function makeid(length) {
@@ -179,10 +207,6 @@ async function addValidationOption() {
   }
 }
 
-function editDefinitionOption(item) {
-  store.commit("editThisDefinition", { item: Object.assign({}, item) });
-}
-
 async function addDefinitionOption() {
   const { value: name } = await $swal.fire({
     title: "Name of new definition (must be unique)",
@@ -212,44 +236,6 @@ async function addDefinitionOption() {
   }
 }
 
-function deleteDefinitionOption(item) {
-  $swal
-    .fire({
-      title: "Are you sure?",
-      html: `<b>Warning</b>: deleting this definition will remove it from your library entirely. <br>Definitions that are not referenced will not appear in your json schema validation. Continue?`,
-      showCancelButton: true,
-      confirmButtonColor: "#63296b",
-      cancelButtonColor: "#4a7d8f",
-      customClass: {
-        popup: "scale-in-center",
-      },
-      confirmButtonText: "Yes, Delete",
-    })
-    .then((res) => {
-      if (res.value) {
-        store.commit("deleteDefinitionOption", { id: item._id });
-      }
-    });
-}
-
-function deleteValidationOption(item) {
-  $swal
-    .fire({
-      title: "Are you sure?",
-      text: `You are deleting "${item.title}" permanently.`,
-      showCancelButton: true,
-      confirmButtonColor: "#63296b",
-      cancelButtonColor: "#4a7d8f",
-      customClass: "scale-in-center",
-      confirmButtonText: "Delete",
-    })
-    .then((res) => {
-      if (res.value) {
-        store.commit("deleteValidationOption", { id: item._id });
-      }
-    });
-}
-
 function checkCustomValidation() {
   let v = localStorage.getItem("custom_validation");
   if (v) {
@@ -268,8 +254,16 @@ function checkCustomDefinitions() {
   }
 }
 
+function checkFrequentlyUsed() {
+  store.commit("checkIfFrequentlyUsed");
+}
+
+onMounted(() => {
+  store.dispatch("checkVersion");
+});
 onMounted(() => checkCustomDefinitions());
 onMounted(() => checkCustomValidation());
+onMounted(() => checkFrequentlyUsed());
 onMounted(() => filterAllOptions(valSelect.value));
 </script>
 
@@ -288,7 +282,9 @@ onMounted(() => filterAllOptions(valSelect.value));
           <font-awesome-icon icon="fas fa-search"></font-awesome-icon> Search
         </span>
       </div>
-      <div class="col-sm-12 d-flex justify-content-center align-items-center border-top border-light pt-1">
+      <div
+        class="col-sm-12 d-flex justify-content-center align-items-center border-top border-light pt-1"
+      >
         <span class="my-0 mr-2 text-muted">Load presets:</span>
         <select
           v-model="valSelect"
@@ -385,34 +381,21 @@ onMounted(() => filterAllOptions(valSelect.value));
         >Drag & drop common validation options to merge into each
         property.</small
       >
-      <template v-for="item in filter_options" :key="item._id">
-        <div
-          class="badge drag-el m-1 tip"
-          :class="[item.title.includes('DEF') ? 'badge-info' : 'badge-primary']"
-          :data-tippy-content="JSON.stringify(item.validation, null, 2)"
-          draggable="true"
-          @dragstart="startDrag($event, item)"
-        >
-          <span v-text="item.title" class="mr-1"></span>
-          <span
-            data-tippy-content="EDIT"
-            data-tippy-placement="bottom"
-            data-tippy-theme="light"
-            class="badge badge-light pointer mr-1 tip"
-            @click="editValidationOption(item)"
-            ><font-awesome-icon icon="fas fa-pen-square"></font-awesome-icon
-          ></span>
-          <span
-            v-if="item && item.can_delete"
-            data-tippy-content="DELETE"
-            data-tippy-placement="bottom"
-            data-tippy-theme="light"
-            class="badge badge-danger pointer"
-            @click="deleteValidationOption(item)"
-            ><font-awesome-icon icon="fas fa-times"></font-awesome-icon
-          ></span>
+      <div class="val-options-container">
+        <div v-for="g in ordered_options" :key="g.group">
+          <details open>
+            <summary
+              class="m-0 font-weight-bold text-dark border-bottom border-dark"
+            >
+              {{ g.group.toUpperCase() }}
+              <small class="text-muted">({{ g.children.length }})</small>
+            </summary>
+            <template v-for="item in g.children" :key="item._id">
+              <DraggableBadge :item="item"></DraggableBadge>
+            </template>
+          </details>
         </div>
-      </template>
+      </div>
       <div
         @click="addValidationOption()"
         data-tippy-content="ADD NEW"
@@ -434,29 +417,7 @@ onMounted(() => filterAllOptions(valSelect.value));
       >
       <div class="border rounded p-2 alert-info mb-2">
         <template v-for="item in defOps" :key="item.title">
-          <div
-            class="badge m-1 text-light"
-            :data-tippy-content="JSON.stringify(item.validation, null, 2)"
-            :style="{ 'background-color': item.color }"
-          >
-            <span v-text="item.title" class="mr-1"></span>
-            <span
-              data-tippy-content="EDIT"
-              data-tippy-theme="light"
-              data-tippy-placement="bottom"
-              class="badge badge-light pointer mr-1"
-              @click="editDefinitionOption(item)"
-              ><font-awesome-icon icon="fas fa-pen-square"></font-awesome-icon
-            ></span>
-            <span
-              v-if="item && item.can_delete"
-              data-tippy-content="DELETE"
-              data-tippy-placement="bottom"
-              class="badge badge-danger pointer"
-              @click="deleteDefinitionOption(item)"
-              ><font-awesome-icon icon="fas fa-times"></font-awesome-icon
-            ></span>
-          </div>
+          <DefinitionBadge :item="item"></DefinitionBadge>
         </template>
         <div
           @click="addDefinitionOption()"
