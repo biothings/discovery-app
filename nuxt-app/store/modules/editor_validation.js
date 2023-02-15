@@ -2,14 +2,26 @@ import Notify from "simple-notify";
 // editor default options
 import { validation_options } from "./editor_options/validation_options";
 import { definition_options } from "./editor_options/definition_options";
+import { bioschemas_by_property } from "./editor_options/bioschemas_by_property";
+import {
+  bioschemas_by_type,
+  most_used,
+} from "./editor_options/bioschemas_by_type";
 
 export const editor_validation = {
   state: {
     editThis: null,
     editThisDefinition: null,
-    validation_options: validation_options,
+    validation_options: validation_options
+      .concat(bioschemas_by_property)
+      .concat(bioschemas_by_type),
     definition_options: definition_options,
     addCardinality: false,
+    bioschemas_most_used: most_used,
+    // change version when major breaking changes are implemented
+    // this will delete all user's custom settings locally and start fresh
+    editor_version: "1.0",
+    recentlyUsed: [],
   },
   strict: true,
   mutations: {
@@ -317,8 +329,39 @@ export const editor_validation = {
       let item = payload["item"];
       state.editThisDefinition = item;
     },
+    addRecentlyUsed(state, payload) {
+      if (
+        !state.recentlyUsed.some((o) => o.title == payload.validation.title)
+      ) {
+        state.recentlyUsed.unshift(payload.validation);
+        state.recentlyUsed = state.recentlyUsed.slice(0, 20);
+        localStorage.setItem(
+          "recentlyUsed",
+          JSON.stringify(state.recentlyUsed)
+        );
+      } else {
+        console.log("already in frequently used.");
+      }
+    },
+    deleteFrequentlyUsed(state, payload) {
+      state.recentlyUsed = [];
+      localStorage.setItem("recentlyUsed", JSON.stringify(state.recentlyUsed));
+    },
+    checkIfFrequentlyUsed(state) {
+      let v = localStorage.getItem("recentlyUsed");
+      if (v) {
+        state.recentlyUsed = JSON.parse(v);
+      }
+    },
+    deleteLocalCustomValidationAndDefinitions() {
+      localStorage.removeItem("custom_validation");
+      localStorage.removeItem("custom_definitions");
+    },
   },
   getters: {
+    getRecentlyUsed: (state) => {
+      return state.recentlyUsed;
+    },
     addCardinality: (state) => {
       return state.addCardinality;
     },
@@ -334,6 +377,31 @@ export const editor_validation = {
     getValidationOptions: (state) => {
       return state.validation_options;
     },
+    getBioschemasMostUsed: (state) => {
+      return state.bioschemas_most_used;
+    },
   },
-  actions: {},
+  actions: {
+    checkVersion({ commit, state }) {
+      let version = localStorage.getItem("editor_version");
+      if (!version || version !== state.editor_version) {
+        console.log(
+          "%c New version of editor, all custom options will be deleted",
+          "color: red"
+        );
+        commit("deleteFrequentlyUsed");
+        commit("deleteLocalCustomValidationAndDefinitions");
+        localStorage.setItem("editor_version", state.editor_version);
+        console.log(
+          "%c New version of editor: " + state.editor_version,
+          "color: green"
+        );
+      } else {
+        console.log(
+          "%c Editor Up-to-date! Version: " + state.editor_version,
+          "color: blue"
+        );
+      }
+    },
+  },
 };

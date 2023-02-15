@@ -22,27 +22,27 @@ export const auth = {
   },
   actions: {
     checkUser({ commit }) {
-      // if (process.env.NODE_ENV == "development") {
-      //   commit("saveUser", {
-      //     user: {
-      //       name: "Marco Cano",
-      //       email: "artofmarco@gmail.com",
-      //       login: "marcodarko",
-      //       avatar_url: "https://avatars.githubusercontent.com/u/23092057?v=4",
-      //     },
-      //   });
-      // }else{
-      let config = useRuntimeConfig();
-      axios
-        .get(config.public.apiUrl + "/user")
-        .then((response) => {
-          commit("saveUser", { user: response.data });
-        })
-        .catch((err) => {
-          commit("resetUser");
-          throw err;
+      if (process.env.NODE_ENV == "development") {
+        commit("saveUser", {
+          user: {
+            name: "Marco Cano",
+            email: "artofmarco@gmail.com",
+            login: "marcodarko",
+            avatar_url: "https://avatars.githubusercontent.com/u/23092057?v=4",
+          },
         });
-      // }
+      } else {
+        let config = useRuntimeConfig();
+        axios
+          .get(config.public.apiUrl + "/user")
+          .then((response) => {
+            commit("saveUser", { user: response.data });
+          })
+          .catch((err) => {
+            commit("resetUser");
+            throw err;
+          });
+      }
     },
   },
   getters: {

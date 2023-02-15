@@ -3,34 +3,6 @@
 
 export const validation_options = [
   {
-    _id: "01233bio",
-    title: "text",
-    color: "#097969",
-    validation: {
-      type: "string",
-    },
-    belongs_to: "bioschemas",
-  },
-  {
-    _id: "01432bio",
-    title: "text(s)",
-    color: "#097969",
-    validation: {
-      oneOf: [
-        {
-          type: "string",
-        },
-        {
-          type: "array",
-          items: {
-            type: "string",
-          },
-        },
-      ],
-    },
-    belongs_to: "bioschemas",
-  },
-  {
     _id: "01233",
     title: "string",
     color: "#5D3FD3",
@@ -65,7 +37,7 @@ export const validation_options = [
     validation: {
       type: "boolean",
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
   {
     _id: "3543",
@@ -74,7 +46,7 @@ export const validation_options = [
     validation: {
       type: "integer",
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
   {
     _id: "4654",
@@ -84,7 +56,7 @@ export const validation_options = [
       type: "string",
       format: "uri",
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
   {
     _id: "5867",
@@ -103,7 +75,7 @@ export const validation_options = [
         },
       ],
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
   {
     _id: "6876",
@@ -113,7 +85,7 @@ export const validation_options = [
       format: "date",
       type: "string",
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
   {
     _id: "7645",
@@ -134,7 +106,7 @@ export const validation_options = [
         },
       ],
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
   {
     _id: "8567",
@@ -143,7 +115,7 @@ export const validation_options = [
     validation: {
       const: "Edit const value",
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
   {
     _id: "9654",
@@ -158,7 +130,7 @@ export const validation_options = [
       },
       required: ["name"],
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
   {
     _id: "1065",
@@ -176,7 +148,7 @@ export const validation_options = [
       },
       strict: false,
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
   {
     _id: "1062",
@@ -196,6 +168,6 @@ export const validation_options = [
         },
       ],
     },
-    belongs_to: "both",
+    belongs_to: "default",
   },
 ];
