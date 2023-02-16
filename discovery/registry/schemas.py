@@ -151,13 +151,24 @@ def add(namespace, url, user, doc=None, overwrite=False):
     else:  # wrap in read-only container
         doc = ValidatedDict(doc)
 
+    if overwrite == True:
+        ns_meta = get_meta(namespace)
+        if ns_meta.date_created:
+            ns_date_created = ns_meta.date_created
+
     # save schema file
     file = ESSchemaFile(**doc)
     file.meta.id = namespace
     file._meta.url = url
     file._meta.username = user
     file._status.refresh_status = 200
-    file._status.refresh_ts = datetime.now().astimezone().isoformat()
+    file._status.refresh_ts = datetime.now().astimezone()
+    if ns_date_created:
+        file._meta.date_created = ns_date_created
+    else:
+        file._meta.date_created = datetime.now().astimezone()
+
+
     file.save()
 
     # save schema classes
