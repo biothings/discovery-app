@@ -447,6 +447,7 @@ class SchemaHandler(APIBaseHandler):
             }, # meta field used to display metadata and status
         }
     }
+
     def class_property_filter(self, metadata, class_id):
         """Filter Schema Properties by class(domain)
         Extract the properties that belong to the requested (schema)class,
