@@ -24,7 +24,7 @@ def mergeDict(d1, d2):
 class SchemaMeta(DiscoveryMeta):
 
     url = Keyword(required=True)
-    timestamp = Date()  # when this document is updated
+    # timestamp = Date()  # when this document is updated
     last_updated = Date()
     date_created = Date()
 
@@ -78,12 +78,7 @@ class Schema(DiscoveryUserDoc):
         if not self.meta.id:
             raise ValidationException("namespace/_id is a required field.")
 
-        if not self._meta.date_created:
-            self._meta.date_created = datetime.now().astimezone().isoformat()
-            self._meta.last_updated = datetime.now().astimezone().isoformat()
-        else:
-            self._meta.last_updated = datetime.now().astimezone().isoformat()
-        
+        self._meta.last_updated = datetime.now().astimezone()
         # self._meta.timestamp = datetime.now()
         return super().save(*args, **kwargs)
 
