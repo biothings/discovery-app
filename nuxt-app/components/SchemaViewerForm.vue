@@ -430,7 +430,7 @@ export default {
               b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000);
             }, 100);
           },
-          willClose: () => {
+          didClose: () => {
             clearInterval(timerInterval);
           },
         })

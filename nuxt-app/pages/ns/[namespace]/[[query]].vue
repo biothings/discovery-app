@@ -1175,25 +1175,17 @@ export default {
                         event_label: "ALL",
                         event_value: 1,
                       });
-
                       let timerInterval;
                       self.$swal.fire({
-                        type: "success",
                         title: "Registration Successful",
-
                         customClass: "scale-in-center",
                         html: "Taking you to your schema homepage in <strong></strong> seconds.",
                         timer: 3000,
-                        willOpen: () => {
-                          const content = self.$swal.getContent();
-                          const $ = content.querySelector.bind(content);
+                        didOpen: () => {
                           self.$swal.showLoading();
+                          const b = self.$swal.getHtmlContainer().querySelector("strong");
                           timerInterval = setInterval(() => {
-                            self.$swal
-                              .getContent()
-                              .querySelector("strong").textContent = (
-                              self.$swal.getTimerLeft() / 1000
-                            ).toFixed(0);
+                            b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000);
                           }, 100);
                         },
                         didClose: () => {

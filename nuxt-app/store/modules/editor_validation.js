@@ -10,6 +10,9 @@ import {
 
 export const editor_validation = {
   state: {
+    // change version when major breaking changes are implemented
+    // this will delete all user's custom settings locally and start fresh
+    editor_version: "1.0",
     editThis: null,
     editThisDefinition: null,
     validation_options: validation_options
@@ -18,9 +21,6 @@ export const editor_validation = {
     definition_options: definition_options,
     addCardinality: false,
     bioschemas_most_used: most_used,
-    // change version when major breaking changes are implemented
-    // this will delete all user's custom settings locally and start fresh
-    editor_version: "1.0",
     recentlyUsed: [],
   },
   strict: true,
