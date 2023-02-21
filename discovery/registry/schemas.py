@@ -151,25 +151,28 @@ def add(namespace, url, user, doc=None, overwrite=False):
     else:  # wrap in read-only container
         doc = ValidatedDict(doc)
 
-    # if we are overwriting a schema (updating), need to save the original creation date
+    # if overwriting a schema (updating), we extract the schema's `date_created` value if available,
+    # and the `last_updated` variable(for older datasources), to apply to the new schema index
+    original_last_updated, original_date_created = None, None
     if overwrite == True:
         meta_data = get_meta(namespace)
         if meta_data.date_created:
             original_date_created = meta_data.date_created
-
+        if meta_data.last_updated:
+            original_last_updated = meta_data.last_updated
+        
+    current_date = datetime.now().astimezone()
     # save schema file
     file = ESSchemaFile(**doc)
     file.meta.id = namespace
     file._meta.url = url
     file._meta.username = user
-    if original_date_created:
-        file._meta.date_created = original_date_created
-    else:
-        file._meta.date_created = datetime.now().astimezone()
-    file._status.refresh_status = 200
-    file._status.refresh_ts = datetime.now().astimezone()
+    # if the schema has an original date_created or last_update we set that, else we use the current date
+    file._meta.date_created = original_date_created or original_last_updated or current_date
+    if overwrite == True: file._status.refresh_status = 200
+    if overwrite == True: file._status.refresh_ts = current_date 
     file.save()
-
+    
     # save schema classes
     count = _add_schema_class(doc, namespace)
 
@@ -275,9 +278,9 @@ def update(namespace, user, url, doc=None):
                 schema._status.refresh_status = exc.status_code
             else:
                 schema._status.refresh_status = 400
-            schema._status.refresh_ts = datetime.now().astimezone().isoformat()
+            schema._status.refresh_ts = datetime.now().astimezone()
             schema._status.refresh_msg = str(exc)
-            schema.save()
+            schema.save(skip_updated_ts=True)
 
             return RegistryError
 
