@@ -10,11 +10,14 @@ from discovery.utils import indices
 from .test_base import DiscoveryTestCase
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
+NIAID_URL = "https://raw.githubusercontent.com/NIAID-Data-Ecosystem/nde-schemas/main/combined_schema_DO_NOT_EDIT/NIAID_schema.json"
 
 @pytest.fixture(scope="module", autouse=True)
 def setup():
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
+    if not schemas.exists("niaid"):
+        schemas.add(namespace="niaid", url=NIAID_URL, user="minions@example.com")
 
 # expects empty es server -- load data
 # github action for testing (automatically test)
@@ -40,7 +43,7 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
                 "schema": "http://schema.org/",
                 "xsd": "http://www.w3.org/2001/XMLSchema#"
             },
-            "@graph": [ ... ], // items
+            "@graph": [ ... ],      // items
             "@id": "http://schema.biothings.io/#0.1"
         }
         """
@@ -59,7 +62,7 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
                 "schema": "http://schema.org/",
                 "xsd": "http://www.w3.org/2001/XMLSchema#"
             },
-            "@graph": [ ... ], // items
+            "@graph": [ ... ],      // items
             "@id": "http://schema.biothings.io/#0.1",
             "_meta": {
                 "url": "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld",
@@ -80,7 +83,7 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         {
             "@context": {<-->},
             "@id": "https://discovery.biothings.io/view/niaid/",
-            "@graph": [<-->] // items
+            "@graph": [<-->]        // items
         }
         """
         res = self.request("api/schema/niaid:ScholarlyArticle")
@@ -100,48 +103,14 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         res = self.request("api/schema/niaid:ScholarlyArticle/validation")
         assert res['properties']
 
-
-
-
-
-# def test_01(self):
-#     """Invalid Property 
-#     {
-#         "code":,
-#         "success:",
-#         "error":
-#     }
-#     """
-
-# def test_01(self):
-#     """No Validation? // missing properties 
-#     # should be empty dict/ etc, check with Marco
-#     {
-#         "code":,
-#         "success:",
-#         "error":
-#     }
-#     """
-
-# def test_01(self):
-#     """Too many requested schemas(namespaces)
-#     {
-#         "code":,
-#         "success:",
-#         "error":
-#     }
-#     """
-
-# def test_01(self):
-#     """No schema found
-#         {
-#             "code":,
-#             "success:",
-#             "error":
-#         }
-#     """
-
-# def test_01(self):
-#     """
-#     for class, test for expected class & expected properties only
-#     """
+    def test_13_get(self):
+        """GET /api/schema/<namespace>:<class_id>
+        {
+        {
+            "@context": {<-->},
+            "@graph": [],           // empty items
+            "@id": "http://schema.biothings.io/#0.1"
+        }
+        """
+        res = self.request("api/schema/bts:fds")
+        assert not res["@graph"] 
