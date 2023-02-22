@@ -23,7 +23,10 @@ def setup():
 # github action for testing (automatically test)
 
 class DiscoverySchemaEndpointTest(DiscoveryTestCase):
-    def test_01_head(self):
+    def refresh(self):
+        indices.refresh()
+        
+    def test_01_get(self):
         """Invalid Namespace
         {
             "code": 400,
@@ -31,8 +34,8 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
             "error": "Error retrieving namespace, bt, with exception schema 'bt' does not exist."
         }
         """
-        self.request("api/schema/bt", method="HEAD", expect=400)
-
+        self.request("api/schema/bt", method="GET", expect=404)
+    
     def test_10_get(self):
         """GET /api/schema/<namespace>
         {
@@ -50,7 +53,7 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         res = self.request("api/schema/bts").json()
         assert res['@id'] == "http://schema.biothings.io/#0.1"
         assert res['@context']
-        assert res['@graph']
+        assert res['@graph'] # add property//size check 
 
     def test_11_get(self):
         """GET /api/schema/<namespace>?meta=1
@@ -75,7 +78,7 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         }
         """
         res = self.request("api/schema/bts?meta=1").json()
-        assert res['_meta']
+        assert res['_meta']  #// check for existing expected 4 data points in dict
         assert res['_meta']['url'] == BTS_URL
 
     def test_12_get(self):
@@ -101,11 +104,11 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         
         """
         res = self.request("api/schema/niaid:ScholarlyArticle/validation")
-        assert res['properties']
+        assert res['properties'] # add field check in properties -- any other unique values
 
     def test_13_get(self):
-        """GET /api/schema/<namespace>:<class_id>
-        {
+        """ Invalid Property (non-existing)
+        GET /api/schema/<namespace>:<class_id>
         {
             "@context": {<-->},
             "@graph": [],           // empty items
@@ -113,4 +116,4 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         }
         """
         res = self.request("api/schema/bts:fds")
-        assert not res["@graph"] 
+        assert res["@graph"] == []
