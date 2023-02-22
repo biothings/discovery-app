@@ -74,13 +74,14 @@ class Schema(DiscoveryUserDoc):
     def save(self, *args, **kwargs):
         """
         Record timestamp when the document is saved.
-        # notes for skip_updated_ts 
+        Pass in the argument `skip_ts=True` to not record the timestamp.
+        -- use when update schema fails.
         """
         if not self.meta.id:
             raise ValidationException("namespace/_id is a required field.")
 
-        skip_updated_ts = kwargs.get("skip_updated_ts", False)
-        if not skip_updated_ts:
+        skip_ts = kwargs.get("skip_ts", False)
+        if not skip_ts:
             self._meta.last_updated = datetime.now().astimezone()
 
         # self._meta.timestamp = datetime.now()
