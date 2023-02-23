@@ -1,5 +1,6 @@
 import os as _os
 import importlib.util as _imp_util
+import sys as _sys
 
 CONFIG_FILE_NAME = "config.py"
 
@@ -27,8 +28,13 @@ for _k, _v in _config.__dict__.items():
     if not _k.startswith('_'):
         globals()[_k] = _v
 
+# insert module import path
+_sys.path.insert(0, _os.path.dirname(_cfg_path))
+
 # cleanup
 del CONFIG_FILE_NAME
+
+
 # override default
 ES_HOST = 'localhost:9200'
 ES_INDICES = {
