@@ -23,6 +23,7 @@ def setup():
 # github action for testing (automatically test)
 
 class DiscoverySchemaEndpointTest(DiscoveryTestCase):
+    
     def refresh(self):
         indices.refresh()
         
@@ -93,6 +94,18 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         assert res['@graph'][0]['@id'] == "niaid:ScholarlyArticle"
 
     def test_13_get(self):
+        """ Invalid Property (non-existing)
+        GET /api/schema/<namespace>:<class_id>
+        {
+            "@context": {<-->},
+            "@graph": [],           // empty items
+            "@id": "http://schema.biothings.io/#0.1"
+        }
+        """
+        res = self.request("api/schema/bts:fds")
+        assert res["@graph"] == []
+
+    def test_14_get(self):
         """GET /api/schema/<namespace>:<class_id>/validation
         {
             "$schema": "http://json-schema.org/draft-07/schema#",
@@ -105,15 +118,3 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         """
         res = self.request("api/schema/niaid:ScholarlyArticle/validation")
         assert res['properties'] # add field check in properties -- any other unique values
-
-    def test_13_get(self):
-        """ Invalid Property (non-existing)
-        GET /api/schema/<namespace>:<class_id>
-        {
-            "@context": {<-->},
-            "@graph": [],           // empty items
-            "@id": "http://schema.biothings.io/#0.1"
-        }
-        """
-        res = self.request("api/schema/bts:fds")
-        assert res["@graph"] == []
