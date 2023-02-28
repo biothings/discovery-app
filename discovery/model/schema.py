@@ -80,7 +80,7 @@ class Schema(DiscoveryUserDoc):
         if not self.meta.id:
             raise ValidationException("namespace/_id is a required field.")
 
-        skip_ts = kwargs.get("skip_ts", False)
+        skip_ts = kwargs.pop("skip_ts", False)
         if not skip_ts:
             self._meta.last_updated = datetime.now().astimezone()
 
