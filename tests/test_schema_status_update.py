@@ -3,6 +3,7 @@
 """
 
 import pytest # for testing ?
+import datetime
 
 from discovery.registry import schemas
 from discovery.utils import indices
@@ -37,8 +38,8 @@ class TestSchemaStatus(DiscoveryTestCase):
         --
         """
         success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
-        schemas.update('n3c', user=test_user, url=success_url)  # update schema
-        test_schema = ESSchemaFile.get(id=namespace)            # get newly updated schema
+        schemas.update('n3c', user=self.test_user, url=success_url)  # update schema
+        test_schema = ESSchemaFile.get(id=self.test_namespace)            # get newly updated schema
         assert test_schema._status.refresh_status == 200
         assert isinstance(test_schema._status.refresh_ts, datetime.datetime) 
 
@@ -52,8 +53,8 @@ class TestSchemaStatus(DiscoveryTestCase):
         }
         """
         fail_url = '//raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
-        schemas.update('n3c', user=test_user, url=fail_url)
-        test_schema = ESSchemaFile.get(id=namespace)
+        schemas.update('n3c', user=self.test_user, url=fail_url)
+        test_schema = ESSchemaFile.get(id=self.test_namespace)
         assert test_schema._status.refresh_status == 400
         assert test_schema._status.refresh_msg == 'invalid url or protocol'
 
@@ -67,8 +68,8 @@ class TestSchemaStatus(DiscoveryTestCase):
         }
         """
         fail_user = 65653
-        schemas.update(test_namespace, user=fail_user, url=test_url)
-        test_schema = ESSchemaFile.get(id=namespace)
+        schemas.update(self.test_namespace, user=fail_user, url=self.test_url)
+        test_schema = ESSchemaFile.get(id=self.test_namespace)
         assert test_schema._status.refresh_status == 400
         assert test_schema._status.refresh_msg == 'user name is required'
 
@@ -83,7 +84,7 @@ class TestSchemaStatus(DiscoveryTestCase):
         }
         """
         fail_url = 'https://www.google.com/gjreoghjerioe'
-        schemas.update(test_namespace, user=test_user, url=fail_url)
-        test_schema = ESSchemaFile.get(id=namespace)
+        schemas.update(self.test_namespace, user=self.test_user, url=fail_url)
+        test_schema = ESSchemaFile.get(id=self.test_namespace)
         assert test_schema._status.refresh_status == 404
         assert isinstance(test_schema._status.refresh_msg, str)
