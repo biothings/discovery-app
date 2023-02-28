@@ -280,6 +280,7 @@ def update(namespace, user, url, doc=None):
                 schema._status.refresh_status = 400
             schema._status.refresh_ts = datetime.now().astimezone()
             schema._status.refresh_msg = str(exc)
+            keywords = {"skip_ts":True}
             schema.save(skip_ts=True)
 
             return RegistryError
