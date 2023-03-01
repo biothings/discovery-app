@@ -35,7 +35,7 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
             "error": "Error retrieving namespace, bt, with exception schema 'bt' does not exist."
         }
         """
-        self.request("api/schema/bt", method="GET", expect=404)
+        self.request("schema/bt", method="GET", expect=400)
     
     def test_10_get(self):
         """GET /api/schema/<namespace>
@@ -51,7 +51,7 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
             "@id": "http://schema.biothings.io/#0.1"
         }
         """
-        res = self.request("api/schema/bts").json()
+        res = self.request("schema/bts").json()
         assert res['@id'] == "http://schema.biothings.io/#0.1"
         assert res['@context']
         assert res['@graph'] # add property//size check 
@@ -78,7 +78,7 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
             }
         }
         """
-        res = self.request("api/schema/bts?meta=1").json()
+        res = self.request("schema/bts?meta=1").json()
         assert res['_meta']  #// check for existing expected 4 data points in dict
         assert res['_meta']['url'] == BTS_URL
 
@@ -90,8 +90,9 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
             "@graph": [<-->]        // items
         }
         """
-        res = self.request("api/schema/niaid:ScholarlyArticle")
-        assert res['@graph'][0]['@id'] == "niaid:ScholarlyArticle"
+        res = self.request("schema/niaid:ScholarlyArticle")
+        res_data = res.json()
+        assert res_data['@graph'][0]['@id'] == "niaid:ScholarlyArticle"
 
     def test_13_get(self):
         """ Invalid Property (non-existing)
@@ -102,8 +103,9 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
             "@id": "http://schema.biothings.io/#0.1"
         }
         """
-        res = self.request("api/schema/bts:fds")
-        assert res["@graph"] == []
+        res = self.request("schema/bts:fds")
+        res_data = res.json()
+        assert res_data["@graph"] == []
 
     def test_14_get(self):
         """GET /api/schema/<namespace>:<class_id>/validation
@@ -116,5 +118,6 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         }
         
         """
-        res = self.request("api/schema/niaid:ScholarlyArticle/validation")
-        assert res['properties'] # add field check in properties -- any other unique values
+        res = self.request("schema/niaid:ScholarlyArticle/validation")
+        res_data = res.json()
+        assert res_data['properties'] # add field check in properties -- any other unique values
