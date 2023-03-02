@@ -147,11 +147,15 @@ def add(namespace, url, user, doc=None, overwrite=False):
     if not isinstance(doc, dict):
         # can be more comprehensive
         # for example: checking @graph field
-        raise RegistryError("invalid document")
+        registry_error = RegistryError("invalid document")
+        registry_error.status_code = 499
+        raise registry_error #RegistryError("invalid document")
     else:  # wrap in read-only container
         doc = ValidatedDict(doc)
 
-    # if overwriting a schema (updating), we extract the schema's `date_created` value if available,
+    current_date = datetime.now().astimezone()
+    
+    # if overwriting/updating a schema, we extract the schema's `date_created` value if available,
     # and the `last_updated` variable(for older datasources), to apply to the new schema index
     original_last_updated, original_date_created = None, None
     if overwrite == True:
@@ -160,23 +164,48 @@ def add(namespace, url, user, doc=None, overwrite=False):
             original_date_created = meta_data.date_created
         if meta_data.last_updated:
             original_last_updated = meta_data.last_updated
-        
-    current_date = datetime.now().astimezone()
-    # save schema file
-    file = ESSchemaFile(**doc)
-    file.meta.id = namespace
-    file._meta.url = url
-    file._meta.username = user
-    # if the schema has an original date_created or last_update we set that, else we use the current date
-    file._meta.date_created = original_date_created or original_last_updated or current_date
-    if overwrite == True: file._status.refresh_status = 200
-    if overwrite == True: file._status.refresh_ts = current_date 
-    file.save()
-    
-    # save schema classes
+        # compare with our existing schema to see if we should update
+        refresh_schema=compare_doc(namespace, doc)
+        if refresh_schema == True:
+            file = ESSchemaFile(**doc)
+            file.meta.id = namespace
+            file._meta.url = url
+            file._meta.username = user
+            file._meta.date_created = original_date_created or original_last_updated or current_date
+            file._status.refresh_ts = current_date
+            file._status.refresh_status = 299
+            file._status.refresh_msg = "new version available and update successful"
+            file.save()
+        else:
+            file = ESSchemaFile.get(id=namespace)
+            file._meta.username = user
+            file._status.refresh_status = 200
+            file._status.refresh_msg = "no need to update, already at latest version"
+            file.save()
+    else:
+        # case where it's first schema addition
+        file = ESSchemaFile(**doc)
+        file.meta.id = namespace
+        file._meta.url = url
+        file._meta.username = user
+        file._meta.date_created = original_date_created or original_last_updated or current_date
+        file.save()
+    # # save schema classes
     count = _add_schema_class(doc, namespace)
 
     return count
+
+
+def compare_doc(namespace, current_doc):
+    """
+    Comparison method
+    Compare existing schema with new doc to see if update should be made
+    """
+    existing_doc = get(namespace)
+    for key in current_doc:
+        if current_doc[key] != existing_doc[key]:
+            return True
+    return False
 
 
 def get(namespace):
@@ -254,7 +283,6 @@ def get_all(start=0, size=10, user=None, fields="_meta.url"):
     for hit in search:
         yield RegistryDocument.wraps(hit)
 
-
 def update(namespace, user, url, doc=None):
     """
     Update the document or metadata associated with a namespace.
@@ -273,14 +301,13 @@ def update(namespace, user, url, doc=None):
         # respond to schema update error with an update to _status meta fields with error message
         schema = ESSchemaFile.get(id=namespace)
         if schema:
-            # if exception has a `status_code` attribute, set it as the status, else use default case(400)
+            # if exception is given error code, set it as the status code, else use default case 400
             if hasattr(exc, 'status_code'):
                 schema._status.refresh_status = exc.status_code
             else:
-                schema._status.refresh_status = 400
+                schema._status.refresh_status = 400 # default fail case to 400, if code is not passed
             schema._status.refresh_ts = datetime.now().astimezone()
             schema._status.refresh_msg = str(exc)
-            keywords = {"skip_ts":True}
             schema.save(skip_ts=True)
 
             return RegistryError
