@@ -2,8 +2,9 @@
     Tests for updating the schema status.
 """
 
-import pytest # for testing ?
+import pytest
 import datetime
+import json
 
 from discovery.registry import schemas
 from discovery.utils import indices
@@ -114,7 +115,6 @@ class TestSchemaStatus(DiscoveryTestCase):
             "refresh_msg": "invalid document"
         }
         """
-        import json 
         test_doc = "./test_schema/mock_updated_schema.json"
         f = open(test_doc)
         _doc = json.load(f)
