@@ -170,26 +170,25 @@ def add(namespace, url, user, doc=None, overwrite=False):
             file = ESSchemaFile(**doc)
             file.meta.id = namespace
             file._meta.url = url
-            file._meta.username = user
             file._meta.date_created = original_date_created or original_last_updated or current_date
             file._status.refresh_ts = current_date
             file._status.refresh_status = 299
             file._status.refresh_msg = "new version available and update successful"
-            file.save()
         else:
             file = ESSchemaFile.get(id=namespace)
             file._meta.username = user
+            file._status.refresh_ts = current_date
             file._status.refresh_status = 200
             file._status.refresh_msg = "no need to update, already at latest version"
-            file.save()
     else:
         # case where it's first schema addition
         file = ESSchemaFile(**doc)
         file.meta.id = namespace
         file._meta.url = url
-        file._meta.username = user
         file._meta.date_created = original_date_created or original_last_updated or current_date
-        file.save()
+    
+    file._meta.username = user
+    file.save()
     # # save schema classes
     count = _add_schema_class(doc, namespace)
 
@@ -211,7 +210,6 @@ def compare_doc(namespace, current_doc):
 def get(namespace):
     """
     Retrieve a schema file.
-
     Example:
 
     >>> from discovery.registry import schemas
@@ -220,8 +218,8 @@ def get(namespace):
     dict_keys(['_id', '@context', '@graph'])
     >>> google.meta.keys()
     dict_keys(['url', 'username', 'timestamp'])
-
     """
+
     if namespace == "schema":
         schema = RegistryDocument(_id="schema")
         schema.meta.url = "https://schema.org/docs/tree.jsonld"
