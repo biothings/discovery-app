@@ -1,0 +1,590 @@
+{
+    "@context": {
+      "owl": "http://www.w3.org/2002/07/owl/",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "schema": "http://schema.org/",
+      "n3c": "http://discovery.biothings.io/view/n3c/"
+    },
+    "@id": "https://discovery.biothings.io/view/n3c/",
+    "@graph": [
+      {
+        "@id": "n3c:Dataset",
+        "@type": "rdfs:Class",
+        "rdfs:label": "Dataset",
+        "rdfs:comment": "This is the schema for describing the Dataset schema used for N3C.",
+        "rdfs:subClassOf": {
+          "@id": "schema:Dataset"
+        },
+        "schema:isPartOf": {
+          "@id": "https://discovery.biothings.io/view/n3c/"
+        },
+        "$validation": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Descriptive name of the dataset",
+              "type": "string"
+            },
+            "description": {
+              "description": "Longer description of what is contained in the dataset",
+              "type": "string"
+            },
+            "author": {
+              "description": "Name of the author or organization that created the dataset.  Note: schema.org/author and schema.org/organization have additional fields that can provide more information about the author/organization, if desired.",
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/person"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/person"
+                  }
+                },
+                {
+                  "$ref": "#/definitions/organization"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/organization"
+                  }
+                }
+              ]
+            },
+            "license": {
+              "description": "A license document that applies to this content, typically indicated by a URL",
+              "type": "string"
+            },
+            "cost": {
+              "description": "Specify the cost to obtain the dataset, \"Free\", \"Subscription\" or others",
+              "type": "string"
+            },
+            "url": {
+              "description": "The main URL about the dataset (direct link to downloadable data file(s) is preferred)",
+              "type": "string",
+              "format": "uri"
+            },
+            "identifier": {
+              "description": "Identifier for the dataset’s record in a shared registry or repository (Re3Data, GEO, Zenodo, figshare, etc). If currently not available, please re-enter the URL above",
+              "type": "string"
+            },
+            "contain_geo_codes": {
+              "description": "Does the dataset contains GEO codes (e.g. zip codes, addresses, or other geo coordinates (latitude, longitude)?",
+              "type": "boolean"
+            },
+            "contain_phi": {
+              "description": "Do you know if the information in this dataset could be used to identify individuals? If so, where could we find out more about that potential use of the data? Otherwise, enter \"No\"",
+              "type": "string"
+            },
+            "domain_team_relevance": {
+              "description": "For which domain teams is this dataset relevant; if not limited to specific domains select \"General use\"",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/domain_team"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/domain_team"
+                  }
+                }
+              ]
+            },
+            "justification": {
+              "description": "How is the dataset relevant to the N3C project, why does the community want and how can it be used?",
+              "type": "string"
+            },
+            "doi": {
+              "description": "The DOI for the dataset if available",
+              "type": "string"
+            },
+            "contact": {
+              "description": "Provide an email contact",
+              "type": "string",
+              "format": "email"
+            },
+            "documentation": {
+              "description": "Provide the URL to the detailed documentation about the dataset",
+              "type": "string",
+              "format": "uri"
+            },
+            "funding": {
+              "description": "Funding that supports (sponsors) the collection of this dataset through some kind of financial contribution",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/funding"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/funding"
+                  }
+                }
+              ]
+            },
+            "keywords": {
+              "description": "A list of keywords associated with this dataset",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "measurementTechnique": {
+              "description": "A technique or technology used in a Dataset, corresponding to the method used for measuring the corresponding variable(s).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/controlledVocabulary"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/controlledVocabulary"
+                  }
+                }
+              ]
+            },
+            "standards_used": {
+              "description": "A list of standards used in the dataset, e.g. OMOP.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "citation": {
+              "description": "A citation to the dataset",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/citation"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/citation"
+                  }
+                }
+              ]
+            },
+            "release_frequency": {
+              "description": "How frequent is the new version of the dataset released (monthly, quarterly, etc)",
+              "type": "string"
+            },
+            "comment": {
+              "description": "Any other comments about this dataset, e.g. specific instructions to access the data?",
+              "type": "string"
+            },
+            "includedInDataCatalog": {
+              "description": "Data catalog(s) which contain this dataset.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/inclusionObject"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/inclusionObject"
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "description",
+            "author",
+            "license",
+            "cost",
+            "url",
+            "identifier",
+            "contain_geo_codes",
+            "contain_phi",
+            "domain_team_relevance",
+            "justification"
+          ],
+          "definitions": {
+            "controlledVocabulary": {
+              "description": "collection of vocabulary terms defined in ontologies",
+              "@type": "CreativeWork",
+              "type": "string",
+              "vocabulary": {
+                "ontology": [
+                  "efo",
+                  "ncit",
+                  "obi"
+                ],
+                "children_of": [
+                  "https://www.ebi.ac.uk/efo/EFO_0002694",
+                  "http://purl.obolibrary.org/obo/NCIT_C20368",
+                  "http://purl.obolibrary.org/obo/OBI_0000011"
+                ]
+              },
+              "strict": false
+            },
+            "moreControlledVocabulary": {
+              "definition": "collection of vocabulary terms defined in ontologies",
+              "@type": "CreativeWork",
+              "type": "string",
+              "strict": false,
+              "vocabulary": {
+                "ontology": [
+                  "efo",
+                  "cido",
+                  "epo",
+                  "covid19"
+                ],
+                "children_of": [
+                  "https://www.ebi.ac.uk/efo/EFO_0001444",
+                  "http://purl.obolibrary.org/obo/cido.owl",
+                  "http://purl.obolibrary.org/obo/epo",
+                  "https://bioportal.bioontology.org/ontologies/COVID19"
+                ]
+              }
+            },
+            "baseOrgObject": {
+              "description": "A barebones Organization object to work around recursion issues in DDE",
+              "@type": "Organization",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "name of the organization",
+                  "type": "string"
+                },
+                "alternateName": {
+                  "description": "Alternate name or Acronym for the organization",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "person": {
+              "description": "Reusable person definition",
+              "@type": "Person",
+              "type": "object",
+              "properties": {
+                "@type": {
+                  "const": "Person"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "orcid": {
+                  "description": "Enter your ORCID ID (https://orcid.org/xxxx-xxxx-xxxx-xxxx)",
+                  "type": "string",
+                  "pattern": "^https:\\/\\/orcid\\.org\\/\\d{4}-\\d{4}-\\d{4}-\\d{4}$"
+                },
+                "affiliation": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/definitions/baseOrgObject"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/baseOrgObject"
+                      }
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "organization": {
+              "description": "Reusable organization definition",
+              "@type": "Organization",
+              "type": "object",
+              "properties": {
+                "@type": {
+                  "const": "Organization"
+                },
+                "name": {
+                  "description": "name of the organization",
+                  "type": "string"
+                },
+                "alternateName": {
+                  "description": "Alternate name or Acronym for the organization",
+                  "type": "string"
+                },
+                "url": {
+                  "description": "The url to the organization",
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "funding": {
+              "type": "object",
+              "@type": "MonetaryGrant",
+              "description": "Information about funding support",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the monetary grant that funded/funds the Dataset"
+                },
+                "identifier": {
+                  "type": "string",
+                  "description": "Unique identifier(s) for the grant(s) used to fund the Dataset"
+                },
+                "funder": {
+                  "description": "name of the funding organization",
+                  "oneOf": [
+                    {
+                      "$ref": "#/definitions/baseOrgObject"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/baseOrgObject"
+                      }
+                    }
+                  ]
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "award URL"
+                }
+              },
+              "required": [
+                "funder"
+              ]
+            },
+            "citation": {
+              "description": "A citation object for a resource which is cited by the dataset (ie- is a derivative of the dataset) , related to the dataset, or from which the dataset was based on (ie- is derived from).",
+              "@type": "Thing",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "Name of or title of the citation",
+                  "type": "string"
+                },
+                "identifier": {
+                  "description": "An identifier associated with the citation",
+                  "type": "string"
+                },
+                "pmid": {
+                  "description": "A pubmed identifier if available",
+                  "type": "string"
+                },
+                "doi": {
+                  "description": "A doi if available",
+                  "type": "string"
+                },
+                "url": {
+                  "description": "The url of the resource cited",
+                  "type": "string",
+                  "format": "uri"
+                },
+                "citeText": {
+                  "description": "The bibliographic citation for the referenced resource as is provided",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "domain_team": {
+              "type": "string",
+              "enum": [
+                "General use",
+                "Acute Kidney Injury (AKI)",
+                "Applicable Data Methods Standards (ADM&S)",
+                "COVID-19 Vaccination",
+                "Cardiovascular Disease",
+                "Critical Care, Ventilation, Multi-organ Dysfunction Syndrome (MODS)",
+                "Diabetes & Obesity",
+                "Elder Impact",
+                "Emergency Serivces or Medicine",
+                "Genomics",
+                "HPO - OMOP",
+                "Imaging",
+                "Immuno-suppressed/compromised (ISC)",
+                "Long COVID",
+                "Machine Learning (ML)",
+                "Neurology",
+                "Oncology",
+                "Pediatrics",
+                "Perioperative",
+                "Pharma-commercial",
+                "Pharmacoepidemiology",
+                "Pregnancy",
+                "Rural Health",
+                "Short & Long-term Complications",
+                "Social Determinits of Health (SDoH)",
+                "Other - describe in justification text"
+              ]
+            },
+            "inclusionObject": {
+              "description": "A data catalog which contains this dataset.",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "@id": "n3c:contain_geo_codes",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Does the dataset contains GEO codes (e.g. zip codes)?",
+        "rdfs:label": "contain_geo_codes",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:Boolean"
+        }
+      },
+      {
+        "@id": "n3c:contain_phi",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Does the dataset contains Protected health information (PHI)? If so, provide more info, otherwise, enter No",
+        "rdfs:label": "contain_phi",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        }
+      },
+      {
+        "@id": "n3c:doi",
+        "@type": "rdf:Property",
+        "rdfs:comment": "DOI for the dataset if available",
+        "rdfs:label": "doi",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        }
+      },
+      {
+        "@id": "n3c:cost",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Specify the cost to obtain the dataset, \"Free\", \"Subscription\" or others",
+        "rdfs:label": "cost",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        }
+      },
+      {
+        "@id": "n3c:domain_team_relevance",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Does the dataset intend to use in an existing domain team?",
+        "rdfs:label": "domain_team_relevance",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        }
+      },
+      {
+        "@id": "n3c:justification",
+        "@type": "rdf:Property",
+        "rdfs:comment": "How is the dataset relevant to the N3C project, why does the community want and how can it be used?",
+        "rdfs:label": "justification",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        }
+      },
+      {
+        "@id": "n3c:contact",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Provide an email contact",
+        "rdfs:label": "contact",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        }
+      },
+      {
+        "@id": "n3c:standards_used",
+        "@type": "rdf:Property",
+        "rdfs:comment": "A list of standards used in the dataset, e.g. OMOP.",
+        "rdfs:label": "standards_used",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        }
+      },
+      {
+        "@id": "n3c:release_frequency",
+        "@type": "rdf:Property",
+        "rdfs:comment": "How frequent is the new version of the dataset released (monthly, quarterly, etc)",
+        "rdfs:label": "release_frequency",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        }
+      },
+      {
+        "@id": "n3c:documentation",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Provide the URL to the detailed documentation about the dataset",
+        "rdfs:label": "documentation",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:URL"
+        }
+      },
+      {
+        "@id": "n3c:funding",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Funding for the generation of the dataset, seeing if this is updated for a change",
+        "rdfs:label": "funding",
+        "schema:domainIncludes": {
+          "@id": "n3c:Dataset"
+        },
+        "schema:rangeIncludes": {
+          "@id": "schema:MonetaryGrant"
+        }
+      }
+    ]
+  }
