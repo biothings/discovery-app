@@ -444,3 +444,14 @@ def get_all_contexts():
     # may need to add other core schema contexts
 
     return {k: v for k, v in contexts.items() if v}
+
+def get_refresh_status(namespace):
+    """
+    Get a schemas update status through namespace
+    """
+    schema = ESSchemaFile.get(id=namespace, ignore=404, _source="_status")
+
+    if schema:
+        return RegistryDocument.wraps(schema).meta
+
+    raise NoEntityError(f"schema '{namespace}' does not exist.")
