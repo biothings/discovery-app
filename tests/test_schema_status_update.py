@@ -2,21 +2,22 @@
     Tests for updating the schema status.
 """
 
-from cgi import test
-import pytest
 import datetime
 
+import pytest
+
+from discovery.model import Schema as ESSchemaFile
 from discovery.registry import schemas
 from discovery.utils import indices
-from discovery.model import Schema as ESSchemaFile
+from tests.test_base import DiscoveryTestCase  # Biothings Testing import here
 
-from tests.test_base import DiscoveryTestCase # Biothings Testing import here 
-
-BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld" # schema example
+BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"  # schema example
 
 
-@pytest.fixture(scope="module", autouse=True)   # scope allows sharing fixtures across classes when using connections
-def setup():                                    # setting up sample schema here ?
+@pytest.fixture(
+    scope="module", autouse=True
+)  # scope allows sharing fixtures across classes when using connections
+def setup():  # setting up sample schema here ?
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
 
@@ -24,26 +25,28 @@ def setup():                                    # setting up sample schema here 
 class TestSchemaStatus(DiscoveryTestCase):
     test_user = "minions@example.com"
     test_namespace = "n3c"
-    test_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
+    test_url = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
 
     def refresh(self):
         indices.refresh()
-    
+
     def test_01(self):
         """
-        Success case: 
+        Success case:
         {
             'refresh_status': 200,
             'refresh_ts': datetime.datetime(...)
         }
         --
         """
-        success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
-        schemas.update('n3c', user=self.test_user, url=success_url)
-        schemas.update('n3c', user=self.test_user, url=success_url) #update twice to set 200  
-        test_schema = ESSchemaFile.get(id='n3c')              # get newly updated schema
+        success_url = (
+            "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
+        )
+        schemas.update("n3c", user=self.test_user, url=success_url)
+        schemas.update("n3c", user=self.test_user, url=success_url)  # update twice to set 200
+        test_schema = ESSchemaFile.get(id="n3c")  # get newly updated schema
         assert test_schema._status.refresh_status == 200
-        assert isinstance(test_schema._status.refresh_ts, datetime.datetime) 
+        assert isinstance(test_schema._status.refresh_ts, datetime.datetime)
         assert test_schema._status.refresh_msg == "no need to update, already at latest version"
 
     def test_02(self):
@@ -55,11 +58,11 @@ class TestSchemaStatus(DiscoveryTestCase):
             'refresh_msg': 'invalid url or protocol'
         }
         """
-        fail_url = '//raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
-        schemas.update('n3c', user=self.test_user, url=fail_url)
+        fail_url = "//raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
+        schemas.update("n3c", user=self.test_user, url=fail_url)
         test_schema = ESSchemaFile.get(id=self.test_namespace)
         assert test_schema._status.refresh_status == 400
-        assert test_schema._status.refresh_msg == 'invalid url or protocol'
+        assert test_schema._status.refresh_msg == "invalid url or protocol"
 
     def test_03(self):
         """
@@ -74,8 +77,7 @@ class TestSchemaStatus(DiscoveryTestCase):
         schemas.update(self.test_namespace, user=fail_user, url=self.test_url)
         test_schema = ESSchemaFile.get(id=self.test_namespace)
         assert test_schema._status.refresh_status == 400
-        assert test_schema._status.refresh_msg == 'user name is required'
-
+        assert test_schema._status.refresh_msg == "user name is required"
 
     def test_04(self):
         """
@@ -86,7 +88,7 @@ class TestSchemaStatus(DiscoveryTestCase):
             'refresh_msg': '404 Client Error: Not Found for url: [URL]'
         }
         """
-        fail_url = 'https://www.google.com/gjreoghjerioe'
+        fail_url = "https://www.google.com/gjreoghjerioe"
         schemas.update(self.test_namespace, user=self.test_user, url=fail_url)
         test_schema = ESSchemaFile.get(id=self.test_namespace)
         assert test_schema._status.refresh_status == 404
@@ -100,14 +102,16 @@ class TestSchemaStatus(DiscoveryTestCase):
             "refresh_ts": datetime.datetime(...),
             "refresh_msg": "invalid document"
         }
-        
+
         """
         fail_doc = "FAIL_TYPE_STRING"
-        success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
-        schemas.update('n3c', user=self.test_user, url=success_url, doc= fail_doc)  # update schema
-        test_schema = ESSchemaFile.get(id='n3c')
+        success_url = (
+            "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
+        )
+        schemas.update("n3c", user=self.test_user, url=success_url, doc=fail_doc)  # update schema
+        test_schema = ESSchemaFile.get(id="n3c")
         assert test_schema._status.refresh_status == 499
-        assert test_schema._status.refresh_msg == 'invalid document'
+        assert test_schema._status.refresh_msg == "invalid document"
 
     def test_06(self):
         """Unique 299 code
@@ -118,7 +122,7 @@ class TestSchemaStatus(DiscoveryTestCase):
         }
         """
         url = "https://raw.githubusercontent.com/biothings/discovery-app/schema-update-status/tests/test_schema/mock_updated_schema.json"
-        schemas.update('n3c', user=self.test_user, url=url)#, doc=_doc)  # update schema
-        test_schema = ESSchemaFile.get(id='n3c')
+        schemas.update("n3c", user=self.test_user, url=url)  # , doc=_doc)  # update schema
+        test_schema = ESSchemaFile.get(id="n3c")
         assert test_schema._status.refresh_status == 299
-        assert test_schema._status.refresh_msg == 'new version available and update successful'
+        assert test_schema._status.refresh_msg == "new version available and update successful"

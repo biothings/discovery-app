@@ -9,7 +9,7 @@
 import functools
 from datetime import datetime
 
-from elasticsearch_dsl import Boolean, Date, InnerDoc, Keyword, Object, Text, Integer
+from elasticsearch_dsl import Boolean, Date, InnerDoc, Integer, Keyword, Object, Text
 from elasticsearch_dsl.exceptions import ValidationException
 
 from .common import DiscoveryDoc, DiscoveryMeta, DiscoveryUserDoc
@@ -27,6 +27,7 @@ class SchemaMeta(DiscoveryMeta):
     # timestamp = Date()  # when this document is updated
     last_updated = Date()
     date_created = Date()
+
 
 class SchemaStatusMeta(InnerDoc):
 

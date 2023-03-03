@@ -9,8 +9,9 @@
 
 import json
 import logging
-import requests
 from datetime import datetime
+
+import requests
 
 from discovery.model import Schema as ESSchemaFile, SchemaClass as ESSchemaClass
 from discovery.utils.adapters import SchemaAdapter
@@ -138,8 +139,8 @@ def add(namespace, url, user, doc=None, overwrite=False):
         except requests.RequestException as exc:
             registry_error = RegistryError(str(exc))
             # verify that the status code exists in the exception and set Registry_Error().status_code
-            if exc.response.status_code:                              
-                registry_error.status_code = exc.response.status_code 
+            if exc.response.status_code:
+                registry_error.status_code = exc.response.status_code
             raise registry_error
         except json.decoder.JSONDecodeError as exc:
             raise RegistryError(str(exc))
@@ -149,12 +150,12 @@ def add(namespace, url, user, doc=None, overwrite=False):
         # for example: checking @graph field
         registry_error = RegistryError("invalid document")
         registry_error.status_code = 499
-        raise registry_error #RegistryError("invalid document")
+        raise registry_error  # RegistryError("invalid document")
     else:  # wrap in read-only container
         doc = ValidatedDict(doc)
 
     current_date = datetime.now().astimezone()
-    
+
     # if overwriting/updating a schema, we extract the schema's `date_created` value if available,
     # and the `last_updated` variable(for older datasources), to apply to the new schema index
     original_last_updated, original_date_created = None, None
@@ -165,12 +166,14 @@ def add(namespace, url, user, doc=None, overwrite=False):
         if meta_data.last_updated:
             original_last_updated = meta_data.last_updated
         # compare with our existing schema to see if we should update
-        refresh_schema=compare_doc(namespace, doc)
+        refresh_schema = compare_doc(namespace, doc)
         if refresh_schema == True:
             file = ESSchemaFile(**doc)
             file.meta.id = namespace
             file._meta.url = url
-            file._meta.date_created = original_date_created or original_last_updated or current_date
+            file._meta.date_created = (
+                original_date_created or original_last_updated or current_date
+            )
             file._status.refresh_ts = current_date
             file._status.refresh_status = 299
             file._status.refresh_msg = "new version available and update successful"
@@ -186,7 +189,7 @@ def add(namespace, url, user, doc=None, overwrite=False):
         file.meta.id = namespace
         file._meta.url = url
         file._meta.date_created = original_date_created or original_last_updated or current_date
-    
+
     file._meta.username = user
     file.save()
     # # save schema classes
@@ -281,6 +284,7 @@ def get_all(start=0, size=10, user=None, fields="_meta.url"):
     for hit in search:
         yield RegistryDocument.wraps(hit)
 
+
 def update(namespace, user, url, doc=None):
     """
     Update the document or metadata associated with a namespace.
@@ -300,10 +304,12 @@ def update(namespace, user, url, doc=None):
         schema = ESSchemaFile.get(id=namespace)
         if schema:
             # if exception is given error code, set it as the status code, else use default case 400
-            if hasattr(exc, 'status_code'):
+            if hasattr(exc, "status_code"):
                 schema._status.refresh_status = exc.status_code
             else:
-                schema._status.refresh_status = 400 # default fail case to 400, if code is not passed
+                schema._status.refresh_status = (
+                    400  # default fail case to 400, if code is not passed
+                )
             schema._status.refresh_ts = datetime.now().astimezone()
             schema._status.refresh_msg = str(exc)
             schema.save(skip_ts=True)
@@ -444,6 +450,7 @@ def get_all_contexts():
     # may need to add other core schema contexts
 
     return {k: v for k, v in contexts.items() if v}
+
 
 def get_refresh_status(namespace):
     """
