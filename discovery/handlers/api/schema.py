@@ -55,7 +55,6 @@ def to_api_doc_repr(regdoc):
             "@graph": [ ... ]
         }
     }
-
     """
 
     api_doc = {}
