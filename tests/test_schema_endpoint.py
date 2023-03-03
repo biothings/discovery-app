@@ -12,6 +12,7 @@ from .test_base import DiscoveryTestCase
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 NIAID_URL = "https://raw.githubusercontent.com/NIAID-Data-Ecosystem/nde-schemas/main/combined_schema_DO_NOT_EDIT/NIAID_schema.json"
 
+
 @pytest.fixture(scope="module", autouse=True)
 def setup():
     if not schemas.exists("bts"):
@@ -19,14 +20,15 @@ def setup():
     if not schemas.exists("niaid"):
         schemas.add(namespace="niaid", url=NIAID_URL, user="minions@example.com")
 
+
 # expects empty es server -- load data
 # github action for testing (automatically test)
 
+
 class DiscoverySchemaEndpointTest(DiscoveryTestCase):
-    
     def refresh(self):
         indices.refresh()
-        
+
     def test_01_get(self):
         """Invalid Namespace
         {
@@ -36,7 +38,7 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         }
         """
         self.request("schema/bt", method="GET", expect=400)
-    
+
     def test_10_get(self):
         """GET /api/schema/<namespace>
         {
@@ -52,9 +54,9 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         }
         """
         res = self.request("schema/bts").json()
-        assert res['@id'] == "http://schema.biothings.io/#0.1"
-        assert res['@context']
-        assert res['@graph'] # add property//size check 
+        assert res["@id"] == "http://schema.biothings.io/#0.1"
+        assert res["@context"]
+        assert res["@graph"]  # add property//size check
 
     def test_11_get(self):
         """GET /api/schema/<namespace>?meta=1
@@ -79,8 +81,8 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         }
         """
         res = self.request("schema/bts?meta=1").json()
-        assert res['_meta']  #// check for existing expected 4 data points in dict
-        assert res['_meta']['url'] == BTS_URL
+        assert res["_meta"]  # // check for existing expected 4 data points in dict
+        assert res["_meta"]["url"] == BTS_URL
 
     def test_12_get(self):
         """GET /api/schema/<namespace>:<class_id>
@@ -92,10 +94,10 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         """
         res = self.request("schema/niaid:ScholarlyArticle")
         res_data = res.json()
-        assert res_data['@graph'][0]['@id'] == "niaid:ScholarlyArticle"
+        assert res_data["@graph"][0]["@id"] == "niaid:ScholarlyArticle"
 
     def test_13_get(self):
-        """ Invalid Property (non-existing)
+        """Invalid Property (non-existing)
         GET /api/schema/<namespace>:<class_id>
         {
             "@context": {<-->},
@@ -116,8 +118,8 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
             "required": [<-->],     //items
             "recommended": [<-->]   //items
         }
-        
+
         """
         res = self.request("schema/niaid:ScholarlyArticle/validation")
         res_data = res.json()
-        assert res_data['properties'] # add field check in properties -- any other unique values
+        assert res_data["properties"]  # add field check in properties -- any other unique values
