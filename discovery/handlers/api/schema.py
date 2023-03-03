@@ -14,7 +14,6 @@
 
 """
 
-
 import json
 import logging
 from datetime import date, datetime
@@ -62,12 +61,12 @@ def to_api_doc_repr(regdoc):
     api_doc = {}
     # api_doc['url'] = regdoc.meta.url if 'url' in regdoc.meta else None
     api_doc["namespace"] = regdoc.pop("_id", None)
-    for key in ["url", "username", "timestamp"]:
-        if key in regdoc.meta:
-            v = regdoc.meta[key]
-            if isinstance(v, (datetime, date)):
-                v = v.isoformat()
-            api_doc[key] = v
+    #for key in ["url", "username", "timestamp"]:
+    for key in regdoc.meta:
+        v = regdoc.meta[key]
+        if isinstance(v, (datetime, date)):
+            v = v.isoformat()
+        api_doc[key] = v
 
     if regdoc:
         api_doc["source"] = regdoc
@@ -223,7 +222,9 @@ class SchemaRegistryHandler(APIBaseHandler):
             else:
                 _fields = [x.strip() for x in self.args.field.split(",")]
                 if not ("_meta" in _fields or "_meta.url" in _fields):
-                    _fields.append("_meta.url")  # always include _meta.url in the response
+                    _fields.append("_meta") # always include _meta.url in the response
+                if not ("_status" in _fields):
+                    _fields.append("_status")
             hits = [
                 to_api_doc_repr(schema)
                 for schema in schemas.get_all(
