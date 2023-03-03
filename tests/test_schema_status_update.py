@@ -2,9 +2,9 @@
     Tests for updating the schema status.
 """
 
+from cgi import test
 import pytest
 import datetime
-import json
 
 from discovery.registry import schemas
 from discovery.utils import indices
@@ -39,10 +39,12 @@ class TestSchemaStatus(DiscoveryTestCase):
         --
         """
         success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
-        schemas.update('n3c', user=self.test_user, url=success_url)         # update schema
+        schemas.update('n3c', user=self.test_user, url=success_url)
+        schemas.update('n3c', user=self.test_user, url=success_url) #update twice to set 200  
         test_schema = ESSchemaFile.get(id='n3c')              # get newly updated schema
         assert test_schema._status.refresh_status == 200
         assert isinstance(test_schema._status.refresh_ts, datetime.datetime) 
+        assert test_schema._status.refresh_msg == "no need to update, already at latest version"
 
     def test_02(self):
         """
@@ -112,15 +114,11 @@ class TestSchemaStatus(DiscoveryTestCase):
         {
             "refresh_status": 299,
             "refresh_ts": datetime.datetime(...),
-            "refresh_msg": "invalid document"
+            "refresh_msg": "new version available and update successful"
         }
         """
-        test_doc = "./test_schema/mock_updated_schema.json"
-        f = open(test_doc)
-        _doc = json.load(f)
-        success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
-        schemas.update('n3c', user=self.test_user, url=success_url, doc=_doc)  # update schema
+        url = "https://raw.githubusercontent.com/biothings/discovery-app/schema-update-status/tests/test_schema/mock_updated_schema.json"
+        schemas.update('n3c', user=self.test_user, url=url)#, doc=_doc)  # update schema
         test_schema = ESSchemaFile.get(id='n3c')
-        assert test_schema._status.refresh_status == 499
-        assert test_schema._status.refresh_msg == 'invalid document'
-
+        assert test_schema._status.refresh_status == 299
+        assert test_schema._status.refresh_msg == 'new version available and update successful'
