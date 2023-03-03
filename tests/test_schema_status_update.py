@@ -38,8 +38,8 @@ class TestSchemaStatus(DiscoveryTestCase):
         --
         """
         success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
-        schemas.update('n3c', user=self.test_user, url=success_url)  # update schema
-        test_schema = ESSchemaFile.get(id=self.test_namespace)            # get newly updated schema
+        schemas.update('n3c', user=self.test_user, url=success_url)         # update schema
+        test_schema = ESSchemaFile.get(id='n3c')              # get newly updated schema
         assert test_schema._status.refresh_status == 200
         assert isinstance(test_schema._status.refresh_ts, datetime.datetime) 
 
@@ -88,3 +88,39 @@ class TestSchemaStatus(DiscoveryTestCase):
         test_schema = ESSchemaFile.get(id=self.test_namespace)
         assert test_schema._status.refresh_status == 404
         assert isinstance(test_schema._status.refresh_msg, str)
+
+    def test_05(self):
+        """
+        Fail Case 4: 499 Error - INVALID
+        {
+            "refresh_status": 499,
+            "refresh_ts": datetime.datetime(...),
+            "refresh_msg": "invalid document"
+        }
+        
+        """
+        fail_doc = "FAIL_TYPE_STRING"
+        success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
+        schemas.update('n3c', user=self.test_user, url=success_url, doc= fail_doc)  # update schema
+        test_schema = ESSchemaFile.get(id='n3c')
+        assert test_schema._status.refresh_status == 499
+        assert test_schema._status.refresh_msg == 'invalid document'
+
+    def test_06(self):
+        """Unique 299 code
+        {
+            "refresh_status": 299,
+            "refresh_ts": datetime.datetime(...),
+            "refresh_msg": "invalid document"
+        }
+        """
+        import json 
+        test_doc = "./test_schema/mock_updated_schema.json"
+        f = open(test_doc)
+        _doc = json.load(f)
+        success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
+        schemas.update('n3c', user=self.test_user, url=success_url, doc=_doc)  # update schema
+        test_schema = ESSchemaFile.get(id='n3c')
+        assert test_schema._status.refresh_status == 499
+        assert test_schema._status.refresh_msg == 'invalid document'
+
