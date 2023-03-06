@@ -13,7 +13,8 @@ import logging
 import requests
 
 from discovery.model import Schema as ESSchemaFile, SchemaClass as ESSchemaClass
-from discovery.utils.adapters import SchemaAdapter
+from discovery.utils.adapters import SchemaAdapter, get_schema_org_version as _get_schema_org_version
+from discovery.utils.indices import save_schema_index_meta, get_schema_index_meta
 
 from .common import ConflictError, NoEntityError, RegistryDocument, RegistryError, ValidatedDict
 
@@ -285,6 +286,7 @@ def add_core(update=False):
     """add schema.org main schema."""
     if not exists("schema") or update:
         _add_schema_class(None, "schema")
+        store_schema_org_version()
 
 
 def add_core_extension(schema, update=False):
@@ -381,3 +383,20 @@ def get_all_contexts():
     # may need to add other core schema contexts
 
     return {k: v for k, v in contexts.items() if v}
+
+
+def store_schema_org_version():
+    """Store the given schema_org schema version to Schema index metadata
+       for future use.
+       Make sure you call this function right after you have added the schema_org schema
+       (e.g. after add_core is called)
+    """
+    ver = _get_schema_org_version()
+    save_schema_index_meta({"schema_org_version": ver})
+
+
+def get_schema_org_version():
+    """Get the stored schema_org schema version from Schema index metadata.
+       Return None if not found.
+    """
+    return get_schema_index_meta().get("schema_org_version")
