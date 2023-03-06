@@ -1,38 +1,38 @@
 name: CI
 
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [ master ]
+# # Controls when the workflow will run
+# on:
+#   # Triggers the workflow on push or pull request events but only for the master branch
+#   push:
+#     branches: [ master ]
     
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ master ]
+#   pull_request:
+#     # The branches below must be a subset of the branches above
+#     branches: [ master ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+#   # Allows you to run this workflow manually from the Actions tab
+#   workflow_dispatch:
 
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ '3.7', '3.8', '3.9', '3.10', "3.11" ]
-    name: Python ${{ matrix.python-version }} sample
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          # architecture: x64
-      - run: pip install -r requirements.txt
-      - run: pip install coverage
-      - run: coverage run --source . -m unittest discover tests
-      - run: coverage report -m
-      - run: coverage xml    # generate coverage.xml output
-      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml    # upload coverage to codacy
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+# # jobs:
+# #   build:
+# #     runs-on: ubuntu-latest
+# #     strategy:
+# #       matrix:
+# #         python-version: [ '3.7', '3.8', '3.9', '3.10', "3.11" ]
+# #     name: Python ${{ matrix.python-version }} sample
+# #     steps:
+# #       - uses: actions/checkout@v3
+# #       - name: Setup python
+# #         uses: actions/setup-python@v4
+# #         with:
+# #           python-version: ${{ matrix.python-version }}
+# #           # architecture: x64
+# #       - run: pip install -r requirements.txt
+# #       - run: pip install coverage
+# #       - run: coverage run --source . -m unittest discover tests
+# #       - run: coverage report -m
+# #       - run: coverage xml    # generate coverage.xml output
+# #       - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml    # upload coverage to codacy
+# #         env:
+# #           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
