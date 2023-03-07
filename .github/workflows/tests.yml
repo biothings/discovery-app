@@ -24,7 +24,7 @@ jobs:
       - name: Upgrade pip
         run: pip install --upgrade pip
       - name: Install dependencies
-        run: pip install -r requirements_web.txt
+        run: pip install -r requirements.txt
       - name: Install PyTest
         run: pip install pytest
       - name: Run Schema Endpoint Tests
