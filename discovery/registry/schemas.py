@@ -159,17 +159,18 @@ def add(namespace, url, user, doc=None, overwrite=False):
     # if overwriting/updating a schema, we extract the schema's `date_created` value if available,
     # and the `last_updated` variable(for older datasources), to apply to the new schema index
     original_last_updated, original_date_created = None, None
-    if overwrite == True:
-        meta_data = get_meta(namespace)
-        if meta_data.date_created:
-            original_date_created = meta_data.date_created
-        if meta_data.last_updated:
-            original_last_updated = meta_data.last_updated
-        # compare with our existing schema to see if we should update
-        refresh_schema = compare_doc(namespace, doc)
-        if refresh_schema == True:
+    if overwrite:
+        # compare with our existing schema to see if we should update    
+        update_schema = is_schema_updated(namespace, doc)
+        if update_schema:
+            meta_data = get_meta(namespace)
+            if meta_data.date_created:
+                original_date_created = meta_data.date_created
+            if meta_data.last_updated:
+                original_last_updated = meta_data.last_updated
             file = ESSchemaFile(**doc)
             file.meta.id = namespace
+            file._meta.username = user
             file._meta.url = url
             file._meta.date_created = (
                 original_date_created or original_last_updated or current_date
@@ -177,38 +178,22 @@ def add(namespace, url, user, doc=None, overwrite=False):
             file._status.refresh_ts = current_date
             file._status.refresh_status = 299
             file._status.refresh_msg = "new version available and update successful"
+            file.save()
+            count = _add_schema_class(doc, namespace)
+            return count
         else:
-            file = ESSchemaFile.get(id=namespace)
-            file._meta.username = user
-            file._status.refresh_ts = current_date
-            file._status.refresh_status = 200
-            file._status.refresh_msg = "no need to update, already at latest version"
+            return 0
+            
     else:
         # case where it's first schema addition
         file = ESSchemaFile(**doc)
+        file._meta.username = user
         file.meta.id = namespace
         file._meta.url = url
         file._meta.date_created = original_date_created or original_last_updated or current_date
-
-    file._meta.username = user
-    file.save()
-    # # save schema classes
-    count = _add_schema_class(doc, namespace)
-
-    return count
-
-
-def compare_doc(namespace, current_doc):
-    """
-    Comparison method
-    Compare existing schema with new doc to see if update should be made
-    """
-    existing_doc = get(namespace)
-    for key in current_doc:
-        if current_doc[key] != existing_doc[key]:
-            return True
-    return False
-
+        file.save()
+        count = _add_schema_class(doc, namespace)
+        return count
 
 def get(namespace):
     """
@@ -285,6 +270,7 @@ def get_all(start=0, size=10, user=None, fields="_meta.url"):
         yield RegistryDocument.wraps(hit)
 
 
+
 def update(namespace, user, url, doc=None):
     """
     Update the document or metadata associated with a namespace.
@@ -295,10 +281,18 @@ def update(namespace, user, url, doc=None):
     """
     if not exists(namespace):
         raise NoEntityError(f"namespace '{namespace}'' does not exist.")
-
     try:
-        # try to successfully run the add() function on the given input
-        return add(namespace, url, user, doc, overwrite=True)
+        count = add(namespace, url, user, doc, overwrite=True)
+        if count == 0:
+            schema = ESSchemaFile.get(id=namespace)
+            schema._status.refresh_ts = datetime.now().astimezone()
+            schema._status.refresh_status = 200
+            schema._status.refresh_msg = "no need to update, already at latest version"
+            schema.save(skip_ts=True)
+            schema_classes = list(get_classes(namespace))
+            return len(schema_classes)
+        else:
+            return count
     except RegistryError as exc:
         # respond to schema update error with an update to _status meta fields with error message
         schema = ESSchemaFile.get(id=namespace)
@@ -313,8 +307,20 @@ def update(namespace, user, url, doc=None):
             schema._status.refresh_ts = datetime.now().astimezone()
             schema._status.refresh_msg = str(exc)
             schema.save(skip_ts=True)
-
             return RegistryError
+
+def is_schema_updated(namespace, current_doc):
+    """
+    Comparison method
+    Compare existing schema with new schema doc to see if there is an updated version available.
+    Return True the existing schema should be updated with new schema,
+    else there is no change detected and we return False.
+    """
+    existing_doc = get(namespace)
+    for key in current_doc:
+        if current_doc[key] != existing_doc[key]:
+            return True
+    return False
 
 
 def delete(namespace):
