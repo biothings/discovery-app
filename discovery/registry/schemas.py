@@ -160,7 +160,7 @@ def add(namespace, url, user, doc=None, overwrite=False):
     # and the `last_updated` variable(for older datasources), to apply to the new schema index
     original_last_updated, original_date_created = None, None
     if overwrite:
-        # compare with our existing schema to see if we should update    
+        # compare with our existing schema to see if we should update
         update_schema = is_schema_updated(namespace, doc)
         if update_schema:
             meta_data = get_meta(namespace)
@@ -183,7 +183,7 @@ def add(namespace, url, user, doc=None, overwrite=False):
             return count
         else:
             return 0
-            
+
     else:
         # case where it's first schema addition
         file = ESSchemaFile(**doc)
@@ -194,6 +194,7 @@ def add(namespace, url, user, doc=None, overwrite=False):
         file.save()
         count = _add_schema_class(doc, namespace)
         return count
+
 
 def get(namespace):
     """
@@ -270,7 +271,6 @@ def get_all(start=0, size=10, user=None, fields="_meta.url"):
         yield RegistryDocument.wraps(hit)
 
 
-
 def update(namespace, user, url, doc=None):
     """
     Update the document or metadata associated with a namespace.
@@ -308,6 +308,7 @@ def update(namespace, user, url, doc=None):
             schema._status.refresh_msg = str(exc)
             schema.save(skip_ts=True)
             return RegistryError
+
 
 def is_schema_updated(namespace, current_doc):
     """
