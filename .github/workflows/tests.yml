@@ -2,10 +2,10 @@ name: Tests
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "master" ]
+    branches: [ "schema-update-status" ]
+  # pull_request:
+  #   # The branches below must be a subset of the branches above
+  #   branches: [ "master" ]
 
 jobs:
   run_tests:
@@ -27,8 +27,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Upgrade pip
         run: pip install --upgrade pip
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      # - name: Install dependencies
+      #   run: pip install -r requirements.txt
       - name: Install PyTest
         run: pip install pytest
       - name: Run Schema Endpoint Tests
