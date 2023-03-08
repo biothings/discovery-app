@@ -28,7 +28,7 @@ jobs:
       - name: Upgrade pip
         run: pip install --upgrade pip
       - name: Install packages
-        run: sudo apt-get install libcurl4-gnutls-dev libgnutls28-dev
+        run: sudo apt-get install libssl-dev libcurl4-openssl-dev python3-dev
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Install PyTest
