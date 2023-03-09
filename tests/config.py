@@ -37,7 +37,7 @@ del CONFIG_FILE_NAME
 
 # override default
 ES_HOST = 'localhost:9200'
-ES_INDEX = 'discover_schema'
+ES_INDEX = 'discover_test'
 # {
 #     "schema": "discover_schema_class",
 #     "dataset": "discover_dataset",
