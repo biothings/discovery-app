@@ -38,7 +38,6 @@ del CONFIG_FILE_NAME
 ES_HOST = 'localhost:9200'
 ES_INDEX = 'dde_test'
 ES_INDICES = {
-    "drug": ES_INDEX,
-    "compound": ES_INDEX,
-    "chem": ES_INDEX,
+    "schema": ES_INDEX,
+    "dataset": ES_INDEX
 }
