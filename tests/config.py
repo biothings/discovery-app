@@ -34,11 +34,11 @@ _sys.path.insert(0, _os.path.dirname(_cfg_path))
 # cleanup
 del CONFIG_FILE_NAME
 
-
 # override default
 ES_HOST = 'localhost:9200'
-ES_INDEX = 'discover_test'
-# {
-#     "schema": "discover_schema_class",
-#     "dataset": "discover_dataset",
-# }
+ES_INDEX = 'dde_test'
+ES_INDICES = {
+    "drug": ES_INDEX,
+    "compound": ES_INDEX,
+    "chem": ES_INDEX,
+}
