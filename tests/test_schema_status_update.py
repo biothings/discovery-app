@@ -15,7 +15,7 @@ from tests.test_base import DiscoveryTestCase  # Biothings Testing import here
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"  # schema example
 N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
-BACKUP_FILE = "https://github.com/biothings/discovery-app/blob/schema-update-status/tests/test_schema/dde_test_schema.json"
+BACKUP_FILE = "https://raw.githubusercontent.com/biothings/discovery-app/schema-update-status/tests/test_schema/dde_test_schema.json"
 
 
 @pytest.fixture(
