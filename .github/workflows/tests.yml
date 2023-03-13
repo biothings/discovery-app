@@ -22,7 +22,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v3
         with:
-          repository: origin/schema-update-status
+          ref:chema-update-status
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
