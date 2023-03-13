@@ -14,7 +14,6 @@ BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/bioth
 NIAID_URL = "https://raw.githubusercontent.com/NIAID-Data-Ecosystem/nde-schemas/main/combined_schema_DO_NOT_EDIT/NIAID_schema.json"
 BACKUP_FILE = "https://github.com/biothings/discovery-app/blob/schema-update-status/tests/test_schema/dde_test_schema_class.json"
 
-
 @pytest.fixture(scope="module", autouse=True)
 def setup():
     schema_file = open(BACKUP_FILE)
