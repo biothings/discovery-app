@@ -164,7 +164,7 @@ def add(namespace, url, user, doc=None, overwrite=False):
         update_schema = is_schema_updated(namespace, doc)
         if update_schema:
             meta_data = get_meta(namespace)
-            if meta_data.date_created:
+            if "date_created" in meta_data:
                 original_date_created = meta_data.date_created
             if meta_data.last_updated:
                 original_last_updated = meta_data.last_updated

@@ -3,26 +3,40 @@
 """
 
 import datetime
+import json
 
 import pytest
 
 from discovery.model import Schema as ESSchemaFile
+from discovery.model.schema import Schema
 from discovery.registry import schemas
 from discovery.utils import indices
 from tests.test_base import DiscoveryTestCase  # Biothings Testing import here
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"  # schema example
+BACKUP_FILE = "/Users/nacosta/Documents/DDE/branches/status_update/discovery-app/tests/test_schema/dde_test_schema.json"
+N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
 
 
 @pytest.fixture(
     scope="module", autouse=True
 )  # scope allows sharing fixtures across classes when using connections
 def setup():  # setting up sample schema here ?
+    schema_file = open(BACKUP_FILE)
+    schema_dict = json.load(schema_file)
+    for doc in schema_dict["docs"]:
+        indices.reset()
+        file = Schema(**doc)
+        file.meta.id = doc["_id"]
+        file.save()
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
+    if not schemas.exists("n3c"):
+        schemas.add(namespace="n3c", url=BTS_URL, user="minions@example.com")
 
 
 class TestSchemaStatus(DiscoveryTestCase):
+    TEST_DATA_DIR_NAME = "test_schema"
     test_user = "minions@example.com"
     test_namespace = "n3c"
     test_url = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"

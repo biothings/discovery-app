@@ -36,8 +36,7 @@ del CONFIG_FILE_NAME
 
 # override default
 ES_HOST = 'localhost:9200'
-ES_INDEX = 'dde_test'
 ES_INDICES = {
-    "schema": ES_INDEX,
-    "dataset": ES_INDEX
+    "schema": "discover_schema_class_test",
+    "dataset": "discover_dataset_test",
 }
