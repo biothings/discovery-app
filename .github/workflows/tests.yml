@@ -34,10 +34,10 @@ jobs:
       - name: Install PyTest
         run: pip install pytest
       - name: Run Schema Status Tests
-        working-directory: tests_schema
+        working-directory: test/tests_schema
         run: pytest test_schema_status_update.py
       - name: Run Schema Endpoint Tests
-        working-directory: tests_schema
+        working-directory: test/tests_schema
         run: pytest test_schema_endpoint.py
     services:
       Elasticsearch:
