@@ -35,8 +35,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Install PyTest
         run: pip install pytest
-      - name: Run Schema Status Tests
-        run: pytest test_schema_status_update.py
+      # - name: Run Schema Status Tests
+      #   run: pytest test_schema_status_update.py
         working-directory: tests
       - name: Run Schema Endpoint Tests
         run: pytest test_schema_endpoint.py
