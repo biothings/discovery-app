@@ -3,7 +3,7 @@
 """
 
 import datetime
-import json
+import json, os
 
 import pytest
 
@@ -15,7 +15,8 @@ from tests.test_base import DiscoveryTestCase  # Biothings Testing import here
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"  # schema example
 N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
-BACKUP_FILE = "https://raw.githubusercontent.com/biothings/discovery-app/schema-update-status/tests/test_schema/dde_test_schema.json"
+dir_path = os.path.dirname(os.path.realpath(__file__))
+BACKUP_FILE = os.path.join(dir_path,"test_schema/dde_test_schema.json")
 
 
 @pytest.fixture(
