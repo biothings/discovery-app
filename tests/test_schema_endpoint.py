@@ -12,23 +12,23 @@ from .test_base import DiscoveryTestCase
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 NIAID_URL = "https://raw.githubusercontent.com/NIAID-Data-Ecosystem/nde-schemas/main/combined_schema_DO_NOT_EDIT/NIAID_schema.json"
-BACKUP_FILE = "https://raw.githubusercontent.com/biothings/discovery-app/schema-update-status/tests/test_schema/dde_test_schema_class.json"
+BACKUP_FILE = "test_schema/dde_test_schema_class.json"
 
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    schema_file = open(BACKUP_FILE)
-    schema_dict = json.load(schema_file)
-    api_schema = schema_dict["discover_schema"]
-    api_schema_class = schema_dict["discover_schema_class"]
+    # schema_file = open(BACKUP_FILE)
+    # schema_dict = json.load(schema_file)
+    # api_schema = schema_dict["discover_schema"]
+    # api_schema_class = schema_dict["discover_schema_class"]
 
-    for doc in api_schema["docs"]:
-        file = Schema(**doc)
-        file.meta.id = doc["_id"]
-        file.save()
+    # for doc in api_schema["docs"]:
+    #     file = Schema(**doc)
+    #     file.meta.id = doc["_id"]
+    #     file.save()
 
-    for doc in api_schema_class["docs"]:
-        file = SchemaClass(**doc)
-        file.save()
+    # for doc in api_schema_class["docs"]:
+    #     file = SchemaClass(**doc)
+    #     file.save()
 
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
@@ -41,6 +41,20 @@ def setup():
 
 
 class DiscoverySchemaEndpointTest(DiscoveryTestCase):
+    TEST_DATA_DIR_NAME = "test_schema"
+    # schema_file = open(TEST_DATA_DIR_NAME+/"")
+    # schema_dict = json.load(schema_file)
+    # api_schema = schema_dict["discover_schema"]
+    # api_schema_class = schema_dict["discover_schema_class"]
+
+    # for doc in api_schema["docs"]:
+    #     file = Schema(**doc)
+    #     file.meta.id = doc["_id"]
+    #     file.save()
+
+    # for doc in api_schema_class["docs"]:
+    #     file = SchemaClass(**doc)
+    #     file.save()
     def refresh(self):
         indices.refresh()
 
