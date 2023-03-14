@@ -14,7 +14,6 @@
 
 """
 
-
 import json
 import logging
 from datetime import date, datetime
@@ -56,18 +55,17 @@ def to_api_doc_repr(regdoc):
             "@graph": [ ... ]
         }
     }
-
     """
 
     api_doc = {}
     # api_doc['url'] = regdoc.meta.url if 'url' in regdoc.meta else None
     api_doc["namespace"] = regdoc.pop("_id", None)
-    for key in ["url", "username", "timestamp"]:
-        if key in regdoc.meta:
-            v = regdoc.meta[key]
-            if isinstance(v, (datetime, date)):
-                v = v.isoformat()
-            api_doc[key] = v
+    # for key in ["url", "username", "timestamp"]:
+    for key in regdoc.meta:
+        v = regdoc.meta[key]
+        if isinstance(v, (datetime, date)):
+            v = v.isoformat()
+        api_doc[key] = v
 
     if regdoc:
         api_doc["source"] = regdoc
@@ -223,7 +221,9 @@ class SchemaRegistryHandler(APIBaseHandler):
             else:
                 _fields = [x.strip() for x in self.args.field.split(",")]
                 if not ("_meta" in _fields or "_meta.url" in _fields):
-                    _fields.append("_meta.url")  # always include _meta.url in the response
+                    _fields.append("_meta")  # always include _meta.url in the response
+                if not ("_status" in _fields):
+                    _fields.append("_status")
             hits = [
                 to_api_doc_repr(schema)
                 for schema in schemas.get_all(
@@ -436,32 +436,42 @@ class SchemaViewHandler(APIBaseHandler):
 
 
 class SchemaHandler(APIBaseHandler):
-    """ Schema Handler
-        Given a request curie with a namespace, search the schema
+    """Schema Handler
+    Given a request curie with a namespace, search the schema
     """
+
+    name = "schema"
+    kwargs = {
+        "GET": {
+            "meta": {"type": bool},  # meta field used to display metadata and status
+        }
+    }
 
     def class_property_filter(self, metadata, class_id):
         """Filter Schema Properties by class(domain)
         Extract the properties that belong to the requested (schema)class,
         and append that to a property list to return.
         """
-        property_list=[]
+        property_list = []
         for data_dict in metadata["@graph"]:
             if data_dict["@type"] == "rdf:Property":
-                if 'schema:domainIncludes' in data_dict:
-                    if isinstance(data_dict['schema:domainIncludes'], dict):
-                        if data_dict['schema:domainIncludes']['@id'] == class_id:
+                if "schema:domainIncludes" in data_dict:
+                    if isinstance(data_dict["schema:domainIncludes"], dict):
+                        if data_dict["schema:domainIncludes"]["@id"] == class_id:
                             property_list.append(data_dict)
-                    elif isinstance(data_dict['schema:domainIncludes'], list):
-                        for domain_dict in data_dict['schema:domainIncludes']:
-                            if domain_dict['@id'] == class_id:
+                    elif isinstance(data_dict["schema:domainIncludes"], list):
+                        for domain_dict in data_dict["schema:domainIncludes"]:
+                            if domain_dict["@id"] == class_id:
                                 property_list.append(data_dict)
                                 break
-                    elif 'schema:domainIncludes' not in data_dict:
+                    elif "schema:domainIncludes" not in data_dict:
                         raise HTTPError(400, reason="No key 'schema:domainIncludes' found.")
                     else:
                         # odd case -- error exception case
-                        raise HTTPError(400, reason="error retrieving property list from 'schema:domainIncludes'")
+                        raise HTTPError(
+                            400,
+                            reason="error retrieving property list from 'schema:domainIncludes'",
+                        )
         return property_list
 
     def graph_data_filter(self, metadata, curie, property_list):
@@ -497,7 +507,7 @@ class SchemaHandler(APIBaseHandler):
         elif isinstance(curie, list):
             for curie_str in curie:
                 property_list = self.graph_data_filter(metadata, curie_str, property_list)
-        #elif isinstance(curie, tuple): -- may need to add expection for tuple input? (discussed vaguely w/ Dr. Wu)
+        # elif isinstance(curie, tuple): -- may need to add expection for tuple input? (discussed vaguely w/ Dr. Wu)
         else:
             raise HTTPError(400, reason="Unidentified curie input request")
         metadata["@graph"] = property_list
@@ -505,26 +515,33 @@ class SchemaHandler(APIBaseHandler):
 
     def get(self, curie=None, validation=None):
         """
-            Fetch  - GET ./api/schema/{ns}
-            Fetch  - GET ./api/schema/{ns}:{class_id}
-            Fetch  - GET ./api/schema/{ns}:{class_id}/validation
-            Fetch  - GET ./api/schema/{ns}:{property_id}
-            (../{ns}?meta=1)
+        Fetch  - GET ./api/schema/{ns}
+        Fetch  - GET ./api/schema/{ns}:{class_id}
+        Fetch  - GET ./api/schema/{ns}:{class_id}/validation
+        Fetch  - GET ./api/schema/{ns}:{property_id}
+        Fetch  - GET ./api/schema/{ns}?meta=1
         """
         if curie is None:
-            raise HTTPError(400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'")
+            raise HTTPError(
+                400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'"
+            )
         # ./api/schema/{ns}
         elif ":" not in curie:
             try:
-                schema_metadata = schemas.get(curie)
+                schema_metadata = schemas.get(curie)  # use registry to get schema
+                # when the meta arg is passed, ?meta=1, display the _status
+                if self.args.meta == 1:
+                    schema_metadata["_meta"] = schema_metadata.meta
                 schema_metadata.pop("_id")
             except Exception as ns_error:
-                raise HTTPError(400, reason=f"Error retrieving namespace, {curie}, with exception {ns_error}")
-            self.finish(schema_metadata)
+                raise HTTPError(
+                    400, reason=f"Error retrieving namespace, {curie}, with exception {ns_error}"
+                )
+            self.finish(json.dumps(schema_metadata, indent=4, default=str))
         else:
             # get namespace from user request -- expect only one
             if "," in curie:
-                ns = curie.split(",")[0].split(":")[0] # n3c:prop1, n3c:prop2
+                ns = curie.split(",")[0].split(":")[0]  # n3c:prop1, n3c:prop2
                 ns_list = list(set([x.split(":")[0] for x in curie.split(",")]))
                 if len(ns_list) > 1:
                     raise HTTPError(400, reason="Too many schemas(namespaces) requested")
@@ -533,7 +550,9 @@ class SchemaHandler(APIBaseHandler):
             try:
                 schema_metadata = schemas.get(ns)
             except Exception as ns_error:
-                raise HTTPError(400, reason=f"Error retrieving namespace, {ns}, with exception {ns_error}")
+                raise HTTPError(
+                    400, reason=f"Error retrieving namespace, {ns}, with exception {ns_error}"
+                )
             # ./api/schema/{ns}:{class_id}/validation
             if validation:
                 for data_dict in schema_metadata["@graph"]:
