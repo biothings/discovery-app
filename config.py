@@ -1,4 +1,7 @@
-from config_key import *  # noqa
+try:
+    from config_key import *  # noqa
+except ImportError:
+    pass
 
 # *****************************************************************************
 # Credentials
