@@ -3,8 +3,8 @@
 """
 
 import datetime
-import json, os
-
+import os
+import json
 import pytest
 
 from discovery.model import Schema as ESSchemaFile

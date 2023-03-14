@@ -43,7 +43,7 @@ if pardir not in sys.path:
 
 # find the path of the config file
 _cfg_path = join(dirname(__file__), pardir)
-_cfg_path = join(_cfg_path, "config_web.py")
+_cfg_path = join(_cfg_path, "config.py")
 
 # load config file using path
 _spec = _imp_util.spec_from_file_location("parent_config", _cfg_path)
