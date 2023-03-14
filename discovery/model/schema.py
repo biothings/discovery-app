@@ -9,7 +9,7 @@
 import functools
 from datetime import datetime
 
-from elasticsearch_dsl import Boolean, Date, InnerDoc, Keyword, Object, Text
+from elasticsearch_dsl import Boolean, Date, InnerDoc, Integer, Keyword, Object, Text
 from elasticsearch_dsl.exceptions import ValidationException
 
 from .common import DiscoveryDoc, DiscoveryMeta, DiscoveryUserDoc
@@ -24,7 +24,16 @@ def mergeDict(d1, d2):
 class SchemaMeta(DiscoveryMeta):
 
     url = Keyword(required=True)
-    timestamp = Date()  # when this document is updated
+    # timestamp = Date()  # when this document is updated
+    last_updated = Date()
+    date_created = Date()
+
+
+class SchemaStatusMeta(InnerDoc):
+
+    refresh_status = Integer()
+    refresh_ts = Date()
+    refresh_msg = Text(index=False)
 
 
 class Schema(DiscoveryUserDoc):
@@ -47,6 +56,7 @@ class Schema(DiscoveryUserDoc):
     """
 
     _meta = Object(SchemaMeta, required=True)
+    _status = Object(SchemaStatusMeta)
 
     # _id : schema namespace, provided by the front-end when registering
     #       accessible through constructor argument 'id' or schema.meta.id
@@ -65,10 +75,17 @@ class Schema(DiscoveryUserDoc):
     def save(self, *args, **kwargs):
         """
         Record timestamp when the document is saved.
+        Pass in the argument `skip_ts=True` to not record the timestamp.
+        -- use when update schema fails.
         """
         if not self.meta.id:
             raise ValidationException("namespace/_id is a required field.")
-        self._meta.timestamp = datetime.now()
+
+        skip_ts = kwargs.pop("skip_ts", False)
+        if not skip_ts:
+            self._meta.last_updated = datetime.now().astimezone()
+
+        # self._meta.timestamp = datetime.now()
         return super().save(*args, **kwargs)
 
     @classmethod

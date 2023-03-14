@@ -9,6 +9,7 @@
 
 import json
 import logging
+from datetime import datetime
 
 import requests
 
@@ -133,36 +134,72 @@ def add(namespace, url, user, doc=None, overwrite=False):
 
     if not doc:
         try:
-            doc = requests.get(url, timeout=10).json()
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            doc = response.json()
         except requests.RequestException as exc:
-            raise RegistryError(str(exc))
+            registry_error = RegistryError(str(exc))
+            # verify that the status code exists in the exception and set Registry_Error().status_code
+            if exc.response.status_code:
+                registry_error.status_code = exc.response.status_code
+            raise registry_error
         except json.decoder.JSONDecodeError as exc:
             raise RegistryError(str(exc))
 
     if not isinstance(doc, dict):
         # can be more comprehensive
         # for example: checking @graph field
-        raise RegistryError("invalid document")
+        registry_error = RegistryError("invalid document")
+        registry_error.status_code = 499
+        raise registry_error  # RegistryError("invalid document")
     else:  # wrap in read-only container
         doc = ValidatedDict(doc)
 
-    # save schema file
-    file = ESSchemaFile(**doc)
-    file.meta.id = namespace
-    file._meta.url = url
-    file._meta.username = user
-    file.save()
+    current_date = datetime.now().astimezone()
 
-    # save schema classes
-    count = _add_schema_class(doc, namespace)
+    # if overwriting/updating a schema, we extract the schema's `date_created` value if available,
+    # and the `last_updated` variable(for older datasources), to apply to the new schema index
+    original_last_updated, original_date_created = None, None
+    if overwrite:
+        # compare with our existing schema to see if we should update
+        update_schema = is_schema_updated(namespace, doc)
+        if update_schema:
+            meta_data = get_meta(namespace)
+            if "date_created" in meta_data:
+                original_date_created = meta_data.date_created
+            if meta_data.last_updated:
+                original_last_updated = meta_data.last_updated
+            file = ESSchemaFile(**doc)
+            file.meta.id = namespace
+            file._meta.username = user
+            file._meta.url = url
+            file._meta.date_created = (
+                original_date_created or original_last_updated or current_date
+            )
+            file._status.refresh_ts = current_date
+            file._status.refresh_status = 299
+            file._status.refresh_msg = "new version available and update successful"
+            file.save()
+            count = _add_schema_class(doc, namespace)
+            return count
+        else:
+            return 0
 
-    return count
+    else:
+        # case where it's first schema addition
+        file = ESSchemaFile(**doc)
+        file._meta.username = user
+        file.meta.id = namespace
+        file._meta.url = url
+        file._meta.date_created = original_date_created or original_last_updated or current_date
+        file.save()
+        count = _add_schema_class(doc, namespace)
+        return count
 
 
 def get(namespace):
     """
     Retrieve a schema file.
-
     Example:
 
     >>> from discovery.registry import schemas
@@ -171,8 +208,8 @@ def get(namespace):
     dict_keys(['_id', '@context', '@graph'])
     >>> google.meta.keys()
     dict_keys(['url', 'username', 'timestamp'])
-
     """
+
     if namespace == "schema":
         schema = RegistryDocument(_id="schema")
         schema.meta.url = "https://schema.org/docs/tree.jsonld"
@@ -245,8 +282,47 @@ def update(namespace, user, url, doc=None):
     """
     if not exists(namespace):
         raise NoEntityError(f"namespace '{namespace}'' does not exist.")
+    try:
+        count = add(namespace, url, user, doc, overwrite=True)
+        if count == 0:
+            schema = ESSchemaFile.get(id=namespace)
+            schema._status.refresh_ts = datetime.now().astimezone()
+            schema._status.refresh_status = 200
+            schema._status.refresh_msg = "no need to update, already at latest version"
+            schema.save(skip_ts=True)
+            schema_classes = list(get_classes(namespace))
+            return len(schema_classes)
+        else:
+            return count
+    except RegistryError as exc:
+        # respond to schema update error with an update to _status meta fields with error message
+        schema = ESSchemaFile.get(id=namespace)
+        if schema:
+            # if exception is given error code, set it as the status code, else use default case 400
+            if hasattr(exc, "status_code"):
+                schema._status.refresh_status = exc.status_code
+            else:
+                schema._status.refresh_status = (
+                    400  # default fail case to 400, if code is not passed
+                )
+            schema._status.refresh_ts = datetime.now().astimezone()
+            schema._status.refresh_msg = str(exc)
+            schema.save(skip_ts=True)
+            return RegistryError
 
-    return add(namespace, url, user, doc, overwrite=True)
+
+def is_schema_updated(namespace, current_doc):
+    """
+    Comparison method
+    Compare existing schema with new schema doc to see if there is an updated version available.
+    Return True the existing schema should be updated with new schema,
+    else there is no change detected and we return False.
+    """
+    existing_doc = get(namespace)
+    for key in current_doc:
+        if current_doc[key] != existing_doc[key]:
+            return True
+    return False
 
 
 def delete(namespace):
@@ -383,6 +459,18 @@ def get_all_contexts():
     # may need to add other core schema contexts
 
     return {k: v for k, v in contexts.items() if v}
+
+
+# def get_refresh_status(namespace):
+#     """
+#     Get a schemas update status through namespace
+#     """
+#     schema = ESSchemaFile.get(id=namespace, ignore=404, _source="_status")
+
+#     if schema:
+#         return RegistryDocument.wraps(schema).meta
+
+#     raise NoEntityError(f"schema '{namespace}' does not exist.")
 
 
 def store_schema_org_version():

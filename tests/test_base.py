@@ -1,9 +1,9 @@
-from biothings.tests.web import BiothingsTestCase
+from biothings.tests.web import BiothingsWebAppTest
 from tornado.escape import json_encode
 from tornado.web import create_signed_value
 
 
-class DiscoveryTestCase(BiothingsTestCase):
+class DiscoveryTestCase(BiothingsWebAppTest):
     @classmethod
     def cookie_header(cls, username):
         cookie_name, cookie_value = "user", {"login": username}
