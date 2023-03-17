@@ -167,18 +167,46 @@
               @click="flipView()"
               >Change View <font-awesome-icon icon="fas fa-retweet"
             /></a>
-            <div v-if="userSchemaURL" class="w-100 text-right">
-              <a
-                class="mr-2 text-primary"
-                :href="userSchemaURL"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <small
-                  >View Source
-                  <font-awesome-icon icon="fas fa-external-link-alt"
-                /></small>
-              </a>
+            <div
+              v-if="userSchemaURL && schemaMeta?.refresh_status"
+              class="w-100"
+            >
+              <table class="table table-sm table-light text-muted my-2">
+                <thead>
+                  <td><small>Date Added</small></td>
+                  <td><small>Last Updated</small></td>
+                  <td><small>Schema Status</small></td>
+                  <td><small>Schema Source</small></td>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      {{ readableDate(schemaMeta?.date_created) }}
+                    </td>
+                    <td>
+                      {{ readableDate(schemaMeta?.last_updated) }}
+                    </td>
+                    <td>
+                      <SourceBadge
+                        :status="schemaMeta?.refresh_status"
+                      ></SourceBadge>
+                    </td>
+                    <td>
+                      <a
+                        class="mr-2 text-primary"
+                        :href="userSchemaURL"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <small
+                          >View Source
+                          <font-awesome-icon icon="fas fa-external-link-alt"
+                        /></small>
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
             <div v-show="developerMode" id="canvasTest"></div>
             <ul
@@ -489,8 +517,8 @@
 import tippy from "tippy.js";
 import { mapGetters } from "vuex";
 import axios from "axios";
-import Notify from "simple-notify";
 import QueryBox from "~~/components/QueryBox.vue";
+import moment from "moment";
 
 import "@/assets/js/networkx.js";
 
@@ -568,6 +596,7 @@ export default {
       checkbox: null,
       treeBuildErr: false,
       apiUrl: "",
+      schemaMeta: {},
     };
   },
   computed: {
@@ -664,6 +693,7 @@ export default {
             if (url || res.data) {
               self.namespaceRegistered = true;
               self.loadSchema(namespace, url);
+              self.getSchemaMeta(namespace);
             } else {
               self.$swal.fire(
                 "This namespace is registered but..",
@@ -1183,9 +1213,13 @@ export default {
                         timer: 3000,
                         didOpen: () => {
                           self.$swal.showLoading();
-                          const b = self.$swal.getHtmlContainer().querySelector("strong");
+                          const b = self.$swal
+                            .getHtmlContainer()
+                            .querySelector("strong");
                           timerInterval = setInterval(() => {
-                            b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000);
+                            b.textContent = Math.ceil(
+                              self.$swal.getTimerLeft() / 1000
+                            );
                           }, 100);
                         },
                         didClose: () => {
@@ -1264,6 +1298,21 @@ export default {
     },
     showAll() {
       this.$store.dispatch("toggleShowAll");
+    },
+    getSchemaMeta(namespace) {
+      let self = this;
+      self.$store.commit("setLoading", { value: true });
+      axios
+        .get(self.apiUrl + `/api/schema/` + namespace + "?meta=1")
+        .then(function (res) {
+          self.schemaMeta = res.data?._meta;
+        })
+        .catch((err) => {
+          throw err;
+        });
+    },
+    readableDate(ts) {
+      return moment(ts).format("MMMM Do YYYY");
     },
   },
   mounted: function () {

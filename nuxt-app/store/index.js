@@ -105,6 +105,72 @@ export default createStore({
           }
         },
       });
+      delegate("#tippyRoot", {
+        target: ".source-badge",
+        content: "loading",
+        animation: "scale",
+        theme: "light",
+        trigger: "mouseenter",
+        interactive: true,
+        allowHTML: true,
+        onShow(instance) {
+          instance.setContent(`<div class="p-0">
+          <table class="table table-sm m-0">
+              <thead>
+              <tr>
+                  <td colspan="2" class='text-muted text-center'>
+                  <b>Schema Source URL Status</b>
+                  </td>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                  <td class='text-success center'>
+                  <b>OK</b>
+                  </td>
+                  <td class="black-text">
+                  <small>Schema URL is working and returns valid metadata.</small>
+                  </td>
+              </tr>
+              <tr>
+                  <td class='text-danger center'>
+                  <b>NOT FOUND</b>
+                  </td>
+                  <td class="black-text">
+                  <small>Schema URL returns not found.</small>
+                  </td>
+              </tr>
+              <tr>
+                  <td class='text-invalid center'>
+                  <b>INVALID</b>
+                  </td>
+                  <td class="black-text">
+                  <small>Schema URL works but contains invalid metadata.</small>
+                  </td>
+              </tr>
+              <tr>
+                  <td class='text-broken center'>
+                  <b>BROKEN</b>
+                  </td>
+                  <td class="black-text">
+                  <small>Schema URL is broken.</small>
+                  </td>
+              </tr>
+              <tr class="alert-info">
+                  <td colspan='2' class='text-primary'>
+                  <p>
+                      <small>Note: Schema updates cannot be synchronized with its source URL if the status is not <b class='text-success'>OK</b></small>. 
+                  </p>
+                  <p>
+                      <small>If you wish to update the URL or Once all issues have been resolved on your end you can update manually via your dashboard.</small>
+                  </p>
+                  </td>
+              </tr>
+              </tbody>
+          </table>
+          </div>`);
+        },
+      });
     },
   },
 });

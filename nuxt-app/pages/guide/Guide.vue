@@ -1089,9 +1089,13 @@ export default {
                   timer: 3000,
                   didOpen: () => {
                     self.$swal.showLoading();
-                    const b = self.$swal.getHtmlContainer().querySelector("strong");
+                    const b = self.$swal
+                      .getHtmlContainer()
+                      .querySelector("strong");
                     timerInterval = setInterval(() => {
-                      b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000);
+                      b.textContent = Math.ceil(
+                        self.$swal.getTimerLeft() / 1000
+                      );
                     }, 100);
                   },
                   didClose: () => {

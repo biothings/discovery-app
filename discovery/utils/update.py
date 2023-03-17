@@ -9,6 +9,9 @@ logger = logging.getLogger("daily-schema-update")
 
 def schema_update(namespace):
     """ Update registered schemas by namespace.
+        To run a schema update manually:
+        from discovery.utils.update import schema_update
+        schema_update(namespace="n3c")
     """
     logger.info(f"starting updating process for {namespace} schema")
     meta = schemas.get_meta(namespace)
