@@ -24,12 +24,6 @@
           <div class="mr-1 d-none d-md-inline"></div>
           <h6 class="m-1 mainTextDark d-inline">
             {{ item.label }}
-            <small
-              ><font-awesome-icon
-                :id="item.label"
-                icon="fas fa-circle"
-                class="text-info"
-            /></small>
           </h6>
         </div>
         <p class="m-0 text-muted d-none d-md-inline">

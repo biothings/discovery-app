@@ -53,6 +53,10 @@
                   <div
                     class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-between"
                   >
+                    <SourceBadge
+                      class="mr-1"
+                      :status="item?.refresh_status"
+                    ></SourceBadge>
                     <nuxt-link
                       :to="'/ns/' + item.namespace"
                       v-text="item.namespace"

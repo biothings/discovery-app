@@ -44,3 +44,14 @@ def reset():
     Schema.init()
     SchemaClass.init()
     Dataset.init()
+
+
+def save_schema_index_meta(meta):
+    """save index metadata to Schema ES index"""
+    return Index(Schema.Index.name).put_mapping(body={"_meta": meta})
+
+
+def get_schema_index_meta():
+    """get index metadata from Schema ES index"""
+    _index_name = Schema.Index.name
+    return Index(_index_name).get_mapping().get(_index_name, {}).get("mappings", {}).get("_meta", {})

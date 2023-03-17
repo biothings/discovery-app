@@ -12,7 +12,7 @@
               >Search By Class Name</nuxt-link
             >
           </li>
-          <li class="nav-item" role="presentation" @click="getNameSpaces()">
+          <li class="nav-item" role="presentation">
             <nuxt-link
               class="nav-link"
               :class="{ 'bg-dark text-light': choice == 'namespaces' }"
@@ -286,11 +286,26 @@
                       v-show="classesGroupByLetter.length > 5"
                     ></h3>
                     <ul style="list-style: none">
-                      <li v-for="def in item.children">
-                        <router-link :to="{ path: '/view/' + def }">
-                          <span v-text="def"></span>
-                          <font-awesome-icon icon="fas fa-chevron-right" />
-                        </router-link>
+                      <li v-for="def in item.children" :key="def">
+                        <table>
+                          <tr>
+                            <td>
+                              <SourceBadge
+                                :status="def?.refresh_status"
+                              ></SourceBadge>
+                            </td>
+                            <td>
+                              <router-link
+                                :to="{ path: '/view/' + def.namespace }"
+                              >
+                                {{ def.namespace }}
+                                <font-awesome-icon
+                                  icon="fas fa-chevron-right"
+                                />
+                              </router-link>
+                            </td>
+                          </tr>
+                        </table>
                       </li>
                     </ul>
                   </li>
@@ -556,24 +571,27 @@ export default {
     getNameSpaces() {
       var self = this;
       let res = [];
-      // TODO:
-      // change this to use https://discovery.biothings.io/api/registry?field=_id&size=20
       const runtimeConfig = useRuntimeConfig();
       axios
-        .get(
-          runtimeConfig.public.apiUrl +
-            "/api/registry/query?facets=namespace&facet_size=100"
-        )
+        .get(runtimeConfig.public.apiUrl + "/api/registry?field=_meta&size=20")
         .then((res) => {
-          res = res.data.facets.namespace.terms.map((r) => r.term);
-          let data = res.reduce((r, e) => {
-            let group = e[0];
-            if (!r[group]) r[group] = { group, children: [e] };
-            else r[group].children.push(e);
-            return r;
-          }, {});
-          res = Object.values(data);
-          self.classesGroupByLetter = self.$_.orderBy(data, ["group"], ["asc"]);
+          let unordered = {};
+          res.data.hits.forEach((hit) => {
+            let firstLetter = hit.namespace[0];
+            if (!unordered[firstLetter]) {
+              unordered[firstLetter] = {
+                group: firstLetter,
+                children: [hit],
+              };
+            } else {
+              unordered[firstLetter].children.push(hit);
+            }
+          });
+          self.classesGroupByLetter = self.$_.orderBy(
+            Object.values(unordered),
+            ["group"],
+            ["asc"]
+          );
         })
         .catch((err) => {
           throw err;
@@ -772,6 +790,7 @@ export default {
     let self = this;
     this.highlighter = new Mark(document.querySelector(".context"));
     this.search();
+    this.getNameSpaces();
     window.onpopstate = function () {
       self.search();
     };

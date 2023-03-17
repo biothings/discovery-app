@@ -24,15 +24,16 @@ class RegistryDocument(dict):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.meta = AttrDict()  # include _ts
+        self.meta = AttrDict()                      # include _ts
 
     @classmethod
     def wraps(cls, esdic):
         doc = cls(_id=esdic.meta.id)
         doc.update(esdic.to_dict())
         doc.meta.update(doc.pop("_meta", {}))
-        doc.meta.update(doc.pop("_ts", {}))
-        _n3c = doc.pop("_n3c", {})  # only on n3c datasets
+        doc.meta.update(doc.pop("_status", {}))
+        doc.meta.update(doc.pop("_ts", {}))         # locate on dde -- what is variable
+        _n3c = doc.pop("_n3c", {})                  # only on n3c datasets
         doc.meta.update(dict(n3c=_n3c) if _n3c else {})
         return doc
 

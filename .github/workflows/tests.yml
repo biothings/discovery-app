@@ -1,0 +1,53 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "schema-update-status" ]
+  # pull_request:
+  #   # The branches below must be a subset of the branches above
+  #   branches: [ "master" ]
+
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.10"] #, "3.8", "3.9", "3.10", "3.11" ]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        with:
+          ref: schema-update-status
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+      - name: Install apt-get packages
+        run: sudo apt-get install libssl-dev libcurl4-openssl-dev python3-dev pkg-config libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Install PyTest
+        run: pip install pytest
+      - name: Run Schema Status Tests
+        run: pytest test_schema_status_update.py
+        working-directory: tests
+      # - name: Run Schema Endpoint Tests
+      #   run: pytest test_schema_endpoint.py
+      #   working-directory: tests
+    services:
+      Elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.6.1
+        env:
+          "discovery.type" : single-node
+          "xpack.security.enabled": false
+          "xpack.security.http.ssl.enabled": false
+          "xpack.security.transport.ssl.enabled": false
+        ports:
+          - 9200:9200
