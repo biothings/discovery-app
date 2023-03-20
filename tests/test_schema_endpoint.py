@@ -3,6 +3,7 @@
 """
 import json
 import os
+
 import pytest
 
 from discovery.model.schema import Schema, SchemaClass

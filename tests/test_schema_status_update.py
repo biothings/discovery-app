@@ -3,8 +3,9 @@
 """
 
 import datetime
-import os
 import json
+import os
+
 import pytest
 
 from discovery.model import Schema as ESSchemaFile
@@ -25,13 +26,11 @@ BACKUP_FILE = os.path.join(dir_path,"test_schema/dde_test_schema.json")
 def setup():  # setting up sample schema here ?
     schema_file = open(BACKUP_FILE)
     schema_dict = json.load(schema_file)
-    for doc in schema_dict["docs"]:
+    for doc in schema_dict['discover_schema']['docs']:
         indices.reset()
         file = Schema(**doc)
         file.meta.id = doc["_id"]
-        file.save()
-    if not schemas.exists("bts"):
-        schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
+    file.save()
     if not schemas.exists("n3c"):
         schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
 
