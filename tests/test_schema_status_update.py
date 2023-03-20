@@ -33,7 +33,7 @@ def setup():  # setting up sample schema here ?
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
     if not schemas.exists("n3c"):
-        schemas.add(namespace="n3c", url=BTS_URL, user="minions@example.com")
+        schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
 
 
 class TestSchemaStatus(DiscoveryTestCase):
