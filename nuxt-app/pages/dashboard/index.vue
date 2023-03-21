@@ -51,7 +51,7 @@
               <div v-if="dashboard && dashboard.length">
                 <div v-for="item in dashboard" class="row m-1">
                   <div
-                    class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-between"
+                    class="col-sm-8 p-1 mainBackDark d-flex align-items-center justify-content-start"
                   >
                     <SourceBadge
                       class="mr-1"
