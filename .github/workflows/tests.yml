@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [ "schema-update-status" ]
+    branches: [ "schemaorg_version" ]
   # pull_request:
   #   # The branches below must be a subset of the branches above
   #   branches: [ "master" ]
