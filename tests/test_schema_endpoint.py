@@ -3,6 +3,7 @@
 """
 import json
 import os
+
 import pytest
 
 from discovery.model.schema import Schema, SchemaClass
@@ -12,36 +13,32 @@ from discovery.utils import indices
 from .test_base import DiscoveryTestCase
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
-NIAID_URL = "https://raw.githubusercontent.com/NIAID-Data-Ecosystem/nde-schemas/main/combined_schema_DO_NOT_EDIT/NIAID_schema.json"
+N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-BACKUP_FILE = os.path.join(dir_path,"test_schema/dde_test_schema_class.json")
+BACKUP_FILE_SCHEMA_CLASS = os.path.join(dir_path,"test_schema/dde_test_schema_class.json")
+BACKUP_FILE_SCHEMA = os.path.join(dir_path,"test_schema/dde_test_schema.json")
 
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    schema_file = open(BACKUP_FILE)
+    schema_file = open(BACKUP_FILE_SCHEMA)
+    schema_class_file = open(BACKUP_FILE_SCHEMA_CLASS)
     schema_dict = json.load(schema_file)
+    schema_class_dict = json.load(schema_class_file)
     api_schema = schema_dict["discover_schema"]
-    api_schema_class = schema_dict["discover_schema_class"]
+    api_schema_class = schema_class_dict["discover_schema_class"]
 
     for doc in api_schema["docs"]:
         file = Schema(**doc)
         file.meta.id = doc["_id"]
-        file.save()
+    file.save()
 
     for doc in api_schema_class["docs"]:
         file = SchemaClass(**doc)
-        file.save()
-
-    if not schemas.exists("bts"):
-        schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
-    if not schemas.exists("niaid"):
-        schemas.add(namespace="niaid", url=NIAID_URL, user="minions@example.com")
-
-
-# expects empty es server -- load data
-# github action for testing (automatically test)
-
+    file.save()
+    
+    if not schemas.exists("n3c"):
+        schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
 
 class DiscoverySchemaEndpointTest(DiscoveryTestCase):
     TEST_DATA_DIR_NAME = "test_schema"
@@ -111,9 +108,9 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
             "@graph": [<-->]        // items
         }
         """
-        res = self.request("schema/niaid:ScholarlyArticle")
+        res = self.request("schema/bts:BiologicalEntity")
         res_data = res.json()
-        assert res_data["@graph"][0]["@id"] == "niaid:ScholarlyArticle"
+        assert res_data["@graph"][0]["@id"] == "bts:BiologicalEntity"
 
     def test_13_get(self):
         """Invalid Property (non-existing)
@@ -139,6 +136,24 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         }
 
         """
-        res = self.request("schema/niaid:ScholarlyArticle/validation")
+        res = self.request("schema/n3c:Dataset/validation")
         res_data = res.json()
         assert res_data["properties"]  # add field check in properties -- any other unique values
+
+    def test_15_get(self):
+        """GET /api/schema/schema?meta=1
+        {
+            "$comment": "internally provided by biothings.schema",
+            "@context": {
+                "schema": "http://schema.org/"
+                },
+            "_meta": {
+                "url": "https://schema.org/docs/tree.jsonld",
+                "version": "15.0"
+                }
+        }
+        """
+        res = self.request("schema/schema?meta=1")
+        res_data = res.json()
+        assert res_data["_meta"]["version"]
+        assert isinstance(res_data["_meta"]["version"], str)

@@ -1,5 +1,6 @@
 {
-    "aliases": {},
+    "discover_schema": {
+        "aliases": {},
     "mappings": {
         "dynamic": "false",
         "properties": {
@@ -1869,4 +1870,6 @@
             }
         }
     ]
+    }
 }
+
