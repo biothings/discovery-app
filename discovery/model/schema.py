@@ -27,6 +27,7 @@ class SchemaMeta(DiscoveryMeta):
     # timestamp = Date()  # when this document is updated
     last_updated = Date()
     date_created = Date()
+    version = Text()
 
 
 class SchemaStatusMeta(InnerDoc):
@@ -84,7 +85,6 @@ class Schema(DiscoveryUserDoc):
         skip_ts = kwargs.pop("skip_ts", False)
         if not skip_ts:
             self._meta.last_updated = datetime.now().astimezone()
-
         # self._meta.timestamp = datetime.now()
         return super().save(*args, **kwargs)
 

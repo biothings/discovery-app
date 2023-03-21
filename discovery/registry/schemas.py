@@ -156,7 +156,7 @@ def add(namespace, url, user, doc=None, overwrite=False):
         doc = ValidatedDict(doc)
 
     current_date = datetime.now().astimezone()
-
+    store_schema_org_version()
     # if overwriting/updating a schema, we extract the schema's `date_created` value if available,
     # and the `last_updated` variable(for older datasources), to apply to the new schema index
     original_last_updated, original_date_created = None, None
@@ -213,6 +213,7 @@ def get(namespace):
     if namespace == "schema":
         schema = RegistryDocument(_id="schema")
         schema.meta.url = "https://schema.org/docs/tree.jsonld"
+        schema.meta.version = _get_schema_org_version()
         schema["$comment"] = "internally provided by biothings.schema"
         schema["@context"] = {"schema": "http://schema.org/"}
         return schema
@@ -286,6 +287,7 @@ def update(namespace, user, url, doc=None):
         count = add(namespace, url, user, doc, overwrite=True)
         if count == 0:
             schema = ESSchemaFile.get(id=namespace)
+            schema._meta.version = get_schema_org_version()
             schema._status.refresh_ts = datetime.now().astimezone()
             schema._status.refresh_status = 200
             schema._status.refresh_msg = "no need to update, already at latest version"
