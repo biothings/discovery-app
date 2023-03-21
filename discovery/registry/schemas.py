@@ -15,7 +15,7 @@ import requests
 
 from discovery.model import Schema as ESSchemaFile, SchemaClass as ESSchemaClass
 from discovery.utils.adapters import SchemaAdapter, get_schema_org_version as _get_schema_org_version
-from discovery.utils.indices import save_schema_index_meta, get_schema_index_meta
+from discovery.utils.indices import get_schema_index_meta, save_schema_index_meta
 
 from .common import ConflictError, NoEntityError, RegistryDocument, RegistryError, ValidatedDict
 
@@ -156,7 +156,6 @@ def add(namespace, url, user, doc=None, overwrite=False):
         doc = ValidatedDict(doc)
 
     current_date = datetime.now().astimezone()
-    store_schema_org_version()
     # if overwriting/updating a schema, we extract the schema's `date_created` value if available,
     # and the `last_updated` variable(for older datasources), to apply to the new schema index
     original_last_updated, original_date_created = None, None
