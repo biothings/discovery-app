@@ -1,143 +1,141 @@
 """
-    Tests for updating the schema status.
+    Schemas by Namespace Endpoint Tester
 """
-
-import datetime
-import os
 import json
+import os
+
 import pytest
 
-from discovery.model import Schema as ESSchemaFile
-from discovery.model.schema import Schema
+from discovery.model.schema import Schema, SchemaClass
 from discovery.registry import schemas
 from discovery.utils import indices
-from tests.test_base import DiscoveryTestCase  # Biothings Testing import here
 
-BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"  # schema example
+from .test_base import DiscoveryTestCase
+
+BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
-BACKUP_FILE = os.path.join(dir_path,"test_schema/dde_test_schema.json")
+BACKUP_FILE_SCHEMA_CLASS = os.path.join(dir_path,"test_schema/dde_test_schema_class.json")
+BACKUP_FILE_SCHEMA = os.path.join(dir_path,"test_schema/dde_test_schema.json")
 
-
-@pytest.fixture(
-    scope="module", autouse=True
-)  # scope allows sharing fixtures across classes when using connections
-def setup():  # setting up sample schema here ?
-    schema_file = open(BACKUP_FILE)
+@pytest.fixture(scope="module", autouse=True)
+def setup():
+    schema_file = open(BACKUP_FILE_SCHEMA)
+    schema_class_file = open(BACKUP_FILE_SCHEMA_CLASS)
     schema_dict = json.load(schema_file)
-    for doc in schema_dict["docs"]:
-        indices.reset()
+    schema_class_dict = json.load(schema_class_file)
+    api_schema = schema_dict["discover_schema"]
+    api_schema_class = schema_class_dict["discover_schema_class"]
+
+    for doc in api_schema["docs"]:
         file = Schema(**doc)
         file.meta.id = doc["_id"]
-        file.save()
-    if not schemas.exists("bts"):
-        schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
+    file.save()
+
+    for doc in api_schema_class["docs"]:
+        file = SchemaClass(**doc)
+    file.save()
+    
     if not schemas.exists("n3c"):
-        schemas.add(namespace="n3c", url=BTS_URL, user="minions@example.com")
+        schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
 
-
-class TestSchemaStatus(DiscoveryTestCase):
+class DiscoverySchemaEndpointTest(DiscoveryTestCase):
     TEST_DATA_DIR_NAME = "test_schema"
-    test_user = "minions@example.com"
-    test_namespace = "n3c"
-    test_url = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
-
     def refresh(self):
         indices.refresh()
 
-    def test_01(self):
-        """
-        Success case:
+    def test_01_get(self):
+        """Invalid Namespace
         {
-            'refresh_status': 200,
-            'refresh_ts': datetime.datetime(...)
-        }
-        --
-        """
-        success_url = (
-            "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
-        )
-        schemas.update("n3c", user=self.test_user, url=success_url)
-        schemas.update("n3c", user=self.test_user, url=success_url)  # update twice to set 200
-        test_schema = ESSchemaFile.get(id="n3c")  # get newly updated schema
-        assert test_schema._status.refresh_status == 200
-        assert isinstance(test_schema._status.refresh_ts, datetime.datetime)
-        assert test_schema._status.refresh_msg == "no need to update, already at latest version"
-
-    def test_02(self):
-        """
-        Fail Case 1: URL failure
-                {
-            'refresh_status': 400,
-            'refresh_ts': datetime.datetime(...),
-            'refresh_msg': 'invalid url or protocol'
+            "code": 400,
+            "success": false,
+            "error": "Error retrieving namespace, bt, with exception schema 'bt' does not exist."
         }
         """
-        fail_url = "//raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
-        schemas.update("n3c", user=self.test_user, url=fail_url)
-        test_schema = ESSchemaFile.get(id=self.test_namespace)
-        assert test_schema._status.refresh_status == 400
-        assert test_schema._status.refresh_msg == "invalid url or protocol"
+        self.request("schema/bt", method="GET", expect=400)
 
-    def test_03(self):
-        """
-        Fail Case 2: Username failure
+    def test_10_get(self):
+        """GET /api/schema/<namespace>
         {
-            'refresh_status': 400,
-            'refresh_ts': datetime.datetime(...),
-            'refresh_msg': 'user name is required'
+            "@context": {
+                "bts": "http://schema.biothings.io/",
+                "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+                "schema": "http://schema.org/",
+                "xsd": "http://www.w3.org/2001/XMLSchema#"
+            },
+            "@graph": [ ... ],      // items
+            "@id": "http://schema.biothings.io/#0.1"
         }
         """
-        fail_user = 65653
-        schemas.update(self.test_namespace, user=fail_user, url=self.test_url)
-        test_schema = ESSchemaFile.get(id=self.test_namespace)
-        assert test_schema._status.refresh_status == 400
-        assert test_schema._status.refresh_msg == "user name is required"
+        res = self.request("schema/bts").json()
+        assert res["@id"] == "http://schema.biothings.io/#0.1"
+        assert res["@context"]
+        assert res["@graph"]  # add property//size check
 
-    def test_04(self):
-        """
-        Fail Case 3: 404 Error
+    def test_11_get(self):
+        """GET /api/schema/<namespace>?meta=1
         {
-            'refresh_status': 404,
-            'refresh_ts': datetime.datetime(...),
-            'refresh_msg': '404 Client Error: Not Found for url: [URL]'
+            "@context": {
+                "bts": "http://schema.biothings.io/",
+                "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+                "schema": "http://schema.org/",
+                "xsd": "http://www.w3.org/2001/XMLSchema#"
+            },
+            "@graph": [ ... ],      // items
+            "@id": "http://schema.biothings.io/#0.1",
+            "_meta": {
+                "url": "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld",
+                "username": "cwu@scripps.edu",
+                "last_updated": "2023-02-16 13:23:17.766097-05:00",
+                "date_created": "2023-02-16 13:23:17.766124-05:00",
+                "refresh_status": 200,
+                "refresh_ts": "2023-02-16 13:23:17.766071-05:00"
+            }
         }
         """
-        fail_url = "https://www.google.com/gjreoghjerioe"
-        schemas.update(self.test_namespace, user=self.test_user, url=fail_url)
-        test_schema = ESSchemaFile.get(id=self.test_namespace)
-        assert test_schema._status.refresh_status == 404
-        assert isinstance(test_schema._status.refresh_msg, str)
+        res = self.request("schema/bts?meta=1").json()
+        assert res["_meta"]  # // check for existing expected 4 data points in dict
+        assert res["_meta"]["url"] == BTS_URL
 
-    def test_05(self):
-        """
-        Fail Case 4: 499 Error - INVALID
+    def test_12_get(self):
+        """GET /api/schema/<namespace>:<class_id>
         {
-            "refresh_status": 499,
-            "refresh_ts": datetime.datetime(...),
-            "refresh_msg": "invalid document"
+            "@context": {<-->},
+            "@id": "https://discovery.biothings.io/view/niaid/",
+            "@graph": [<-->]        // items
         }
-
         """
-        fail_doc = "FAIL_TYPE_STRING"
-        success_url = (
-            "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
-        )
-        schemas.update("n3c", user=self.test_user, url=success_url, doc=fail_doc)  # update schema
-        test_schema = ESSchemaFile.get(id="n3c")
-        assert test_schema._status.refresh_status == 499
-        assert test_schema._status.refresh_msg == "invalid document"
+        res = self.request("schema/bts:BiologicalEntity")
+        res_data = res.json()
+        assert res_data["@graph"][0]["@id"] == "bts:BiologicalEntity"
 
-    def test_06(self):
-        """Unique 299 code
+    def test_13_get(self):
+        """Invalid Property (non-existing)
+        GET /api/schema/<namespace>:<class_id>
         {
-            "refresh_status": 299,
-            "refresh_ts": datetime.datetime(...),
-            "refresh_msg": "new version available and update successful"
+            "@context": {<-->},
+            "@graph": [],           // empty items
+            "@id": "http://schema.biothings.io/#0.1"
         }
         """
-        url = "https://raw.githubusercontent.com/biothings/discovery-app/schema-update-status/tests/test_schema/mock_updated_schema.json"
-        schemas.update("n3c", user=self.test_user, url=url)  # , doc=_doc)  # update schema
-        test_schema = ESSchemaFile.get(id="n3c")
-        assert test_schema._status.refresh_status == 299
-        assert test_schema._status.refresh_msg == "new version available and update successful"
+        res = self.request("schema/bts:fds")
+        res_data = res.json()
+        assert res_data["@graph"] == []
+
+    def test_14_get(self):
+        """GET /api/schema/<namespace>:<class_id>/validation
+        {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": [<-->],   //items
+            "required": [<-->],     //items
+            "recommended": [<-->]   //items
+        }
+
+        """
+        res = self.request("schema/n3c:Dataset/validation")
+        res_data = res.json()
+        assert res_data["properties"]  # add field check in properties -- any other unique values
