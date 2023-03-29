@@ -27,9 +27,14 @@ export const editor = {
     showDescriptions: false,
     previousPreviewProps: {},
     top_class_validation: {},
+    schema_version: ''
   },
   strict: true,
   mutations: {
+    saveSchemaVersion(state, payload) {
+      state.schema_version = payload.v;
+      console.log('%c Schema.org version: ' + state.schema_version, 'background-color: green; color: white; padding: 1em')
+    },
     setRemoveValidation(state, payload) {
       state.removeValidation = payload.value;
     },
@@ -404,6 +409,10 @@ export const editor = {
           mainClass["rdfs:label"] = state.schema[i]["label"];
           mainClass["rdfs:subClassOf"] = { "@id": state.startingPoint };
           mainClass["$validation"] = {};
+          // Add schema.org version
+          if (state.schema_version) {
+            mainClass["schemaVersion"] = [`https://schema.org/docs/releases.html#v${state.schema_version}`]
+          }
           //Add New Class
           state.finalschema["@graph"].push(mainClass);
           //Handle main Class Properties
@@ -731,8 +740,26 @@ export const editor = {
       }
       return props;
     },
+    schema_version: (state) => {
+      return state.schema_version
+    }
   },
   actions: {
+    async getSchemaOrgVersion({ commit, state }) {
+      if (!state.schema_version) {
+        let config = useRuntimeConfig();
+        axios.get(config.public.apiUrl + '/api/schema/schema?meta=1').then(res=>{
+          if (res.data?._meta?.version) {
+            commit('saveSchemaVersion', {'v': res.data?._meta?.version});
+          }else{
+            console.log('Schema.org version not found')
+          }
+          commit('saveSchemaVersion', {'v': res.data?._meta?.version});
+        }).catch(err=>{
+          console.log('Error getting schema.org version: ' + err)
+        });
+      }
+    },
     SelectExistingProps({ commit, state }) {
       state.schema.forEach((schema) => {
         if (Object.hasOwnProperty.call(schema, "validation")) {

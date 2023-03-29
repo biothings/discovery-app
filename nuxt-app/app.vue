@@ -9,6 +9,7 @@ let isLoading = computed(() => store.getters.loading);
 
 onMounted(() => {
   store.dispatch("setUpTips");
+  store.dispatch("getSchemaOrgVersion");
 });
 
 useHead({

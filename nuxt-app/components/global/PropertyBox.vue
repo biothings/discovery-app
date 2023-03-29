@@ -3,7 +3,7 @@
     <div
       class="col-sm-12 col-md-3 bg-dark bold d-flex justify-content-start align-items-center"
     >
-      <small class="m-0">
+      <span class="m-0">
         <font-awesome-icon
           v-if="FAClass"
           :icon="'fas ' + FAClass"
@@ -15,10 +15,10 @@
           v-text="name"
           :data-tippy-content="JSON.stringify(fullInfo, null, 2)"
         ></span>
-      </small>
+      </span>
     </div>
-    <div class="col-sm-12 col-md-9 text-muted bg-light">
-      <small v-text="fullInfo['description']"></small>
+    <div class="col-sm-12 col-md-9 text-dark bg-light">
+      <small class="p-1"><b>{{ fullInfo['description'] }}</b></small>
       <div class="rounded-0">
         <div class="p-1 rounded-0 d-flex">
           <!-- HAS TYPE -->
@@ -26,8 +26,8 @@
             v-if="fullInfo && fullInfo.type"
             class="d-flex justify-content-center align-items-center"
           >
-            <div class="badge badge-pill badge-dark m-1">
-              <span class="text-warning" v-text="fullInfo['type']"></span>
+            <div class="badge badge-pill alert-info m-1">
+              type: <b>{{ fullInfo['type'] }}</b>
             </div>
           </div>
 
@@ -65,7 +65,7 @@
             v-if="fullInfo && fullInfo.properties"
             class="d-flex justify-content-center align-items-center"
           >
-            <font-awesome-icon
+            <small>fields</small> <font-awesome-icon
               icon="fas fa-chevron-right"
               class="text-muted mr-1"
             />
@@ -79,22 +79,23 @@
                 v-for="(value, name) in fullInfo['properties']"
                 :key="name"
               >
-                <div class="border-left border-primary my-4 pl-2">
-                  <small class="mainTextDark"
-                    ><font-awesome-icon icon="fas fa-circle" class="mr-1" />
+                <div class="my-2 pl-2 d-flex align-items-center justify-content-center">
+                  <span class="mainTextDark"
+                    >
+                    <font-awesome-icon icon="fas fa-asterisk" class="text-danger mr-1" v-if="isPropRequired(name)"/>
                     <b v-text="name"></b
-                  ></small>
-                  <span
-                    v-if="isPropRequired(name)"
-                    class="text-danger caps mx-1"
-                    style="zoom: 0.5"
-                    >is required</span
-                  >
+                  ></span>
 
                   <font-awesome-icon
                     icon="fas fa-caret-right"
-                    class="text-dark m-1"
+                    class="text-muted m-1"
                   />
+
+                  <div class="badge badge-pill alert-primary" v-if="value?.oneOf" :data-tippy-content="JSON.stringify(value, null, 2)">
+                    more info <font-awesome-icon
+                    icon="fas fa-info-circle"
+                  />
+                  </div>
 
                   <small
                     class="badge badge-pill alert-dark"
@@ -153,7 +154,7 @@ export default {
       itemID: Math.floor(Math.random() * 90000) + 10000,
     };
   },
-  props: ["name", "fullInfo", "required", "recommended", "optional"],
+  props: ["name", "fullInfo", "required", "recommended", "optional", "potential"],
   methods: {
     getText(ref) {
       let arr = ref.split("/");
@@ -176,7 +177,10 @@ export default {
         return "text-warning";
       } else if (this.optional && this.optional.includes(propname)) {
         return "text-info";
-      } else {
+      } else if (this.potential && this.potential.includes(propname)) {
+        return "text-primary";
+      }
+      else {
         return "text-light";
       }
     },
@@ -189,7 +193,10 @@ export default {
         return "fa-circle";
       } else if (this.optional && this.optional.includes(this.name)) {
         return "fa-square";
-      } else {
+      } else if (this.potential && this.potential.includes(this.name)) {
+        return "fa-asterisk";
+      }
+       else {
         return false;
       }
     },

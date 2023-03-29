@@ -35,12 +35,12 @@ export default createStore({
   mutations: {
     setLoading(state, payload) {
       state.loading = payload.value;
-    },
+    }
   },
   getters: {
     loading: (state) => {
       return state.loading;
-    },
+    }
   },
   actions: {
     setUpTips() {
@@ -171,6 +171,6 @@ export default createStore({
           </div>`);
         },
       });
-    },
+    }
   },
 });

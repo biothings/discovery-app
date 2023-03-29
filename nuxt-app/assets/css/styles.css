@@ -76,6 +76,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.p-2{
+  padding: 2em;
+}
+
+.mr-2{
+  margin-right: 2em;
+}
+
 .text-invalid {
   color: #cd5c00;
 }
