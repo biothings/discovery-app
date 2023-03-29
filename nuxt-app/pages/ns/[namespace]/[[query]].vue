@@ -167,6 +167,11 @@
               @click="flipView()"
               >Change View <font-awesome-icon icon="fas fa-retweet"
             /></a>
+            <div v-if="namespace === 'schema'" class="d-inline float-right" data-tippy-content="Learn more about this version">
+              <a :href="'https://schema.org/docs/releases.html#v' + schema_version" target="_blank" class="badge badge-primary">
+                <font-awesome-icon icon="fas fa-star" class="text-warning"/> {{ 'Version ' + schema_version }} 
+              </a>
+            </div>
             <div
               v-if="userSchemaURL && schemaMeta?.refresh_status"
               class="w-100"
@@ -425,7 +430,7 @@
     </div>
     <!-- QUERY MODE -->
     <div id="mainCont">
-      <div class="container mt-5" v-if="query">
+      <div class="container mt-5 pt-3" v-if="query">
         <div
           class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around p-3"
         >
@@ -443,9 +448,9 @@
               class="text-light fa-stack-1x"
             />
           </span>
-          <div>
+          <div class="d-flex justify-content-around align-items-center">
             <template v-if="!validationView">
-              <small class="text-center text-light mb-1"
+              <small class="text-center text-light mr-2"
                 >Expand Properties</small
               >
               <input
@@ -458,9 +463,9 @@
               />
             </template>
           </div>
-          <div>
-            <small class="text-center text-light mb-1"
-              ><img src="@/assets/img/cube.svg" width="15" /> Validation
+          <div class="d-flex justify-content-around align-items-center">
+            <small class="text-center text-light mr-2"
+              ><img src="@/assets/img/cube.svg" width="25" /> Validation
               View</small
             >
             <input
@@ -622,6 +627,9 @@ export default {
       }
       return letters.sort();
     },
+    schema_version(){
+      return this.$store.getters.schema_version
+    }
   },
   watch: {
     searchQuery: function (newQ) {

@@ -1,7 +1,7 @@
 <template>
-  <div class="p-3 mb-2 alert alert-light">
+  <div class="p-3 mb-2 alert alert-secondary">
     <div v-if="q && q.name">
-      <a class="d-inline text-info" :href="'/view/' + q.name.split(':')[0]">
+      <a class="d-inline text-info" :href="'/ns/' + q.name.split(':')[0]">
         <h3
           class="bold d-inline"
           :id="q.name"
@@ -61,7 +61,7 @@
     </template>
     <p
       v-html="q['description'] || 'No Description Provided'"
-      class="padding20 description"
+      class="p-2 description"
       :class="textColor"
     ></p>
     <template v-if="q && q.range">
@@ -231,7 +231,7 @@ export default {
         arr = string.split(":");
         let name = arr[arr.length - 1];
         arr["0"] == "schema"
-          ? (res += "/view/schema/" + name)
+          ? (res += "/ns/schema/" + name)
           : (res += "./" + name);
       } else {
         res = string;
