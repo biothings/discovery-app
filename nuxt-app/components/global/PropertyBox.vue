@@ -5,11 +5,15 @@
     >
       <span class="m-0">
         <font-awesome-icon
-          v-if="FAClass"
+          v-if="FAClass && !isPotentialRequirement"
           :icon="'fas ' + FAClass"
           :class="getColorClass(name)"
           class="mr-1"
         />
+        <font-awesome-layers v-else class="mr-1">
+          <font-awesome-icon icon="fas fa-circle" class="text-primary" />
+          <font-awesome-icon icon="fas fa-asterisk" class="text-light" />
+        </font-awesome-layers>
         <span
           class="text-light font-weight-bold"
           v-text="name"
@@ -18,7 +22,9 @@
       </span>
     </div>
     <div class="col-sm-12 col-md-9 text-dark bg-light">
-      <small class="p-1"><b>{{ fullInfo['description'] }}</b></small>
+      <small class="p-1"
+        ><b>{{ fullInfo["description"] }}</b></small
+      >
       <div class="rounded-0">
         <div class="p-1 rounded-0 d-flex">
           <!-- HAS TYPE -->
@@ -27,7 +33,7 @@
             class="d-flex justify-content-center align-items-center"
           >
             <div class="badge badge-pill alert-info m-1">
-              type: <b>{{ fullInfo['type'] }}</b>
+              type: <b>{{ fullInfo["type"] }}</b>
             </div>
           </div>
 
@@ -65,7 +71,8 @@
             v-if="fullInfo && fullInfo.properties"
             class="d-flex justify-content-center align-items-center"
           >
-            <small>fields</small> <font-awesome-icon
+            <small>fields</small>
+            <font-awesome-icon
               icon="fas fa-chevron-right"
               class="text-muted mr-1"
             />
@@ -79,10 +86,14 @@
                 v-for="(value, name) in fullInfo['properties']"
                 :key="name"
               >
-                <div class="my-2 pl-2 d-flex align-items-center justify-content-center">
-                  <span class="mainTextDark"
-                    >
-                    <font-awesome-icon icon="fas fa-asterisk" class="text-danger mr-1" v-if="isPropRequired(name)"/>
+                <div
+                  class="my-2 pl-2 d-flex align-items-center justify-content-center"
+                >
+                  <span class="mainTextDark">
+                    <font-awesome-icon
+                      icon="fas fa-asterisk"
+                      class="text-danger mr-1"
+                      v-if="isPropRequired(name)" />
                     <b v-text="name"></b
                   ></span>
 
@@ -91,10 +102,12 @@
                     class="text-muted m-1"
                   />
 
-                  <div class="badge badge-pill alert-primary" v-if="value?.oneOf" :data-tippy-content="JSON.stringify(value, null, 2)">
-                    more info <font-awesome-icon
-                    icon="fas fa-info-circle"
-                  />
+                  <div
+                    class="badge badge-pill alert-primary"
+                    v-if="value?.oneOf"
+                    :data-tippy-content="JSON.stringify(value, null, 2)"
+                  >
+                    more info <font-awesome-icon icon="fas fa-info-circle" />
                   </div>
 
                   <small
@@ -152,9 +165,17 @@ export default {
       textColor: "",
       backColor: "",
       itemID: Math.floor(Math.random() * 90000) + 10000,
+      isPotentialRequirement: false,
     };
   },
-  props: ["name", "fullInfo", "required", "recommended", "optional", "potential"],
+  props: [
+    "name",
+    "fullInfo",
+    "required",
+    "recommended",
+    "optional",
+    "potential",
+  ],
   methods: {
     getText(ref) {
       let arr = ref.split("/");
@@ -178,9 +199,8 @@ export default {
       } else if (this.optional && this.optional.includes(propname)) {
         return "text-info";
       } else if (this.potential && this.potential.includes(propname)) {
-        return "text-primary";
-      }
-      else {
+        this.isPotentialRequirement = true;
+      } else {
         return "text-light";
       }
     },
@@ -194,9 +214,8 @@ export default {
       } else if (this.optional && this.optional.includes(this.name)) {
         return "fa-square";
       } else if (this.potential && this.potential.includes(this.name)) {
-        return "fa-asterisk";
-      }
-       else {
+        this.isPotentialRequirement = true;
+      } else {
         return false;
       }
     },

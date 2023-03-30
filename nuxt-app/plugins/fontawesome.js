@@ -1,6 +1,9 @@
 // For Nuxt 3
 import { library, config } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon, FontAwesomeLayers } from "@fortawesome/vue-fontawesome";
+import {
+  FontAwesomeIcon,
+  FontAwesomeLayers,
+} from "@fortawesome/vue-fontawesome";
 
 /* import specific icons */
 import {
