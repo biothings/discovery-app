@@ -167,9 +167,20 @@
               @click="flipView()"
               >Change View <font-awesome-icon icon="fas fa-retweet"
             /></a>
-            <div v-if="namespace === 'schema'" class="d-inline float-right" data-tippy-content="Learn more about this version">
-              <a :href="'https://schema.org/docs/releases.html#v' + schema_version" target="_blank" class="badge badge-primary">
-                <font-awesome-icon icon="fas fa-star" class="text-warning"/> {{ 'Version ' + schema_version }} 
+            <div
+              v-if="namespace === 'schema'"
+              class="d-inline float-right"
+              data-tippy-content="Learn more about this version"
+            >
+              <a
+                :href="
+                  'https://schema.org/docs/releases.html#v' + schema_version
+                "
+                target="_blank"
+                class="badge badge-primary"
+              >
+                <font-awesome-icon icon="fas fa-star" class="text-warning" />
+                {{ "Version " + schema_version }}
               </a>
             </div>
             <div
@@ -627,9 +638,9 @@ export default {
       }
       return letters.sort();
     },
-    schema_version(){
-      return this.$store.getters.schema_version
-    }
+    schema_version() {
+      return this.$store.getters.schema_version;
+    },
   },
   watch: {
     searchQuery: function (newQ) {
@@ -951,7 +962,6 @@ export default {
             "/api/registry/" +
             self.namespace +
             "/" +
-            "schema:" +
             self.query +
             "?v"
         )
@@ -961,7 +971,7 @@ export default {
             self.$store.commit("saveSchemaForViewer", payload);
             this.userSchema = res.data;
             for (var i = 0; i < self.userSchema["hits"].length; i++) {
-              if (self.userSchema["hits"][i]["label"] === query) {
+              if (self.userSchema["hits"][i]["name"] === query) {
                 // console.log("MATCH",self.userSchema['hits'][i])
                 let q = self.userSchema["hits"][i];
                 self.getParentsOf(q);
