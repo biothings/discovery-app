@@ -46,7 +46,7 @@
       </li>
       <li
         class="nav-item text-info pointer"
-        data-tippy-content="These properties are optional but for encouraged for completeness and better understanding about your metadata"
+        data-tippy-content="These properties are optional but encouraged for completeness and better understanding about your metadata"
       >
         <a
           class="nav-link text-info"
