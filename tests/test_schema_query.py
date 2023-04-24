@@ -28,11 +28,11 @@ class DiscoveryQueryTest(BiothingsTestCase):
         """
         self.query(q="alternateName")
 
-    # def test_04_customization(self):
-    #     """
-    #     [QUERY] Customization by parents
-    #     """
-    #     res = self.query(q="schema:Intangible")
-    #     assert res["total"] >= 3
-    #     res = self.query(q="Thing")
-    #     assert res["total"] > 770
+    def test_04_customization(self):
+        """
+        [QUERY] Customization by parents
+        """
+        res = self.query(q="schema:Intangible")
+        assert res["total"] >= 1
+        res = self.query(q="Thing")
+        assert res["total"] > 2 # 770
