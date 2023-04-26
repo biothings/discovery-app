@@ -11,6 +11,7 @@ import { editor_validation } from "./modules/editor_validation";
 import { guide } from "./modules/guide";
 import { portals } from "./modules/portals";
 import { validator } from "./modules/validator";
+import { news } from "./modules/whatsnew";
 import { delegate } from "tippy.js";
 import axios from "axios";
 
@@ -28,6 +29,7 @@ export default createStore({
     portals,
     validator,
     editor_validation,
+    news,
   },
   state: () => ({
     loading: false,
