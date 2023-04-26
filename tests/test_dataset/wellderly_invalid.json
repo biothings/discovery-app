@@ -17,7 +17,7 @@
     ],
     "url": "https://www.scripps.edu/science-and-medicine/translational-institute/translational-research/genomic-medicine/wellderly/",
     "version": "1.0",
-    "datePublished": "2016-04-16TT",
+    "datePublished": "2016-04-16TTasdanksfkas",
     "dateModified": "2018-06-27",
     "license": {
         "@type": "URL",
@@ -26,11 +26,6 @@
     },
     "Sameas": "https://www.ebi.ac.uk/ega/datasets/EGAD00001003941",
     "measurementTechnique": "whole-genome sequencing",
-    "publisher": {
-        "@type": "Organization",
-        "name": "Scripps Research",
-        "url": "http://scripps.edu"
-    },
     "creator": {
         "@type": "Person",
         "name": "Ali Torkamani",
