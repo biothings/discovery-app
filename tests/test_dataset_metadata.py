@@ -39,10 +39,6 @@ class TestDatasetMetadata(DiscoveryTestCase):
     # They are not designed as unit tests.
     # Don't just run a single one.
     #
-    # TEST_DATA_DIR_NAME = 'schemas'
-
-    # def refresh(self):
-    #     indices.refresh()
 
     @staticmethod
     def get_dataset(filename):
@@ -69,7 +65,7 @@ class TestDatasetMetadata(DiscoveryTestCase):
     # register infection
 
     def test_004_post(self):
-        # unsuccessful attempt to register infection 
+        # unsuccessful attempt to register infection
         # currently giving 400 error - with "publisher" property expected -- double check with Dr. Wu
         doc = self.get_dataset("niaid_infection.json")
         self.request("dataset", method="POST", json=doc, headers=self.auth_user, expect=400)

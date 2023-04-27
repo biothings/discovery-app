@@ -1,11 +1,8 @@
 """
     Schemas by Namespace Endpoint Tester
 """
-import json
-
 import pytest
 
-from discovery.model.schema import Schema, SchemaClass
 from discovery.registry import schemas
 from discovery.utils import indices
 
