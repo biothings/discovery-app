@@ -1,0 +1,737 @@
+{
+    "@context": {
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "schema": "http://schema.org/",
+      "niaid": "https://discovery.biothings.io/view/niaid/"
+    },
+    "@id": "https://discovery.biothings.io/view/niaid/",
+    "@graph": [
+      {
+        "@id": "niaid:NiaidDataset",
+        "@type": "rdfs:Class",
+        "rdfs:comment": "A schema describing a minimal Dataset for the National Institute of Allergy and Infectious Disease (NIAID). A dataset is a collection of data of a particular experimental type. Additional schema.org and/or custom properties could be added.",
+        "rdfs:label": "NiaidDataset",
+        "rdfs:subClassOf": {
+          "@id": "schema:Dataset"
+        },
+        "schema:isPartOf": {
+          "@id": "https://discovery.biothings.io/view/niaid/"
+        },
+        "$validation": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Descriptive name of the dataset",
+              "type": "string"
+            },
+            "description": {
+              "description": "Longer description of what is contained in the dataset",
+              "type": "string"
+            },
+            "measurementTechnique": {
+              "description": "A technique or technology used in a Dataset, corresponding to the method used for measuring the corresponding variable(s).",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/controlledVocabulary"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/controlledVocabulary"
+                  }
+                }
+              ]
+            },
+            "identifier": {
+              "description": "A short unique identifier for the Dataset (ideally less than 15 characters)",
+              "type": "string"
+            },
+            "creator": {
+              "description": "Name of the author or organization that created the dataset.  Note: schema.org/creator and schema.org/organization have additional fields that can provide more information about the author/organization, if desired.",
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/person"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/person"
+                  }
+                },
+                {
+                  "$ref": "#/definitions/organization"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/organization"
+                  }
+                }
+              ]
+            },
+            "distribution": {
+              "description": "DataDownload objects, which contain the URL link to download the raw, analyzed, and summary data associated with the dataset as well as associated metadata for the file.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/dataDownload"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/dataDownload"
+                  }
+                }
+              ]
+            },
+            "citation": {
+              "description": "Journal article or other publication associated with the dataset (stored as an object, not a string)",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/article"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/article"
+                  }
+                }
+              ]
+            },
+            "funding": {
+              "description": "Funding that supports (sponsors) the collection of this dataset through some kind of financial contribution",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/monetaryGrant"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/monetaryGrant"
+                  }
+                }
+              ]
+            },
+            "license": {
+              "description": "A license document that applies to this content, typically indicated by URL.",
+              "type": "string",
+              "format": "uri"
+            },
+            "species": {
+              "description": "Species(es) from which dataset has been collected",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/speciesControlledVocabulary"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/speciesControlledVocabulary"
+                  }
+                }
+              ]
+            },
+            "infectiousAgent": {
+              "description": "Infectious agent(s) / pathogen(s) which are the focus of the dataset (e.g. SARS-CoV-2)",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/pathogenControlledVocabulary"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/pathogenControlledVocabulary"
+                  }
+                }
+              ]
+            },
+            "infectiousDisease": {
+              "description": "Infectious disease(s) or condition(s) which are the focus of the dataset (e.g. COVID-19, pneumonia, etc.)",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/diseaseControlledVocabulary"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/diseaseControlledVocabulary"
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "description",
+            "measurementTechnique",
+            "creator",
+            "distribution",
+            "funding",
+            "identifier"
+          ],
+          "definitions": {
+            "person": {
+              "description": "Reusable person definition",
+              "@type": "Person",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "organization": {
+              "description": "Reusable organization definition",
+              "@type": "Organization",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "controlledVocabulary": {
+              "description": "collection of vocabulary terms defined in ontologies",
+              "@type": "CreativeWork",
+              "type": "string",
+              "vocabulary": {
+                "ontology": [
+                  "edam",
+                  "ncit"
+                ],
+                "children_of": [
+                  "http://edamontology.org/topic_3361",
+                  "http://purl.obolibrary.org/obo/NCIT_C20368"
+                ]
+              },
+              "strict": false
+            },
+            "pathogenControlledVocabulary": {
+              "description": "collection of vocabulary terms defined in ontologies",
+              "@type": "CreativeWork",
+              "type": "string",
+              "vocabulary": {
+                "ontology": [
+                  "ncbitaxon"
+                ],
+                "children_of": [
+                  "http://purl.obolibrary.org/obo/NCBITaxon_10239",
+                  "http://purl.obolibrary.org/obo/NCBITaxon_2"
+                ]
+              },
+              "strict": false
+            },
+            "speciesControlledVocabulary": {
+              "description": "collection of vocabulary terms defined in ontologies",
+              "@type": "CreativeWork",
+              "type": "string",
+              "vocabulary": {
+                "ontology": [
+                  "ncbitaxon"
+                ],
+                "children_of": [
+                  "http://purl.obolibrary.org/obo/NCBITaxon_131567",
+                  "http://purl.obolibrary.org/obo/NCBITaxon_10239"
+                ]
+              },
+              "strict": false
+            },
+            "diseaseControlledVocabulary": {
+              "description": "collection of vocabulary terms defined in ontologies",
+              "@type": "CreativeWork",
+              "type": "string",
+              "vocabulary": {
+                "ontology": [
+                  "mondo"
+                ],
+                "children_of": [
+                  "http://purl.obolibrary.org/obo/MONDO_0000001"
+                ]
+              },
+              "strict": false
+            },
+            "monetaryGrant": {
+              "type": "object",
+              "@type": "MonetaryGrant",
+              "description": "Funding that supports (sponsors) the collection of this dataset through some kind of financial contribution",
+              "properties": {
+                "funder": {
+                  "description": "An organization associated with a creator or funder of a dataset",
+                  "oneOf": [
+                    {
+                      "$ref": "#/definitions/funder"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/definitions/funder"
+                      }
+                    }
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "description about the funding award / grant"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "award / grant URL"
+                },
+                "identifier": {
+                  "type": "string",
+                  "description": "Unique identifier(s) for the grant(s) used to fund the Dataset"
+                }
+              },
+              "required": [
+                "funder",
+                "identifier"
+              ]
+            },
+            "funder": {
+              "type": "object",
+              "@type": "Organization",
+              "description": "Information about a single funder",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "An organization associated with a creator or funder of a dataset"
+                },
+                "parentOrganization": {
+                  "type": "string",
+                  "description": "name of the parent funding organization"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "dataDownload": {
+              "description": "A dataset in downloadable form.",
+              "@type": "DataDownload",
+              "type": "object",
+              "properties": {
+                "dateModified": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "contentUrl": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "dateModified",
+                "contentUrl"
+              ]
+            },
+            "article": {
+              "description": "A scholarly article in which the dataset is cited.",
+              "@type": "ScholarlyArticle",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "url"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "@id": "niaid:name",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Descriptive name of the dataset",
+        "rdfs:label": "name",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "schema:Text"
+          }
+        ],
+        "schema:sameAs": {
+          "@id": "schema:name"
+        },
+        "owl:cardinality": "one",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:description",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Longer description of what is contained in the dataset",
+        "rdfs:label": "description",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "schema:Text"
+          }
+        ],
+        "schema:sameAs": {
+          "@id": "schema:description"
+        },
+        "owl:cardinality": "one",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:measurementTechnique",
+        "@type": "rdf:Property",
+        "rdfs:comment": "A technique or technology used in a Dataset, corresponding to the method used for measuring the corresponding variable(s).",
+        "rdfs:label": "measurementTechnique",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "schema:Text"
+          }
+        ],
+        "schema:sameAs": {
+          "@id": "schema:measurementTechnique"
+        },
+        "owl:cardinality": "many",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:identifier",
+        "@type": "rdf:Property",
+        "rdfs:comment": "A short unique identifier for the Dataset (ideally less than 15 characters)",
+        "rdfs:label": "identifier",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        },
+        "schema:sameAs": {
+          "@id": "schema:identifier"
+        },
+        "owl:cardinality": "one",
+        "marginality": "recommended"
+      },
+      {
+        "@id": "niaid:creator",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Name of the author or organization that created the dataset.  Note: schema.org/creator and schema.org/organization have additional fields that can provide more information about the author/organization, if desired.",
+        "rdfs:label": "creator",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "niaid:NiaidOrganization"
+          }
+        ],
+        "schema:sameAs": {
+          "@id": "schema:creator"
+        },
+        "owl:cardinality": "many",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:distribution",
+        "@type": "rdf:Property",
+        "rdfs:comment": "DataDownload objects, which contain the URL link to download the raw, analyzed, and summary data associated with the dataset as well as associated metadata for the file.",
+        "rdfs:label": "distribution",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "niaid:NiaidDataDownload"
+          }
+        ],
+        "owl:cardinality": "many",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:citation",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Journal article or other publication associated with the dataset (stored as an object, not a string)",
+        "rdfs:label": "citation",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "niaid:NiaidScholarlyArticle"
+          }
+        ],
+        "schema:sameAs": {
+          "@id": "schema:citation"
+        },
+        "owl:cardinality": "many",
+        "marginality": "recommended"
+      },
+      {
+        "@id": "niaid:funding",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Funding that supports (sponsors) the collection of this dataset through some kind of financial contribution",
+        "rdfs:label": "funding",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "niaid:NiaidMonetaryGrant"
+          }
+        ],
+        "schema:sameAs": {
+          "@id": "schema:funding"
+        },
+        "owl:cardinality": "many",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:license",
+        "@type": "rdf:Property",
+        "rdfs:comment": "A license document that applies to this content, typically indicated by URL.",
+        "rdfs:label": "license",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "schema:URL"
+          }
+        ],
+        "schema:sameAs": {
+          "@id": "schema:license"
+        },
+        "owl:cardinality": "one",
+        "marginality": "recommended"
+      },
+      {
+        "@id": "niaid:species",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Species(es) from which dataset has been collected",
+        "rdfs:label": "species",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "schema:Text"
+          }
+        ],
+        "owl:cardinality": "many",
+        "marginality": "recommended"
+      },
+      {
+        "@id": "niaid:infectiousAgent",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Infectious agent(s) / pathogen(s) which are the focus of the dataset (e.g. SARS-CoV-2)",
+        "rdfs:label": "infectiousAgent",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "schema:Text"
+          }
+        ],
+        "owl:cardinality": "many",
+        "marginality": "recommended"
+      },
+      {
+        "@id": "niaid:infectiousDisease",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Infectious disease(s) / condition(s) which are the focus of the dataset (e.g. COVID-19, coronavirus)",
+        "rdfs:label": "infectiousDisease",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataset"
+          }
+        ],
+        "schema:rangeIncludes": [
+          {
+            "@id": "schema:Text"
+          }
+        ],
+        "owl:cardinality": "many",
+        "marginality": "recommended"
+      },
+      {
+        "@id": "niaid:NiaidDataDownload",
+        "@type": "rdfs:Class",
+        "rdfs:comment": "A dataset in downloadable form.",
+        "rdfs:label": "NiaidDataDownload",
+        "rdfs:subClassOf": {
+          "@id": "schema:DataDownload"
+        },
+        "schema:isPartOf": {
+          "@id": "https://discovery.biothings.io/view/niaid/"
+        }
+      },
+      {
+        "@id": "niaid:contentUrl",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Link to the location where the dataset can be found, ideally a permanent URL",
+        "rdfs:label": "contentUrl",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataDownload"
+          }
+        ],
+        "schema:rangeIncludes": {
+          "@id": "schema:URL"
+        },
+        "schema:sameAs": {
+          "@id": "schema:contentUrl"
+        },
+        "owl:cardinality": "one",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:dateModified",
+        "@type": "rdf:Property",
+        "rdfs:comment": "Date which the particular DataDownload (file) has been changed",
+        "rdfs:label": "dateModified",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidDataDownload"
+          }
+        ],
+        "schema:rangeIncludes": {
+          "@id": "schema:Date"
+        },
+        "schema:sameAs": {
+          "@id": "schema:DataDownload"
+        },
+        "owl:cardinality": "one",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:NiaidScholarlyArticle",
+        "@type": "rdfs:Class",
+        "rdfs:comment": "A scholarly article in which the dataset is cited.",
+        "rdfs:label": "NiaidScholarlyArticle",
+        "rdfs:subClassOf": {
+          "@id": "schema:ScholarlyArticle"
+        },
+        "schema:isPartOf": {
+          "@id": "https://discovery.biothings.io/view/niaid/"
+        }
+      },
+      {
+        "@id": "niaid:NiaidMonetaryGrant",
+        "@type": "rdfs:Class",
+        "rdfs:comment": "Funding that supports (sponsors) the collection of this dataset through some kind of financial contribution",
+        "rdfs:label": "NiaidMonetaryGrant",
+        "rdfs:subClassOf": {
+          "@id": "schema:MonetaryGrant"
+        },
+        "schema:isPartOf": {
+          "@id": "https://discovery.biothings.io/view/niaid/"
+        }
+      },
+      {
+        "@id": "niaid:funder",
+        "@type": "rdf:Property",
+        "rdfs:comment": "An organization that supports (sponsors) something this dataset some kind of financial contribution.",
+        "rdfs:label": "funder",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidMonetaryGrant"
+          }
+        ],
+        "schema:rangeIncludes": {
+          "@id": "niaid:NiaidOrganization"
+        },
+        "schema:sameAs": {
+          "@id": "schema:funder"
+        },
+        "owl:cardinality": "one",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:description",
+        "@type": "rdf:Property",
+        "rdfs:comment": "description about the funding award / grant",
+        "rdfs:label": "description",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidMonetaryGrant"
+          }
+        ],
+        "schema:rangeIncludes": {
+          "@id": "schema:Text"
+        },
+        "schema:sameAs": {
+          "@id": "schema:description"
+        },
+        "owl:cardinality": "one",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:url",
+        "@type": "rdf:Property",
+        "rdfs:comment": "award / grant URL",
+        "rdfs:label": "url",
+        "schema:domainIncludes": [
+          {
+            "@id": "niaid:NiaidMonetaryGrant"
+          }
+        ],
+        "schema:rangeIncludes": {
+          "@id": "schema:Url"
+        },
+        "schema:sameAs": {
+          "@id": "schema:url"
+        },
+        "owl:cardinality": "one",
+        "marginality": "required"
+      },
+      {
+        "@id": "niaid:NiaidOrganization",
+        "@type": "rdfs:Class",
+        "rdfs:comment": "An organization associated with a creator or funder of a dataset",
+        "rdfs:label": "NiaidOrganization",
+        "rdfs:subClassOf": {
+          "@id": "schema:Organization"
+        },
+        "schema:isPartOf": {
+          "@id": "https://discovery.biothings.io/view/niaid/"
+        }
+      }
+    ]
+  }
