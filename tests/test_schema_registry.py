@@ -18,9 +18,7 @@ def setup():
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
 
-
 class DiscoveryAPITest(DiscoveryTestCase):
-    # TEST_DATA_DIR_NAME = 'schemas'
     def refresh(self):
         indices.refresh()
 
@@ -87,27 +85,27 @@ class DiscoveryAPITest(DiscoveryTestCase):
     def test_20_delete(self):
         self.request("registry/bts", method="DELETE", expect=401)
 
-    # def test_21_delete(self):
-    #     self.request("registry/bts", method="DELETE", headers=self.evil_user, expect=403)
+    def test_21_delete(self):
+        self.request("registry/bts", method="DELETE", headers=self.evil_user, expect=403)
 
-    # def test_22_delete(self):
-    #     self.request("registry/xtx", method="DELETE", headers=self.auth_user, expect=404)
+    def test_22_delete(self):
+        self.request("registry/xtx", method="DELETE", headers=self.auth_user, expect=404)
 
-    # def test_23_delete(self):
-    #     # self.query(q="BiologicalEntity", hits=True)
-    #     self.request("registry/bts", expect=200)
-    #     # self.request("registry/bts", method="DELETE", headers=self.auth_user)
-    #     self.request("registry/bts", expect=404)
-    #     self.refresh()
-    #     # self.query(q="BiologicalEntity", hits=False)
+    def test_23_delete(self):
+        self.query(q="BiologicalEntity", hits=True)
+        self.request("registry/bts", expect=200)
+        self.request("registry/bts", method="DELETE", headers=self.auth_user)
+        self.request("registry/bts", expect=404)
+        self.refresh()
+        self.query(q="BiologicalEntity", hits=False)
 
-    # def test_30_post(self):
-    #     if schemas.exists("bts"):
-    #         schemas.delete("bts")
-    #     doc = {"url": BTS_URL, "namespace": "bts"}
-    #     self.query(q="BiologicalEntity", hits=False)
-    #     self.request("registry/bts", expect=404)
-    #     self.request("registry", method="POST", json=doc, headers=self.auth_user)
-    #     self.request("registry/bts", expect=200)
-    #     self.refresh()
-    #     # self.query(q="BiologicalEntity")
+    def test_30_post(self):
+        if schemas.exists("bts"):
+            schemas.delete("bts")
+        doc = {"url": BTS_URL, "namespace": "bts"}
+        self.query(q="BiologicalEntity", hits=False)
+        self.request("registry/bts", expect=404)
+        self.request("registry", method="POST", json=doc, headers=self.auth_user)
+        self.request("registry/bts", expect=200)
+        self.refresh()
+        self.query(q="BiologicalEntity")
