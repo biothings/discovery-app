@@ -15,10 +15,12 @@ NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/biothings/discovery-app/te
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
 CTSA_URL = "https://raw.githubusercontent.com/biothings/discovery-app/master/tests/test_schema/CTSADataset.json"
-backup_file = "./tests/test_schema/backup.json"
+backup_file = "tests/test_schema/backup.json"
+
+
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    indices.reset()    
+    indices.reset()
     backup.restore_from_file(backup_file)
     if not schemas.exists("niaid"):
         schemas.add(namespace='niaid', url=NIAID_SCHEMA_URL, user="minions@example.com")
