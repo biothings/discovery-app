@@ -15,7 +15,7 @@ NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/biothings/discovery-app/te
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
 CTSA_URL = "https://raw.githubusercontent.com/biothings/discovery-app/master/tests/test_schema/CTSADataset.json"
-backup_url='https://raw.githubusercontent.com/biothings/discovery-app/test_updates/tests/test_schema/backup.json'
+backup_url='./test_schema/backup.json'
 @pytest.fixture(scope="module", autouse=True)
 def setup():
     indices.reset()    
