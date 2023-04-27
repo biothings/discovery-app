@@ -1,22 +1,30 @@
 import json
 
 import pytest
+# from biothings.tests.web import BiothingsTestCase
 
 from discovery.registry import datasets, schemas
-from discovery.utils import indices
+from discovery.utils import indices, backup
 
 from .test_base import DiscoveryTestCase
 
-NIAID_SCHEMA_URL = (
-    "https://raw.githubusercontent.com/SuLab/niaid-data-portal/master/schema/NIAIDDataset.json"
-)
-
-
+# something is going on with NIAID and adding it with this URL, it raises a 'duplicate keys' error
+NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/biothings/discovery-app/test_updates/tests/test_schema/niaid_schema.json"
+# NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/SuLab/niaid-data-portal/master/schema/NIAIDDataset.json"
+BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
+N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
+CTSA_URL = "https://raw.githubusercontent.com/biothings/discovery-app/master/tests/test_schema/CTSADataset.json"
+backup1='//Users/nacosta/Documents/DDE/branches/test_updates/discovery-app/tests/test_schema/backup.json'
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    # indices.reset()
+    indices.reset()
+    backup.restore_from_file(backup1)
     if not schemas.exists("niaid"):
-        schemas.add("niaid", NIAID_SCHEMA_URL, "minions@example.com")
+        schemas.add(namespace='niaid', url=NIAID_SCHEMA_URL, user="minions@example.com")
+    if not schemas.exists("n3c"):
+        schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
+    if not schemas.exists("bts"):
+        schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
     if datasets.exists("83dc3401f86819de"):  # wellderly
         datasets.delete("83dc3401f86819de")
     if datasets.exists("e87b433020414bad"):  # systems_bio_cdiff_0002
@@ -31,6 +39,11 @@ class TestDatasetMetadata(DiscoveryTestCase):
     # They are not designed as unit tests.
     # Don't just run a single one.
     #
+    # TEST_DATA_DIR_NAME = 'schemas'
+
+    # def refresh(self):
+    #     indices.refresh()
+
     @staticmethod
     def get_dataset(filename):
         with open(f"tests/test_dataset/{filename}") as dataset:
@@ -43,165 +56,167 @@ class TestDatasetMetadata(DiscoveryTestCase):
         doc = self.get_dataset("wellderly.json")
         self.request("dataset", method="POST", json=doc, expect=401)
 
-    # def test_002_post(self):
-    #     # unsuccessful attempt 2 to register wellderly
-    #     doc = self.get_dataset("wellderly_invalid.json")
-    #     self.request("dataset", method="POST", json=doc, headers=self.auth_user, expect=400)
+    def test_002_post(self):
+        # unsuccessful attempt 2 to register wellderly
+        doc = self.get_dataset("wellderly_invalid.json")
+        self.request("dataset", method="POST", json=doc, headers=self.auth_user, expect=400)
 
-    # def test_003_post(self):
-    #     # successful attempt to register wellderly
-    #     doc = self.get_dataset("wellderly.json")
-    #     self.request("dataset", method="POST", json=doc, headers=self.auth_user)
+    def test_003_post(self):
+        # successful attempt to register wellderly
+        doc = self.get_dataset("wellderly.json")
+        self.request("dataset", method="POST", json=doc, headers=self.auth_user)
 
     # register infection
 
-    # def test_004_post(self):
-    #     # unsuccessful attempt to register infection
-    #     doc = self.get_dataset("niaid_infection.json")
-    #     self.request("dataset", method="POST", json=doc, headers=self.auth_user, expect=400)
+    def test_004_post(self):
+        # unsuccessful attempt to register infection 
+        # currently giving 400 error - with "publisher" property expected -- double check with Dr. Wu
+        doc = self.get_dataset("niaid_infection.json")
+        self.request("dataset", method="POST", json=doc, headers=self.auth_user, expect=400)
 
-    # def test_005_post(self):
-    #     # successful attempt to register infection
-    #     doc = self.get_dataset("niaid_infection.json")
-    #     self.request(
-    #         "dataset?schema=niaid::niaid:NiaidDataset",
-    #         method="POST",
-    #         json=doc,
-    #         headers=self.auth_user,
-    #     )
+    # test 005 and 006 require NIAID dataset
+    def test_005_post(self):
+        # successful attempt to register infection
+        doc = self.get_dataset("niaid_infection.json")
+        self.request(
+            "dataset?schema=niaid::niaid:NiaidDataset",
+            method="POST",
+            json=doc,
+            headers=self.auth_user,
+        )
 
-    # # register human (private)
+    # #register human (private)
 
-    # def test_006_post(self):
-    #     doc = self.get_dataset("niaid_human.json")
-    #     self.request(
-    #         "dataset?schema=niaid::niaid:NiaidDataset&private",
-    #         method="POST",
-    #         json=doc,
-    #         headers=self.auth_user,
-    #     )
+    def test_006_post(self):
+        doc = self.get_dataset("niaid_human.json")
+        self.request(
+            "dataset?schema=niaid::niaid:NiaidDataset&private",
+            method="POST",
+            json=doc,
+            headers=self.auth_user,
+        )
 
-    # # update wellderly
+    # update wellderly
 
-    # def test_010_put(self):
-    #     # unsuccessful attempt 1 to update wellderly
-    #     doc = self.get_dataset("wellderly.json")
-    #     self.request("dataset/83dc3401f86819de", method="PUT", expect=401, json=doc)
+    def test_010_put(self):
+        # unsuccessful attempt 1 to update wellderly
+        doc = self.get_dataset("wellderly.json")
+        self.request("dataset/83dc3401f86819de", method="PUT", expect=401, json=doc)
 
-    # def test_011_put(self):
-    #     # unsuccessful attempt 2 to update wellderly
-    #     doc = self.get_dataset("wellderly.json")
-    #     self.request(
-    #         "dataset/8888888888888888", method="PUT", expect=404, json=doc, headers=self.auth_user
-    #     )
+    def test_011_put(self):
+        # unsuccessful attempt 2 to update wellderly
+        doc = self.get_dataset("wellderly.json")
+        self.request(
+            "dataset/8888888888888888", method="PUT", expect=404, json=doc, headers=self.auth_user
+        )
 
-    # def test_012_put(self):
-    #     # unsuccessful attempt 3 to update wellderly
-    #     doc = self.get_dataset("wellderly.json")
-    #     self.request(
-    #         "dataset/83dc3401f86819de", method="PUT", expect=403, json=doc, headers=self.evil_user
-    #     )
+    def test_012_put(self):
+        # unsuccessful attempt 3 to update wellderly
+        doc = self.get_dataset("wellderly.json")
+        self.request(
+            "dataset/83dc3401f86819de", method="PUT", expect=403, json=doc, headers=self.evil_user
+        )
 
-    # def test_013_put(self):
-    #     # unsuccessful attempt 4 to update wellderly
-    #     doc = self.get_dataset("wellderly_invalid.json")
-    #     self.request(
-    #         "dataset/83dc3401f86819de", method="PUT", expect=400, json=doc, headers=self.auth_user
-    #     )
+    def test_013_put(self):
+        # unsuccessful attempt 4 to update wellderly
+        doc = self.get_dataset("wellderly_invalid.json")
+        self.request(
+            "dataset/83dc3401f86819de", method="PUT", expect=400, json=doc, headers=self.auth_user
+        )
 
-    # def test_014_put(self):
-    #     # unsuccessful attempt 5 to update wellderly
-    #     doc = self.get_dataset("wellderly_update_invalid.json")
-    #     self.request(
-    #         "dataset/83dc3401f86819de", method="PUT", expect=409, json=doc, headers=self.auth_user
-    #     )
+    def test_014_put(self):
+        # unsuccessful attempt 5 to update wellderly
+        doc = self.get_dataset("wellderly_update_invalid.json")
+        self.request(
+            "dataset/83dc3401f86819de", method="PUT", expect=409, json=doc, headers=self.auth_user
+        )
 
-    # def test_015_put(self):
-    #     # successful attempt to update wellderly
-    #     doc = self.get_dataset("wellderly.json")
-    #     self.request("dataset/83dc3401f86819de", method="PUT", json=doc, headers=self.auth_user)
+    def test_015_put(self):
+        # successful attempt to update wellderly
+        doc = self.get_dataset("wellderly.json")
+        self.request("dataset/83dc3401f86819de", method="PUT", json=doc, headers=self.auth_user)
 
     # # TODO add tests that update dataset _meta in different ways
 
     # # read only
 
-    # def test_020_get_public(self):
-    #     expected_ids = [
-    #         "83dc3401f86819de",  # ctsa_wellderly
-    #         "ecf3767159a74988",  # niaid_infection
-    #     ]
-    #     indices.refresh()
-    #     res = self.request("dataset").json()
-    #     for hit in res["hits"]:
-    #         if hit["_id"] in expected_ids:
-    #             expected_ids.remove(hit["_id"])
-    #     assert not expected_ids
+    def test_020_get_public(self):
+        expected_ids = [
+            "83dc3401f86819de"  # ctsa_wellderly
+            # "ecf3767159a74988",  # niaid_infection
+        ]
+        indices.refresh()
+        res = self.request("dataset").json()
+        for hit in res["hits"]:
+            if hit["_id"] in expected_ids:
+                expected_ids.remove(hit["_id"])
+        assert not expected_ids
 
-    # def test_021_get_public(self):
-    #     res = self.request("dataset?user=minions@example.com").json()
-    #     assert res["total"] == 2
+    def test_021_get_public(self):
+        res = self.request("dataset?user=minions@example.com").json()
+        assert res["total"] == 2
 
-    # def test_022_get_public(self):
-    #     res = self.request("dataset?user=villain@example.com").json()
-    #     assert res["total"] == 0
+    def test_022_get_public(self):
+        res = self.request("dataset?user=villain@example.com").json()
+        assert res["total"] == 0
 
-    # def test_031_get_all_private(self):
-    #     self.request("dataset?private", expect=401)
+    def test_031_get_all_private(self):
+        self.request("dataset?private", expect=401)
 
-    # def test_032_get_all_private(self):
-    #     # my private datasets (empty)
-    #     res = self.request("dataset?private", headers=self.evil_user).json()
-    #     assert res["total"] == 0
+    def test_032_get_all_private(self):
+        # my private datasets (empty)
+        res = self.request("dataset?private", headers=self.evil_user).json()
+        assert res["total"] == 0
 
-    # def test_033_get_all_private(self):
-    #     # others' private datasets
-    #     self.request(
-    #         "dataset?private&user=minions@example.com", headers=self.evil_user, expect=403
-    #     )
+    def test_033_get_all_private(self):
+        # others' private datasets
+        self.request(
+            "dataset?private&user=minions@example.com", headers=self.evil_user, expect=403
+        )
 
-    # def test_034_get_all_private(self):
-    #     # my private dataset implicit form
-    #     res = self.request("dataset?private", headers=self.auth_user).json()
-    #     assert res["hits"]
+    def test_034_get_all_private(self):
+        # my private dataset implicit form
+        res = self.request("dataset?private", headers=self.auth_user).json()
+        assert res["hits"]
 
-    # def test_035_get_all_private(self):
-    #     # my private dataset explicit form
-    #     res = self.request(
-    #         "dataset?private&user=minions@example.com", headers=self.auth_user
-    #     ).json()
-    #     assert res["hits"]
+    def test_035_get_all_private(self):
+        # my private dataset explicit form
+        res = self.request(
+            "dataset?private&user=minions@example.com", headers=self.auth_user
+        ).json()
+        assert res["hits"]
 
-    # def test_041_get_id(self):
-    #     # public
-    #     res = self.request("dataset/83dc3401f86819de").json()
-    #     assert res["identifier"] == "EGAD00001003941"
+    def test_041_get_id(self):
+        # public
+        res = self.request("dataset/83dc3401f86819de").json()
+        assert res["identifier"] == "EGAD00001003941"
 
-    # def test_042_get_id(self):
-    #     # private (id as token)
-    #     res = self.request("dataset/e87b433020414bad").json()
-    #     assert res["identifier"] == "systems_bio_cdiff_0002"
+    def test_042_get_id(self):
+        # private (id as token)
+        res = self.request("dataset/e87b433020414bad").json()
+        assert res["identifier"] == "systems_bio_cdiff_0002"
 
-    # def test_043_get_id(self):
-    #     self.request("dataset/nonexist", expect=404)
+    def test_043_get_id(self):
+        self.request("dataset/nonexist", expect=404)
 
     # # delete
 
-    # def test_050_delete(self):
-    #     # not logged in
-    #     self.request("dataset/83dc3401f86819de", method="DELETE", expect=401)
+    def test_050_delete(self):
+        # not logged in
+        self.request("dataset/83dc3401f86819de", method="DELETE", expect=401)
 
-    # def test_051_delete(self):
-    #     # not found
-    #     self.request(
-    #         "dataset/8888888888888888", method="DELETE", expect=404, headers=self.evil_user
-    #     )
+    def test_051_delete(self):
+        # not found
+        self.request(
+            "dataset/8888888888888888", method="DELETE", expect=404, headers=self.evil_user
+        )
 
-    # def test_052_delete(self):
-    #     # others'
-    #     self.request(
-    #         "dataset/83dc3401f86819de", method="DELETE", expect=403, headers=self.evil_user
-    #     )
+    def test_052_delete(self):
+        # others'
+        self.request(
+            "dataset/83dc3401f86819de", method="DELETE", expect=403, headers=self.evil_user
+        )
 
-    # def test_053_delete(self):
-    #     # success
-    #     self.request("dataset/83dc3401f86819de", method="DELETE", headers=self.auth_user)
+    def test_053_delete(self):
+        # success
+        self.request("dataset/83dc3401f86819de", method="DELETE", headers=self.auth_user)
