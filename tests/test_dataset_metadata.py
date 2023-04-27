@@ -1,7 +1,8 @@
 import json
+import requests
+from urllib import request
 
 import pytest
-# from biothings.tests.web import BiothingsTestCase
 
 from discovery.registry import datasets, schemas
 from discovery.utils import indices, backup
@@ -14,11 +15,11 @@ NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/biothings/discovery-app/te
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
 CTSA_URL = "https://raw.githubusercontent.com/biothings/discovery-app/master/tests/test_schema/CTSADataset.json"
-backup1='./test_schema/backup.json'
+backup_url='https://raw.githubusercontent.com/biothings/discovery-app/test_updates/tests/test_schema/backup.json'
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    indices.reset()
-    backup.restore_from_file(backup1)
+    indices.reset()    
+    backup.restore_from_file(backup_url)
     if not schemas.exists("niaid"):
         schemas.add(namespace='niaid', url=NIAID_SCHEMA_URL, user="minions@example.com")
     if not schemas.exists("n3c"):
