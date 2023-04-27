@@ -685,25 +685,6 @@
         "marginality": "required"
       },
       {
-        "@id": "niaid:description",
-        "@type": "rdf:Property",
-        "rdfs:comment": "description about the funding award / grant",
-        "rdfs:label": "description",
-        "schema:domainIncludes": [
-          {
-            "@id": "niaid:NiaidMonetaryGrant"
-          }
-        ],
-        "schema:rangeIncludes": {
-          "@id": "schema:Text"
-        },
-        "schema:sameAs": {
-          "@id": "schema:description"
-        },
-        "owl:cardinality": "one",
-        "marginality": "required"
-      },
-      {
         "@id": "niaid:url",
         "@type": "rdf:Property",
         "rdfs:comment": "award / grant URL",
