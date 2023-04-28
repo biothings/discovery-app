@@ -38,7 +38,9 @@ jobs:
       - name: Install PyTest
         run: pip install pytest
       - name: Run Tests
-        run: pytest tests/
+        run: pytest tests/test_schema_query.py
+      - name: Run Tests
+        run: pytest tests/test_schema_endpoint.py
       - name: Setup tmate debug session on failure
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
