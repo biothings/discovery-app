@@ -37,10 +37,16 @@ jobs:
         run: pip install -r requirements.txt
       - name: Install PyTest
         run: pip install pytest
-      - name: Run Tests
-        run: pytest tests/test_schema_query.py
-      - name: Run Tests
+      - name: Run metadata test
+        run: pytest tests/test_dataset_metadata.py
+      - name: Run endpoint test
         run: pytest tests/test_schema_endpoint.py
+      - name: Run endpoint registry
+        run: pytest tests/test_schema_registry.py
+      - name: Run endpoint status
+        run: pytest tests/test_schema_status.py
+      - name: Run endpoint viewer
+        run: pytest tests/test_schema_viewer.py
       - name: Setup tmate debug session on failure
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
