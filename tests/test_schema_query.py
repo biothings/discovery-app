@@ -6,10 +6,6 @@ from biothings.tests.web import BiothingsTestCase
 
 class DiscoveryQueryTest(BiothingsTestCase):
     TEST_DATA_DIR_NAME = 'schemas'
-
-    def refresh(self):
-        indices.refresh()
-
     def test_01_default(self):
         """
         [QUERY] Basic functionality

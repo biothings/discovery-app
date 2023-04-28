@@ -1,9 +1,5 @@
 import json
-import requests
-from urllib import request
-
 import pytest
-import os 
 
 from discovery.registry import datasets, schemas
 from discovery.utils import indices, backup
