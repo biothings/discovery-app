@@ -39,6 +39,9 @@ jobs:
         run: pip install pytest
       - name: Run Tests
         run: pytest tests/
+      - name: Setup tmate debug session on failure
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
     services:
       Elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:8.6.1
