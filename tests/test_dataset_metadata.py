@@ -3,6 +3,7 @@ import requests
 from urllib import request
 
 import pytest
+import os 
 
 from discovery.registry import datasets, schemas
 from discovery.utils import indices, backup
@@ -21,6 +22,7 @@ backup_file = "tests/test_schema/backup.json"
 @pytest.fixture(scope="module", autouse=True)
 def setup():
     indices.reset()
+    print(os.path.abspath(os.getcwd()))
     backup.restore_from_file(backup_file)
     if not schemas.exists("niaid"):
         schemas.add(namespace='niaid', url=NIAID_SCHEMA_URL, user="minions@example.com")
