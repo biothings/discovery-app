@@ -24,18 +24,18 @@ def setup():
     indices.reset()
     print(os.path.abspath(os.getcwd()))
     backup.restore_from_file(backup_file)
-    if not schemas.exists("niaid"):
-        schemas.add(namespace='niaid', url=NIAID_SCHEMA_URL, user="minions@example.com")
-    if not schemas.exists("n3c"):
-        schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
-    if not schemas.exists("bts"):
-        schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
-    if datasets.exists("83dc3401f86819de"):  # wellderly
-        datasets.delete("83dc3401f86819de")
-    if datasets.exists("e87b433020414bad"):  # systems_bio_cdiff_0002
-        datasets.delete("e87b433020414bad")
-    if datasets.exists("ecf3767159a74988"):  # systems_bio_cdiff_0001
-        datasets.delete("ecf3767159a74988")
+    # if not schemas.exists("niaid"):
+    #     schemas.add(namespace='niaid', url=NIAID_SCHEMA_URL, user="minions@example.com")
+    # if not schemas.exists("n3c"):
+    #     schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
+    # if not schemas.exists("bts"):
+    #     schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
+    # if datasets.exists("83dc3401f86819de"):  # wellderly
+    #     datasets.delete("83dc3401f86819de")
+    # if datasets.exists("e87b433020414bad"):  # systems_bio_cdiff_0002
+    #     datasets.delete("e87b433020414bad")
+    # if datasets.exists("ecf3767159a74988"):  # systems_bio_cdiff_0001
+    #     datasets.delete("ecf3767159a74988")
 
 
 class TestDatasetMetadata(DiscoveryTestCase):
