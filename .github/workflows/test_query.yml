@@ -39,7 +39,7 @@ jobs:
         run: pip install pytest
       - name: Run schema query test
         run: pytest tests/test_schema_query.py
-        working-directory: tests/app
+        working-directory: tests/
       - name: Setup tmate debug session on failure
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
