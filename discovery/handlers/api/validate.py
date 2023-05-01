@@ -5,13 +5,12 @@
     specified in $validation
 
 """
-from tornado.web import HTTPError
 import jsonschema
+from tornado.web import HTTPError
 
 from discovery.registry import datasets
 
 from .base import APIBaseHandler
-
 
 
 class MetadataValidationHandler(APIBaseHandler):

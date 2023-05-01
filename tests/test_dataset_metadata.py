@@ -1,8 +1,9 @@
 import json
+
 import pytest
 
 from discovery.registry import datasets, schemas
-from discovery.utils import indices, backup
+from discovery.utils import backup, indices
 
 from .test_base import DiscoveryTestCase
 

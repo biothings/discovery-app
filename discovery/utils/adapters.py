@@ -29,7 +29,6 @@ import logging
 from biothings_schema import Schema as SchemaParser
 from biothings_schema.dataload import BaseSchemaLoader, get_schemaorg_version as _get_schemaorg_version
 
-
 from discovery.registry import schemas
 
 # the underlying package uses warnings

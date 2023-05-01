@@ -3,6 +3,7 @@
 """
 from biothings.tests.web import BiothingsTestCase
 
+
 class DiscoveryQueryTest(BiothingsTestCase):
     TEST_DATA_DIR_NAME = 'schemas'
 

@@ -1,8 +1,8 @@
 import logging
 import time
 
-from discovery.registry import schemas
 from discovery.model import Schema
+from discovery.registry import schemas
 
 logging.basicConfig(level="INFO")
 logger = logging.getLogger("daily-schema-update")

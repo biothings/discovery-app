@@ -38,7 +38,7 @@ jobs:
       - name: Install PyTest
         run: pip install pytest
       - name: Run schema query test
-        run: pytest tests/test_schema_query.py
+        run: pytest test_schema_query.py
         working-directory: tests/
       - name: Setup tmate debug session on failure
         if: ${{ failure() }}

@@ -1,5 +1,5 @@
-import sys
 import importlib.util as _imp_util
+import sys
 from os.path import dirname, join, pardir
 
 if pardir not in sys.path:

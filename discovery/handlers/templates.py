@@ -5,12 +5,7 @@ import sass
 from jinja2 import Environment, FileSystemLoader
 from tornado.web import RedirectHandler, RequestHandler
 
-from discovery.siteconfig import (
-    default as siteconfig,
-    n3c as siteconfign3c,
-    niaid as siteconfigniaid,
-    outbreak as siteconfigoutbreak,
-)
+from discovery.siteconfig import default as siteconfig, n3c as siteconfign3c, niaid as siteconfigniaid, outbreak as siteconfigoutbreak
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../templates")
 TEMPLATE_LOADER = FileSystemLoader(searchpath=TEMPLATE_PATH)

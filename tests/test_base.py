@@ -2,6 +2,7 @@ from biothings.tests.web import BiothingsWebAppTest
 from tornado.escape import json_encode
 from tornado.web import create_signed_value
 
+
 class DiscoveryTestCase(BiothingsWebAppTest):
 
     @classmethod

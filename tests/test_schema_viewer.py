@@ -1,6 +1,7 @@
+from biothings.tests.web import BiothingsWebAppTest
+
 from discovery.utils import indices
 
-from biothings.tests.web import BiothingsWebAppTest
 
 def setup():
     indices.reset()
