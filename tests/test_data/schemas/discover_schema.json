@@ -1,1 +1,1 @@
-{"aliases": {}, "mappings": {"dynamic": "false", "properties": {"_meta": {"properties": {"timestamp": {"type": "date"}, "url": {"type": "keyword"}, "username": {"type": "keyword"}}}}}}
+{"aliases": {"discover_schema":{} }, "mappings": {"dynamic": "false", "properties": {"_meta": {"properties": {"timestamp": {"type": "date"}, "url": {"type": "keyword"}, "username": {"type": "keyword"}}}}}}
