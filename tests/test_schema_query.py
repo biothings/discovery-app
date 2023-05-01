@@ -4,7 +4,7 @@
 from biothings.tests.web import BiothingsTestCase
 
 class DiscoveryQueryTest(BiothingsTestCase):
-    TEST_DATA_DIR_NAME = 'tests/test_data/schemas'
+    TEST_DATA_DIR_NAME = 'schemas'
 
     def test_01_default(self):
         """
