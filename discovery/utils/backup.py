@@ -138,13 +138,13 @@ def restore_from_s3(filename=None, bucket="dde"):
 
     logging.info("GET s3://%s/%s", bucket, filename)
 
+    obj = s3.get_object(
+        Bucket=bucket,
+        Key=filename
+    )
 
-#    obj = s3.get_object(
-#        Bucket=bucket,
-#        Key=filename
-#    )
-#    dddeapis = json.loads(obj['Body'].read())
-#    _restore(dddeapis)
+    ddeapis = json.loads(obj['Body'].read())
+    backup_from_file(ddeapis)
 
 
 def restore_from_file(filename=None):
