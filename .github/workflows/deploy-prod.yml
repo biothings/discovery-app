@@ -1,0 +1,53 @@
+name: Deploy-to-EC2-Prod
+
+on: workflow_dispatch
+
+jobs:
+  deploy:
+    name: Deploy to EC2 manually
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Step 0 - Install APT Dependences
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev libxmlsec1-dev libxmlsec1-openssl libxml2 libxmlsec1 pkg-config
+
+      - name: Step 1 - Checkout the Files
+        uses: actions/checkout@v3
+
+      - name: Step 2 - Install Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '17.9.1'
+
+      - name: Step 3 - Build Frontend
+        run: |
+          cd nuxt-app
+          npm install
+          NODE_OPTIONS="--max-old-space-size=1512" npm run build
+
+      - name: Step 4 - Deploy to Prod Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SOURCE: "/"
+          SSH_PRIVATE_KEY: ${{ secrets.AWS_PROD_EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.AWS_PROD_HOST_DNS }}
+          REMOTE_USER: ${{ secrets.AWS_PROD_USERNAME }}
+          TARGET: ${{ secrets.AWS_PROD_TARGET_DIR }}
+          SCRIPT_AFTER: |
+            set -x
+            echo "Installing backend requirements."
+            cd /home/ubuntu/discovery
+            pip install -Ur requirements.txt --no-cache-dir --ignore-installed --force-reinstall
+            echo "Restarting discovery backend services..."
+            sudo systemctl restart discovery@8000
+            sleep 10
+            sudo systemctl restart discovery@8080
+            echo "Discovery backend services restarted!!!"
+            sleep 10
+            echo "Restarting discovery frontend services..."
+            sudo systemctl restart discovery-frontend@3000
+            sleep 10
+            sudo systemctl restart discovery-frontend@3080
+            echo "Discovery frontend services restarted!!!"
+            set +x
+            echo $RSYNC_STDOUT
