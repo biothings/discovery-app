@@ -9,21 +9,21 @@ from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema
 from discovery.registry import schemas
 
-class DocumentCoverageChecker():
 
+class DocumentCoverageChecker:
     classes_found = {}
     coverage = {}
 
     def percentage(self, part, whole):
-        return round(100 * float(part)/float(whole), 2)
+        return round(100 * float(part) / float(whole), 2)
 
     def check_field(self, meta_type, prop, value):
         if isinstance(value, dict):
             self.check_dictionary(value)
         else:
-            if not prop in ["_score", "_meta", "_ts", "_id", "@context", "@type"]:
+            if prop not in ["_score", "_meta", "_ts", "_id", "@context", "@type"]:
                 # ignore internal fields not relevant
-                if not prop in self.classes_found[meta_type]:
+                if prop not in self.classes_found[meta_type]:
                     # property comes from schema not metadata
                     # property exists but not found yet
                     if value == "SCHEMA PROPERTY":
@@ -33,7 +33,7 @@ class DocumentCoverageChecker():
                 else:
                     self.classes_found[meta_type][prop] += 1
             else:
-                logging.info('skipping internal field: ', prop)
+                logging.info("skipping internal field: ", prop)
 
     def check_dictionary(self, doc):
         meta_type = doc.get("@type", None)
@@ -41,9 +41,9 @@ class DocumentCoverageChecker():
             if ":" not in meta_type:
                 # default schema.org prefix
                 meta_type = "schema:" + meta_type
-            if not meta_type in self.classes_found:
+            if meta_type not in self.classes_found:
                 # will be the 100% #
-                self.classes_found[meta_type] = {'_count': 1}
+                self.classes_found[meta_type] = {"_count": 1}
                 # get schema for this meta type class
                 try:
                     schema_class = schemas.get_class(meta_type.split(":")[0], meta_type)
@@ -51,25 +51,25 @@ class DocumentCoverageChecker():
                     for prop in schema_properties:
                         self.check_field(meta_type, prop["label"], "SCHEMA PROPERTY")
                 except:
-                    logging.info('schema for this class does not exist:', meta_type)
+                    logging.info("schema for this class does not exist:", meta_type)
             else:
-                self.classes_found[meta_type]['_count'] += 1
+                self.classes_found[meta_type]["_count"] += 1
             for prop, value in doc.items():
-                    self.check_field(meta_type, prop, value)
+                self.check_field(meta_type, prop, value)
         else:
             logging.info(f"Doc has no @type: {doc}")
 
     def restructure_results(self):
-        for k,v in self.classes_found.items():
+        for k, v in self.classes_found.items():
             # sort in ascending order
             v = dict(sorted(v.items(), key=lambda item: item[1]))
-            count = v['_count']
+            count = v["_count"]
             # delete temp count so it's not included
-            v.pop('_count', None)
+            v.pop("_count", None)
             for key, val in v.items():
-                if not k in self.coverage:
-                    self.coverage[k] = {'coverage': {}, 'count': count}
-                self.coverage[k]['coverage'][key] = self.percentage(val, count)
+                if k not in self.coverage:
+                    self.coverage[k] = {"coverage": {}, "count": count}
+                self.coverage[k]["coverage"][key] = self.percentage(val, count)
 
 
 def get_coverage():
@@ -82,12 +82,8 @@ def get_coverage():
     for doc in docs:
         doc = doc.to_dict()
         checker.check_dictionary(doc)
-    checker.restructure_results();
-    new_meta = {
-        "_meta": {
-            "metadata_coverage": checker.coverage
-        }
-    }
+    checker.restructure_results()
+    new_meta = {"_meta": {"metadata_coverage": checker.coverage}}
     s = Schema()
     s.update_index_meta(new_meta)
-    print('Coverage update complete')
+    print("Coverage update complete")
