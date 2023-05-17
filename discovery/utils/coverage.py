@@ -72,7 +72,7 @@ class DocumentCoverageChecker:
                 self.coverage[k]["coverage"][key] = self.percentage(val, count)
 
 
-def get_coverage():
+def daily_coverage_update():
     """
     Look through metadata and calculate field coverage per class instance
     """
