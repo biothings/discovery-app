@@ -6,12 +6,13 @@ from threading import Thread
 from aiocron import crontab
 from biothings.web.launcher import main
 from filelock import FileLock, Timeout
-from tornado.options import options, define
+from tornado.options import define, options
 
 from discovery.handlers import HANDLERS
+from discovery.handlers.proxy import ProxyHandler
 from discovery.notify import update_n3c_routine
 from discovery.utils.backup import daily_backup_routine
-from discovery.handlers.proxy import ProxyHandler
+from discovery.utils.coverage import daily_coverage_update
 from discovery.utils.update import daily_schema_update
 
 define("proxy_url", default="http://localhost:3000/", help="localhost port serving frontend")
@@ -39,6 +40,8 @@ def routine():
         daily_backup_routine()
         logger.info("daily_schema_update()")
         daily_schema_update()
+        logger.info("daily_coverage_update()")
+        daily_coverage_update()
 
 
 def run_routine():
