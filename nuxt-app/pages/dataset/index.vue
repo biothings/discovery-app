@@ -736,7 +736,7 @@ export default {
       self.all_filters[item.type].forEach((gf) => {
         if (
           gf.value == item.value ||
-          gf.template_aliases.includes(item.value.toLowerCase())
+          gf?.template_aliases?.includes(item.value.toLowerCase())
         ) {
           gf.active = !gf.active;
           // console.log(gf);
