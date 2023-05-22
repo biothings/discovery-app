@@ -3,7 +3,7 @@ name: Deploy-to-EC2-Dev
 on:
   push:
     branches:
-      - vue3-app
+      - main
 
 jobs:
   deploy:
