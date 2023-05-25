@@ -33,7 +33,8 @@ class DocumentCoverageChecker:
                 else:
                     self.classes_found[meta_type][prop] += 1
             else:
-                logging.info("skipping internal field: ", prop)
+                logging.info("skipping internal field: %s", prop)
+
 
     def check_dictionary(self, doc):
         meta_type = doc.get("@type", None)
@@ -51,7 +52,7 @@ class DocumentCoverageChecker:
                     for prop in schema_properties:
                         self.check_field(meta_type, prop["label"], "SCHEMA PROPERTY")
                 except:
-                    logging.info("schema for this class does not exist:", meta_type)
+                    logging.info("schema for this class does not exist: %s", meta_type)
             else:
                 self.classes_found[meta_type]["_count"] += 1
             for prop, value in doc.items():
