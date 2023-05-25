@@ -33,7 +33,7 @@ class DocumentCoverageChecker:
                 else:
                     self.classes_found[meta_type][prop] += 1
             else:
-                logging.info("skipping internal field: ", prop)
+                logging.info("skipping internal field: {0}".format(prop))
 
     def check_dictionary(self, doc):
         meta_type = doc.get("@type", None)
