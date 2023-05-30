@@ -131,7 +131,7 @@ export default {
   props: ["item"],
   methods: {
     saveDataAndRedirect(item, goesToEditor) {
-      console.log(item, goesToEditor)
+      console.log(item, goesToEditor);
       if (goesToEditor) {
         // Extend and send analytics
         if (item && item.namespace && item.label && item.prefix) {

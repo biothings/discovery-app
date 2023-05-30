@@ -436,6 +436,7 @@ export default {
             name: "IRB Required",
             value: "PPRL",
             active: false,
+            template_aliases: ["pprl"],
             icon: "N3Co.png",
             type: "name",
             tip: "Institutional Review Board Required",
