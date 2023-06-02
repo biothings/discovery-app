@@ -3,7 +3,7 @@
     <div class="col-sm-10 alert-dark text-muted p-2 rounded-left border-dark">
       <h5>
         <font-awesome-icon icon="fas fa-circle" class="text-info mr-2" />
-        <nuxt-link :to="{ path: '/ns/' + preset.prefix + '/' + preset.name }">
+        <nuxt-link :to="{ path: `/ns/${preset.namespace}/${preset.prefix}:${preset.name}`}">
           {{ preset.prefix }}:{{ preset.name }}
         </nuxt-link>
       </h5>
