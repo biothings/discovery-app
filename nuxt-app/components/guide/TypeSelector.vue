@@ -679,8 +679,8 @@ export default {
         `</form>
                 </div>`;
 
-      self
-        .$swal({
+      self.$swal
+        .fire({
           title: propName,
           inputAttributes: {
             id: "hideThis",

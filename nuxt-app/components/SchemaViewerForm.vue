@@ -10,7 +10,7 @@
         required
         ref="my_input"
         aria-label="Paste your link here"
-        placeholder="Paste your link here"
+        placeholder="Paste your link here. (Raw data link)"
         aria-describedby="button-addon2"
       />
       <div class="input-group-append">
@@ -69,34 +69,37 @@ export default {
   },
   watch: {
     input: function (value) {
+      let self = this;
       if (value.includes("blob") || value.includes("github.com")) {
         this.suggestedURL = value
           .replace("blob/", "")
           .replace("github.com", "raw.githubusercontent.com")
           .replace("www.github.com", "raw.githubusercontent.com");
-        this.$swal({
-          title: "Link Converted",
-          imageUrl: dde_logo,
-          imageHeight: 100,
-          imageAlt: "Warning",
-          customClass: "scale-in-center",
-          html:
-            "<p>We noticed that was not a raw data link. We have converted it to: </p> " +
-            '<p><a target="_blank" href="' +
-            this.suggestedURL +
-            '">' +
-            this.suggestedURL +
-            "</a></p>" +
-            "<p>Proceed with this link?</p>",
-          showCancelButton: true,
-          confirmButtonColor: "#5C3069",
-          cancelButtonColor: "#006476",
-          confirmButtonText: "Yes, use this link!",
-        }).then((result) => {
-          if (result.value) {
-            this.input = this.suggestedURL;
-          }
-        });
+        this.$swal
+          .fire({
+            title: "Link Converted",
+            imageUrl: dde_logo,
+            imageHeight: 100,
+            imageAlt: "Warning",
+            customClass: "scale-in-center",
+            html:
+              "<p>We noticed that was not a raw data link. We have converted it to: </p> " +
+              '<p><a target="_blank" href="' +
+              self.suggestedURL +
+              '">' +
+              self.suggestedURL +
+              "</a></p>" +
+              "<p>Proceed with this link?</p>",
+            showCancelButton: true,
+            confirmButtonColor: "#5C3069",
+            cancelButtonColor: "#006476",
+            confirmButtonText: "Yes, use this link!",
+          })
+          .then((result) => {
+            if (result.value) {
+              self.input = self.suggestedURL;
+            }
+          });
       }
     },
   },
@@ -118,7 +121,7 @@ export default {
         }
         self.makeURLandRedirect();
       } else {
-        this.$swal({
+        this.$swal.fire({
           imageUrl: not_right,
           imageHeight: 200,
           imageAlt: "Error",
@@ -142,7 +145,7 @@ export default {
         }
         self.makeURLandRedirect();
       } else {
-        this.$swal({
+        this.$swal.fire({
           imageUrl: oh_no,
           imageHeight: 200,
           icon: "Error",

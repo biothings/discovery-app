@@ -465,7 +465,7 @@ export default {
         modal.style.display = "none";
         self.makeURLandRedirect();
       } else {
-        self.$swal("Error parsing schema", "No classes found", "error");
+        self.$swal.fire("Error parsing schema", "No classes found", "error");
       }
     },
     sendRequest(url, backupURL = "") {
@@ -572,7 +572,7 @@ export default {
 
         self.sendRequest(master_url, main_url);
 
-        // self.$swal({
+        // self.$swal.fire({
         //   title: 'Link Converted',
         //   imageAlt: 'Warning',
         //   animation:false,
