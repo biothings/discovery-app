@@ -893,7 +893,7 @@ export default {
           for (var eIndex = 0; eIndex < e.length; eIndex++) {
             optionsenum[e[eIndex]] = e[eIndex];
           }
-          self.$swal({
+          self.$swal.fire({
             title: propName,
             input: "select",
             inputOptions: optionsenum,
@@ -947,8 +947,8 @@ export default {
             `</form>
                     </div>`;
 
-          self
-            .$swal({
+          self.$swal
+            .fire({
               title: propName,
               inputAttributes: {
                 id: "hideThis",
@@ -1034,7 +1034,7 @@ export default {
         // console.log('path',path)
         switch (path) {
           case "string":
-            self.$swal({
+            self.$swal.fire({
               title: propName,
               input: "text",
               inputPlaceholder: "Enter text here",
@@ -1097,7 +1097,7 @@ export default {
               );
             } else {
               // if options, user chooses type
-              self.$swal({
+              self.$swal.fire({
                 title: "Select type of " + propName,
                 input: "select",
                 inputOptions: options,
@@ -1148,7 +1148,7 @@ export default {
           );
         } else {
           // if options, user chooses type
-          self.$swal({
+          self.$swal.fire({
             title: "Select type of " + propName,
             input: "select",
             inputOptions: options,

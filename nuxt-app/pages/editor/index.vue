@@ -1215,7 +1215,7 @@ export default {
         payload["start"] = startingPoint;
         this.$store.commit("saveSchemaForEditor", payload);
       } else {
-        self.$swal({
+        self.$swal.fire({
           title: "No Schema Selected",
           imageAlt: "Warning",
           html:
