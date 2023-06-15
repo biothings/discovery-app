@@ -18,7 +18,7 @@ if (portal_name) {
   switch (portal_name) {
     case "niaid":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/zf6HqKY4/niaidportal.jpg";
+      featuredImg = "https://i.postimg.cc/J0QNFjbc/niaidportal.jpg";
       break;
     case "outbreak":
       portal = portals.find((item) => item.keyName == portal_name);
