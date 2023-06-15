@@ -39,7 +39,7 @@ export const portals = {
       },
       {
         name: "NIAID Systems Biology",
-        shortName: "NIAID",
+        shortName: "NIAID SysBio",
         keyName: "niaid",
         header:
           "The NIAID Systems Biology Consortium for Infectious Diseases Data Dissemination Working Group works to make our research outputs more FAIR.",
