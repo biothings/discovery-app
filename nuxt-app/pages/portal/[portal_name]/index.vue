@@ -172,7 +172,7 @@ useHead({
         <div
           class="col-sm-12 col-md-8 py-5 d-flex justify-content-center align-items-center"
         >
-          <div>
+          <div class="container">
             <div class="d-flex justify-content-start align-items-center">
               <img
                 :src="portal.portalicon"
@@ -184,8 +184,8 @@ useHead({
                 <span v-text="portal.name"></span>
               </h1>
             </div>
-            <h5 class="mt-3" v-text="portal.header"></h5>
-            <div class="text-muted" v-html="portal.description"></div>
+            <h5 class="my-3 text-dark" v-text="portal.header"></h5>
+            <div class="text-dark" v-html="portal.description"></div>
             <div
               class="border-top text-left text-muted p-2"
               v-if="portal.publications"

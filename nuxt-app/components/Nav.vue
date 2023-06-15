@@ -1,9 +1,12 @@
 <script setup>
 import Login from "./Login.vue";
 import { useStore } from "vuex";
+import { ref } from 'vue';
 
 let store = useStore();
 let portals = store.getters.getPortals;
+let menu = ref(false);
+
 </script>
 <template>
   <header id="header">
@@ -33,11 +36,14 @@ let portals = store.getters.getPortals;
         aria-controls="navbarSupportedContent"
         aria-expanded="false"
         aria-label="Toggle navigation"
+        @click="menu = !menu"
+
       >
-        <span class="navbar-toggler-icon"></span>
+        Menu
       </button>
       <div
-        class="collapse navbar-collapse justify-content-end"
+        :class="!menu ? 'collapse ' : ''"
+        class="navbar-collapse justify-content-end"
         id="navbarSupportedContent"
       >
         <ul class="navbar-nav" id="user_link">

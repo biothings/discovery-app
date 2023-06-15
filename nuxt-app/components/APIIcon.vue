@@ -7,7 +7,7 @@ const props = defineProps(["color"]);
     x="0px"
     y="0px"
     viewBox="0 0 290.8 288.2"
-    style="enable-background: new 0 0 290.8 288.2; width: 100"
+    style="enable-background: new 0 0 290.8 288.2; width: 100px"
     xml:space="preserve"
   >
     <g id="p6GB5o_00000035501811217998549420000001654671662498870918_">
