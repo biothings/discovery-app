@@ -57,11 +57,13 @@ function loadContent(target) {
     ],
   });
 
-  editor = new EditorView({
-    state,
-    parent: document.body.querySelector(target),
-  });
-
+  setTimeout(() => {
+    // give UI time to render container needed for editor
+    editor = new EditorView({
+      state,
+      parent: document.body.querySelector(target),
+    });
+  }, 500);
   // let value = editor.state.doc;
   // console.log(value);
 }
