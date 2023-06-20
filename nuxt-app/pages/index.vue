@@ -352,6 +352,7 @@ export default {
     },
   },
   mounted: function () {
+    console.log("ROUTER", this.$router.currentRoute?.value?.path?.value?.path)
     this.bestPractices = tippy("#bestPractices", {
       interactive: true,
       arrow: true,

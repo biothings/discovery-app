@@ -13,7 +13,7 @@
         <p class="text-muted">
           Follow best practices to make your metadata more findable
         </p>
-        <a :href="'/dataset?guide=' + $router.currentRoute"
+        <a :href="'/dataset?guide=' + $router.currentRoute?.value?.path"
           >Browse other registered metadata using this guide
           <font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon
         ></a>
@@ -144,7 +144,7 @@
             </span>
             <a
               class="nav-link active text-primary mr-2"
-              :href="'/login?next=' + $router.currentRoute"
+              :href="'/login?next=' + $router.currentRoute?.value?.path"
               v-if="userInfo && !userInfo.login"
             >
               <span
@@ -261,7 +261,7 @@
           <div class="alert text-danger text-center p-5">
             <h5>You must be logged in to proceed</h5>
             <h6>
-              <a :href="'/login?next=' + $router.currentRoute"
+              <a :href="'/login?next=' + $router.currentRoute?.value?.path"
                 >click here to log in</a
               >
             </h6>
@@ -362,7 +362,7 @@
               </div>
             </template>
             <template v-else>
-              <template v-if="$router.currentRoute == '/guide/n3c/dataset'">
+              <template v-if="$router.currentRoute?.value?.path == '/guide/n3c/dataset'">
                 <h1 class="logoText">N3C Dataset Request</h1>
                 <div class="p-5 text-center m-3">
                   <img
@@ -663,7 +663,7 @@ export default {
 
               self.$gtag.event("click", {
                 event_category: "dataset_edited",
-                event_label: self.$router.currentRoute,
+                event_label: self.$router.currentRoute?.value?.path,
                 event_value: 1,
               });
 
@@ -1035,11 +1035,11 @@ export default {
 
               self.$gtag.event("click", {
                 event_category: "dataset_added",
-                event_label: self.$router.currentRoute,
+                event_label: self.$router.currentRoute?.value?.path,
                 event_value: 1,
               });
 
-              if (self.$router.currentRoute == "/guide/n3c/dataset") {
+              if (self.$router.currentRoute?.value?.path == "/guide/n3c/dataset") {
                 self.$swal.fire({
                   icon: "success",
                   title: "Registration Successful",

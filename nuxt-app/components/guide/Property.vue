@@ -35,7 +35,7 @@
         <template v-if="allMode && validation">
           <!-- 🌈  ALL MODE 🌈 -->
           <div class="p-0">
-            <template v-if="$router.currentRoute == '/guide/n3c/dataset'">
+            <template v-if="$router.currentRoute?.value?.path == '/guide/n3c/dataset'">
               <div class="mainTextDark row m-0">
                 <div class="col-sm-10 p-1 text-left p-2">
                   <h6>
