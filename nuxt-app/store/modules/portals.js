@@ -70,7 +70,7 @@ export const portals = {
           },
         ],
         datasets: "/dataset?template=niaid:dataset",
-        colors: [{ hex: "#369AC1" }, { hex: "#113B56" }],
+        colors: [{ hex: "#7630dd" }, { hex: "#113B56" }],
         publications: [
           {
             name: "Developing a standardized but extendable framework to increase the findability of infectious disease datasets",
