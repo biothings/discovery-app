@@ -220,7 +220,7 @@ class DatasetNotifier(Notifier):
             profile = SimpleNamespace()
             profile.project_id = "10016"  # External Dataset project
             profile.issuetype_id = "10024"
-            profile.assignee_id = "5c708335e1bcdf6294d0c85e"  # Liz
+            profile.assignee_id = "62604faab8be7c006a454e08"  # sruthi
             profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"  # cwu
             profile.label = "DATASET"
             self.channels.append(
