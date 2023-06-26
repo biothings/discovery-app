@@ -180,7 +180,7 @@ class DatasetMessage(Message):
         return doc
 
     # override
-    def to_ADF(self):   # noqa N802
+    def to_ADF(self):  # noqa N802
         """
         Attach dataset metadata details at the end of the message.
         Use pyadf to build complex document structures. See documentation:
@@ -233,7 +233,6 @@ class DatasetNotifier(Notifier):
 
     @staticmethod
     def get_portal_image(guide=""):
-
         for portal, url in {
             "outbreak": "https://discovery.biothings.io/static/img/outbreak.png",
             "niaid": "https://discovery.biothings.io/static/img/niaid.png",
@@ -246,36 +245,43 @@ class DatasetNotifier(Notifier):
     def add(self, _id, doc, user, **meta):
         """return an iterator of HTTPRequest instances during add event"""
         for channel in self.channels:
-
             if isinstance(channel, N3CChannel):
                 if meta.get("class_id") == "n3c::n3c:Dataset":
+                    client = HTTPClient()
                     # check if the user has a registered account first
-                    results = yield channel.sends_query(user)
+                    # results = yield channel.sends_query(user)
+                    results = client.fetch(channel.sends_query(user))
                     results = json.loads(results.body)
 
                     if results:
                         userid = results[0]["accountId"]
                     elif "@" in user:
                         # register this user by email if not registered yet
-                        yield
-                        userid = yield channel.sends_signup(user)
+                        # yield
+                        # userid = yield channel.sends_signup(user)
+                        userid = client.fetch(channel.sends_signup(user))
                         userid = json.loads(userid.body)
                         userid = userid["accountId"]
 
                     else:  # no email address, cannot register
                         userid = None
-                    yield  # this will return None for requests.send(response)
-                    response = yield from channel.send(
-                        DatasetMessage(
-                            {
-                                "title": "External Dataset Request",  # customized title
-                                "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
-                                "url": f"http://discovery.biothings.io/dataset/{_id}",
-                                "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
-                                "reporter": userid,  # registered user id basing on email
-                                "doc": doc,  # produce additional jira ticket content
-                            }
-                        )
+                    # yield  # this will return None for requests.send(response)
+                    # response = yield from channel.send(
+                    response = client.fetch(
+                        list(
+                            channel.send(
+                                DatasetMessage(
+                                    {
+                                        "title": "External Dataset Request",  # customized title
+                                        "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+                                        "url": f"http://discovery.biothings.io/dataset/{_id}",
+                                        "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
+                                        "reporter": userid,  # registered user id basing on email
+                                        "doc": doc,  # produce additional jira ticket content
+                                    }
+                                )
+                            )
+                        )[0]
                     )
 
                     if response.code == 201:
@@ -291,7 +297,7 @@ class DatasetNotifier(Notifier):
                             dataset.update(_n3c={"url": url})
                         except Exception as exc:
                             logging.error(str(exc))
-                    yield  # this will return None for requests.send(response)
+                    # yield  # this will return None for requests.send(response)
             else:  # all other channels
                 yield from channel.send(
                     DatasetMessage(
@@ -305,10 +311,9 @@ class DatasetNotifier(Notifier):
                         }
                     )
                 )
-                yield  # this will return None for requests.send(response)
+                # yield  # this will return None for requests.send(response)
 
     def delete(self, _id, name, user):
-
         message = DatasetMessage(
             {
                 "title": "Dataset Metadata Deleted",
@@ -318,7 +323,6 @@ class DatasetNotifier(Notifier):
         return self.broadcast(message)
 
     def update(self, _id, name, version, user):
-
         message = DatasetMessage(
             {
                 "title": "Dataset Metadata Updated",
@@ -390,9 +394,11 @@ def update_n3c_status(_id):
 
 
 def update_n3c_routine():
+    from discovery.model.dataset import Dataset
+
     logger = logging.getLogger("update_n3c")
     logger.info("Updating status for all N3C datasets...")
-    datasets = ESDataset.search().query("exists", field="_n3c.url")
+    datasets = Dataset.search().query("exists", field="_n3c.url")
     datasets = datasets.source(False).scan()
 
     _cnt = 0
