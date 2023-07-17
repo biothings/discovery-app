@@ -484,7 +484,7 @@ class SchemaHandler(APIBaseHandler):
                 if curie in metadata["@graph"][i]["@id"]:
                     # property search
                     if metadata["@graph"][i]["@type"] == "rdf:Property":
-                        print(metadata["@graph"][i])
+                        # print(metadata["@graph"][i])
                         property_list.append(metadata["@graph"][i])
                         break
                     # class search
@@ -507,7 +507,7 @@ class SchemaHandler(APIBaseHandler):
                 property_list = self.graph_data_filter(metadata, curie_str, property_list)
         elif isinstance(curie, list):
             for curie_str in curie:
-                property_list = self.graph_data_filter(metadata, curie_str, property_list)
+                proddeperty_list = self.graph_data_filter(metadata, curie_str, property_list)
         # elif isinstance(curie, tuple): -- may need to add expection for tuple input? (discussed vaguely w/ Dr. Wu)
         else:
             raise HTTPError(400, reason="Unidentified curie input request")
@@ -543,11 +543,13 @@ class SchemaHandler(APIBaseHandler):
             # get namespace from user request -- expect only one
             if "," in curie:
                 ns = curie.split(",")[0].split(":")[0]  # n3c:prop1, n3c:prop2
+                class_id = curie.split(",")[0].split(":")[1]
                 ns_list = list(set([x.split(":")[0] for x in curie.split(",")]))
                 if len(ns_list) > 1:
                     raise HTTPError(400, reason="Too many schemas(namespaces) requested")
             else:
                 ns = curie.split(":")[0]
+                class_id=curie.split(":")[1]
             try:
                 schema_metadata = schemas.get(ns)
             except Exception as ns_error:
@@ -556,11 +558,30 @@ class SchemaHandler(APIBaseHandler):
                 )
             # ./api/schema/{ns}:{class_id}/validation
             if validation:
+                
+                # error handling
+                if '@graph' not in schema_metadata:
+                    if ns == 'schema':
+                        raise HTTPError(
+                            500, reason=f"Schema.org class element does not contain validation field."
+                        )
+
+                # go through graph elements and identify if the class exists
                 for data_dict in schema_metadata["@graph"]:
-                    if data_dict["@id"] == curie:
-                        validation_dict = data_dict.get("$validation", {})
+                    if data_dict["@id"] == curie: 
+                        try:
+                            validation_dict = data_dict.get("$validation", {})
+                        except Exception as validation_error:
+                            raise HTTPError(
+                            500, reason=f"Validation does not exist in field."
+                        )
                         break
+                    else:
+                        raise HTTPError(
+                            500, reason=f"Given class does not exist in schema"
+                        )
                 self.finish(validation_dict)
+
             # ./api/schema/{ns}:{search_key}
             else:
                 schema_metadata.pop("_id")
