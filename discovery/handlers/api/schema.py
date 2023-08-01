@@ -454,6 +454,7 @@ class SchemaHandler(APIBaseHandler):
         Extract the properties that belong to the requested (schema)class,
         and append that to a property list to return.
         """
+
         property_list = []
         for data_dict in metadata["@graph"]:
             if data_dict["@type"] == "rdf:Property":
@@ -481,6 +482,7 @@ class SchemaHandler(APIBaseHandler):
         Filter the requested schema(namespace) metadata
         Traverse the `@graph` data and filter data based on requested query
         """
+
         for i in range(len(metadata["@graph"])):
             try:
                 if curie in metadata["@graph"][i]["@id"]:
@@ -523,9 +525,9 @@ class SchemaHandler(APIBaseHandler):
         Fetch  - GET ./api/schema/{ns}:{class_id}/validation
         Fetch  - GET ./api/schema/{ns}:{property_id}
         Fetch  - GET ./api/schema/{ns}?meta=1
-        """
+        """    
 
-        # start by splitting the curie to get user request
+        # Start by splitting the curie to get user request
         # if no curie is given, throw error
         if curie is None:
             raise HTTPError(
@@ -604,6 +606,15 @@ class SchemaHandler(APIBaseHandler):
             # ./api/schema/{ns}:{search_key}
             else:
                 schema_metadata.pop("_id")
+                if "@graph" not in schema_metadata and ns != "schema":
+                    raise HTTPError(
+                    404, reason= f"Data missing - '@graph' field is missing from {ns} metadata."
+            )
+                if "@graph" not in schema_metadata and ns == "schema":
+                    raise HTTPError(
+                    404, reason= f"Cannot retrieve schema.org metadata this way."
+            )
+
                 self.finish(self.get_curie(schema_metadata, curie))
 
 
