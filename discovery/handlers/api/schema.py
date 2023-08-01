@@ -449,7 +449,8 @@ class SchemaHandler(APIBaseHandler):
     }
 
     def class_property_filter(self, metadata, class_id):
-        """Filter Schema Properties by class(domain)
+        """ 
+        Filter Schema Properties by class(domain)
         Extract the properties that belong to the requested (schema)class,
         and append that to a property list to return.
         """
@@ -476,7 +477,8 @@ class SchemaHandler(APIBaseHandler):
         return property_list
 
     def graph_data_filter(self, metadata, curie, property_list):
-        """Filter the requested schema(namespace) metadata
+        """
+        Filter the requested schema(namespace) metadata
         Traverse the `@graph` data and filter data based on requested query
         """
         for i in range(len(metadata["@graph"])):
@@ -522,23 +524,29 @@ class SchemaHandler(APIBaseHandler):
         Fetch  - GET ./api/schema/{ns}:{property_id}
         Fetch  - GET ./api/schema/{ns}?meta=1
         """
+
+        # start by splitting the curie to get user request
+        # if no curie is given, throw error
         if curie is None:
             raise HTTPError(
                 400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'"
             )
-        # ./api/schema/{ns}
+        # pattern identified: ./api/schema/{ns} - namespace only
         elif ":" not in curie:
             try:
-                schema_metadata = schemas.get(curie)  # use registry to get schema
+                # get schema from given namespace, and return schema metadata
+                schema_metadata = schemas.get(curie)
                 # when the meta arg is passed, ?meta=1, display the _status
                 if self.args.meta == 1:
                     schema_metadata["_meta"] = schema_metadata.meta
                 schema_metadata.pop("_id")
+            # catch errors and provide error feedback
             except Exception as ns_error:
                 raise HTTPError(
                     400, reason=f"Error retrieving namespace, {curie}, with exception {ns_error}"
                 )
             self.finish(json.dumps(schema_metadata, indent=4, default=str))
+        # pattern identified: ./api/schema/{ns}:{class_id|property_id} - namespace & curie value
         else:
             # get namespace from user request -- expect only one
             if "," in curie:
@@ -546,40 +554,51 @@ class SchemaHandler(APIBaseHandler):
                 class_id = curie.split(",")[0].split(":")[1]
                 ns_list = list(set([x.split(":")[0] for x in curie.split(",")]))
                 if len(ns_list) > 1:
-                    raise HTTPError(400, reason="Too many schemas(namespaces) requested")
+                    raise HTTPError(
+                        400, reason="Too many schemas(namespaces) requested"
+                )
             else:
                 ns = curie.split(":")[0]
                 class_id=curie.split(":")[1]
+            # get the schema from given namespace
             try:
                 schema_metadata = schemas.get(ns)
+            # catch errors and return feedback
             except Exception as ns_error:
                 raise HTTPError(
                     400, reason=f"Error retrieving namespace, {ns}, with exception {ns_error}"
                 )
-            # ./api/schema/{ns}:{class_id}/validation
+            # pattern identified: ./api/schema/{ns}:{class_id}/validation - validation request
             if validation:
-                
                 # error handling
+                # cathces missing `@graph` field -- add this error check
+                # will be a schema namespace, else error 
                 if '@graph' not in schema_metadata:
+                    print()
+                    print(schema_metadata)
                     if ns == 'schema':
                         raise HTTPError(
-                            500, reason=f"Schema.org class element does not contain validation field."
+                            404, reason=f"Schema.org class does not contain validation field."
+                        )
+                    else:
+                        raise HTTPError(
+                            400, reason=f"Schema metadata is not defined correctly, missing `@graph` field."
                         )
 
                 # go through graph elements and identify if the class exists
+                # --double check schema_metadata is list / data_dict["@id"] data type dict : else raise 400
+                validation_dict = {}
+                class_match_found=False
                 for data_dict in schema_metadata["@graph"]:
-                    if data_dict["@id"] == curie: 
-                        try:
-                            validation_dict = data_dict.get("$validation", {})
-                        except Exception as validation_error:
-                            raise HTTPError(
-                            500, reason=f"Validation does not exist in field."
-                        )
+                    # check type of the class -- 
+                    if data_dict["@id"] == curie:
+                        validation_dict = data_dict.get("$validation", {})
+                        class_match_found=True
                         break
-                    else:
-                        raise HTTPError(
-                            500, reason=f"Given class does not exist in schema"
-                        )
+                if not class_match_found:
+                    raise HTTPError(
+                        400, reason=f"Schema metadata is not defined correctly, given class does not exist in schema."
+                    )
                 self.finish(validation_dict)
 
             # ./api/schema/{ns}:{search_key}
