@@ -48,26 +48,37 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
 
     def test_01_get(self):
         """
+        Case: 
         {
-            "code": 500,
+            "code": 400,
             "success": false,
-            "error": "Given class does not exist"
+            "error": "Schema metadata is not defined correctly, given class does not exist in schema."
         }
         """
-        self.request("schema/n3c:Thing/validation", method="GET", expect=500)
+        self.request("schema/n3c:Thing/validation", method="GET", expect=400)
 
     def test_02_get(self):
         """
+
         {
-            "code": 500,
+            "code": 404,
             "success": false,
-            "error": "Schema.org class element does not contain validation field."
+            "error": "Schema.org class does not contain validation field."
         }
         """
-        self.request("schema/schema:ExerciseGym/validation", method="GET", expect=500)
+        self.request("schema/schema:ExerciseGym/validation", method="GET", expect=404)
 
     def test_03_get(self):
         """
         """
         res = self.request("schema/n3c:Dataset/validation").json()
         assert res['properties']
+
+    # http://localhost:8000/api/schema/schema:Dataset
+    # http://localhost:8000/api/schema/Dataset
+    
+
+# Random errors -
+# invalid currie
+
+# missing prefix ...
