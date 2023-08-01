@@ -70,15 +70,29 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
 
     def test_03_get(self):
         """
+        Testing 
         """
         res = self.request("schema/n3c:Dataset/validation").json()
-        assert res['properties']
+        assert res['properties']['name']
+        assert res['properties']['description']
+        assert res['properties']['author']
 
-    # http://localhost:8000/api/schema/schema:Dataset
-    # http://localhost:8000/api/schema/Dataset
-    
+    def test_04_get(self):
+        """
+        {
+        "code": 400,
+        "success": false,
+        "error": "Error retrieving namespace, nc, with exception schema 'nc' does not exist."
+        }
+        """
+        self.request("schema/nc:Dataset/validation",  method="GET", expect=400)
 
-# Random errors -
-# invalid currie
-
-# missing prefix ...
+    def test_05_get(self):
+        """
+        {
+        "code": 400,
+        "success": false,
+        "error": "Schema metadata is not defined correctly, given class does not exist in schema."
+        }
+        """
+        self.request("schema/n3c:Datt/validation",  method="GET", expect=400)
