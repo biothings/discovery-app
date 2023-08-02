@@ -48,7 +48,7 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
 
     def test_01_get(self):
         """
-        Case: 
+        Test case: a given schema exists and class does not exist.
         {
             "code": 400,
             "success": false,
@@ -56,10 +56,22 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         }
         """
         self.request("schema/n3c:Thing/validation", method="GET", expect=400)
-
+    
     def test_02_get(self):
         """
+        Test case: a given schema exists(is not schema.org) and class does not exist. 
+        {
+        "code": 400,
+        "success": false,
+        "error": "Schema metadata is not defined correctly, given class does not exist in schema."
+        }
+        """
+        self.request("schema/n3c:Datt/validation",  method="GET", expect=400)
 
+
+    def test_03_get(self):
+        """
+        Test case: attempt to validate a schema.org class -- validation field unavailable for schema.org.
         {
             "code": 404,
             "success": false,
@@ -68,17 +80,18 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         """
         self.request("schema/schema:ExerciseGym/validation", method="GET", expect=404)
 
-    def test_03_get(self):
+    def test_04_get(self):
         """
-        Testing 
+        Test case: given curie exists, check for accuracy. 
         """
         res = self.request("schema/n3c:Dataset/validation").json()
         assert res['properties']['name']
         assert res['properties']['description']
         assert res['properties']['author']
 
-    def test_04_get(self):
+    def test_05_get(self):
         """
+        Test case: given namespace does not exist.
         {
         "code": 400,
         "success": false,
@@ -87,12 +100,3 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         """
         self.request("schema/nc:Dataset/validation",  method="GET", expect=400)
 
-    def test_05_get(self):
-        """
-        {
-        "code": 400,
-        "success": false,
-        "error": "Schema metadata is not defined correctly, given class does not exist in schema."
-        }
-        """
-        self.request("schema/n3c:Datt/validation",  method="GET", expect=400)
