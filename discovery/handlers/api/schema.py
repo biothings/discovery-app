@@ -488,7 +488,6 @@ class SchemaHandler(APIBaseHandler):
                 if curie in metadata["@graph"][i]["@id"]:
                     # property search
                     if metadata["@graph"][i]["@type"] == "rdf:Property":
-                        # print(metadata["@graph"][i])
                         property_list.append(metadata["@graph"][i])
                         break
                     # class search
@@ -576,8 +575,6 @@ class SchemaHandler(APIBaseHandler):
                 # cathces missing `@graph` field -- add this error check
                 # will be a schema namespace, else error 
                 if '@graph' not in schema_metadata:
-                    print()
-                    print(schema_metadata)
                     if ns == 'schema':
                         raise HTTPError(
                             404, reason=f"Schema.org class does not contain validation field."
