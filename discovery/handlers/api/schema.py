@@ -449,7 +449,7 @@ class SchemaHandler(APIBaseHandler):
     }
 
     def class_property_filter(self, metadata, class_id):
-        """ 
+        """
         Filter Schema Properties by class(domain)
         Extract the properties that belong to the requested (schema)class,
         and append that to a property list to return.
@@ -516,16 +516,12 @@ class SchemaHandler(APIBaseHandler):
         metadata["@graph"] = property_list
         return metadata
 
-
-    ########################################
-
     def check_key_presence(self, schema_metadata, key, ns):
         if key not in schema_metadata:
             if ns == 'schema':
-                raise HTTPError(404, reason=f"Metadata from schema.org cannot be retrieved this way.")
+                raise HTTPError(404, reason="Metadata from schema.org cannot be retrieved this way.")
             else:
                 raise HTTPError(400, reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.")
-
 
     def handle_validation_request(self, curie, schema_metadata):
         ns=curie.split(":")[0]
@@ -565,11 +561,7 @@ class SchemaHandler(APIBaseHandler):
         ns = curie.split(":")[0]
         schema_metadata.pop("_id")
         self.check_key_presence(schema_metadata, "@graph", ns)
-
         self.finish(self.get_curie(schema_metadata, curie))
-
-            
-    ########################################
 
     def get(self, curie=None, validation=None):
         """
@@ -578,18 +570,19 @@ class SchemaHandler(APIBaseHandler):
         Fetch  - GET ./api/schema/{ns}:{class_id}/validation
         Fetch  - GET ./api/schema/{ns}:{property_id}
         Fetch  - GET ./api/schema/{ns}?meta=1
-        """    
+        """
 
-        # Start by splitting the curie to get user request
         # if no curie is given, throw error
         if curie is None:
             raise HTTPError(
                 400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'"
             )
-        # pattern identified: ./api/schema/{ns} - namespace only
+
+        # curie: /{ns}
         if ":" not in curie:
             self.handle_namespace_request(curie)
-        # pattern identified: ./api/schema/{ns}:{class_id|property_id} - namespace & curie value
+
+        # curie: /{ns}:{class_id|property_id}
         else:
             # get namespace from user request -- expect only one
             if "," in curie:
@@ -611,11 +604,11 @@ class SchemaHandler(APIBaseHandler):
                     400, reason=f"Error retrieving namespace {ns}: {ns_error}"
                 )
 
-            # pattern identified: ./api/schema/{ns}:{class_id}/validation - validation request
+            # curie: /{ns}:{class_id}/validation
             if validation:
                 self.handle_validation_request(curie, schema_metadata)
 
-            # ./api/schema/{ns}:{search_key}
+            # curie: /{ns}:{search_key}
             else:
                 self.handle_class_request(curie, schema_metadata)
 
