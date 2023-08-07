@@ -517,6 +517,17 @@ class SchemaHandler(APIBaseHandler):
         return metadata
 
     def check_key_presence(self, schema_metadata, key, ns):
+        """
+        Check the presence of a key in the schema metadata.
+        
+        Args:
+            schema_metadata (dict): The schema metadata dictionary.
+            key (str): The key to check for presence.
+            ns (str): The namespace.
+
+        Raises:
+            HTTPError: If the key is not present in the schema metadata.
+        """
         if key not in schema_metadata:
             if ns == 'schema':
                 raise HTTPError(404, reason="Metadata from schema.org cannot be retrieved this way.")
@@ -524,6 +535,16 @@ class SchemaHandler(APIBaseHandler):
                 raise HTTPError(400, reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.")
 
     def handle_validation_request(self, curie, schema_metadata):
+        """
+        Handle validation request for a CURIE.
+        
+        Args:
+            curie (str): The CURIE to validate.
+            schema_metadata (dict): The schema metadata dictionary.
+            
+        Raises:
+            HTTPError: If validation data is not found or property doesn't match.
+        """
         ns=curie.split(":")[0]
         self.check_key_presence(schema_metadata, '@graph', ns)
 
@@ -544,6 +565,15 @@ class SchemaHandler(APIBaseHandler):
         self.finish(validation_dict)
 
     def handle_namespace_request(self, curie):
+        """
+        Handle namespace request.
+        
+        Args:
+            curie (str): The CURIE representing the namespace.
+            
+        Raises:
+            HTTPError: If the namespace is not found or there's an error.
+        """
         try:
             # get schema from the given namespace and return schema metadata
             schema_metadata = schemas.get(curie)
@@ -558,6 +588,13 @@ class SchemaHandler(APIBaseHandler):
         self.finish(json.dumps(schema_metadata, indent=4, default=str))
 
     def handle_class_request(self,curie, schema_metadata):
+        """
+        Handle class request for a CURIE.
+        
+        Args:
+            curie (str): The CURIE representing the class.
+            schema_metadata (dict): The schema metadata dictionary.
+        """
         ns = curie.split(":")[0]
         schema_metadata.pop("_id")
         self.check_key_presence(schema_metadata, "@graph", ns)
