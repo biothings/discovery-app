@@ -519,7 +519,7 @@ class SchemaHandler(APIBaseHandler):
     def check_key_presence(self, schema_metadata, key, ns):
         """
         Check the presence of a key in the schema metadata.
-        
+
         Args:
             schema_metadata (dict): The schema metadata dictionary.
             key (str): The key to check for presence.
@@ -537,11 +537,11 @@ class SchemaHandler(APIBaseHandler):
     def handle_validation_request(self, curie, schema_metadata):
         """
         Handle validation request for a CURIE.
-        
+
         Args:
             curie (str): The CURIE to validate.
             schema_metadata (dict): The schema metadata dictionary.
-            
+
         Raises:
             HTTPError: If validation data is not found or property doesn't match.
         """
@@ -567,10 +567,10 @@ class SchemaHandler(APIBaseHandler):
     def handle_namespace_request(self, curie):
         """
         Handle namespace request.
-        
+
         Args:
             curie (str): The CURIE representing the namespace.
-            
+
         Raises:
             HTTPError: If the namespace is not found or there's an error.
         """
@@ -590,7 +590,7 @@ class SchemaHandler(APIBaseHandler):
     def handle_class_request(self,curie, schema_metadata):
         """
         Handle class request for a CURIE.
-        
+
         Args:
             curie (str): The CURIE representing the class.
             schema_metadata (dict): The schema metadata dictionary.
