@@ -171,7 +171,13 @@ class SchemaClass(DiscoveryDoc):
     uri = Text(fields={"raw": Keyword()})
     parent_classes = Text(multi=True, analyzer="simple")  # immediate ones only
     properties = Object(SchemaClassProp)  # immediate ones only
-    validation = Object(enabled=False)
+    validation = Object(
+        dynamic=False,  # only index properties listed
+        properties={
+            "$schema": Text(fields={"raw": Keyword()}),
+            "type": Keyword()
+        }
+    )  # nested properties for filter
     ref = Boolean()  # not defined in this schema
 
     class Index:
