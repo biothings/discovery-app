@@ -172,7 +172,8 @@ class SchemaClass(DiscoveryDoc):
     parent_classes = Text(multi=True, analyzer="simple")  # immediate ones only
     properties = Object(SchemaClassProp)  # immediate ones only
     validation = Object(
-        dynamic=False,  # only index properties listed
+        dynamic=False,  # only index fields listed
+        # indexing fields, validation.$schema & validation.type, to allow filter/query on 
         properties={
             "$schema": Text(fields={"raw": Keyword()}),
             "type": Keyword()
