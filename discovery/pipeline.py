@@ -13,41 +13,44 @@ from elasticsearch_dsl import Search
 
 class DiscoveryQueryBuilder(ESQueryBuilder):
     def default_string_query(self, q, options):
-
         search = Search()
         q = q.strip()
 
-        # elasticsearch query string syntax
+        # Check for other elasticsearch query string syntax
         if ":" in q or " AND " in q or " OR " in q:
             search = search.query("query_string", query=q)
-
-        search = search.update_from_dict(
-            {
-                "query": {
-                    "function_score": {
-                        "query": {
-                            "dis_max": {
-                                "queries": [
-                                    {"term": {"_id": {"value": q, "boost": 15.0}}},
-                                    {"term": {"label.raw": {"value": q, "boost": 10.0}}},
-                                    {"term": {"_meta.username": {"value": q}}},  # for dataset
-                                    {"term": {"name": {"value": q}}},
-                                    {"match": {"parent_classes": {"query": q}}},
-                                    {"prefix": {"label": {"value": q}}},
-                                    {"query_string": {"query": q}},
-                                ]
-                            }
-                        },
-                        "functions": [
-                            {"filter": {"term": {"namespace": "schema"}}, "weight": 0.5},
-                            {"filter": {"term": {"prefix.raw": "schema"}}, "weight": 0.5},
-                            {
-                                "filter": {"match": {"parent_classes": "bts:BiologicalEntity"}},
-                                "weight": 1.5,
+        else:
+            # Update the search with the constructed query
+            search = search.update_from_dict(
+                {
+                    "query": {
+                        "function_score": {
+                            "query": {
+                                "dis_max": {
+                                    "queries": [
+                                        {"term": {"_id": {"value": q, "boost": 15.0}}},
+                                        {"term": {"label.raw": {"value": q, "boost": 10.0}}},
+                                        {"term": {"_meta.username": {"value": q}}},
+                                        {"term": {"name": {"value": q}}},
+                                        {"match": {"parent_classes": {"query": q}}},
+                                        {"prefix": {"label": {"value": q}}},
+                                        {"query_string": {"query": q}},
+                                    ]
+                                }
                             },
-                        ],
-                    }
-                },
-            }
-        )
+                            "functions": [
+                                {"filter": {"term": {"namespace": "schema"}}, "weight": 0.5},
+                                {"filter": {"term": {"prefix.raw": "schema"}}, "weight": 0.5},
+                                {
+                                    "filter": {
+                                        "match": {"parent_classes": "bts:BiologicalEntity"}
+                                    },
+                                    "weight": 1.5,
+                                },
+                            ],
+                        }
+                    },
+                }
+            )
+
         return search
