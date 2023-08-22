@@ -9,8 +9,16 @@
 import functools
 from datetime import datetime
 
-from elasticsearch_dsl import Boolean, Date, InnerDoc, Integer, Keyword, Object, Text
-from elasticsearch_dsl import Index as ESIndex
+from elasticsearch_dsl import (
+    Boolean,
+    Date,
+    Index as ESIndex,
+    InnerDoc,
+    Integer,
+    Keyword,
+    Object,
+    Text,
+)
 from elasticsearch_dsl.exceptions import ValidationException
 
 from .common import DiscoveryDoc, DiscoveryMeta, DiscoveryUserDoc
@@ -23,7 +31,6 @@ def mergeDict(d1, d2):
 
 
 class SchemaMeta(DiscoveryMeta):
-
     url = Keyword(required=True)
     # timestamp = Date()  # when this document is updated
     last_updated = Date()
@@ -32,7 +39,6 @@ class SchemaMeta(DiscoveryMeta):
 
 
 class SchemaStatusMeta(InnerDoc):
-
     refresh_status = Integer()
     refresh_ts = Date()
     refresh_msg = Text(index=False)
@@ -73,7 +79,6 @@ class Schema(DiscoveryUserDoc):
             "number_of_shards": 1,
             "number_of_replicas": 0,
         }
-
 
     def update_index_meta(self, meta):
         allowed_keys = {"_meta"}
@@ -174,10 +179,7 @@ class SchemaClass(DiscoveryDoc):
     validation = Object(
         dynamic=False,  # only index fields listed
         # indexing fields, validation.$schema(.raw) & validation.type, to allow filter/query on
-        properties={
-            "$schema": Text(fields={"raw": Keyword()}),
-            "type": Keyword()
-        }
+        properties={"$schema": Text(fields={"raw": Keyword()}), "type": Keyword()},
     )  # nested properties for filter
     ref = Boolean()  # not defined in this schema
 
@@ -193,6 +195,5 @@ class SchemaClass(DiscoveryDoc):
         }
 
     def save(self, **kwargs):
-
         self.meta.id = f"{self.namespace}::{self.prefix}:{self.label}"
         return super().save(**kwargs)
