@@ -22,10 +22,10 @@ import certifi
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import Finish, HTTPError
 
+from discovery.model.schema import Schema
 from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
 from discovery.utils.adapters import SchemaAdapter
-from discovery.model.schema import Schema
 
 from .base import APIBaseHandler, authenticated, registryOperation
 
@@ -351,7 +351,6 @@ class SchemaRegistryHandler(APIBaseHandler):
 
 
 class SchemaViewHandler(APIBaseHandler):
-
     name = "view"
     kwargs = {
         "GET": {
@@ -529,10 +528,15 @@ class SchemaHandler(APIBaseHandler):
             HTTPError: If the key is not present in the schema metadata.
         """
         if key not in schema_metadata:
-            if ns == 'schema':
-                raise HTTPError(404, reason="Metadata from schema.org cannot be retrieved this way.")
+            if ns == "schema":
+                raise HTTPError(
+                    404, reason="Metadata from schema.org cannot be retrieved this way."
+                )
             else:
-                raise HTTPError(400, reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.")
+                raise HTTPError(
+                    400,
+                    reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.",
+                )
 
     def handle_validation_request(self, curie, schema_metadata):
         """
@@ -545,17 +549,17 @@ class SchemaHandler(APIBaseHandler):
         Raises:
             HTTPError: If validation data is not found or property doesn't match.
         """
-        ns=curie.split(":")[0]
-        self.check_key_presence(schema_metadata, '@graph', ns)
+        ns = curie.split(":")[0]
+        self.check_key_presence(schema_metadata, "@graph", ns)
 
         validation_dict = {}
-        class_match_found=False
-        property=curie.split(":")[1]
+        class_match_found = False
+        property = curie.split(":")[1]
 
         for data_dict in schema_metadata["@graph"]:
             if data_dict["@id"] == curie:
                 validation_dict = data_dict.get("$validation", {})
-                class_match_found=True
+                class_match_found = True
                 break
 
         if not class_match_found:
@@ -587,7 +591,7 @@ class SchemaHandler(APIBaseHandler):
             raise HTTPError(400, reason=f"Error retrieving namespace {curie}: {ns_error}")
         self.finish(json.dumps(schema_metadata, indent=4, default=str))
 
-    def handle_class_request(self,curie, schema_metadata):
+    def handle_class_request(self, curie, schema_metadata):
         """
         Handle class request for a CURIE.
 
@@ -627,9 +631,7 @@ class SchemaHandler(APIBaseHandler):
                 # check if request has too many ns fields
                 ns_list = list(set([x.split(":")[0] for x in curie.split(",")]))
                 if len(ns_list) > 1:
-                    raise HTTPError(
-                        400, reason="Too many schemas(namespaces) requested"
-                )
+                    raise HTTPError(400, reason="Too many schemas(namespaces) requested")
             else:
                 ns = curie.split(":")[0]
             # get the schema from given namespace
@@ -637,9 +639,7 @@ class SchemaHandler(APIBaseHandler):
                 schema_metadata = schemas.get(ns)
             # catch errors and return feedback
             except Exception as ns_error:
-                raise HTTPError(
-                    400, reason=f"Error retrieving namespace {ns}: {ns_error}"
-                )
+                raise HTTPError(400, reason=f"Error retrieving namespace {ns}: {ns_error}")
 
             # curie: /{ns}:{class_id}/validation
             if validation:
@@ -652,16 +652,16 @@ class SchemaHandler(APIBaseHandler):
 
 class CoverageHandler(APIBaseHandler):
     """
-        Fetch  - GET ./api/coverage
-        Fetch  - GET ./api/coverage/{curie}
+    Fetch  - GET ./api/coverage
+    Fetch  - GET ./api/coverage/{curie}
     """
 
     name = "metadata_coverage"
 
     def get(self, curie=None):
         """
-            Fetch  - GET ./api/coverage
-            Fetch  - GET ./api/coverage/{curie}
+        Fetch  - GET ./api/coverage
+        Fetch  - GET ./api/coverage/{curie}
         """
         try:
             s = Schema()
