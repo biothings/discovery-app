@@ -1,8 +1,9 @@
 <script setup>
 import axios from "axios";
-import { reactive, computed, ref } from "vue";
+import { reactive, computed, ref, watch } from "vue";
 import { useStore } from "vuex";
 import Notify from "simple-notify";
+import { useRouter, useRoute } from "vue-router";
 
 const { $swal } = useNuxtApp();
 const store = useStore();
@@ -14,9 +15,29 @@ let errors = ref(false);
 let valid = ref(false);
 let expanded = ref(false);
 let expandedWide = ref(false);
+let router = useRouter();
+let route = useRoute();
 
+const schema_class = ref(route.query.schema_class ? route.query.schema_class : '');
+let schemas = store.getters.getValidationSchemaOptions;
 let userInfo = computed(() => store.getters.userInfo);
 let metaToValidate = computed(() => store.getters.getValidationMetadata);
+
+watch(schema_class, (v, previous) => {
+  let found = schemas.find(value => v == value.name)
+  if (found) {
+    getSchema(found.url)
+  }else{
+    getSchema("/api/schema/" + v + "/validation")
+  }
+}, {immediate:true})
+
+watch(optionSelected, (v, previous) => {
+  router.push({
+    name: route.name,
+    query: { schema_class: v?.value?.name },
+  })
+})
 
 useHead({
   title: "DDE | Metadata Validator",
@@ -48,28 +69,29 @@ useHead({
   ],
 });
 
-let schemas = store.getters.getValidationSchemaOptions;
-
 function format() {
   //trigger a change, will be handled on JSONEditor
   metadataSelected.value = { ...metaToValidate.value };
 }
 
-function getSchema(e) {
+function getSchema(pathToClass){
+  console.log('GETTING', pathToClass)
   store.commit("setLoading", { value: true });
-  optionSelected.value = schemas.find((opt) => opt.url == e.target.value);
-  console.log(optionSelected.value);
   axios
-    .get(runtimeConfig.public.apiUrl + optionSelected.value["url"])
+    .get(runtimeConfig.public.apiUrl + pathToClass)
     .then((res) => {
       store.commit("setLoading", { value: false });
       schemaSelected.value = res.data;
     })
     .catch((err) => {
       store.commit("setLoading", { value: false });
-      $swal.fire("Oh no!", "There was an issue fetching this schema", "error");
+      $swal.fire("Oh no! 🫠 try something else.", err?.message);
       throw err;
     });
+}
+
+function selectSchema(e) {
+  optionSelected.value = schemas.find((opt) => opt.name == e.target.value);
 }
 
 function validateMetadata() {
@@ -310,15 +332,16 @@ async function getFile() {
           class="bg-info p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
         >
           <div class="numberCircle mainBackDark m-0 mr-2">1</div>
-          <strong class="text-light mr-2">Schema:</strong>
+          <strong class="text-light mr-2">Schema Class:</strong>
           <select
             name="schema-selector"
             class="form-control form-control-sm col-sm-4"
-            @change="getSchema($event)"
+            @change="selectSchema($event)"
+            v-model="schema_class"
           >
-            <option value="" disabled selected>Select Schema</option>
+            <option value="" disabled selected>Select schema class</option>
             <template v-for="schema in schemas" :key="schema.name">
-              <option :value="schema.url">
+              <option :value="schema.name">
                 {{ schema.name }}
               </option>
             </template>
