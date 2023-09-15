@@ -1,15 +1,14 @@
 <script setup>
 import axios from "axios";
-import { reactive, computed, ref, watch } from "vue";
+import { reactive, computed, ref, watch, onMounted } from "vue";
 import { useStore } from "vuex";
 import Notify from "simple-notify";
 import { useRouter, useRoute } from "vue-router";
 
 const { $swal } = useNuxtApp();
 const store = useStore();
-let schemaSelected = reactive({});
+let classValidationJSON = reactive({});
 let metadataSelected = reactive({});
-let optionSelected = reactive({});
 const runtimeConfig = useRuntimeConfig();
 let errors = ref(false);
 let valid = ref(false);
@@ -18,26 +17,19 @@ let expandedWide = ref(false);
 let router = useRouter();
 let route = useRoute();
 
-const schema_class = ref(route.query.schema_class ? route.query.schema_class : '');
-let schemas = store.getters.getValidationSchemaOptions;
+let schema_namespaces = computed(()=> store.getters.validationSchemaOptions);
 let userInfo = computed(() => store.getters.userInfo);
 let metaToValidate = computed(() => store.getters.getValidationMetadata);
 
-watch(schema_class, (v, previous) => {
-  let found = schemas.find(value => v == value.name)
-  if (found) {
-    getSchema(found.url)
-  }else{
-    getSchema("/api/schema/" + v + "/validation")
-  }
-}, {immediate:true})
+let searchTerm = ref('')
 
-watch(optionSelected, (v, previous) => {
+function handleSubmit(){
   router.push({
     name: route.name,
-    query: { schema_class: v?.value?.name },
+    query: { schema_class: searchTerm.value },
   })
-})
+  getClassValidation(searchTerm.value)
+}
 
 useHead({
   title: "DDE | Metadata Validator",
@@ -74,30 +66,42 @@ function format() {
   metadataSelected.value = { ...metaToValidate.value };
 }
 
-function getSchema(pathToClass){
-  console.log('GETTING', pathToClass)
+function getClassValidation(v){
   store.commit("setLoading", { value: true });
   axios
-    .get(runtimeConfig.public.apiUrl + pathToClass)
+    .get(runtimeConfig.public.apiUrl + "/api/schema/" + v + "/validation")
     .then((res) => {
       store.commit("setLoading", { value: false });
-      schemaSelected.value = res.data;
+      classValidationJSON.value = res.data;
+      $swal.fire({
+        icon: "success",
+        toast: true,
+        title: v + "Schema Class Validation Loaded",
+        showConfirmButton: false,
+        timer: 3000,
+        position: 'top-right',
+        iconColor: 'white',
+        customClass: {
+          popup: 'bg-success text-white'
+        },
+      });
     })
     .catch((err) => {
+      console.log(JSON.stringify(err))
       store.commit("setLoading", { value: false });
-      $swal.fire("Oh no! 🫠 try something else.", err?.message);
+      $swal.fire({
+        title: "Oh no!",
+        html: `<b>"${v}"</b> is not a class with validation, make another selection.`,
+        footer: err?.message
+      });
       throw err;
     });
 }
 
-function selectSchema(e) {
-  optionSelected.value = schemas.find((opt) => opt.name == e.target.value);
-}
-
 function validateMetadata() {
   if (
-    !optionSelected.value?.["name"] ||
-    !schemaSelected.value ||
+    !searchTerm.value ||
+    !classValidationJSON.value ||
     !metaToValidate
   ) {
     $swal.fire(
@@ -114,9 +118,9 @@ function validateMetadata() {
       .post(
         runtimeConfig.public.apiUrl +
           "/api/schema/validate/" +
-          optionSelected.value["name"].split(":")[0] +
+          searchTerm.value.split(":")[0] +
           "/" +
-          optionSelected.value["name"],
+          searchTerm.value,
         metaToValidate.value,
         {
           headers: headers,
@@ -164,7 +168,7 @@ function validateMetadata() {
 }
 
 function reset() {
-  schemaSelected.value = {};
+  classValidationJSON.value = {};
   metadataSelected.value = {};
   errors.value = false;
   valid.value = false;
@@ -244,47 +248,6 @@ function loadRegistered() {
     });
 }
 
-// function getFromURL(){
-//   $swal.fire({
-//     title: 'Enter URL',
-//     footer:"<small>Enter URL where metadata could be found, we will look for metadata imbedded in a script tag</small>",
-//     input: 'text',
-//     inputAttributes: {
-//       autocapitalize: 'off'
-//     },
-//     showCancelButton: true,
-//     confirmButtonText: 'Look up',
-//     showLoaderOnConfirm: true,
-//     preConfirm: (url) => {
-//       return fetch(url)
-//         .then(response => {
-//           if (!response.ok) {
-//             throw new Error(response.statusText)
-//           }
-//           return response.toString()
-//         })
-//         .catch(error => {
-//           $swal.showValidationMessage(
-//             `Request failed: ${error}`
-//           )
-//         })
-//     },
-//     allowOutsideClick: () => !$swal.isLoading(),
-//     backdrop: true
-//   }).then((result) => {
-//     if (result.isConfirmed) {
-//       console.log('RESULT URL', result.value)
-//       var doc = new DOMParser().parseFromString(result.value, "text/html");
-//       var links = doc.querySelectorAll("h1");
-//       console.log('H!', links)
-//       var els = document.createElement('div');
-//       els.innerHTML = result.value;
-//       let found = els.querySelectorAll('h1')
-//       console.log('FOUND', found)
-//     }
-//   })
-// }
-
 async function getFile() {
   const { value: file } = await $swal.fire({
     title: "Open File",
@@ -317,6 +280,16 @@ async function getFile() {
     }
   }
 }
+
+onMounted(() =>{
+  store.dispatch('getValidationOptions');
+  if(route.query.schema_class){
+    searchTerm.value = route.query.schema_class;
+  }
+  if (searchTerm.value) {
+    getClassValidation(searchTerm.value)
+  }
+})
 </script>
 <template>
   <div
@@ -332,20 +305,28 @@ async function getFile() {
           class="bg-info p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
         >
           <div class="numberCircle mainBackDark m-0 mr-2">1</div>
-          <strong class="text-light mr-2">Schema Class:</strong>
-          <select
-            name="schema-selector"
-            class="form-control form-control-sm col-sm-4"
-            @change="selectSchema($event)"
-            v-model="schema_class"
-          >
-            <option value="" disabled selected>Select schema class</option>
-            <template v-for="schema in schemas" :key="schema.name">
-              <option :value="schema.name">
-                {{ schema.name }}
-              </option>
-            </template>
-          </select>
+          <strong class="text-light mr-2">Schema Class Validation:</strong>
+          <div class="col-sm-4">
+            <form @submit.prevent="handleSubmit()" class="d-flex">
+              <input
+              type="text"
+              list="input_ac"
+              placeholder="Type here..."
+              v-model="searchTerm"
+              class="form-control form-control-sm"
+              >
+              <datalist id="input_ac" v-if="schema_namespaces.length">
+                  <option
+                      v-for="item in schema_namespaces"
+                      :key="item"
+                      :value="item"
+                  >
+                      {{ item }}
+                  </option>
+              </datalist>
+              <button v-if="searchTerm" type="submit" class="btn btn-sm bg-dark text-light">Load</button>
+            </form>
+          </div>
           <font-awesome-icon
             icon="fas fa-info-circle"
             class="mx-2 text-warning"
@@ -390,7 +371,7 @@ async function getFile() {
         <JSONEditor
           v-if="expanded"
           name="validatorSchema"
-          :content="schemaSelected"
+          :content="classValidationJSON"
         ></JSONEditor>
       </div>
       <div class="col-sm-12 col-md-7 alert-primary p-0">
