@@ -87,7 +87,6 @@ function getClassValidation(v){
       });
     })
     .catch((err) => {
-      console.log(JSON.stringify(err))
       store.commit("setLoading", { value: false });
       $swal.fire({
         title: "Oh no!",
