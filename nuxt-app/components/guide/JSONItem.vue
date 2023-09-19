@@ -161,10 +161,10 @@ export default {
   },
   props: ["item", "number", "username"],
   methods: {
-    checkAlreadyExists() {
+    checkAlreadyExists(item) {
       let self = this;
-      if (Object.hasOwnProperty.call(this.item, "identifier")) {
-        let id = this.item.identifier.replace("&", "%26");
+      if (Object.hasOwnProperty.call(item, "identifier")) {
+        let id = item.identifier.replace("&", "%26");
         const runtimeConfig = useRuntimeConfig();
         axios
           .get(
@@ -174,7 +174,7 @@ export default {
           .then((res) => {
             if (res.data.total == 1) {
               self.exists = res.data.hits[0]["_id"];
-              store.commit("addBulkReport", {
+              self.$store.commit("addBulkReport", {
                 field: "Exists",
                 value: self.exists,
               });
@@ -192,13 +192,13 @@ export default {
           });
       }
     },
-    checkRequirements() {
+    checkRequirements(item) {
       let self = this;
       //rest first
       self.missingFields = [];
       self.missingRequired = [];
 
-      let itemFields = Object.keys(self.item);
+      let itemFields = Object.keys(item);
       let validationFields = Object.keys(self.validation.properties);
       let requiredFields = self.validation.required;
       requiredFields.forEach((field) => {
@@ -232,9 +232,9 @@ export default {
       return object;
     },
     register() {
-      this.item = this.clean(this.item);
-      this.checkRequirements();
-      this.checkAlreadyExists();
+      let item = this.clean(Object.assign({}, this.item));
+      this.checkRequirements(item);
+      this.checkAlreadyExists(item);
     },
     SaveDefinition() {
       let value = this.beforeCloseVal;
@@ -273,7 +273,7 @@ export default {
     registerJSONItem() {
       var self = this;
 
-      let schema = store.getters.getSchema;
+      let schema = self.$store.getters.getSchema;
       self.loading = true;
       let config = {
         headers: {
@@ -305,7 +305,7 @@ export default {
               `" target="_blank" rel="nonreferrer"> 
               View Registration</a>`;
             self.errMSG = "";
-            store.commit("addBulkReport", {
+            self.$store.commit("addBulkReport", {
               field: "Registered",
               value: self.item.identifier,
             });
@@ -313,7 +313,7 @@ export default {
         })
         .catch((err) => {
           self.loading = false;
-          store.commit("addBulkReport", {
+          self.$store.commit("addBulkReport", {
             field: "Failed",
             value: self.item.identifier,
           });
@@ -352,7 +352,7 @@ export default {
         .then((res) => {
           self.loading = false;
           if (res.data.success) {
-            store.commit("addBulkReport", {
+            self.$store.commit("addBulkReport", {
               field: "Updated",
               value: self.exists,
             });
@@ -366,7 +366,7 @@ export default {
         })
         .catch((err) => {
           self.loading = false;
-          store.commit("addBulkReport", {
+          self.$store.commit("addBulkReport", {
             field: "Failed",
             value: self.exists,
           });
