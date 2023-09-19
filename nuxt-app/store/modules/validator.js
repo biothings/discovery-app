@@ -1,42 +1,24 @@
+import axios from "axios";
+
 export const validator = {
   state: () => ({
     validationSchema: {},
-    optionSelected: false,
-    validationSchemaOptions: [
-      {
-        name: "n3c:Dataset",
-        url: "/api/schema/n3c:Dataset/validation",
-      },
-      {
-        name: "niaid:Dataset",
-        url: "/api/schema/niaid:Dataset/validation",
-      },
-      {
-        name: "niaid:ComputationalTool",
-        url: "/api/schema/niaid:ComputationalTool/validation",
-      },
-      {
-        name: "outbreak:Dataset",
-        url: "/api/schema/outbreak:Dataset/validation",
-      },
-    ],
+    validationSchemaOptions: [],
     validationMetadata: {},
   }),
   mutations: {
+    saveValidationOptions(state, payload) {
+      state.validationSchemaOptions = payload;
+    },
     saveValidationSchema(state, payload) {
       state.validationSchema = payload["value"];
     },
     saveValidationMetadata(state, payload) {
       state.validationMetadata = payload["value"];
     },
-    saveValidationOption(state, payload) {
-      state.optionSelected = payload["value"];
-      console.log("OPTION", state.optionSelected);
-    },
     resetValidation(state) {
       state.validationSchema = {};
       state.validationMetadata = {};
-      state.optionSelected = false;
     },
   },
   getters: {
@@ -46,11 +28,23 @@ export const validator = {
     getValidationMetadata: (state) => {
       return state.validationMetadata;
     },
-    getValidationOption: (state) => {
-      return state.optionSelected;
-    },
-    getValidationSchemaOptions: (state) => {
+    validationSchemaOptions: (state) => {
       return state.validationSchemaOptions;
     },
   },
+  actions:{
+    getValidationOptions(context) {
+      let config = useRuntimeConfig();
+      axios
+      .get(config.public.apiUrl + "/api/registry/query?q=_exists_:validation&fields=name&size=0&aggs=name&facet_size=100")
+      .then((res) => {
+        if (res.data?.facets?.name?.terms) {
+          context.commit("saveValidationOptions", res.data?.facets?.name?.terms.map((agg) => agg.term));
+        }
+      }).catch((err) => {
+        console.log('Failed to get validation options', err)
+      })
+      
+    },
+  }
 };
