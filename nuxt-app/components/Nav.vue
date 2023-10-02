@@ -1,12 +1,11 @@
 <script setup>
 import Login from "./Login.vue";
 import { useStore } from "vuex";
-import { ref } from 'vue';
+import { ref } from "vue";
 
 let store = useStore();
 let portals = store.getters.getPortals;
 let menu = ref(false);
-
 </script>
 <template>
   <header id="header">
@@ -37,7 +36,6 @@ let menu = ref(false);
         aria-expanded="false"
         aria-label="Toggle navigation"
         @click="menu = !menu"
-
       >
         Menu
       </button>
