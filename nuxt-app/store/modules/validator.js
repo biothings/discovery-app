@@ -32,19 +32,25 @@ export const validator = {
       return state.validationSchemaOptions;
     },
   },
-  actions:{
+  actions: {
     getValidationOptions(context) {
       let config = useRuntimeConfig();
       axios
-      .get(config.public.apiUrl + "/api/registry/query?q=_exists_:validation&fields=name&size=0&aggs=name&facet_size=100")
-      .then((res) => {
-        if (res.data?.facets?.name?.terms) {
-          context.commit("saveValidationOptions", res.data?.facets?.name?.terms.map((agg) => agg.term));
-        }
-      }).catch((err) => {
-        console.log('Failed to get validation options', err)
-      })
-      
+        .get(
+          config.public.apiUrl +
+            "/api/registry/query?q=_exists_:validation&fields=name&size=0&aggs=name&facet_size=100"
+        )
+        .then((res) => {
+          if (res.data?.facets?.name?.terms) {
+            context.commit(
+              "saveValidationOptions",
+              res.data?.facets?.name?.terms.map((agg) => agg.term)
+            );
+          }
+        })
+        .catch((err) => {
+          console.log("Failed to get validation options", err);
+        });
     },
-  }
+  },
 };

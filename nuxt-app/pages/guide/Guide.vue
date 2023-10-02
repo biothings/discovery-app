@@ -362,7 +362,9 @@
               </div>
             </template>
             <template v-else>
-              <template v-if="$router.currentRoute?.value?.path == '/guide/n3c/dataset'">
+              <template
+                v-if="$router.currentRoute?.value?.path == '/guide/n3c/dataset'"
+              >
                 <h1 class="logoText">N3C Dataset Request</h1>
                 <div class="p-5 text-center m-3">
                   <img
@@ -1040,7 +1042,9 @@ export default {
                 event_value: 1,
               });
 
-              if (self.$router.currentRoute?.value?.path == "/guide/n3c/dataset") {
+              if (
+                self.$router.currentRoute?.value?.path == "/guide/n3c/dataset"
+              ) {
                 self.$swal.fire({
                   icon: "success",
                   title: "Registration Successful",
