@@ -99,8 +99,8 @@ export const guide = {
     },
     saveSchema(state, payload) {
       state.schema = payload["schema"];
-      console.log("form properties", state.schema.validation.properties);
-      state.output["@type"] = state.schema.name || state.schema.label;
+      console.log("form properties", state.schema?.validation?.properties);
+      state.output["@type"] = state.schema?.name || state.schema?.label;
       state.output["@context"] = payload["schema"]["@context"];
       let obj = Object.assign({}, state.output);
       state.output_default = obj;
@@ -110,7 +110,7 @@ export const guide = {
         let cat = {
           category: state.schema.label || state.schema.name,
         };
-        if (state.schema.validation.required.includes(propname)) {
+        if (state.schema?.validation?.required?.includes(propname)) {
           cat.subcategory = "Required";
         } else {
           cat.subcategory = "Recommended";
@@ -850,7 +850,7 @@ export const guide = {
       return state.schema.validation?.properties?.[propname]?.value;
     },
     isRequired: (state) => (propname) => {
-      if (state.schema.validation.required.includes(propname)) {
+      if (state.schema?.validation?.required?.includes(propname)) {
         return true;
       } else {
         return false;

@@ -1,6 +1,6 @@
 <script setup>
 import axios from "axios";
-import { reactive, computed, ref, watch, onMounted } from "vue";
+import { reactive, computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import Notify from "simple-notify";
 import { useRouter, useRoute } from "vue-router";
@@ -17,18 +17,18 @@ let expandedWide = ref(false);
 let router = useRouter();
 let route = useRoute();
 
-let schema_namespaces = computed(()=> store.getters.validationSchemaOptions);
+let schema_namespaces = computed(() => store.getters.validationSchemaOptions);
 let userInfo = computed(() => store.getters.userInfo);
 let metaToValidate = computed(() => store.getters.getValidationMetadata);
 
-let searchTerm = ref('')
+let searchTerm = ref("");
 
-function handleSubmit(){
+function handleSubmit() {
   router.push({
     name: route.name,
     query: { schema_class: searchTerm.value },
-  })
-  getClassValidation(searchTerm.value)
+  });
+  getClassValidation(searchTerm.value);
 }
 
 useHead({
@@ -66,7 +66,7 @@ function format() {
   metadataSelected.value = { ...metaToValidate.value };
 }
 
-function getClassValidation(v){
+function getClassValidation(v) {
   store.commit("setLoading", { value: true });
   axios
     .get(runtimeConfig.public.apiUrl + "/api/schema/" + v + "/validation")
@@ -79,10 +79,10 @@ function getClassValidation(v){
         title: v + "Schema Class Validation Loaded",
         showConfirmButton: false,
         timer: 3000,
-        position: 'top-right',
-        iconColor: 'white',
+        position: "top-right",
+        iconColor: "white",
         customClass: {
-          popup: 'bg-success text-white'
+          popup: "bg-success text-white",
         },
       });
     })
@@ -91,18 +91,14 @@ function getClassValidation(v){
       $swal.fire({
         title: "Oh no!",
         html: `<b>"${v}"</b> is not a class with validation, make another selection.`,
-        footer: err?.message
+        footer: err?.message,
       });
       throw err;
     });
 }
 
 function validateMetadata() {
-  if (
-    !searchTerm.value ||
-    !classValidationJSON.value ||
-    !metaToValidate
-  ) {
+  if (!searchTerm.value || !classValidationJSON.value || !metaToValidate) {
     $swal.fire(
       "Error!",
       "Missing required data to perform validation",
@@ -280,15 +276,15 @@ async function getFile() {
   }
 }
 
-onMounted(() =>{
-  store.dispatch('getValidationOptions');
-  if(route.query.schema_class){
+onMounted(() => {
+  store.dispatch("getValidationOptions");
+  if (route.query.schema_class) {
     searchTerm.value = route.query.schema_class;
   }
   if (searchTerm.value) {
-    getClassValidation(searchTerm.value)
+    getClassValidation(searchTerm.value);
   }
-})
+});
 </script>
 <template>
   <div
@@ -308,22 +304,28 @@ onMounted(() =>{
           <div class="col-sm-4">
             <form @submit.prevent="handleSubmit()" class="d-flex">
               <input
-              type="text"
-              list="input_ac"
-              placeholder="Type here..."
-              v-model="searchTerm"
-              class="form-control form-control-sm"
-              >
+                type="text"
+                list="input_ac"
+                placeholder="Type here..."
+                v-model="searchTerm"
+                class="form-control form-control-sm"
+              />
               <datalist id="input_ac" v-if="schema_namespaces.length">
-                  <option
-                      v-for="item in schema_namespaces"
-                      :key="item"
-                      :value="item"
-                  >
-                      {{ item }}
-                  </option>
+                <option
+                  v-for="item in schema_namespaces"
+                  :key="item"
+                  :value="item"
+                >
+                  {{ item }}
+                </option>
               </datalist>
-              <button v-if="searchTerm" type="submit" class="btn btn-sm bg-dark text-light">Load</button>
+              <button
+                v-if="searchTerm"
+                type="submit"
+                class="btn btn-sm bg-dark text-light"
+              >
+                Load
+              </button>
             </form>
           </div>
           <font-awesome-icon

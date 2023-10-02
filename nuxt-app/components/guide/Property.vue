@@ -35,7 +35,9 @@
         <template v-if="allMode && validation">
           <!-- 🌈  ALL MODE 🌈 -->
           <div class="p-0">
-            <template v-if="$router.currentRoute?.value?.path == '/guide/n3c/dataset'">
+            <template
+              v-if="$router.currentRoute?.value?.path == '/guide/n3c/dataset'"
+            >
               <div class="mainTextDark row m-0">
                 <div class="col-sm-10 p-1 text-left p-2">
                   <h6>
@@ -194,7 +196,7 @@
         >
           <h6>Progress Tracker</h6>
         </div>
-        <template v-if="categoryTotals">
+        <template v-if="categoryTotals && showCategories">
           <template v-for="(subcats, cat, i) in categoryTotals" :key="cat + i">
             <Category class="fade-in" :cat="cat" :subcats="subcats"></Category>
           </template>
@@ -279,7 +281,16 @@ export default {
     Category,
     InputBox,
   },
-  props: ["type"],
+  props: {
+    type: {
+      type: String,
+      default: "",
+    },
+    showCategories: {
+      type: Boolean,
+      default: true,
+    },
+  },
   methods: {
     isRequired(propname) {
       let req = this.$store.getters.getValidation["required"];

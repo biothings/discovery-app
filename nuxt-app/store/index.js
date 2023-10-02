@@ -12,6 +12,7 @@ import { guide } from "./modules/guide";
 import { portals } from "./modules/portals";
 import { validator } from "./modules/validator";
 import { news } from "./modules/whatsnew";
+import { mg } from "./modules/markup_generator";
 import { delegate } from "tippy.js";
 import axios from "axios";
 
@@ -30,6 +31,7 @@ export default createStore({
     validator,
     editor_validation,
     news,
+    mg,
   },
   state: () => ({
     loading: false,

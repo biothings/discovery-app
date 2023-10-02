@@ -24,7 +24,7 @@
                   ]"
                 >
                   <span
-                    v-text="info.description || 'No description provided'"
+                    v-html="info.description || 'No description provided'"
                   ></span>
                   <small class="mainTextLight">
                     (<span v-text="name"></span>)

@@ -2,7 +2,9 @@
   <div class="d-block w-100">
     <div class="row m-0 p-relative">
       <div class="col-sm-12 w-100">
-        <div class="d-flex justify-content-center align-items-stretch">
+        <div
+          class="d-flex justify-content-center align-items-stretch flex-wrap"
+        >
           <!-- 🍏 TABS 🍏-->
           <template v-for="(value, name) in parsed_options">
             <div
