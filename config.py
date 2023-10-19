@@ -35,9 +35,11 @@ APP_LIST = [
     (r"/api/view/?", "discovery.handlers.api.SchemaViewHandler"),
     (r"/api/gh/([^/]+)/?", "discovery.handlers.api.GHHandler"),
     (r"/api/gh/?", "discovery.handlers.api.GHHandler"),
+    (r"/api/coverage/([^/]+)/?", "discovery.handlers.api.CoverageHandler"),
+    (r"/api/coverage/?", "discovery.handlers.api.CoverageHandler"),
+    (r"/api/schema/validate/([^/]+)/([^/]+)/?", "discovery.handlers.api.MetadataValidationHandler"),
     (r"/api/schema/([^/]+)/?", "discovery.handlers.api.SchemaHandler"),
-    (r"/api/schema/([^/]+)/([^/]+)/?", "discovery.handlers.api.SchemaHandler"),
-    (r"/api/schema/validate/([^/]+)/([^/]+)/?", "discovery.handlers.api.MetadataValidationHandler")
+    (r"/api/schema/([^/]+)/([^/]+)/?", "discovery.handlers.api.SchemaHandler")
 ]
 
 # biothings web tester will read this
