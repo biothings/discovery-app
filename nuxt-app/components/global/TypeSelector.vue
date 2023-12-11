@@ -385,7 +385,9 @@ export default {
             self.parsed_options[option["@type"]] = option;
           } else if (option && option["items"] && option["items"]["@type"]) {
             if (!self.parsed_options.hasOwnProperty(option["items"]["@type"])) {
-              self.parsed_options[option["items"]["@type"]] = option;
+              self.parsed_options[option["items"]["@type"]] = option?.items ? option.items : option;
+            }else{
+              console.log('TypeSelector no option found for: ', self.main_name)
             }
           } else if (option && option["enum"]) {
             // use main prop name and replace underscore with space
@@ -405,7 +407,7 @@ export default {
         self.info.hasOwnProperty("properties") &&
         self.info.hasOwnProperty("@type") &&
         self.info.hasOwnProperty("type") &&
-        self.info.type == "object"
+        self.info?.type == "object"
       ) {
         // OBJECT TYPE FIELD
         self.parsed_options[self.info["@type"]] = self.info;
@@ -492,6 +494,7 @@ export default {
               });
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
+          backdrop: true
         })
         .then((result) => {
           if (result.value) {
@@ -740,6 +743,7 @@ export default {
     },
   },
   mounted: function () {
+    // console.log('TYPE SELECTOR : ' + this.main_name, this.info)
     this.parseOptions();
   },
 };

@@ -163,6 +163,7 @@ export default {
               });
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
+          backdrop: true
         })
         .then((result) => {
           if (result.value) {

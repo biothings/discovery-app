@@ -1,6 +1,6 @@
 <template>
   <div
-    class="m-1 text-center p-2 tip rounded"
+    class="m-1 text-center tip rounded"
     :data-tippy-content="cat"
     style="max-height: 109px; outline: none !important"
   >

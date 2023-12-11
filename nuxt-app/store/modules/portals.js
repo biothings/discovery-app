@@ -4,6 +4,7 @@ import n3c from "~~/assets/img/N3Co.png";
 import n3cLogo from "~~/assets/img/N3Cwhite.png";
 import outbreak from "~~/assets/img/outbreak_white.svg";
 import niaidIcon from "~~/assets/img/niaid/icon.svg";
+import nde from "~~/assets/img/niaid/nde.svg";
 import outbreakIcon from "~~/assets/img/icon-01.svg";
 
 export const portals = {
@@ -36,6 +37,40 @@ export const portals = {
         ],
         datasets: "/dataset?template=/guide/outbreak/dataset",
         colors: [{ hex: "#D13B62" }, { hex: "#0A253D" }],
+      },
+      {
+        name: "NIAID Data Ecosystem",
+        shortName: "NIAID Data Ecosystem",
+        keyName: "nde",
+        header:
+          "Find, access and understand datasets and tools across infectious disease and immune-mediated data repositories.",
+        linkname: "nde",
+        description: `<p>The NIAID Data Ecosystem is a secure environment to discover immune-mediated and infectious disease data to speed the development of diagnostics, therapeutics, and vaccines.</p>`,
+        image: nde,
+        portalicon: nde,
+        site: "https://data.niaid.nih.gov/portal",
+        schema: "/view/nde",
+        coverage: ["Dataset", "ResourceCatalog"],
+        guides: [
+          {
+            guide: "/guide/nde/ResourceCatalog",
+            name: "Resource Catalog",
+            registry: "/dataset?template=nde:ResourceCatalog",
+          },
+          {
+            guide: "/guide/nde/Dataset",
+            name: "Dataset",
+            registry: "/dataset?template=nde:dataset",
+          },
+        ],
+        datasets: "/dataset?template=nde:dataset",
+        colors: [{ hex: "#103b56" }, { hex: "#3684af" }],
+        // publications: [
+        //   // {
+        //   //   name: "Developing a standardized but extendable framework to increase the findability of infectious disease datasets",
+        //   //   link: "https://www.biorxiv.org/content/10.1101/2022.10.10.511492v1",
+        //   // },
+        // ],
       },
       {
         name: "NIAID Systems Biology",

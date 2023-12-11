@@ -20,6 +20,7 @@ let json = ref({});
 let searchTerm = ref("");
 
 function updateEditor() {
+  store.commit('setUsePrefilled', false);
   store.commit("formPreviewForGuide");
   json.value = store.getters.getPreview;
 }
@@ -193,8 +194,17 @@ onMounted(() => {
               </p>
             </div>
           </div>
+          <div class="text-danger alert-dark m-0 p-1">
+            <h5 class="m-0">Required</h5>
+          </div>
           <template v-for="(prop, index) in validation.properties" :key="index">
-            <InputBox :name="index" :info="prop"></InputBox>
+            <InputBox v-if="store.getters.isRequired(index)" :name="index" :info="prop"></InputBox>
+          </template>
+          <div class="text-info alert-dark m-0 p-1">
+            <h5 class="m-0">Recommended</h5>
+          </div>
+          <template v-for="(prop, index) in validation.properties" :key="index">
+            <InputBox v-if="!store.getters.isRequired(index)" :name="index" :info="prop"></InputBox>
           </template>
         </div>
         <div class="col-sm-12 col-md-5 p-0 mainBackDark">

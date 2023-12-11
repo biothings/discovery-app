@@ -5,7 +5,7 @@ export const json_schema_viewer = {
   },
   strict: true,
   mutations: {
-    saveSchema(state, payload) {
+    saveSchemaJSV(state, payload) {
       state.schemaJSV = payload["schema"];
       console.log("🍕🍕🍕 saved schemaJSV..🍕🍕🍕", state.schemaJSV);
     },
