@@ -1007,6 +1007,7 @@ export default {
                 showCancelButton: true,
                 confirmButtonText: "Go",
                 allowOutsideClick: () => !this.$swal.isLoading(),
+                backdrop: true
               })
               .then((result) => {
                 if (result.value) {

@@ -399,7 +399,7 @@ export default {
         self.loadMsg = `<b class="text-success">Example loaded</b>`;
         let payload = {};
         payload["schema"] = self.file;
-        this.$store.commit("saveSchema", payload);
+        this.$store.commit("saveSchemaJSV", payload);
       } else if (self.input) {
         axios
           .get(self.input)
@@ -410,7 +410,7 @@ export default {
               self.loadMsg = `<b class="text-success">Schema loaded</b>`;
               payload = {};
               payload["schema"] = schema;
-              this.$store.commit("saveSchema", payload);
+              this.$store.commit("saveSchemaJSV", payload);
             } else if (schema && schema.hasOwnProperty("@context")) {
               self.loadMsg = `<b class="text-danger">ATTENTION! File is JSON-LD and only visualized partially. You should visualize this here: <a href="/schema-playground">Schema Playground</a> for a complete visualization.</b>`;
               if (schema && schema["@graph"]) {
@@ -437,7 +437,7 @@ export default {
                       if (value) {
                         payload = {};
                         payload["schema"] = options[value]["$validation"];
-                        this.$store.commit("saveSchema", payload);
+                        this.$store.commit("saveSchemaJSV", payload);
                         resolve();
                       }
                     });

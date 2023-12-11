@@ -16,6 +16,7 @@ export const guide = {
     bulkJSONItems: [],
     valid: Boolean,
     errors: [],
+    useGuidePreFilled: true,
     guide_prefilled: {
       includedInDataCatalog: {
         name: "N3C Datasets",
@@ -65,6 +66,9 @@ export const guide = {
     saveBulkItems(state, payload) {
       state.bulkJSONItems = payload["items"];
     },
+    setUsePrefilled(state, payload) {
+      state.useGuidePreFilled = payload;
+    },
     updateJsonItem(state, payload) {
       let item = payload["item"];
       let change = payload["change"];
@@ -99,7 +103,7 @@ export const guide = {
     },
     saveSchema(state, payload) {
       state.schema = payload["schema"];
-      console.log("form properties", state.schema?.validation?.properties);
+      console.log("Schema saved", state.schema);
       state.output["@type"] = state.schema?.name || state.schema?.label;
       state.output["@context"] = payload["schema"]["@context"];
       let obj = Object.assign({}, state.output);
@@ -446,9 +450,10 @@ export const guide = {
       let props = state.schema.validation.properties;
       // Add prefilled values from config
       state.output = Object.assign({}, state.output_default);
-
-      for (var key in state.guide_prefilled) {
-        state.output[key] = state.guide_prefilled[key];
+      if(state.useGuidePreFilled){
+        for (var key in state.guide_prefilled) {
+          state.output[key] = state.guide_prefilled[key];
+        }
       }
       for (let key in props) {
         if (props[key].hasOwnProperty("value")) {

@@ -43,6 +43,7 @@ export default {
             return method;
           },
           allowOutsideClick: () => !Swal.isLoading(),
+          backdrop: true
         })
         .then((result) => {
           let payload = {
