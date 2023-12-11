@@ -16,6 +16,10 @@ let portal_name = route.params.portal_name;
 
 if (portal_name) {
   switch (portal_name) {
+    case "nde":
+      portal = portals.find((item) => item.keyName == portal_name);
+      featuredImg = "https://i.postimg.cc/d1RJrJYk/niaidportal.jpg";
+      break;
     case "niaid":
       portal = portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/J0QNFjbc/niaidportal.jpg";

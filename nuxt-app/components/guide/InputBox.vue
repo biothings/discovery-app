@@ -41,10 +41,10 @@
                 <!--🌈🌈🌈 INPUT 🌈 🌈🌈 TYPES 🌈🌈🌈-->
 
                 <!-- 🌈 BOOLEAN 🌈 -->
-                <template v-if="info && info.type === 'boolean'">
+                <template v-if="info && info?.type === 'boolean'">
                   <BooleanInput :name="name" :info="info"></BooleanInput>
                 </template>
-                <template v-if="info && info.type === 'string'">
+                <template v-if="info && info?.type === 'string'">
                   <!-- 🌈 STRING 🌈 -->
                   <template v-if="info && !info.format">
                     <!-- 🌈 STRING VOCABULARY🌈 -->
@@ -304,7 +304,7 @@
                 </template>
 
                 <!-- 🌈 LICENSE 🌈 -->
-                <template v-if="info.type === 'object' && name === 'license'">
+                <template v-if="info?.type === 'object' && name === 'license'">
                   <form id="licenseForm" class="p-1" v-if="!userInput">
                     <small class="text-muted"
                       >Allow commercial uses of your work?</small
@@ -399,7 +399,7 @@
                 </template>
 
                 <!-- 🌈  KEYWORDS 🌈 -->
-                <template v-if="info.type === 'array' && name === 'keywords'">
+                <template v-if="info?.type === 'array' && name === 'keywords'">
                   <div class="form-group p-2 row">
                     <div class="col-sm-12 mb-2">
                       <form @submit.prevent="addKeyword">
@@ -451,7 +451,7 @@
                 <!-- 🌈  CONSTANT DATA CATALOG 🌈 -->
                 <template
                   v-if="
-                    info.type === 'object' && name === 'includedInDataCatalog'
+                    info?.type === 'object' && name === 'includedInDataCatalog'
                   "
                 >
                   <!--<div class="text-center">
@@ -468,7 +468,7 @@
                 <!-- 🌈  OBJECT 🌈 -->
                 <template
                   v-if="
-                    info.type === 'object' &&
+                    info?.type === 'object' &&
                     name !== 'license' &&
                     name !== 'includedInDataCatalog'
                   "
@@ -555,12 +555,12 @@
                             :placeholder="'enter ' + item.format"
                           />
                         </template>
-                        <template v-if="item.type === 'string' && !item.format">
+                        <template v-if="item?.type === 'string' && !item.format">
                           <input
                             type="text"
                             v-model="userInput"
                             class="form-control form-control-sm"
-                            :placeholder="'enter ' + item.type"
+                            :placeholder="'enter ' + item?.type"
                           />
                         </template>
                       </div>
@@ -797,6 +797,7 @@ export default {
               });
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
+          backdrop: true
         })
         .then((result) => {
           if (result.value) {
@@ -1894,12 +1895,13 @@ export default {
   },
   mounted: function () {
     var self = this;
-
+    // console.log('%c MOUNTING ' + self.name, "color:green")
+    // console.log({...self.info})
     if (self.info.hasOwnProperty("oneOf")) {
       if (
         (self.info["oneOf"].hasOwnProperty("type") &&
-          self.info["oneOf"][0]["type"] == "array") ||
-        self.info["oneOf"][1]["type"] == "array"
+          self.info["oneOf"][0]?.type == "array") ||
+        self.info["oneOf"][1]?.type == "array"
       ) {
         self.canAcceptMultiple = true;
       }
