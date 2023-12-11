@@ -211,7 +211,8 @@ export const editor = {
       newProp["description"] = payload["description"];
       newProp["name"] = state.prefix + ":" + payload["name"];
       newProp["range"] = payload["range"];
-      newProp["domain"] = state.prefix + ":" + payload["domain"];
+      // domain id can already have prefix, if not add it.
+      newProp["domain"] = payload["domain"].includes(":") ? payload["domain"] : state.prefix + ":" + payload["domain"];
       // if new prop added it should appear in validation by default
       newProp["selected"] = payload["special"];
 
@@ -429,7 +430,7 @@ export const editor = {
               mainProp["rdfs:comment"] =
                 state.schema[i].properties[x]["description"];
               mainProp["rdfs:label"] = state.schema[i].properties[x]["label"];
-              mainProp["schema:domainIncludes"] = state.schema[i]["name"];
+              mainProp["schema:domainIncludes"] = {"@id": state.schema[i]["name"]};
               //Ranges of Property
               if (state.schema[i].properties[x]["range"]) {
                 let ranges = state.schema[i].properties[x]["range"].split(",");
