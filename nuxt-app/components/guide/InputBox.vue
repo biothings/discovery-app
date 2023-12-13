@@ -1933,14 +1933,21 @@ export default {
       },
       set(newValue) {
         var payload = {};
-        if (name.includes("date")) {
-          let v = moment(newValue).format("YYYY-MM-DD");
-          payload["completed"] = { name: this.name, value: v };
-        } else {
-          payload["completed"] = { name: this.name, value: newValue };
+        let self = this;
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = null;
         }
-        this.$store.commit("markCompleted", payload);
-        this.$store.dispatch("saveProgress");
+        this.timer = setTimeout(() => {
+          if (name.includes("date")) {
+            let v = moment(newValue).format("YYYY-MM-DD");
+            payload["completed"] = { name: self.name, value: v };
+          } else {
+            payload["completed"] = { name: self.name, value: newValue };
+          }
+          self.$store.commit("markCompleted", payload);
+          self.$store.dispatch("saveProgress");
+        }, 800);
       },
     },
     datePreset: function () {

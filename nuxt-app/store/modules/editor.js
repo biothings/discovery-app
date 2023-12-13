@@ -219,7 +219,38 @@ export const editor = {
       for (var i = 0; i < state.schema.length; i++) {
         if (state.schema[i].special) {
           if (Object.hasOwnProperty.call(state.schema[i], "properties")) {
-            state.schema[i].properties.push(newProp);
+            console.log(state.schema)
+            //check if exists then update
+            if (state.schema[i].properties.some(prop => prop?.label == payload["name"])) {
+              for (var x = 0; x < state.schema[i].properties.length; x++) {
+                if (state.schema[i].properties[x].label === newProp["label"]) {
+                  // remove matching existing
+                  state.schema[i].properties.splice(x, 1);
+                  //replace with new
+                  state.schema[i].properties.push(newProp);
+                  new Notify({
+                    status: "success",
+                    title: "Editor",
+                    text: newProp["label"] + " updated",
+                    effect: "fade",
+                    speed: 300,
+                    customClass: null,
+                    customIcon: null,
+                    showIcon: true,
+                    showCloseButton: true,
+                    autoclose: true,
+                    autotimeout: 2000,
+                    gap: 20,
+                    distance: 20,
+                    type: 1,
+                    position: "right top",
+                  });
+                }
+              }
+            } else {
+              //else add new prop
+              state.schema[i].properties.push(newProp);
+            }
           } else if (
             !Object.hasOwnProperty.call(state.schema[i], "properties")
           ) {

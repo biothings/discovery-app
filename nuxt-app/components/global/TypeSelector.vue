@@ -636,8 +636,10 @@ export default {
       let self = this;
       if (self.requirementsFulfilled(fieldInfo)) {
         if (!self.isChild) {
+          console.log(1)
           self.animatedSubmit(ClassType, fieldInfo);
         } else {
+          console.log(2)
           self.regularSubmit(ClassType, fieldInfo);
         }
       } else {
