@@ -444,7 +444,7 @@
               ></small
             >
             <small v-if="propExists" class="text-danger"
-              >A property with this name already exists</small
+              >A property with this name already exists, any changes will replace existing value unless the property name changes.</small
             >
           </div>
           <div class="form-group">
@@ -520,17 +520,18 @@
           </div>
           <div class="w-100 p-1">
             <button
-              :disabled="!addNewPropReady && !propExists"
-              :class="[
-                addNewPropReady && !propExists
-                  ? 'btn-success'
-                  : 'btn-secondary',
-              ]"
+              type="button"
+              class="btn btn-lg w-50 btn-danger"
+              @click.prevent="addPropMode = false"
+            >
+              Cancel
+            </button>
+            <button
               type="submit"
-              class="btn btn-lg w-100"
+              class="btn btn-lg w-50 btn-success"
               @click.prevent="submitNewProp()"
             >
-              Submit
+              {{ addNewPropReady && !propExists ? 'Submit' : 'Update' }}
             </button>
           </div>
         </form>
@@ -638,23 +639,15 @@ export default {
           });
         }
       }
-      let payload = {};
-      payload["label"] = prop["label"];
-      self.$store.commit("removeProperty", payload);
+      // let payload = {};
+      // payload["label"] = prop["label"];
+      // self.$store.commit("removeProperty", payload);
     },
     handlePillSubmit() {
       var self = this;
       if (!self.newPropRange.includes(self.range_query)) {
         self.newPropRange.push(self.range_query);
         self.range_query = "";
-      } else {
-        self.$swal.fire({
-          type: "error",
-          toast: true,
-          title: "Option already added",
-          showConfirmButton: false,
-          timer: 2000,
-        });
       }
     },
     removeRangePill(value) {
