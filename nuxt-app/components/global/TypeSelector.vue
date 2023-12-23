@@ -18,11 +18,11 @@
               ]"
             >
               <h6 class="m-0" v-if="!isChild">
-                <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
+                <font-awesome-icon icon="fas fa-plus" class="mr-1"></font-awesome-icon>
                 <span v-text="name"></span>
               </h6>
               <h6 class="m-0" v-else>
-                <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
+                <font-awesome-icon icon="fas fa-plus" class="mr-1"></font-awesome-icon>
                 <span v-text="name"></span>
               </h6>
             </div>
@@ -41,7 +41,7 @@
           @submit.prevent="handleSubmit(name, value)"
         >
           <template v-if="type_selected == name">
-            <div class="col-sm-12 py-2">
+            <div class="col-sm-12 py-2" v-if="!value?.type == 'string'">
               <template v-if="!isChild">
                 <small class="text-muted m-2"
                   ><font-awesome-icon
@@ -60,7 +60,48 @@
               </template>
             </div>
 
-            <!-- 🤩 CLASS TYPE  IF NOT ENUM OR VOCAB🤩-->
+            <!-- SIMPLE VALUES -->
+            <div v-if="value?.type == 'string' && !value.vocabulary && !value.enum">
+
+              <template v-if="value?.type == 'string'">
+                <div
+                  class="bg-light p-4 text-light align-items-center"
+                  :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
+                >
+                  <div class="w-100">
+                    <form
+                      id="keywords_form"
+                      class="w-100 d-flex justify-content-center"
+                      @submit.prevent="addKeyword"
+                    >
+                      <input
+                        class="form-control"
+                        type="text"
+                        v-model="keyword_input"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-primary form-label"
+                        @click="addKeyword"
+                      >
+                        Add <span v-if="value?.format == 'uri'">URL</span><span v-else>Text</span>
+                      </button>
+                    </form>
+                  </div>
+                  <div class="alert alert-success m-3 w-100" v-show="keywords.size">
+                    <span
+                      v-for="(text, i) in [...keywords]"
+                      class="badge badge-sm badge-success pointer"
+                    >
+                      <small v-html="text"></small>
+                    </span>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <!-- COMPLEX VALUES -->
+            <div v-else>
+              <!-- 🤩 CLASS TYPE  IF NOT ENUM OR VOCAB🤩-->
             <div
               class="col-sm-12 mainBackLight text-light p-1 text-center classTab"
               v-if="value && !value.vocabulary && !value.enum"
@@ -151,7 +192,7 @@
                   <b v-if="value && value.required">
                     <font-awesome-icon
                       icon="fas fa-circle"
-                      class="text-info"
+                      class="text-info mr-1"
                       :class="[
                         isRequired(value.required, propName)
                           ? 'text-danger'
@@ -249,7 +290,7 @@
                         type="number"
                         @input="updateObject(propName, $event)"
                       />
-                    </div>
+                    </div> 
                   </template>
                   <!-- 🌼   BOOLEAN 🌼  -->
                   <template v-else-if="propInfo && propInfo.type == 'boolean'">
@@ -318,11 +359,12 @@
                   </template>
                   <!-- 🥶🥶🥶 LAST RESORT NO TYPE 🥶🥶🥶-->
                   <template v-else>
-                    <small v-text="propInfo"></small>
+                    <!-- <small v-text="propInfo"></small> -->
                   </template>
                 </template>
               </div>
             </div>
+
             <!-- 🍏 SUBMIT IF NOT ENUM OR VOCAB🍏-->
             <div
               class="col-sm-12 p-0 mt-2"
@@ -339,6 +381,8 @@
                 Add <span v-text="isChild ? childName : name"></span>
               </button>
             </div>
+            </div>
+            <!-- END COMPLEX VALUES -->
           </template>
         </form>
       </div>
@@ -368,7 +412,7 @@ export default {
     Vocabulary,
   },
   methods: {
-    parseOptions() {
+    findTypesAvailable() {
       var self = this;
       // get options from oneOf or anyOf
       self.info && self.info.oneOf
@@ -398,9 +442,18 @@ export default {
           } else if (option && option["type"] == "array") {
             let name = self.main_name.split("_").join(" ");
             if (!self.parsed_options.hasOwnProperty(name)) {
-              option["keywords"] = true;
-              self.parsed_options[name] = option;
+              if (option?.items) {
+                //keywords are complex objects
+                option["keywords"] = false;
+                self.parsed_options[name] = option.items;
+              }else{
+                // keywords are simple strings
+                option["keywords"] = true;
+                self.parsed_options[name] = option;
+              }
             }
+          }else{
+            console.log('Option unhandled from: ' + this.main_name, option)
           }
         }
       } else if (
@@ -411,25 +464,86 @@ export default {
       ) {
         // OBJECT TYPE FIELD
         self.parsed_options[self.info["@type"]] = self.info;
+      }else{
+        console.log('@type not found for child node, using Thing as default: ', self.childName)
+        // use @type Thing as default
+        self.parsed_options['Thing'] = self.info;
       }
-      // console.log(self.main_name, self.parsed_options)
+      console.log('%c RESULTS FOR ' + self.main_name, 'background-color:yellow')
+      console.log({...self.parsed_options})
       // self.checkAutoSelect();
     },
     isRequired(requiredList, name) {
       return requiredList.includes(name) ? true : false;
     },
+    isNumeric(value) {
+        return /^-?\d+$/.test(value);
+    },
     updateObject(prop, event) {
       var self = this;
-      self.userObject[prop] = event.target.value;
+      // ratingVAlue from NDE is string
+      if (this.isNumeric(event.target.value) && prop !== 'ratingValue') {
+        self.userObject[prop] = parseInt(event.target.value);
+      } else {
+        self.userObject[prop] = event.target.value;
+      }
     },
     updateParent(childValue) {
       var self = this;
+      // console.log(self.userObject)
+      // console.log(childValue.subfield)
+      // console.log('INFO', self.info)
+      let mustBeArray = false;
+      if (self.info?.oneOf) {
+        self.info.oneOf.forEach(option => {
+          if (option?.items?.properties) {
+            for (const key in option?.items?.properties) {
+              if (Object.hasOwnProperty.call(option?.items?.properties, key)) {
+                //if found child in prop info properties
+                if (key == childValue?.subfield && option?.items?.properties[key]?.oneOf) {
+                  option?.items?.properties[key]?.oneOf.forEach(subOp => {
+                    if (subOp?.['type'] == 'array' && subOp?.items) {
+                      //look through child items for matched type
+                      if (Array.isArray(subOp?.items)) {
+                        console.log('Items are an array', subOp?.items)
+                        subOp?.items?.forEach(item => {
+                          if (item?.['@type'] == childValue?.value?.["@type"]) {
+                            //confirmed
+                            console.log('updating parent', childValue)
+                            console.log('%c Child value must be array: ' + childValue?.subfield, 'color: orange')
+                            mustBeArray = true;
+                          }
+                        })
+                      }else if(typeof subOp?.items == 'object'){
+                        console.log('Items are an object', subOp?.items)
+                        if ('@type' in subOp?.items && subOp?.items?.['@type'] == childValue?.value?.["@type"]) {
+                          //confirmed
+                          console.log('updating parent', childValue)
+                          console.log('%c Child value must be array: ' + childValue?.subfield, 'color: orange')
+                            mustBeArray = true;
+                        }else{
+                          console.log('oh no', subOp?.items.constructor)
+                        }
+                      }
+                    }
+                  })
+                }
+              }
+            }
+          }
+        })
+      }
+
       if (self.userObject && self.userObject[childValue.subfield]) {
         let existing_val = [self.userObject[childValue.subfield]];
         existing_val.push(childValue.value);
         self.userObject[childValue.subfield] = existing_val;
       } else {
-        self.userObject[childValue.subfield] = childValue.value;
+        if (mustBeArray) {
+          self.userObject[childValue.subfield] = [childValue.value];
+        } else {
+          self.userObject[childValue.subfield] = childValue.value;
+        }
       }
     },
     select(name) {
@@ -473,7 +587,7 @@ export default {
             let ontologies = propInfo["vocabulary"]["ontology"].toString();
             let children = propInfo["vocabulary"]["children_of"].toString();
             let url =
-              `https://www.ebi.ac.uk/ols/api/search?q=${query}` +
+              `https://www.ebi.ac.uk/ols4/api/search?q=${query}` +
               "&ontology=" +
               ontologies +
               "&childrenOf=" +
@@ -544,6 +658,9 @@ export default {
                     var payload = {};
                     payload["item"] = res;
                     payload["from"] = self.main_name;
+                    if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                      payload["forceArray"] = true;
+                    }
                     this.$store.commit("addToArrayFrom", payload);
                     this.$store.dispatch("saveProgress");
                   }
@@ -603,11 +720,16 @@ export default {
         // CHILD
         self.$emit("update", { value: data, subfield: self.childName });
         self.type_selected = "";
+        self.$store.dispatch("saveProgress");
       } else {
         // PARENT
         var payload = {};
         payload["item"] = data;
         payload["from"] = self.main_name;
+        if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+          payload["forceArray"] = true;
+        }
+        // console.log('PAYLOAD', payload)
         this.$store.commit("addToArrayFrom", payload);
         this.$store.dispatch("saveProgress");
         //reset
@@ -636,10 +758,8 @@ export default {
       let self = this;
       if (self.requirementsFulfilled(fieldInfo)) {
         if (!self.isChild) {
-          console.log(1)
           self.animatedSubmit(ClassType, fieldInfo);
         } else {
-          console.log(2)
           self.regularSubmit(ClassType, fieldInfo);
         }
       } else {
@@ -719,6 +839,9 @@ export default {
               var payload = {};
               payload["item"] = result.value[i];
               payload["from"] = propName;
+              if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                payload["forceArray"] = true;
+              }
               this.$store.commit("addToArrayFrom", payload);
 
               this.$store.dispatch("saveProgress");
@@ -745,8 +868,7 @@ export default {
     },
   },
   mounted: function () {
-    // console.log('TYPE SELECTOR : ' + this.main_name, this.info)
-    this.parseOptions();
+    this.findTypesAvailable();
   },
 };
 </script>

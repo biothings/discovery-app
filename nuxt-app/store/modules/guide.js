@@ -103,7 +103,7 @@ export const guide = {
     },
     saveSchema(state, payload) {
       state.schema = payload["schema"];
-      console.log("Schema saved", state.schema);
+      console.log("Schema Saved", {...state.schema});
       state.output["@type"] = state.schema?.name || state.schema?.label;
       state.output["@context"] = payload["schema"]["@context"];
       let obj = Object.assign({}, state.output);
@@ -423,7 +423,13 @@ export const guide = {
       let item = payload["item"];
       //Initialize array
       if (!state.schema.validation.properties[field].value) {
-        state.schema.validation.properties[field]["value"] = item;
+        if (payload?.forceArray) {
+          //for cases that oneOf only has one value and it's array only
+          console.log('%c Force array for ' + field, 'color:hotpink')
+          state.schema.validation.properties[field]["value"] = [item];
+        } else {
+          state.schema.validation.properties[field]["value"] = item;
+        }
       } else {
         if (
           state.schema.validation.properties[field]["value"].constructor ===
@@ -447,6 +453,7 @@ export const guide = {
       }
     },
     formPreviewForGuide(state) {
+      console.log("%c 🔆 Creating Metadata...", "color: blue; padding: 5px;");
       let props = state.schema.validation.properties;
       // Add prefilled values from config
       state.output = Object.assign({}, state.output_default);
@@ -462,13 +469,22 @@ export const guide = {
               Array.isArray(props[key]["value"]) &&
               props[key]["value"].length === 1
             ) {
-              state.output[key] = props[key].value[0];
+              if (props[key]?.oneOf?.length == 1 && props[key]?.oneOf?.[0]?.type == 'array') {
+                //NOTE for cases where oneOF only has one option and it's array
+                //if array is only one item do not remove array structure keep as is
+                console.log('%c oneOf with one value found and must be array: ' + key, 'color: red')
+                state.output[key] = props[key].value;
+              }else{
+                //else take the one item and place out of the array
+                state.output[key] = props[key].value[0];
+              }
             } else {
               state.output[key] = props[key].value;
             }
           }
         }
       }
+      console.log("%c ✅ Validating Metadata...", "color: #4338c9; padding: 5px;");
       // VALIDATION ON COMPLETE
       var ajv = new Ajv({ allErrors: true, strict: false });
       addFormats(ajv);
@@ -485,6 +501,7 @@ export const guide = {
       // });
 
       if (!isValid) {
+        console.log("%c ❌ Validation Failed", "background-color: #a50202; color: white; padding: 5px;");
         state.valid = false;
         state.errors = ajv.errors;
         for (var key in props) {
@@ -517,6 +534,7 @@ export const guide = {
           }
         }
       } else {
+        console.log("%c ✅ Validation Passed", "background-color: #b7ea68; padding: 5px;");
         state.valid = true;
         state.errors = [];
         for (var key in props) {
@@ -862,7 +880,8 @@ export const guide = {
       }
     },
     isInputHidden: (state) => (propname) => {
-      if (propname in state.guide_prefilled) {
+      // N3C wants to hide some fields from user
+      if (propname in state.guide_prefilled && window.location.href.includes('n3c')) {
         return true;
       } else {
         return false;
@@ -1043,6 +1062,7 @@ export const guide = {
       commit("reset");
     },
     saveProgress({ commit, state }) {
+      console.log("%c ⭐ Saving progress", "background-color: lightblue; padding: 5px;");
       commit("formPreviewForGuide");
       let obj = state.output;
       sessionStorage.setItem("guideProgress", JSON.stringify(obj));

@@ -129,11 +129,11 @@
             <td>
               <small class="mainTextDark bold">Expected Type: </small>
               <template v-for="(type, i) in item.range">
-                <RouterLink :to="getLink(type)">
+                <a v-for="link in getLink(type)" :href="link" :key="link">
                   <small>
                     <span v-html="type"></span>
                   </small>
-                </RouterLink>
+                </a>
                 <span v-if="i !== item.range.length - 1">, </span>
               </template>
             </td>
@@ -245,15 +245,7 @@ export default {
         return link;
       } catch (e) {
         if (qName.includes(":")) {
-          let arr = qName.split(":");
-          return ["./" + arr[arr.length - 1]];
-        } else {
-          return false;
-        }
-      } finally {
-        if (qName.includes(":")) {
-          let arr = qName.split(":");
-          return ["./" + arr[arr.length - 1]];
+          return ["/ns/" + qName.split(":")[0] + "/" + qName];
         } else {
           return false;
         }
