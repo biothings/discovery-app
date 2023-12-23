@@ -42,8 +42,8 @@ export const auth = {
           commit("resetUser");
           throw err;
         });
-      // }
-    },
+      }
+    // },
   },
   getters: {
     userInfo: (state) => {

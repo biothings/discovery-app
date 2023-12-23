@@ -143,7 +143,7 @@ export default {
       let ontologies = vocabInfo["vocabulary"]["ontology"].toString();
       let children = vocabInfo["vocabulary"]["children_of"].toString();
       let url =
-        `https://www.ebi.ac.uk/ols/api/search?q=${query}` +
+        `https://www.ebi.ac.uk/ols4/api/search?q=${query}` +
         "&ontology=" +
         ontologies +
         "&childrenOf=" +

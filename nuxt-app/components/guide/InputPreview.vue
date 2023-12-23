@@ -12,10 +12,10 @@
           <span v-text="userInput.name"></span>
         </template>
         <template v-else>
-          <span v-text="name"></span>
+          <span v-text="name" class="mr-1"></span>
           <font-awesome-icon
             icon="fas fa-info-circle"
-            class="text-info"
+            class="text-info mr-1"
           ></font-awesome-icon>
         </template>
         <span
@@ -23,7 +23,7 @@
           class="d-inline"
           @click="removeItem($event, userInput)"
         >
-          <font-awesome-icon icon="fas fa-times"></font-awesome-icon
+          <font-awesome-icon icon="fas fa-times" class="mr-1"></font-awesome-icon
         ></span>
       </span>
     </template>
@@ -36,10 +36,10 @@
       >
         <font-awesome-icon icon="fas fa-check"></font-awesome-icon>
         <template v-if="person && person.name">
-          <span v-text="person.name"></span>
+          <span v-text="person.name" class="mr-1"></span>
         </template>
         <template v-else-if="person && person.constructor == String">
-          <span v-text="person"></span>
+          <span v-text="person" class="mr-1"></span>
         </template>
         <span v-else v-text="name + ' ' + (i + 1)"></span>
         <span

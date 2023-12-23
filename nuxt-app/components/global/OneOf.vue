@@ -141,7 +141,7 @@ export default {
             let children = self.option["vocabulary"]["children_of"].toString();
 
             let url =
-              `https://www.ebi.ac.uk/ols/api/search?q=` +
+              `https://www.ebi.ac.uk/ols4/api/search?q=` +
               query +
               "&ontology=" +
               ontologies +
@@ -216,7 +216,7 @@ export default {
 
       if (ontologies) {
         let url =
-          `https://www.ebi.ac.uk/ols/api/search?q=` +
+          `https://www.ebi.ac.uk/ols4/api/search?q=` +
           query +
           "&ontology=" +
           ontologies +
