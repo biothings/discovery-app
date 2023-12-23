@@ -451,7 +451,7 @@
                 <!-- 🌈  CONSTANT DATA CATALOG 🌈 -->
                 <template
                   v-if="
-                    info?.type === 'object' && name === 'includedInDataCatalog'
+                    info?.type === 'object' && name === ''
                   "
                 >
                   <!--<div class="text-center">
@@ -469,33 +469,32 @@
                 <template
                   v-if="
                     info?.type === 'object' &&
-                    name !== 'license' &&
-                    name !== 'includedInDataCatalog'
+                    name !== 'license'
                   "
                 >
-                  <div class="form-group p-2 row">
-                    <TypeSelector
-                      :info="info"
-                      :main_name="name"
-                      :isChild="false"
-                    ></TypeSelector>
-                  </div>
-                  <div class="col-sm-12 m-auto">
-                    <!-- 🌈  input preview for object or array🌈 -->
-                    <InputPreview
-                      :name="name"
-                      :userInput="userInput"
-                      :removeItem="removeItem"
-                    ></InputPreview>
-                    <!-- 🌈  input preview for string🌈 -->
-                    <template v-if="typeof userInput === 'string'">
-                      <span
-                        style="overflow: hidden; max-width: 100%"
-                        class="badge badge-success text-light"
-                        v-text="userInput"
-                      ></span>
-                    </template>
-                  </div>
+                <div class="form-group p-2 row">
+                  <TypeSelector
+                    :info="info"
+                    :main_name="name"
+                    :isChild="false"
+                  ></TypeSelector>
+                </div>
+                <div class="col-sm-12 m-auto">
+                  <!-- 🌈  input preview for object or array🌈 -->
+                  <InputPreview
+                    :name="name"
+                    :userInput="userInput"
+                    :removeItem="removeItem"
+                  ></InputPreview>
+                  <!-- 🌈  input preview for string🌈 -->
+                  <template v-if="typeof userInput === 'string'">
+                    <span
+                      style="overflow: hidden; max-width: 100%"
+                      class="badge badge-success text-light"
+                      v-text="userInput"
+                    ></span>
+                  </template>
+                    </div>
                 </template>
                 <!-- 🌈  ONE OF  OR ANY OF🌈 -->
                 <template v-if="info.oneOf || info.anyOf">
@@ -608,21 +607,27 @@
         </div>
       </div>
       <div
-        class="col-sm-2 p-2 alert-dark actions d-flex align-items-center justify-content-around"
+        class="col-sm-2 p-2 actions d-flex align-items-center justify-content-around"
+        :class="{'alert-success': userInput, 'alert-dark': !userInput, 'alert-warning': hasErrors,}"
       >
         <span
           class="fa-stack fa-1x pointer tip"
-          data-tippy-content="Done"
+          :data-tippy-content="hasErrors ? 'Invalid Input. See Issues Above' : 'Perfect!'"
           @click="markCompleted(name)"
           v-show="userInput || userInput === false"
         >
           <font-awesome-icon
             icon="fas fa-circle"
-            class="text-success back fa-stack-2x"
+            class="back fa-stack-2x"
+            :class="[hasErrors ? 'text-warning' : 'text-success']"
           ></font-awesome-icon>
-          <font-awesome-icon
+          <font-awesome-icon v-if="!hasErrors"
             icon="fas fa-check"
             class="fa-stack-1x text-light"
+          ></font-awesome-icon>
+          <font-awesome-icon v-else
+            icon="fas fa-exclamation-circle"
+            class="fa-stack-1x text-danger heartbeat"
           ></font-awesome-icon>
         </span>
         <span
@@ -776,7 +781,7 @@ export default {
             let ontologies = propInfo["vocabulary"]["ontology"].toString();
             let children = propInfo["vocabulary"]["children_of"].toString();
             let url =
-              `https://www.ebi.ac.uk/ols/api/search?q=${query}` +
+              `https://www.ebi.ac.uk/ols4/api/search?q=${query}` +
               "&ontology=" +
               ontologies +
               "&childrenOf=" +
@@ -982,6 +987,9 @@ export default {
                   var payload = {};
                   payload["item"] = result.value[i];
                   payload["from"] = propName;
+                  if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                    payload["forceArray"] = true;
+                  }
                   self.$store.commit("addToArrayFrom", payload);
 
                   self.$store.dispatch("saveProgress");
@@ -1052,6 +1060,9 @@ export default {
                       var payload = {};
                       payload["item"] = slist[sIndex];
                       payload["from"] = propName;
+                      if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                        payload["forceArray"] = true;
+                      }
                       self.$store.commit("addToArrayFrom", payload);
 
                       self.$store.dispatch("saveProgress");
@@ -1060,6 +1071,9 @@ export default {
                     var payload = {};
                     payload["item"] = value;
                     payload["from"] = propName;
+                    if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                      payload["forceArray"] = true;
+                    }
                     self.$store.commit("addToArrayFrom", payload);
 
                     self.$store.dispatch("saveProgress");
@@ -1717,6 +1731,9 @@ export default {
                   var payload = {};
                   payload["item"] = obj;
                   payload["from"] = propName;
+                  if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                    payload["forceArray"] = true;
+                  }
                   self.$store.commit("addToArrayFrom", payload);
 
                   self.$store.dispatch("saveProgress");
@@ -1837,7 +1854,7 @@ export default {
 
           // self.loading = true;
           //
-          // axios.get("http://www.ebi.ac.uk/ols/api/suggest?q="+query+"&ontology="+ontologies+"&rows=5").then(res=>{
+          // axios.get("http://www.ebi.ac.uk/ols4/api/suggest?q="+query+"&ontology="+ontologies+"&rows=5").then(res=>{
           //   self.vocabSuggestions = res.data.response.docs;
           //   self.loading = false;
           // }).catch(err=>{
@@ -1845,7 +1862,7 @@ export default {
           // });
 
           let url =
-            "https://www.ebi.ac.uk/ols/api/search?q=" +
+            "https://www.ebi.ac.uk/ols4/api/search?q=" +
             query +
             "&ontology=" +
             ontologies +
@@ -1896,7 +1913,6 @@ export default {
   mounted: function () {
     var self = this;
     // console.log('%c MOUNTING ' + self.name, "color:green")
-    // console.log({...self.info})
     if (self.info.hasOwnProperty("oneOf")) {
       if (
         (self.info["oneOf"].hasOwnProperty("type") &&
@@ -1920,6 +1936,7 @@ export default {
   computed: {
     ...mapGetters({
       showDesc: "showDesc",
+      errors: "getErrors",
     }),
     isRequired: function () {
       return this.$store.getters.isRequired(this.name);
@@ -1966,6 +1983,19 @@ export default {
         return false;
       }
     },
+    hasErrors: function(){
+      let self = this;
+      if (this.errors && this.errors.length) {
+        let found = this.errors.some((val) => val.instancePath.includes(self.name));
+        if (found) {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        return false
+      }
+    }
   },
 };
 </script>
