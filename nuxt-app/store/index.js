@@ -64,7 +64,7 @@ export default createStore({
             // EBI API LOOKUP TIP DESCRIPTION
             axios
               .get(
-                "https://www.ebi.ac.uk/ols/api/search?q=" +
+                "https://www.ebi.ac.uk/ols4/api/search?q=" +
                   encodeURI(info) +
                   "&exact=1"
               )
