@@ -212,6 +212,15 @@ export const guide = {
       if (state.schema.validation.properties.hasOwnProperty(selection.name)) {
         state.schema.validation.properties[selection.name]["value"] =
           selection.value;
+        //prefill identifier with URL field if available
+        if (
+          selection.name == 'url' &&
+          'identifier' in state.schema.validation.properties &&
+          !state.schema.validation.properties['identifier']["value"] &&
+          !state.schema.validation?.required?.includes('identifier')
+        ){
+          state.schema.validation.properties['identifier']["value"] = selection.value;
+        }
         //check for duplicate keys or plural names
         if (
           selection.name + "s" in state.schema.validation.properties &&
