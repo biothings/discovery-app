@@ -60,6 +60,11 @@ import woohoo from "@/assets/img/woohoo-01.svg";
 import oh_no from "@/assets/img/oh_no-01.svg";
 import dde_logo from "@/assets/img/dde-logo-o.svg";
 import not_right from "@/assets/img/not_right-01.svg";
+import broken from "@/assets/img/broken_root-01.svg"
+import check_validation from "@/assets/img/check_validation-01.svg"
+import check_range from "@/assets/img/check_range-01.svg"
+import check_definition from "@/assets/img/check_definition-01.svg"
+import check_label from "@/assets/img/label_issue-01.svg"
 export default {
   data: function () {
     return {
@@ -158,45 +163,45 @@ export default {
       let msg_html = "<div>";
       switch (type) {
         case "no_path_to_root":
-          msg_html += `<img src="@/assets/img/broken_root-01.svg" height="50px" alt="broken path to root"/>
+          msg_html += `<img src="` + broken +`" height="50px" alt="No path to root class"/>
                     <small class="text-primary d-block">Tip: A broken path can generate more errors, 
                         we recommend fixing this first and see if this fixes other issues.</small>`;
           break;
         case "invalid_validation_schema":
-          msg_html += `<img src="@/assets/img/check_validation-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_validation + `" height="50px" alt="check validation"/>`;
           break;
         case "undefined_rangeincludes":
-          msg_html += `<img src="@/assets/img/check_range-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_range +`" height="50px" alt="check rangeIncludes"/>`;
           break;
         case "non_class_or_property_@type":
-          msg_html += `<img src="@/assets/img/check_range-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_range + `" height="50px" alt="check rangeIncludes"/>`;
           break;
         case "invalid_property":
-          msg_html += `<img src="@/assets/img/check_definition-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_definition + `" height="50px" alt="check definition"/>`;
           break;
         case "invalid_class":
-          msg_html += `<img src="@/assets/img/check_definition-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_definition + `" height="50px" alt="check definition"/>`;
           break;
         case "dup_label":
-          msg_html += `<img src="@/assets/img/label_issue-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_label + `" height="50px" alt="check labels"/>`;
           break;
         case "unmatched_label":
-          msg_html += `<img src="@/assets/img/label_issue-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_label + `" height="50px" alt="check labels"/>`;
           break;
         case "missing_rangeincludes":
-          msg_html += `<img src="@/assets/img/check_range-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_range + `" height="50px" alt="check ranges"/>`;
           break;
         case "undefined_domainincludes_class":
-          msg_html += `<img src="@/assets/img/check_definition-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_definition + `" height="50px" alt="check definition"/>`;
           break;
         case "invalid_property_label":
-          msg_html += `<img src="@/assets/img/label_issue-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_label + `" height="50px" alt="check label"/>`;
           break;
         case "invalid_class_label":
-          msg_html += `<img src="@/assets/img/label_issue-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + check_label + `" height="50px" alt="check labels"/>`;
           break;
         default:
-          msg_html += `<img src="@/assets/img/not_right-01.svg" height="50px" alt="broken path to root"/>`;
+          msg_html += `<img src="` + not_right + `" height="50px" alt="oh no"/>`;
           break;
       }
       msg_html +=

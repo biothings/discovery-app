@@ -18,7 +18,7 @@ export default defineNuxtConfig({
       // to test CRUD operations you must use a proxy server, a localhost will only work
       //with GET calls, for prod a proxy server/handler must be used.
       apiUrl:
-        process.env.NODE_ENV == "development" ? "http://localhost:8000" : "",
+        process.env.NODE_ENV == "development" ? "http://localhost" : "",
     },
   },
   // https://github.com/nuxt/framework/discussions/3823
