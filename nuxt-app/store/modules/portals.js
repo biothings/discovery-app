@@ -40,6 +40,36 @@ export const portals = {
         colors: [{ hex: "#D13B62" }, { hex: "#0A253D" }],
       },
       {
+        name: "TEST",
+        shortName: "TEST",
+        keyName: "nde",
+        header:
+          "test",
+        linkname: "nde",
+        description: `<p>Test.</p>`,
+        image: nde,
+        portalicon: nde,
+        site: "https://data.niaid.nih.gov/portal",
+        schema: "/view/ndetest1",
+        showCoverage: false,
+        coverage: ["Dataset"],
+        guides: [
+          {
+            guide: "/guide/ndetest/Dataset",
+            name: "Dataset Test 1",
+            registry: "/dataset?template=nde:ResourceCatalog",
+          },
+        ],
+        datasets: "/dataset?template=nde:dataset",
+        colors: [{ hex: "hotpink" }, { hex: "purple" }],
+        // publications: [
+        //   // {
+        //   //   name: "Developing a standardized but extendable framework to increase the findability of infectious disease datasets",
+        //   //   link: "https://www.biorxiv.org/content/10.1101/2022.10.10.511492v1",
+        //   // },
+        // ],
+      },
+      {
         name: "NIAID Data Ecosystem",
         shortName: "NIAID Data Ecosystem",
         keyName: "nde",
