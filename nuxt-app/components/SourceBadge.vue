@@ -7,7 +7,7 @@ let cls = ref("bg-secondary");
 let text = ref("N/A");
 
 onMounted(() => {
-  switch (props.status.toString()) {
+  switch (props?.status?.toString()) {
     case "200":
       text.value = "ok";
       cls.value = "bg-success";
