@@ -46,7 +46,7 @@ export const portals = {
         header:
           "Find, access and understand datasets and tools across infectious disease and immune-mediated data repositories.",
         linkname: "nde",
-        description: `<p>The NIAID Data Ecosystem is a secure environment to discover immune-mediated and infectious disease data to speed the development of diagnostics, therapeutics, and vaccines.</p>`,
+        description: `<p>The <a href="https://data.niaid.nih.gov/" target="_blank">NIAID Data Ecosystem Discovery Portal</a> offers a convenient one-stop-shop for discovery of data on infectious and immune-mediated diseases (IIDs) to speed the development of diagnostics, therapeutics, and vaccines. The NIAID Data Ecosystem Discovery Portal harvests metadata from dataset repositories (including <a href="https://discovery.biothings.io/portal/niaid" target="_blank">NIAID SysBio</a>) and harmonizes them to this schema to enable easy cross-platform dataset searching and filtering. Datasets and resources submitted using the submission options below will automatically be ingested into the NIAID Data Ecosystem Discovery Portal.</p>`,
         image: nde,
         portalicon: nde,
         site: "https://data.niaid.nih.gov/portal",
