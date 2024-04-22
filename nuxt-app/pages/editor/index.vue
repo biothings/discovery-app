@@ -188,7 +188,7 @@
                     v-model="addCardinality"
                     id="ac"
                     class="slider ml-2"
-                    @click="toggleCardinality()"
+                    @click="toggleCard()"
                     type="checkbox"
                   />
                 </div>
@@ -293,7 +293,7 @@
             <hr />
             <form
               class="m-auto col-sm-12 col-md-9 py-2 bg-light rounded fade-in text-left"
-              @submit.prevent="addClass()"
+              @submit.prevent="addClss()"
             >
               <h4 class="text-info">Create a new class</h4>
               <small>
@@ -499,14 +499,15 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from "vuex";
+import { mapState, mapActions } from "pinia";
+import { useEditorStore } from "../../stores/editor";
+import { useAuthStore } from "../../stores/auth";
+import { useMainStore } from "../../stores/index";
 import axios from "axios";
 import moment from "moment";
 import Notify from "simple-notify";
-
 import editorImg from "@/assets/img/editor.png";
 import dropSound from "@/assets/img/tinybutton.wav";
-
 import NGXGraph from "~~/components/NGXGraph.vue";
 import ValidationDropzone from "~~/components/ValidationDropzone.vue";
 import GitHubSaver from "~~/components/GitHubSaver.vue";
@@ -566,51 +567,48 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      userInfo: "userInfo",
+    ...mapState(useAuthStore, ["userInfo"]),
+    ...mapState(useMainStore, ["loading"]),
+    ...mapState(useEditorStore, {
       validation_props: "getValidationProps",
-      startingPoint: "getStartingPoint",
-      prefix: "getPrefix",
-      classesAvailable: "getSchema",
-      loading: "loading",
-      addCardinality: "addCardinality",
+      classesAvailable: "schema",
+      getFinalSchema: "finalschema",
     }),
+    ...mapState(useEditorStore, ["addCardinality", "removeValidation", "startingPoint", "prefix", "addCardinality"]),
     removeValidation: {
       get() {
-        return this.$store.getters.removeValidation;
+        return this.removeValidation;
       },
       set(v) {
-        this.$store.commit("setRemoveValidation", { value: v });
+        this.setRemoveValidation({ value: v });
       },
     },
-    ...mapState({
-      newClassAdded: (state) => {
-        if (state?.editor?.schema?.length) {
-          for (var i = 0; i < state.editor.schema.length; i++) {
-            if (state.editor.schema[i].special) {
-              return true;
-            }
+    newClassAdded: () => {
+      if (this?.schema?.length) {
+        for (var i = 0; i < this.schema.length; i++) {
+          if (this.schema[i].special) {
+            return true;
           }
-          return false;
-        } else {
-          return false;
         }
-      },
-    }),
+        return false;
+      } else {
+        return false;
+      }
+    },
   },
   watch: {
     prefix: function (prefix) {
       if (prefix && !this.loadingMode) {
-        this.$store.dispatch("getParents");
+        this.getParents();
         setTimeout(() => {
-          this.$store.dispatch("SelectExistingProps");
+          this.SelectExistingProps();
         }, 1000);
         setTimeout(() => {
-          this.$store.dispatch("applyExistingValidationRules");
+          this.applyExistingValidationRules();
         }, 2000);
       }
     },
-    inputNamespace: function (value, oldvalue) {
+    inputNamespace: function (value) {
       let self = this;
       var re = /^[a-z0-9]+$/i;
       if (value.length < 3) {
@@ -638,7 +636,7 @@ export default {
         } else {
           const runtimeConfig = useRuntimeConfig();
           let url = runtimeConfig.public.apiUrl + "/api/registry/" + value;
-          self.$store.commit("setLoading", { value: true });
+          self.setLoading({ value: true });
           axios
             .head(url)
             .then(function (res) {
@@ -647,11 +645,11 @@ export default {
                 '%c Namespace "' + value + '" is NOT available',
                 "color:coral"
               );
-              self.$store.commit("setLoading", { value: false });
+              self.setLoading({ value: false });
             })
             .catch((err) => {
               //last check for reserved names
-              self.$store.commit("setLoading", { value: false });
+              self.setLoading({ value: false });
               if (value === "metadata" || value === "dataset") {
                 self.availableNamespace = false;
               } else {
@@ -668,20 +666,31 @@ export default {
     },
   },
   methods: {
-    toggleCardinality() {
-      this.$store.commit("toggleCardinality");
-    },
-    toggleVOptions() {
-      this.$store.commit("toggleValOptions");
+    ...mapActions(useMainStore, ["setUpTips"]),
+    ...mapActions(useEditorStore, [
+      "setRemoveValidation",
+      "toggleCardinality",
+      "formPreview",
+      "getParents",
+      "SelectExistingProps",
+      "applyExistingValidationRules",
+      "restoreStore",
+      "toggleDesc",
+      "toggleRemoveValidation",
+      "addClass",
+      "saveSchemaForEditor",
+      "savePrefix",
+    ]),
+    toggleCard() {
+      this.toggleCardinality();
     },
     editValidation() {
-      let self = this;
-      self.validationView = !self.validationView;
-      this.$store.commit("formPreview");
+      this.validationView = !this.validationView;
+      this.formPreview();
     },
     githubOptions() {
       // show modal
-      this.$store.commit("formPreview");
+      this.formPreview();
       var modal = document.getElementById("ghOptions");
       modal.style.display = "block";
       var span = document.getElementById("closeBtn");
@@ -867,8 +876,8 @@ export default {
     saveProgress() {
       let self = this;
 
-      this.$store.commit("formPreview");
-      let schema = this.$store.getters.getFinalSchema;
+      this.formPreview();
+      let schema = this.getFinalSchema;
 
       var progress = localStorage.getItem("EditorProgress");
       if (progress) {
@@ -929,8 +938,6 @@ export default {
               description: found.description,
               date: moment().format("MM-DD-YYYY, h:mm:ss A"),
               schema: this.$store.state["editor"],
-              // 'startingPoint': this.$store.getters.getStartingPoint,
-              // 'parentInfo': this.$store.getters.getSchema.find(cls => cls.name == this.$store.getters.getStartingPoint)
             };
           } else {
             return entry;
@@ -997,8 +1004,6 @@ export default {
             description: desc,
             date: moment().format("MM-DD-YYYY, h:mm:ss A"),
             schema: this.$store.state["editor"],
-            // 'startingPoint': this.$store.getters.getStartingPoint,
-            // 'parentInfo': this.$store.getters.getSchema.find(cls => cls.name == this.$store.getters.getStartingPoint)
           };
           progress.push(item);
           localStorage.setItem("EditorProgress", JSON.stringify(progress));
@@ -1034,8 +1039,6 @@ export default {
             description: desc,
             date: moment().format("MM-DD-YYYY, h:mm:ss A"),
             schema: this.$store.state["editor"],
-            // 'startingPoint': this.$store.getters.getStartingPoint,
-            // 'parentInfo': this.$store.getters.getSchema.find(cls => cls.name == this.$store.getters.getStartingPoint)
           };
           localStorage.setItem("EditorProgress", JSON.stringify([item]));
           new Notify({
@@ -1133,15 +1136,9 @@ export default {
     loadDataIntoEditor(data) {
       this.loadingMode = true;
       console.log("✅ Loading Mode: ", this.loadingMode);
-      this.$store.commit("restoreStore", { schema: data.schema });
+      this.restoreStore({ schema: data.schema });
     },
-    toggleDesc() {
-      this.$store.commit("toggleDesc");
-    },
-    toggleRemoveValidation() {
-      this.$store.commit("toggleRemoveValidation");
-    },
-    addClass() {
+    addClss() {
       let self = this;
       let name = this.$refs.clsName.value;
       let desc = this.$refs.clsDesc.value;
@@ -1167,12 +1164,11 @@ export default {
       } else {
         if (name && desc) {
           // DUPLICATE CHECK
-          // this.$store.getters.isDuplicateClass(name)
           let payload = {
             name: name,
             description: desc,
           };
-          this.$store.commit("addClass", payload);
+          this.addClass(payload);
         } else {
           self.$swal.fire({
             icon: "error",
@@ -1187,7 +1183,8 @@ export default {
     getPreview() {
       let self = this;
       if (self.prefix) {
-        this.$store.commit("formPreview");
+        this.formPreview();
+        l;
         self.$swal.fire({
           position: "center",
           confirmButtonColor: "#63296b",
@@ -1199,7 +1196,7 @@ export default {
             renderjson.set_show_to_level(5);
             document
               .getElementById("previewJSON")
-              .appendChild(renderjson(self.$store.getters.getFinalSchema));
+              .appendChild(renderjson(self.getFinalSchema));
           },
         });
       }
@@ -1213,7 +1210,7 @@ export default {
         var payload = {};
         payload["schema"] = JSON.parse(schema);
         payload["start"] = startingPoint;
-        this.$store.commit("saveSchemaForEditor", payload);
+        this.saveSchemaForEditor(payload);
       } else {
         self.$swal.fire({
           title: "No Schema Selected",
@@ -1229,15 +1226,13 @@ export default {
     },
     savePrefix() {
       if (this.availableNamespace) {
-        var payload = {};
-        payload["prefix"] = this.inputNamespace;
-        this.$store.commit("savePrefix", payload);
+        this.savePrefix({ prefix: this.inputNamespace });
       }
     },
     downloadSchema() {
       var self = this;
       if (self.prefix) {
-        this.$store.commit("formPreview");
+        this.formPreview();
         self.$swal
           .fire({
             title: "Name your file",
@@ -1255,7 +1250,7 @@ export default {
           .then((result) => {
             if (result.value) {
               self.download(
-                JSON.stringify(this.$store.getters.getFinalSchema, null, 2),
+                JSON.stringify(this.getFinalSchema, null, 2),
                 result.value + ".jsonld",
                 "text/plain"
               );
@@ -1357,10 +1352,9 @@ export default {
             data = {
               name: repo,
               file: file,
-              data: this.$store.getters.getFinalSchema,
+              data: this.getFinalSchema,
             };
-
-            console.log(typeof this.$store.getters.getFinalSchema);
+            console.log(typeof this.getFinalSchema);
             console.log(data);
 
             let config = {
@@ -1418,7 +1412,7 @@ export default {
     this.checkForData();
   },
   updated: function () {
-    this.$store.dispatch("setUpTips");
+    this.setUpTips();
   },
 };
 </script>

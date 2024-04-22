@@ -149,7 +149,8 @@
 
 <script>
 import ValidationBox from "./ValidationBox.vue";
-import { mapGetters, mapActions } from "vuex";
+import { mapState, mapActions } from "pinia";
+import { useSchemaViewerStore } from "../stores/schema_viewer";
 
 export default {
   name: "QueryBox",
@@ -164,8 +165,15 @@ export default {
     };
   },
   props: ["q", "userSchema", "parent"],
+  computed: {
+    ...mapState(useSchemaViewerStore, [
+      "validationView",
+      "showAll",
+      "validationView",
+    ]),
+  },
   methods: {
-    ...mapActions(["toggleShowAll"]),
+    ...mapActions(useSchemaViewerStore, ["toggleShowAll"]),
     getPaths(classInfo) {
       // console.log('getting all possible paths...')
       let res = [];
@@ -241,7 +249,7 @@ export default {
     getLink(qName) {
       // console.log('getLink', qName)
       try {
-        let link = [store.getters.handleLink(qName)];
+        let link = [this.handleLink(qName)];
         return link;
       } catch (e) {
         if (qName.includes(":")) {
@@ -260,9 +268,6 @@ export default {
       this.textColor = "mainTextDark";
       this.backColor = "mainBackDark";
     }
-  },
-  computed: {
-    ...mapGetters(["validationView", "showAll"]),
   },
 };
 </script>

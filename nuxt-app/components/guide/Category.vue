@@ -35,6 +35,8 @@
 
 <script>
 import Chart from "./Chart.vue";
+import { mapActions, mapState } from "pinia";
+import { useGuideStore } from "../../stores/guide";
 
 export default {
   name: "Category",
@@ -49,6 +51,7 @@ export default {
   },
   props: ["cat", "subcats", "totals"],
   methods: {
+    ...mapActions(useGuideStore, ["removeCategory"]),
     removeCat() {
       var self = this;
       this.$swal
@@ -64,16 +67,17 @@ export default {
         })
         .then((result) => {
           if (result.value) {
-            var payload = {};
-            payload["origin"] = self.cat;
-            self.$store.commit("removeCategory", payload);
+            self.removeCategory({ origin: self.cat });
             self.added = false;
           }
         });
     },
   },
+  computed: {
+    ...mapState(useGuideStore, ["startingPoint"]),
+  },
   mounted: function () {
-    let sp = this.$store.getters.startingPoint;
+    let sp = this.startingPoint;
     console.log(this.subcats);
     if (sp.name == this.cat) {
       this.canRemove = false;

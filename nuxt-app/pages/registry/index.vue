@@ -347,7 +347,7 @@
               Extended Definition</small
             >
             <button
-              @click="compareAll()"
+              @click="compareAllAction()"
               class="btn mainBackLight text-light m-auto"
             >
               <font-awesome-icon icon="fas fa-list-ul" /> Compare All
@@ -411,7 +411,9 @@
 <script>
 import Mark from "mark.js";
 import axios from "axios";
-import { mapGetters } from "vuex";
+import { mapState, mapActions } from "pinia";
+import { useSchemaRegistryStore } from "../../stores/schema_registry";
+import { useMainStore } from "../../stores/index";
 import SchemaRegistryItem from "~~/components/SchemaRegistryItem.vue";
 
 export default {
@@ -458,16 +460,12 @@ export default {
     SchemaRegistryItem,
   },
   computed: {
-    compareItems: function () {
-      return this.$store.getters.getCompareItems;
-    },
-    results: function () {
-      return this.$store.getters.getResults;
-    },
-    compareUsedAvailable: function () {
-      return this.$store.getters.getCompareUsedAvailable;
-    },
-    ...mapGetters(["loading"]),
+    ...mapState(useSchemaRegistryStore, {
+      results: "getResults",
+      compareItems: "compareItems",
+      compareUsedAvailable: "getCompareUsedAvailable",
+    }),
+    ...mapState(useMainStore, ["loading"]),
   },
   data: function () {
     return {
@@ -568,6 +566,12 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useMainStore, ["setLoading"]),
+    ...mapActions(useSchemaRegistryStore, [
+      "compareAll",
+      "compareUsed",
+      "resetItems",
+    ]),
     getNameSpaces() {
       var self = this;
       let res = [];
@@ -641,7 +645,7 @@ export default {
 
       let url = runtimeConfig.public.apiUrl + `/api/registry/query?q=${query}`;
 
-      self.$store.commit("setLoading", { value: true });
+      self.setLoading({ value: true });
       self.registry = [];
       self.highlighter.unmark();
 
@@ -698,10 +702,10 @@ export default {
             "color:orange"
           );
           console.log("%c hits: " + response.data.total, "color:limegreen");
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
         })
         .catch((err) => {
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
           throw err;
         });
     },
@@ -760,14 +764,14 @@ export default {
     sortResults(e) {
       this.sort = e.target.value;
     },
-    compareAll() {
-      this.$store.commit("compareAll");
+    compareAllAction() {
+      this.compareAll();
     },
     compareUsed() {
-      this.$store.commit("compareUsed");
+      this.compareUsed();
     },
     resetItems() {
-      this.$.commit("resetItems");
+      this.resetItems();
     },
     openModal() {
       var self = this;
@@ -778,7 +782,7 @@ export default {
         modal.style.display = "none";
       };
       if (self.compareItems.length > 1) {
-        this.$store.commit("compareAll");
+        this.compareAll();
       }
     },
   },

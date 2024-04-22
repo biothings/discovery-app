@@ -531,10 +531,14 @@
 
 <script>
 import tippy from "tippy.js";
-import { mapGetters } from "vuex";
+import { mapState, mapActions } from "pinia";
 import axios from "axios";
 import QueryBox from "~~/components/QueryBox.vue";
 import moment from "moment";
+import { useAuthStore } from "../../../stores/auth";
+import { useMainStore } from "../../../stores/index";
+import { useSchemaViewerStore } from "../../../stores/schema_viewer";
+import { useEditorStore } from "../../../stores/editor";
 
 import "@/assets/js/networkx.js";
 
@@ -616,13 +620,16 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["loading", "userInfo", "queryContent"]),
+    ...mapState(useMainStore, ["loading"]),
+    ...mapState(useAuthStore, ["userInfo"]),
+    ...mapState(useSchemaViewerStore, ["queryContent", "validationView"]),
+    ...mapState(useEditorStore, ["schema_version"]),
     validationView: {
       get() {
-        return this.$store.getters.validationView;
+        return this.validationView;
       },
       set(v) {
-        this.$store.commit("setValidationView", { value: v });
+        this.setValidationView({ value: v });
       },
     },
     schemaFilters() {
@@ -637,9 +644,6 @@ export default {
         }
       }
       return letters.sort();
-    },
-    schema_version() {
-      return this.$store.getters.schema_version;
     },
   },
   watch: {
@@ -688,6 +692,14 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useSchemaViewerStore, [
+      "setValidationView",
+      "saveSchemaForViewer",
+      "saveProps",
+      "checkIFValidationView",
+      "toggleShowAll",
+    ]),
+    ...mapActions(useMainStore, ["setLoading"]),
     saveDataAndRedirect(item) {
       var self = this;
       let found = this.$_.find(self.userSchema.hits, (o) => o.name == item);
@@ -702,11 +714,11 @@ export default {
     },
     checkIfNamespaceIsRegistered(namespace) {
       let self = this;
-      self.$store.commit("setLoading", { value: true });
+      self.setLoading({ value: true });
       axios
         .get(self.apiUrl + `/api/registry/` + namespace)
         .then(function (res) {
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
           if (res.data) {
             let url = res.data.url;
             if (url || res.data) {
@@ -723,7 +735,7 @@ export default {
           }
         })
         .catch((err) => {
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
           self.loadSchema();
           throw err;
         });
@@ -731,24 +743,24 @@ export default {
     loadSchema(namespace, url) {
       let self = this;
       if (namespace && self.namespaceRegistered) {
-        self.$store.commit("setLoading", { value: true });
+        self.setLoading({ value: true });
         axios
           .get(self.apiUrl + "/api/registry/" + namespace)
           .then((res) => {
             self.data = res.data;
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
             self.userSchema = res.data;
             self.userSchemaURL = url;
             var payload = {};
             payload["schema"] = res.data;
-            self.$store.commit("saveSchemaForViewer", payload);
+            self.saveSchemaForViewer(payload);
             self.orderAlphabetically();
             if (self.query) {
               self.handleQuery();
             }
           })
           .catch((err) => {
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
             throw err;
           });
       } else if (!namespace) {
@@ -765,7 +777,7 @@ export default {
         // CHECK IF LS ITEM EXISTS AT ALL
         if (localStorage.getItem("user-schema-classes") !== null) {
           // console.log('LS loaded')
-          self.$store.commit("saveSchemaForViewer", payload);
+          self.saveSchemaForViewer(payload);
           this.orderAlphabetically();
 
           if (self.query) {
@@ -932,7 +944,7 @@ export default {
 
       var payload = {};
       payload["props"] = res;
-      self.$store.commit("saveProps", payload);
+      self.saveProps(payload);
     },
     handleQuery() {
       var self = this;
@@ -943,12 +955,12 @@ export default {
         self.getParentsOf(q);
         var payload = {};
         payload["queryContent"] = q;
-        self.$store.commit("checkIFValidationView", payload);
+        self.checkIFValidationView(payload);
       } else if (self.findProp(self.query)) {
         let prop = self.findProp(self.query);
         var payload = {};
         payload["queryContent"] = prop;
-        self.$store.commit("checkIFValidationView", payload);
+        self.checkIFValidationView(payload);
       } else {
         console.log("NO MATCH: " + self.query);
       }
@@ -968,7 +980,7 @@ export default {
           .then((res) => {
             var payload = {};
             payload["schema"] = res.data;
-            self.$store.commit("saveSchemaForViewer", payload);
+            self.saveSchemaForViewer(payload);
             this.userSchema = res.data;
             for (var i = 0; i < self.userSchema["hits"].length; i++) {
               if (self.userSchema["hits"][i]["name"] === query) {
@@ -977,7 +989,7 @@ export default {
                 self.getParentsOf(q);
                 var payload = {};
                 payload["queryContent"] = q;
-                self.$store.commit("checkIFValidationView", payload);
+                self.checkIFValidationView(payload);
               }
             }
             return false;
@@ -1315,17 +1327,19 @@ export default {
         });
     },
     showAll() {
-      this.$store.dispatch("toggleShowAll");
+      this.toggleShowAll();
     },
     getSchemaMeta(namespace) {
       let self = this;
-      self.$store.commit("setLoading", { value: true });
+      self.setLoading({ value: true });
       axios
         .get(self.apiUrl + `/api/schema/` + namespace + "?meta=1")
         .then(function (res) {
           self.schemaMeta = res.data?._meta;
+          self.setLoading({ value: false });
         })
         .catch((err) => {
+          self.setLoading({ value: false });
           throw err;
         });
     },

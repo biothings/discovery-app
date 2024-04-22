@@ -1,7 +1,7 @@
 import newFeature from "~~/assets/img/new-feature-01.svg";
 import fix from "~~/assets/img/fix-01.svg";
 
-export const news = {
+export const useNewsStore = defineStore("newsStore", {
   state: () => ({
     news: {
       2022: {
@@ -89,9 +89,4 @@ export const news = {
       },
     },
   }),
-  getters: {
-    getNews: (state) => {
-      return state.news;
-    },
-  },
-};
+});

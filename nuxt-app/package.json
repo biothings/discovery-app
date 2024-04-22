@@ -8,8 +8,11 @@
     "postinstall": "nuxt prepare",
     "format": "prettier .  --write"
   },
+  "overrides": {
+    "vue": "latest"
+  },
   "devDependencies": {
-    "nuxt": "3.0.0-rc.10",
+    "nuxt": "^3.0.0-rc.14",
     "prettier": "^2.7.1"
   },
   "dependencies": {
@@ -21,6 +24,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.1.2",
     "@fortawesome/free-solid-svg-icons": "^6.1.2",
     "@fortawesome/vue-fontawesome": "^3.0.1",
+    "@pinia/nuxt": "^0.5.1",
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
     "axios": "^0.21.4",
@@ -33,6 +37,7 @@
     "mark.js": "^8.11.1",
     "moment": "^2.29.4",
     "papaparse": "^5.3.2",
+    "pinia": "2.0.35",
     "showdown": "^2.1.0",
     "simple-notify": "^0.5.5",
     "sweetalert2": "^11.4.33",
@@ -40,7 +45,6 @@
     "tippy.js": "^6.3.7",
     "vue-gtag-next": "^1.14.0",
     "vue-router": "^4.1.2",
-    "vue-sweetalert2": "^5.0.5",
-    "vuex": "^4.0.2"
+    "vue-sweetalert2": "^5.0.5"
   }
 }

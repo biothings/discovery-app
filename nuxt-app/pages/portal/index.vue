@@ -1,8 +1,8 @@
 <script setup>
-import { useStore } from "vuex";
+import { usePortalsStore } from "../../stores/portals";
 
-let store = useStore();
-let portals = store.getters.getPortals;
+let store = usePortalsStore();
+let portals = store.portals;
 
 useHead({
   title: "DDE | Data Portals",

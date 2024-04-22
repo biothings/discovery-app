@@ -170,7 +170,7 @@
             id="download_metadata"
             name="download_metadata"
             v-model="downloadMode"
-            @click="toggleDownloadMode"
+            @click="toggleDownloadModeAction"
           />
           <label
             for="download_metadata"
@@ -326,7 +326,9 @@ import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import outbreakIcon from "~~/assets/img/icon-01.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
 
-import { mapGetters } from "vuex";
+import { mapActions, mapState } from "pinia";
+import { useMainStore } from "../../stores/index";
+import { useResourceRegistryStore } from "../../stores/resource_registry";
 
 import ResourceRegistryItem from "~~/components/ResourceRegistryItem.vue";
 
@@ -460,8 +462,14 @@ export default {
     ResourceRegistryItem,
   },
   methods: {
-    toggleDownloadMode() {
-      this.$store.commit("toggleDownloadMode");
+    ...mapActions(useMainStore, ["setLoading"]),
+    ...mapActions(useResourceRegistryStore, [
+      "toggleDownloadMode",
+      "clearDownloadList",
+      "setDownloadMode",
+    ]),
+    toggleDownloadModeAction() {
+      this.toggleDownloadMode();
     },
     handleDownload() {
       var self = this;
@@ -812,7 +820,7 @@ export default {
     search() {
       let self = this;
       let url = self.apiUrl + self.registry_api_url;
-      self.$store.commit("setLoading", { value: true });
+      self.setLoading({ value: true });
       self.hits = [];
       self.total = 0;
 
@@ -884,12 +892,12 @@ export default {
           console.log("%c Query executed", "color:hotpink");
           console.log("%c " + JSON.stringify(config, null, 2), "color:blue");
           console.log("%c hits: " + response.data.total, "color:limegreen");
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
           self.total = response.data.total;
           self.calculatePages();
         })
         .catch((err) => {
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
           throw err;
         });
     },
@@ -977,7 +985,7 @@ export default {
   watch: {
     downloadMode: function (v) {
       if (!v) {
-        this.$store.commit("clearDownloadList");
+        this.clearDownloadList();
       }
     },
     finalQ: function (v) {
@@ -985,13 +993,14 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["loading", "downloadList"]),
+    ...mapState(useMainStore, ["loading"]),
+    ...mapState(useResourceRegistryStore, ["downloadList", "downloadMode"]),
     downloadMode: {
       get() {
-        return this.$store.getters.downloadMode;
+        return this.downloadMode;
       },
       set(v) {
-        this.$store.commit("setDownloadMode", { value: v });
+        this.setDownloadMode({ value: v });
       },
     },
   },

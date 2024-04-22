@@ -1,5 +1,6 @@
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 export default defineNuxtConfig({
+  modules: ["@pinia/nuxt"],
   css: [
     "@fortawesome/fontawesome-svg-core/styles.css",
     "@/assets/css/styles.css",
@@ -17,8 +18,7 @@ export default defineNuxtConfig({
     public: {
       // to test CRUD operations you must use a proxy server, a localhost will only work
       //with GET calls, for prod a proxy server/handler must be used.
-      apiUrl:
-        process.env.NODE_ENV == "development" ? "http://localhost" : "",
+      apiUrl: process.env.NODE_ENV == "development" ? "http://localhost" : "",
     },
   },
   // https://github.com/nuxt/framework/discussions/3823

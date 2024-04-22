@@ -1,10 +1,10 @@
 <script setup>
-import { useStore } from "vuex";
+import { useEditorValidationStore } from "../stores/editor_validation";
 import cubeImg from "@/assets/img/cubeplus.svg";
 
 const { $swal } = useNuxtApp();
 const props = defineProps(["item"]);
-const store = useStore();
+const store = useEditorValidationStore();
 
 function startDrag(evt, item) {
   let img = new Image();
@@ -16,7 +16,7 @@ function startDrag(evt, item) {
 }
 
 function editValidationOption(item) {
-  store.commit("editThis", { item: Object.assign({}, item) });
+  store.editThis({ item: Object.assign({}, item) });
 }
 
 function deleteValidationOption(item) {
@@ -32,7 +32,7 @@ function deleteValidationOption(item) {
     })
     .then((res) => {
       if (res.value) {
-        store.commit("deleteValidationOption", { id: item._id });
+        store.deleteValidationOption({ id: item._id });
       }
     });
 }

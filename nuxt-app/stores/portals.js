@@ -6,8 +6,9 @@ import outbreak from "~~/assets/img/outbreak_white.svg";
 import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
 import outbreakIcon from "~~/assets/img/icon-01.svg";
+import { defineStore } from "pinia";
 
-export const portals = {
+export const usePortalsStore = defineStore("portalsStore", {
   state: () => ({
     portals: [
       {
@@ -178,9 +179,4 @@ export const portals = {
       },
     ],
   }),
-  getters: {
-    getPortals: (state) => {
-      return state.portals;
-    },
-  },
-};
+});

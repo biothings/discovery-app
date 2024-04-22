@@ -507,7 +507,10 @@
 import axios from "axios";
 import tippy from "tippy.js";
 import Papa from "papaparse";
-import { mapGetters } from "vuex";
+import { mapState, mapActions } from "pinia";
+import { useGuideStore } from "../../stores/guide";
+import { useAuthStore } from "../../stores/auth";
+import { useMainStore } from "../../stores/index";
 import Notify from "simple-notify";
 import moment from "moment";
 
@@ -585,36 +588,58 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      bulkReport: "getBulkReport",
-      beginBulkRegistration: "beginBulkRegistration",
+    ...mapState(useAuthStore, ["userInfo"]),
+    ...mapState(useMainStore, ["loading"]),
+    ...mapState(useGuideStore, [
+      "getBulkReport",
+      "beginBulkRegistration",
+      "editingID",
+      "isComplete",
+      "startingPoint",
+      "getOutput",
+      "schema",
+      "getValidation",
+      "output",
+    ]),
+    ...mapState(useGuideStore, {
       schemaName: "getSchemaName",
-      editingID: "editingID",
       validation: "getValidation",
       valid: "getValidStatus",
       errors: "getErrors",
-      isComplete: "isComplete",
       totals: "getTotals",
       categoryTotals: "getCategoryTotals",
-      startingPoint: "startingPoint",
       step: "getStep",
       jsonItems: "getBulkJSONItems",
       fieldsleftRegistration: "fieldsLeft",
-      userInfo: "userInfo",
-      loading: "loading",
     }),
   },
   watch: {
     step: function (s) {
       if (s === "5") {
-        this.$store.getters.getCategoryTotals;
-        this.$store.getters.getTotals;
+        this.categoryTotals;
+        this.totals;
       }
     },
   },
   methods: {
+    ...mapActions(useGuideStore, [
+      "toggleBeginBulkRegistration",
+      "setEditMode",
+      "formPreviewForGuide",
+      "reset",
+      "saveSchema",
+      "saveSchemaName",
+      "markSelected",
+      "addPortalSchema",
+      "mergeCategoryProps",
+      "saveBulkItems",
+      "markCompleted",
+      "setStartingPoint",
+      "changeStep",
+      "setUsePrefilled",
+    ]),
     startBulk() {
-      this.$store.commit("toggleBeginBulkRegistration");
+      this.toggleBeginBulkRegistration();
     },
     checkOverriddenID(id) {
       let self = this;
@@ -631,7 +656,7 @@ export default {
             Object.hasOwnProperty.call(res.data.hits[0], "_id")
           ) {
             //turn on edit mode
-            self.$store.commit("setEditMode", { id: res.data.hits[0]["_id"] });
+            self.setEditMode({ id: res.data.hits[0]["_id"] });
             return true;
           } else {
             return false;
@@ -645,11 +670,10 @@ export default {
       var self = this;
 
       if (self.isComplete && self.editingID) {
-        self.$store.commit("formPreviewForGuide");
-        let output = self.$store.getters.getOutput;
-        self.$store.commit("setLoading", { value: true });
-
-        let schema = self.$store.getters.schema;
+        self.formPreviewForGuide();
+        let output = self.getOutput;
+        self.setLoading({ value: true });
+        let schema = self.schema;
 
         let config = {
           headers: {
@@ -660,7 +684,7 @@ export default {
         axios
           .put(self.apiUrl + "/api/dataset/" + self.editingID, output, config)
           .then((res) => {
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
             if (res.data.success) {
               sessionStorage.removeItem("guideProgress");
 
@@ -689,7 +713,7 @@ export default {
                 },
                 didClose: () => {
                   clearInterval(timerInterval);
-                  self.$store.dispatch("reset");
+                  self.reset();
                   self.$router.push({ path: "/dataset/" + self.editingID });
                 },
               });
@@ -711,7 +735,7 @@ export default {
             }
           })
           .catch((err) => {
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
             let culprit = "<h6>" + err.response.data.error + "</h6>";
             if (err.response.data && err.response.data.path) {
               culprit +=
@@ -756,22 +780,22 @@ export default {
             throw err;
           });
 
-        self.$store.commit("setLoading", { value: true });
+        self.setLoading({ value: true });
       }
     },
     getAndLoadSchema(url) {
       var self = this;
-      self.$store.commit("setLoading", { value: true });
+      self.setLoading({ value: true });
       axios
         .get(url)
         .then((res) => {
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
           var payload = {};
           payload["schema"] = res.data;
-          self.$store.commit("saveSchema", payload);
+          self.saveSchema(payload);
         })
         .catch((err) => {
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
           new Notify({
             status: "error",
             title: "Guide Error",
@@ -794,7 +818,7 @@ export default {
     },
     getStartingPointSchema(item) {
       let self = this;
-      self.$store.commit("setLoading", { value: true });
+      self.setLoading({ value: true });
       let url =
         self.apiUrl +
         "/api/registry/" +
@@ -808,8 +832,11 @@ export default {
         .then((res) => {
           var payload = {};
           payload["name"] = item.name;
-          console.log("%c ⭐ (5) Schema Obtained Successfully", "background-color: purple; color: white; padding: 5px;");
-          self.$store.commit("saveSchemaName", payload);
+          console.log(
+            "%c ⭐ (5) Schema Obtained Successfully",
+            "background-color: purple; color: white; padding: 5px;"
+          );
+          self.saveSchemaName(payload);
           self.parseData(res.data);
 
           // IF ANY PORTALS AND IF ANY ARE SELECTED
@@ -829,7 +856,7 @@ export default {
                   .then((result) => {
                     var payload = {};
                     payload["portal"] = result.data;
-                    self.$store.commit("addPortalSchema", payload);
+                    self.addPortalSchema(payload);
 
                     var payload = {};
                     payload["origin"] = result.data.label;
@@ -841,7 +868,7 @@ export default {
                     } else {
                       payload["catpropsrequired"] = [];
                     }
-                    self.$store.commit("mergeCategoryProps", payload);
+                    self.mergeCategoryProps(payload);
                   })
                   .catch((error) => {
                     throw error;
@@ -849,10 +876,10 @@ export default {
               }
             }
           }
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
         })
         .catch((err) => {
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
           try {
             self.$swal.fire({
               type: "error",
@@ -868,21 +895,24 @@ export default {
     },
     parseData(data) {
       let self = this;
-      let schemaName = self.$store.getters.getSchemaName;
-      console.log("%c ⭐ (6) Saving schema and assigning categories", "background-color: purple; color: white; padding: 5px;");
+      let schemaName = self.schemaName;
+      console.log(
+        "%c ⭐ (6) Saving schema and assigning categories",
+        "background-color: purple; color: white; padding: 5px;"
+      );
       if (data.hits) {
         for (var i = 0; i < data.hits.length; i++) {
           if (data.hits[i].hasOwnProperty("name")) {
             if (data.hits[i].name.includes(schemaName)) {
               var payload = {};
               payload["schema"] = self.assignCategories(data.hits[i]);
-              self.$store.commit("saveSchema", payload);
+              self.saveSchema(payload);
             }
           } else if (data.hits[i].hasOwnProperty("label")) {
             if (data.hits[i].label.includes(schemaName)) {
               var payload = {};
               payload["schema"] = self.assignCategories(data.hits[i]);
-              self.$store.commit("saveSchema", payload);
+              self.saveSchema(payload);
             }
           }
         }
@@ -891,13 +921,13 @@ export default {
           if (data.name.includes(schemaName)) {
             var payload = {};
             payload["schema"] = data;
-            self.$store.commit("saveSchema", payload);
+            self.saveSchema(payload);
           }
         } else if (data.hasOwnProperty("label")) {
           if (data.label.includes(schemaName)) {
             var payload = {};
             payload["schema"] = data;
-            self.$store.commit("saveSchema", payload);
+            self.saveSchema(payload);
           }
         }
       }
@@ -945,7 +975,7 @@ export default {
           })
           .then((result) => {
             if (result.value) {
-              self.$store.dispatch("reset");
+              self.reset();
               sessionStorage.removeItem("guideProgress");
               self.$router.go();
             }
@@ -972,7 +1002,7 @@ export default {
         });
     },
     isRequired(propname) {
-      let req = this.$store.getters.getValidation["required"];
+      let req = this.getValidation["required"];
       if (req.includes(propname)) {
         return true;
       } else {
@@ -980,14 +1010,10 @@ export default {
       }
     },
     selectProp(propname) {
-      var payload = {};
-      payload["select"] = propname;
-      this.$store.commit("markSelected", payload);
+      this.markSelected({ select: propname });
     },
     getPreview() {
-      let self = this;
-      
-      this.$store.commit("formPreviewForGuide");
+      this.formPreviewForGuide();
       this.$swal.fire({
         position: "center",
         confirmButtonColor: "#5C3069",
@@ -998,7 +1024,7 @@ export default {
           renderjson.set_show_to_level(5);
           document
             .getElementById("previewJSON")
-            .appendChild(renderjson(self.$store.getters.getPreview));
+            .appendChild(renderjson(this.output));
         },
       });
     },
@@ -1006,11 +1032,11 @@ export default {
       var self = this;
 
       if (this.isComplete) {
-        self.$store.commit("formPreviewForGuide");
-        let output = self.$store.getters.getOutput;
-        self.$store.commit("setLoading", { value: true });
+        self.formPreviewForGuide();
+        let output = self.output;
+        self.setLoading({ value: true });
 
-        let schema = self.$store.getters.schema;
+        let schema = self.schema;
 
         let config = {
           headers: {
@@ -1033,7 +1059,7 @@ export default {
             config
           )
           .then((res) => {
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
             if (res.data.success) {
               sessionStorage.removeItem("guideProgress");
 
@@ -1078,7 +1104,7 @@ export default {
                             </div>
                           </div>`,
                   didClose: () => {
-                    self.$store.dispatch("reset");
+                    self.reset();
                     self.$router.push("/dataset");
                   },
                 });
@@ -1106,7 +1132,7 @@ export default {
                   },
                   didClose: () => {
                     clearInterval(timerInterval);
-                    self.$store.dispatch("reset");
+                    self.reset();
                     self.$router.push({ path: "/dataset/" + res.data.id });
                   },
                 });
@@ -1129,7 +1155,7 @@ export default {
             }
           })
           .catch((err) => {
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
             let culprit = "<h6>" + err.response.data.error + "</h6>";
             if (err.response.data && err.response.data.path) {
               culprit +=
@@ -1174,11 +1200,11 @@ export default {
             throw err;
           });
 
-        self.$store.commit("setLoading", { value: true });
+        self.setLoading({ value: true });
       }
     },
     showHelp() {
-      self.$swal.fire({
+      this.$swal.fire({
         title: "Dataset Guide",
         html: `<p>
                     After selecting a starting point you will be able complete a series of fields. It's really easy and fast! Here's a quick introduction to the layout:
@@ -1265,7 +1291,7 @@ export default {
               let json = JSON.parse(fr.result);
               if (json.length < 101) {
                 payload["items"] = json;
-                self.$store.commit("saveBulkItems", payload);
+                self.saveBulkItems(payload);
               } else {
                 self.$swal.fire({
                   icon: "error",
@@ -1328,17 +1354,10 @@ export default {
           }
         }
         items.push(newDoc);
-        // console.log("%c --------------------------------------------",'color:green')
-        // console.log('%c '+JSON.stringify(items,null,2),'color:lightgreen')
-        // console.log("%c --------------------------------------------",'color:green')
-
-        var payload = {};
-        payload["items"] = items;
-        self.$store.commit("saveBulkItems", payload);
+        self.saveBulkItems({ items: items });
       }
     },
     createNested(obj, keyPath, value) {
-      var self = this;
       lastKeyIndex = keyPath.length - 1;
       for (var i = 0; i < lastKeyIndex; ++i) {
         key = keyPath[i];
@@ -1426,14 +1445,14 @@ export default {
                                   name: key,
                                   value: value,
                                 };
-                                self.$store.commit("markCompleted", payload);
+                                self.markCompleted(payload);
                               } else {
                                 let value = selected[key];
                                 payload["completed"] = {
                                   name: key,
                                   value: value,
                                 };
-                                self.$store.commit("markCompleted", payload);
+                                self.markCompleted(payload);
                               }
                             }
                           }
@@ -1456,7 +1475,7 @@ export default {
                   )
                   .then((publicres) => {
                     let list = publicres.data.hits;
-                    self.$store.commit("setLoading", { value: true });
+                    self.setLoading({ value: true });
                     axios
                       .get(
                         self.apiUrl +
@@ -1464,7 +1483,7 @@ export default {
                           self.userInfo.login
                       )
                       .then((privateres) => {
-                        self.$store.commit("setLoading", { value: false });
+                        self.setLoading({ value: false });
                         list = list.concat(privateres.data.hits);
                         let options = {};
                         for (var i = 0; i < list.length; i++) {
@@ -1509,24 +1528,18 @@ export default {
                                           name: key,
                                           value: value,
                                         };
-                                        self.$store.commit(
-                                          "markCompleted",
-                                          payload
-                                        );
+                                        self.markCompleted(payload);
                                       } else {
                                         let value = selected[key];
                                         payload["completed"] = {
                                           name: key,
                                           value: value,
                                         };
-                                        self.$store.commit(
-                                          "markCompleted",
-                                          payload
-                                        );
+                                        self.markCompleted(payload);
                                       }
                                     }
                                   }
-                                  self.$store.commit("formPreviewForGuide");
+                                  self.formPreviewForGuide();
                                 }
                               }
                             }
@@ -1584,7 +1597,7 @@ export default {
                                 name: key,
                                 value: [obj],
                               };
-                              self.$store.commit("markCompleted", payload);
+                              self.markCompleted(payload);
                             } else if (self.$_.isArray(selected[key])) {
                               let list = selected[key];
 
@@ -1615,7 +1628,7 @@ export default {
                                 }
                               }
                               payload["completed"] = { name: key, value: list };
-                              self.$store.commit("markCompleted", payload);
+                              self.markCompleted(payload);
                             } else {
                               let value = selected[key];
                               if (key.includes("date")) {
@@ -1628,7 +1641,7 @@ export default {
                                 };
                               }
 
-                              self.$store.commit("markCompleted", payload);
+                              self.markCompleted(payload);
                             }
                           }
                         }
@@ -1654,54 +1667,72 @@ export default {
         });
     },
     checkAutoLoad() {
-      console.log("%c ⭐ (1) Autoload - Checking portal guides available", "background-color: purple; color: white; padding: 5px;");
+      console.log(
+        "%c ⭐ (1) Autoload - Checking portal guides available",
+        "background-color: purple; color: white; padding: 5px;"
+      );
       var self = this;
       let payload = {};
       //if GUIDE_PRESETS is only ONE
       if (self.presets && self.presets.length === 1) {
-        console.log("%c ⭐ (2) Autoload - 1 guide available", "background-color: purple; color: white; padding: 5px;");
+        console.log(
+          "%c ⭐ (2) Autoload - 1 guide available",
+          "background-color: purple; color: white; padding: 5px;"
+        );
         payload["startingPoint"] = self.presets[0];
-        self.$store.commit("setStartingPoint", payload);
+        self.setStartingPoint(payload);
         if (self.portals && self.portals.length) {
           payload["step"] = 2;
-          self.$store.commit("changeStep", payload);
+          self.chageStep(payload);
         } else {
           payload["step"] = 3;
-          self.$store.commit("changeStep", payload);
+          self.chageStep(payload);
           self.getFormValues();
         }
       }
       // if GUIDE_PRESETS is more than one
       else {
-        console.log("%c ⭐ (2) Autoload - Portal has multiple guides available. Looking for match.", "background-color: purple; color: white; padding: 5px;");
+        console.log(
+          "%c ⭐ (2) Autoload - Portal has multiple guides available. Looking for match.",
+          "background-color: purple; color: white; padding: 5px;"
+        );
         // if url QUERY
         if (self.guideQuery) {
           let found = self.presets.find(
             (guide) => guide.name.toLowerCase() == self.guideQuery.toLowerCase()
           );
           if (found) {
-            console.log("%c ⭐ (3) URL match found. Loading guide: " + self.guideQuery, "background-color: purple; color: white; padding: 5px;");
-            self.$store.commit("setStartingPoint", { startingPoint: found });
+            console.log(
+              "%c ⭐ (3) URL match found. Loading guide: " + self.guideQuery,
+              "background-color: purple; color: white; padding: 5px;"
+            );
+            self.setStartingPoint({ startingPoint: found });
             payload["step"] = 3;
-            self.$store.commit("changeStep", payload);
+            self.chageStep(payload);
             self.getFormValues();
           } else {
-            console.log("%c ⭐ (3) No Match found. User will select.", "background-color: purple; color: white; padding: 5px;");
+            console.log(
+              "%c ⭐ (3) No Match found. User will select.",
+              "background-color: purple; color: white; padding: 5px;"
+            );
             payload["step"] = 1;
-            self.$store.commit("changeStep", payload);
+            self.chageStep(payload);
           }
         }
         // Choose first item from GUIDE_PRESETS as default
         else {
-          console.log("%c ⭐ (3) Loading default guide - no exact match", "background-color: purple; color: white; padding: 5px;");
+          console.log(
+            "%c ⭐ (3) Loading default guide - no exact match",
+            "background-color: purple; color: white; padding: 5px;"
+          );
           payload["startingPoint"] = self.presets[0];
-          self.$store.commit("setStartingPoint", payload);
+          self.setStartingPoint(payload);
           if (self.portals && self.portals.length) {
             payload["step"] = 2;
-            self.$store.commit("changeStep", payload);
+            self.chageStep(payload);
           } else {
             payload["step"] = 3;
-            self.$store.commit("changeStep", payload);
+            self.chageStep(payload);
             self.getFormValues();
           }
         }
@@ -1710,11 +1741,14 @@ export default {
     getFormValues() {
       var self = this;
       // Handle selections for startingPoint and Portals IF any
-      console.log("%c ⭐ (4) Getting schema", "background-color: purple; color: white; padding: 5px;");
-      self.getStartingPointSchema(self.$store.getters.startingPoint);
+      console.log(
+        "%c ⭐ (4) Getting schema",
+        "background-color: purple; color: white; padding: 5px;"
+      );
+      self.getStartingPointSchema(self.startingPoint);
       let payload = {};
       payload["step"] = 3;
-      self.$store.commit("changeStep", payload);
+      self.chageStep(payload);
     },
     readableName(text) {
       if (text) {
@@ -1726,32 +1760,38 @@ export default {
       return text.replaceAll("_", " ");
     },
     setStartingPoint(startingPointInfo) {
-      console.log("%c ⭐ (2) Setting Starting Point: " + startingPointInfo, "background-color: purple; color: white; padding: 5px;");
+      console.log(
+        "%c ⭐ (2) Setting Starting Point: " + startingPointInfo,
+        "background-color: purple; color: white; padding: 5px;"
+      );
       var self = this;
       let payload = {};
       payload["startingPoint"] = startingPointInfo;
-      self.$store.commit("setStartingPoint", payload);
+      self.setStartingPoint(payload);
       if (self.portals && self.portals.length) {
         // IF PORTALS AVAILABLE
         payload["step"] = 2;
-        self.$store.commit("changeStep", payload);
+        self.chageStep(payload);
       } else {
         // IF NO PORTALS AVAILABLE
         self.getFormValues();
         payload["step"] = 3;
-        self.$store.commit("changeStep", payload);
+        self.chageStep(payload);
       }
     },
     goToStep(s) {
       var self = this;
       let payload = {};
       payload["step"] = s;
-      self.$store.commit("changeStep", payload);
+      self.chageStep(payload);
     },
     checkProgress() {
       let self = this;
       let p = sessionStorage.getItem("guideProgress");
-      console.log("%c ⭐ (7) Checking progress", "background-color: purple; color: white; padding: 5px;");
+      console.log(
+        "%c ⭐ (7) Checking progress",
+        "background-color: purple; color: white; padding: 5px;"
+      );
       if (p) {
         new Notify({
           status: "success",
@@ -1771,18 +1811,24 @@ export default {
           position: "right top",
         });
         let selected = JSON.parse(p);
-        console.log("%c ⭐ (8) Progress found. Values recovered.", "background-color: purple; color: white; padding: 5px;");
+        console.log(
+          "%c ⭐ (8) Progress found. Values recovered.",
+          "background-color: purple; color: white; padding: 5px;"
+        );
         for (let key in selected) {
           if (!["@context", "@type", "_id"].includes(key)) {
             var payload = {};
             let value = selected[key];
             payload["completed"] = { name: key, value: value };
-            self.$store.commit("markCompleted", payload);
+            self.markCompleted(payload);
           }
         }
-        self.$store.commit("formPreviewForGuide");
-      }else{
-        console.log("%c ⭐ (8) No progress found, starting blank.", "background-color: purple; color: white; padding: 5px;");
+        self.formPreviewForGuide();
+      } else {
+        console.log(
+          "%c ⭐ (8) No progress found, starting blank.",
+          "background-color: purple; color: white; padding: 5px;"
+        );
       }
     },
     viewErrors() {
@@ -1817,10 +1863,10 @@ export default {
   },
   mounted: function () {
     //check if prefilled N3C fields should be used
-    if (!window.location.href.includes('n3c')) {
-      this.$store.commit('setUsePrefilled', false);
-    }else{
-      this.$store.commit('setUsePrefilled', true);
+    if (!window.location.href.includes("n3c")) {
+      this.setUsePrefilled(false);
+    } else {
+      this.setUsePrefilled(true);
     }
 
     const runtimeConfig = useRuntimeConfig();
@@ -1837,7 +1883,7 @@ export default {
       animation: "fade",
       theme: "light",
       onShow(instance) {
-        let totals = self.$store.getters.getTotals;
+        let totals = self.totals;
         let percentage = Math.ceil((totals.complete / totals.total) * 100);
         instance.setContent(
           "<div class='text-success bold m-0'>" +

@@ -84,7 +84,7 @@
                   ><i class="fas fa-circle"></i> <b v-text="name"></b
                 ></small>
                 <span
-                  v-if="isPropRequired(name)"
+                  v-if="isPropertyRequired(name)"
                   class="text-danger caps"
                   style="zoom: 0.5"
                   >is required</span
@@ -173,6 +173,9 @@
 </template>
 
 <script>
+import { useJSONSchemaStore } from "../stores/json_schema_viewer";
+import { mapState } from "pinia";
+
 export default {
   name: "JS_PropertyBox",
   data: function () {
@@ -188,7 +191,7 @@ export default {
       let arr = ref.split("/");
       return arr[arr.length - 1];
     },
-    isPropRequired(name) {
+    isPropertyRequired(name) {
       var self = this;
       if (
         self.propinfo.hasOwnProperty("required") &&
@@ -210,8 +213,9 @@ export default {
     }
   },
   computed: {
+    ...mapState(useJSONSchemaStore, ["isPropRequired"]),
     isRequired: function () {
-      return this.$store.getters.isPropRequired(this.propname);
+      return this.isPropRequired(this.propname);
     },
   },
 };

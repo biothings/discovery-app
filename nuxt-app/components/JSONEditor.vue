@@ -4,7 +4,7 @@ import { basicSetup, EditorView } from "codemirror";
 import { EditorState, Compartment } from "@codemirror/state";
 import { json } from "@codemirror/lang-json";
 import { autocompletion } from "@codemirror/autocomplete";
-import { useStore } from "vuex";
+import { useValidatorStore } from "../stores/validator";
 import {
   defaultHighlightStyle,
   syntaxHighlighting,
@@ -12,7 +12,7 @@ import {
 import { history } from "@codemirror/commands";
 
 let editor;
-const store = useStore();
+const validatorStore = useValidatorStore();
 const props = defineProps({
   name: {
     type: String,
@@ -43,12 +43,12 @@ function loadContent(target) {
           // console.log('change', e.state.doc.toString())
           try {
             //valid JSON
-            store.commit("saveValidationMetadata", {
+            validatorStore.saveValidationMetadata({
               value: JSON.parse(e.state.doc.toString()),
             });
           } catch (error) {
             // not yet valid JSON
-            store.commit("saveValidationMetadata", {
+            validatorStore.saveValidationMetadata({
               value: e.state.doc.toString(),
             });
           }

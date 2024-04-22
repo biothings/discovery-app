@@ -90,9 +90,10 @@
 
 <script>
 import axios from "axios";
-
 import DefinitionBox from "~~/components/JS_DefinitionBox.vue";
 import JS_PropertyBox from "~~/components/JS_PropertyBox.vue";
+import { mapState, mapActions } from "pinia";
+import { useJSONSchemaStore } from "../../stores/json_schema_viewer";
 
 export default {
   name: "JSONSchemaViewer",
@@ -384,14 +385,13 @@ export default {
     JS_PropertyBox,
   },
   computed: {
-    schema: function () {
-      return this.$store.getters.getSchemaJSV;
-    },
-    schemaType: function () {
-      return this.$store.getters.getType;
-    },
+    ...mapState(useJSONSchemaStore, {
+      schema: "getSchemaJSV",
+      schemaType: "getType",
+    }),
   },
   methods: {
+    ...mapActions(useJSONSchemaStore, ["saveSchemaJSV"]),
     loadSchema(ex) {
       let self = this;
 
@@ -399,7 +399,7 @@ export default {
         self.loadMsg = `<b class="text-success">Example loaded</b>`;
         let payload = {};
         payload["schema"] = self.file;
-        this.$store.commit("saveSchemaJSV", payload);
+        this.saveSchemaJSV(payload);
       } else if (self.input) {
         axios
           .get(self.input)
@@ -410,7 +410,7 @@ export default {
               self.loadMsg = `<b class="text-success">Schema loaded</b>`;
               payload = {};
               payload["schema"] = schema;
-              this.$store.commit("saveSchemaJSV", payload);
+              this.saveSchemaJSV(payload);
             } else if (schema && schema.hasOwnProperty("@context")) {
               self.loadMsg = `<b class="text-danger">ATTENTION! File is JSON-LD and only visualized partially. You should visualize this here: <a href="/schema-playground">Schema Playground</a> for a complete visualization.</b>`;
               if (schema && schema["@graph"]) {
@@ -437,7 +437,7 @@ export default {
                       if (value) {
                         payload = {};
                         payload["schema"] = options[value]["$validation"];
-                        this.$store.commit("saveSchemaJSV", payload);
+                        this.saveSchemaJSV(payload);
                         resolve();
                       }
                     });

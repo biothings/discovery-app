@@ -1,5 +1,5 @@
 <template>
-  <template v-if="!loggedIn">
+  <template v-if="!userInfo?.login">
     <li class="nav-item">
       <a class="nav-link" :href="'/login?next=' + nextPath">Login</a>
     </li>
@@ -36,15 +36,16 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { useAuthStore } from "../stores/auth";
+import { mapState, mapActions } from "pinia";
 
 export default {
   name: "Login",
   methods: {
-    ...mapActions(["checkUser"]),
+    ...mapActions(useAuthStore, ["checkUser"]),
   },
   computed: {
-    ...mapGetters(["loggedIn", "userInfo"]),
+    ...mapState(useAuthStore, ["loggedIn", "userInfo"]),
     nextPath: function () {
       return this.$route.path;
     },

@@ -4,6 +4,8 @@
 
 <script>
 import Notify from "simple-notify";
+import { mapActions } from "pinia";
+import { useEditorValidationStore } from "../stores/editor_validation";
 import { basicSetup, EditorView } from "codemirror";
 import { EditorState, Compartment } from "@codemirror/state";
 import { json } from "@codemirror/lang-json";
@@ -23,15 +25,14 @@ export default {
     };
   },
   methods: {
+    ...mapActions(useEditorValidationStore, ["editValidationItem"]),
     SaveDefinition() {
       let self = this;
       let value = self.editor.state.doc;
       let copy = Object.assign({}, self.item);
       try {
         copy.validation = JSON.parse(value);
-        this.$store.commit("editValidationItem", {
-          item: copy,
-        });
+        this.editValidationItem({ item: copy });
       } catch (error) {
         new Notify({
           status: "",

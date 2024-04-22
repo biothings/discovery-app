@@ -6,7 +6,8 @@
 import cytoscape from "cytoscape";
 import dagre from "cytoscape-dagre";
 
-import { mapGetters } from "vuex";
+import { mapState } from "pinia";
+import { useEditorStore } from "../stores/editor";
 
 export default {
   name: "NGXGraph",
@@ -17,7 +18,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
+    ...mapState(useEditorStore, {
       classesAvailable: "getSchema",
       propsSelected: "getPropsSelected",
     }),

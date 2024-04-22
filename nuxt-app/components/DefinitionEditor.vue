@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapState, mapActions } from "pinia";
 import Notify from "simple-notify";
 import { basicSetup, EditorView } from "codemirror";
 import { EditorState, Compartment } from "@codemirror/state";
@@ -14,6 +14,7 @@ import {
   syntaxHighlighting,
 } from "@codemirror/language";
 import { history } from "@codemirror/commands";
+import { useEditorValidationStore } from "../stores/editor_validation";
 
 export default {
   name: "CodeEditor",
@@ -23,18 +24,22 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
+    ...mapState(useEditorValidationStore, {
       item: "getEditDefinitionItem",
     }),
   },
   methods: {
+    ...mapActions(useEditorValidationStore, [
+      "editDefinitionItem",
+      "editThisDefinition",
+    ]),
     SaveDefinition() {
       let self = this;
       let value = self.editor.state.doc;
       let copy = Object.assign({}, self.item);
       try {
         copy.validation = JSON.parse(value);
-        this.$store.commit("editDefinitionItem", {
+        self.editDefinitionItem({
           item: copy,
         });
       } catch (error) {
@@ -108,7 +113,7 @@ export default {
             self.SaveDefinition();
           } else {
             //reset selected item, prevents auto pop up
-            self.$store.commit("editThisDefinition", { item: null });
+            self.editThisDefinition({ item: null });
           }
         });
     },

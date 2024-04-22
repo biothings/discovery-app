@@ -18,11 +18,17 @@
               ]"
             >
               <h6 class="m-0" v-if="!isChild">
-                <font-awesome-icon icon="fas fa-plus" class="mr-1"></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-plus"
+                  class="mr-1"
+                ></font-awesome-icon>
                 <span v-text="name"></span>
               </h6>
               <h6 class="m-0" v-else>
-                <font-awesome-icon icon="fas fa-plus" class="mr-1"></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-plus"
+                  class="mr-1"
+                ></font-awesome-icon>
                 <span v-text="name"></span>
               </h6>
             </div>
@@ -61,8 +67,9 @@
             </div>
 
             <!-- SIMPLE VALUES -->
-            <div v-if="value?.type == 'string' && !value.vocabulary && !value.enum">
-
+            <div
+              v-if="value?.type == 'string' && !value.vocabulary && !value.enum"
+            >
               <template v-if="value?.type == 'string'">
                 <div
                   class="bg-light p-4 text-light align-items-center"
@@ -84,11 +91,15 @@
                         class="btn btn-sm btn-primary form-label"
                         @click="addKeyword"
                       >
-                        Add <span v-if="value?.format == 'uri'">URL</span><span v-else>Text</span>
+                        Add <span v-if="value?.format == 'uri'">URL</span
+                        ><span v-else>Text</span>
                       </button>
                     </form>
                   </div>
-                  <div class="alert alert-success m-3 w-100" v-show="keywords.size">
+                  <div
+                    class="alert alert-success m-3 w-100"
+                    v-show="keywords.size"
+                  >
                     <span
                       v-for="(text, i) in [...keywords]"
                       class="badge badge-sm badge-success pointer"
@@ -102,243 +113,215 @@
             <!-- COMPLEX VALUES -->
             <div v-else>
               <!-- 🤩 CLASS TYPE  IF NOT ENUM OR VOCAB🤩-->
-            <div
-              class="col-sm-12 mainBackLight text-light p-1 text-center classTab"
-              v-if="value && !value.vocabulary && !value.enum"
-            >
-              <h5 class="m-0" v-text="name"></h5>
-            </div>
-
-            <!-- 🐸 VOCABULARY TOP LEVEL 🐸-->
-            <div
-              v-if="value && value.vocabulary"
-              class="bg-light p-4 text-light d-flex justify-content-start align-items-center"
-              :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
-            >
-              <Vocabulary :main_name="main_name" :info="info"></Vocabulary>
-            </div>
-
-            <!-- 🍒 ENUMERATION TOP LEVEL 🍒-->
-            <div
-              v-else-if="value && value.enum"
-              class="bg-light p-4 text-light d-flex justify-content-start align-items-center"
-              :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
-            >
-              <button
-                class="btn btn-danger m-auto"
-                @click.prevent="handleEnum(main_name, value)"
+              <div
+                class="col-sm-12 mainBackLight text-light p-1 text-center classTab"
+                v-if="value && !value.vocabulary && !value.enum"
               >
-                <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
-                <span v-text="main_name"></span>
-              </button>
-            </div>
+                <h5 class="m-0" v-text="name"></h5>
+              </div>
 
-            <!-- 🎃 ARRAY KEYWORDS 🎃-->
-            <div
-              v-else-if="value && value.keywords && !value.enum"
-              class="bg-light p-4 text-light align-items-center"
-              :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
-            >
-              <div class="w-100">
-                <form
-                  id="keywords_form"
-                  class="w-100 d-flex justify-content-center"
-                  @submit.prevent="addKeyword"
+              <!-- 🐸 VOCABULARY TOP LEVEL 🐸-->
+              <div
+                v-if="value && value.vocabulary"
+                class="bg-light p-4 text-light d-flex justify-content-start align-items-center"
+                :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
+              >
+                <Vocabulary :main_name="main_name" :info="info"></Vocabulary>
+              </div>
+
+              <!-- 🍒 ENUMERATION TOP LEVEL 🍒-->
+              <div
+                v-else-if="value && value.enum"
+                class="bg-light p-4 text-light d-flex justify-content-start align-items-center"
+                :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
+              >
+                <button
+                  class="btn btn-danger m-auto"
+                  @click.prevent="handleEnum(main_name, value)"
                 >
-                  <input
-                    class="form-control"
-                    type="text"
-                    v-model="keyword_input"
-                  />
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-primary form-label"
-                    @click="addKeyword"
+                  <font-awesome-icon icon="fas fa-plus"></font-awesome-icon>
+                  <span v-text="main_name"></span>
+                </button>
+              </div>
+
+              <!-- 🎃 ARRAY KEYWORDS 🎃-->
+              <div
+                v-else-if="value && value.keywords && !value.enum"
+                class="bg-light p-4 text-light align-items-center"
+                :class="[isChild ? 'col-sm-12' : 'col-sm-12']"
+              >
+                <div class="w-100">
+                  <form
+                    id="keywords_form"
+                    class="w-100 d-flex justify-content-center"
+                    @submit.prevent="addKeyword"
                   >
-                    Add Keyword
-                  </button>
-                </form>
-              </div>
-              <div class="alert alert-success m-3 w-100" v-show="keywords.size">
-                <span
-                  v-for="(text, i) in [...keywords]"
-                  class="badge badge-sm badge-success pointer"
-                >
-                  <small v-html="text"></small>
-                </span>
-              </div>
-            </div>
-
-            <!-- 🌈🌈🌈 FOR EACH PROP 🌈🌈🌈-->
-
-            <div
-              v-for="(propInfo, propName) in value.properties"
-              class="row m-0"
-            >
-              <!-- 🤩 INPUT DESCRIPTION 🤩-->
-              <div
-                class="col-sm-12 p-1"
-                v-if="propInfo && propInfo.description && propName !== '@type'"
-              >
-                <small v-html="propInfo.description"></small>
-              </div>
-              <!-- 🤩 INPUT NAME 🤩-->
-              <div
-                class="bg-dark p-1 text-light d-flex justify-content-start align-items-center border-bottom"
-                :class="[isChild ? 'col-sm-12' : 'col-sm-12 col-md-4']"
-                v-if="propName !== '@type'"
-              >
-                <small>
-                  <b v-if="value && value.required">
-                    <font-awesome-icon
-                      icon="fas fa-circle"
-                      class="text-info mr-1"
-                      :class="[
-                        isRequired(value.required, propName)
-                          ? 'text-danger'
-                          : 'text-info',
-                      ]"
-                    ></font-awesome-icon>
-                    <span v-text="propName"></span>
-                  </b>
-                  <b v-else class="text-info" v-text="propName"></b>
-                </small>
-              </div>
-              <!-- 🎃 INPUT TYPES 🎃-->
-              <div
-                class="p-1 text-dark border-bottom"
-                :class="[
-                  isChild
-                    ? 'col-sm-12 alert-secondary'
-                    : 'col-sm-12 col-md-8 bg-light',
-                ]"
-                v-if="propName !== '@type'"
-              >
-                <!-- 🥶 WITH TYPE 🥶-->
-                <template v-if="propInfo && propInfo.type">
-                  <!-- 🥶 STRING TYPES 🥶-->
-                  <template v-if="propInfo.type == 'string'">
-                    <!-- 🐸 VOCABULARY UNDER PROPERTIES 🐸-->
-                    <template v-if="propInfo && propInfo.vocabulary">
-                      <button
-                        class="btn btn-danger m-auto"
-                        @click.prevent="handleVocab(main_name, value)"
-                      >
-                        <font-awesome-icon
-                          icon="fas fa-plus"
-                        ></font-awesome-icon>
-                        <span v-text="main_name + '(s)'"></span>
-                      </button>
-                    </template>
-                    <!-- 🥶 WITH FORMAT 🥶-->
-                    <template v-else-if="propInfo && propInfo.format == 'uri'">
-                      <!-- 🥶 STRING URL 🥶-->
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text" id="basic-addon1"
-                            ><font-awesome-icon
-                              icon="fas fa-link"
-                            ></font-awesome-icon
-                          ></span>
-                        </div>
-                        <input
-                          class="form-control"
-                          type="url"
-                          @input="updateObject(propName, $event)"
-                          :placeholder="'enter ' + propName"
-                        />
-                      </div>
-                    </template>
-                    <template v-else-if="propInfo && propInfo.format == 'date'">
-                      <!-- 🥶 STRING DATE 🥶-->
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text" id="basic-addon1"
-                            ><font-awesome-icon
-                              icon="fas fa-calendar-alt"
-                            ></font-awesome-icon
-                          ></span>
-                        </div>
-                        <input
-                          class="form-control"
-                          type="date"
-                          @input="updateObject(propName, $event)"
-                        />
-                      </div>
-                    </template>
-                    <!-- 🥶 REGULAR STRING 🥶-->
                     <input
-                      v-else
                       class="form-control"
                       type="text"
-                      @input="updateObject(propName, $event)"
-                      :placeholder="'enter ' + propName"
+                      v-model="keyword_input"
                     />
-                  </template>
-                  <!-- 🧤  INTEGER 🧤 -->
-                  <template v-else-if="propInfo && propInfo.type == 'integer'">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1"
-                          ><font-awesome-icon
-                            icon="fas fa-hashtag"
-                          ></font-awesome-icon
-                        ></span>
-                      </div>
-                      <input
-                        class="form-control"
-                        type="number"
-                        @input="updateObject(propName, $event)"
-                      />
-                    </div> 
-                  </template>
-                  <!-- 🌼   BOOLEAN 🌼  -->
-                  <template v-else-if="propInfo && propInfo.type == 'boolean'">
-                    <small>Oops, this hasn't been handled yet..</small>
-                  </template>
-                  <!-- 🩳  TYPE OBJECT 🩳 -->
-                  <template v-else-if="propInfo && propInfo.type == 'object'">
-                    <div class="alert-secondary">
-                      <pre v-text="getNestedValue(propName)"></pre>
-                    </div>
-                    <type-selector
-                      :info="propInfo"
-                      :main_name="main_name"
-                      :childName="propName"
-                      :isChild="true"
-                      @update="updateParent"
-                    ></type-selector>
-                  </template>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-primary form-label"
+                      @click="addKeyword"
+                    >
+                      Add Keyword
+                    </button>
+                  </form>
+                </div>
+                <div
+                  class="alert alert-success m-3 w-100"
+                  v-show="keywords.size"
+                >
+                  <span
+                    v-for="(text, i) in [...keywords]"
+                    class="badge badge-sm badge-success pointer"
+                  >
+                    <small v-html="text"></small>
+                  </span>
+                </div>
+              </div>
 
-                  <!-- 🥶🥶🥶 LAST RESORT STRING 🥶🥶🥶-->
-                  <input
-                    v-else
-                    class="form-control"
-                    type="text"
-                    @input="updateObject(propName, $event)"
-                    :placeholder="'enter ' + propName"
-                  />
-                </template>
-                <!-- 👹  NO TYPE ON TOP LEVEL 👹 -->
-                <template v-else>
-                  <template v-if="propInfo && propInfo.anyOf">
-                    <!-- 🦷  ANY OF 🦷 -->
-                    <div class="w-100">
-                      <div class="border rounded p-1">
-                        <pre v-text="getNestedValue(propName)"></pre>
+              <!-- 🌈🌈🌈 FOR EACH PROP 🌈🌈🌈-->
+
+              <div
+                v-for="(propInfo, propName) in value.properties"
+                class="row m-0"
+              >
+                <!-- 🤩 INPUT DESCRIPTION 🤩-->
+                <div
+                  class="col-sm-12 p-1"
+                  v-if="
+                    propInfo && propInfo.description && propName !== '@type'
+                  "
+                >
+                  <small v-html="propInfo.description"></small>
+                </div>
+                <!-- 🤩 INPUT NAME 🤩-->
+                <div
+                  class="bg-dark p-1 text-light d-flex justify-content-start align-items-center border-bottom"
+                  :class="[isChild ? 'col-sm-12' : 'col-sm-12 col-md-4']"
+                  v-if="propName !== '@type'"
+                >
+                  <small>
+                    <b v-if="value && value.required">
+                      <font-awesome-icon
+                        icon="fas fa-circle"
+                        class="text-info mr-1"
+                        :class="[
+                          isRequired(value.required, propName)
+                            ? 'text-danger'
+                            : 'text-info',
+                        ]"
+                      ></font-awesome-icon>
+                      <span v-text="propName"></span>
+                    </b>
+                    <b v-else class="text-info" v-text="propName"></b>
+                  </small>
+                </div>
+                <!-- 🎃 INPUT TYPES 🎃-->
+                <div
+                  class="p-1 text-dark border-bottom"
+                  :class="[
+                    isChild
+                      ? 'col-sm-12 alert-secondary'
+                      : 'col-sm-12 col-md-8 bg-light',
+                  ]"
+                  v-if="propName !== '@type'"
+                >
+                  <!-- 🥶 WITH TYPE 🥶-->
+                  <template v-if="propInfo && propInfo.type">
+                    <!-- 🥶 STRING TYPES 🥶-->
+                    <template v-if="propInfo.type == 'string'">
+                      <!-- 🐸 VOCABULARY UNDER PROPERTIES 🐸-->
+                      <template v-if="propInfo && propInfo.vocabulary">
+                        <button
+                          class="btn btn-danger m-auto"
+                          @click.prevent="handleVocab(main_name, value)"
+                        >
+                          <font-awesome-icon
+                            icon="fas fa-plus"
+                          ></font-awesome-icon>
+                          <span v-text="main_name + '(s)'"></span>
+                        </button>
+                      </template>
+                      <!-- 🥶 WITH FORMAT 🥶-->
+                      <template
+                        v-else-if="propInfo && propInfo.format == 'uri'"
+                      >
+                        <!-- 🥶 STRING URL 🥶-->
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"
+                              ><font-awesome-icon
+                                icon="fas fa-link"
+                              ></font-awesome-icon
+                            ></span>
+                          </div>
+                          <input
+                            class="form-control"
+                            type="url"
+                            @input="updateObject(propName, $event)"
+                            :placeholder="'enter ' + propName"
+                          />
+                        </div>
+                      </template>
+                      <template
+                        v-else-if="propInfo && propInfo.format == 'date'"
+                      >
+                        <!-- 🥶 STRING DATE 🥶-->
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"
+                              ><font-awesome-icon
+                                icon="fas fa-calendar-alt"
+                              ></font-awesome-icon
+                            ></span>
+                          </div>
+                          <input
+                            class="form-control"
+                            type="date"
+                            @input="updateObject(propName, $event)"
+                          />
+                        </div>
+                      </template>
+                      <!-- 🥶 REGULAR STRING 🥶-->
+                      <input
+                        v-else
+                        class="form-control"
+                        type="text"
+                        @input="updateObject(propName, $event)"
+                        :placeholder="'enter ' + propName"
+                      />
+                    </template>
+                    <!-- 🧤  INTEGER 🧤 -->
+                    <template
+                      v-else-if="propInfo && propInfo.type == 'integer'"
+                    >
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text" id="basic-addon1"
+                            ><font-awesome-icon
+                              icon="fas fa-hashtag"
+                            ></font-awesome-icon
+                          ></span>
+                        </div>
+                        <input
+                          class="form-control"
+                          type="number"
+                          @input="updateObject(propName, $event)"
+                        />
                       </div>
-                      <type-selector
-                        :info="propInfo"
-                        :main_name="main_name"
-                        :childName="propName"
-                        :isChild="true"
-                        @update="updateParent"
-                      ></type-selector>
-                    </div>
-                  </template>
-                  <template v-if="propInfo && propInfo.oneOf">
-                    <!-- 👿  ONE OF 👿 -->
-                    <div class="w-100">
+                    </template>
+                    <!-- 🌼   BOOLEAN 🌼  -->
+                    <template
+                      v-else-if="propInfo && propInfo.type == 'boolean'"
+                    >
+                      <small>Oops, this hasn't been handled yet..</small>
+                    </template>
+                    <!-- 🩳  TYPE OBJECT 🩳 -->
+                    <template v-else-if="propInfo && propInfo.type == 'object'">
                       <div class="alert-secondary">
                         <pre v-text="getNestedValue(propName)"></pre>
                       </div>
@@ -349,38 +332,81 @@
                         :isChild="true"
                         @update="updateParent"
                       ></type-selector>
-                    </div>
-                  </template>
-                  <!-- 👹  CONSTANT 👹 -->
-                  <template v-else-if="propInfo && propInfo.const">
-                    <div class="text-muted">
-                      <small v-text="propInfo.const"></small>
-                    </div>
-                  </template>
-                  <!-- 🥶🥶🥶 LAST RESORT NO TYPE 🥶🥶🥶-->
-                  <template v-else>
-                    <!-- <small v-text="propInfo"></small> -->
-                  </template>
-                </template>
-              </div>
-            </div>
+                    </template>
 
-            <!-- 🍏 SUBMIT IF NOT ENUM OR VOCAB🍏-->
-            <div
-              class="col-sm-12 p-0 mt-2"
-              v-if="value && !value.vocabulary && !value.enum & !value.keywords"
-            >
-              <button
-                type="submit"
-                class="btn w-100"
-                :class="[
-                  isChild ? 'btn-info btn-sm' : 'btn-success btn-lg',
-                  pulse && isChild ? 'jello' : '',
-                ]"
+                    <!-- 🥶🥶🥶 LAST RESORT STRING 🥶🥶🥶-->
+                    <input
+                      v-else
+                      class="form-control"
+                      type="text"
+                      @input="updateObject(propName, $event)"
+                      :placeholder="'enter ' + propName"
+                    />
+                  </template>
+                  <!-- 👹  NO TYPE ON TOP LEVEL 👹 -->
+                  <template v-else>
+                    <template v-if="propInfo && propInfo.anyOf">
+                      <!-- 🦷  ANY OF 🦷 -->
+                      <div class="w-100">
+                        <div class="border rounded p-1">
+                          <pre v-text="getNestedValue(propName)"></pre>
+                        </div>
+                        <type-selector
+                          :info="propInfo"
+                          :main_name="main_name"
+                          :childName="propName"
+                          :isChild="true"
+                          @update="updateParent"
+                        ></type-selector>
+                      </div>
+                    </template>
+                    <template v-if="propInfo && propInfo.oneOf">
+                      <!-- 👿  ONE OF 👿 -->
+                      <div class="w-100">
+                        <div class="alert-secondary">
+                          <pre v-text="getNestedValue(propName)"></pre>
+                        </div>
+                        <type-selector
+                          :info="propInfo"
+                          :main_name="main_name"
+                          :childName="propName"
+                          :isChild="true"
+                          @update="updateParent"
+                        ></type-selector>
+                      </div>
+                    </template>
+                    <!-- 👹  CONSTANT 👹 -->
+                    <template v-else-if="propInfo && propInfo.const">
+                      <div class="text-muted">
+                        <small v-text="propInfo.const"></small>
+                      </div>
+                    </template>
+                    <!-- 🥶🥶🥶 LAST RESORT NO TYPE 🥶🥶🥶-->
+                    <template v-else>
+                      <!-- <small v-text="propInfo"></small> -->
+                    </template>
+                  </template>
+                </div>
+              </div>
+
+              <!-- 🍏 SUBMIT IF NOT ENUM OR VOCAB🍏-->
+              <div
+                class="col-sm-12 p-0 mt-2"
+                v-if="
+                  value && !value.vocabulary && !value.enum & !value.keywords
+                "
               >
-                Add <span v-text="isChild ? childName : name"></span>
-              </button>
-            </div>
+                <button
+                  type="submit"
+                  class="btn w-100"
+                  :class="[
+                    isChild ? 'btn-info btn-sm' : 'btn-success btn-lg',
+                    pulse && isChild ? 'jello' : '',
+                  ]"
+                >
+                  Add <span v-text="isChild ? childName : name"></span>
+                </button>
+              </div>
             </div>
             <!-- END COMPLEX VALUES -->
           </template>
@@ -393,6 +419,8 @@
 <script>
 import tippy from "tippy.js";
 import Vocabulary from "~~/components/guide/Vocabulary.vue";
+import { mapActions } from "pinia";
+import { useGuideStore } from "../../stores/guide";
 
 export default {
   name: "TypeSelector",
@@ -412,6 +440,7 @@ export default {
     Vocabulary,
   },
   methods: {
+    ...mapActions(useGuideStore, ["saveProgress", "addToArrayFrom"]),
     findTypesAvailable() {
       var self = this;
       // get options from oneOf or anyOf
@@ -429,9 +458,11 @@ export default {
             self.parsed_options[option["@type"]] = option;
           } else if (option && option["items"] && option["items"]["@type"]) {
             if (!self.parsed_options.hasOwnProperty(option["items"]["@type"])) {
-              self.parsed_options[option["items"]["@type"]] = option?.items ? option.items : option;
-            }else{
-              console.log('TypeSelector no option found for: ', self.main_name)
+              self.parsed_options[option["items"]["@type"]] = option?.items
+                ? option.items
+                : option;
+            } else {
+              console.log("TypeSelector no option found for: ", self.main_name);
             }
           } else if (option && option["enum"]) {
             // use main prop name and replace underscore with space
@@ -446,14 +477,14 @@ export default {
                 //keywords are complex objects
                 option["keywords"] = false;
                 self.parsed_options[name] = option.items;
-              }else{
+              } else {
                 // keywords are simple strings
                 option["keywords"] = true;
                 self.parsed_options[name] = option;
               }
             }
-          }else{
-            console.log('Option unhandled from: ' + this.main_name, option)
+          } else {
+            console.log("Option unhandled from: " + this.main_name, option);
           }
         }
       } else if (
@@ -464,25 +495,31 @@ export default {
       ) {
         // OBJECT TYPE FIELD
         self.parsed_options[self.info["@type"]] = self.info;
-      }else{
-        console.log('@type not found for child node, using Thing as default: ', self.childName)
+      } else {
+        console.log(
+          "@type not found for child node, using Thing as default: ",
+          self.childName
+        );
         // use @type Thing as default
-        self.parsed_options['Thing'] = self.info;
+        self.parsed_options["Thing"] = self.info;
       }
-      console.log('%c RESULTS FOR ' + self.main_name, 'background-color:yellow')
-      console.log({...self.parsed_options})
+      console.log(
+        "%c RESULTS FOR " + self.main_name,
+        "background-color:yellow"
+      );
+      console.log({ ...self.parsed_options });
       // self.checkAutoSelect();
     },
     isRequired(requiredList, name) {
       return requiredList.includes(name) ? true : false;
     },
     isNumeric(value) {
-        return /^-?\d+$/.test(value);
+      return /^-?\d+$/.test(value);
     },
     updateObject(prop, event) {
       var self = this;
       // ratingVAlue from NDE is string
-      if (this.isNumeric(event.target.value) && prop !== 'ratingValue') {
+      if (this.isNumeric(event.target.value) && prop !== "ratingValue") {
         self.userObject[prop] = parseInt(event.target.value);
       } else {
         self.userObject[prop] = event.target.value;
@@ -495,43 +532,58 @@ export default {
       // console.log('INFO', self.info)
       let mustBeArray = false;
       if (self.info?.oneOf) {
-        self.info.oneOf.forEach(option => {
+        self.info.oneOf.forEach((option) => {
           if (option?.items?.properties) {
             for (const key in option?.items?.properties) {
               if (Object.hasOwnProperty.call(option?.items?.properties, key)) {
                 //if found child in prop info properties
-                if (key == childValue?.subfield && option?.items?.properties[key]?.oneOf) {
-                  option?.items?.properties[key]?.oneOf.forEach(subOp => {
-                    if (subOp?.['type'] == 'array' && subOp?.items) {
+                if (
+                  key == childValue?.subfield &&
+                  option?.items?.properties[key]?.oneOf
+                ) {
+                  option?.items?.properties[key]?.oneOf.forEach((subOp) => {
+                    if (subOp?.["type"] == "array" && subOp?.items) {
                       //look through child items for matched type
                       if (Array.isArray(subOp?.items)) {
-                        console.log('Items are an array', subOp?.items)
-                        subOp?.items?.forEach(item => {
-                          if (item?.['@type'] == childValue?.value?.["@type"]) {
+                        console.log("Items are an array", subOp?.items);
+                        subOp?.items?.forEach((item) => {
+                          if (item?.["@type"] == childValue?.value?.["@type"]) {
                             //confirmed
-                            console.log('updating parent', childValue)
-                            console.log('%c Child value must be array: ' + childValue?.subfield, 'color: orange')
+                            console.log("updating parent", childValue);
+                            console.log(
+                              "%c Child value must be array: " +
+                                childValue?.subfield,
+                              "color: orange"
+                            );
                             mustBeArray = true;
                           }
-                        })
-                      }else if(typeof subOp?.items == 'object'){
-                        console.log('Items are an object', subOp?.items)
-                        if ('@type' in subOp?.items && subOp?.items?.['@type'] == childValue?.value?.["@type"]) {
+                        });
+                      } else if (typeof subOp?.items == "object") {
+                        console.log("Items are an object", subOp?.items);
+                        if (
+                          "@type" in subOp?.items &&
+                          subOp?.items?.["@type"] ==
+                            childValue?.value?.["@type"]
+                        ) {
                           //confirmed
-                          console.log('updating parent', childValue)
-                          console.log('%c Child value must be array: ' + childValue?.subfield, 'color: orange')
-                            mustBeArray = true;
-                        }else{
-                          console.log('oh no', subOp?.items.constructor)
+                          console.log("updating parent", childValue);
+                          console.log(
+                            "%c Child value must be array: " +
+                              childValue?.subfield,
+                            "color: orange"
+                          );
+                          mustBeArray = true;
+                        } else {
+                          console.log("oh no", subOp?.items.constructor);
                         }
                       }
                     }
-                  })
+                  });
                 }
               }
             }
           }
-        })
+        });
       }
 
       if (self.userObject && self.userObject[childValue.subfield]) {
@@ -608,7 +660,7 @@ export default {
               });
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -658,11 +710,14 @@ export default {
                     var payload = {};
                     payload["item"] = res;
                     payload["from"] = self.main_name;
-                    if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                    if (
+                      self.info?.oneOf?.length == 1 &&
+                      self.info?.oneOf?.[0]?.type == "array"
+                    ) {
                       payload["forceArray"] = true;
                     }
-                    this.$store.commit("addToArrayFrom", payload);
-                    this.$store.dispatch("saveProgress");
+                    this.addToArrayFrom(payload);
+                    this.saveProgress();
                   }
                 }
               });
@@ -720,18 +775,21 @@ export default {
         // CHILD
         self.$emit("update", { value: data, subfield: self.childName });
         self.type_selected = "";
-        self.$store.dispatch("saveProgress");
+        self.saveProgress();
       } else {
         // PARENT
         var payload = {};
         payload["item"] = data;
         payload["from"] = self.main_name;
-        if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+        if (
+          self.info?.oneOf?.length == 1 &&
+          self.info?.oneOf?.[0]?.type == "array"
+        ) {
           payload["forceArray"] = true;
         }
         // console.log('PAYLOAD', payload)
-        this.$store.commit("addToArrayFrom", payload);
-        this.$store.dispatch("saveProgress");
+        self.addToArrayFrom(payload);
+        self.saveProgress();
         //reset
         self.userObject = {};
         self.type_selected = "";
@@ -839,12 +897,14 @@ export default {
               var payload = {};
               payload["item"] = result.value[i];
               payload["from"] = propName;
-              if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+              if (
+                self.info?.oneOf?.length == 1 &&
+                self.info?.oneOf?.[0]?.type == "array"
+              ) {
                 payload["forceArray"] = true;
               }
-              this.$store.commit("addToArrayFrom", payload);
-
-              this.$store.dispatch("saveProgress");
+              this.addToArrayFrom(payload);
+              this.saveProgress();
             }
           }
         });
@@ -853,8 +913,8 @@ export default {
       var payload = {};
       payload["item"] = this.keyword_input;
       payload["from"] = this.main_name;
-      this.$store.commit("addToArrayFrom", payload);
-      this.$store.dispatch("saveProgress");
+      this.addToArrayFrom(payload);
+      this.saveProgress();
       this.keyword_input = "";
     },
   },

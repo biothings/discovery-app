@@ -1,12 +1,12 @@
 <script setup>
-import { useStore } from "vuex";
+import { useEditorValidationStore } from "../stores/editor_validation";
 
 const { $swal } = useNuxtApp();
 const props = defineProps(["item"]);
-const store = useStore();
+const store = useEditorValidationStore();
 
 function editDefinitionOption(item) {
-  store.commit("editThisDefinition", { item: Object.assign({}, item) });
+  store.editThisDefinition({ item: Object.assign({}, item) });
 }
 
 function deleteDefinitionOption(item) {
@@ -24,7 +24,7 @@ function deleteDefinitionOption(item) {
     })
     .then((res) => {
       if (res.value) {
-        store.commit("deleteDefinitionOption", { id: item._id });
+        store.deleteDefinitionOption({ id: item._id });
       }
     });
 }

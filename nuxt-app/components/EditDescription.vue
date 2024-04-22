@@ -5,12 +5,15 @@
 </template>
 
 <script>
+import { mapActions } from "pinia";
+import { useEditorStore } from "../stores/editor";
 import Notify from "simple-notify";
 
 export default {
   name: "EditDescription",
   props: ["propname", "val"],
   methods: {
+    ...mapActions(useEditorStore, ["setValidation"]),
     handleEdit() {
       let self = this;
       let hasDesc = false;
@@ -43,7 +46,7 @@ export default {
             return method;
           },
           allowOutsideClick: () => !Swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           let payload = {
@@ -51,7 +54,7 @@ export default {
             validation: { validation: { description: result.value } },
             name: self.propname,
           };
-          self.$store.commit("setValidation", payload);
+          self.setValidation(payload);
         });
     },
   },

@@ -67,6 +67,9 @@ import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import outbreakIcon from "~~/assets/img/icon-01.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
 
+import { mapState, mapActions } from "pinia";
+import { useResourceRegistryStore } from "../stores/resource_registry";
+
 export default {
   name: "ResourceRegistryItem",
   data: function () {
@@ -79,6 +82,7 @@ export default {
   },
   props: ["item"],
   methods: {
+    ...mapActions(useResourceRegistryStore, ["addDownload"]),
     getSubclass(parents) {
       if (parents) {
         let sub = parents[0].split(", ");
@@ -102,14 +106,14 @@ export default {
       });
     },
     handleDownload() {
-      let doc = {
+      this.addDownload({
         id: this.item._id,
         name: this.item.name,
-      };
-      this.$store.commit("addDownload", { value: doc });
+      });
     },
   },
   computed: {
+    ...mapState(useResourceRegistryStore, ["downloadMode", "downloadList"]),
     imgIcon: function () {
       let self = this;
       let guide = Object.prototype.hasOwnProperty.call(
@@ -126,9 +130,9 @@ export default {
         return outbreakIcon;
       } else if (guide.includes("n3c")) {
         return n3cLogo;
-      } else if (guide.includes("nde")){
-        return nde
-      }else {
+      } else if (guide.includes("nde")) {
+        return nde;
+      } else {
         return dde;
       }
     },
@@ -161,11 +165,8 @@ export default {
         }
       }
     },
-    downloadMode: function () {
-      return this.$store.getters.downloadMode;
-    },
     inDownloadCart: function () {
-      return this.$store.getters.downloadList.includes(this.item._id);
+      return this.downloadList.includes(this.item._id);
     },
   },
   mounted: function () {

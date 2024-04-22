@@ -56,6 +56,8 @@
 <script>
 import axios from "axios";
 import moment from "moment";
+import { mapActions, mapState } from "pinia";
+import { useGuideStore } from "../../stores/guide";
 
 export default {
   name: "NameSpecial",
@@ -67,16 +69,17 @@ export default {
   },
   props: ["info", "name"],
   computed: {
+    ...mapState(useGuideStore, ["getValidationValue"]),
     userInput: {
       get() {
-        return this.$store.getters.getValidationValue(this.name);
+        return this.getValidationValue(this.name);
       },
       set(newValue) {
         var payload = {};
         let self = this;
         if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = null;
+          clearTimeout(this.timer);
+          this.timer = null;
         }
         this.timer = setTimeout(() => {
           if (name.includes("date")) {
@@ -85,10 +88,9 @@ export default {
           } else {
             payload["completed"] = { name: self.name, value: newValue };
           }
-          self.$store.commit("markCompleted", payload);
-          self.$store.dispatch("saveProgress");
+          self.markCompleted(payload);
+          self.saveProgress();
         }, 800);
-        
       },
     },
   },
@@ -98,6 +100,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useGuideStore, ["markCompleted", "saveProgress"]),
     look_existing(q) {
       let self = this;
       let config = useRuntimeConfig();
@@ -148,11 +151,11 @@ export default {
                 if (typeof selected[key] === "object") {
                   let value = [selected[key]];
                   payload["completed"] = { name: key, value: value };
-                  this.$store.commit("markCompleted", payload);
+                  this.markCompleted(payload);
                 } else {
                   let value = selected[key];
                   payload["completed"] = { name: key, value: value };
-                  this.$store.commit("markCompleted", payload);
+                  this.markCompleted(payload);
                 }
               }
             }
