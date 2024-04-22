@@ -1,52 +1,21 @@
-import { createStore } from "vuex";
-import { auth } from "./modules/auth";
-import { faq } from "./modules/faq";
-import { compatibility } from "./modules/compatibility";
-import { json_schema_viewer } from "./modules/json_schema_viewer";
-import { resource_registry } from "./modules/resource_registry";
-import { schema_registry } from "./modules/schema_registry";
-import { schema_viewer } from "./modules/schema_viewer";
-import { editor } from "./modules/editor";
-import { editor_validation } from "./modules/editor_validation";
-import { guide } from "./modules/guide";
-import { portals } from "./modules/portals";
-import { validator } from "./modules/validator";
-import { news } from "./modules/whatsnew";
-import { mg } from "./modules/markup_generator";
 import { delegate } from "tippy.js";
 import axios from "axios";
+import { defineStore } from "pinia";
 
-export default createStore({
-  modules: {
-    auth,
-    faq,
-    compatibility,
-    json_schema_viewer,
-    resource_registry,
-    schema_registry,
-    schema_viewer,
-    editor,
-    guide,
-    portals,
-    validator,
-    editor_validation,
-    news,
-    mg,
-  },
+export const useMainStore = defineStore("mainStore", {
   state: () => ({
     loading: false,
   }),
-  mutations: {
-    setLoading(state, payload) {
-      state.loading = payload.value;
-    },
-  },
-  getters: {
-    loading: (state) => {
-      return state.loading;
-    },
-  },
   actions: {
+    setLoading(payload) {
+      this.loading = payload.value;
+    },
+    loadingON() {
+      this.loading = true;
+    },
+    loadingOFF() {
+      this.loading = false;
+    },
     setUpTips() {
       console.log("Setting up Tippy");
       delegate("#tippyRoot", {

@@ -138,7 +138,8 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapState, mapActions } from "pinia";
+import { useEditorStore } from "../../stores/editor";
 import axios from "axios";
 
 export default {
@@ -160,7 +161,16 @@ export default {
     };
   },
   props: ["item", "number", "username"],
+  computed: {
+    ...mapState(useEditorStore, {
+      startingPoint: "getStartingPoint",
+      validation: "getValidation",
+      beginBulkRegistration: "beginBulkRegistration",
+      getSchema: "schema",
+    }),
+  },
   methods: {
+    ...mapActions(useEditorStore, ["addBulkReport"]),
     checkAlreadyExists(item) {
       let self = this;
       if (Object.hasOwnProperty.call(item, "identifier")) {
@@ -174,7 +184,7 @@ export default {
           .then((res) => {
             if (res.data.total == 1) {
               self.exists = res.data.hits[0]["_id"];
-              self.$store.commit("addBulkReport", {
+              self.addBulkReport({
                 field: "Exists",
                 value: self.exists,
               });
@@ -273,7 +283,7 @@ export default {
     registerJSONItem() {
       var self = this;
 
-      let schema = self.$store.getters.getSchema;
+      let schema = self.getSchema;
       self.loading = true;
       let config = {
         headers: {
@@ -305,7 +315,7 @@ export default {
               `" target="_blank" rel="nonreferrer"> 
               View Registration</a>`;
             self.errMSG = "";
-            self.$store.commit("addBulkReport", {
+            self.addBulkReport({
               field: "Registered",
               value: self.item.identifier,
             });
@@ -313,7 +323,7 @@ export default {
         })
         .catch((err) => {
           self.loading = false;
-          self.$store.commit("addBulkReport", {
+          self.addBulkReport({
             field: "Failed",
             value: self.item.identifier,
           });
@@ -352,7 +362,7 @@ export default {
         .then((res) => {
           self.loading = false;
           if (res.data.success) {
-            self.$store.commit("addBulkReport", {
+            self.addBulkReport({
               field: "Updated",
               value: self.exists,
             });
@@ -366,7 +376,7 @@ export default {
         })
         .catch((err) => {
           self.loading = false;
-          self.$store.commit("addBulkReport", {
+          self.addBulkReport({
             field: "Failed",
             value: self.exists,
           });
@@ -425,13 +435,6 @@ export default {
           }
         });
     },
-  },
-  computed: {
-    ...mapGetters({
-      startingPoint: "getStartingPoint",
-      validation: "getValidation",
-      beginBulkRegistration: "beginBulkRegistration",
-    }),
   },
   watch: {
     beginBulkRegistration: function (v) {

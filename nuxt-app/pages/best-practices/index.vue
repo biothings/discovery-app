@@ -151,7 +151,7 @@
           </div>
         </div>
       </div>
-      <div class="container px-5" id="choose">
+      <div class="container px-5 text-dark" id="choose">
         <h1 class="logoText">Choose a Template</h1>
         <div class="container">
           <p class="text-muted">

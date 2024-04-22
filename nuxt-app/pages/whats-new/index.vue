@@ -1,7 +1,7 @@
 <script setup>
-import { useStore } from "vuex";
-let store = useStore();
-let news = store.getters.getNews;
+import { useNewsStore } from "../../stores/whatsnew";
+let store = useNewsStore();
+let news = store.news;
 
 useHead({
   title: "DDE | What's New",

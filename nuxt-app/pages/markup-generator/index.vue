@@ -1,7 +1,9 @@
 <script setup>
 import axios from "axios";
-import { ref, onMounted, computed } from "vue";
-import { useStore } from "vuex";
+import { ref, onMounted } from "vue";
+import { useValidatorStore } from "../../stores/validator";
+import { useGuideStore } from "../../stores/guide";
+import { useMainStore } from "../../stores/index";
 import Notify from "simple-notify";
 import { useRouter, useRoute } from "vue-router";
 
@@ -10,19 +12,22 @@ import InputBox from "../../components/guide/InputBox";
 
 const { $swal } = useNuxtApp();
 const runtimeConfig = useRuntimeConfig();
-const store = useStore();
+const mainStore = useMainStore();
+const valStore = useValidatorStore();
+const guideStore = useGuideStore();
+const validator = useValidatorStore();
 let router = useRouter();
 let route = useRoute();
 
-let schema_namespaces = computed(() => store.getters.validationSchemaOptions);
-let validation = computed(() => store.getters.getValidation);
+let schema_namespaces = valStore.validationSchemaOptions;
+let validation = guideStore.getValidation;
 let json = ref({});
 let searchTerm = ref("");
 
 function updateEditor() {
-  store.commit('setUsePrefilled', false);
-  store.commit("formPreviewForGuide");
-  json.value = store.getters.getPreview;
+  guideStore.setUsePrefilled(false);
+  guideStore.formPreviewForGuide();
+  json.value = guideStore.getPreview;
 }
 
 useHead({
@@ -58,41 +63,41 @@ useHead({
   ],
 });
 
-function reset(){
+function reset() {
   router.push({
-      name: route.name,
+    name: route.name,
   });
-  searchTerm.value = ''; 
-  json.value = {}; 
-  store.commit("reset");
+  searchTerm.value = "";
+  json.value = {};
+  guideStore.reset();
 }
 
 function handleSubmit() {
-    if (searchTerm.value) {
-        router.push({
-            name: route.name,
-            query: { schema_class: searchTerm.value },
-        });
-        getClassValidation(searchTerm.value);
-    }else{
-        reset();
-    }
+  if (searchTerm.value) {
+    router.push({
+      name: route.name,
+      query: { schema_class: searchTerm.value },
+    });
+    getClassValidation(searchTerm.value);
+  } else {
+    reset();
+  }
 }
 
 function getClassValidation(curie) {
-  store.commit("setLoading", { value: true });
+  mainStore.setLoading({ value: true });
   axios
     .get(runtimeConfig.apiUrl + `/api/registry/${curie.split(":")[0]}/${curie}`)
     .then((res) => {
-      store.commit("setStartingPoint", {
+      guideStore.setStartingPoint({
         namespace: "n3c",
         prefix: "n3c",
         name: "Dataset",
       });
-      store.commit("changeStep", { step: 3 });
-      store.commit("saveSchemaName", { name: "n3c:Dataset" });
-      store.commit("saveSchema", { schema: res.data });
-      store.commit("setLoading", { value: false });
+      guideStore.changeStep({ step: 3 });
+      guideStore.saveSchemaName({ name: "n3c:Dataset" });
+      guideStore.saveSchema({ schema: res.data });
+      mainStore.setLoading({ value: false });
       new Notify({
         status: "success",
         title: "Ready",
@@ -112,7 +117,7 @@ function getClassValidation(curie) {
       });
     })
     .catch((err) => {
-      store.commit("setLoading", { value: false });
+      mainStore.setLoading({ value: false });
       try {
         $swal.fire({
           type: "error",
@@ -128,19 +133,18 @@ function getClassValidation(curie) {
 }
 
 onMounted(() => {
-  store.dispatch("getValidationOptions");
+  validator.getValidationOptions();
   if (route.query.schema_class) {
     searchTerm.value = route.query.schema_class;
     getClassValidation(searchTerm.value);
   }
 });
-
 </script>
 <template>
   <div class="mt-4 p-0">
     <div class="container text-left alert-dark pt-2">
       <div class="alert alert-light mt-5">
-        <h3 class="p-1 logoText">{{ searchTerm || 'Markup Generator' }}</h3>
+        <h3 class="p-1 logoText">{{ searchTerm || "Markup Generator" }}</h3>
       </div>
       <div class="m-0 row">
         <div class="col-sm-12 bg-dark p-2">
@@ -171,7 +175,7 @@ onMounted(() => {
             <button
               v-if="searchTerm"
               type="button"
-              @click="reset();"
+              @click="reset()"
               class="btn btn-sm bg-danger text-light ml-1"
             >
               Clear
@@ -189,8 +193,9 @@ onMounted(() => {
             <div class="col-sm-8 alert alert-primary mt-5">
               <h5>Instructions</h5>
               <p>
-                Select a class from the list above and fill out a form that will generate JSON markup
-                compatible wth that class' validation rules.
+                Select a class from the list above and fill out a form that will
+                generate JSON markup compatible wth that class' validation
+                rules.
               </p>
             </div>
           </div>
@@ -198,13 +203,21 @@ onMounted(() => {
             <h5 class="m-0">Required</h5>
           </div>
           <template v-for="(prop, index) in validation.properties" :key="index">
-            <InputBox v-if="store.getters.isRequired(index)" :name="index" :info="prop"></InputBox>
+            <InputBox
+              v-if="guideStore.isRequired(index)"
+              :name="index"
+              :info="prop"
+            ></InputBox>
           </template>
           <div class="text-info alert-dark m-0 p-1">
             <h5 class="m-0">Recommended</h5>
           </div>
           <template v-for="(prop, index) in validation.properties" :key="index">
-            <InputBox v-if="!store.getters.isRequired(index)" :name="index" :info="prop"></InputBox>
+            <InputBox
+              v-if="!guideStore.isRequired(index)"
+              :name="index"
+              :info="prop"
+            ></InputBox>
           </template>
         </div>
         <div class="col-sm-12 col-md-5 p-0 mainBackDark">

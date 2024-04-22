@@ -1,8 +1,8 @@
 <script setup>
-import { watch, computed, onMounted } from "vue";
-import { useStore } from "vuex";
+import { watch, onMounted } from "vue";
+import { useEditorValidationStore } from '../stores/editor_validation';
 
-let store = useStore();
+let evs = useEditorValidationStore();
 const { $swal, $_ } = useNuxtApp();
 let search_query = ref("");
 let filter_selected = ref("by_name");
@@ -11,12 +11,12 @@ let filter_options = ref([]);
 let valSelect = ref("default");
 let ordered_options = ref([]);
 
-let editItem = computed(() => store.getters.getEditItem);
-let editDefintionItem = computed(() => store.getters.getEditDefinitionItem);
-let valOps = computed(() => store.getters.getValidationOptions);
-let defOps = computed(() => store.getters.getDefinitionOptions);
-let bioschemasMostUsed = computed(() => store.getters.getBioschemasMostUsed);
-let recentlyUsed = computed(() => store.getters.getRecentlyUsed);
+let editItem = evs.getEditItem;
+let editDefintionItem = evs.getEditDefinitionItem;
+let valOps = evs.getValidationOptions;
+let defOps = evs.getDefinitionOptions;
+let bioschemasMostUsed = evs.getBioschemasMostUsed;
+let recentlyUsed = evs.getRecentlyUsed;
 
 function filterBioSchemasMostUsed() {
   filter_options.value = valOps.value.filter((item) =>
@@ -200,7 +200,7 @@ async function addValidationOption() {
         belongs_to: "both",
       },
     };
-    store.commit("addValidationOption", payload);
+    evs.addValidationOption(payload);
     checkCustomValidation();
     checkCustomDefinitions();
     filter_options.value = valOps.value;
@@ -229,7 +229,7 @@ async function addDefinitionOption() {
         belongs_to: "both",
       },
     };
-    store.commit("addDefinitionOption", payload);
+    evs.addDefinitionOption(payload);
     checkCustomValidation();
     checkCustomDefinitions();
     filter_options.value = valOps.value;
@@ -239,27 +239,27 @@ async function addDefinitionOption() {
 function checkCustomValidation() {
   let v = localStorage.getItem("custom_validation");
   if (v) {
-    store.commit("updateValidationOptions", {
+    evs.updateValidationOptions({
       validation: JSON.parse(v),
-    });
+    })
   }
 }
 
 function checkCustomDefinitions() {
   let v = localStorage.getItem("custom_definitions");
   if (v) {
-    store.commit("updateDefinitionOptions", {
+    evs.updateDefinitionOptions({
       definitions: JSON.parse(v),
-    });
+    })
   }
 }
 
 function checkFrequentlyUsed() {
-  store.commit("checkIfFrequentlyUsed");
+  evs.checkIfFrequentlyUsed();
 }
 
 onMounted(() => {
-  store.dispatch("checkVersion");
+  evs.checkVersion();
 });
 onMounted(() => checkCustomDefinitions());
 onMounted(() => checkCustomValidation());

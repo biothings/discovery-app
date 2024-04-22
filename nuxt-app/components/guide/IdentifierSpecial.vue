@@ -72,6 +72,8 @@
 <script>
 import axios from "axios";
 import moment from "moment";
+import { mapActions, mapState } from "pinia";
+import { useGuideStore } from "../../stores/guide";
 
 export default {
   name: "IdentifierSpecial",
@@ -83,9 +85,10 @@ export default {
   },
   props: ["info", "name"],
   computed: {
+    ...mapState(useGuideStore, ["editingID", "getValidationValue"]),
     userInput: {
       get() {
-        return this.$store.getters.getValidationValue(this.name);
+        return this.getValidationValue(this.name);
       },
       set(newValue) {
         var payload = {};
@@ -95,12 +98,9 @@ export default {
         } else {
           payload["completed"] = { name: this.name, value: newValue };
         }
-        this.$store.commit("markCompleted", payload);
-        this.$store.dispatch("saveProgress");
+        this.markCompleted(payload);
+        this.saveProgress();
       },
-    },
-    editingID: function () {
-      return this.$store.getters.editingID;
     },
   },
   watch: {
@@ -109,6 +109,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useGuideStore, ["markCompleted", "saveProgress"]),
     look_existing(q) {
       let self = this;
       const runtimeConfig = useRuntimeConfig();
@@ -152,11 +153,11 @@ export default {
                 if (typeof selected[key] === "object") {
                   let value = [selected[key]];
                   payload["completed"] = { name: key, value: value };
-                  this.$store.commit("markCompleted", payload);
+                  this.markCompleted(payload);
                 } else {
                   let value = selected[key];
                   payload["completed"] = { name: key, value: value };
-                  this.$store.commit("markCompleted", payload);
+                  this.markCompleted(payload);
                 }
               }
             }

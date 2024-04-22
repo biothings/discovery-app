@@ -489,7 +489,7 @@
         </div>
       </div>
     </div>
-    <div v-else>
+    <div v-else class="jumbotron text-center" style="min-height: 100vh; padding-top: 80px">
       <a class="nav-link" :href="apiUrl + '/login?next=' + nextPath"
         >Please Login</a
       >
@@ -502,7 +502,9 @@ import axios from "axios";
 import moment from "moment";
 import Notify from "simple-notify";
 
-import { mapGetters, mapActions } from "vuex";
+import { mapState, mapActions } from "pinia";
+import { useAuthStore } from "../../stores/auth";
+import { useMainStore } from "../../stores/index";
 
 export default {
   name: "Dashboard",
@@ -616,9 +618,14 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["loggedIn", "userInfo"]),
+    ...mapState(useAuthStore, ["loggedIn", "userInfo"]),
+    nextPath: function () {
+      return this.$route.path;
+    },
   },
   methods: {
+    ...mapActions(useMainStore, ["setLoading"]),
+    ...mapActions(useAuthStore, ["checkUser"]),
     // Namespaces
     handleNamespaceReset: function () {
       this.namespaceQuery = "";
@@ -962,7 +969,7 @@ export default {
 
           if (result.value == "Refresh URL") {
             // same url
-            self.$store.commit("setLoading", { value: true });
+            self.setLoading({ value: true });
             axios
               .put(self.apiUrl + "/api/registry/" + namespace + ns)
               .then((res) => {
@@ -972,7 +979,7 @@ export default {
                     "schema: " + namespace + " updated!",
                     "success"
                   );
-                  self.$store.commit("setLoading", { value: false });
+                  self.setLoading({ value: false });
                 } else if (res.data.result == "noop") {
                   this.$swal.fire(
                     "Nothing new here",
@@ -981,10 +988,10 @@ export default {
                       " is already on its latest version",
                     "success"
                   );
-                  self.$store.commit("setLoading", { value: false });
+                  self.setLoading({ value: false });
                 } else {
                   this.$swal.fire("Done!", res.data.result, "info");
-                  self.$store.commit("setLoading", { value: false });
+                  self.setLoading({ value: false });
                 }
               })
               .catch((err) => {
@@ -1007,7 +1014,7 @@ export default {
                 showCancelButton: true,
                 confirmButtonText: "Go",
                 allowOutsideClick: () => !this.$swal.isLoading(),
-                backdrop: true
+                backdrop: true,
               })
               .then((result) => {
                 if (result.value) {
@@ -1016,7 +1023,7 @@ export default {
                   data = {
                     url: newurl,
                   };
-                  self.$store.commit("setLoading", { value: true });
+                  self.setLoading({ value: true });
                   axios
                     .put(self.apiUrl + "/api/registry/" + namespace + ns, data)
                     .then((res) => {
@@ -1026,7 +1033,7 @@ export default {
                           "Status: " + res.data.result,
                           "success"
                         );
-                        self.$store.commit("setLoading", { value: false });
+                        self.setLoading({ value: false });
                       }
                     })
                     .catch((err) => {
@@ -1035,7 +1042,7 @@ export default {
                         "We had trouble updating: " + namespace,
                         "error"
                       );
-                      self.$store.commit("setLoading", { value: false });
+                      self.setLoading({ value: false });
                     });
                 }
               });
@@ -1115,7 +1122,7 @@ export default {
     },
     getNamespaces() {
       let self = this;
-      self.$store.commit("setLoading", { value: true });
+      self.setLoading({ value: true });
       var params = {
         params: {
           size: self.perPage_NS,
@@ -1128,7 +1135,7 @@ export default {
         },
       };
       //SCHEMA NAMESPACES
-      self.$store.commit("setLoading", { value: true });
+      self.setLoading({ value: true });
       axios
         .get(self.apiUrl + "/api/registry", params)
         .then((res) => {
@@ -1136,16 +1143,16 @@ export default {
           self.dashboard = res.data.hits;
           self.total_NS = res.data.total;
           self.calculatePages_NS();
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
         })
         .catch((err) => {
-          self.$store.commit("setLoading", { value: false });
+          self.setLoading({ value: false });
           throw err;
         });
     },
     getDatasets() {
       let self = this;
-      self.$store.commit("setLoading", { value: true });
+      self.setLoading({ value: true });
       if (self.datasetQuery) {
         var params = {
           params: {
@@ -1164,10 +1171,10 @@ export default {
             self.datasets = res.data.hits;
             self.datasetsTotal = res.data.total;
             self.calculatePages();
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
           })
           .catch((err) => {
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
             throw err;
           });
       } else {
@@ -1188,10 +1195,10 @@ export default {
             self.datasets = res.data.hits;
             self.datasetsTotal = res.data.total;
             self.calculatePages();
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
           })
           .catch((err) => {
-            self.$store.commit("setLoading", { value: false });
+            self.setLoading({ value: false });
             throw err;
           });
       }
@@ -1258,7 +1265,6 @@ export default {
       }
       return "No recent updates";
     },
-    ...mapActions(["checkUser"]),
   },
   mounted: function () {
     const runtimeConfig = useRuntimeConfig();

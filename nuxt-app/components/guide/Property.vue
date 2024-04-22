@@ -263,10 +263,12 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapState, mapActions } from "pinia";
 import Category from "./Category.vue";
 import InputBox from "./InputBox.vue";
 import Notify from "simple-notify";
+
+import { useGuideStore } from "../../stores/guide";
 
 export default {
   name: "Property",
@@ -292,8 +294,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useGuideStore, ["changeStep", "markSelected", "toggleDesc"]),
     isRequired(propname) {
-      let req = this.$store.getters.getValidation["required"];
+      let req = this.validation?.required;
       if (req.includes(propname)) {
         return true;
       } else {
@@ -305,12 +308,12 @@ export default {
       if (self.type === "REQUIRED") {
         let payload = {};
         payload["step"] = 4;
-        this.$store.commit("changeStep", payload);
+        this.changeStep(payload);
       } else {
         if (self.isComplete) {
           let payload = {};
           payload["step"] = 5;
-          this.$store.commit("changeStep", payload);
+          this.changeStep(payload);
         } else {
           new Notify({
             status: "error",
@@ -333,9 +336,7 @@ export default {
       }
     },
     selectProp(propname) {
-      var payload = {};
-      payload["select"] = propname;
-      this.$store.commit("markSelected", payload);
+      this.markSelected({ select: propname });
     },
     checkSettings() {
       var self = this;
@@ -346,20 +347,17 @@ export default {
       }
     },
     goToStep(s) {
-      var self = this;
-      let payload = {};
-      payload["step"] = s;
-      this.$store.commit("changeStep", payload);
+      this.changeStep({ step: s });
     },
     toggleDesc() {
-      this.$store.commit("toggleDesc");
+      this.toggleDesc();
     },
   },
   mounted: function () {
     this.checkSettings();
   },
   computed: {
-    ...mapGetters({
+    ...mapState(useGuideStore, {
       validation: "getValidation",
       isComplete: "isComplete",
       categoryTotals: "getCategoryTotals",

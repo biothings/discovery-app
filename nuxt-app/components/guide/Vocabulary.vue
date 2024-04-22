@@ -120,6 +120,8 @@
 
 <script>
 import tippy from "tippy.js";
+import { mapActions } from "pinia";
+import { useGuideStore } from "../../stores/guide";
 
 export default {
   name: "Vocabulary",
@@ -135,6 +137,7 @@ export default {
   },
   props: ["main_name", "info"],
   methods: {
+    ...mapActions(useGuideStore, ["addToArrayFrom", "saveProgress"]),
     lookup(query, vocabInfo) {
       let self = this;
 
@@ -213,8 +216,8 @@ export default {
           var payload = {};
           payload["item"] = self.getItem(item);
           payload["from"] = self.main_name;
-          self.$store.commit("addToArrayFrom", payload);
-          self.$store.dispatch("saveProgress");
+          self.addToArrayFrom(payload);
+          self.saveProgress();
         });
         self.selected = [];
         self.results = [];

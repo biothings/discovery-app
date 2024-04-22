@@ -2,10 +2,9 @@
 import Notify from "simple-notify";
 
 import { computed, ref } from "vue";
-import { useStore } from "vuex";
+import { usePortalsStore } from "../../../stores/portals";
 
-let store = useStore();
-let portals = store.getters.getPortals;
+let store = usePortalsStore();
 
 let portal = {};
 let featuredImg = "";
@@ -17,23 +16,23 @@ let portal_name = route.params.portal_name;
 if (portal_name) {
   switch (portal_name) {
     case "nde":
-      portal = portals.find((item) => item.keyName == portal_name);
+      portal = store.portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/d1RJrJYk/niaidportal.jpg";
       break;
     case "niaid":
-      portal = portals.find((item) => item.keyName == portal_name);
+      portal = store.portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/J0QNFjbc/niaidportal.jpg";
       break;
     case "outbreak":
-      portal = portals.find((item) => item.keyName == portal_name);
+      portal = store.portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/3w4WfN01/outportal.jpg";
       break;
     case "cd2h":
-      portal = portals.find((item) => item.keyName == portal_name);
+      portal = store.portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/Dz2bCndY/cd2hportal.jpg";
       break;
     case "n3c":
-      portal = portals.find((item) => item.keyName == portal_name);
+      portal = store.portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/y87FGm7P/n3cportal.jpg";
       break;
     default:
@@ -263,7 +262,10 @@ useHead({
         <div
           class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-dark p-5"
         >
-          <div class="text-center p-2 m-1 rounded p-3" v-if="portal.showCoverage">
+          <div
+            class="text-center p-2 m-1 rounded p-3"
+            v-if="portal.showCoverage"
+          >
             <CoverageIcon :color="portal?.colors[0]?.hex"></CoverageIcon>
             <nuxt-link
               :to="{ path: '/coverage' }"

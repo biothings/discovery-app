@@ -449,11 +449,7 @@
                 </template>
 
                 <!-- 🌈  CONSTANT DATA CATALOG 🌈 -->
-                <template
-                  v-if="
-                    info?.type === 'object' && name === ''
-                  "
-                >
+                <template v-if="info?.type === 'object' && name === ''">
                   <!--<div class="text-center">
                       <div class="text-center bold text-info" v-if="constFound">
                         <small class="bold m-auto">Fixed Value, No Action Needed</small>
@@ -466,35 +462,30 @@
                     </div>-->
                 </template>
                 <!-- 🌈  OBJECT 🌈 -->
-                <template
-                  v-if="
-                    info?.type === 'object' &&
-                    name !== 'license'
-                  "
-                >
-                <div class="form-group p-2 row">
-                  <TypeSelector
-                    :info="info"
-                    :main_name="name"
-                    :isChild="false"
-                  ></TypeSelector>
-                </div>
-                <div class="col-sm-12 m-auto">
-                  <!-- 🌈  input preview for object or array🌈 -->
-                  <InputPreview
-                    :name="name"
-                    :userInput="userInput"
-                    :removeItem="removeItem"
-                  ></InputPreview>
-                  <!-- 🌈  input preview for string🌈 -->
-                  <template v-if="typeof userInput === 'string'">
-                    <span
-                      style="overflow: hidden; max-width: 100%"
-                      class="badge badge-success text-light"
-                      v-text="userInput"
-                    ></span>
-                  </template>
-                    </div>
+                <template v-if="info?.type === 'object' && name !== 'license'">
+                  <div class="form-group p-2 row">
+                    <TypeSelector
+                      :info="info"
+                      :main_name="name"
+                      :isChild="false"
+                    ></TypeSelector>
+                  </div>
+                  <div class="col-sm-12 m-auto">
+                    <!-- 🌈  input preview for object or array🌈 -->
+                    <InputPreview
+                      :name="name"
+                      :userInput="userInput"
+                      :removeItem="removeItem"
+                    ></InputPreview>
+                    <!-- 🌈  input preview for string🌈 -->
+                    <template v-if="typeof userInput === 'string'">
+                      <span
+                        style="overflow: hidden; max-width: 100%"
+                        class="badge badge-success text-light"
+                        v-text="userInput"
+                      ></span>
+                    </template>
+                  </div>
                 </template>
                 <!-- 🌈  ONE OF  OR ANY OF🌈 -->
                 <template v-if="info.oneOf || info.anyOf">
@@ -554,7 +545,9 @@
                             :placeholder="'enter ' + item.format"
                           />
                         </template>
-                        <template v-if="item?.type === 'string' && !item.format">
+                        <template
+                          v-if="item?.type === 'string' && !item.format"
+                        >
                           <input
                             type="text"
                             v-model="userInput"
@@ -608,12 +601,18 @@
       </div>
       <div
         class="col-sm-2 p-2 actions d-flex align-items-center justify-content-around"
-        :class="{'alert-success': userInput, 'alert-dark': !userInput, 'alert-warning': hasErrors,}"
+        :class="{
+          'alert-success': userInput,
+          'alert-dark': !userInput,
+          'alert-warning': hasErrors,
+        }"
       >
         <span
           class="fa-stack fa-1x pointer tip"
-          :data-tippy-content="hasErrors ? 'Invalid Input. See Issues Above' : 'Perfect!'"
-          @click="markCompleted(name)"
+          :data-tippy-content="
+            hasErrors ? 'Invalid Input. See Issues Above' : 'Perfect!'
+          "
+          @click="markComplete(name)"
           v-show="userInput || userInput === false"
         >
           <font-awesome-icon
@@ -621,11 +620,13 @@
             class="back fa-stack-2x"
             :class="[hasErrors ? 'text-warning' : 'text-success']"
           ></font-awesome-icon>
-          <font-awesome-icon v-if="!hasErrors"
+          <font-awesome-icon
+            v-if="!hasErrors"
             icon="fas fa-check"
             class="fa-stack-1x text-light"
           ></font-awesome-icon>
-          <font-awesome-icon v-else
+          <font-awesome-icon
+            v-else
             icon="fas fa-exclamation-circle"
             class="fa-stack-1x text-danger heartbeat"
           ></font-awesome-icon>
@@ -651,7 +652,8 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapActions, mapActions } from "pinia";
+import { useGuideStore } from "../../stores/guide";
 import axios from "axios";
 import tippy from "tippy.js";
 import moment from "moment";
@@ -689,51 +691,50 @@ export default {
   },
   props: ["name", "info"],
   methods: {
-    markCompleted(propname) {
+    ...mapActions(useGuideStore, [
+      "saveProgress",
+      "markCompleted",
+      "clearValueOfProp",
+      "addToArrayFrom",
+    ]),
+    markComplete(propname) {
       var self = this;
 
       var payload = {};
       payload["completed"] = { name: propname, value: self.userInput };
-      self.$store.commit("markCompleted", payload);
+      self.markCompleted(payload);
       //unselect after complete
       var payload2 = {};
       payload2["select"] = "";
-      self.$store.commit("markSelected", payload2);
-      self.$store.dispatch("saveProgress");
+      self.markSelected(payload2)
+      self.saveProgress()
     },
     clearFieldFor: function (propname) {
-      var self = this;
-      var payload = {};
-      payload["clear"] = propname;
-      self.$store.commit("clearValueOfProp", payload);
-      self.$store.dispatch("saveProgress");
+      this.clearValueOfProp({ clear: propname });
+      this.saveProgress();
     },
     addKeyword() {
-      let self = this;
-      let value = self.$refs.keywordInput.value;
+      let value = this.$refs.keywordInput.value;
 
       if (value.includes(",")) {
         let arr = value.split(",");
         for (var i = 0; i < arr.length; i++) {
           let val = arr[i].trim();
-          var payload = {};
-          payload["item"] = val;
-          payload["from"] = self.name;
-          self.$store.commit("addToArrayFrom", payload);
-          self.$refs.keywordInput.value = "";
+          this.addToArrayFrom({
+            item: val,
+            from: this.name,
+          });
+          this.$refs.keywordInput.value = "";
         }
       } else {
-        var payload = {};
-        payload["item"] = value;
-        payload["from"] = self.name;
-        self.$store.commit("addToArrayFrom", payload);
-        self.$refs.keywordInput.value = "";
+        this.addToArrayFrom({
+          item: value,
+          from: this.name,
+        });
+        this.$refs.keywordInput.value = "";
       }
     },
     removeItem(e, name) {
-      console.log(e);
-      let self = this;
-
       var x = e.pageX - 130;
       var y = e.pageY - 20;
       var el = document.querySelector("#puff");
@@ -746,11 +747,10 @@ export default {
       setTimeout(() => {
         el.classList.remove("d-inline");
       }, 500);
-
-      var payload = {};
-      payload["item"] = name;
-      payload["from"] = self.name;
-      self.$store.commit("removeArrayItemFrom", payload);
+      this.addToArrayFrom({
+        item: name,
+        from: this.name,
+      });
     },
     handleOneOf(parentProp, childProp, childPropInfo) {
       var self = this;
@@ -802,7 +802,7 @@ export default {
               });
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -845,11 +845,11 @@ export default {
               .then((result) => {
                 if (result.value) {
                   for (var i = 0; i < result.value.length; i++) {
-                    var payload = {};
-                    payload["item"] = result.value[i];
-                    payload["from"] = propName;
-                    self.$store.commit("addToArrayFrom", payload);
-                    self.$store.dispatch("saveProgress");
+                    self.addToArrayFrom({
+                      item: result.value[i],
+                      from: propName,
+                    });
+                    self.saveProgress();
                   }
                 }
               });
@@ -908,12 +908,11 @@ export default {
             showCancelButton: true,
             inputValidator: (value) => {
               if (value) {
-                var payload = {};
-                payload["item"] = value;
-                payload["from"] = propName;
-                self.$store.commit("addToArrayFrom", payload);
-
-                self.$store.dispatch("saveProgress");
+                self.addToArrayFrom({
+                  item: value,
+                  from: propName,
+                });
+                self.saveProgress();
               }
             },
           });
@@ -987,12 +986,14 @@ export default {
                   var payload = {};
                   payload["item"] = result.value[i];
                   payload["from"] = propName;
-                  if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                  if (
+                    self.info?.oneOf?.length == 1 &&
+                    self.info?.oneOf?.[0]?.type == "array"
+                  ) {
                     payload["forceArray"] = true;
                   }
-                  self.$store.commit("addToArrayFrom", payload);
-
-                  self.$store.dispatch("saveProgress");
+                  self.addToArrayFrom(payload);
+                  self.saveProgress();
                 }
               }
             });
@@ -1060,23 +1061,27 @@ export default {
                       var payload = {};
                       payload["item"] = slist[sIndex];
                       payload["from"] = propName;
-                      if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                      if (
+                        self.info?.oneOf?.length == 1 &&
+                        self.info?.oneOf?.[0]?.type == "array"
+                      ) {
                         payload["forceArray"] = true;
                       }
-                      self.$store.commit("addToArrayFrom", payload);
-
-                      self.$store.dispatch("saveProgress");
+                      self.addToArrayFrom(payload);
+                      self.saveProgress();
                     }
                   } else {
                     var payload = {};
                     payload["item"] = value;
                     payload["from"] = propName;
-                    if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                    if (
+                      self.info?.oneOf?.length == 1 &&
+                      self.info?.oneOf?.[0]?.type == "array"
+                    ) {
                       payload["forceArray"] = true;
                     }
-                    self.$store.commit("addToArrayFrom", payload);
-
-                    self.$store.dispatch("saveProgress");
+                    self.addToArrayFrom(payload);
+                    self.saveProgress();
                   }
                 }
               },
@@ -1731,12 +1736,14 @@ export default {
                   var payload = {};
                   payload["item"] = obj;
                   payload["from"] = propName;
-                  if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                  if (
+                    self.info?.oneOf?.length == 1 &&
+                    self.info?.oneOf?.[0]?.type == "array"
+                  ) {
                     payload["forceArray"] = true;
                   }
-                  self.$store.commit("addToArrayFrom", payload);
-
-                  self.$store.dispatch("saveProgress");
+                  self.addToArrayFrom(payload);
+                  self.saveProgress();
                 }
               }
             }
@@ -1902,7 +1909,7 @@ export default {
       handler(obj) {
         var payload = {};
         payload["completed"] = { name: this.name, value: obj };
-        self.$store.commit("markCompleted", payload);
+        self.markCompleted(payload);
       },
       deep: true,
     },
@@ -1934,26 +1941,32 @@ export default {
     // self.checkForConstantKey(self.info,'const')
   },
   computed: {
-    ...mapGetters({
-      showDesc: "showDesc",
+    ...mapGetters(useGuideStore, {
       errors: "getErrors",
     }),
+    ...mapGetters(useGuideStore, [
+      "showDesc",
+      "isInputHidden",
+      "isRequired",
+      "schema",
+      "getValidationValue",
+    ]),
     isRequired: function () {
-      return this.$store.getters.isRequired(this.name);
+      return this.isRequired(this.name);
     },
     isInputHidden: function () {
-      return this.$store.getters.isInputHidden(this.name);
+      return this.isInputHidden(this.name);
     },
     userInput: {
       get() {
-        return this.$store.getters.getValidationValue(this.name);
+        return this.getValidationValue(this.name);
       },
       set(newValue) {
         var payload = {};
         let self = this;
         if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = null;
+          clearTimeout(this.timer);
+          this.timer = null;
         }
         this.timer = setTimeout(() => {
           if (name.includes("date")) {
@@ -1962,13 +1975,13 @@ export default {
           } else {
             payload["completed"] = { name: self.name, value: newValue };
           }
-          self.$store.commit("markCompleted", payload);
-          self.$store.dispatch("saveProgress");
+          self.markCompleted(payload);
+          self.saveProgress();
         }, 800);
       },
     },
     datePreset: function () {
-      let schema = this.$store.getters.schema;
+      let schema = this.schema;
       if (
         schema.validation.properties.hasOwnProperty("datePublished") &&
         schema.validation.properties["datePublished"].value
@@ -1983,19 +1996,21 @@ export default {
         return false;
       }
     },
-    hasErrors: function(){
+    hasErrors: function () {
       let self = this;
       if (this.errors && this.errors.length) {
-        let found = this.errors.some((val) => val.instancePath.includes(self.name));
+        let found = this.errors.some((val) =>
+          val.instancePath.includes(self.name)
+        );
         if (found) {
-          return true
+          return true;
         } else {
-          return false
+          return false;
         }
       } else {
-        return false
+        return false;
       }
-    }
+    },
   },
 };
 </script>

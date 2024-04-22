@@ -123,9 +123,10 @@
 
 <script>
 import axios from "axios";
-
 import CompatibilityResult from "~~/components/CompatibilityResult.vue";
 import Flowchart from "~~/components/Flowchart.vue";
+import { useCompatibilityStore } from "../../stores/compatibility";
+import { mapState, mapActions } from "pinia";
 
 export default {
   name: "Compatibility",
@@ -178,13 +179,24 @@ export default {
     };
   },
   methods: {
+    ...mapActions(useCompatibilityStore, [
+      "saveData",
+      "activateCategory",
+      "updateResults",
+      "saveQuery",
+      "toggleLoginFilter",
+      "updateResults",
+      "toggleCompliant",
+      "resetData",
+      "activateRecommended",
+    ]),
     getData: function () {
       let self = this;
       self.loading = true;
       axios
         .get(self.url)
         .then((res) => {
-          self.$store.commit("saveData", { data: res.data });
+          self.saveData({ data: res.data });
           self.loading = false;
         })
         .catch((err) => {
@@ -193,57 +205,53 @@ export default {
         });
     },
     activateCategory(cat) {
-      this.$store.commit("activateCategory", { category: cat });
-      this.$store.commit("updateResults");
+      this.activateCategory({ category: cat });
+      this.updateResults();
     },
     activateRecommended(rec) {
-      this.$store.commit("activateRecommended", { recommended: rec });
-      this.$store.commit("updateResults");
+      this.activateRecommended({ recommended: rec });
+      this.updateResults();
     },
   },
   computed: {
+    ...mapState(useCompatibilityStore, ["getQuery", "requiresLogin"]),
+    ...mapState(useCompatibilityStore, {
+      categories: "getCategories",
+      recommended: "getRecommended",
+      results: "getData",
+      sc: "schema_compliant",
+      filters: "getFilters",
+    }),
     query: {
       get() {
-        return this.$store.getters.getQuery;
+        return this.getQuery;
       },
       set(v) {
-        this.$store.commit("saveQuery", { q: v });
+        this.saveQuery({ q: v });
       },
-    },
-    categories: function () {
-      return this.$store.getters.getCategories;
-    },
-    recommended: function () {
-      return this.$store.getters.getRecommended;
-    },
-    results: function () {
-      return this.$store.getters.getData;
     },
     with_login: {
       get() {
-        return this.$store.getters.requiresLogin;
+        return this.requiresLogin;
       },
-      set(v) {
-        this.$store.commit("toggleLoginFilter");
-        this.$store.commit("updateResults");
+      set() {
+        this.toggleLoginFilter();
+        this.updateResults();
       },
     },
     schema_compliant: {
       get() {
-        return this.$store.getters.schema_compliant;
+        return this.sc;
       },
-      set(v) {
-        this.$store.commit("toggleCompliant");
-        this.$store.commit("updateResults");
+      set() {
+        this.toggleCompliant();
+        this.updateResults();
       },
-    },
-    filters: function () {
-      return this.$store.getters.getFilters;
     },
   },
   watch: {
     query: function (q) {
-      q ? this.$store.commit("updateResults") : this.$store.commit("resetData");
+      q ? this.updateResults() : this.resetData();
     },
   },
   mounted: function () {

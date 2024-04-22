@@ -3,7 +3,9 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapState } from "pinia";
+import { mapActions } from "pinia";
+import { useEditorStore } from "../stores/editor";
 import Notify from "simple-notify";
 import { basicSetup, EditorView } from "codemirror";
 import { EditorState, Compartment } from "@codemirror/state";
@@ -23,18 +25,19 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      item: "getEditItem",
+    ...mapState(useEditorStore, {
+      item: "editThis",
     }),
   },
   methods: {
+    ...mapActions(useEditorStore, ["editValidationItem", "editThis"]),
     SaveDefinition() {
       let self = this;
       let value = self.editor.state.doc;
       let copy = Object.assign({}, self.item);
       try {
         copy.validation = JSON.parse(value);
-        this.$store.commit("editValidationItem", {
+        this.editValidationItem({
           item: copy,
         });
       } catch (error) {
@@ -108,7 +111,7 @@ export default {
             self.SaveDefinition();
           } else {
             //reset selected item, prevents auto pop up
-            self.$store.commit("editThis", { item: null });
+            self.editThis({ item: null });
           }
         });
     },

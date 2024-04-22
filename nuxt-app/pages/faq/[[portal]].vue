@@ -1,8 +1,8 @@
 <script setup>
-import { useStore } from "vuex";
-let store = useStore();
+import { useFAQStore } from "../../stores/faq";
+let faqStore = useFAQStore();
 let route = useRoute();
-let faq = store.getters.getFAQ(route.params.portal);
+let faq = faqStore.getFAQ(route.params.portal);
 let name = ref("");
 switch (route.params.portal) {
   case "n3c":

@@ -9,7 +9,9 @@ import deletehelp from "~~/assets/img/deletehelp.png";
 import privacy from "~~/assets/img/privacy.png";
 import editmeta from "~~/assets/img/editmeta.png";
 
-export const faq = {
+import { defineStore } from "pinia";
+
+export const useFAQStore = defineStore("faqStore", {
   state: () => ({
     faqs: {
       dde: [
@@ -558,4 +560,4 @@ export const faq = {
       return state.faqs?.[name] ? state.faqs?.[name] : state.faqs.dde;
     },
   },
-};
+});

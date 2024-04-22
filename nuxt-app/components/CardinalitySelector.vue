@@ -18,6 +18,9 @@
 </template>
 
 <script>
+import { mapActions } from "pinia";
+import { useEditorStore } from "../stores/editor";
+
 export default {
   name: "CardinalitySelector",
   props: ["propname", "val"],
@@ -32,14 +35,13 @@ export default {
     }
   },
   methods: {
+    ...mapActions(useEditorStore, ["setValidation"]),
     handleChange() {
-      let self = this;
-      let payload = {
+      this.setValidation({
         // follow structure of val options
         validation: { validation: { "owl:cardinality": self.selection } },
         name: self.propname,
-      };
-      self.$store.commit("setValidation", payload);
+      });
     },
   },
 };

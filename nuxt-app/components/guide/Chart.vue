@@ -11,6 +11,8 @@
 
 <script>
 import { Chart, registerables } from "chart.js";
+import { mapActions } from "pinia";
+import { useGuideStore } from "../../stores/guide";
 
 export default {
   name: "Chart",
@@ -23,6 +25,7 @@ export default {
   },
   props: ["name", "totals", "unique", "maincategory"],
   methods: {
+    ...mapActions(useGuideStore, ["highlight", "unhighlight"]),
     visualize() {
       var self = this;
       let progressColor = self["totals"]["todo"] === 0 ? "#28A744" : "#17A2B7";
@@ -59,11 +62,11 @@ export default {
         },
       });
     },
-    highlight() {
+    highlightThis() {
       var payload = {};
       payload["category"] = this.maincategory;
       payload["subcategory"] = this.name;
-      this.$store.commit("highlight", payload);
+      this.highlight(payload);
     },
     updateChart(data) {
       this.myChart.data.datasets.forEach((dataset) => {
@@ -88,9 +91,9 @@ export default {
     },
     shouldHighlight: function (h) {
       if (h) {
-        this.highlight();
+        this.highlightThis();
       } else {
-        this.$store.commit("unhighlight");
+        this.unhighlight();
       }
     },
   },

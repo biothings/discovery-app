@@ -1,15 +1,17 @@
 <script setup>
 import Nav from "./components/Nav.vue";
 import Footer from "./components/Footer.vue";
-import { useStore } from "vuex";
 import { onMounted, computed } from "vue";
+import { useMainStore } from "./stores/index";
+import { useEditorStore } from "./stores/editor";
 
-const store = useStore();
-let isLoading = computed(() => store.getters.loading);
+const mainStore = useMainStore();
+const editorStore = useEditorStore();
+let isLoading = computed(() => mainStore.loading);
 
 onMounted(() => {
-  store.dispatch("setUpTips");
-  store.dispatch("getSchemaOrgVersion");
+  mainStore.setUpTips();
+  editorStore.getSchemaOrgVersion();
 });
 
 useHead({

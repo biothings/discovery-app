@@ -22,20 +22,24 @@
 </template>
 
 <script>
+import { mapActions, mapState } from "pinia";
+import { useGuideStore } from "../../stores/guide";
+
 export default {
   name: "BooleanInput",
   props: ["name", "info"],
   methods: {
+    ...mapActions(useGuideStore, ["addValue", "saveProgress"]),
     markCompletedBoolean(val) {
-      let payload = { name: this.name, info: this.info, value: val };
-      this.$store.commit("addValue", payload);
-      this.$store.dispatch("saveProgress");
+      this.addValue({ name: this.name, info: this.info, value: val });
+      this.saveProgress();
     },
   },
   computed: {
+    ...mapState(useGuideStore, ["getValidationValue"]),
     done: {
       get() {
-        return this.$store.getters.getValidationValue(this.name);
+        return this.getValidationValue(this.name);
       },
     },
   },

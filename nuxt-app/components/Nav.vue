@@ -1,10 +1,10 @@
 <script setup>
 import Login from "./Login.vue";
-import { useStore } from "vuex";
+import { usePortalsStore } from "../stores/portals";
 import { ref } from "vue";
 
-let store = useStore();
-let portals = store.getters.getPortals;
+let store = usePortalsStore();
+let portals = store.portals;
 let menu = ref(false);
 </script>
 <template>

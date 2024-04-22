@@ -1,12 +1,16 @@
 <script setup>
 import axios from "axios";
-import { reactive, computed, ref, onMounted } from "vue";
-import { useStore } from "vuex";
+import { reactive, ref, onMounted } from "vue";
+import { useAuthStore } from "../../stores/auth";
+import { useValidatorStore } from "../../stores/validator";
 import Notify from "simple-notify";
 import { useRouter, useRoute } from "vue-router";
+import { useMainStore } from '../../stores/index'
 
 const { $swal } = useNuxtApp();
-const store = useStore();
+const authStore = useAuthStore();
+const store = useMainStore();
+const validatorStore = useValidatorStore();
 let classValidationJSON = reactive({});
 let metadataSelected = reactive({});
 const runtimeConfig = useRuntimeConfig();
@@ -16,10 +20,6 @@ let expanded = ref(false);
 let expandedWide = ref(false);
 let router = useRouter();
 let route = useRoute();
-
-let schema_namespaces = computed(() => store.getters.validationSchemaOptions);
-let userInfo = computed(() => store.getters.userInfo);
-let metaToValidate = computed(() => store.getters.getValidationMetadata);
 
 let searchTerm = ref("");
 
@@ -63,15 +63,15 @@ useHead({
 
 function format() {
   //trigger a change, will be handled on JSONEditor
-  metadataSelected.value = { ...metaToValidate.value };
+  metadataSelected.value = { ...validatorStore.getValidationMetadata };
 }
 
 function getClassValidation(v) {
-  store.commit("setLoading", { value: true });
+  store.loadingON();
   axios
     .get(runtimeConfig.public.apiUrl + "/api/schema/" + v + "/validation")
     .then((res) => {
-      store.commit("setLoading", { value: false });
+      store.loadingOFF();
       classValidationJSON.value = res.data;
       $swal.fire({
         icon: "success",
@@ -87,7 +87,7 @@ function getClassValidation(v) {
       });
     })
     .catch((err) => {
-      store.commit("setLoading", { value: false });
+      store.loadingOFF();
       $swal.fire({
         title: "Oh no!",
         html: `<b>"${v}"</b> is not a class with validation, make another selection.`,
@@ -98,14 +98,18 @@ function getClassValidation(v) {
 }
 
 function validateMetadata() {
-  if (!searchTerm.value || !classValidationJSON.value || !metaToValidate) {
+  if (
+    !searchTerm.value ||
+    !classValidationJSON.value ||
+    !validatorStore.getValidationMetadata
+  ) {
     $swal.fire(
       "Error!",
       "Missing required data to perform validation",
       "error"
     );
   } else {
-    store.commit("setLoading", { value: true });
+    store.loadingON();
     const headers = {
       "Content-Type": "application/json",
     };
@@ -116,13 +120,13 @@ function validateMetadata() {
           searchTerm.value.split(":")[0] +
           "/" +
           searchTerm.value,
-        metaToValidate.value,
+        validatorStore.getValidationMetadata,
         {
           headers: headers,
         }
       )
       .then((res) => {
-        store.commit("setLoading", { value: false });
+        store.loadingOFF();
         if (Object.hasOwnProperty.call(res.data, "valid")) {
           if (res.data?.valid) {
             errors.value = false;
@@ -155,7 +159,7 @@ function validateMetadata() {
       })
       .catch((err) => {
         valid.value = false;
-        store.commit("setLoading", { value: false });
+        store.loadingOFF();
         $swal.fire("Oh no!", "Cannot validate this metadata", "error");
         throw err;
       });
@@ -170,12 +174,16 @@ function reset() {
 }
 
 function loadRegistered() {
-  store.commit("setLoading", { value: true });
+  store.loadingON();
   axios
-    .get(runtimeConfig.public.apiUrl + "/api/dataset?&user=" + userInfo?.login)
+    .get(
+      runtimeConfig.public.apiUrl +
+        "/api/dataset?&user=" +
+        authStore.userInfo?.login
+    )
     .then((publicResults) => {
       let list = publicResults.data.hits;
-      store.commit("setLoading", { value: false });
+      store.loadingOFF();
       let options = {};
       for (var i = 0; i < list.length; i++) {
         options[list[i]["name"]] = list[i]["name"];
@@ -221,7 +229,7 @@ function loadRegistered() {
         });
     })
     .catch((err) => {
-      store.commit("setLoading", { value: false });
+      store.loadingOFF();
       new Notify({
         status: "error",
         title: "Failed to load public metadata",
@@ -277,7 +285,7 @@ async function getFile() {
 }
 
 onMounted(() => {
-  store.dispatch("getValidationOptions");
+  validatorStore.getValidationOptions();
   if (route.query.schema_class) {
     searchTerm.value = route.query.schema_class;
   }
@@ -310,9 +318,12 @@ onMounted(() => {
                 v-model="searchTerm"
                 class="form-control form-control-sm"
               />
-              <datalist id="input_ac" v-if="schema_namespaces.length">
+              <datalist
+                id="input_ac"
+                v-if="validatorStore.validationSchemaOptions.length"
+              >
                 <option
-                  v-for="item in schema_namespaces"
+                  v-for="item in validatorStore.validationSchemaOptions"
                   :key="item"
                   :value="item"
                 >

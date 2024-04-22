@@ -259,7 +259,9 @@
 
 <script>
 import axios from "axios";
-import { mapGetters } from "vuex";
+import { mapState, mapActions } from "pinia";
+import { useEditorStore } from "../stores/editor";
+import { useMainStore } from "../stores/index";
 
 export default {
   name: "GitHubSaver",
@@ -285,9 +287,10 @@ export default {
     };
   },
   methods: {
+    ...mapActions(useMainStore, ["setLoading"]),
     resetFields() {
       let self = this;
-      this.$store.commit("setLoading", { state: true });
+      this.setLoading({ value: true });
       setTimeout(function () {
         self.repo_selected = "";
         self.name_selected = "";
@@ -297,15 +300,15 @@ export default {
         self.files_available = [];
         self.file_selected = "";
       }, 1000);
-      this.$store.commit("setLoading", { state: false });
+      this.setLoading({ value: false });
     },
     checkRepo() {
       let self = this;
-      this.$store.commit("setLoading", { state: true });
+      this.setLoading({ value: true });
       axios
         .get(self.apiUrl + "/api/gh/" + self.repoName)
         .then((res) => {
-          this.$store.commit("setLoading", { state: false });
+          this.setLoading({ value: false });
           if (res.data.success) {
             return "https://github.com/" + res.data.msg;
           } else {
@@ -317,7 +320,7 @@ export default {
           }
         })
         .catch((err) => {
-          this.$store.commit("setLoading", { state: false });
+          this.setLoading({ value: false });
           self.$swal.fire({
             type: "error",
             title: "Oops...Something went really wrong!",
@@ -328,11 +331,11 @@ export default {
     },
     getRepos() {
       var self = this;
-      this.$store.commit("setLoading", { state: true });
+      this.setLoading({ value: true });
       axios
         .get(self.apiUrl + "/api/gh")
         .then((res) => {
-          this.$store.commit("setLoading", { state: false });
+          this.setLoading({ value: false });
           if (res.data.success) {
             self.repos = res.data.msg;
           } else {
@@ -344,7 +347,7 @@ export default {
           }
         })
         .catch((err) => {
-          this.$store.commit("setLoading", { state: false });
+          this.setLoading({ value: false });
           self.$swal.fire({
             type: "error",
             title: "Oops!",
@@ -359,7 +362,7 @@ export default {
       data = {
         name: self.repo_selected,
         file: self.name_selected,
-        data: this.$store.getters.getFinalSchema,
+        data: this.code,
         existing: true,
         comment: self.comment,
         existing_file: true,
@@ -371,12 +374,12 @@ export default {
         },
       };
 
-      this.$store.commit("setLoading", { state: true });
+      this.setLoading({ value: true });
 
       return axios
         .put(self.apiUrl + "/api/gh", data, config)
         .then((res) => {
-          this.$store.commit("setLoading", { state: false });
+          this.setLoading({ value: false });
           if (res.data.success) {
             self.repo_saved = true;
             self.repo_link = "https://github.com/" + res.data.msg;
@@ -390,7 +393,7 @@ export default {
           }
         })
         .catch((err) => {
-          this.$store.commit("setLoading", { state: false });
+          this.setLoading({ value: false });
           self.repo_saved = false;
           self.$swal.fire({
             type: "error",
@@ -410,7 +413,7 @@ export default {
         data = {
           name: self.repo_selected,
           file: self.name_selected + ".jsonld",
-          data: this.$store.getters.getFinalSchema,
+          data: this.code,
           existing: true,
           comment: self.comment,
         };
@@ -421,12 +424,12 @@ export default {
           },
         };
 
-        this.$store.commit("setLoading", { state: true });
+        this.setLoading({ value: true });
 
         return axios
           .post(self.apiUrl + "/api/gh", data, config)
           .then((res) => {
-            this.$store.commit("setLoading", { state: false });
+            this.setLoading({ value: false });
             if (res.data.success) {
               self.repo_saved = true;
               self.repo_link = "https://github.com/" + res.data.msg;
@@ -440,7 +443,7 @@ export default {
             }
           })
           .catch((err) => {
-            this.$store.commit("setLoading", { state: false });
+            this.setLoading({ value: false });
             self.repo_saved = false;
             self.$swal.fire({
               type: "error",
@@ -470,13 +473,13 @@ export default {
     },
     sendRequest(url, backupURL = "") {
       let self = this;
-      this.$store.commit("setLoading", { state: true });
+      this.setLoading({ value: true });
       axios
         .get(self.apiUrl + "/api/view?url=" + url)
         .then((res) => {
           console.log(res.data);
           self.data = res.data;
-          this.$store.commit("setLoading", { state: false });
+          this.setLoading({ value: false });
           localStorage.setItem(
             "user-schema-classes",
             JSON.stringify(self.data)
@@ -485,7 +488,7 @@ export default {
           self.assignTempName(res.data.hits);
         })
         .catch((err) => {
-          this.$store.commit("setLoading", { state: false });
+          this.setLoading({ value: false });
           if (backupURL) {
             self.sendRequest(backupURL);
           } else {
@@ -596,10 +599,10 @@ export default {
     },
   },
   computed: {
-    ...mapGetters({
-      loading: "loading",
-      code: "getFinalSchema",
+    ...mapState(useEditorStore, {
+      code: "finalschema",
     }),
+    ...mapState(useMainStore, ["loading"]),
     readyLink: function () {
       let self = this;
       if (self.existing_file) {
@@ -613,11 +616,11 @@ export default {
     repo_selected: function (name, oldname) {
       let self = this;
       if (self.repos.length && self.repos.includes(name)) {
-        this.$store.commit("setLoading", { state: true });
+        this.setLoading({ value: true });
         return axios
           .get(self.apiUrl + "/api/gh/" + name)
           .then((res) => {
-            this.$store.commit("setLoading", { state: false });
+            this.setLoading({ value: false });
             if (res.data.success) {
               self.files_available = res.data.msg;
             } else {
@@ -629,7 +632,7 @@ export default {
             }
           })
           .catch((err) => {
-            this.$store.commit("setLoading", { state: false });
+            this.setLoading({ value: false });
             self.$swal.fire({
               icon: "error",
               title: "Oops...Something went wrong!",

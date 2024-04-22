@@ -47,7 +47,9 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapActions, mapState } from "pinia";
+import { useEditorStore } from "../stores/editor";
+import { useEditorValidationStore } from "../stores/editor_validation";
 import EditDescription from "~~/components/EditDescription.vue";
 import CardinalitySelector from "~~/components/CardinalitySelector.vue";
 
@@ -66,6 +68,8 @@ export default {
     CardinalitySelector,
   },
   methods: {
+    ...mapActions(useEditorStore, ["setValidation", "resetValidationFor"]),
+    ...mapActions(useEditorValidationStore, ["addRecentlyUsed"]),
     allowDrop(ev) {
       console.log(ev);
       // $(ev.target).attr("drop-active", true);
@@ -95,8 +99,8 @@ export default {
           };
           let audio = document.getElementById("dropsound");
           audio.play();
-          self.$store.commit("setValidation", payload);
-          self.$store.commit("addRecentlyUsed", payload);
+          self.setValidation(payload);
+          self.addRecentlyUsed(payload);
         }
       });
     },
@@ -114,12 +118,14 @@ export default {
         name: self.propname,
       };
       self.matches = [];
-      this.$store.commit("resetValidationFor", payload);
+      self.resetValidationFor(payload);
     },
   },
   computed: {
-    ...mapGetters({
+    ...mapState(useEditorValidationStore, {
       validation_options: "getValidationOptions",
+    }),
+    ...mapState(useEditorStore, {
       addCardinality: "addCardinality",
     }),
   },

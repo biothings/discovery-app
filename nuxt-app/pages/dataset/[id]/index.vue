@@ -1,13 +1,13 @@
 <script setup>
 import showdown from "showdown";
 import { computed, ref } from "vue";
-import { useStore } from "vuex";
+import { useMainStore } from "../../../stores/index";
 import Notify from "simple-notify";
 
 const { $swal } = useNuxtApp();
 
 const route = useRoute();
-const store = useStore();
+const store = useMainStore();
 const id = route.params.id;
 let metadata = ref({});
 let isN3C = ref(false);
@@ -113,7 +113,7 @@ function getMetadata(id) {
   generateScriptText(id);
   meta_id.value = id;
   const runtimeConfig = useRuntimeConfig();
-  store.commit("setLoading", { value: true });
+  store.setLoading({ value: true });
 
   fetch(runtimeConfig.public.apiUrl + "/api/dataset/" + id + "?meta=true")
     .then((response) => response.json())
@@ -162,7 +162,7 @@ function getMetadata(id) {
           },
         ],
       });
-      store.commit("setLoading", { value: false });
+      store.setLoading({ value: false });
       if (
         Object.prototype.hasOwnProperty.call(metadata.value["_meta"], "n3c") &&
         Object.keys(metadata.value["_meta"]["n3c"]).length
@@ -203,7 +203,7 @@ function getMetadata(id) {
         title: "Page does not exist",
         html: "<a href='/dataset' rel='nonreferrer'>Go To Registry</a>",
       });
-      store.commit("setLoading", { value: false });
+      store.setLoading({ value: false });
       throw err;
     });
 }

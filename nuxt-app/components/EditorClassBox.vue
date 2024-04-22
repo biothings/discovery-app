@@ -444,7 +444,8 @@
               ></small
             >
             <small v-if="propExists" class="text-danger"
-              >A property with this name already exists, any changes will replace existing value unless the property name changes.</small
+              >A property with this name already exists, any changes will
+              replace existing value unless the property name changes.</small
             >
           </div>
           <div class="form-group">
@@ -531,7 +532,7 @@
               class="btn btn-lg w-50 btn-success"
               @click.prevent="submitNewProp()"
             >
-              {{ addNewPropReady && !propExists ? 'Submit' : 'Update' }}
+              {{ addNewPropReady && !propExists ? "Submit" : "Update" }}
             </button>
           </div>
         </form>
@@ -542,7 +543,8 @@
 
 <script>
 import axios from "axios";
-import { mapGetters } from "vuex";
+import { mapActions, mapState } from "pinia";
+import { useEditorStore } from "../stores/editor";
 
 import Notify from "simple-notify";
 
@@ -579,7 +581,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
+    ...mapState(useEditorStore, {
       showDesc: "getShowDesc",
     }),
     addNewPropReady: function () {
@@ -597,7 +599,7 @@ export default {
   },
   watch: {
     newPropName: function (v) {
-      this.propExists = this.$store.getters.isDuplicateProp(v);
+      this.propExists = this.isDuplicateProp(v);
     },
     query: function (q) {
       if (q) {
@@ -616,6 +618,15 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useEditorStore, [
+      "isDuplicateProp",
+      "removeProperty",
+      "selectProp",
+      "requireProp",
+      "optionalProp",
+      "recommendProp",
+      "addProperty",
+    ]),
     editCustomProp(prop) {
       let self = this;
       self.getRangeOptions();
@@ -639,9 +650,6 @@ export default {
           });
         }
       }
-      // let payload = {};
-      // payload["label"] = prop["label"];
-      // self.$store.commit("removeProperty", payload);
     },
     handlePillSubmit() {
       var self = this;
@@ -730,7 +738,7 @@ export default {
           if (res.value) {
             let payload = {};
             payload["label"] = propLabel;
-            self.$store.commit("removeProperty", payload);
+            self.removeProperty(payload);
           }
         });
     },
@@ -797,10 +805,7 @@ export default {
       return item.split(", ");
     },
     markSelected(propLabel) {
-      let self = this;
-      var payload = {};
-      payload["label"] = propLabel;
-      self.$store.commit("selectProp", payload);
+      this.selectProp({ label: propLabel });
       this.updateTotals();
     },
     markRequired(propLabel) {
@@ -812,7 +817,7 @@ export default {
         ) {
           var payload = {};
           payload["label"] = propLabel;
-          self.$store.commit("requireProp", payload);
+          self.requireProp(payload);
         } else if (
           self.item.properties[i].label === propLabel &&
           !self.item.properties[i].selected
@@ -836,7 +841,7 @@ export default {
         ) {
           var payload = {};
           payload["label"] = propLabel;
-          self.$store.commit("optionalProp", payload);
+          self.optionalProp(payload);
         } else if (
           self.item.properties[i].label === propLabel &&
           !self.item.properties[i].selected
@@ -860,7 +865,7 @@ export default {
         ) {
           var payload = {};
           payload["label"] = propLabel;
-          self.$store.commit("recommendProp", payload);
+          self.recommendProp(payload);
         } else if (
           self.item.properties[i].label === propLabel &&
           !self.item.properties[i].selected
@@ -917,7 +922,7 @@ export default {
       } else {
         payload["special"] = false;
       }
-      self.$store.commit("addProperty", payload);
+      self.addProperty(payload);
       self.addPropMode = false;
       self.resetAddPropForm();
     },
@@ -987,7 +992,7 @@ export default {
               return new Promise((resolve) => {
                 if (value.match(/^[a-z]+(?:[A-Z][a-z]+)*$/)) {
                   // DUPLICATE CHECK
-                  if (self.$store.getters.isDuplicateProp(value)) {
+                  if (self.isDuplicateProp(value)) {
                     resolve(
                       "Property already exists in parent classes. All properties should be unique or more specific."
                     );
@@ -1092,7 +1097,7 @@ export default {
                   } else {
                     payload["special"] = false;
                   }
-                  self.$store.commit("addProperty", payload);
+                  self.addProperty(payload);
                   self.expand = true;
                 }
               });

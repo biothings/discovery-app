@@ -116,6 +116,8 @@
 <script>
 import axios from "axios";
 import Notify from "simple-notify";
+import { mapActions, mapState } from "pinia";
+import { useSchemaRegistryStore } from "../stores/schema_registry";
 
 export default {
   name: "SchemaRegistryItem",
@@ -130,6 +132,7 @@ export default {
   },
   props: ["item"],
   methods: {
+    ...mapActions(useSchemaRegistryStore, ["addItem", "removeItem"]),
     saveDataAndRedirect(item, goesToEditor) {
       console.log(item, goesToEditor);
       if (goesToEditor) {
@@ -201,10 +204,7 @@ export default {
           ]);
           item["properties"] = sorted;
           item["color"] = self.getRandomColor();
-          let payload = {};
-          payload["item"] = item;
-          self.$store.commit("addItem", payload);
-
+          self.addItem({ item: item });
           self.adding = false;
         })
         .catch((err) => {
@@ -231,6 +231,9 @@ export default {
     },
   },
   computed: {
+    ...mapState(useSchemaRegistryStore, {
+      maxReached: "getMaxReached",
+    }),
     imgLink: function () {
       switch (this.item["namespace"]) {
         case "schema":
@@ -258,9 +261,6 @@ export default {
         return 0;
       }
     },
-    maxReached() {
-      return this.$store.getters.getMaxReached;
-    },
   },
   watch: {
     picked: function (picked) {
@@ -270,7 +270,7 @@ export default {
       if (picked) {
         self.getFullInfo(self.item);
       } else {
-        this.$store.commit("removeItem", payload);
+        this.removeItem(payload);
       }
     },
   },
