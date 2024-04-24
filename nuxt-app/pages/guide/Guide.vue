@@ -429,7 +429,7 @@
               <div class="row">
                 <div class="col-sm-12 text-center p-3">
                   <h4
-                    class="bold"
+                    class="bold text-dark"
                     :class="{
                       'text-info': fieldsleftRegistration !== 0,
                       'text-success': fieldsleftRegistration !== 0,
@@ -481,7 +481,7 @@
                 </button>
               </div>
               <div
-                class="d-flex justify-content-center flex-wrap"
+                class="d-flex justify-content-center flex-wrap p-4"
                 v-if="categoryTotals"
               >
                 <template
@@ -808,7 +808,10 @@ export default {
         .then((res) => {
           var payload = {};
           payload["name"] = item.name;
-          console.log("%c ⭐ (5) Schema Obtained Successfully", "background-color: purple; color: white; padding: 5px;");
+          console.log(
+            "%c ⭐ (5) Schema Obtained Successfully",
+            "background-color: purple; color: white; padding: 5px;"
+          );
           self.$store.commit("saveSchemaName", payload);
           self.parseData(res.data);
 
@@ -869,7 +872,10 @@ export default {
     parseData(data) {
       let self = this;
       let schemaName = self.$store.getters.getSchemaName;
-      console.log("%c ⭐ (6) Saving schema and assigning categories", "background-color: purple; color: white; padding: 5px;");
+      console.log(
+        "%c ⭐ (6) Saving schema and assigning categories",
+        "background-color: purple; color: white; padding: 5px;"
+      );
       if (data.hits) {
         for (var i = 0; i < data.hits.length; i++) {
           if (data.hits[i].hasOwnProperty("name")) {
@@ -986,7 +992,7 @@ export default {
     },
     getPreview() {
       let self = this;
-      
+
       this.$store.commit("formPreviewForGuide");
       this.$swal.fire({
         position: "center",
@@ -1114,12 +1120,9 @@ export default {
             } else {
               try {
                 self.$swal.fire({
-                  type: "error",
-                  position: "top center",
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
                   title: "Registration failed because: ",
-
                   customClass: "scale-in-center",
                   text: res.data.reason,
                 });
@@ -1161,12 +1164,9 @@ export default {
                 "</small></div>";
             }
             self.$swal.fire({
-              type: "error",
-              position: "top center",
               title: "Registration failed because: ",
               confirmButtonColor: "#5C3069",
               cancelButtonColor: "#006476",
-
               customClass: "scale-in-center",
               html: culprit,
               footer: "<small>Validation Error</small>",
@@ -1654,12 +1654,18 @@ export default {
         });
     },
     checkAutoLoad() {
-      console.log("%c ⭐ (1) Autoload - Checking portal guides available", "background-color: purple; color: white; padding: 5px;");
+      console.log(
+        "%c ⭐ (1) Autoload - Checking portal guides available",
+        "background-color: purple; color: white; padding: 5px;"
+      );
       var self = this;
       let payload = {};
       //if GUIDE_PRESETS is only ONE
       if (self.presets && self.presets.length === 1) {
-        console.log("%c ⭐ (2) Autoload - 1 guide available", "background-color: purple; color: white; padding: 5px;");
+        console.log(
+          "%c ⭐ (2) Autoload - 1 guide available",
+          "background-color: purple; color: white; padding: 5px;"
+        );
         payload["startingPoint"] = self.presets[0];
         self.$store.commit("setStartingPoint", payload);
         if (self.portals && self.portals.length) {
@@ -1673,27 +1679,39 @@ export default {
       }
       // if GUIDE_PRESETS is more than one
       else {
-        console.log("%c ⭐ (2) Autoload - Portal has multiple guides available. Looking for match.", "background-color: purple; color: white; padding: 5px;");
+        console.log(
+          "%c ⭐ (2) Autoload - Portal has multiple guides available. Looking for match.",
+          "background-color: purple; color: white; padding: 5px;"
+        );
         // if url QUERY
         if (self.guideQuery) {
           let found = self.presets.find(
             (guide) => guide.name.toLowerCase() == self.guideQuery.toLowerCase()
           );
           if (found) {
-            console.log("%c ⭐ (3) URL match found. Loading guide: " + self.guideQuery, "background-color: purple; color: white; padding: 5px;");
+            console.log(
+              "%c ⭐ (3) URL match found. Loading guide: " + self.guideQuery,
+              "background-color: purple; color: white; padding: 5px;"
+            );
             self.$store.commit("setStartingPoint", { startingPoint: found });
             payload["step"] = 3;
             self.$store.commit("changeStep", payload);
             self.getFormValues();
           } else {
-            console.log("%c ⭐ (3) No Match found. User will select.", "background-color: purple; color: white; padding: 5px;");
+            console.log(
+              "%c ⭐ (3) No Match found. User will select.",
+              "background-color: purple; color: white; padding: 5px;"
+            );
             payload["step"] = 1;
             self.$store.commit("changeStep", payload);
           }
         }
         // Choose first item from GUIDE_PRESETS as default
         else {
-          console.log("%c ⭐ (3) Loading default guide - no exact match", "background-color: purple; color: white; padding: 5px;");
+          console.log(
+            "%c ⭐ (3) Loading default guide - no exact match",
+            "background-color: purple; color: white; padding: 5px;"
+          );
           payload["startingPoint"] = self.presets[0];
           self.$store.commit("setStartingPoint", payload);
           if (self.portals && self.portals.length) {
@@ -1710,7 +1728,10 @@ export default {
     getFormValues() {
       var self = this;
       // Handle selections for startingPoint and Portals IF any
-      console.log("%c ⭐ (4) Getting schema", "background-color: purple; color: white; padding: 5px;");
+      console.log(
+        "%c ⭐ (4) Getting schema",
+        "background-color: purple; color: white; padding: 5px;"
+      );
       self.getStartingPointSchema(self.$store.getters.startingPoint);
       let payload = {};
       payload["step"] = 3;
@@ -1726,7 +1747,10 @@ export default {
       return text.replaceAll("_", " ");
     },
     setStartingPoint(startingPointInfo) {
-      console.log("%c ⭐ (2) Setting Starting Point: " + startingPointInfo, "background-color: purple; color: white; padding: 5px;");
+      console.log(
+        "%c ⭐ (2) Setting Starting Point: " + startingPointInfo,
+        "background-color: purple; color: white; padding: 5px;"
+      );
       var self = this;
       let payload = {};
       payload["startingPoint"] = startingPointInfo;
@@ -1751,7 +1775,10 @@ export default {
     checkProgress() {
       let self = this;
       let p = sessionStorage.getItem("guideProgress");
-      console.log("%c ⭐ (7) Checking progress", "background-color: purple; color: white; padding: 5px;");
+      console.log(
+        "%c ⭐ (7) Checking progress",
+        "background-color: purple; color: white; padding: 5px;"
+      );
       if (p) {
         new Notify({
           status: "success",
@@ -1771,7 +1798,10 @@ export default {
           position: "right top",
         });
         let selected = JSON.parse(p);
-        console.log("%c ⭐ (8) Progress found. Values recovered.", "background-color: purple; color: white; padding: 5px;");
+        console.log(
+          "%c ⭐ (8) Progress found. Values recovered.",
+          "background-color: purple; color: white; padding: 5px;"
+        );
         for (let key in selected) {
           if (!["@context", "@type", "_id"].includes(key)) {
             var payload = {};
@@ -1781,8 +1811,11 @@ export default {
           }
         }
         self.$store.commit("formPreviewForGuide");
-      }else{
-        console.log("%c ⭐ (8) No progress found, starting blank.", "background-color: purple; color: white; padding: 5px;");
+      } else {
+        console.log(
+          "%c ⭐ (8) No progress found, starting blank.",
+          "background-color: purple; color: white; padding: 5px;"
+        );
       }
     },
     viewErrors() {
@@ -1817,10 +1850,10 @@ export default {
   },
   mounted: function () {
     //check if prefilled N3C fields should be used
-    if (!window.location.href.includes('n3c')) {
-      this.$store.commit('setUsePrefilled', false);
-    }else{
-      this.$store.commit('setUsePrefilled', true);
+    if (!window.location.href.includes("n3c")) {
+      this.$store.commit("setUsePrefilled", false);
+    } else {
+      this.$store.commit("setUsePrefilled", true);
     }
 
     const runtimeConfig = useRuntimeConfig();

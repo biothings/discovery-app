@@ -126,9 +126,9 @@ export default {
         return outbreakIcon;
       } else if (guide.includes("n3c")) {
         return n3cLogo;
-      } else if (guide.includes("nde")){
-        return nde
-      }else {
+      } else if (guide.includes("nde")) {
+        return nde;
+      } else {
         return dde;
       }
     },

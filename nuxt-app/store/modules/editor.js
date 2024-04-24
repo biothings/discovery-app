@@ -212,16 +212,22 @@ export const editor = {
       newProp["name"] = state.prefix + ":" + payload["name"];
       newProp["range"] = payload["range"];
       // domain id can already have prefix, if not add it.
-      newProp["domain"] = payload["domain"].includes(":") ? payload["domain"] : state.prefix + ":" + payload["domain"];
+      newProp["domain"] = payload["domain"].includes(":")
+        ? payload["domain"]
+        : state.prefix + ":" + payload["domain"];
       // if new prop added it should appear in validation by default
       newProp["selected"] = payload["special"];
 
       for (var i = 0; i < state.schema.length; i++) {
         if (state.schema[i].special) {
           if (Object.hasOwnProperty.call(state.schema[i], "properties")) {
-            console.log(state.schema)
+            console.log(state.schema);
             //check if exists then update
-            if (state.schema[i].properties.some(prop => prop?.label == payload["name"])) {
+            if (
+              state.schema[i].properties.some(
+                (prop) => prop?.label == payload["name"]
+              )
+            ) {
               for (var x = 0; x < state.schema[i].properties.length; x++) {
                 if (state.schema[i].properties[x].label === newProp["label"]) {
                   // remove matching existing
@@ -461,7 +467,9 @@ export const editor = {
               mainProp["rdfs:comment"] =
                 state.schema[i].properties[x]["description"];
               mainProp["rdfs:label"] = state.schema[i].properties[x]["label"];
-              mainProp["schema:domainIncludes"] = {"@id": state.schema[i]["name"]};
+              mainProp["schema:domainIncludes"] = {
+                "@id": state.schema[i]["name"],
+              };
               //Ranges of Property
               if (state.schema[i].properties[x]["range"]) {
                 let ranges = state.schema[i].properties[x]["range"].split(",");

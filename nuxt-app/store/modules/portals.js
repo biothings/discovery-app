@@ -4,6 +4,7 @@ import n3c from "~~/assets/img/N3Co.png";
 import n3cLogo from "~~/assets/img/N3Cwhite.png";
 import outbreak from "~~/assets/img/outbreak_white.svg";
 import niaidIcon from "~~/assets/img/niaid/icon.svg";
+import creiddIcon from "~~/assets/img/creid/icon.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
 import outbreakIcon from "~~/assets/img/icon-01.svg";
 
@@ -115,6 +116,33 @@ export const portals = {
             link: "https://www.biorxiv.org/content/10.1101/2022.10.10.511492v1",
           },
         ],
+      },
+      {
+        name: "CREID Research Network Portal",
+        shortName: "CREID",
+        keyName: "creid",
+        header:
+          "Register your CREID Network datasets for inclusion in the NIAID Data Ecosystem Discovery Portal",
+        linkname: "creid",
+        description: `<p>The Centers for Research in Emerging Infectious Diseases (CREID) Network Data Access Portal allows CREID members to upload details on research datasets they have submitted to external repositories.</p> 
+        <p>Information submitted here will automatically be ingested into the NIAID Data Ecosystem Discovery Portal. The NIAID Data Ecosystem Discovery Portal harvests metadata from dataset repositories to enable easy cross-platform dataset searching and filtering of data on infectious and immune-mediated diseases.</p> 
+        <p>CREID researchers who do not already deposit data in repositories accessible to the NIAID Data Ecosystem Discovery Portal can register their datasets using this platform.</p>`,
+        image: creiddIcon,
+        portalicon: creiddIcon,
+        site: "",
+        schema: "/view/creid",
+        showCoverage: false,
+        coverage: ["Dataset"],
+        guides: [
+          {
+            guide: "/guide/creid",
+            name: "Dataset",
+            registry: "/dataset?template=creid:dataset",
+          },
+        ],
+        datasets: "/dataset?template=creid:dataset",
+        colors: [{ hex: "#8c44b2" }, { hex: "#0c596b" }],
+        // publications: [],
       },
       {
         name: "CTSA National Center for Data to Health",
