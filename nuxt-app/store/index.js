@@ -86,14 +86,15 @@ export default createStore({
                 instance.setContent(info);
               });
           } else {
-            let html = '<table class="table table-sm table-borderless m-0">';
+            let html =
+              '<table class="table table-sm table-borderless m-0 text-light mainBackDark">';
             try {
               if (instance.reference.dataset.tippyContent.includes("{")) {
                 let json = JSON.parse(instance.reference.dataset.tippyContent);
                 for (const k in json) {
                   html += `<tr>
                       <td><small><b>${k}</b></small></td>
-                      <td><small class='text-light'><pre class='code-overflow text-light p-1 rounded m-0'>${JSON.stringify(
+                      <td><small class='text-light'><pre class='code-overflow bg-dark text-light p-1 rounded m-0'>${JSON.stringify(
                         json[k],
                         null,
                         2

@@ -444,7 +444,8 @@
               ></small
             >
             <small v-if="propExists" class="text-danger"
-              >A property with this name already exists, any changes will replace existing value unless the property name changes.</small
+              >A property with this name already exists, any changes will
+              replace existing value unless the property name changes.</small
             >
           </div>
           <div class="form-group">
@@ -531,7 +532,7 @@
               class="btn btn-lg w-50 btn-success"
               @click.prevent="submitNewProp()"
             >
-              {{ addNewPropReady && !propExists ? 'Submit' : 'Update' }}
+              {{ addNewPropReady && !propExists ? "Submit" : "Update" }}
             </button>
           </div>
         </form>

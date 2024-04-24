@@ -617,6 +617,9 @@ export default {
   },
   computed: {
     ...mapGetters(["loggedIn", "userInfo"]),
+    nextPath: function () {
+      return this.$route.path;
+    },
   },
   methods: {
     // Namespaces
@@ -916,7 +919,6 @@ export default {
                             }
                             this.$swal.fire({
                               type: "error",
-                              position: "top center",
                               title: "Oh no! It failed because: ",
                               html: culprit,
                               footer: "<small>Validation Error</small>",
@@ -1007,7 +1009,7 @@ export default {
                 showCancelButton: true,
                 confirmButtonText: "Go",
                 allowOutsideClick: () => !this.$swal.isLoading(),
-                backdrop: true
+                backdrop: true,
               })
               .then((result) => {
                 if (result.value) {

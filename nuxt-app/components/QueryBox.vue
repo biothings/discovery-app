@@ -43,12 +43,18 @@
       <ul style="list-style: none">
         <li v-for="path in getPaths(q)">
           <span v-for="(item, index) in path">
-            <a
+            <!-- <a
               :class="[index !== path.length - 1 ? 'text-muted' : textColor]"
               class="font-weight-bold"
               :href="getBreadcrumbLink(item)"
               v-text="item"
-            ></a>
+            ></a> -->
+            <span
+              :class="[index !== path.length - 1 ? 'text-muted' : textColor]"
+              class="font-weight-bold pointer"
+              @click="goTo(item)"
+              v-text="item"
+            ></span>
             <span v-if="index !== path.length - 1"
               >&nbsp;<font-awesome-icon
                 icon="fas fa-caret-right"
@@ -141,6 +147,17 @@
         </tbody>
       </table>
     </div>
+    <div
+      v-if="!q.properties && !validationView"
+      class="jumbotron d-flex justify-content-center align-items-center"
+    >
+      <div>
+        <p class="m-4">
+          This class does not define any new properties, instead all of its
+          properties are directly inherited from it's subclasses.
+        </p>
+      </div>
+    </div>
     <div v-if="validationView && q.validation">
       <ValidationBox :validation="q.validation"></ValidationBox>
     </div>
@@ -150,6 +167,7 @@
 <script>
 import ValidationBox from "./ValidationBox.vue";
 import { mapGetters, mapActions } from "vuex";
+import Notify from "simple-notify";
 
 export default {
   name: "QueryBox",
@@ -237,6 +255,38 @@ export default {
         res = string;
       }
       return res;
+    },
+    goTo(string) {
+      let res = "";
+      let arr = [];
+      if (string.includes(":")) {
+        arr = string.split(":");
+        if (arr[0] == "schema") {
+          new Notify({
+            status: "warning",
+            title: "Navigation Unavailable",
+            text: "This class cannot be navigated to directly. Taking you to its homepage.",
+            effect: "fade",
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 3000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: "right top",
+          });
+          this.$router.push("/ns/schema");
+          return;
+        }
+        res = `/ns/${arr[0]}/${arr[arr.length - 1]}`;
+      } else {
+        res = string;
+      }
+      this.$router.push(res);
     },
     getLink(qName) {
       // console.log('getLink', qName)

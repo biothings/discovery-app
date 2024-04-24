@@ -449,11 +449,7 @@
                 </template>
 
                 <!-- 🌈  CONSTANT DATA CATALOG 🌈 -->
-                <template
-                  v-if="
-                    info?.type === 'object' && name === ''
-                  "
-                >
+                <template v-if="info?.type === 'object' && name === ''">
                   <!--<div class="text-center">
                       <div class="text-center bold text-info" v-if="constFound">
                         <small class="bold m-auto">Fixed Value, No Action Needed</small>
@@ -466,35 +462,30 @@
                     </div>-->
                 </template>
                 <!-- 🌈  OBJECT 🌈 -->
-                <template
-                  v-if="
-                    info?.type === 'object' &&
-                    name !== 'license'
-                  "
-                >
-                <div class="form-group p-2 row">
-                  <TypeSelector
-                    :info="info"
-                    :main_name="name"
-                    :isChild="false"
-                  ></TypeSelector>
-                </div>
-                <div class="col-sm-12 m-auto">
-                  <!-- 🌈  input preview for object or array🌈 -->
-                  <InputPreview
-                    :name="name"
-                    :userInput="userInput"
-                    :removeItem="removeItem"
-                  ></InputPreview>
-                  <!-- 🌈  input preview for string🌈 -->
-                  <template v-if="typeof userInput === 'string'">
-                    <span
-                      style="overflow: hidden; max-width: 100%"
-                      class="badge badge-success text-light"
-                      v-text="userInput"
-                    ></span>
-                  </template>
-                    </div>
+                <template v-if="info?.type === 'object' && name !== 'license'">
+                  <div class="form-group p-2 row">
+                    <TypeSelector
+                      :info="info"
+                      :main_name="name"
+                      :isChild="false"
+                    ></TypeSelector>
+                  </div>
+                  <div class="col-sm-12 m-auto">
+                    <!-- 🌈  input preview for object or array🌈 -->
+                    <InputPreview
+                      :name="name"
+                      :userInput="userInput"
+                      :removeItem="removeItem"
+                    ></InputPreview>
+                    <!-- 🌈  input preview for string🌈 -->
+                    <template v-if="typeof userInput === 'string'">
+                      <span
+                        style="overflow: hidden; max-width: 100%"
+                        class="badge badge-success text-light"
+                        v-text="userInput"
+                      ></span>
+                    </template>
+                  </div>
                 </template>
                 <!-- 🌈  ONE OF  OR ANY OF🌈 -->
                 <template v-if="info.oneOf || info.anyOf">
@@ -554,7 +545,9 @@
                             :placeholder="'enter ' + item.format"
                           />
                         </template>
-                        <template v-if="item?.type === 'string' && !item.format">
+                        <template
+                          v-if="item?.type === 'string' && !item.format"
+                        >
                           <input
                             type="text"
                             v-model="userInput"
@@ -608,11 +601,17 @@
       </div>
       <div
         class="col-sm-2 p-2 actions d-flex align-items-center justify-content-around"
-        :class="{'alert-success': userInput, 'alert-dark': !userInput, 'alert-warning': hasErrors,}"
+        :class="{
+          'alert-success': userInput,
+          'alert-dark': !userInput,
+          'alert-warning': hasErrors,
+        }"
       >
         <span
           class="fa-stack fa-1x pointer tip"
-          :data-tippy-content="hasErrors ? 'Invalid Input. See Issues Above' : 'Perfect!'"
+          :data-tippy-content="
+            hasErrors ? 'Invalid Input. See Issues Above' : 'Perfect!'
+          "
           @click="markCompleted(name)"
           v-show="userInput || userInput === false"
         >
@@ -621,11 +620,13 @@
             class="back fa-stack-2x"
             :class="[hasErrors ? 'text-warning' : 'text-success']"
           ></font-awesome-icon>
-          <font-awesome-icon v-if="!hasErrors"
+          <font-awesome-icon
+            v-if="!hasErrors"
             icon="fas fa-check"
             class="fa-stack-1x text-light"
           ></font-awesome-icon>
-          <font-awesome-icon v-else
+          <font-awesome-icon
+            v-else
             icon="fas fa-exclamation-circle"
             class="fa-stack-1x text-danger heartbeat"
           ></font-awesome-icon>
@@ -802,7 +803,7 @@ export default {
               });
           },
           allowOutsideClick: () => !self.$swal.isLoading(),
-          backdrop: true
+          backdrop: true,
         })
         .then((result) => {
           if (result.value) {
@@ -987,7 +988,10 @@ export default {
                   var payload = {};
                   payload["item"] = result.value[i];
                   payload["from"] = propName;
-                  if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                  if (
+                    self.info?.oneOf?.length == 1 &&
+                    self.info?.oneOf?.[0]?.type == "array"
+                  ) {
                     payload["forceArray"] = true;
                   }
                   self.$store.commit("addToArrayFrom", payload);
@@ -1060,7 +1064,10 @@ export default {
                       var payload = {};
                       payload["item"] = slist[sIndex];
                       payload["from"] = propName;
-                      if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                      if (
+                        self.info?.oneOf?.length == 1 &&
+                        self.info?.oneOf?.[0]?.type == "array"
+                      ) {
                         payload["forceArray"] = true;
                       }
                       self.$store.commit("addToArrayFrom", payload);
@@ -1071,7 +1078,10 @@ export default {
                     var payload = {};
                     payload["item"] = value;
                     payload["from"] = propName;
-                    if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                    if (
+                      self.info?.oneOf?.length == 1 &&
+                      self.info?.oneOf?.[0]?.type == "array"
+                    ) {
                       payload["forceArray"] = true;
                     }
                     self.$store.commit("addToArrayFrom", payload);
@@ -1731,7 +1741,10 @@ export default {
                   var payload = {};
                   payload["item"] = obj;
                   payload["from"] = propName;
-                  if (self.info?.oneOf?.length == 1 && self.info?.oneOf?.[0]?.type == 'array') {
+                  if (
+                    self.info?.oneOf?.length == 1 &&
+                    self.info?.oneOf?.[0]?.type == "array"
+                  ) {
                     payload["forceArray"] = true;
                   }
                   self.$store.commit("addToArrayFrom", payload);
@@ -1952,8 +1965,8 @@ export default {
         var payload = {};
         let self = this;
         if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = null;
+          clearTimeout(this.timer);
+          this.timer = null;
         }
         this.timer = setTimeout(() => {
           if (name.includes("date")) {
@@ -1983,19 +1996,21 @@ export default {
         return false;
       }
     },
-    hasErrors: function(){
+    hasErrors: function () {
       let self = this;
       if (this.errors && this.errors.length) {
-        let found = this.errors.some((val) => val.instancePath.includes(self.name));
+        let found = this.errors.some((val) =>
+          val.instancePath.includes(self.name)
+        );
         if (found) {
-          return true
+          return true;
         } else {
-          return false
+          return false;
         }
       } else {
-        return false
+        return false;
       }
-    }
+    },
   },
 };
 </script>

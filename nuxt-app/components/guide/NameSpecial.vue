@@ -75,8 +75,8 @@ export default {
         var payload = {};
         let self = this;
         if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = null;
+          clearTimeout(this.timer);
+          this.timer = null;
         }
         this.timer = setTimeout(() => {
           if (name.includes("date")) {
@@ -88,7 +88,6 @@ export default {
           self.$store.commit("markCompleted", payload);
           self.$store.dispatch("saveProgress");
         }, 800);
-        
       },
     },
   },

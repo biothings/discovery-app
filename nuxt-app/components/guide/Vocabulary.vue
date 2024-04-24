@@ -34,7 +34,7 @@
       </div>
     </div>
     <div
-      class="col-sm-12 p-2 mb-1 alert-secondary"
+      class="col-sm-12 p-2 mb-1 alert-secondary text-dark"
       style="max-height: 450px; overflow-y: scroll; word-break: break-all"
     >
       <table class="table table-sm table-hover">
@@ -54,7 +54,7 @@
               <td>
                 <font-awesome-icon
                   icon="fas fa-info-circle"
-                  class="text-info vocabTip"
+                  class="text-info"
                   :data-tippy-content="JSON.stringify(result, null, 2)"
                 ></font-awesome-icon>
               </td>
@@ -87,18 +87,18 @@
       <small class="text-success m-1 d-block"
         >(<b v-text="selected.length"></b>) Selected:</small
       >
+      <p></p>
       <div class="row m-0">
         <div
           class="col-sm-12 rounded border border-secondary alert-success p-1"
         >
           <template v-for="item in selected">
             <span
-              class="badge badge-success m-1 vocabTip"
+              class="badge badge-success m-1"
               @click="removeResult(item)"
               :data-tippy-content="JSON.stringify(item, null, 2)"
             >
               <span v-text="item.label || item.name || item"></span>
-              <b class="text-danger">&times;</b>
             </span>
           </template>
         </div>
@@ -119,7 +119,7 @@
 </template>
 
 <script>
-import tippy from "tippy.js";
+import Notify from "simple-notify";
 
 export default {
   name: "Vocabulary",
@@ -174,8 +174,25 @@ export default {
         });
         if (!exists.length) {
           self.selected.push(r);
+          new Notify({
+            status: "success",
+            title: "Term Added",
+            text: r?.label || "",
+            effect: "fade",
+            speed: 300,
+            customClass: null,
+            customIcon: null,
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 3000,
+            gap: 20,
+            distance: 20,
+            type: 1,
+            position: "right top",
+          });
         } else {
-          Swal.fire({
+          this.$swal.fire({
             type: "error",
             toast: true,
             title: `Already added`,
@@ -190,7 +207,7 @@ export default {
     removeResult(r) {
       let self = this;
       let res = [];
-      res = _.filter(self.selected, function (o) {
+      res = self.$_.filter(self.selected, function (o) {
         return o.label !== r.label;
       });
       self.selected = res;
@@ -199,7 +216,7 @@ export default {
       let self = this;
       let res = [];
       f = f.toLowerCase();
-      res = _.filter(self.results, function (o) {
+      res = self.$_.filter(self.results, function (o) {
         return o.label.toLowerCase().includes(f);
       });
       if (res.length) {
@@ -277,46 +294,6 @@ export default {
   },
   mounted: function () {
     let self = this;
-
-    tippy(".vocabTip", {
-      placement: "right-end",
-      animation: "fade",
-      theme: "light",
-      onShow(instance) {
-        let info = instance.reference.dataset.tippyInfo;
-
-        function getContent(value) {
-          return value.constructor === String
-            ? value
-            : JSON.stringify(value, null, 2);
-        }
-        // REGULAR TIP DESCRIPTION
-        try {
-          let json = JSON.parse(info);
-          let html = "";
-          for (key in json) {
-            html +=
-              `<tr>
-                            <td><small><b>` +
-              key +
-              `</b></small></td>
-                            <td style="word-break:break-all;"><small>` +
-              getContent(json[key]) +
-              `</small></td>
-                          </tr>`;
-          }
-          instance.setContent(
-            "<table class='table table-sm table-striped'>" + html + "</table>"
-          );
-        } catch (err) {
-          instance.setContent(
-            "<div class='text-info text-left m-0 p-1 bg-white'><pre style='margin:0px !important;word-break:break-all;'>" +
-              info +
-              "</pre></div>"
-          );
-        }
-      },
-    });
 
     if (self.info.hasOwnProperty("vocabulary")) {
       self.vocabInfo = self.info;

@@ -23,7 +23,10 @@
           class="d-inline"
           @click="removeItem($event, userInput)"
         >
-          <font-awesome-icon icon="fas fa-times" class="mr-1"></font-awesome-icon
+          <font-awesome-icon
+            icon="fas fa-times"
+            class="mr-1"
+          ></font-awesome-icon
         ></span>
       </span>
     </template>
