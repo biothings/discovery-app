@@ -118,8 +118,8 @@ export const portals = {
         ],
       },
       {
-        name: "CREID Research Network Portal",
-        shortName: "CREID",
+        name: "NIAID CREID Research Network Portal",
+        shortName: "NIAID CREID",
         keyName: "creid",
         header:
           "Register your CREID Network datasets for inclusion in the NIAID Data Ecosystem Discovery Portal",
