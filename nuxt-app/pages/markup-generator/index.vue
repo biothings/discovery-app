@@ -20,7 +20,7 @@ let json = ref({});
 let searchTerm = ref("");
 
 function updateEditor() {
-  store.commit('setUsePrefilled', false);
+  store.commit("setUsePrefilled", false);
   store.commit("formPreviewForGuide");
   json.value = store.getters.getPreview;
 }
@@ -58,25 +58,25 @@ useHead({
   ],
 });
 
-function reset(){
+function reset() {
   router.push({
-      name: route.name,
+    name: route.name,
   });
-  searchTerm.value = ''; 
-  json.value = {}; 
+  searchTerm.value = "";
+  json.value = {};
   store.commit("reset");
 }
 
 function handleSubmit() {
-    if (searchTerm.value) {
-        router.push({
-            name: route.name,
-            query: { schema_class: searchTerm.value },
-        });
-        getClassValidation(searchTerm.value);
-    }else{
-        reset();
-    }
+  if (searchTerm.value) {
+    router.push({
+      name: route.name,
+      query: { schema_class: searchTerm.value },
+    });
+    getClassValidation(searchTerm.value);
+  } else {
+    reset();
+  }
 }
 
 function getClassValidation(curie) {
@@ -134,13 +134,12 @@ onMounted(() => {
     getClassValidation(searchTerm.value);
   }
 });
-
 </script>
 <template>
   <div class="mt-4 p-0">
     <div class="container text-left alert-dark pt-2">
       <div class="alert alert-light mt-5">
-        <h3 class="p-1 logoText">{{ searchTerm || 'Markup Generator' }}</h3>
+        <h3 class="p-1 logoText">{{ searchTerm || "Markup Generator" }}</h3>
       </div>
       <div class="m-0 row">
         <div class="col-sm-12 bg-dark p-2">
@@ -171,7 +170,7 @@ onMounted(() => {
             <button
               v-if="searchTerm"
               type="button"
-              @click="reset();"
+              @click="reset()"
               class="btn btn-sm bg-danger text-light ml-1"
             >
               Clear
@@ -189,8 +188,9 @@ onMounted(() => {
             <div class="col-sm-8 alert alert-primary mt-5">
               <h5>Instructions</h5>
               <p>
-                Select a class from the list above and fill out a form that will generate JSON markup
-                compatible wth that class' validation rules.
+                Select a class from the list above and fill out a form that will
+                generate JSON markup compatible wth that class' validation
+                rules.
               </p>
             </div>
           </div>
@@ -198,13 +198,21 @@ onMounted(() => {
             <h5 class="m-0">Required</h5>
           </div>
           <template v-for="(prop, index) in validation.properties" :key="index">
-            <InputBox v-if="store.getters.isRequired(index)" :name="index" :info="prop"></InputBox>
+            <InputBox
+              v-if="store.getters.isRequired(index)"
+              :name="index"
+              :info="prop"
+            ></InputBox>
           </template>
           <div class="text-info alert-dark m-0 p-1">
             <h5 class="m-0">Recommended</h5>
           </div>
           <template v-for="(prop, index) in validation.properties" :key="index">
-            <InputBox v-if="!store.getters.isRequired(index)" :name="index" :info="prop"></InputBox>
+            <InputBox
+              v-if="!store.getters.isRequired(index)"
+              :name="index"
+              :info="prop"
+            ></InputBox>
           </template>
         </div>
         <div class="col-sm-12 col-md-5 p-0 mainBackDark">

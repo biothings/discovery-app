@@ -50,12 +50,12 @@
   max-width: 200px;
 }
 
-.inputbox{
+.inputbox {
   border-bottom: 1px #e1e1e1 solid;
-  transition: all .5s;
+  transition: all 0.5s;
 }
 
-.inputbox:hover{
+.inputbox:hover {
   background-color: white;
 }
 

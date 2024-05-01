@@ -20,6 +20,10 @@ if (portal_name) {
       portal = portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/d1RJrJYk/niaidportal.jpg";
       break;
+    case "creid":
+      portal = portals.find((item) => item.keyName == portal_name);
+      featuredImg = "https://i.postimg.cc/d0mRcHRw/creidfeatured.jpg";
+      break;
     case "niaid":
       portal = portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/J0QNFjbc/niaidportal.jpg";
@@ -263,7 +267,10 @@ useHead({
         <div
           class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-dark p-5"
         >
-          <div class="text-center p-2 m-1 rounded p-3" v-if="portal.showCoverage">
+          <div
+            class="text-center p-2 m-1 rounded p-3"
+            v-if="portal.showCoverage"
+          >
             <CoverageIcon :color="portal?.colors[0]?.hex"></CoverageIcon>
             <nuxt-link
               :to="{ path: '/coverage' }"
