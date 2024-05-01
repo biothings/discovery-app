@@ -215,7 +215,12 @@
                         ]"
                       ></font-awesome-icon>
                       <span v-text="propName"></span>
-                      <small class="text-warning" v-if="JSON.stringify(propInfo)?.includes('uri')"> (URI)</small>
+                      <small
+                        class="text-warning"
+                        v-if="JSON.stringify(propInfo)?.includes('uri')"
+                      >
+                        (URI)</small
+                      >
                     </b>
                     <b v-else class="text-info" v-text="propName"></b>
                   </small>
@@ -373,7 +378,10 @@
                       <!-- 👿  ONE OF 👿 -->
                       <div class="w-100">
                         <div class="alert-secondary">
-                          <pre class="alert-success m-1" v-text="getNestedValue(propName)"></pre>
+                          <pre
+                            class="alert-success m-1"
+                            v-text="getNestedValue(propName)"
+                          ></pre>
                         </div>
                         <type-selector
                           :info="propInfo"
@@ -387,7 +395,29 @@
                     <!-- 👹  CONSTANT 👹 -->
                     <template v-else-if="propInfo && propInfo.const">
                       <div class="text-muted">
-                        <small v-text="propInfo.const"></small>
+                        <!-- <small v-text="propInfo.const"></small> -->
+                        <input
+                          :value="propInfo.const"
+                          disabled
+                          class="form-control"
+                          type="text"
+                        />
+                        <label
+                          ><small
+                            >Value for this property is constant and cannot be
+                            edited.</small
+                          ></label
+                        >
+                        <button
+                          v-if="
+                            !Object.hasOwnProperty.call(userObject, propName)
+                          "
+                          class="btn btn-sm bg-success text-light"
+                          type="button"
+                          @click="updateObjectValue(propName, propInfo.const)"
+                        >
+                          Accept
+                        </button>
                       </div>
                     </template>
                     <!-- 🥶🥶🥶 LAST RESORT NO TYPE 🥶🥶🥶-->
@@ -428,6 +458,7 @@
 <script>
 import tippy from "tippy.js";
 import Vocabulary from "~~/components/guide/Vocabulary.vue";
+import Notify from "simple-notify";
 
 export default {
   name: "TypeSelector",
@@ -537,6 +568,26 @@ export default {
         self.userObject[prop] = event.target.value;
       }
     },
+    updateObjectValue(prop, value) {
+      this.userObject[prop] = value;
+      new Notify({
+        status: "success",
+        title: prop + " constant",
+        text: "Value Accepted",
+        effect: "fade",
+        speed: 100,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 3000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: "right top",
+      });
+    },
     updateParent(childValue) {
       var self = this;
       // console.log(self.userObject)
@@ -617,7 +668,7 @@ export default {
         : (self.type_selected = name);
     },
     getNestedValue(childName) {
-      console.log(childName, this.userObject)
+      console.log(childName, this.userObject);
       var self = this;
       return self.userObject.hasOwnProperty(childName)
         ? JSON.stringify(self.userObject[childName], null, 2)
@@ -835,7 +886,7 @@ export default {
         }
       } else {
         self.$swal.fire({
-          type: "error",
+          icon: "error",
           toast: true,
           title: `${ClassType} missing requirements`,
           showConfirmButton: false,
