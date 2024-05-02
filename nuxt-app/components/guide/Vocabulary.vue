@@ -62,17 +62,11 @@
           </template>
         </tbody>
       </table>
-      <template v-if="!results.length">
-        <h1 class="text-center">
-          <font-awesome-icon
-            icon="fas fa-search"
-            class="text-muted"
-          ></font-awesome-icon>
-        </h1>
+      <div>
         <div v-if="query" class="text-center alert alert-light">
           <!-- 🍏 CUSTOM NON STRICT 🍏-->
           <template v-if="vocabInfo && !vocabInfo.strict">
-            <small class="text-muted d-block">No results</small>
+            <small class="text-muted d-block">Don't see what you need?</small>
             <small
               @click="addCustomVocab()"
               class="text-primary pointer d-block"
@@ -80,7 +74,7 @@
             >
           </template>
         </div>
-      </template>
+      </div>
     </div>
     <!-- 🍏 SELECTED 🍏-->
     <div class="col-sm-12 m-0 bg-light rounded-0 p-2" v-if="selected.length">
