@@ -1,11 +1,21 @@
 <template>
   <tr>
-    <td>
-      <b class="text-info" v-text="number + ': '"></b>
+    <td class="text-dark">
+      <b class="text-info" v-text="number + 1 + ': '"></b>
       <small v-text="item.name"></small>
-      <small class="ml-1 pointer text-primary" @click="getPreview()"
-        >Inspect Metadata</small
-      >
+      <font-awesome-icon
+        icon="fas fa-magnifying-glass"
+        class="ml-1 pointer text-primary"
+        data-tippy-content="Inspect Metadata"
+        @click="getPreview()"
+      ></font-awesome-icon>
+      <font-awesome-icon
+        icon="fas fa-pen-square"
+        class="ml-1 pointer"
+        :class="[editMode ? 'text-success' : 'text-primary']"
+        data-tippy-content="Edit Metadata"
+        @click="editMode = !editMode"
+      ></font-awesome-icon>
     </td>
     <td class="align-middle">
       <small v-if="loading" class="text-muted">Please wait...</small>
@@ -67,15 +77,9 @@
     <td v-if="errMSG" class="align-middle">
       <button
         role="button"
-        @click="editItem(item)"
-        class="btn btn-sm mainBackDark text-light m-1"
-      >
-        Edit Metadata
-      </button>
-      <button
-        role="button"
         @click="register()"
         class="btn btn-sm mainBackLight text-light m-1"
+        title="Try to registered your metadata again with latest changes"
       >
         Retry Registration
       </button>
@@ -84,15 +88,9 @@
       <div v-if="canOverwrite">
         <button
           role="button"
-          @click="editItem(item)"
-          class="btn btn-sm mainBackDark text-light m-1"
-        >
-          Edit Metadata
-        </button>
-        <button
-          role="button"
           @click="updateJSONItem()"
           class="btn btn-sm btn-info text-light m-1"
+          title="Update registered metadata with new changes made here"
         >
           Update Registration
         </button>
@@ -135,11 +133,39 @@
       </span>
     </td>
   </tr>
+  <tr v-if="editMode">
+    <td colspan="4" class="m-0 alert alert-secondary">
+      <button
+        type="button"
+        @click="closeAndSave()"
+        class="btn btn-success btn-sm m-1"
+      >
+        Save & Close
+      </button>
+      <div :id="itemID" style="width: 800px"></div>
+      <button
+        type="button"
+        @click="closeAndSave()"
+        class="btn btn-success btn-sm m-1"
+      >
+        Save & Close
+      </button>
+    </td>
+  </tr>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
 import axios from "axios";
+import { basicSetup, EditorView } from "codemirror";
+import { EditorState, Compartment } from "@codemirror/state";
+import { json } from "@codemirror/lang-json";
+import { autocompletion } from "@codemirror/autocomplete";
+import {
+  defaultHighlightStyle,
+  syntaxHighlighting,
+} from "@codemirror/language";
+import { history } from "@codemirror/commands";
 
 export default {
   name: "JSONItem",
@@ -157,6 +183,10 @@ export default {
       exists: null,
       canOverwrite: false,
       help: false,
+      editMode: false,
+      editor: null,
+      itemID: Math.floor(Math.random() * 90000) + 10000,
+      editedItem: {},
     };
   },
   props: ["item", "number", "username"],
@@ -211,6 +241,14 @@ export default {
           self.missingFields.push(field);
         }
       });
+      //add @context if missing from original file
+      if (!item?.["@context"]) {
+        let schemaContext = this.$store.getters.getOutput?.["@context"];
+        if (schemaContext) {
+          this.item["@context"] = schemaContext;
+          self.missingFields.push("(ADDED) @context");
+        }
+      }
     },
     clean(object) {
       let self = this;
@@ -238,8 +276,9 @@ export default {
     },
     SaveDefinition() {
       let value = this.beforeCloseVal;
+      console.log("value", value);
       this.$swal.fire({
-        type: "success",
+        icon: "success",
         toast: true,
         title: "Metadata Updated",
         showConfirmButton: false,
@@ -249,7 +288,7 @@ export default {
         this.item = JSON.parse(value);
       } catch (error) {
         this.$swal.fire({
-          type: "error",
+          icon: "error",
           toast: true,
           title: "Invalid JSON",
           showConfirmButton: false,
@@ -262,18 +301,17 @@ export default {
         position: "center",
         confirmButtonColor: "#5C3069",
         cancelButtonColor: "#006476",
-        animation: false,
         customClass: "scale-in-center",
         html:
-          `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><small><pre>` +
+          `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><pre>` +
           JSON.stringify(this.item, null, 2) +
-          `</pre></small></div>`,
+          `</pre></div>`,
       });
     },
     registerJSONItem() {
       var self = this;
 
-      let schema = self.$store.getters.getSchema;
+      let schema = self.$store.getters.schema;
       self.loading = true;
       let config = {
         headers: {
@@ -386,34 +424,34 @@ export default {
               target="_blank"  rel="nonreferrer">Get help!</a>`;
         });
     },
-    editItem(item) {
+    editItem() {},
+    editItemOLD(item) {
       let self = this;
       this.$swal
         .fire({
           title: "Edit Metadata",
           confirmButtonColor: "#5C3069",
           cancelButtonColor: "#006476",
-          animation: false,
           customClass: "scale-in-center swal-wide",
           html: '<textarea id="editContent"></textarea>',
           showCancelButton: true,
           confirmButtonText: "Save Changes",
-          onOpen: function () {
-            self.editor = CodeMirror.fromTextArea(
-              document.getElementById("editContent"),
-              {
-                mode: "json",
-                // lineNumbers: true,
-                autorefresh: true,
-                lineWrapping: true,
-                spellcheck: true,
-                autofocus: true,
-              }
-            );
-            self.editor.setValue(JSON.stringify(item, null, 2));
-            self.editor.on("change", (editor) => {
-              self.beforeCloseVal = editor.getValue();
-            });
+          didOpen: function () {
+            // self.editor = CodeMirror.fromTextArea(
+            //   document.getElementById("editContent"),
+            //   {
+            //     mode: "json",
+            //     // lineNumbers: true,
+            //     autorefresh: true,
+            //     lineWrapping: true,
+            //     spellcheck: true,
+            //     autofocus: true,
+            //   }
+            // );
+            // self.editor.setValue(JSON.stringify(item, null, 2));
+            // self.editor.on("change", (editor) => {
+            //   self.beforeCloseVal = editor.getValue();
+            // });
           },
           preConfirm: () => {
             self.SaveDefinition();
@@ -425,10 +463,60 @@ export default {
           }
         });
     },
+    closeAndSave() {
+      try {
+        let newVal = JSON.parse(this.editor.state.doc.toString());
+        this.$store.commit("saveEditedItem", {
+          value: newVal,
+          index: this.number,
+        });
+        this.editMode = false;
+      } catch (error) {
+        alert(`Invalid JSON Structure: ${error.toString()}`);
+      }
+    },
+    loadContent() {
+      let self = this;
+      let language = new Compartment(),
+        tabSize = new Compartment();
+
+      let state = EditorState.create({
+        doc: JSON.stringify(this.item, null, 2),
+        extensions: [
+          basicSetup,
+          history(),
+          autocompletion(),
+          language.of(json()),
+          tabSize.of(EditorState.tabSize.of(8)),
+          syntaxHighlighting(defaultHighlightStyle),
+          // watch for changes
+          // EditorView.updateListener.of(function (e) {
+          //     console.log('change', e.state.doc.toString())
+          //     try {
+          //       //valid JSON
+          //       let newVal = JSON.parse(e.state.doc.toString());
+          //       this.editedItem = newVal;
+          //     } catch (error) {
+          //       // not yet valid JSON
+          //     }
+          // })
+        ],
+      });
+
+      setTimeout(() => {
+        // give UI time to render container needed for editor
+        self.editor = new EditorView({
+          state,
+          parent: document.getElementById(self.itemID),
+        });
+      }, 500);
+      // let value = editor.state.doc;
+      // console.log(value);
+    },
   },
   computed: {
     ...mapGetters({
-      startingPoint: "getStartingPoint",
+      startingPoint: "startingPoint",
       validation: "getValidation",
       beginBulkRegistration: "beginBulkRegistration",
     }),
@@ -439,6 +527,18 @@ export default {
         this.register();
       }
     },
+    editMode: function (v) {
+      if (v) {
+        this.loadContent();
+      }
+    },
   },
 };
 </script>
+
+<style>
+#editContent {
+  width: 700px;
+  height: 400px;
+}
+</style>
