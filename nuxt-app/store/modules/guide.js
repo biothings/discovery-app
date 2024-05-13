@@ -847,6 +847,26 @@ export const guide = {
       });
       state.editingID = payload["id"];
     },
+    saveEditedItem(state, payload) {
+      state.bulkJSONItems[payload.index] = payload.value;
+      new Notify({
+        status: "success",
+        title: "Guide",
+        text: "Updated",
+        effect: "fade",
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: "right top",
+      });
+    },
   },
   getters: {
     getBulkReport: (state) => {

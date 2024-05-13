@@ -63,7 +63,7 @@
           </div>
           <div style="height: 700px; overflow: scroll; resize: vertical">
             <table
-              class="m-0 table table-sm table-light table-hover table-striped"
+              class="m-0 table table-sm table-light table-hover table-striped text-dark"
             >
               <thead>
                 <th>
@@ -89,7 +89,7 @@
                 <template v-for="(item, i) in jsonItems">
                   <JSONItem
                     :item="item"
-                    :number="i + 1"
+                    :number="i"
                     :username="userInfo.login"
                   ></JSONItem>
                 </template>
