@@ -43,6 +43,9 @@
           </small>
         </template>
       </details>
+      <small 
+      data-tippy-content="This metadata cannot be registered until all requirements are met"
+      class="badge badge-warning" v-if="missingRequired.length">Attention Required</small>
       <details
         v-if="missingRequired.length && !exists"
         class="text-left text-danger"
@@ -424,45 +427,44 @@ export default {
               target="_blank"  rel="nonreferrer">Get help!</a>`;
         });
     },
-    editItem() {},
-    editItemOLD(item) {
-      let self = this;
-      this.$swal
-        .fire({
-          title: "Edit Metadata",
-          confirmButtonColor: "#5C3069",
-          cancelButtonColor: "#006476",
-          customClass: "scale-in-center swal-wide",
-          html: '<textarea id="editContent"></textarea>',
-          showCancelButton: true,
-          confirmButtonText: "Save Changes",
-          didOpen: function () {
-            // self.editor = CodeMirror.fromTextArea(
-            //   document.getElementById("editContent"),
-            //   {
-            //     mode: "json",
-            //     // lineNumbers: true,
-            //     autorefresh: true,
-            //     lineWrapping: true,
-            //     spellcheck: true,
-            //     autofocus: true,
-            //   }
-            // );
-            // self.editor.setValue(JSON.stringify(item, null, 2));
-            // self.editor.on("change", (editor) => {
-            //   self.beforeCloseVal = editor.getValue();
-            // });
-          },
-          preConfirm: () => {
-            self.SaveDefinition();
-          },
-        })
-        .then((dataChange) => {
-          if (dataChange.value) {
-            self.SaveDefinition();
-          }
-        });
-    },
+    // editItemOLD(item) {
+    //   let self = this;
+    //   this.$swal
+    //     .fire({
+    //       title: "Edit Metadata",
+    //       confirmButtonColor: "#5C3069",
+    //       cancelButtonColor: "#006476",
+    //       customClass: "scale-in-center swal-wide",
+    //       html: '<textarea id="editContent"></textarea>',
+    //       showCancelButton: true,
+    //       confirmButtonText: "Save Changes",
+    //       didOpen: function () {
+    //         // self.editor = CodeMirror.fromTextArea(
+    //         //   document.getElementById("editContent"),
+    //         //   {
+    //         //     mode: "json",
+    //         //     // lineNumbers: true,
+    //         //     autorefresh: true,
+    //         //     lineWrapping: true,
+    //         //     spellcheck: true,
+    //         //     autofocus: true,
+    //         //   }
+    //         // );
+    //         // self.editor.setValue(JSON.stringify(item, null, 2));
+    //         // self.editor.on("change", (editor) => {
+    //         //   self.beforeCloseVal = editor.getValue();
+    //         // });
+    //       },
+    //       preConfirm: () => {
+    //         self.SaveDefinition();
+    //       },
+    //     })
+    //     .then((dataChange) => {
+    //       if (dataChange.value) {
+    //         self.SaveDefinition();
+    //       }
+    //     });
+    // },
     closeAndSave() {
       try {
         let newVal = JSON.parse(this.editor.state.doc.toString());
@@ -520,6 +522,9 @@ export default {
       validation: "getValidation",
       beginBulkRegistration: "beginBulkRegistration",
     }),
+  },
+  mounted: function(){
+    this.checkRequirements(this.item);
   },
   watch: {
     beginBulkRegistration: function (v) {
