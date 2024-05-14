@@ -52,7 +52,6 @@
               Over</small
             >
             <button
-              v-if="!beginBulkRegistration"
               @click.prevent="startBulk()"
               class="btn btn-success text-light m-1"
               aria-label="Bulk Register Metadata"
