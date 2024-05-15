@@ -63,13 +63,41 @@ let menu = ref(false);
               >Schema Playground</nuxt-link
             >
           </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <nuxt-link
               class="nav-link h-link"
               to="/validator"
               data-tippy-content="Validate metadata against a chosen schema"
               >Metadata Validator</nuxt-link
             >
+          </li> -->
+          <li class="nav-item dropdown d-inline">
+            <nuxt-link
+              class="nav-link dropdown-toggle"
+              to="/metadata-playground"
+              id="metaDropdown"
+              role="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Metadata Playground
+            </nuxt-link>
+            <div
+              class="dropdown-menu p-1"
+              aria-labelledby="metaDropdown"
+              style="max-width: none"
+            >
+              <nuxt-link
+                class="dropdown-item mainTextLight text-left"
+                to="/validator"
+                >Metadata Validator <i class="fas fa-chevron-right"></i
+              ></nuxt-link>
+              <nuxt-link
+                class="dropdown-item mainTextDark text-left"
+                to="/markup-generator"
+                >Markup Generator<i class="fas fa-chevron-right"></i
+              ></nuxt-link>
+            </div>
           </li>
           <li class="nav-item dropdown">
             <nuxt-link

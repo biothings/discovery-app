@@ -4,20 +4,17 @@
       <b class="text-info" v-text="number + 1 + ': '"></b>
       <b
         :data-tippy-content="item.name"
-        v-text="item.name?.substring(0, 30) + '...'"
+        v-text="
+          item.name.length > 30
+            ? item.name?.substring(0, 30) + '...'
+            : item.name
+        "
       ></b>
       <font-awesome-icon
         icon="fas fa-magnifying-glass"
         class="ml-1 pointer text-primary"
         data-tippy-content="Inspect Metadata"
-        @click="getPreview()"
-      ></font-awesome-icon>
-      <font-awesome-icon
-        icon="fas fa-pen-square"
-        class="ml-1 pointer"
-        :class="[editMode ? 'text-success' : 'text-primary']"
-        data-tippy-content="Edit Metadata"
-        @click="editMode = !editMode"
+        @click="getPreview(item)"
       ></font-awesome-icon>
     </td>
     <td class="align-middle">
@@ -59,7 +56,7 @@
         <summary
           v-text="'(' + missingRequired.length + ') Missing Required Fields'"
         ></summary>
-        <b v-text="missingRequired.join(', ')"></b>
+        <b v-text="missingRequired.sort().join(', ')"></b>
       </details>
       <details
         v-if="missingFields.length && !exists"
@@ -68,7 +65,7 @@
         <summary
           v-text="'(' + missingFields.length + ') Missing Optional Fields'"
         ></summary>
-        <b class="text-dark" v-text="missingFields.join(', ')"></b>
+        <b class="text-dark" v-text="missingFields.sort().join(', ')"></b>
       </details>
       <details
         v-if="nullValueWarnings.length && !exists"
@@ -83,27 +80,67 @@
         <small v-text="nullValueWarnings.join(', ')"></small>
       </details>
     </td>
-    <td v-if="errMSG" class="align-middle">
-      <button
-        role="button"
-        @click="register()"
-        class="btn btn-sm mainBackLight text-light m-1"
-        title="Try to registered your metadata again with latest changes"
-      >
-        Retry Registration
-      </button>
-    </td>
-    <td v-else>
-      <div v-if="canOverwrite">
+    <td class="align-middle">
+      <div>
         <button
-          role="button"
-          @click="updateJSONItem()"
-          class="btn btn-sm btn-info text-light m-1"
-          title="Update registered metadata with new changes made here"
+          class="btn btn-sm m-1 btn-block"
+          data-tippy-content="Edit Metadata"
+          @click="editMode = !editMode"
+          :class="[editMode ? 'btn-warning' : 'btn-primary']"
         >
-          Update Registration
+          <font-awesome-icon
+            icon="fas fa-pen-square"
+            class="ml-1 pointer"
+          ></font-awesome-icon>
+          Edit Metadata
+        </button>
+        <button
+          class="btn btn-sm m-1 btn-primary btn-block"
+          data-tippy-content="Perform a full validation check locally against the schema in question"
+          @click="validate()"
+        >
+          <font-awesome-icon
+            icon="fas fa-check"
+            class="ml-1 pointer"
+          ></font-awesome-icon>
+          Validate vs Schema
+        </button>
+        <button
+          class="btn btn-sm m-1 btn-primary btn-block"
+          data-tippy-content="Perform a validation check for any issues before registration"
+          @click="validateAPI()"
+        >
+          <font-awesome-icon
+            icon="fas fa-registered"
+            class="ml-1 pointer"
+          ></font-awesome-icon>
+          Validate for Registration
         </button>
       </div>
+      <template v-if="errMSG">
+        <div>
+          <button
+            role="button"
+            @click="register()"
+            class="btn btn-sm btn-block mainBackLight text-light m-1"
+            title="Try to registered your metadata again with latest changes"
+          >
+            Retry Registration
+          </button>
+        </div>
+      </template>
+      <template v-else>
+        <div v-if="canOverwrite">
+          <button
+            role="button"
+            @click="updateJSONItem()"
+            class="btn btn-sm btn-info btn-block text-light m-1"
+            title="Update registered metadata with new changes made here"
+          >
+            Update Registration
+          </button>
+        </div>
+      </template>
     </td>
     <td
       class="align-middle"
@@ -113,13 +150,13 @@
         'badge-info': successMSGUpdate,
       }"
     >
-      <span class="d-block text-light">
+      <span class="d-block text-light text-center">
         <font-awesome-icon
           v-if="loading"
           icon="fas fa-spinner"
           class="fa-pulse mainTextDark"
         ></font-awesome-icon>
-        <small v-if="errMSG">FAILED <i class="fas fa-poo"></i></small>
+        <small v-if="errMSG">FAILED</small>
         <small v-if="successMSG"
           >REGISTERED
           <font-awesome-icon icon="fas fa-registered"></font-awesome-icon
@@ -175,6 +212,8 @@ import {
   syntaxHighlighting,
 } from "@codemirror/language";
 import { history } from "@codemirror/commands";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
 
 export default {
   name: "JSONItem",
@@ -258,6 +297,17 @@ export default {
           self.missingFields.push("(ADDED) @context");
         }
       }
+      const ordered = Object.keys(item)
+        .sort()
+        .reduce((obj, key) => {
+          obj[key] = item[key];
+          return obj;
+        }, {});
+      this.$store.commit("saveEditedItem", {
+        value: ordered,
+        index: this.number,
+        notify: false,
+      });
     },
     clean(object) {
       let self = this;
@@ -305,16 +355,17 @@ export default {
         });
       }
     },
-    getPreview() {
+    getPreview(item) {
       this.$swal.fire({
         position: "center",
-        confirmButtonColor: "#5C3069",
-        cancelButtonColor: "#006476",
+        confirmButtonColor: "#63296b",
+        cancelButtonColor: "#4a7d8f",
         customClass: "scale-in-center",
-        html:
-          `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><pre>` +
-          JSON.stringify(this.item, null, 2) +
-          `</pre></div>`,
+        html: `<div class="text-left p-1 previewBox bg-dark"><pre id="previewJSON"></pre></div>`,
+        didOpen: function () {
+          renderjson.set_show_to_level(5);
+          document.getElementById("previewJSON").appendChild(renderjson(item));
+        },
       });
     },
     registerJSONItem() {
@@ -367,7 +418,7 @@ export default {
           self.errMSG =
             err.response?.data?.error == "Conflict"
               ? "Registration already exists"
-              : err.response?.data?.error;
+              : JSON.stringify(err.response?.data, null, 2);
         });
     },
     updateJSONItem() {
@@ -410,7 +461,7 @@ export default {
           self.errMSG =
             err.response?.data?.error == "Conflict"
               ? "Registration already exists"
-              : err.response?.data?.error;
+              : JSON.stringify(err.response?.data, null, 2);
         });
     },
     // editItemOLD(item) {
@@ -460,6 +511,7 @@ export default {
           this.$store.commit("saveEditedItem", {
             value: newVal,
             index: this.number,
+            notify: true,
           });
           this.editor = null;
           this.editMode = false;
@@ -510,6 +562,52 @@ export default {
       }, 500);
       // let value = editor.state.doc;
       // console.log(value);
+    },
+    validate() {
+      var ajv = new Ajv({ allErrors: true, strict: false });
+      addFormats(ajv);
+      var schema = this.validation;
+      var data = this.item;
+      const isValid = ajv.validate(schema, data);
+      if (!isValid && ajv?.errors) {
+        this.getPreview(ajv.errors);
+      } else {
+        this.getPreview({ result: "ALL GOOD!" });
+      }
+    },
+    validateAPI() {
+      var self = this;
+
+      let schema = self.$store.getters.schema;
+      self.loading = true;
+      let config = {
+        headers: {
+          "content-type": "application/json",
+        },
+      };
+      // ./api/schema/validate/namespace/curie
+      const runtimeConfig = useRuntimeConfig();
+
+      axios
+        .post(
+          runtimeConfig.public.apiUrl +
+            "/api/schema/validate/" +
+            schema["namespace"] +
+            "/" +
+            schema["prefix"] +
+            ":" +
+            schema["label"],
+          self.item,
+          config
+        )
+        .then((res) => {
+          self.loading = false;
+          self.getPreview(res.data);
+        })
+        .catch((err) => {
+          self.loading = false;
+          self.getPreview(err);
+        });
     },
   },
   computed: {
