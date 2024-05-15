@@ -267,22 +267,6 @@ useHead({
         <div
           class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-dark p-5"
         >
-          <div
-            class="text-center p-2 m-1 rounded p-3"
-            v-if="portal.showCoverage"
-          >
-            <CoverageIcon :color="portal?.colors[0]?.hex"></CoverageIcon>
-            <nuxt-link
-              :to="{ path: '/coverage' }"
-              rel="noreferrer"
-              class="nd mt-2 tip text-info rounded"
-              data-tippy-content="Explore and visualize metadata coverage"
-            >
-              <h5>
-                Coverage <font-awesome-icon icon="fas fa-chevron-right" />
-              </h5>
-            </nuxt-link>
-          </div>
           <div class="text-center p-2 m-1 rounded p-3" v-if="portal.site">
             <WebsiteIcon :color="portal?.colors[0]?.hex"></WebsiteIcon>
             <a
@@ -321,6 +305,22 @@ useHead({
               <h5>
                 <span v-text="g.name + 's'"></span>
                 <font-awesome-icon icon="fas fa-chevron-right" />
+              </h5>
+            </nuxt-link>
+          </div>
+          <div
+            class="text-center p-2 m-1 rounded p-3"
+            v-if="portal.showCoverage"
+          >
+            <CoverageIcon :color="portal?.colors[0]?.hex"></CoverageIcon>
+            <nuxt-link
+              :to="{ path: '/coverage' }"
+              rel="noreferrer"
+              class="nd mt-2 tip text-info rounded"
+              data-tippy-content="Explore and visualize metadata coverage"
+            >
+              <h5>
+                Coverage <font-awesome-icon icon="fas fa-chevron-right" />
               </h5>
             </nuxt-link>
           </div>
