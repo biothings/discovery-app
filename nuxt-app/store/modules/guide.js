@@ -25,7 +25,7 @@ export const guide = {
     },
     output_default: {},
     editingID: false,
-    beginBulkRegistration: false,
+    beginBulkRegistration: 1,
     bulkReport: {
       Exists: [],
       Registered: [],
@@ -58,7 +58,7 @@ export const guide = {
       };
     },
     toggleBeginBulkRegistration(state) {
-      state.beginBulkRegistration = !state.beginBulkRegistration;
+      state.beginBulkRegistration += 1;
     },
     toggleDesc(state) {
       state.showDescriptions = !state.showDescriptions;

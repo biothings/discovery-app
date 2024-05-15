@@ -2,7 +2,10 @@
   <tr>
     <td class="text-dark">
       <b class="text-info" v-text="number + 1 + ': '"></b>
-      <small v-text="item.name"></small>
+      <b
+        :data-tippy-content="item.name"
+        v-text="item.name?.substring(0, 30) + '...'"
+      ></b>
       <font-awesome-icon
         icon="fas fa-magnifying-glass"
         class="ml-1 pointer text-primary"
@@ -43,9 +46,12 @@
           </small>
         </template>
       </details>
-      <small 
-      data-tippy-content="This metadata cannot be registered until all requirements are met"
-      class="badge badge-warning" v-if="missingRequired.length">Attention Required</small>
+      <small
+        data-tippy-content="This metadata cannot be registered until all requirements are met"
+        class="badge badge-warning"
+        v-if="missingRequired.length"
+        >Attention Required</small
+      >
       <details
         v-if="missingRequired.length && !exists"
         class="text-left text-danger"
@@ -53,16 +59,16 @@
         <summary
           v-text="'(' + missingRequired.length + ') Missing Required Fields'"
         ></summary>
-        <small v-text="missingRequired.join(', ')"></small>
+        <b v-text="missingRequired.join(', ')"></b>
       </details>
       <details
         v-if="missingFields.length && !exists"
-        class="text-left text-info"
+        class="text-left text-primary"
       >
         <summary
           v-text="'(' + missingFields.length + ') Missing Optional Fields'"
         ></summary>
-        <small v-text="missingFields.join(', ')"></small>
+        <b class="text-dark" v-text="missingFields.join(', ')"></b>
       </details>
       <details
         v-if="nullValueWarnings.length && !exists"
@@ -202,7 +208,7 @@ export default {
         axios
           .get(
             runtimeConfig.public.apiUrl +
-              `/api/dataset/query?q=(identifier:"${id}")`
+              `/api/dataset/query?q=(identifier:("${id}"))`
           )
           .then((res) => {
             if (res.data.total == 1) {
@@ -358,20 +364,10 @@ export default {
             field: "Failed",
             value: self.item.identifier,
           });
-          self.errMSG = `<ul class='text-danger mb-0 text-left'>
-            <li>Reason: <b>${err.response.data.reason || "N/A"}</b></li>
-            <li>Required: ${
-              err.response.data.validator ? "🟢 Yes" : "🔴 No"
-            }</li>
-            <li>Failing at field: <b>${err.response.data.path || "N/A"}</b></li>
-            <li>Additional Details: <b>${
-              (err.response.data.parent && err.response.data.parent.reason) ||
-              "N/A"
-            }</b></li>
-            </ul>`;
-          self.help = `<a class="btn btn-sm alert-danger"
-              href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&template=bulk-registration-issue.md&title=Issue+registering+some+metadata"
-              target="_blank"  rel="nonreferrer"> Get help!</a>`;
+          self.errMSG =
+            err.response?.data?.error == "Conflict"
+              ? "Registration already exists"
+              : err.response?.data?.error;
         });
     },
     updateJSONItem() {
@@ -411,20 +407,10 @@ export default {
             field: "Failed",
             value: self.exists,
           });
-          self.errMSG = `<ul class='text-danger mb-0 text-left'>
-            <li>Reason: <b>${err.response.data.reason || "N/A"}</b></li>
-            <li>Required: ${
-              err.response.data.validator ? "🟢 Yes" : "🔴 No"
-            }</li>
-            <li>Failing at field: <b>${err.response.data.path || "N/A"}</b></li>
-            <li>Additional Details: <b>${
-              (err.response.data.parent && err.response.data.parent.reason) ||
-              "N/A"
-            }</b></li>
-            </ul>`;
-          self.help = `<a class="btn btn-sm alert-danger"
-              href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&template=bulk-registration-issue.md&title=Issue+registering+some+metadata"
-              target="_blank"  rel="nonreferrer">Get help!</a>`;
+          self.errMSG =
+            err.response?.data?.error == "Conflict"
+              ? "Registration already exists"
+              : err.response?.data?.error;
         });
     },
     // editItemOLD(item) {
@@ -466,15 +452,25 @@ export default {
     //     });
     // },
     closeAndSave() {
+      let self = this;
       try {
-        let newVal = JSON.parse(this.editor.state.doc.toString());
-        this.$store.commit("saveEditedItem", {
-          value: newVal,
-          index: this.number,
-        });
-        this.editMode = false;
+        let editorData = this.editor.state.doc.toString();
+        if (editorData) {
+          let newVal = JSON.parse(editorData);
+          this.$store.commit("saveEditedItem", {
+            value: newVal,
+            index: this.number,
+          });
+          this.editor = null;
+          this.editMode = false;
+          setTimeout(() => {
+            self.checkRequirements(self.item);
+          }, 1000);
+        } else {
+          console.log("No editor data", editorData);
+        }
       } catch (error) {
-        alert(`Invalid JSON Structure: ${error.toString()}`);
+        console.log("INVALID JSON", error.toString());
       }
     },
     loadContent() {
@@ -523,14 +519,12 @@ export default {
       beginBulkRegistration: "beginBulkRegistration",
     }),
   },
-  mounted: function(){
+  mounted: function () {
     this.checkRequirements(this.item);
   },
   watch: {
-    beginBulkRegistration: function (v) {
-      if (v) {
-        this.register();
-      }
+    beginBulkRegistration: function () {
+      this.register();
     },
     editMode: function (v) {
       if (v) {
