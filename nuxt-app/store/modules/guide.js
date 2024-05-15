@@ -25,7 +25,7 @@ export const guide = {
     },
     output_default: {},
     editingID: false,
-    beginBulkRegistration: false,
+    beginBulkRegistration: 1,
     bulkReport: {
       Exists: [],
       Registered: [],
@@ -58,7 +58,7 @@ export const guide = {
       };
     },
     toggleBeginBulkRegistration(state) {
-      state.beginBulkRegistration = !state.beginBulkRegistration;
+      state.beginBulkRegistration += 1;
     },
     toggleDesc(state) {
       state.showDescriptions = !state.showDescriptions;
@@ -846,6 +846,26 @@ export const guide = {
         position: "right top",
       });
       state.editingID = payload["id"];
+    },
+    saveEditedItem(state, payload) {
+      state.bulkJSONItems[payload.index] = payload.value;
+      new Notify({
+        status: "success",
+        title: "Guide",
+        text: "Updated",
+        effect: "fade",
+        speed: 300,
+        customClass: null,
+        customIcon: null,
+        showIcon: true,
+        showCloseButton: true,
+        autoclose: true,
+        autotimeout: 2000,
+        gap: 20,
+        distance: 20,
+        type: 1,
+        position: "right top",
+      });
     },
   },
   getters: {

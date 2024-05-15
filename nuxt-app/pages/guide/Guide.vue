@@ -23,10 +23,10 @@
         <!-- BULK -->
         <div v-if="jsonItems.length" class="alert grad">
           <div class="p-1 d-flex justify-content-around align-items-center">
-            <small
+            <b
               class="text-light"
-              v-text="jsonItems.length + ' documents found'"
-            ></small>
+              v-text="jsonItems.length + ' items found'"
+            ></b>
             <div class="alert p-1 m-1 d-flex">
               <span
                 v-for="(value, field) in bulkReport"
@@ -52,7 +52,6 @@
               Over</small
             >
             <button
-              v-if="!beginBulkRegistration"
               @click.prevent="startBulk()"
               class="btn btn-success text-light m-1"
               aria-label="Bulk Register Metadata"
@@ -61,23 +60,18 @@
               Register Metadata
             </button>
           </div>
-          <div style="height: 700px; overflow: scroll; resize: vertical">
+          <div
+            style="height: 700px; overflow: scroll; resize: vertical"
+            class="bg-light"
+          >
             <table
-              class="m-0 table table-sm table-light table-hover table-striped"
+              class="m-0 table table-sm table-light table-hover table-striped text-dark"
             >
               <thead>
-                <th>
-                  <small>Name</small>
-                </th>
-                <th>
-                  <small>Result/Details</small>
-                </th>
-                <th>
-                  <small>Options</small>
-                </th>
-                <th>
-                  <small>Status</small>
-                </th>
+                <th>Name</th>
+                <th>Result/Details</th>
+                <th>Options</th>
+                <th>Status</th>
               </thead>
               <colgroup>
                 <col span="1" style="width: 30%" />
@@ -89,7 +83,7 @@
                 <template v-for="(item, i) in jsonItems">
                   <JSONItem
                     :item="item"
-                    :number="i + 1"
+                    :number="i"
                     :username="userInfo.login"
                   ></JSONItem>
                 </template>
