@@ -1,11 +1,24 @@
 <template>
   <tr>
-    <td>
-      <b class="text-info" v-text="number + ': '"></b>
-      <small v-text="item.name"></small>
-      <small class="ml-1 pointer text-primary" @click="getPreview()"
-        >Inspect Metadata</small
-      >
+    <td class="text-dark">
+      <b class="text-info" v-text="number + 1 + ': '"></b>
+      <b
+        :data-tippy-content="item.name"
+        v-text="item.name?.substring(0, 30) + '...'"
+      ></b>
+      <font-awesome-icon
+        icon="fas fa-magnifying-glass"
+        class="ml-1 pointer text-primary"
+        data-tippy-content="Inspect Metadata"
+        @click="getPreview()"
+      ></font-awesome-icon>
+      <font-awesome-icon
+        icon="fas fa-pen-square"
+        class="ml-1 pointer"
+        :class="[editMode ? 'text-success' : 'text-primary']"
+        data-tippy-content="Edit Metadata"
+        @click="editMode = !editMode"
+      ></font-awesome-icon>
     </td>
     <td class="align-middle">
       <small v-if="loading" class="text-muted">Please wait...</small>
@@ -33,6 +46,12 @@
           </small>
         </template>
       </details>
+      <small
+        data-tippy-content="This metadata cannot be registered until all requirements are met"
+        class="badge badge-warning"
+        v-if="missingRequired.length"
+        >Attention Required</small
+      >
       <details
         v-if="missingRequired.length && !exists"
         class="text-left text-danger"
@@ -40,16 +59,16 @@
         <summary
           v-text="'(' + missingRequired.length + ') Missing Required Fields'"
         ></summary>
-        <small v-text="missingRequired.join(', ')"></small>
+        <b v-text="missingRequired.join(', ')"></b>
       </details>
       <details
         v-if="missingFields.length && !exists"
-        class="text-left text-info"
+        class="text-left text-primary"
       >
         <summary
           v-text="'(' + missingFields.length + ') Missing Optional Fields'"
         ></summary>
-        <small v-text="missingFields.join(', ')"></small>
+        <b class="text-dark" v-text="missingFields.join(', ')"></b>
       </details>
       <details
         v-if="nullValueWarnings.length && !exists"
@@ -67,15 +86,9 @@
     <td v-if="errMSG" class="align-middle">
       <button
         role="button"
-        @click="editItem(item)"
-        class="btn btn-sm mainBackDark text-light m-1"
-      >
-        Edit Metadata
-      </button>
-      <button
-        role="button"
         @click="register()"
         class="btn btn-sm mainBackLight text-light m-1"
+        title="Try to registered your metadata again with latest changes"
       >
         Retry Registration
       </button>
@@ -84,15 +97,9 @@
       <div v-if="canOverwrite">
         <button
           role="button"
-          @click="editItem(item)"
-          class="btn btn-sm mainBackDark text-light m-1"
-        >
-          Edit Metadata
-        </button>
-        <button
-          role="button"
           @click="updateJSONItem()"
           class="btn btn-sm btn-info text-light m-1"
+          title="Update registered metadata with new changes made here"
         >
           Update Registration
         </button>
@@ -135,11 +142,39 @@
       </span>
     </td>
   </tr>
+  <tr v-if="editMode">
+    <td colspan="4" class="m-0 alert alert-secondary">
+      <button
+        type="button"
+        @click="closeAndSave()"
+        class="btn btn-success btn-sm m-1"
+      >
+        Save & Close
+      </button>
+      <div :id="itemID" style="width: 800px"></div>
+      <button
+        type="button"
+        @click="closeAndSave()"
+        class="btn btn-success btn-sm m-1"
+      >
+        Save & Close
+      </button>
+    </td>
+  </tr>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
 import axios from "axios";
+import { basicSetup, EditorView } from "codemirror";
+import { EditorState, Compartment } from "@codemirror/state";
+import { json } from "@codemirror/lang-json";
+import { autocompletion } from "@codemirror/autocomplete";
+import {
+  defaultHighlightStyle,
+  syntaxHighlighting,
+} from "@codemirror/language";
+import { history } from "@codemirror/commands";
 
 export default {
   name: "JSONItem",
@@ -157,6 +192,10 @@ export default {
       exists: null,
       canOverwrite: false,
       help: false,
+      editMode: false,
+      editor: null,
+      itemID: Math.floor(Math.random() * 90000) + 10000,
+      editedItem: {},
     };
   },
   props: ["item", "number", "username"],
@@ -169,7 +208,7 @@ export default {
         axios
           .get(
             runtimeConfig.public.apiUrl +
-              `/api/dataset/query?q=(identifier:"${id}")`
+              `/api/dataset/query?q=(identifier:("${id}"))`
           )
           .then((res) => {
             if (res.data.total == 1) {
@@ -211,6 +250,14 @@ export default {
           self.missingFields.push(field);
         }
       });
+      //add @context if missing from original file
+      if (!item?.["@context"]) {
+        let schemaContext = this.$store.getters.getOutput?.["@context"];
+        if (schemaContext) {
+          this.item["@context"] = schemaContext;
+          self.missingFields.push("(ADDED) @context");
+        }
+      }
     },
     clean(object) {
       let self = this;
@@ -238,8 +285,9 @@ export default {
     },
     SaveDefinition() {
       let value = this.beforeCloseVal;
+      console.log("value", value);
       this.$swal.fire({
-        type: "success",
+        icon: "success",
         toast: true,
         title: "Metadata Updated",
         showConfirmButton: false,
@@ -249,7 +297,7 @@ export default {
         this.item = JSON.parse(value);
       } catch (error) {
         this.$swal.fire({
-          type: "error",
+          icon: "error",
           toast: true,
           title: "Invalid JSON",
           showConfirmButton: false,
@@ -262,18 +310,17 @@ export default {
         position: "center",
         confirmButtonColor: "#5C3069",
         cancelButtonColor: "#006476",
-        animation: false,
         customClass: "scale-in-center",
         html:
-          `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><small><pre>` +
+          `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox"><pre>` +
           JSON.stringify(this.item, null, 2) +
-          `</pre></small></div>`,
+          `</pre></div>`,
       });
     },
     registerJSONItem() {
       var self = this;
 
-      let schema = self.$store.getters.getSchema;
+      let schema = self.$store.getters.schema;
       self.loading = true;
       let config = {
         headers: {
@@ -317,20 +364,10 @@ export default {
             field: "Failed",
             value: self.item.identifier,
           });
-          self.errMSG = `<ul class='text-danger mb-0 text-left'>
-            <li>Reason: <b>${err.response.data.reason || "N/A"}</b></li>
-            <li>Required: ${
-              err.response.data.validator ? "🟢 Yes" : "🔴 No"
-            }</li>
-            <li>Failing at field: <b>${err.response.data.path || "N/A"}</b></li>
-            <li>Additional Details: <b>${
-              (err.response.data.parent && err.response.data.parent.reason) ||
-              "N/A"
-            }</b></li>
-            </ul>`;
-          self.help = `<a class="btn btn-sm alert-danger"
-              href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&template=bulk-registration-issue.md&title=Issue+registering+some+metadata"
-              target="_blank"  rel="nonreferrer"> Get help!</a>`;
+          self.errMSG =
+            err.response?.data?.error == "Conflict"
+              ? "Registration already exists"
+              : err.response?.data?.error;
         });
     },
     updateJSONItem() {
@@ -370,75 +407,137 @@ export default {
             field: "Failed",
             value: self.exists,
           });
-          self.errMSG = `<ul class='text-danger mb-0 text-left'>
-            <li>Reason: <b>${err.response.data.reason || "N/A"}</b></li>
-            <li>Required: ${
-              err.response.data.validator ? "🟢 Yes" : "🔴 No"
-            }</li>
-            <li>Failing at field: <b>${err.response.data.path || "N/A"}</b></li>
-            <li>Additional Details: <b>${
-              (err.response.data.parent && err.response.data.parent.reason) ||
-              "N/A"
-            }</b></li>
-            </ul>`;
-          self.help = `<a class="btn btn-sm alert-danger"
-              href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&template=bulk-registration-issue.md&title=Issue+registering+some+metadata"
-              target="_blank"  rel="nonreferrer">Get help!</a>`;
+          self.errMSG =
+            err.response?.data?.error == "Conflict"
+              ? "Registration already exists"
+              : err.response?.data?.error;
         });
     },
-    editItem(item) {
+    // editItemOLD(item) {
+    //   let self = this;
+    //   this.$swal
+    //     .fire({
+    //       title: "Edit Metadata",
+    //       confirmButtonColor: "#5C3069",
+    //       cancelButtonColor: "#006476",
+    //       customClass: "scale-in-center swal-wide",
+    //       html: '<textarea id="editContent"></textarea>',
+    //       showCancelButton: true,
+    //       confirmButtonText: "Save Changes",
+    //       didOpen: function () {
+    //         // self.editor = CodeMirror.fromTextArea(
+    //         //   document.getElementById("editContent"),
+    //         //   {
+    //         //     mode: "json",
+    //         //     // lineNumbers: true,
+    //         //     autorefresh: true,
+    //         //     lineWrapping: true,
+    //         //     spellcheck: true,
+    //         //     autofocus: true,
+    //         //   }
+    //         // );
+    //         // self.editor.setValue(JSON.stringify(item, null, 2));
+    //         // self.editor.on("change", (editor) => {
+    //         //   self.beforeCloseVal = editor.getValue();
+    //         // });
+    //       },
+    //       preConfirm: () => {
+    //         self.SaveDefinition();
+    //       },
+    //     })
+    //     .then((dataChange) => {
+    //       if (dataChange.value) {
+    //         self.SaveDefinition();
+    //       }
+    //     });
+    // },
+    closeAndSave() {
       let self = this;
-      this.$swal
-        .fire({
-          title: "Edit Metadata",
-          confirmButtonColor: "#5C3069",
-          cancelButtonColor: "#006476",
-          animation: false,
-          customClass: "scale-in-center swal-wide",
-          html: '<textarea id="editContent"></textarea>',
-          showCancelButton: true,
-          confirmButtonText: "Save Changes",
-          onOpen: function () {
-            self.editor = CodeMirror.fromTextArea(
-              document.getElementById("editContent"),
-              {
-                mode: "json",
-                // lineNumbers: true,
-                autorefresh: true,
-                lineWrapping: true,
-                spellcheck: true,
-                autofocus: true,
-              }
-            );
-            self.editor.setValue(JSON.stringify(item, null, 2));
-            self.editor.on("change", (editor) => {
-              self.beforeCloseVal = editor.getValue();
-            });
-          },
-          preConfirm: () => {
-            self.SaveDefinition();
-          },
-        })
-        .then((dataChange) => {
-          if (dataChange.value) {
-            self.SaveDefinition();
-          }
+      try {
+        let editorData = this.editor.state.doc.toString();
+        if (editorData) {
+          let newVal = JSON.parse(editorData);
+          this.$store.commit("saveEditedItem", {
+            value: newVal,
+            index: this.number,
+          });
+          this.editor = null;
+          this.editMode = false;
+          setTimeout(() => {
+            self.checkRequirements(self.item);
+          }, 1000);
+        } else {
+          console.log("No editor data", editorData);
+        }
+      } catch (error) {
+        console.log("INVALID JSON", error.toString());
+      }
+    },
+    loadContent() {
+      let self = this;
+      let language = new Compartment(),
+        tabSize = new Compartment();
+
+      let state = EditorState.create({
+        doc: JSON.stringify(this.item, null, 2),
+        extensions: [
+          basicSetup,
+          history(),
+          autocompletion(),
+          language.of(json()),
+          tabSize.of(EditorState.tabSize.of(8)),
+          syntaxHighlighting(defaultHighlightStyle),
+          // watch for changes
+          // EditorView.updateListener.of(function (e) {
+          //     console.log('change', e.state.doc.toString())
+          //     try {
+          //       //valid JSON
+          //       let newVal = JSON.parse(e.state.doc.toString());
+          //       this.editedItem = newVal;
+          //     } catch (error) {
+          //       // not yet valid JSON
+          //     }
+          // })
+        ],
+      });
+
+      setTimeout(() => {
+        // give UI time to render container needed for editor
+        self.editor = new EditorView({
+          state,
+          parent: document.getElementById(self.itemID),
         });
+      }, 500);
+      // let value = editor.state.doc;
+      // console.log(value);
     },
   },
   computed: {
     ...mapGetters({
-      startingPoint: "getStartingPoint",
+      startingPoint: "startingPoint",
       validation: "getValidation",
       beginBulkRegistration: "beginBulkRegistration",
     }),
   },
+  mounted: function () {
+    this.checkRequirements(this.item);
+  },
   watch: {
-    beginBulkRegistration: function (v) {
+    beginBulkRegistration: function () {
+      this.register();
+    },
+    editMode: function (v) {
       if (v) {
-        this.register();
+        this.loadContent();
       }
     },
   },
 };
 </script>
+
+<style>
+#editContent {
+  width: 700px;
+  height: 400px;
+}
+</style>
