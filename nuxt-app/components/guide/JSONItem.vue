@@ -107,14 +107,14 @@
         </button>
         <button
           class="btn btn-sm m-1 btn-primary btn-block"
-          data-tippy-content="Perform a validation check for any issues before registration"
+          data-tippy-content="Test validity for registration without registering this metadata"
           @click="validateAPI()"
         >
           <font-awesome-icon
             icon="fas fa-registered"
             class="ml-1 pointer"
           ></font-awesome-icon>
-          Validate for Registration
+          Dry Run Registration
         </button>
       </div>
       <template v-if="errMSG">
