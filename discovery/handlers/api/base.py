@@ -9,7 +9,6 @@ from tornado.httpclient import AsyncHTTPClient
 from tornado.ioloop import IOLoop
 from tornado.web import Finish, HTTPError
 
-from discovery.notify import N3CChannel
 from discovery.registry import ConflictError, DatasetValidationError, NoEntityError, RegistryError
 
 from ..base import DiscoveryBaseHandler
@@ -45,13 +44,6 @@ def registryOperation(func):
             raise HTTPError(400, reason=str(err))
 
     return _  # decorator
-
-
-def log_response(http_response):
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    logging.info("### http_response")
-    logger.info(http_response)
 
 
 class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
@@ -91,63 +83,12 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                     self.current_user = user.get("email") or user["login"]
 
     def report(self, action, **details):
-        print("### report")
         if self.notifier:
-            print("### report: if self.notifier")
             notifier = self.notifier(self.biothings.config)
             requests = getattr(notifier, action)(**details)
-            print("### requests")
-            print(requests)
             if not isinstance(requests, list):
                 requests = [requests]
-            # IOLoop.current().add_callback(partial(self._report, requests))
-            # asyncio.run_coroutine_threadsafe(notifier.broadcast(self.event), asyncio.get_event_loop())
             IOLoop.current().add_callback(partial(self.broadcast, requests))
 
-
     async def broadcast(self, events):
-        print("### broadcast")
-        responses = await asyncio.gather(*events, return_exceptions=True)
-        print("### responses from broadcast asyncio.gather()")
-        print(responses)
-        for response in responses:
-            if isinstance(response, Exception):
-                log_response(response)
-            else:
-                log_response(response)
-        # for channel in self.channels:
-        #     print("### broadcast - for channel in self.channels:")
-        #     if await channel.handles(event):
-        #         print("### broadcast - if await channel.handles(event):")
-        #         await channel.send(event)
-
-        # for request in event:
-        #     if not request:
-        #         print("### It is NOT N3CChannel")
-        #         continue
-        #     if isinstance(
-        #         request, (N3CChannel.N3CPreflightRequest, N3CChannel.N3CHTTPRequest)
-        #     ):
-        #         print("### It is N3CChannel")
-
-    # async def _report(self, requests):
-
-    #     # do not run in debug mode
-    #     client = AsyncHTTPClient()
-    #     if not self.settings.get("debug"):
-
-    #         for request in requests:
-    #             if not request:
-    #                 continue
-    #             if isinstance(
-    #                 request, (N3CChannel.N3CPreflightRequest, N3CChannel.N3CHTTPRequest)
-    #             ):
-    #                 response = await client.fetch(request, raise_error=False)
-    #                 # this func will call requests.__next__ so it should be received empty yield result
-    #                 # to make sure the next request will be return on for loop
-    #                 requests.send(response)
-    #                 log_response(response)
-
-    #             else:  # standard tornado HTTP requests
-    #                 response = await client.fetch(request, raise_error=False)
-    #                 log_response(response)
+        await asyncio.gather(*events, return_exceptions=True)
