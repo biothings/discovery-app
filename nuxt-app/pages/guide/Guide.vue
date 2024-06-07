@@ -504,6 +504,7 @@ import Papa from "papaparse";
 import { mapGetters } from "vuex";
 import Notify from "simple-notify";
 import moment from "moment";
+import dde_logo from "@/assets/img/dde-logo-o.svg";
 
 import popSound from "@/assets/img/pop.wav";
 import metaPic from "@/assets/img/metadata.png";
@@ -690,7 +691,7 @@ export default {
             } else {
               try {
                 self.$swal.fire({
-                  type: "error",
+                  icon: "error",
                   position: "top center",
                   confirmButtonColor: "#5C3069",
                   cancelButtonColor: "#006476",
@@ -737,7 +738,7 @@ export default {
                 "</small></div>";
             }
             self.$swal.fire({
-              type: "error",
+              icon: "error",
               position: "top center",
               title: "Saving edits failed because: ",
               confirmButtonColor: "#5C3069",
@@ -852,7 +853,7 @@ export default {
           self.$store.commit("setLoading", { value: false });
           try {
             self.$swal.fire({
-              type: "error",
+              icon: "error",
               position: "center",
               title: "Failed because: ",
               text: err,
@@ -1226,7 +1227,7 @@ export default {
       var self = this;
       self.bulkMode = !self.bulkMode;
       if (self.bulkMode) {
-        self.getFile("json");
+        self.importBulk();
       }
     },
     async getFile(type) {
@@ -1840,6 +1841,120 @@ export default {
           timer: 2000,
         });
       }
+    },
+    getRawGithubLink(value){
+      if (value.includes("blob") || value.includes("github.com")) {
+        let suggestedURL = value
+          .replace("blob/", "")
+          .replace("github.com", "raw.githubusercontent.com")
+          .replace("www.github.com", "raw.githubusercontent.com");
+        new Notify({
+          status: "info",
+          title: "Link Updated",
+          text: "GitHub link changed to raw data link",
+          effect: "fade",
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 3000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: "right top",
+        });
+        return suggestedURL;
+      }else{
+        return value;
+      }
+    },
+    importBulk() {
+      var self = this;
+      self.$swal
+        .fire({
+          title: "Import Metadata",
+          text: "Select method",
+          input: "select",
+          inputOptions: {
+            giturl: "Hosted metadata on GitHub (raw url)",
+            localFile:
+              "Open a file from your computer",
+          },
+          inputPlaceholder: "Choose one",
+          showCancelButton: true,
+          confirmButtonColor: "#5C3069",
+          cancelButtonColor: "#006476",
+          customClass: "scale-in-center",
+          confirmButtonText: "Next",
+          showLoaderOnConfirm: true,
+          preConfirm: (method) => {
+            return method;
+          },
+          allowOutsideClick: () => !self.$swal.isLoading(),
+          backdrop: true,
+        })
+        .then((result) => {
+          if (result.value) {
+            switch (result.value) {
+              case "giturl":
+                // URL
+                self.$swal
+                  .fire({
+                    title: "Enter the URL here",
+                    input: "text",
+                    inputAttributes: {
+                      autocapitalize: "off",
+                    },
+                    confirmButtonColor: "#5C3069",
+                    cancelButtonColor: "#006476",
+
+                    customClass: "scale-in-center",
+                    showCancelButton: true,
+                    confirmButtonText: "Go",
+                    allowOutsideClick: () => !self.$swal.isLoading(),
+                    backdrop: true,
+                  })
+                  .then((result) => {
+                    if (result.value) {
+                      let url = self.getRawGithubLink(result.value);
+                      axios
+                        .get(url)
+                        .then((res) => {
+                          var payload = {};
+                          let json = res.data;
+                          if (json.length < 101) {
+                            payload["items"] = json;
+                            self.$store.commit("saveBulkItems", payload);
+                          } else {
+                            self.$swal.fire({
+                              icon: "error",
+                              title: "Over Limit",
+                              text:
+                                json.length + " items. Please submit 100 items at a time.",
+                            });
+                          }
+                        })
+                        .catch((err) => {
+                          self.$swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Something went wrong!",
+                          });
+                          throw err;
+                        });
+                    }
+                  });
+                break;
+              case "localFile":
+                self.getFile("json");
+                break;
+              default:
+                return false;
+            }
+          }
+        });
     },
   },
   mounted: function () {
