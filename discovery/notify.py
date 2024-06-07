@@ -252,7 +252,13 @@ class DatasetNotifier(Notifier):
             profile.issuetype_id = "10024"
             profile.assignee_id = "62604faab8be7c006a454e08"  # sruthi
             profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"  # cwu
-            profile.label = "DATASET"            
+            profile.label = "DATASET"
+            # profile = SimpleNamespace()
+            # profile.project_id = "10000"  # External Dataset project
+            # profile.issuetype_id = "10001"
+            # profile.assignee_id = "557058:b0b8ce60-730d-41a6-a84f-71870ee7cdf3"  # sruthi
+            # profile.reporter_id = "557058:b0b8ce60-730d-41a6-a84f-71870ee7cdf3"
+            # profile.label = "DATASET"
             self.channels.append(
                 N3CChannel(
                     getattr(settings, "N3C_URI"),
