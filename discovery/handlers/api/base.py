@@ -51,12 +51,7 @@ def log_response(http_response):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
     logging.info("### http_response")
-    logging.info(http_response)
-    print(http_response)
     logger.info(http_response)
-    # logger.info(http_response.request.url)
-    # logger.info(http_response.code)
-    # logger.info(http_response.body)
 
 
 class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
@@ -113,7 +108,8 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
     async def broadcast(self, events):
         print("### broadcast")
         responses = await asyncio.gather(*events, return_exceptions=True)
-        print("### broadcast asyncio.gather()")
+        print("### responses from broadcast asyncio.gather()")
+        print(responses)
         for response in responses:
             if isinstance(response, Exception):
                 log_response(response)
@@ -134,24 +130,24 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
         #     ):
         #         print("### It is N3CChannel")
 
-    async def _report(self, requests):
+    # async def _report(self, requests):
 
-        # do not run in debug mode
-        client = AsyncHTTPClient()
-        if not self.settings.get("debug"):
+    #     # do not run in debug mode
+    #     client = AsyncHTTPClient()
+    #     if not self.settings.get("debug"):
 
-            for request in requests:
-                if not request:
-                    continue
-                if isinstance(
-                    request, (N3CChannel.N3CPreflightRequest, N3CChannel.N3CHTTPRequest)
-                ):
-                    response = await client.fetch(request, raise_error=False)
-                    # this func will call requests.__next__ so it should be received empty yield result
-                    # to make sure the next request will be return on for loop
-                    requests.send(response)
-                    log_response(response)
+    #         for request in requests:
+    #             if not request:
+    #                 continue
+    #             if isinstance(
+    #                 request, (N3CChannel.N3CPreflightRequest, N3CChannel.N3CHTTPRequest)
+    #             ):
+    #                 response = await client.fetch(request, raise_error=False)
+    #                 # this func will call requests.__next__ so it should be received empty yield result
+    #                 # to make sure the next request will be return on for loop
+    #                 requests.send(response)
+    #                 log_response(response)
 
-                else:  # standard tornado HTTP requests
-                    response = await client.fetch(request, raise_error=False)
-                    log_response(response)
+    #             else:  # standard tornado HTTP requests
+    #                 response = await client.fetch(request, raise_error=False)
+    #                 log_response(response)

@@ -28,8 +28,9 @@ class N3CChannel(Channel):
     class N3CHTTPRequest(HTTPRequest):
         pass
 
-    def __init__(self, user, password, profile):
+    def __init__(self, uri, user, password, profile):
         logging.info("### __init__")
+        self.uri = uri
         self.user = user
         self.password = password
         self.profile = profile  # project related info
@@ -41,40 +42,31 @@ class N3CChannel(Channel):
     async def send(self, event):
         logging.info("### send")
         print("### send")
-        # url = "https://n3c-help.atlassian.net/rest/api/3/issue",
-        url = "https://everaldorodrigo.atlassian.net/rest/api/3/issue"
+        urn = "/rest/api/3/issue"
+        url = "%s%s" % (self.uri, urn)
         headers = {"Content-Type": "application/json"}
         auth = aiohttp.BasicAuth(self.user, self.password)
-        # print(auth)
-        # print(self.user)
-        # print(self.password)
         payload = json.dumps(event.to_jira_payload(self.profile))
-        # print("### payload")
-        # print(payload)
         async with aiohttp.ClientSession() as session:
             async with session.post(
                     url=url,
                     headers=headers,
                     auth=auth,
                     data=payload,
-                    # ssl=certifi.where()
             ) as response:
                 response_status = response.status
                 response_text = await response.text()
+
+                logger = logging.getLogger(__name__)
+                logger.setLevel(logging.INFO)
+                logging.info("### http_response send")
+                logger.info("[send] HTTP response status code: %d - %s" % (response_status, response_text))
+
                 return response_status, response_text
-                # print("### JIRA send response")
-                # print("### response.status")
-                # print(response.status)
-                # print("### response.text")
-                # print(response.text)
-                # response_text = await response.text()
-                # logging.info("### JIRA: %s", response_text)
-                # return response_text
 
     async def sends_query(self, user):
-        logging.info("### sends_request")
-        # url = "https://n3c-help.atlassian.net/rest/api/3/user/search?query=" + user
-        url = "https://everaldorodrigo.atlassian.net/rest/api/3/user/search?query=" + user
+        urn = "/rest/api/3/user/search?query=%s" % (user)
+        url = "%s%s" % (self.uri, urn)
         auth = aiohttp.BasicAuth(self.user, self.password)
         print("### auth")
         print(auth)
@@ -86,6 +78,12 @@ class N3CChannel(Channel):
             ) as response:
                 response_status = response.status
                 response_text = await response.text()
+
+                logger = logging.getLogger(__name__)
+                logger.setLevel(logging.INFO)
+                logging.info("### http_response sends_query")
+                logger.info("[sends_query] HTTP response status code: %d" % (response_status))
+
                 return response_status, response_text
 
         # Response
@@ -102,8 +100,8 @@ class N3CChannel(Channel):
         # API Usage
         # https://developer.atlassian.com/cloud/jira/service-desk/rest/api-group-customer/
 
-        # url = "https://n3c-help.atlassian.net/rest/servicedeskapi/customer"
-        url = "https://everaldorodrigo.atlassian.net/rest/servicedeskapi/customer"
+        urn = "/rest/servicedeskapi/customer"
+        url = "%s%s" % (self.uri, urn)
         headers={"Content-Type": "application/json"}
         auth = aiohttp.BasicAuth(self.user, self.password)
         payload = json.dumps({"displayName": user, "email": user})
@@ -120,6 +118,12 @@ class N3CChannel(Channel):
             ) as response:
                 response_status = response.status
                 response_text = await response.text()
+
+                logger = logging.getLogger(__name__)
+                logger.setLevel(logging.INFO)
+                logging.info("### http_response sends_signup")
+                logger.info("[sends_signup] HTTP response status code: %d" % (response_status))
+
                 return response_status, response_text
                 # response_text = await response.text()
                 # logging.info("### JIRA: %s", response_text)
@@ -434,8 +438,7 @@ class DatasetNotifier(Notifier):
     def __init__(self, settings):
         super().__init__(settings)
 
-        if hasattr(settings, "N3C_AUTH_USER") and hasattr(settings, "N3C_AUTH_PASSWORD"):
-            logging.info("### LOADING N3C CONFIG")
+        if hasattr(settings, "N3C_URI") and hasattr(settings, "N3C_AUTH_USER") and hasattr(settings, "N3C_AUTH_PASSWORD"):
             profile = SimpleNamespace()
             # profile.project_id = "10016"  # External Dataset project
             # profile.issuetype_id = "10024"
@@ -449,11 +452,15 @@ class DatasetNotifier(Notifier):
             profile.label = "DATASET"
             self.channels.append(
                 N3CChannel(
+                    getattr(settings, "N3C_URI"),
                     getattr(settings, "N3C_AUTH_USER"),
                     getattr(settings, "N3C_AUTH_PASSWORD"),
                     profile,
                 )
             )
+        else:
+            logging.warn("Missing N3C configuration keys.")
+
 
     @staticmethod
     def get_portal_image(guide=""):
@@ -799,11 +806,11 @@ async def test_on(async_requests):
     from discovery.handlers.api.base import log_response
     responses = await asyncio.gather(*async_requests, return_exceptions=True)
     
-    for response in responses:
-        if isinstance(response, Exception):
-            log_response(response)
-        else:
-            log_response(response)
+    # for response in responses:
+    #     if isinstance(response, Exception):
+    #         log_response(response)
+    #     else:
+    #         log_response(response)
 
 async def test_schema():
     settings = SimpleNamespace()
