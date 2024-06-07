@@ -32,18 +32,19 @@ class N3CChannel(Channel):
         self.user = user
         self.password = password
         self.profile = profile  # project related info
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
 
     async def handles(self, event):
         return isinstance(event, Message)
 
-    async def send(self, event):
-        urn = "/rest/api/3/issue"
-        url = "%s%s" % (self.uri, urn)
-        headers = {"Content-Type": "application/json"}
+    async def _make_request(self, method, urn, headers=None, payload=None):
+        url = f"{self.uri}{urn}"
         auth = aiohttp.BasicAuth(self.user, self.password)
-        payload = json.dumps(event.to_jira_payload(self.profile))
+
         async with aiohttp.ClientSession() as session:
-            async with session.post(
+            async with session.request(
+                    method=method,
                     url=url,
                     headers=headers,
                     auth=auth,
@@ -51,27 +52,21 @@ class N3CChannel(Channel):
             ) as response:
                 response_status = response.status
                 response_text = await response.text()
-                logger = logging.getLogger(__name__)
-                logger.setLevel(logging.INFO)
-                logger.info("[send] HTTP response status code: %d - %s" % (response_status, response_text))
                 return response_status, response_text
 
+    async def send(self, event):
+        urn = "/rest/api/3/issue"
+        headers = {"Content-Type": "application/json"}
+        payload = json.dumps(event.to_jira_payload(self.profile))
+        response_status, response_text = await self._make_request('POST', urn, headers, payload)
+        self.logger.info(f"[send] HTTP response status code: {response_status} - {response_text}")
+        return response_status, response_text
+
     async def sends_query(self, user):
-        urn = "/rest/api/3/user/search?query=%s" % (user)
-        url = "%s%s" % (self.uri, urn)
-        auth = aiohttp.BasicAuth(self.user, self.password)
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                    url=url,
-                    auth=auth,
-                    # ssl=certifi.where()
-            ) as response:
-                response_status = response.status
-                response_text = await response.text()
-                logger = logging.getLogger(__name__)
-                logger.setLevel(logging.INFO)
-                logger.info("[sends_query] HTTP response status code: %d" % (response_status))
-                return response_status, response_text
+        urn = f"/rest/api/3/user/search?query={user}"
+        response_status, response_text = await self._make_request('GET', urn)
+        self.logger.info(f"[sends_query] HTTP response status code: {response_status}")
+        return response_status, response_text
 
         # Response
         # [
@@ -83,26 +78,12 @@ class N3CChannel(Channel):
         # ]
 
     async def sends_signup(self, user):
-        # API Usage
-        # https://developer.atlassian.com/cloud/jira/service-desk/rest/api-group-customer/
         urn = "/rest/servicedeskapi/customer"
-        url = "%s%s" % (self.uri, urn)
-        headers={"Content-Type": "application/json"}
-        auth = aiohttp.BasicAuth(self.user, self.password)
+        headers = {"Content-Type": "application/json"}
         payload = json.dumps({"displayName": user, "email": user})
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                    url=url,
-                    headers=headers,
-                    auth=auth,
-                    data=payload,
-            ) as response:
-                response_status = response.status
-                response_text = await response.text()
-                logger = logging.getLogger(__name__)
-                logger.setLevel(logging.INFO)
-                logger.info("[sends_signup] HTTP response status code: %d" % (response_status))
-                return response_status, response_text
+        response_status, response_text = await self._make_request('POST', urn, headers, payload)
+        self.logger.info(f"[sends_signup] HTTP response status code: {response_status}")
+        return response_status, response_text
 
         # Response
         # {
@@ -248,11 +229,11 @@ class DatasetNotifier(Notifier):
 
         if hasattr(settings, "N3C_URI") and hasattr(settings, "N3C_AUTH_USER") and hasattr(settings, "N3C_AUTH_PASSWORD"):
             profile = SimpleNamespace()
-            profile.project_id = "10016"  # External Dataset project
-            profile.issuetype_id = "10024"
-            profile.assignee_id = "62604faab8be7c006a454e08"  # sruthi
-            profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"  # cwu
-            profile.label = "DATASET"
+            profile.project_id = getattr(settings, "N3C_PROFILE_PROJECT_ID")
+            profile.issuetype_id = getattr(settings, "N3C_PROFILE_ISSUETYPE_ID")
+            profile.assignee_id = getattr(settings, "N3C_PROFILE_ASSIGNEE_ID")
+            profile.reporter_id = getattr(settings, "N3C_PROFILE_REPORTER_ID")
+            profile.label = getattr(settings, "N3C_PROFILE_LABEL")
             self.channels.append(
                 N3CChannel(
                     getattr(settings, "N3C_URI"),
@@ -466,7 +447,7 @@ async def test_dataset():
         dataset.update("0x0000", "lorem ipsum", "v2", "wethepeople"),
         dataset.delete("0x0000", "lorem ipsum", "wethepeople"),
     ]
-    
+
     await test_on(async_requests)
 
 def test_flatlist():
