@@ -21,11 +21,6 @@ from discovery.utils import indices
 
 
 class N3CChannel(Channel):
-    class N3CPreflightRequest(HTTPRequest):
-        pass
-
-    class N3CHTTPRequest(HTTPRequest):
-        pass
 
     def __init__(self, uri, user, password, profile):
         self.uri = uri
@@ -38,8 +33,7 @@ class N3CChannel(Channel):
     async def handles(self, event):
         return isinstance(event, Message)
 
-    async def _make_request(self, method, urn, headers=None, payload=None):
-        url = f"{self.uri}{urn}"
+    async def _make_request(self, method, url, headers=None, payload=None):
         auth = aiohttp.BasicAuth(self.user, self.password)
 
         async with aiohttp.ClientSession() as session:
@@ -56,15 +50,17 @@ class N3CChannel(Channel):
 
     async def send(self, event):
         urn = "/rest/api/3/issue"
+        url = f"{self.uri}{urn}"
         headers = {"Content-Type": "application/json"}
         payload = json.dumps(event.to_jira_payload(self.profile))
-        response_status, response_text = await self._make_request('POST', urn, headers, payload)
+        response_status, response_text = await self._make_request('POST', url, headers, payload)
         self.logger.info(f"[send] HTTP response status code: {response_status} - {response_text}")
         return response_status, response_text
 
     async def sends_query(self, user):
         urn = f"/rest/api/3/user/search?query={user}"
-        response_status, response_text = await self._make_request('GET', urn)
+        url = f"{self.uri}{urn}"
+        response_status, response_text = await self._make_request('GET', url)
         self.logger.info(f"[sends_query] HTTP response status code: {response_status}")
         return response_status, response_text
 
@@ -79,9 +75,10 @@ class N3CChannel(Channel):
 
     async def sends_signup(self, user):
         urn = "/rest/servicedeskapi/customer"
+        url = f"{self.uri}{urn}"
         headers = {"Content-Type": "application/json"}
         payload = json.dumps({"displayName": user, "email": user})
-        response_status, response_text = await self._make_request('POST', urn, headers, payload)
+        response_status, response_text = await self._make_request('POST', url, headers, payload)
         self.logger.info(f"[sends_signup] HTTP response status code: {response_status}")
         return response_status, response_text
 
