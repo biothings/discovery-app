@@ -1,7 +1,7 @@
 <template>
   <div
     id="guides"
-    class="container-fluid"
+    class="container-fluid text-dark"
     style="min-height: 100vh; padding-top: 60px"
   >
     <div class="bg-light text-center mt-1 p-1">
