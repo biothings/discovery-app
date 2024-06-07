@@ -1,3 +1,5 @@
+import aiohttp
+import asyncio
 import json
 import logging
 from collections import defaultdict
@@ -27,31 +29,65 @@ class N3CChannel(Channel):
         pass
 
     def __init__(self, user, password, profile):
+        logging.info("### __init__")
         self.user = user
         self.password = password
         self.profile = profile  # project related info
 
-    def send(self, message):
-        result = yield self.N3CHTTPRequest(
-            "https://n3c-help.atlassian.net/rest/api/3/issue",
-            method="POST",
-            headers={"Content-Type": "application/json"},
-            auth_username=self.user,
-            auth_password=self.password,
-            body=json.dumps(message.to_jira_payload(self.profile)),
-            ca_certs=certifi.where(),  # for Windows compatibility
-        )
-        # this result is sent from requests.send(response)
-        # so it should be return to outer stack by yield from call
-        return result
+    async def handles(self, event):
+        logging.info("### handles")
+        return isinstance(event, Message)
 
-    def sends_query(self, user):
-        return self.N3CPreflightRequest(
-            "https://n3c-help.atlassian.net/rest/api/3/user/search?query=" + user,
-            auth_username=self.user,
-            auth_password=self.password,
-            ca_certs=certifi.where(),  # for Windows compatibility
-        )
+    async def send(self, event):
+        logging.info("### send")
+        print("### send")
+        # url = "https://n3c-help.atlassian.net/rest/api/3/issue",
+        url = "https://everaldorodrigo.atlassian.net/rest/api/3/issue"
+        headers = {"Content-Type": "application/json"}
+        auth = aiohttp.BasicAuth(self.user, self.password)
+        # print(auth)
+        # print(self.user)
+        # print(self.password)
+        payload = json.dumps(event.to_jira_payload(self.profile))
+        # print("### payload")
+        # print(payload)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                    url=url,
+                    headers=headers,
+                    auth=auth,
+                    data=payload,
+                    # ssl=certifi.where()
+            ) as response:
+                response_status = response.status
+                response_text = await response.text()
+                return response_status, response_text
+                # print("### JIRA send response")
+                # print("### response.status")
+                # print(response.status)
+                # print("### response.text")
+                # print(response.text)
+                # response_text = await response.text()
+                # logging.info("### JIRA: %s", response_text)
+                # return response_text
+
+    async def sends_query(self, user):
+        logging.info("### sends_request")
+        # url = "https://n3c-help.atlassian.net/rest/api/3/user/search?query=" + user
+        url = "https://everaldorodrigo.atlassian.net/rest/api/3/user/search?query=" + user
+        auth = aiohttp.BasicAuth(self.user, self.password)
+        print("### auth")
+        print(auth)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    url=url,
+                    auth=auth,
+                    # ssl=certifi.where()
+            ) as response:
+                response_status = response.status
+                response_text = await response.text()
+                return response_status, response_text
+
         # Response
         # [
         #   {
@@ -61,19 +97,63 @@ class N3CChannel(Channel):
         #   }
         # ]
 
-    def sends_signup(self, user):
+    async def sends_signup(self, user):
+        logging.info("### sends_signup")
         # API Usage
         # https://developer.atlassian.com/cloud/jira/service-desk/rest/api-group-customer/
 
-        return self.N3CPreflightRequest(
-            "https://n3c-help.atlassian.net/rest/servicedeskapi/customer",
-            method="POST",
-            headers={"Content-Type": "application/json"},
-            auth_username=self.user,
-            auth_password=self.password,
-            body=json.dumps({"displayName": user, "email": user}),
-            ca_certs=certifi.where(),  # for Windows compatibility
-        )
+        # url = "https://n3c-help.atlassian.net/rest/servicedeskapi/customer"
+        url = "https://everaldorodrigo.atlassian.net/rest/servicedeskapi/customer"
+        headers={"Content-Type": "application/json"}
+        auth = aiohttp.BasicAuth(self.user, self.password)
+        payload = json.dumps({"displayName": user, "email": user})
+        # payload = json.dumps({"email": user, "fullName": user})
+        import ssl
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                    url=url,
+                    headers=headers,
+                    auth=auth,
+                    data=payload,
+                    # ssl=ssl_context #ssl=certifi.where()
+            ) as response:
+                response_status = response.status
+                response_text = await response.text()
+                return response_status, response_text
+                # response_text = await response.text()
+                # logging.info("### JIRA: %s", response_text)
+                # return response_text
+
+        # Response
+        # {
+        #   "accountId": "qm:a713c8ea-1075-4e30-9d96-891a7d181739:5ad6d3581db05e2a66fa80b",
+        #   "name": "qm:a713c8ea-1075-4e30-9d96-891a7d181739:5ad6d3581db05e2a66fa80b",
+        #   ...
+        # }
+
+
+    async def get_info(self, user):
+        logging.info("### get_info")
+        # API Usage
+        # https://developer.atlassian.com/cloud/jira/service-desk/rest/api-group-customer/
+
+        # url = "https://n3c-help.atlassian.net/rest/servicedeskapi/customer"
+        url = "https://everaldorodrigo.atlassian.net/rest/servicedeskapi/info"
+        headers={"Content-Type": "application/json"}
+        auth = aiohttp.BasicAuth(self.user, self.password)
+        import ssl
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
+        async with aiohttp.ClientSession() as session:
+                async with session.get(
+                        url=url,
+                        headers=headers,
+                        auth=auth,
+                        # ssl=ssl_context #ssl=certifi.where()
+                ) as response:
+                    response_text = await response.text()
+                    return response_text
+
         # Response
         # {
         #   "accountId": "qm:a713c8ea-1075-4e30-9d96-891a7d181739:5ad6d3581db05e2a66fa80b",
@@ -207,6 +287,144 @@ class DatasetMessage(Message):
         return payload
 
 
+# class DatasetNotifier(Notifier):
+#     """
+#     Dataset Registry Notifier
+#     Additionally support N3C Channel
+#     """
+
+#     def __init__(self, settings):
+#         super().__init__(settings)
+
+#         if hasattr(settings, "N3C_AUTH_USER") and hasattr(settings, "N3C_AUTH_PASSWORD"):
+#             profile = SimpleNamespace()
+#             profile.project_id = "10016"  # External Dataset project
+#             profile.issuetype_id = "10024"
+#             profile.assignee_id = "62604faab8be7c006a454e08"  # sruthi
+#             profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"  # cwu
+#             profile.label = "DATASET"
+#             self.channels.append(
+#                 N3CChannel(
+#                     getattr(settings, "N3C_AUTH_USER"),
+#                     getattr(settings, "N3C_AUTH_PASSWORD"),
+#                     profile,
+#                 )
+#             )
+
+#     @staticmethod
+#     def get_portal_image(guide=""):
+#         for portal, url in {
+#             "outbreak": "https://discovery.biothings.io/static/img/outbreak.png",
+#             "niaid": "https://discovery.biothings.io/static/img/niaid.png",
+#             "n3c": "https://discovery.biothings.io/static/img/N3Co.png",
+#             "": "https://discovery.biothings.io/static/img/dde-logo-o.png",  # default
+#         }.items():
+#             if portal in guide:
+#                 return url
+
+#     def add(self, _id, doc, user, **meta):
+#         """return an iterator of HTTPRequest instances during add event"""
+#         for channel in self.channels:
+#             if isinstance(channel, N3CChannel):
+#                 if meta.get("class_id") == "n3c::n3c:Dataset":
+#                     client = HTTPClient()
+#                     # check if the user has a registered account first
+#                     # results = yield channel.sends_query(user)
+#                     results = client.fetch(channel.sends_query(user))
+#                     results = json.loads(results.body)
+#                     # future = asyncio.run_coroutine_threadsafe(channel.sends_query(user), asyncio.get_event_loop())
+#                     # results = future.result()
+
+#                     if results:
+#                         userid = results[0]["accountId"]
+#                     elif "@" in user:
+#                         # register this user by email if not registered yet
+#                         # yield
+#                         # userid = yield channel.sends_signup(user)
+#                         userid = client.fetch(channel.sends_signup(user))
+#                         userid = json.loads(userid.body)
+#                         userid = userid["accountId"]
+
+#                     else:  # no email address, cannot register
+#                         userid = None
+#                     # yield  # this will return None for requests.send(response)
+#                     # response = yield from channel.send(
+#                     response = client.fetch(
+#                         list(
+#                             channel.send(
+#                                 DatasetMessage(
+#                                     {
+#                                         "title": "External Dataset Request",  # customized title
+#                                         "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+#                                         "url": f"http://discovery.biothings.io/dataset/{_id}",
+#                                         "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
+#                                         "reporter": userid,  # registered user id basing on email
+#                                         "doc": doc,  # produce additional jira ticket content
+#                                     }
+#                                 )
+#                             )
+#                         )[0]
+#                     )
+
+#                     if response.code == 201:
+#                         try:
+#                             url = json.loads(response.body)["self"]
+#                             # {
+#                             #   "id":"10668",
+#                             #   "key":"EXTDATASET-33",
+#                             #   "self":"https://n3c-help.atlassian.net/rest/api/3/issue/10668"
+#                             # }
+#                             indices.refresh()
+#                             dataset = ESDataset.get(_id)
+#                             dataset.update(_n3c={"url": url})
+#                         except Exception as exc:
+#                             logging.error(str(exc))
+#                     # yield  # this will return None for requests.send(response)
+#             else:  # all other channels
+#                 yield from channel.send(
+#                     DatasetMessage(
+#                         {
+#                             "title": "New Dataset Registered",
+#                             "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+#                             "url": f"http://discovery.biothings.io/dataset/{_id}",
+#                             "url_text": "View details about this dataset",
+#                             "image": DatasetNotifier.get_portal_image(meta.get("guide", "")),
+#                             "image_altext": "DDE_PORTAL_IMG",
+#                         }
+#                     )
+#                 )
+#                 # yield  # this will return None for requests.send(response)
+
+#     def delete(self, _id, name, user):
+#         message = DatasetMessage(
+#             {
+#                 "title": "Dataset Metadata Deleted",
+#                 "body": f'Dataset "{name}" is deleted by {user}.',
+#             }
+#         )
+#         return self.broadcast(message)
+
+#     def update(self, _id, name, version, user):
+#         message = DatasetMessage(
+#             {
+#                 "title": "Dataset Metadata Updated",
+#                 "body": f"Dataset {name} is updated by {user}. Current version is {version}.",
+#                 "url": f"http://discovery.biothings.io/dataset/{_id}",
+#                 "url_text": "View details",
+#             }
+#         )
+#         return self.broadcast(message)
+
+#     async def broadcast(self, event):
+#         # for channel in self.channels:
+#         #     if isinstance(channel, N3CChannel):
+#         #         continue  # skip N3C by default
+#         #     yield from channel.send(message)
+#         for channel in self.channels:
+#             if await channel.handles(event):
+#                 await channel.send(event)
+
+
 class DatasetNotifier(Notifier):
     """
     Dataset Registry Notifier
@@ -217,11 +435,17 @@ class DatasetNotifier(Notifier):
         super().__init__(settings)
 
         if hasattr(settings, "N3C_AUTH_USER") and hasattr(settings, "N3C_AUTH_PASSWORD"):
+            logging.info("### LOADING N3C CONFIG")
             profile = SimpleNamespace()
-            profile.project_id = "10016"  # External Dataset project
-            profile.issuetype_id = "10024"
-            profile.assignee_id = "62604faab8be7c006a454e08"  # sruthi
-            profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"  # cwu
+            # profile.project_id = "10016"  # External Dataset project
+            # profile.issuetype_id = "10024"
+            # profile.assignee_id = "62604faab8be7c006a454e08"  # sruthi
+            # profile.reporter_id = "557058:3b14bc92-4371-460c-8b25-b7a44db23e26"  # cwu
+            # profile.label = "DATASET"
+            profile.project_id = "10000"  # External Dataset project
+            profile.issuetype_id = "10001"
+            profile.assignee_id = "557058:b0b8ce60-730d-41a6-a84f-71870ee7cdf3"  # sruthi
+            profile.reporter_id = "557058:b0b8ce60-730d-41a6-a84f-71870ee7cdf3"
             profile.label = "DATASET"
             self.channels.append(
                 N3CChannel(
@@ -242,51 +466,68 @@ class DatasetNotifier(Notifier):
             if portal in guide:
                 return url
 
-    def add(self, _id, doc, user, **meta):
+    async def add(self, _id, doc, user, **meta):
         """return an iterator of HTTPRequest instances during add event"""
+        print("### JIRA: add / return an iterator of HTTPRequest instances during add event")
+        print(self.channels)
+        print(meta)
         for channel in self.channels:
+            print("### channel")
+            print(channel)
             if isinstance(channel, N3CChannel):
-                if meta.get("class_id") == "n3c::n3c:Dataset":
-                    client = HTTPClient()
-                    # check if the user has a registered account first
-                    # results = yield channel.sends_query(user)
-                    results = client.fetch(channel.sends_query(user))
-                    results = json.loads(results.body)
+                print('### meta.get("class_id")')
+                print(meta.get("class_id"))
+                # if meta.get("class_id") == "n3c::n3c:Dataset":
+                if meta.get("schema") == "n3c::n3c:Dataset": # TODO: Should change from class_id to schema?
+                    response_status, response_text = await channel.sends_query(user)
+                    print("### response_text")
+                    print(response_text)
+                    # results = asyncio.run_coroutine_threadsafe(channel.sends_query(user), asyncio.get_event_loop()).result()
+                    results = json.loads(response_text)
 
                     if results:
                         userid = results[0]["accountId"]
                     elif "@" in user:
-                        # register this user by email if not registered yet
-                        # yield
-                        # userid = yield channel.sends_signup(user)
-                        userid = client.fetch(channel.sends_signup(user))
-                        userid = json.loads(userid.body)
+                        response_status, response_text = await channel.sends_signup(user)
+                        # userid = asyncio.run_coroutine_threadsafe(channel.sends_signup(user), asyncio.get_event_loop()).result()
+                        userid = json.loads(response_text)
                         userid = userid["accountId"]
-
                     else:  # no email address, cannot register
                         userid = None
-                    # yield  # this will return None for requests.send(response)
-                    # response = yield from channel.send(
-                    response = client.fetch(
-                        list(
-                            channel.send(
-                                DatasetMessage(
-                                    {
-                                        "title": "External Dataset Request",  # customized title
-                                        "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
-                                        "url": f"http://discovery.biothings.io/dataset/{_id}",
-                                        "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
-                                        "reporter": userid,  # registered user id basing on email
-                                        "doc": doc,  # produce additional jira ticket content
-                                    }
-                                )
-                            )
-                        )[0]
-                    )
 
-                    if response.code == 201:
+                    response_status, response_text = await channel.send(
+                        DatasetMessage(
+                            {
+                                "title": "External Dataset Request",  # customized title
+                                "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+                                "url": f"http://discovery.biothings.io/dataset/{_id}",
+                                "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
+                                "reporter": userid,  # registered user id basing on email
+                                "doc": doc,  # produce additional jira ticket content
+                            }
+                        )
+                    )
+                    # response = asyncio.run_coroutine_threadsafe(channel.send(
+                    #     DatasetMessage(
+                    #         {
+                    #             "title": "External Dataset Request",  # customized title
+                    #             "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+                    #             "url": f"http://discovery.biothings.io/dataset/{_id}",
+                    #             "url_text": "View this dataset on Data Discovery Engine",  # since details already included below
+                    #             "reporter": userid,  # registered user id basing on email
+                    #             "doc": doc,  # produce additional jira ticket content
+                    #         }
+                    #     )
+                    # ), asyncio.get_event_loop()).result()
+
+
+                    print("### response.status")
+                    print(response_status)
+
+                    if response_status == 201:
                         try:
-                            url = json.loads(response.body)["self"]
+                            response_body = response_text
+                            url = json.loads(response_body)["self"]
                             # {
                             #   "id":"10668",
                             #   "key":"EXTDATASET-33",
@@ -297,9 +538,8 @@ class DatasetNotifier(Notifier):
                             dataset.update(_n3c={"url": url})
                         except Exception as exc:
                             logging.error(str(exc))
-                    # yield  # this will return None for requests.send(response)
             else:  # all other channels
-                yield from channel.send(
+                await channel.send(
                     DatasetMessage(
                         {
                             "title": "New Dataset Registered",
@@ -311,18 +551,30 @@ class DatasetNotifier(Notifier):
                         }
                     )
                 )
-                # yield  # this will return None for requests.send(response)
+                # asyncio.run_coroutine_threadsafe(channel.send(
+                #         DatasetMessage(
+                #             {
+                #                 "title": "New Dataset Registered",
+                #                 "body": f'A new dataset "{doc.get("name")}" has been submitted by {user} on Data Discovery Engine.',
+                #                 "url": f"http://discovery.biothings.io/dataset/{_id}",
+                #                 "url_text": "View details about this dataset",
+                #                 "image": DatasetNotifier.get_portal_image(meta.get("guide", "")),
+                #                 "image_altext": "DDE_PORTAL_IMG",
+                #             }
+                #         )
+                #     ), asyncio.get_event_loop()).result()
 
-    def delete(self, _id, name, user):
+
+    async def delete(self, _id, name, user):
         message = DatasetMessage(
             {
                 "title": "Dataset Metadata Deleted",
                 "body": f'Dataset "{name}" is deleted by {user}.',
             }
         )
-        return self.broadcast(message)
+        await self.broadcast(message)
 
-    def update(self, _id, name, version, user):
+    async def update(self, _id, name, version, user):
         message = DatasetMessage(
             {
                 "title": "Dataset Metadata Updated",
@@ -331,18 +583,52 @@ class DatasetNotifier(Notifier):
                 "url_text": "View details",
             }
         )
-        return self.broadcast(message)
+        await self.broadcast(message)
 
-    def broadcast(self, message):
+    async def broadcast(self, event):
         for channel in self.channels:
-            if isinstance(channel, N3CChannel):
-                continue  # skip N3C by default
-            yield from channel.send(message)
+            if await channel.handles(event):
+                await channel.send(event)
 
+
+# class SchemaNotifier(Notifier):
+#     def add(self, namespace, num_classes):
+#         return self.broadcast(
+#             Message(
+#                 {
+#                     "title": "New Schema Registration",
+#                     "body": f'{num_classes} classes have been registered under namespace "{namespace}".',
+#                     "url": f"https://discovery.biothings.io/view/{namespace}",
+#                     "url_text": "Visualize Schema",
+#                 }
+#             )
+#         )
+
+#     def delete(self, namespace, num_classes):
+#         return self.broadcast(
+#             Message(
+#                 {
+#                     "title": "Schema Deleted",
+#                     "body": f'{num_classes} classes have been deleted under namespace "{namespace}".',
+#                 }
+#             )
+#         )
+
+#     def update(self, namespace, num_classes):
+#         return self.broadcast(
+#             Message(
+#                 {
+#                     "title": "Schema Updated",
+#                     "body": f'Schema "{namespace}" updated. {num_classes} current classes.',
+#                     "url": f"https://discovery.biothings.io/view/{namespace}",
+#                     "url_text": "Visualize Schema",
+#                 }
+#             )
+#         )
 
 class SchemaNotifier(Notifier):
-    def add(self, namespace, num_classes):
-        return self.broadcast(
+    async def add(self, namespace, num_classes):
+        await self.broadcast(
             Message(
                 {
                     "title": "New Schema Registration",
@@ -353,8 +639,8 @@ class SchemaNotifier(Notifier):
             )
         )
 
-    def delete(self, namespace, num_classes):
-        return self.broadcast(
+    async def delete(self, namespace, num_classes):
+        await self.broadcast(
             Message(
                 {
                     "title": "Schema Deleted",
@@ -363,8 +649,8 @@ class SchemaNotifier(Notifier):
             )
         )
 
-    def update(self, namespace, num_classes):
-        return self.broadcast(
+    async def update(self, namespace, num_classes):
+        await self.broadcast(
             Message(
                 {
                     "title": "Schema Updated",
@@ -376,9 +662,110 @@ class SchemaNotifier(Notifier):
         )
 
 
+
+##############################################
+##############################################
+##############################################
+
+# def update_n3c_status(_id):
+#     import requests
+
+#     logger = logging.getLogger("update_n3c")
+#     try:
+#         dataset = ESDataset.get(_id)
+#         dataset.update(
+#             _n3c={
+#                 "url": dataset._n3c.url,
+#                 "status": requests.get(dataset._n3c.url).json()["fields"]["status"]["name"],
+#                 "timestamp": datetime.now(timezone.utc),
+#             }
+#         )
+#     except Exception as exc:
+#         logger.warning('Failed to update N3C dataset "%s" status:\n%s', _id, exc)
+
+
+# def update_n3c_routine():
+#     from discovery.model.dataset import Dataset
+
+#     logger = logging.getLogger("update_n3c")
+#     logger.info("Updating status for all N3C datasets...")
+#     datasets = Dataset.search().query("exists", field="_n3c.url")
+#     datasets = datasets.source(False).scan()
+
+#     _cnt = 0
+#     for dataset in datasets:
+#         update_n3c_status(dataset.meta.id)
+#         _cnt += 1
+#     logger.info("Done [%s N3C Datasets updated]", _cnt)
+
+
+# def test_on(requests):
+#     from discovery.handlers.api.base import log_response
+
+#     client = HTTPClient()
+#     for request in requests:
+#         if request:
+#             response = client.fetch(request, raise_error=False)
+#             log_response(response)
+
+
+# def test_schema():
+#     settings = SimpleNamespace()
+#     settings.SLACK_WEBHOOKS = [input("slack webhook url: ")]
+#     # schema.configure(settings)
+#     schema = SchemaNotifier(settings)
+#     test_on(schema.add("ec", 538))
+#     test_on(schema.update("ec", 270))
+#     test_on(schema.delete("ec", 270))
+
+
+# def test_dataset():
+#     # settings = SimpleNamespace()
+#     # settings.SLACK_WEBHOOKS = [input("slack webhook url: ")]
+#     # settings.N3C_AUTH_USER = input("n3c user: ")
+#     # settings.N3C_AUTH_PASSWORD = input("n3c password: ")
+#     import config_key as settings
+
+#     # dataset.configure(settings)
+#     dataset = DatasetNotifier(settings)
+#     test_on(
+#         dataset.add(
+#             "0x0000",
+#             {
+#                 "identifier": "grandtest",
+#                 "description": "learn everything there is to know.",
+#                 "name": "lorem ipsum",
+#                 "url": "http://example.com/",
+#             },
+#             "wethepeople",
+#             **{
+#                 "schema": "n3c::n3c:Dataset",
+#             },
+#         )
+#     )
+#     test_on(dataset.update("0x0000", "lorem ipsum", "v2", "wethepeople"))
+#     test_on(dataset.delete("0x0000", "lorem ipsum", "wethepeople"))
+
+
+# def test_flatlist():
+#     message = DatasetMessage(
+#         {
+#             "doc": {
+#                 "@type": "n3c:Dataset",
+#                 "includedInDataCatalog": {
+#                     "name": "N3C Datasets",
+#                     "url": "https://ncats.nih.gov/n3c/",
+#                 },
+#                 "name": "Wellderly Blood Genetics",
+#                 "description": "Wellderly Blood Genetics",
+#                 "justification": "",  # Test empty field
+#             }
+#         }
+#     )
+#     print(json.dumps(message.to_ADF()))
+
 def update_n3c_status(_id):
     import requests
-
     logger = logging.getLogger("update_n3c")
     try:
         dataset = ESDataset.get(_id)
@@ -395,7 +782,6 @@ def update_n3c_status(_id):
 
 def update_n3c_routine():
     from discovery.model.dataset import Dataset
-
     logger = logging.getLogger("update_n3c")
     logger.info("Updating status for all N3C datasets...")
     datasets = Dataset.search().query("exists", field="_n3c.url")
@@ -408,36 +794,36 @@ def update_n3c_routine():
     logger.info("Done [%s N3C Datasets updated]", _cnt)
 
 
-def test_on(requests):
+async def test_on(async_requests):
+    logging.info("JIRA test_on")
     from discovery.handlers.api.base import log_response
-
-    client = HTTPClient()
-    for request in requests:
-        if request:
-            response = client.fetch(request, raise_error=False)
+    responses = await asyncio.gather(*async_requests, return_exceptions=True)
+    
+    for response in responses:
+        if isinstance(response, Exception):
+            log_response(response)
+        else:
             log_response(response)
 
-
-def test_schema():
+async def test_schema():
     settings = SimpleNamespace()
     settings.SLACK_WEBHOOKS = [input("slack webhook url: ")]
-    # schema.configure(settings)
     schema = SchemaNotifier(settings)
-    test_on(schema.add("ec", 538))
-    test_on(schema.update("ec", 270))
-    test_on(schema.delete("ec", 270))
 
+    async_requests = [
+        schema.add("ec", 538),
+        schema.update("ec", 270),
+        schema.delete("ec", 270),
+    ]
 
-def test_dataset():
-    # settings = SimpleNamespace()
-    # settings.SLACK_WEBHOOKS = [input("slack webhook url: ")]
-    # settings.N3C_AUTH_USER = input("n3c user: ")
-    # settings.N3C_AUTH_PASSWORD = input("n3c password: ")
-    import config_key as settings
+    await test_on(async_requests)
 
-    # dataset.configure(settings)
+async def test_dataset():
+    import config_key as settings  # Adjust the import to match your actual module
+
     dataset = DatasetNotifier(settings)
-    test_on(
+
+    async_requests = [
         dataset.add(
             "0x0000",
             {
@@ -450,11 +836,12 @@ def test_dataset():
             **{
                 "schema": "n3c::n3c:Dataset",
             },
-        )
-    )
-    test_on(dataset.update("0x0000", "lorem ipsum", "v2", "wethepeople"))
-    test_on(dataset.delete("0x0000", "lorem ipsum", "wethepeople"))
-
+        ),
+        dataset.update("0x0000", "lorem ipsum", "v2", "wethepeople"),
+        dataset.delete("0x0000", "lorem ipsum", "wethepeople"),
+    ]
+    
+    await test_on(async_requests)
 
 def test_flatlist():
     message = DatasetMessage(
@@ -473,9 +860,9 @@ def test_flatlist():
     )
     print(json.dumps(message.to_ADF()))
 
-
-if __name__ == "__main__":
-    pass
-    # test_schema()
-    # test_dataset()
-    # test_flatlist()
+def main():
+    # if __name__ == "__main__":
+        # pass
+    asyncio.run(test_schema())
+    asyncio.run(test_dataset())
+    test_flatlist()

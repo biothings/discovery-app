@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from functools import partial
@@ -49,9 +50,13 @@ def registryOperation(func):
 def log_response(http_response):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-    logger.info(http_response.request.url)
-    logger.info(http_response.code)
-    logger.info(http_response.body)
+    logging.info("### http_response")
+    logging.info(http_response)
+    print(http_response)
+    logger.info(http_response)
+    # logger.info(http_response.request.url)
+    # logger.info(http_response.code)
+    # logger.info(http_response.body)
 
 
 class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
@@ -91,10 +96,43 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
                     self.current_user = user.get("email") or user["login"]
 
     def report(self, action, **details):
+        print("### report")
         if self.notifier:
+            print("### report: if self.notifier")
             notifier = self.notifier(self.biothings.config)
             requests = getattr(notifier, action)(**details)
-            IOLoop.current().add_callback(partial(self._report, requests))
+            print("### requests")
+            print(requests)
+            if not isinstance(requests, list):
+                requests = [requests]
+            # IOLoop.current().add_callback(partial(self._report, requests))
+            # asyncio.run_coroutine_threadsafe(notifier.broadcast(self.event), asyncio.get_event_loop())
+            IOLoop.current().add_callback(partial(self.broadcast, requests))
+
+
+    async def broadcast(self, events):
+        print("### broadcast")
+        responses = await asyncio.gather(*events, return_exceptions=True)
+        print("### broadcast asyncio.gather()")
+        for response in responses:
+            if isinstance(response, Exception):
+                log_response(response)
+            else:
+                log_response(response)
+        # for channel in self.channels:
+        #     print("### broadcast - for channel in self.channels:")
+        #     if await channel.handles(event):
+        #         print("### broadcast - if await channel.handles(event):")
+        #         await channel.send(event)
+
+        # for request in event:
+        #     if not request:
+        #         print("### It is NOT N3CChannel")
+        #         continue
+        #     if isinstance(
+        #         request, (N3CChannel.N3CPreflightRequest, N3CChannel.N3CHTTPRequest)
+        #     ):
+        #         print("### It is N3CChannel")
 
     async def _report(self, requests):
 
