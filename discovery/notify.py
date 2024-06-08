@@ -14,8 +14,6 @@ from biothings.web.analytics.events import Message
 from biothings.web.analytics.notifiers import Notifier
 from pyadf.document import Document as ADF
 from pyadf.inline_nodes.marks.mark import Mark
-from tornado.httpclient import HTTPRequest
-
 from discovery.model.dataset import Dataset as ESDataset
 from discovery.utils import indices
 
