@@ -504,7 +504,6 @@ import Papa from "papaparse";
 import { mapGetters } from "vuex";
 import Notify from "simple-notify";
 import moment from "moment";
-import dde_logo from "@/assets/img/dde-logo-o.svg";
 
 import popSound from "@/assets/img/pop.wav";
 import metaPic from "@/assets/img/metadata.png";
@@ -1874,11 +1873,18 @@ export default {
       var self = this;
       self.$swal
         .fire({
-          title: "Import Metadata",
-          text: "Select method",
+          title: "Bulk Registration",
+          html: `
+          <h4>Select import method</h4>
+          <div class="text-left">
+          <p>You can load a local JSON file or import metadata registered on GitHub.</p>
+          <p>To import metadata hosted on GitHub simply copy and paste the link to the JSON file you wish to upload.</p>
+          <p><small>Note: Your link will be converted to raw data link automatically unless you provide the raw data link.</small></p>
+          </div>
+          `,
           input: "select",
           inputOptions: {
-            giturl: "Hosted metadata on GitHub (raw url)",
+            giturl: "Import from GitHub",
             localFile:
               "Open a file from your computer",
           },
