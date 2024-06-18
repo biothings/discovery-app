@@ -1,8 +1,8 @@
 import pytest
+import uuid
 
 from aioresponses import aioresponses
 from biothings.web.analytics.events import Message
-from unittest.mock import patch
 from discovery.notify import N3CChannel
 from types import SimpleNamespace
 
@@ -14,12 +14,12 @@ async def test_N3C_send():
     urn = "/rest/api/3/issue"
     url=f"{uri}{urn}"
     user = "user"
-    password = "password"
+    password = uuid.uuid4().hex
     profile = SimpleNamespace()
     profile.project_id = "1"  # External Dataset project
     profile.issuetype_id = "10001"
-    profile.assignee_id = "557058:b0b8ce60-730d-41a6-a84f-71870ee7cdf3"  # sruthi
-    profile.reporter_id = "557058:b0b8ce60-730d-41a6-a84f-71870ee7cdf3"
+    profile.assignee_id = "000000:aaaaaaaa-1111-bbbb-2222-cccccccccccc"
+    profile.reporter_id = "000000:aaaaaaaa-1111-bbbb-2222-cccccccccccc"
     profile.label = "DATASET"
     channel = N3CChannel(uri=uri,
                          user=user,
@@ -38,7 +38,10 @@ async def test_N3C_send_query():
     uri = "http://jira_domain"
     urn = f"/rest/api/3/user/search?query={user}"
     url = f"{uri}{urn}"
-    channel = N3CChannel(uri=uri, user="username", password="password", profile="profile")
+    username = " username"
+    password = uuid.uuid4().hex
+    profile = "profile"
+    channel = N3CChannel(uri=uri, user=username, password=password, profile=profile)
 
     with aioresponses() as m:
         m.get(url=url, status=200, body="query_response")
