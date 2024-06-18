@@ -55,7 +55,10 @@ async def test_N3C_sends_signup():
     uri = "http://jira_domain"
     urn = "/rest/servicedeskapi/customer"
     url = f"{uri}{urn}"
-    channel = N3CChannel(uri=uri, user="username", password="password", profile="profile")
+    username = " username"
+    password = uuid.uuid4().hex
+    profile = "profile"
+    channel = N3CChannel(uri=uri, user=username, password=password, profile=profile)
     with aioresponses() as m:
         m.post(url=url, status=200, body="signup_response")
         response_status, response_text = await channel.sends_signup(user)
