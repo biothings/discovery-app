@@ -244,10 +244,9 @@ class DatasetNotifier(Notifier):
     @staticmethod
     def get_portal_image(guide=""):
         for portal, url in {
-            "outbreak": "https://discovery.biothings.io/static/img/outbreak.png",
-            "niaid": "https://discovery.biothings.io/static/img/niaid.png",
-            "n3c": "https://discovery.biothings.io/static/img/N3Co.png",
-            "": "https://discovery.biothings.io/static/img/dde-logo-o.png",  # default
+            "outbreak": "https://discovery.biothings.io/outbreak.png",
+            "n3c": "https://discovery.biothings.io/N3Co.png",
+            "": "https://discovery.biothings.io/dde-logo-o.png",  # default
         }.items():
             if portal in guide:
                 return url
