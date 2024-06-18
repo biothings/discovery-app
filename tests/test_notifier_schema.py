@@ -6,14 +6,14 @@ from discovery.notify import SchemaNotifier, Message
 
 
 def setup_module(module):
-    os.environ['SLACK_WEBHOOKS'] = 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX'
-    os.environ['GA_ACCOUNT'] = 'UA-XXXX-Y'
-    os.environ['GA_UID_GENERATOR_VERSION'] = '0'
-    os.environ['GA4_MEASUREMENT_ID'] = 'G-XXXXXX'
-    os.environ['GA4_API_SECRET'] = 'SECRET'
-    os.environ['GA4_UID_GENERATOR_VERSION'] = '0'
-    os.environ['N3C_AUTH_USER'] = 'n3c_user'
-    os.environ['N3C_AUTH_PASSWORD'] = 'n3c_password'
+    os.environ["SLACK_WEBHOOKS"] = "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+    os.environ["GA_ACCOUNT"] = "UA-XXXX-Y"
+    os.environ["GA_UID_GENERATOR_VERSION"] = "0"
+    os.environ["GA4_MEASUREMENT_ID"] = "G-XXXXXX"
+    os.environ["GA4_API_SECRET"] = "SECRET"
+    os.environ["GA4_UID_GENERATOR_VERSION"] = "0"
+    os.environ["N3C_AUTH_USER"] = "n3c_user"
+    os.environ["N3C_AUTH_PASSWORD"] = "n3c_password"
 
 class MockSettings:
     SLACK_WEBHOOKS = os.getenv("SLACK_WEBHOOKS")
