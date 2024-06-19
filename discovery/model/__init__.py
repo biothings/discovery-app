@@ -20,7 +20,7 @@ from .schema import Schema, SchemaClass
 __all__ = ["Schema", "SchemaClass", "Dataset"]
 
 # parse environment variables
-ES_HOST = os.getenv("ES_HOST", "localhost:9200")
+ES_HOST = os.getenv("ES_HOST", "http://localhost:9200")
 
 # create a default connection
 connections.create_connection(hosts=ES_HOST)

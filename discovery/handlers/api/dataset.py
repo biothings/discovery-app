@@ -123,6 +123,7 @@ class DatasetMetadataHandler(APIBaseHandler):
         """
         Add a dataset.
         """
+        print("### Add a dataset.")
         _id = datasets.add(doc=self.args_json, user=self.current_user, **self.args)
 
         self.finish({"success": True, "result": "created", "id": _id})

@@ -56,7 +56,7 @@ for _k, _v in _config.__dict__.items():
         globals()[_k] = _v
 
 # override default
-ES_HOST = 'localhost:9200'
+ES_HOST = 'http://localhost:9200'
 ES_INDICES = {
     "schema": "discover_schema_class_test",
 }

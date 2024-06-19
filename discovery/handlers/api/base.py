@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from functools import partial
@@ -8,7 +9,6 @@ from tornado.httpclient import AsyncHTTPClient
 from tornado.ioloop import IOLoop
 from tornado.web import Finish, HTTPError
 
-from discovery.notify import N3CChannel
 from discovery.registry import ConflictError, DatasetValidationError, NoEntityError, RegistryError
 
 from ..base import DiscoveryBaseHandler
@@ -44,14 +44,6 @@ def registryOperation(func):
             raise HTTPError(400, reason=str(err))
 
     return _  # decorator
-
-
-def log_response(http_response):
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-    logger.info(http_response.request.url)
-    logger.info(http_response.code)
-    logger.info(http_response.body)
 
 
 class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
@@ -94,26 +86,9 @@ class APIBaseHandler(DiscoveryBaseHandler, BaseAPIHandler):
         if self.notifier:
             notifier = self.notifier(self.biothings.config)
             requests = getattr(notifier, action)(**details)
-            IOLoop.current().add_callback(partial(self._report, requests))
+            if not isinstance(requests, list):
+                requests = [requests]
+            IOLoop.current().add_callback(partial(self.broadcast, requests))
 
-    async def _report(self, requests):
-
-        # do not run in debug mode
-        client = AsyncHTTPClient()
-        if not self.settings.get("debug"):
-
-            for request in requests:
-                if not request:
-                    continue
-                if isinstance(
-                    request, (N3CChannel.N3CPreflightRequest, N3CChannel.N3CHTTPRequest)
-                ):
-                    response = await client.fetch(request, raise_error=False)
-                    # this func will call requests.__next__ so it should be received empty yield result
-                    # to make sure the next request will be return on for loop
-                    requests.send(response)
-                    log_response(response)
-
-                else:  # standard tornado HTTP requests
-                    response = await client.fetch(request, raise_error=False)
-                    log_response(response)
+    async def broadcast(self, events):
+        await asyncio.gather(*events, return_exceptions=True)
