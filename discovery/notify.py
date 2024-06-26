@@ -332,8 +332,8 @@ class DatasetNotifier(Notifier):
 
     async def broadcast(self, event):
         for channel in self.channels:
-            if await channel.handles(event):
-                await channel.send(event)
+            if (not isinstance(channel, N3CChannel)) and (await channel.handles(event)):
+                    await channel.send(event)
 
 
 class SchemaNotifier(Notifier):
