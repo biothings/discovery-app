@@ -9,7 +9,7 @@
       <img id="puff" src="@/assets/img/puff.gif" />
       <audio id="pop-sound" :src="popSound"></audio>
       <div class="p-2 bg-light text-center mt-5">
-        <h6 class="logoText">DISCOVERY GUIDE</h6>
+        <h6 class="text-dde-dark">DISCOVERY GUIDE</h6>
         <p class="text-muted">
           Follow best practices to make your metadata more findable
         </p>
@@ -18,7 +18,10 @@
           <font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon
         ></a>
       </div>
-      <h4 v-text="readableName(schemaName)" class="text-center logoText"></h4>
+      <h4
+        v-text="readableName(schemaName)"
+        class="text-center text-dde-dark"
+      ></h4>
       <div id="jsonTable">
         <!-- BULK -->
         <div v-if="jsonItems.length" class="alert grad">
@@ -120,7 +123,7 @@
         </div>
         <div>
           <div
-            class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start"
+            class="actions bg-dde-mid p-2 rounded d-flex align-items-center justify-content-start"
           >
             <span
               class="fa-stack fa-1x pointer tip mr-2"
@@ -265,7 +268,7 @@
         <div v-else class="widgetContainer bg-light text-center">
           <template v-if="step === 1 && !bulkMode">
             <!-- STARTING POINT -->
-            <h4 class="logoText">Metadata</h4>
+            <h4 class="text-dde-dark">Metadata</h4>
             <p class="text-muted">
               Select the type of metadata you are interested in creating.
             </p>
@@ -282,7 +285,7 @@
           </template>
           <!-- OPTIONAL PORTALS -->
           <template v-if="step === 2 && !bulkMode">
-            <h4 class="logoText">Discovery Portals</h4>
+            <h4 class="text-dde-dark">Discovery Portals</h4>
             <p class="text-muted">
               Select the portals you are interested in. Each will add fields
               required in order to be discovered by that portal.
@@ -328,7 +331,7 @@
 
           <template v-if="step === 5 && !bulkMode">
             <template v-if="editingID">
-              <h1 class="logoText">Save Your Changes</h1>
+              <h1 class="text-dde-dark">Save Your Changes</h1>
               <div class="p-5 text-center m-3">
                 <p class="text-muted text-center">
                   <b>Are you all done?</b> Click <b>Save Changes</b> to proceed.
@@ -359,7 +362,7 @@
               <template
                 v-if="$router.currentRoute?.value?.path == '/guide/n3c/dataset'"
               >
-                <h1 class="logoText">N3C Dataset Request</h1>
+                <h1 class="text-dde-dark">N3C Dataset Request</h1>
                 <div class="p-5 text-center m-3">
                   <img
                     src="@/assets/img/N3C.png"
@@ -389,7 +392,7 @@
                 </div>
               </template>
               <template v-else>
-                <h1 class="logoText">Registration</h1>
+                <h1 class="text-dde-dark">Registration</h1>
                 <div class="p-5 text-center m-3">
                   <p class="text-muted text-center">
                     <b>Are you all done?</b> Click <b>Register</b> to proceed.
@@ -520,11 +523,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/m2HH6cYD/guide.jpg",
+          content: "https://i.postimg.cc/43w0hpbz/guide.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/m2HH6cYD/guide.jpg",
+          content: "https://i.postimg.cc/43w0hpbz/guide.jpg",
         },
         {
           property: "og:url",
@@ -1056,7 +1059,7 @@ export default {
                   customClass: "scale-in-center",
                   html:
                     `<div class="row m-0">
-                            <div class="col-sm-12 logoText">
+                            <div class="col-sm-12 text-dde-dark">
                               <h3>Your request is submitted, we will review it and get back to you soon.</h3>
                             </div>
                             <div class="col-sm-12">
@@ -1841,7 +1844,7 @@ export default {
         });
       }
     },
-    getRawGithubLink(value){
+    getRawGithubLink(value) {
       if (value.includes("blob") || value.includes("github.com")) {
         let suggestedURL = value
           .replace("blob/", "")
@@ -1865,7 +1868,7 @@ export default {
           position: "right top",
         });
         return suggestedURL;
-      }else{
+      } else {
         return value;
       }
     },
@@ -1885,8 +1888,7 @@ export default {
           input: "select",
           inputOptions: {
             giturl: "Import from GitHub",
-            localFile:
-              "Open a file from your computer",
+            localFile: "Open a file from your computer",
           },
           inputPlaceholder: "Choose one",
           showCancelButton: true,
@@ -1938,7 +1940,8 @@ export default {
                               icon: "error",
                               title: "Over Limit",
                               text:
-                                json.length + " items. Please submit 100 items at a time.",
+                                json.length +
+                                " items. Please submit 100 items at a time.",
                             });
                           }
                         })

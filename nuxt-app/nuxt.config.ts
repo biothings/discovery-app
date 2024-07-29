@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     "sweetalert2/dist/sweetalert2.min.css",
     "tabulator-tables/dist/css/tabulator.min.css",
     "simple-notify/dist/simple-notify.min.css",
+    "aos/dist/aos.css",
   ],
   runtimeConfig: {
     // The private keys which are only available within server-side

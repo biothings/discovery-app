@@ -5,7 +5,7 @@
     style="min-height: 100vh; padding-top: 60px"
   >
     <div class="bg-light text-center mt-1 py-5">
-      <h1 class="logoText">JSON SCHEMA VIEWER</h1>
+      <h1 class="text-dde-dark">JSON SCHEMA VIEWER</h1>
       <div class="mb-1">
         <form id="linkForm" class="col-sm-10 m-auto" @submit="loadSchema()">
           <small v-html="loadMsg"></small>
@@ -102,11 +102,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:url",

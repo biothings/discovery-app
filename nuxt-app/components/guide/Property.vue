@@ -190,9 +190,9 @@
         </template>
       </div>
       <!-- 🌈  PROGRESS TRACKER 🌈 -->
-      <div class="col-sm-12 col-md-3 p-0">
+      <div class="col-sm-12 col-md-3 p-0 bg-dde-mid">
         <div
-          class="w-100 text-muted d-flex justify-content-around align-items-center p-1"
+          class="w-100 text-light d-flex justify-content-around align-items-center p-1"
         >
           <h6>Progress Tracker</h6>
         </div>

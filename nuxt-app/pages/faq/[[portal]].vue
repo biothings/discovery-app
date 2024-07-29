@@ -17,11 +17,11 @@ useHead({
   meta: [
     {
       name: "twitter:image",
-      content: "https://i.postimg.cc/Kj9MSL9k/faq.jpg",
+      content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
     },
     {
       property: "og:image",
-      content: "https://i.postimg.cc/Kj9MSL9k/faq.jpg",
+      content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
     },
     {
       property: "og:url",
@@ -48,19 +48,22 @@ useHead({
 </script>
 
 <template>
-  <main class="bg-light" style="min-height: 100vh">
-    <div class="jumbotron bg-light text-center pt-5" style="margin-top: 40px">
-      <h1 class="logoText" v-text="name"></h1>
-      <small class="text-muted">
+  <main class="bg-dde-mid text-light" style="min-height: 100vh">
+    <div
+      class="jumbotron bg-dde-dark text-center pt-5"
+      style="margin-top: 40px"
+    >
+      <h1 class="text-light" v-text="name"></h1>
+      <span>
         Jump To:
         <template v-for="section in faq" :key="section + '1'">
           <a
-            class="badge badge-secondary mr-2"
+            class="text-primary mr-2"
             v-text="section.sectionName.replace('_', ' ')"
             :href="'#' + section.sectionName"
           ></a>
         </template>
-      </small>
+      </span>
     </div>
     <div class="jumbotron container">
       <template v-for="section in faq" :key="section">
