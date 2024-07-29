@@ -16,7 +16,7 @@
       <div class="row m-0">
         <div class="col-sm-2">
           <img
-            src="@/assets/img/paper.gif"
+            src="@/assets/img/visualize-schema.svg"
             alt="register"
             class="w-100"
             style="border-radius: 50%"
@@ -44,7 +44,7 @@
       <div class="row m-0">
         <div class="col-sm-2">
           <img
-            src="@/assets/img/wave.gif"
+            src="@/assets/img/schema-reg.svg"
             alt="register"
             class="w-100"
             style="border-radius: 50%"
@@ -105,7 +105,7 @@
       <div class="row m-0">
         <div class="col-sm-2">
           <img
-            src="@/assets/img/computer.gif"
+            src="@/assets/img/build-schema.svg"
             alt="register"
             class="w-100"
             style="border-radius: 50%"
@@ -280,11 +280,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/7hf2495v/playground.jpg",
+          content: "https://i.postimg.cc/mDdZgc5D/playground.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/7hf2495v/playground.jpg",
+          content: "https://i.postimg.cc/mDdZgc5D/playground.jpg",
         },
         {
           property: "og:url",

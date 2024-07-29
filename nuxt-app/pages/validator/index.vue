@@ -4,6 +4,7 @@ import { reactive, computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import Notify from "simple-notify";
 import { useRouter, useRoute } from "vue-router";
+import validator_img from "../../assets/img/validator.svg";
 
 const { $swal } = useNuxtApp();
 const store = useStore();
@@ -52,11 +53,11 @@ useHead({
     },
     {
       name: "og:image",
-      content: "https://i.postimg.cc/ZRm0nQ0h/dde-Validator.jpg",
+      content: "https://i.postimg.cc/hjxFHXR6/validator.jpg",
     },
     {
       name: "twitter:image",
-      content: "https://i.postimg.cc/ZRm0nQ0h/dde-Validator.jpg",
+      content: "https://i.postimg.cc/hjxFHXR6/validator.jpg",
     },
   ],
 });
@@ -292,12 +293,15 @@ onMounted(() => {
     :class="[!expandedWide ? 'container' : 'container-fluid px-3']"
   >
     <div class="jumbotron bg-light text-center p-2">
-      <h1 class="logoText logoFont">Metadata Validator</h1>
+      <h1 class="text-dde-mid mt-5">
+        <img :src="validator_img" width="100" height="100" alt="Generator" />
+        Metadata Validator
+      </h1>
     </div>
-    <div class="row p-2 alert-secondary rounded mb-5">
+    <div class="row p-2 bg-dde-mid rounded mb-5">
       <div class="col-sm-12 alert-info p-0">
         <div
-          class="bg-info p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
+          class="bg-dde-light p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
         >
           <div class="numberCircle mainBackDark m-0 mr-2">1</div>
           <strong class="text-light mr-2">Schema Class Validation:</strong>
@@ -306,7 +310,8 @@ onMounted(() => {
               <input
                 type="text"
                 list="input_ac"
-                placeholder="Type here..."
+                placeholder="Start here"
+                data-tippy-content="Select a class to validate against"
                 v-model="searchTerm"
                 class="form-control form-control-sm"
               />
@@ -377,7 +382,7 @@ onMounted(() => {
       </div>
       <div class="col-sm-12 col-md-7 alert-primary p-0">
         <div
-          class="bg-primary p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
+          class="bg-dde-mid p-1 d-flex justify-content-start align-items-center flex-wrap px-4 py-2"
         >
           <div class="numberCircle mainBackDark m-0 mr-2">2</div>
           <strong class="text-light mr-2">Metadata:</strong>

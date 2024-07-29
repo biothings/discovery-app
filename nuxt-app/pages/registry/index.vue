@@ -1,13 +1,13 @@
 <template>
   <div id="registry" class="jumbotron bg-white" style="min-height: 80vh">
-    <div class="container">
+    <div class="container mt-5">
       <div>
-        <h1 class="text-center logoText mb-1 mt-2">Schema Registry</h1>
+        <h1 class="text-center text-dde-dark mb-1 mt-5">Schema Registry</h1>
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
             <nuxt-link
               class="nav-link"
-              :class="{ 'bg-dark text-light': choice == 'classes' }"
+              :class="{ 'bg-dde-accent text-light': choice == 'classes' }"
               to="/registry?search=classes"
               >Search By Class Name</nuxt-link
             >
@@ -15,7 +15,7 @@
           <li class="nav-item" role="presentation">
             <nuxt-link
               class="nav-link"
-              :class="{ 'bg-dark text-light': choice == 'namespaces' }"
+              :class="{ 'bg-dde-accent text-light': choice == 'namespaces' }"
               to="/registry?search=namespaces"
               >Browse By Namespace</nuxt-link
             >
@@ -26,7 +26,7 @@
           <div v-if="choice == 'classes'">
             <div class="p-2 alert-secondary">
               <div class="alert alert-light jumbotron">
-                <h2 class="logoText">Classes</h2>
+                <h2 class="text-dde-dark">Classes</h2>
                 <p>
                   Visualize (<font-awesome-icon
                     icon="fas fa-eye"
@@ -42,7 +42,7 @@
               </div>
               <div>
                 <form @submit.prevent="search()">
-                  <div class="row m-0 cBox actions bg-secondary rounded">
+                  <div class="row m-0 cBox actions bg-dde-mid rounded">
                     <div class="col-sm-9 p-2">
                       <div class="d-flex align-item-center">
                         <div
@@ -64,7 +64,7 @@
                       </div>
                     </div>
                     <div
-                      class="col-sm-3 p-2 bg-dark actions d-flex align-items-center justify-content-around"
+                      class="col-sm-3 p-2 bg-dde-dark actions d-flex align-items-center justify-content-around"
                     >
                       <span
                         class="fa-stack fa-1x pointer unselectable tip"
@@ -104,7 +104,7 @@
                       >
                         <font-awesome-icon
                           icon="fas fa-circle"
-                          class="mainTextDark fa-stack-2x"
+                          class="text-muted fa-stack-2x"
                         />
                         <font-awesome-icon
                           icon="fas fa-not-equal"
@@ -254,7 +254,7 @@
           <div v-if="choice == 'namespaces'">
             <div class="p-2 alert-dark">
               <div class="alert alert-light jumbotron">
-                <h2 class="logoText">Namespaces</h2>
+                <h2 class="text-dde-dark">Namespaces</h2>
                 <p>
                   Browse registered namespaces and view their available schema
                   classes and properties.
@@ -325,7 +325,7 @@
           <span id="closeBtn" class="close">&times;</span>
         </div>
         <div>
-          <h5 class="text-center logoText">Compare Schemas</h5>
+          <h5 class="text-center text-dde-dark">Compare Schemas</h5>
         </div>
         <div
           class="d-flex justify-content-center p-2"

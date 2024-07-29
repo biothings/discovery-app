@@ -1,9 +1,9 @@
 <template>
   <li
-    class="list-group-item row m-0 d-flex justify-content-center align-items-stretch p-0"
+    class="list-group-item row m-0 d-flex justify-content-center align-items-stretch p-0 mt-1"
   >
     <div
-      class="col-sm-3 d-flex justify-content-center align-items-center text-light"
+      class="col-sm-3 d-flex justify-content-center align-items-center text-dark"
       :class="[r.schemaorgCompliant ? 'bg-success' : 'bg-danger']"
     >
       <div class="text-center">
@@ -29,7 +29,7 @@
         </a>
       </div>
     </div>
-    <div class="col-sm-9">
+    <div class="col-sm-9 text-dark">
       <h5>
         <span v-text="r.name"></span>
       </h5>

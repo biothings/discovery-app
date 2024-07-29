@@ -7,12 +7,16 @@
   <template v-else>
     <li class="nav-item">
       <nuxt-link
-        class="nav-link pulse headTip bg-info"
+        class="nav-link pulse headTip themeButton"
         id="navPhotoLink"
         to="/dashboard/"
         data-tippy-content="Manage your contributions"
       >
-        <small class="mr-1">{{ userInfo?.login }}</small>
+        <small class="mr-2">{{
+          userInfo?.name
+            ? "Hello, " + userInfo.name.split(" ")[0]
+            : userInfo?.login
+        }}</small>
         <img
           v-if="!userInfo.avatar_url"
           id="navPhoto"

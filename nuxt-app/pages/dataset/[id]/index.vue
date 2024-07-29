@@ -100,12 +100,12 @@ function getPreview() {
 
 function getFeatured(meta) {
   if (meta.value?._meta?.guide.includes("n3c")) {
-    return "https://i.postimg.cc/bY9q3pMn/n3c.jpg";
+    return "https://i.postimg.cc/ry0C25bK/n3cfeatured.jpg";
   }
   if (meta.value?._meta?.guide.includes("outbreak")) {
-    return "https://i.postimg.cc/PJr96spb/outbreak.jpg";
+    return "https://i.postimg.cc/brs2gRj1/outbreakfeatured.jpg";
   }
-  return "https://i.postimg.cc/sDvbMVVR/dataset.jpg";
+  return "https://i.postimg.cc/wTG3pgRY/featured.jpg";
 }
 
 function getMetadata(id) {
@@ -264,7 +264,7 @@ getMetadata(id);
 </script>
 
 <template>
-  <div class="alert-secondary">
+  <div class="alert-secondary mt-5 pb-5">
     <div v-if="metadata && metadata.name" class="container">
       <div class="text-left" style="margin: auto">
         <div class="text-light grad-light">
@@ -320,10 +320,13 @@ getMetadata(id);
         </div>
         <div class="bg-light p-4 text-center">
           <div class="p-3 text-left">
-            <span
+            <!-- <span
               class="text-dark m-auto"
               v-html="processMarkdown(metadata.description)"
-            ></span>
+            ></span> -->
+            <CollapsibleText
+              :text="processMarkdown(metadata.description)"
+            ></CollapsibleText>
           </div>
           <template v-for="(content, name) in viewMetadata" :key="name">
             <ResourceFieldBox
@@ -340,7 +343,7 @@ getMetadata(id);
             </template>
           </div>
         </div>
-        <div class="alert alert-info text-muted mt-5">
+        <div class="alert bg-dde-mid-muted text-dde-dark m-5">
           <h5>Embed this structured dataset metadata on your website</h5>
           <h6>Embedding options:</h6>
           <div class="row">
@@ -353,7 +356,7 @@ getMetadata(id);
                   your website's code.</small
                 >
               </p>
-              <p class="text-info">
+              <p class="text-dde-mid bold">
                 <small
                   >Changes to metadata will be applied automatically.</small
                 >
@@ -378,7 +381,7 @@ getMetadata(id);
                   <code>&lt;/head&gt;</code> tag, paste the code below.</small
                 >
               </p>
-              <p class="text-info">
+              <p class="text-dde-mid bold">
                 <small>Changes to metadata need to be updated manually.</small>
               </p>
               <small class="d-block text-muted">

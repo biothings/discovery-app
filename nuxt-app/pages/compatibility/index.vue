@@ -6,13 +6,13 @@
     <div v-if="loading" class="loader">
       <img src="@/assets/img/ripple.svg" />
     </div>
-    <div class="row m-0 w-100 mt-5">
-      <div class="mt-3 col-sm-12">
+    <div class="row m-0 w-100 mt-5 bg-dde-mid">
+      <div class="mt-3 col-sm-12 mt-5">
         <Flowchart class="col-sm-12 col-md-8 m-auto border"></Flowchart>
       </div>
       <div class="col-sm-12">
         <form class="row m-0">
-          <div class="col-sm-12 bg-dark p-3 mt-5 text-light">
+          <div class="col-sm-12 bg-dde-dark p-3 mt-5 text-light">
             <h3 class="text-center">
               Check data portal compatibility with schema.org structured
               metadata
@@ -33,7 +33,7 @@
             </div>
           </div>
 
-          <div class="col-sm-12 p-0">
+          <div class="col-sm-12 p-0 mb-5">
             <div class="row m-0">
               <div class="col-sm-12 col-md-3 row m-0 alert-dark pt-3">
                 <div class="form-group col-sm-12">
@@ -135,11 +135,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/YCQ2ZNL0/compatibility.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/YCQ2ZNL0/compatibility.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:url",

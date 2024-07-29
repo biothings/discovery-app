@@ -1,5 +1,5 @@
 <template>
-  <div class="p-3 mb-2 alert alert-secondary">
+  <div class="p-3 mb-2 alert alert-light">
     <div v-if="q && q.name">
       <a class="d-inline text-info" :href="'/ns/' + q.name.split(':')[0]">
         <h3
@@ -24,13 +24,13 @@
       ></h3>
     </div>
     <template v-if="q && q.domain">
-      <small class="text-muted">is a property of: </small>
+      <small class="text-dark">is a property of: </small>
       <template v-for="(item, index) in q.domain">
         <template v-for="link in getLink(item)">
           <RouterLink
             class="d-inline bold mr-1"
             :to="link"
-            :class="[index !== q.domain.length - 1 ? 'text-muted' : textColor]"
+            :class="[index !== q.domain.length - 1 ? 'text-dark' : textColor]"
           >
             <small>
               <span v-html="item"></span>
@@ -44,13 +44,13 @@
         <li v-for="path in getPaths(q)">
           <span v-for="(item, index) in path">
             <!-- <a
-              :class="[index !== path.length - 1 ? 'text-muted' : textColor]"
+              :class="[index !== path.length - 1 ? 'text-dark' : textColor]"
               class="font-weight-bold"
               :href="getBreadcrumbLink(item)"
               v-text="item"
             ></a> -->
             <span
-              :class="[index !== path.length - 1 ? 'text-muted' : textColor]"
+              :class="[index !== path.length - 1 ? 'text-dark' : textColor]"
               class="font-weight-bold pointer"
               @click="goTo(item)"
               v-text="item"
@@ -71,7 +71,7 @@
       :class="textColor"
     ></p>
     <template v-if="q && q.range">
-      <small class="text-muted"
+      <small class="text-dark"
         >Values expected to be one of these types:
       </small>
       <template v-for="(item, index) in q.range">
@@ -79,7 +79,7 @@
           <RouterLink
             class="d-inline bold"
             :to="link"
-            :class="[index !== q.domain.length - 1 ? 'text-muted' : textColor]"
+            :class="[index !== q.domain.length - 1 ? 'text-dark' : textColor]"
           >
             <small>
               <span v-html="item"></span>
@@ -126,10 +126,10 @@
                 <span v-html="item.label"></span>
               </a>
               <p>
-                <small
-                  class="text-muted"
+                <span
+                  class="text-dark"
                   v-html="item.description || 'No description provided'"
-                ></small>
+                ></span>
               </p>
             </td>
             <td>

@@ -1,5 +1,6 @@
 import { createStore } from "vuex";
 import { auth } from "./modules/auth";
+import { about } from "./modules/about";
 import { faq } from "./modules/faq";
 import { compatibility } from "./modules/compatibility";
 import { json_schema_viewer } from "./modules/json_schema_viewer";
@@ -32,6 +33,7 @@ export default createStore({
     editor_validation,
     news,
     mg,
+    about,
   },
   state: () => ({
     loading: false,

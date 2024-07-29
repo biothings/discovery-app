@@ -1,7 +1,7 @@
 <template>
   <div id="viewer" v-cloak>
     <!-- HOMEPAGE MODE -->
-    <div class="alert-secondary" v-if="!query">
+    <div class="alert-light" v-if="!query">
       <div
         class="grad-dark d-flex justify-content-center align-items-center flex-wrap pt-5"
       >
@@ -116,7 +116,7 @@
       </div>
 
       <div
-        class="row w-100 alert alert-secondary m-0"
+        class="row w-100 alert alert-light m-0"
         v-if="searchResults.length || searchResultsProps.length"
       >
         <div class="col-sm-12 col-md-6 p-4">
@@ -160,7 +160,7 @@
             id="alphabetical-order"
             class="text-left p-4 bg-light overflow-x-scroll"
           >
-            <h3 class="text-muted d-inline mr-2 logoText">Definitions</h3>
+            <h3 class="text-muted d-inline mr-2 text-dde-dark">Definitions</h3>
             <a
               role="button"
               class="btn btn-sm mainBackDark pointer ml-2"
@@ -266,7 +266,7 @@
                     <div>
                       <font-awesome-icon
                         icon="fas fa-code-branch"
-                        class="pointer tip text-light btn mainBackDark p-1"
+                        class="pointer tip text-light btn themeButton p-1"
                         @click.prevent="saveDataAndRedirect(def['name'])"
                         :data-tippy-content="'Extend ' + def['name']"
                       />
@@ -283,12 +283,12 @@
             id="hierarchical"
             class="text-left p-4 bg-light overflow-x-scroll"
           >
-            <h3 class="text-muted d-inline mr-2 logoText">
+            <h3 class="text-muted d-inline mr-2 text-dde-dark">
               Definition Hierarchy
             </h3>
             <a
               role="button"
-              class="btn btn-sm mainBackDark pointer ml-2"
+              class="btn btn-sm mainBackDark pointer ml-2 text-light"
               @click="flipView()"
               >Change View <font-awesome-icon icon="fas fa-retweet"
             /></a>
@@ -443,7 +443,7 @@
     <div id="mainCont">
       <div class="container mt-5 pt-3" v-if="query">
         <div
-          class="w-100 p-2 bg-dark d-flex align-items-center justify-content-around p-3"
+          class="w-100 p-2 bg-dde-dark d-flex align-items-center justify-content-around p-3"
         >
           <span
             class="fa-stack fa-1x pointer unselectable tip"

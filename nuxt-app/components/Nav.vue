@@ -3,6 +3,11 @@ import Login from "./Login.vue";
 import { useStore } from "vuex";
 import { ref } from "vue";
 
+import validator_img from "../assets/img/validator.svg";
+import generator_img from "../assets/img/generator.svg";
+import res_reg from "../assets/img/resource_reg.svg";
+import schema_reg from "../assets/img/schema-reg.svg";
+
 let store = useStore();
 let portals = store.getters.getPortals;
 let menu = ref(false);
@@ -10,23 +15,12 @@ let menu = ref(false);
 <template>
   <header id="header">
     <title>Data Discovery Engine</title>
-    <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top shadow">
+    <nav
+      class="navbar navbar-expand-md navbar-dark bg-dde-mid fixed-top shadow"
+    >
       <nuxt-link class="navbar-brand" to="/">
-        <img
-          src="@/assets/img/dde-logo-o.svg"
-          width="30"
-          height="30"
-          alt="DDE"
-          class="d-none d-md-inline"
-        />
-        <i class="fas fa-home d-inline d-md-none mainTextDark"></i>
+        <img src="@/assets/img/dde-logo-o-text.png" alt="DDE" height="50" />
       </nuxt-link>
-      <nuxt-link
-        id="logo"
-        class="navbar-brand caps logoText d-none d-md-inline logoFont"
-        to="/"
-        >Data Discovery Engine</nuxt-link
-      >
       <button
         class="navbar-toggler alert-secondary"
         type="button"
@@ -45,19 +39,20 @@ let menu = ref(false);
         id="navbarSupportedContent"
       >
         <ul class="navbar-nav" id="user_link">
+          <li class="nav-item">
+            <nuxt-link class="nav-link h-link" to="/about">About</nuxt-link>
+          </li>
           <li
             class="nav-item"
             data-tippy-content="Create discoverable metadata"
           >
-            <nuxt-link
-              class="nav-link h-link mainTextLight"
-              to="/best-practices"
+            <nuxt-link class="nav-link h-link" to="/best-practices"
               >Discovery Guide</nuxt-link
             >
           </li>
           <li class="nav-item">
             <nuxt-link
-              class="nav-link h-link mainTextDark"
+              class="nav-link h-link"
               to="/schema-playground"
               data-tippy-content="Create and Visualize a Schema"
               >Schema Playground</nuxt-link
@@ -80,7 +75,7 @@ let menu = ref(false);
               aria-haspopup="true"
               aria-expanded="false"
             >
-              Metadata Playground
+              Metadata Toolkit
             </nuxt-link>
             <div
               class="dropdown-menu p-1"
@@ -90,12 +85,24 @@ let menu = ref(false);
               <nuxt-link
                 class="dropdown-item mainTextLight text-left"
                 to="/validator"
-                >Metadata Validator <i class="fas fa-chevron-right"></i
+              >
+                <img
+                  :src="validator_img"
+                  width="20"
+                  height="20"
+                  alt="Validator" />
+                Metadata Validator <i class="fas fa-chevron-right"></i
               ></nuxt-link>
               <nuxt-link
                 class="dropdown-item mainTextDark text-left"
                 to="/markup-generator"
-                >Markup Generator<i class="fas fa-chevron-right"></i
+              >
+                <img
+                  :src="generator_img"
+                  width="20"
+                  height="20"
+                  alt="Generator" />
+                Markup Generator<i class="fas fa-chevron-right"></i
               ></nuxt-link>
             </div>
           </li>
@@ -148,12 +155,16 @@ let menu = ref(false);
               <nuxt-link
                 class="dropdown-item mainTextLight text-left"
                 to="/dataset"
-                >Resource Registry <i class="fas fa-chevron-right"></i
+              >
+                <img :src="res_reg" width="20" height="20" alt="Validator" />
+                Resource Registry <i class="fas fa-chevron-right"></i
               ></nuxt-link>
               <nuxt-link
                 class="dropdown-item mainTextDark text-left"
                 to="/registry"
-                >Schema Registry <i class="fas fa-chevron-right"></i
+              >
+                <img :src="schema_reg" width="20" height="20" alt="Validator" />
+                Schema Registry <i class="fas fa-chevron-right"></i
               ></nuxt-link>
             </div>
           </li>
