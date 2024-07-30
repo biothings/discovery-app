@@ -50,11 +50,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:url",

@@ -5,7 +5,9 @@
     style="min-height: 80vh"
   >
     <div id="dashTippyParent" class="col-sm-12 col-md-8">
-      <h4 class="logoText">{{ $route.params.username }}'s contributions</h4>
+      <h4 class="text-dde-dark">
+        {{ $route.params.username }}'s contributions
+      </h4>
       <div class="mt-3 mainTextDark">
         <div class="numberCircle mainBackDark" v-text="dashboardTotal"></div>
         Registered Schemas
@@ -143,11 +145,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:url",

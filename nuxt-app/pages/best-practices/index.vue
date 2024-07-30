@@ -4,13 +4,11 @@
     class="container-fluid text-dark"
     style="min-height: 100vh; padding-top: 60px"
   >
-    <div class="bg-light text-center mt-1 p-1">
+    <div class="bg-light text-center mt-5 p-1">
       <h1 class="mainTextLight">DATASET DISCOVERY BEST PRACTICES</h1>
     </div>
     <div class="text-center mb-5">
-      <div
-        class="col-md-8 col-sm-12 m-auto p-3 container text-center text-muted"
-      >
+      <div class="col-md-8 col-sm-12 m-auto p-3 container text-left text-dark">
         <p class="d-flex justify-content-center align-items-center">
           <nuxt-link to="/dataset">Metadata Registry</nuxt-link>
           <span class="mx-2">|</span>
@@ -34,7 +32,7 @@
           >
           data-sharing best-practices knowledge.
         </p>
-        <p class="text-muted">
+        <p>
           Let the guided wizard do all the hard work and just fill out the
           fields provided and register your metadata.
         </p>
@@ -44,7 +42,7 @@
           <div class="col-sm-12 col-md-4 align-items-stretch d-flex p-0">
             <div class="row m-0">
               <div
-                class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4"
+                class="col-sm-12 d-flex justify-content-center align-items-center bg-dde-dark text-light text-center py-4"
               >
                 <div>
                   <span class="fa-stack fa-1x m-2">
@@ -57,7 +55,7 @@
                       class="fa-stack-1x text-light"
                     />
                   </span>
-                  <h6 class="text-muted caps">
+                  <h6 class="caps">
                     Produce
                     <a
                       data-tippy-content="Learn More About FAIR Principles"
@@ -72,7 +70,7 @@
                 </div>
               </div>
               <div
-                class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4"
+                class="col-sm-12 d-flex justify-content-center align-items-center bg-dde-dark text-light text-center py-4"
               >
                 <div>
                   <span class="fa-stack fa-1x m-2">
@@ -85,13 +83,13 @@
                       class="fa-stack-1x text-light"
                     />
                   </span>
-                  <h6 class="text-muted caps">
+                  <h6 class="caps">
                     Fast and easy to use <br />Step-by-step guide.
                   </h6>
                 </div>
               </div>
               <div
-                class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4"
+                class="col-sm-12 d-flex justify-content-center align-items-center bg-dde-dark text-light text-center py-4"
               >
                 <div>
                   <span class="fa-stack fa-1x m-2">
@@ -104,14 +102,14 @@
                       class="fa-stack-1x text-light"
                     />
                   </span>
-                  <h6 class="text-muted caps">
+                  <h6 class="caps">
                     Customize discoverability<br />
                     by Data Portals.
                   </h6>
                 </div>
               </div>
               <div
-                class="col-sm-12 d-flex justify-content-center align-items-center alert-secondary text-center py-4"
+                class="col-sm-12 d-flex justify-content-center align-items-center bg-dde-dark text-light text-center py-4"
               >
                 <div>
                   <span class="fa-stack fa-1x m-2">
@@ -124,7 +122,7 @@
                       class="fa-stack-1x text-light"
                     />
                   </span>
-                  <h6 class="text-muted caps">
+                  <h6 class="caps">
                     Generate findable metadata<br />
                     by computers and humans.
                   </h6>
@@ -152,7 +150,7 @@
         </div>
       </div>
       <div class="container px-5" id="choose">
-        <h1 class="logoText">Choose a Template</h1>
+        <h1 class="text-dde-dark">Choose a Template</h1>
         <div class="container">
           <p class="text-muted">
             Learn how this metadata will be available via our
@@ -167,10 +165,7 @@
         <div
           class="d-flex justify-content-center align-items-stretch flex-wrap"
         >
-          <div
-            class="card text-center m-1 border border-success"
-            style="width: 18rem"
-          >
+          <div class="card text-center m-1" style="width: 18rem">
             <div class="card-header">
               Data Portal | <nuxt-link to="/portal/cd2h">CD2H</nuxt-link>
             </div>
@@ -214,9 +209,9 @@
                 <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
               </nuxt-link>
             </div>
-            <div class="card-footer text-muted alert-secondary">
+            <div class="card-footer text-light bg-dde-mid">
               <b>About this guide:</b>
-              <table class="table table-sm table-secondary table-striped">
+              <table class="table table-sm table-dark table-striped">
                 <tbody>
                   <tr>
                     <td>
@@ -301,9 +296,9 @@
                 <font-awesome-icon icon="fas fa-plus" /> Submit Request
               </nuxt-link>
             </div>
-            <div class="card-footer text-muted alert-info">
+            <div class="card-footer text-light bg-dde-mid">
               <b>About this guide:</b>
-              <table class="table table-sm table-secondary table-striped">
+              <table class="table table-sm table-dark table-striped">
                 <tbody>
                   <tr>
                     <td>
@@ -390,9 +385,9 @@
                 <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
               </nuxt-link>
             </div>
-            <div class="card-footer text-muted alert-info">
+            <div class="card-footer text-light bg-dde-mid">
               <b>About this guide:</b>
-              <table class="table table-sm table-info table-striped">
+              <table class="table table-sm table-dark table-striped">
                 <tbody>
                   <tr>
                     <td>
@@ -487,9 +482,9 @@
                 <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
               </nuxt-link>
             </div>
-            <div class="card-footer text-muted alert-info">
+            <div class="card-footer text-light bg-dde-mid">
               <b>About this guide:</b>
-              <table class="table table-sm table-info table-striped">
+              <table class="table table-sm table-dark table-striped">
                 <tbody>
                   <tr>
                     <td>
@@ -553,11 +548,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/Kj1nFptt/bestpractices.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/Kj1nFptt/bestpractices.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:url",
