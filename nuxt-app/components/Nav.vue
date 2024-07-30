@@ -154,7 +154,7 @@ let menu = ref(false);
             >
               <nuxt-link
                 class="dropdown-item mainTextLight text-left"
-                to="/dataset"
+                to="/resource"
               >
                 <img :src="res_reg" width="20" height="20" alt="Validator" />
                 Resource Registry <i class="fas fa-chevron-right"></i

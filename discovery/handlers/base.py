@@ -48,19 +48,19 @@ class UserInfoHandler(DiscoveryBaseHandler):
         )  # dict(user) to convert UserInfo type to dict, self.finish cannot accept UserInfo
 
 
-class DatasetSitemapHandler(tornado.web.RequestHandler):
+class ResourceSitemapHandler(tornado.web.RequestHandler):
     def get(self):
         ids = datasets.get_ids()
         tpl = tornado.template.Template(
             """
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
             <url>
-                <loc>https://discovery.biothings.io/dataset</loc>
+                <loc>https://discovery.biothings.io/resource</loc>
             </url>
             {% for _id in ids %}
                 {% block _id %}
                 <url>
-                    <loc>{{ "https://discovery.biothings.io/dataset/" + escape(_id) }}</loc>
+                    <loc>{{ "https://discovery.biothings.io/resource/" + escape(_id) }}</loc>
                 </url>
                 {% end %}
             {% end %}
@@ -73,6 +73,6 @@ class DatasetSitemapHandler(tornado.web.RequestHandler):
 HANDLERS = [
     (r"/user/?", UserInfoHandler),
     (r"/logout/?", LogoutHandler),
-    (r"/sitemap/dataset.xml", DatasetSitemapHandler),
+    (r"/sitemap/resource.xml", ResourceSitemapHandler),
     (r"/dataset/(geo/.+)", RedirectHandler, {"url": "http://metadataplus.biothings.io/{0}"}),
 ]

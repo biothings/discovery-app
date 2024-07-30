@@ -88,11 +88,11 @@ function getPreview() {
     html:
       `<h6 class="text-center mainTextDark">Copy this code</h6><div class="text-left alert-secondary">
                   <div>
-                    <small>
+                    <span>
                       <pre>` +
       txt +
       `</pre>
-                    </small>
+                    </span>
                   </div>
                 </div>`,
   });
@@ -284,14 +284,22 @@ getMetadata(id);
                 >FAQ</router-link
               >
             </div>
-            <small
+            <span
               v-if="metadata && metadata.version"
               class="text-light d-block text-center"
               v-text="'Version ' + metadata.version"
-            ></small>
-            <small v-if="last_updated" class="text-light d-block text-center">
+            ></span>
+            <span v-if="last_updated" class="text-light d-block text-center">
               Last updated <b v-text="last_updated"></b>
-            </small>
+            </span>
+            <div v-if="metadata && metadata._meta.username" class="text-center">
+              <span>
+                Registered by
+                <router-link :to="'/contributor/' + metadata._meta.username">{{
+                  metadata._meta.username
+                }}</router-link></span
+              >
+            </div>
             <div class="text-center" v-if="isN3C">
               <div class="badge badge-pill text-light m-auto" :class="color">
                 <span v-text="n3c_status"></span>
@@ -299,47 +307,49 @@ getMetadata(id);
             </div>
           </div>
           <div class="text-center alert-dark p-2">
-            <template v-if="metadata && metadata._meta.username">
-              <small
-                ><router-link :to="'/contributor/' + metadata._meta.username"
-                  >more by user</router-link
-                ></small
-              >
-              |
-              <small
-                ><a :href="'/api/dataset/' + meta_id" rel="noopener"
-                  >raw json-ld</a
-                ></small
-              >
-              |
-              <template v-if="schemaLink">
-                <small><a :href="schemaLink" rel="noopener">schema</a></small>
-              </template>
-            </template>
+            <span
+              ><a :href="'/api/dataset/' + meta_id" rel="noopener"
+                >raw json-ld</a
+              ></span
+            >
           </div>
         </div>
         <div class="bg-light p-4 text-center">
+          <div class="text-left">
+            Schema:
+            <a :href="schemaLink" rel="noopener" target="_blank">
+              <h5 class="d-inline">
+                {{ metadata?.["@type"] }}
+                <font-awesome-icon icon="fa fa-external-link-alt" />
+              </h5>
+            </a>
+            <hr />
+          </div>
           <div class="p-3 text-left">
-            <!-- <span
+            <span
+              v-if="metadata.description && metadata.description.length < 500"
               class="text-dark m-auto"
               v-html="processMarkdown(metadata.description)"
-            ></span> -->
+            ></span>
             <CollapsibleText
+              v-else
               :text="processMarkdown(metadata.description)"
             ></CollapsibleText>
           </div>
-          <template v-for="(content, name) in viewMetadata" :key="name">
-            <ResourceFieldBox
-              :name="name"
-              :content="content"
-              isChild="false"
-            ></ResourceFieldBox>
-          </template>
+          <table class="table table-striped table-hover">
+            <tbody>
+              <tr v-for="(content, name) in viewMetadata" :key="name">
+                <ResourceFieldBox
+                  :name="name"
+                  :content="content"
+                  isChild="false"
+                ></ResourceFieldBox>
+              </tr>
+            </tbody>
+          </table>
           <div class="d-flex flex-wrap mt-5 justify-content-center">
             <template v-for="item in metadata.keywords">
-              <small class="text-muted m-1"
-                ># <span v-text="item"></span
-              ></small>
+              <span class="text-muted m-1"># <span v-text="item"></span></span>
             </template>
           </div>
         </div>
@@ -350,20 +360,18 @@ getMetadata(id);
             <div class="col-sm-12 col-md-6 p-3">
               <h6>Dynamic Embedding</h6>
               <p>
-                <small
+                <span
                   >Leave it up to us! Just copy the following code and paste it
                   anywhere before the closing <code>&lt;/head&gt;</code> tag on
-                  your website's code.</small
+                  your website's code.</span
                 >
               </p>
               <p class="text-dde-mid bold">
-                <small
-                  >Changes to metadata will be applied automatically.</small
-                >
+                <span>Changes to metadata will be applied automatically.</span>
               </p>
-              <small class="d-block text-muted">
+              <span class="d-block text-muted">
                 <b>CLICK TO COPY</b>
-              </small>
+              </span>
               <input
                 id="myInput"
                 @click="copyScript('myInput')"
@@ -376,17 +384,17 @@ getMetadata(id);
             <div class="col-sm-12 col-md-6 p-3">
               <h6>Hard Coded</h6>
               <p>
-                <small
+                <span
                   >In your website's code anywhere before the closing
-                  <code>&lt;/head&gt;</code> tag, paste the code below.</small
+                  <code>&lt;/head&gt;</code> tag, paste the code below.</span
                 >
               </p>
               <p class="text-dde-mid bold">
-                <small>Changes to metadata need to be updated manually.</small>
+                <span>Changes to metadata need to be updated manually.</span>
               </p>
-              <small class="d-block text-muted">
+              <span class="d-block text-muted">
                 <b>COPY THIS CODE:</b>
-              </small>
+              </span>
               <button
                 class="btn-secondary text-light btn m-auto"
                 @click="getPreview()"
@@ -394,8 +402,8 @@ getMetadata(id);
                 View Code
               </button>
               <br />
-              <small
-                ><a class="pointer" @click="download()">Download Code</a></small
+              <span
+                ><a class="pointer" @click="download()">Download Code</a></span
               >
             </div>
           </div>

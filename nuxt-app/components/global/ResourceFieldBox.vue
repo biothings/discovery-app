@@ -8,7 +8,7 @@
     <template v-if="type == 'array'">
       <div class="row m-0">
         <div class="text-left">
-          <small
+          <span
             class="text-primary"
             @click="expandArray = !expandArray"
             style="cursor: pointer"
@@ -19,7 +19,7 @@
             >)
             <b v-if="!expandArray">+</b>
             <b v-if="expandArray">-</b>
-          </small>
+          </span>
         </div>
         <div class="col-sm-12" v-if="expandArray">
           <div>
@@ -112,30 +112,30 @@
       <div class="d-flex">
         <template v-if="isUrl(content)">
           <div class="text-left">
-            <small class="mainTextDark">
+            <span class="mainTextDark">
               <b v-text="readable_name"></b>
               <font-awesome-icon v-if="!readable_name" icon="fas fa-circle" />
               <span v-else>:</span>
-            </small>
+            </span>
           </div>
           <div class="ml-1">
             <a :href="content" target="_blank" rel="nonreferrer">
-              <small
+              <span
                 ><span v-text="content"></span>
                 <font-awesome-icon icon="fas fa-external-link-alt" class="ml-1"
-              /></small>
+              /></span>
             </a>
           </div>
         </template>
         <template v-else
           > 
           <div class="d-flex">
-            <small class="mainTextDark">
+            <span class="mainTextDark">
               <b
                 v-text="readable_name ? readable_name + ' :' : ''"
                 class="mr-1"
               ></b>
-            </small>
+            </span>
           </div>
           <div class="d-flex">
             <a
@@ -147,25 +147,25 @@
               rel="nonreferrer"
             ></a>
             <template v-else>
-              <small>
+              <span>
                 <font-awesome-icon
                   v-if="name == '@type' && content == 'Person'"
                   icon="fas fa-user"
-                  class="text-muted"
+                  class="text-dark"
                 />
                 <font-awesome-icon
                   v-if="name == '@type' && content == 'Organization'"
                   icon="fas fa-building"
-                  class="text-muted"
+                  class="text-dark"
                 />
                 <font-awesome-icon
                   v-if="name == '@type' && content == 'CreativeWork'"
                   icon="fas fa-lightbulb"
-                  class="text-muted"
+                  class="text-dark"
                 />
-              </small>
+              </span>
               &nbsp;
-              <small class="text-muted text-left" v-html="content"></small>
+              <span class="text-dark text-left" v-html="content"></span>
             </template>
           </div>
         </template>
@@ -175,10 +175,10 @@
     <template v-if="type == 'object'">
       <div class="d-flex">
         <div class="d-flex justify-content-start align-items-center">
-          <small class="mainTextDark">
+          <span class="mainTextDark">
             <b v-text="readable_name"></b>
             <font-awesome-icon icon="fas fa-chevron-right" class="mr-1" />
-          </small>
+          </span>
         </div>
         <div>
           <template v-for="(value, key) in content" :key="key + 'child'">
@@ -195,19 +195,19 @@
     <template v-if="type == 'boolean'">
       <div class="d-flex">
         <div class="d-flex justify-content-start align-items-center">
-          <small class="mainTextDark">
+          <span class="mainTextDark">
             <b v-text="readable_name"></b> :&nbsp;
-          </small>
+          </span>
         </div>
         <div>
-          <small v-if="content === true"
+          <span v-if="content === true"
             ><font-awesome-icon icon="fas fa-check" class="text-success" />
             <span v-text="content"></span
-          ></small>
-          <small v-else
+          ></span>
+          <span v-else
             ><font-awesome-icon icon="fas fa-times" class="text-danger" />
             <span v-text="content"></span
-          ></small>
+          ></span>
         </div>
       </div>
     </template>
@@ -215,12 +215,12 @@
     <template v-if="type == 'number'">
       <div class="d-flex">
         <div class="d-flex justify-content-start align-items-center">
-          <small class="mainTextDark">
+          <span class="mainTextDark">
             <b v-text="readable_name"></b> :&nbsp;
-          </small>
+          </span>
         </div>
         <div>
-          <small><span v-text="content"></span></small>
+          <span><span v-text="content"></span></span>
         </div>
       </div>
     </template>

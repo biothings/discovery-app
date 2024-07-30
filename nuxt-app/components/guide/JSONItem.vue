@@ -28,7 +28,7 @@
           <summary>🛎️ You've already registered this metadata.</summary>
           <small
             >Here's a link to
-            <router-link target="_blank" :to="'/dataset/' + exists"
+            <router-link target="_blank" :to="'/resource/' + exists"
               >that record</router-link
             >. If you choose to update this record it will replace the
             previously registered metadata completely.
@@ -38,7 +38,7 @@
           <summary>🚨 Already registered by someone else.</summary>
           <small
             >The identifier provided has already been used to register
-            <a target="_blank" :href="'/dataset/' + exists">this record</a>.
+            <a target="_blank" :href="'/resource/' + exists">this record</a>.
             Looks like you won't be able to make any changes to this item.
           </small>
         </template>
@@ -398,7 +398,7 @@ export default {
           self.loading = false;
           if (res.data.success) {
             self.successMSG =
-              `<a class="btn btn-sm alert-success" href="/dataset/` +
+              `<a class="btn btn-sm alert-success" href="/resource/` +
               res.data.id +
               `" target="_blank" rel="nonreferrer"> 
               View Registration</a>`;
@@ -445,7 +445,7 @@ export default {
               value: self.exists,
             });
             self.successMSGUpdate =
-              `<a class="btn btn-sm alert-info" href="/dataset/` +
+              `<a class="btn btn-sm alert-info" href="/resource/` +
               self.exists +
               `" target="_blank" rel="nonreferrer">
                View Update</a>`;

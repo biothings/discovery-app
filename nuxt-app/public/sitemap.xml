@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>https://discovery.biothings.io/sitemap.xml</loc>
+    <loc>https://discovery.biothings.io/static-sitemap.xml</loc>
   </sitemap>
   <sitemap>
-    <loc>https://discovery.biothings.io/sitemap/dataset.xml</loc>
+    <loc>https://discovery.biothings.io/sitemap/resource.xml</loc>
   </sitemap>
 </sitemapindex>

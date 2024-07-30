@@ -18,7 +18,7 @@
           @click="goTo(item)"
         >
           <img :src="imgIcon" width="20" :alt="item.name" class="mr-1" />
-          <nuxt-link :to="{ path: '/dataset/' + item._id }">{{
+          <nuxt-link :to="{ path: '/resource/' + item._id }">{{
             item.name
           }}</nuxt-link>
           <span
@@ -140,7 +140,7 @@ export default {
       }
     },
     detailLink: function () {
-      return "/dataset/" + this.item._id;
+      return "/resource/" + this.item._id;
     },
     last_updated: function () {
       if (

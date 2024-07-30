@@ -36,7 +36,7 @@
                 <b class="d-block">
                   <small>
                     <span class="text-dark" v-text="hit.name"></span>.
-                    <a :href="'/dataset/' + hit['_id']" target="_blank"
+                    <a :href="'/resource/' + hit['_id']" target="_blank"
                       >Show me this dataset
                       <font-awesome-icon
                         icon="fas fa-chevron-right"
