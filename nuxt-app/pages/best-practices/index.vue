@@ -10,7 +10,7 @@
     <div class="text-center mb-5">
       <div class="col-md-8 col-sm-12 m-auto p-3 container text-left text-dark">
         <p class="d-flex justify-content-center align-items-center">
-          <nuxt-link to="/dataset">Metadata Registry</nuxt-link>
+          <nuxt-link to="/resource">Metadata Registry</nuxt-link>
           <span class="mx-2">|</span>
           <nuxt-link to="/coverage">Metadata Coverage</nuxt-link>
         </p>

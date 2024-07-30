@@ -193,7 +193,7 @@
           <div class="link-wrapper">
             <nuxt-link
               class="link hover-1 mt-5"
-              to="/dataset"
+              to="/resource"
               style="z-index: 2"
             >
               <img :src="res_reg" width="150" alt="resource registry" />
@@ -215,12 +215,14 @@
         </div>
       </div>
     </div>
-    <div class="bg-dde-mid jumbotron m-0">
-      <p class="text-center bold text-light">
+    <div class="bg-light jumbotron m-0">
+      <p class="text-center bold text-dde-dark">
         The Data Discovery Engine is a project from the
         <a href="http://wulab.io/" rel="noreferrer" target="_blank">Wu Lab</a>
-        at Scripps Research and is supported by the National Center for
-        Advancing Translational Sciences (5 U24 TR002306).
+        and
+        <a href="http://sulab.org/" rel="noreferrer" target="_blank">Su Lab</a>
+        at Scripps Research and is supported by the National Cancer Institute
+        (75N91019D00024).
       </p>
     </div>
   </div>

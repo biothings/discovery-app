@@ -62,7 +62,7 @@
           class="col-sm-7 p-1 bg-dark actions d-flex align-items-center justify-content-around"
         >
           <div>
-            <nuxt-link :to="{ path: '/dataset/' + item._id }">
+            <nuxt-link :to="{ path: '/resource/' + item._id }">
               <span
                 class="fa-stack fa-1x pointer tip"
                 data-tippy-content="View Dataset"

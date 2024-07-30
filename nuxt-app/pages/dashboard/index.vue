@@ -292,7 +292,7 @@
                     class="col-sm-12 col-md-8 p-1 mainBackLight d-flex align-items-center justify-content-between"
                   >
                     <nuxt-link
-                      :to="'/dataset/' + item._id"
+                      :to="'/resource/' + item._id"
                       class="m-2 text-light d-block"
                       :title="item.name"
                     >
@@ -306,7 +306,7 @@
                     class="col-sm-12 col-md-4 p-1 bg-dark actions d-flex align-items-center justify-content-around"
                   >
                     <div>
-                      <nuxt-link :to="'/dataset/' + item._id">
+                      <nuxt-link :to="'/resource/' + item._id">
                         <span
                           class="fa-stack fa-1x pointer tip"
                           data-tippy-content="View Dataset"

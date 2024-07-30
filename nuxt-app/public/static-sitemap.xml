@@ -2,35 +2,77 @@
   <url>
     <loc>https://discovery.biothings.io/</loc>
     <priority>1.0</priority>
-    <lastmod>2019-10-06</lastmod>
+    <lastmod>2024-07-30</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://discovery.biothings.io/about</loc>
     <priority>0.5</priority>
-    <lastmod>2019-10-06</lastmod>
+    <lastmod>2024-07-30</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://discovery.biothings.io/best-practices</loc>
     <priority>0.5</priority>
-    <lastmod>2019-10-06</lastmod>
+    <lastmod>2024-07-30</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://discovery.biothings.io/dashboard</loc>
     <priority>0.5</priority>
-    <lastmod>2019-10-06</lastmod>
+    <lastmod>2024-07-30</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://discovery.biothings.io/faq</loc>
     <priority>0.5</priority>
-    <lastmod>2019-10-06</lastmod>
+    <lastmod>2024-07-30</lastmod>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://discovery.biothings.io/guide</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/compatibility</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/branding</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/contributor</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/coverage</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/editor</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/json-schema-viewer</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/markup-generator</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/ns</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/portal</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/registries</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/registry</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/validator</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/resource</loc>
+  </url>
+  <url>
+    <loc>https://discovery.biothings.io/whats-new</loc>
   </url>
   <url>
     <loc>https://discovery.biothings.io/registry</loc>
@@ -38,7 +80,7 @@
   <url>
     <loc>https://discovery.biothings.io/schema-playground</loc>
     <priority>0.5</priority>
-    <lastmod>2019-10-06</lastmod>
+    <lastmod>2024-07-30</lastmod>
     <changefreq>monthly</changefreq>
   </url>
 </urlset>
