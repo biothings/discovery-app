@@ -10,7 +10,7 @@ export const about = {
           {
             name: "Andrew",
             lastname: "Su",
-            title: "Principal Investigator",
+            title: "Professor",
             work_logo: scripps_img,
             work_website: "https://www.scripps.edu/",
             bio: "",
@@ -139,6 +139,10 @@ export const about = {
       {
         name: "Jiwen (Kevin)",
         lastname: "Xin",
+      },
+      {
+        name: "Laura",
+        lastname: "Hughes",
       },
     ],
   }),

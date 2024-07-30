@@ -20,7 +20,7 @@ export const news = {
             title: "Metadata Registry Downloads",
             description: `The DDE's metadata registry now allows single or bulk item download in addition to being able to download as JSON or CSV.`,
             icon: newFeature,
-            link: "/dataset",
+            link: "/resource",
           },
           {
             id: "223",
