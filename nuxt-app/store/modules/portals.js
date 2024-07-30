@@ -3,6 +3,7 @@ import dde from "~~/assets/img/dde-logo-o.svg";
 import n3c from "~~/assets/img/N3Co.png";
 import n3cLogo from "~~/assets/img/N3Cwhite.png";
 import outbreak from "~~/assets/img/outbreak_white.svg";
+import outbreak_logo from "~~/assets/img/outbreak/outbreak_logo.svg";
 import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import creiddIcon from "~~/assets/img/creid/icon.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
@@ -23,8 +24,8 @@ export const portals = {
             </p><p>
             Outbreak.info focuses on aggregating all SARS-CoV-2 / COVID-19 information into a single site. We focus on making the metadata about these resources more standardized, on creating web interfaces to make the resources more findable, and on a few focused data integration efforts to make data more usable.
             </p>`,
-        image: outbreak,
-        portalicon: outbreakIcon,
+        image: outbreak_logo,
+        portalicon: outbreak_logo,
         api: "https://api.outbreak.info/",
         site: "https://outbreak.info/",
         schema: "/view/outbreak",

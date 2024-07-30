@@ -1,8 +1,8 @@
 <template>
   <div id="registry" class="jumbotron" style="min-height: 80vh">
     <div class="col-md-10 col-sm-12 m-auto p-0">
-      <div class="">
-        <h1 class="text-center logoText mb-1 mt-2">
+      <div class="text-dark mt-5">
+        <h1 class="text-center text-dde-dark mb-1 mt-2">
           <span v-if="N3CView">N3C</span> Resource Registry
         </h1>
         <p class="text-center text-muted" v-if="N3CView">
@@ -12,7 +12,7 @@
         </p>
         <div>
           <form @submit.prevent="search(query)">
-            <div class="row m-0 cBox actions bg-secondary">
+            <div class="row m-0 cBox actions bg-dde-mid">
               <div class="col-sm-10 p-2">
                 <div class="">
                   <input
@@ -26,7 +26,7 @@
                 </div>
               </div>
               <div
-                class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around"
+                class="col-sm-2 p-2 bg-dde-dark actions d-flex align-items-center justify-content-around"
               >
                 <span
                   data-tippy-content="search"
@@ -35,7 +35,7 @@
                 >
                   <font-awesome-icon
                     icon="fas fa-circle"
-                    class="text-muted fa-stack-2x"
+                    class="text-info fa-stack-2x"
                   />
                   <font-awesome-icon
                     icon="fas fa-search"
@@ -52,7 +52,7 @@
                 >
                   <font-awesome-icon
                     icon="fas fa-circle"
-                    class="text-muted fa-stack-2x"
+                    class="text-danger fa-stack-2x"
                   />
                   <font-awesome-icon
                     icon="fas fa-undo"
@@ -63,9 +63,9 @@
             </div>
           </form>
         </div>
-        <div class="alert-dark m-0 p-1" v-if="!N3CView">
-          <div style="width: 120px" class="text-muted d-inline-block">
-            <small>Portals</small>
+        <div class="bg-dde-muted m-0 p-1" v-if="!N3CView">
+          <div style="width: 120px" class="text-dde-dark d-inline-block">
+            <b>Filter by Portal:</b>
           </div>
           <template
             v-for="filter in all_filters['_meta.guide']"
@@ -339,11 +339,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/sDvbMVVR/dataset.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/sDvbMVVR/dataset.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:url",

@@ -18,27 +18,27 @@ if (portal_name) {
   switch (portal_name) {
     case "nde":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/d1RJrJYk/niaidportal.jpg";
+      featuredImg = "https://i.postimg.cc/9Mms0J6P/niaid.jpg";
       break;
     case "creid":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/d0mRcHRw/creidfeatured.jpg";
+      featuredImg = "https://i.postimg.cc/9Mms0J6P/niaid.jpg";
       break;
     case "niaid":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/J0QNFjbc/niaidportal.jpg";
+      featuredImg = "https://i.postimg.cc/9Mms0J6P/niaid.jpg";
       break;
     case "outbreak":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/3w4WfN01/outportal.jpg";
+      featuredImg = "https://i.postimg.cc/brs2gRj1/outbreakfeatured.jpg";
       break;
     case "cd2h":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/Dz2bCndY/cd2hportal.jpg";
+      featuredImg = "https://i.postimg.cc/wTG3pgRY/featured.jpg";
       break;
     case "n3c":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/y87FGm7P/n3cportal.jpg";
+      featuredImg = "https://i.postimg.cc/ry0C25bK/n3cfeatured.jpg";
       break;
     default:
       redirect();
@@ -157,24 +157,30 @@ useHead({
 </script>
 
 <template>
-  <div id="portal" class="container-fluid p-0" style="min-height: 80vh">
+  <div
+    id="portal"
+    class="container-fluid p-0 border border-bottom-info"
+    style="min-height: 80vh"
+  >
     <template v-if="portal?.name">
       <div class="row m-0">
         <div
           class="text-center col-sm-12 p-0"
           :style="{ background: gradient }"
         >
-          <div class="lines p-5" style="min-height: 250px">
+          <div class="lines p-5 mt-5" style="min-height: 250px">
             <img
               class="mt-4"
               :src="portal?.image"
               :alt="portal?.name"
               width="300"
             />
-            <nuxt-link to="/portal" class="d-block text-info"
-              ><font-awesome-icon icon="fas fa-chevron-left" /> Back to
-              Portals</nuxt-link
-            >
+            <div>
+              <nuxt-link to="/portal" class="btn btn-sm btn-light text-dark"
+                ><font-awesome-icon icon="fas fa-chevron-left" /> Back to
+                Portals</nuxt-link
+              >
+            </div>
           </div>
         </div>
         <div
@@ -230,7 +236,9 @@ useHead({
               </div>
             </template>
             <template v-else>
-              <div class="border-top text-center text-muted p-2">
+              <div
+                class="border-top text-center text-dde-dark p-5 bg-dde-mid-muted"
+              >
                 <h4>Contribute</h4>
                 <p>
                   Follow an easy-to-follow guide to help you contribute metadata
@@ -265,7 +273,8 @@ useHead({
           </div>
         </div>
         <div
-          class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch alert-dark p-5"
+          class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch bg-dde-dark p-5"
+          :style="{ borderLeft: portal.colors[0].hex + ' solid 5px' }"
         >
           <div class="text-center p-2 m-1 rounded p-3" v-if="portal.site">
             <WebsiteIcon :color="portal?.colors[0]?.hex"></WebsiteIcon>
@@ -273,7 +282,7 @@ useHead({
               :href="portal.site"
               target="_blank"
               rel="noreferrer"
-              class="nd mt-2 tip text-info"
+              class="nd mt-2 tip text-light"
               :data-tippy-content="'Explore the ' + portal.name + ' website'"
             >
               <h5>Site <font-awesome-icon icon="fas fa-chevron-right" /></h5>
@@ -283,7 +292,7 @@ useHead({
             <SchemaIcon :color="portal?.colors[0]?.hex"></SchemaIcon>
             <nuxt-link
               :to="{ path: portal.schema }"
-              class="nd mt-2 tip text-info"
+              class="nd mt-2 tip text-light"
               :data-tippy-content="'Explore the schema used in ' + portal.name"
             >
               <h5>Schema <font-awesome-icon icon="fas fa-chevron-right" /></h5>
@@ -297,7 +306,7 @@ useHead({
             <MetadataIcon :color="portal?.colors[0]?.hex"></MetadataIcon>
             <nuxt-link
               :to="g.registry"
-              class="nd mt-2 tip text-info"
+              class="nd mt-2 tip text-light"
               :data-tippy-content="
                 'Browse metadata in Data Discovery Engine for ' + g.name
               "
@@ -316,7 +325,7 @@ useHead({
             <nuxt-link
               :to="{ path: '/coverage' }"
               rel="noreferrer"
-              class="nd mt-2 tip text-info rounded"
+              class="nd mt-2 tip text-light rounded"
               data-tippy-content="Explore and visualize metadata coverage"
             >
               <h5>
@@ -333,7 +342,7 @@ useHead({
               :href="portal.api"
               target="_blank"
               rel="noreferrer"
-              class="nd mt-2 tip text-info"
+              class="nd mt-2 tip text-light"
               :data-tippy-content="'Explore API for ' + portal.name"
             >
               <h5>API <font-awesome-icon icon="fas fa-chevron-right" /></h5>
@@ -346,7 +355,7 @@ useHead({
             <FAQIcon :color="portal?.colors[0]?.hex"></FAQIcon>
             <nuxt-link
               :to="{ path: portal.faq_link }"
-              class="nd mt-2 tip text-info"
+              class="nd mt-2 tip text-light"
               data-tippy-content="Frequently Asked Questions"
             >
               <h5>FAQ <font-awesome-icon icon="fas fa-chevron-right" /></h5>

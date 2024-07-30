@@ -1,6 +1,6 @@
 <template>
   <div class="bg-light" style="position: relative">
-    <h4 class="logoText text-center m-2">
+    <h4 class="text-dde-dark text-center m-2">
       <font-awesome-icon icon="fab fa-github-alt" /> Save your work to GitHub
     </h4>
     <p class="text-dark w-50 m-auto mb-2">
@@ -36,7 +36,7 @@
         class="col-sm-12 col-md-4 border p-1"
         :class="[repo_selected ? 'alert-success' : 'alert-light']"
       >
-        <h6 class="logoText">1. Choose a repository</h6>
+        <h6 class="text-dde-dark">1. Choose a repository</h6>
         <small class="text-muted"
           >Choose an existing repository to save your work to.</small
         >
@@ -79,7 +79,7 @@
         class="col-sm-12 col-md-4 border p-1"
         :class="[name_selected ? 'alert-success' : 'alert-light']"
       >
-        <h6 class="logoText">2. Choose file</h6>
+        <h6 class="text-dde-dark">2. Choose file</h6>
         <small class="text-muted">Create or update an existing file.</small>
         <div v-if="repo_selected">
           <small class="text-info d-block" v-if="!existing_file"
@@ -168,7 +168,7 @@
         class="col-sm-12 col-md-4 border p-1"
         :class="[repo_saved ? 'alert-success' : 'alert-light']"
       >
-        <h6 class="logoText">3. Save to GitHub</h6>
+        <h6 class="text-dde-dark">3. Save to GitHub</h6>
         <small v-if="!existing_file" class="text-muted"
           >A new file will be saved to this repository.</small
         >

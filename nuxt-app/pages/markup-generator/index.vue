@@ -7,6 +7,7 @@ import { useRouter, useRoute } from "vue-router";
 
 import CodeEditorWithProp from "../../components/CodeEditorWithProp";
 import InputBox from "../../components/guide/InputBox";
+import generator_img from "../../assets/img/generator.svg";
 
 const { $swal } = useNuxtApp();
 const runtimeConfig = useRuntimeConfig();
@@ -49,11 +50,11 @@ useHead({
     },
     {
       name: "og:image",
-      content: "https://i.postimg.cc/ZRm0nQ0h/dde-Validator.jpg",
+      content: "https://i.postimg.cc/X7C7cYPZ/generator.jpg",
     },
     {
       name: "twitter:image",
-      content: "https://i.postimg.cc/ZRm0nQ0h/dde-Validator.jpg",
+      content: "https://i.postimg.cc/X7C7cYPZ/generator.jpg",
     },
   ],
 });
@@ -136,13 +137,16 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="mt-4 p-0">
-    <div class="container text-left alert-dark pt-2">
-      <div class="alert alert-light mt-5">
-        <h3 class="p-1 logoText">{{ searchTerm || "Markup Generator" }}</h3>
+  <div class="mt-4 p-0 bg-light">
+    <div class="container text-left bg-light pt-2">
+      <div class="mt-5 text-center">
+        <h1 class="p-1 text-dde-dark">
+          <img :src="generator_img" width="100" height="100" alt="Generator" />
+          {{ searchTerm || "Markup Generator" }}
+        </h1>
       </div>
-      <div class="m-0 row">
-        <div class="col-sm-12 bg-dark p-2">
+      <div class="m-0 row p-1 bg-dde-mid">
+        <div class="col-sm-12 bg-dde-dark p-2">
           <form @submit.prevent="handleSubmit()" class="d-flex col-sm-5">
             <input
               type="text"
@@ -185,17 +189,23 @@ onMounted(() => {
             v-if="!searchTerm"
             class="row d-flex justify-content-center align-items-center"
           >
-            <div class="col-sm-8 alert alert-primary mt-5">
+            <div class="col-sm-8 alert bg-dde-muted mt-5">
               <h5>Instructions</h5>
-              <p>
-                Select a class from the list above and fill out a form that will
-                generate JSON markup compatible wth that class' validation
-                rules.
-              </p>
+              <ol>
+                <li>
+                  Select a class to start with from the list and hit the
+                  <b>load</b> button.
+                </li>
+                <li>
+                  We'll display this class' validation as an easy-to-use form.
+                </li>
+                <li>Fill out whatever fields you want.</li>
+                <li>Hit the <b>Generate JSON</b> to see your output.</li>
+              </ol>
             </div>
           </div>
           <div class="text-danger alert-dark m-0 p-1">
-            <h5 class="m-0">Required</h5>
+            <h5 v-if="validation?.properties" class="m-0">Required</h5>
           </div>
           <template v-for="(prop, index) in validation.properties" :key="index">
             <InputBox
@@ -205,7 +215,7 @@ onMounted(() => {
             ></InputBox>
           </template>
           <div class="text-info alert-dark m-0 p-1">
-            <h5 class="m-0">Recommended</h5>
+            <h5 v-if="validation?.properties" class="m-0">Recommended</h5>
           </div>
           <template v-for="(prop, index) in validation.properties" :key="index">
             <InputBox
@@ -215,16 +225,19 @@ onMounted(() => {
             ></InputBox>
           </template>
         </div>
-        <div class="col-sm-12 col-md-5 p-0 mainBackDark">
+        <div class="col-sm-12 col-md-5 p-0 bg-dde-mid">
           <div
             v-if="searchTerm"
-            class="d-flex justify-content-center align-items-start grad"
+            class="d-flex justify-content-center align-items-start grad-light"
           >
             <button class="btn btn-success m-1" @click="updateEditor">
               Generate JSON
             </button>
           </div>
-          <CodeEditorWithProp :item="json"></CodeEditorWithProp>
+          <CodeEditorWithProp
+            class="alert-secondary"
+            :item="json"
+          ></CodeEditorWithProp>
           <div class="alert-warning p-1 m-0">
             <small>
               Note: Changes you type here won't have any effect on the form on

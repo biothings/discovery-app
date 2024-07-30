@@ -8,7 +8,7 @@
     <audio id="dropsound" :src="dropSound"></audio>
     <div>
       <div class="jumbotron bg-light text-center m-1 p-2">
-        <h1 class="logoText">Schema Editor</h1>
+        <h1 class="text-dde-dark">Schema Editor</h1>
         <small class="text-muted"
           >Extend an existing schema to create your own.</small
         >
@@ -520,11 +520,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/rssJ788J/editor.jpg",
+          content: "https://i.postimg.cc/GpnYnP7V/editor.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/rssJ788J/editor.jpg",
+          content: "https://i.postimg.cc/GpnYnP7V/editor.jpg",
         },
         {
           property: "og:url",

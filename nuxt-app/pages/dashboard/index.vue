@@ -1,15 +1,21 @@
 <template>
-  <section id="dashboard">
+  <section id="dashboard" class="bg-dde-dark">
     <div
       class="container"
       style="min-height: 100vh; padding-top: 80px"
       v-if="userInfo?.login"
     >
-      <h1 class="text-muted caps">My Dashboard</h1>
+      <h1 class="text-light caps mt-5">
+        {{
+          userInfo?.name
+            ? "Hello, " + userInfo.name.split(" ")[0] + "!"
+            : "My Dashboard"
+        }}
+      </h1>
       <div class="dashboard">
         <div class="row mb-5">
           <!-- uSER BOX -->
-          <div class="col-sm-2 p-0 userInfo bg-secondary">
+          <div class="col-sm-2 p-0 userInfo bg-dde-mid">
             <div class="pRelative">
               <img
                 v-if="userInfo.avatar_url"
@@ -26,9 +32,9 @@
                 src="@/assets/img/default.png"
                 alt="userInfo photo"
               />
-              <div class="clip bg-secondary pAbsolute" style="z-index: 2"></div>
+              <div class="clip bg-dde-mid pAbsolute" style="z-index: 2"></div>
             </div>
-            <div class="text-light p-3 text-center">
+            <div class="text-light p-3 text-center bg-dde-mid">
               <template v-if="userInfo && userInfo.name">
                 <p class="text-light mt-4 lighter" v-text="userInfo.name"></p>
               </template>
@@ -44,7 +50,7 @@
           </div>
           <!-- RESULTS -->
           <div class="col-sm-10" id="dashTippyParent">
-            <div class="alert-dark p-2">
+            <div class="bg-dde-mid-muted p-2">
               <div class="mt-3 mainTextDark">
                 ({{ total_NS }}) Registered Schema Namespaces
               </div>
@@ -235,7 +241,7 @@
               </div>
             </div>
 
-            <div class="alert-info p-2">
+            <div class="bg-dde-accent-muted p-2">
               <div class="mt-3 mainTextLight">
                 ({{ datasetsTotal }}) Registered Datasets
               </div>
@@ -512,11 +518,11 @@ export default {
       meta: [
         {
           name: "twitter:image",
-          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:image",
-          content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+          content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
         },
         {
           property: "og:url",

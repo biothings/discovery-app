@@ -2,18 +2,18 @@
   <li class="list-group-item">
     <h6 class="font-weight-bold mainTextDark">
       <i
-        class="fas fa-tiny fa-code text-muted float-right"
+        class="fas fa-tiny fa-code text-dark float-right"
         :data-tippy-content="JSON.stringify(propinfo, null, 2)"
       ></i>
       <span v-text="propname"></span>
-      <span v-if="isRequired" class="text-danger caps" style="zoom: 0.5"
+      <span v-if="isRequired" class="text-danger caps ml-2" style="zoom: 0.5"
         >is required</span
       >
     </h6>
-    <small class="text-muted" v-text="propinfo['description']"></small>
+    <small class="text-dark" v-text="propinfo['description']"></small>
     <div class="d-flex rounded-0">
       <div
-        class="text-muted px-5 py-3 d-flex justify-content-center align-items-center"
+        class="text-dark px-5 py-3 d-flex justify-content-center align-items-center"
       >
         <small>
           TAKES <i class="fas fa-chevron-right"></i>
@@ -68,7 +68,7 @@
           v-if="propinfo && propinfo.properties"
           class="d-flex justify-content-center align-items-center"
         >
-          <i class="fas fa-chevron-right m-1 text-muted"></i>
+          <i class="fas fa-chevron-right m-1 text-dark"></i>
         </div>
         <div
           v-if="propinfo && propinfo.properties"
@@ -111,10 +111,10 @@
           class="d-flex justify-content-center align-items-center"
         >
           <div class="d-flex justify-content-center align-items-center">
-            <small class="text-muted">ONE OF</small>
+            <small class="text-dark">ONE OF</small>
           </div>
           <div class="d-flex justify-content-center align-items-center">
-            <i class="fas fa-chevron-right m-1 text-muted"></i>
+            <i class="fas fa-chevron-right m-1 text-dark"></i>
           </div>
           <div class="d-flex justify-content-center align-items-center">
             <div class="border-left border-info pl-3">

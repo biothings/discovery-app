@@ -1,4 +1,4 @@
-import diagram from "~~/assets/img/diagram.png";
+import diagram from "~~/assets/img/diagram.svg";
 import schemagraph from "~~/assets/img/schemagraph.png";
 import dashhelp from "~~/assets/img/dashhelp.png";
 import editor from "~~/assets/img/editor.png";
@@ -23,6 +23,14 @@ export const faq = {
               answer: `<p>
                                 The Data Discovery Engine is a website that provides guidance for researchers on how to make their data discoverable and reusable, and bring the practical benefits of data sharing to researcher’s own research projects, as well as the research community as a whole.
                             </p>
+                            <ol>
+                              <li>Users interested in registering metadata with the goal of making their metadata Findable, Accessible, Interoperable and Reusable (FAIR).</li>
+                              <li>Users interested in developing a schema to represent the data they are interested in via an existing extensible schema standard.</li>
+                              <li>Metadata forms that output compliant structured metadata based on specific project requirements.</li>
+                              <li>A group of tools to help you create a schema and validation rules by extending existing classes.</li>
+                              <li>Project specific portals that take advantage of all the tools in the DDE to register compliant metadata based on their own unique schema and tools to manage that data.</li>
+                              <li>Metadata based on Schema.org standards that makes it indexable by major search engines.</li>
+                            </ol>
                             <p class="alert alert-secondary">
                                 <small>
                                 Through it's three main components the Data Discovery Engine can support: the extension and reusability of schemas, structured metadata tools that utilize those schemas and making the resulting metadata accessible through our API and Data Portals supported. 

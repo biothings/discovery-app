@@ -4,6 +4,13 @@ import Footer from "./components/Footer.vue";
 import { useStore } from "vuex";
 import { onMounted, computed } from "vue";
 
+// scroll to top on page change
+const nuxtApp = useNuxtApp();
+
+nuxtApp.hook("page:finish", () => {
+  window.scrollTo(0, 0);
+});
+
 const store = useStore();
 let isLoading = computed(() => store.getters.loading);
 
@@ -154,7 +161,7 @@ useHead({
     <div v-if="isLoading" class="loader">
       <img src="@/assets/img/ripple.svg" />
     </div>
-    <NuxtLoadingIndicator color="#63286b" />
+    <NuxtLoadingIndicator color="#d83f88" />
     <NuxtPage></NuxtPage>
     <Footer></Footer>
   </div>

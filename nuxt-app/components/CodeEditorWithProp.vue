@@ -1,5 +1,5 @@
 <template>
-  <div id="CM-WP" class="bg-light text-left"></div>
+  <div id="CM-WP" class="text-left"></div>
 </template>
 
 <script>
@@ -89,7 +89,9 @@ export default {
     },
   },
   mounted: function () {
-    this.openEditor();
+    setTimeout(() => {
+      this.openEditor();
+    }, 1000);
   },
 };
 </script>

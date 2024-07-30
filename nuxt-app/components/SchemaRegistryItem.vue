@@ -62,38 +62,26 @@
           />
         </p>
       </div>
-      <div class="p-1 bg-dark d-flex align-items-center justify-content-around">
+      <div
+        class="p-1 bg-dde-dark d-flex align-items-center justify-content-around"
+      >
         <div>
-          <span
-            class="fa-stack fa-1x pointer tip mr-2 ml-2"
+          <button
+            class="btn btn-sm btn-info m-1"
             @click.prevent="saveDataAndRedirect(item)"
-            :data-tippy-content="'Visualize ' + item.label"
+            data-tippy-content="Visualize class in detail"
           >
-            <font-awesome-icon
-              icon="fas fa-circle"
-              class="fa-stack-2x text-info"
-            />
-            <font-awesome-icon
-              icon="fas fa-eye"
-              class="fa-stack-1x text-light"
-            />
-          </span>
+            View
+          </button>
         </div>
         <div>
-          <span
-            class="fa-stack fa-1x pointer tip mr-2 ml-2"
+          <button
+            class="btn btn-sm bg-dde-light text-light m-1"
             @click.prevent="saveDataAndRedirect(item, 'editor')"
-            :data-tippy-content="'Extend ' + item.label"
+            data-tippy-content="Extend using this class as a subclass"
           >
-            <font-awesome-icon
-              icon="fas fa-circle"
-              class="fa-stack-2x mainTextLight"
-            />
-            <font-awesome-icon
-              icon="fas fa-code-branch"
-              class="fa-stack-1x text-light"
-            />
-          </span>
+            Extend
+          </button>
         </div>
       </div>
       <div

@@ -9,11 +9,11 @@ useHead({
   meta: [
     {
       name: "twitter:image",
-      content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+      content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
     },
     {
       property: "og:image",
-      content: "https://i.postimg.cc/qq5MjpZv/ddefeatured.jpg",
+      content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
     },
     {
       property: "og:url",
@@ -45,29 +45,29 @@ useHead({
 <template>
   <div
     id="portals"
-    class="container-fluid alert-secondary py-5"
+    class="container-fluid alert-dark py-5 text-dde-dark"
     style="min-height: 80vh"
   >
     <div class="jumbotron bg-none mb-0 text-center">
-      <h1 class="logoText">Data Portals</h1>
-      <p class="w-75 m-auto text-muted">
+      <h1 class="text-dde-dark bold">Data Portals</h1>
+      <p class="w-75 m-auto">
         Explore data portals and learn how you can contribute and access their
         data.
       </p>
     </div>
     <div class="container">
-      <ul class="list-group">
+      <div class="d-flex justify-content-center flex-wrap">
         <template v-for="portal in portals" :key="portal.name">
-          <li
-            class="list-group-item mb-1"
-            :style="{ borderLeft: portal.colors[1].hex + ' solid 10px' }"
+          <div
+            class="card mb-1 col-sm-4 m-2 p-2"
+            :style="{ borderLeft: portal.colors[0].hex + ' solid 30px' }"
           >
             <div>
               <div class="d-flex justify-content-start align-items-center">
                 <img
                   :src="portal.portalicon"
                   :alt="portal.name"
-                  width="50px"
+                  width="50"
                   class="mr-2"
                 />
                 <RouterLink
@@ -83,9 +83,29 @@ useHead({
               </div>
               <h5 class="mt-3" v-text="portal.header"></h5>
             </div>
-          </li>
+          </div>
         </template>
-      </ul>
+      </div>
+      <div class="alert bg-light text-dde-dark m-5 bold">
+        <h2>
+          Apply to feature your project here and enjoy all these features:
+        </h2>
+        <ul class="text-left">
+          <li>Register a custom schema</li>
+          <li>Advanced metadata intake guides</li>
+          <li>Share and embed your metadata easily</li>
+          <li>Metadata field coverage</li>
+          <li>Schema/Metadata management dashboard</li>
+        </ul>
+        <h4>
+          <a
+            href="https://github.com/biothings/discovery-app/issues/new/choose"
+            target="_blank"
+            rel="nonreferrer"
+            >Fill out an application to get started today</a
+          >.
+        </h4>
+      </div>
     </div>
   </div>
 </template>

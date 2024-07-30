@@ -42,11 +42,11 @@ useHead({
   meta: [
     {
       name: "twitter:image",
-      content: "https://i.postimg.cc/FsGxPZJG/coverage.jpg",
+      content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
     },
     {
       property: "og:image",
-      content: "https://i.postimg.cc/FsGxPZJG/coverage.jpg",
+      content: "https://i.postimg.cc/wTG3pgRY/featured.jpg",
     },
     {
       property: "og:url",

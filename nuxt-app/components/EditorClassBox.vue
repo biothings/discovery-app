@@ -361,7 +361,7 @@
     </div>
 
     <div
-      class="col-sm-2 p-2 bg-dark actions d-flex align-items-center justify-content-around"
+      class="col-sm-2 p-2 bg-dde-dark actions d-flex align-items-center justify-content-around"
     >
       <span
         v-if="item.special"
@@ -414,7 +414,7 @@
 
     <div
       v-if="addPropMode"
-      class="col-sm-12 p-2 bg-dark d-flex align-items-center justify-content-center text-light"
+      class="col-sm-12 p-2 bg-dde-dark d-flex align-items-center justify-content-center text-light"
     >
       <div class="col-sm-10 m-auto p-3 bg-light text-muted rounded">
         <h5>New Property</h5>

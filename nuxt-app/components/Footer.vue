@@ -1,37 +1,107 @@
 <template>
-  <footer class="section bg-dark text-light footer">
-    <div class="container padding20">
+  <footer class="section bg-black text-light footer">
+    <div class="container p-5">
       <div class="d-flex justify-content-around flex-wrap align-items-start">
         <div class="p-2">
-          <h6 class="text-light">Data Discovery Engine</h6>
-          <nuxt-link class="d-block text-light" to="/">Home</nuxt-link>
-          <nuxt-link class="d-block text-light" to="/about">About</nuxt-link>
-          <nuxt-link class="d-block text-light" to="/faq/dde">FAQ</nuxt-link>
-          <nuxt-link class="d-block text-light" to="/best-practices"
-            >Discovery Guide</nuxt-link
-          >
-          <nuxt-link class="d-block text-light" to="/schema-playground"
-            >Schema Playground</nuxt-link
-          >
+          <h6 class="text-dde-light">Data Discovery Engine</h6>
+          <ul>
+            <li>
+              <nuxt-link class="d-block text-light" to="/">Home</nuxt-link>
+            </li>
+            <li>
+              <nuxt-link class="d-block text-light" to="/about"
+                >About</nuxt-link
+              >
+            </li>
+            <li>
+              <nuxt-link class="d-block text-light" to="/portal"
+                >Data Portals</nuxt-link
+              >
+            </li>
+            <li>
+              <nuxt-link class="d-block text-light" to="/best-practices"
+                >Discovery Guide</nuxt-link
+              >
+              <ul>
+                <li>
+                  <nuxt-link class="text-light" to="/dataset"
+                    >Metadata Registry</nuxt-link
+                  >
+                </li>
+                <li>
+                  <nuxt-link class="text-light" to="/markup-generator"
+                    >Metadata Generator</nuxt-link
+                  >
+                </li>
+                <li>
+                  <nuxt-link class="text-light" to="/validator"
+                    >Metadata Validator</nuxt-link
+                  >
+                </li>
+              </ul>
+            </li>
+            <li>
+              <nuxt-link class="d-block text-light" to="/schema-playground"
+                >Schema Playground</nuxt-link
+              >
+              <ul>
+                <li>
+                  <nuxt-link class="text-light" to="/registry"
+                    >Schema Registry</nuxt-link
+                  >
+                </li>
+                <li>
+                  <nuxt-link class="text-light" to="/ns"
+                    >Schema Visualizer</nuxt-link
+                  >
+                </li>
+                <li>
+                  <nuxt-link class="text-light" to="/json-schema-viewer"
+                    >JSON schema validation viewer</nuxt-link
+                  >
+                </li>
+              </ul>
+            </li>
+            <li>
+              <nuxt-link class="d-block text-light" to="/compatibility"
+                >Schema.org Project Compatibility Report</nuxt-link
+              >
+            </li>
+            <li>
+              <nuxt-link class="d-block text-light" to="/branding"
+                >Branding</nuxt-link
+              >
+            </li>
+            <li>
+              <nuxt-link class="d-block text-light" to="/faq/dde"
+                >FAQ</nuxt-link
+              >
+            </li>
+          </ul>
         </div>
         <div class="p-2">
-          <h6 class="text-light">Contact US</h6>
+          <h6 class="text-dde-light">Contact Us</h6>
           <a
             class="d-block text-light"
             target="_blank"
-            href="mailto:cd2h-metadata@googlegroups.com"
+            href="mailto:help@biothings.io"
             ><font-awesome-icon icon="fas fa-envelope" /> Email</a
           >
         </div>
         <div class="p-2">
-          <h6 class="text-light">Contribute</h6>
+          <h6 class="text-dde-light">Contribute | Issues</h6>
           <a
             class="d-block text-light"
             target="_blank"
-            href="https://github.com/data2health/rdp-portal"
+            href="https://github.com/biothings/discovery-app"
             ><font-awesome-icon icon="fab fa-github" /> GitHub</a
           >
         </div>
+      </div>
+      <div class="d-flex justify-content-around flex-wrap mt-3">
+        <img src="@/assets/img/wulab.png" alt="wulab" height="100" />
+        <img src="@/assets/img/scripps.png" alt="scripps" height="100" />
+        <img src="@/assets/img/translator.jpg" alt="translator" height="80" />
       </div>
       <p class="rights text-light text-center" style="margin: 0px">
         <small>
