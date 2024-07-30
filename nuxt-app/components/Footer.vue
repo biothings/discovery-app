@@ -24,8 +24,8 @@
               >
               <ul>
                 <li>
-                  <nuxt-link class="text-light" to="/dataset"
-                    >Metadata Registry</nuxt-link
+                  <nuxt-link class="text-light" to="/resource"
+                    >Resource Registry</nuxt-link
                   >
                 </li>
                 <li>
@@ -98,10 +98,18 @@
           >
         </div>
       </div>
-      <div class="d-flex justify-content-around flex-wrap mt-3">
-        <img src="@/assets/img/wulab.png" alt="wulab" height="100" />
-        <img src="@/assets/img/scripps.png" alt="scripps" height="100" />
-        <img src="@/assets/img/translator.jpg" alt="translator" height="80" />
+      <div
+        class="d-flex justify-content-around align-items-center flex-wrap mt-3"
+      >
+        <a href="https://wulab.io/" target="_blank" rel="nonreferrer">
+          <img src="@/assets/img/wulab.png" alt="wulab" height="100" />
+        </a>
+        <a href="https://sulab.org/" target="_blank" rel="nonreferrer">
+          <img src="@/assets/img/sulab.png" alt="sulab" height="50" />
+        </a>
+        <a href="https://www.scripps.edu/" target="_blank" rel="nonreferrer">
+          <img src="@/assets/img/scripps.png" alt="scripps" height="100" />
+        </a>
       </div>
       <p class="rights text-light text-center" style="margin: 0px">
         <small>
