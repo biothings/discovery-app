@@ -246,7 +246,14 @@ const viewMetadata = computed(() => {
       chosen_only[v] = metadata.value[v];
     }
   });
-  return chosen_only;
+
+  const ordered = Object.keys(chosen_only)
+    .sort()
+    .reduce((obj, key) => {
+      obj[key] = chosen_only[key];
+      return obj;
+    }, {});
+  return ordered;
 });
 
 const schemaLink = computed(() => {
@@ -297,21 +304,14 @@ getMetadata(id);
                 Registered by
                 <router-link :to="'/contributor/' + metadata._meta.username">{{
                   metadata._meta.username
-                }}</router-link></span
-              >
+                }}</router-link>
+              </span>
             </div>
             <div class="text-center" v-if="isN3C">
               <div class="badge badge-pill text-light m-auto" :class="color">
                 <span v-text="n3c_status"></span>
               </div>
             </div>
-          </div>
-          <div class="text-center alert-dark p-2">
-            <span
-              ><a :href="'/api/dataset/' + meta_id" rel="noopener"
-                >raw json-ld</a
-              ></span
-            >
           </div>
         </div>
         <div class="bg-light p-4 text-center">
@@ -323,6 +323,11 @@ getMetadata(id);
                 <font-awesome-icon icon="fa fa-external-link-alt" />
               </h5>
             </a>
+            <small style="float: right"
+              ><a :href="'/api/dataset/' + meta_id" rel="noopener"
+                >Metadata in JSON-LD</a
+              ></small
+            >
             <hr />
           </div>
           <div class="p-3 text-left">

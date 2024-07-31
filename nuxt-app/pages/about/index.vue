@@ -93,7 +93,12 @@
                   <img :src="member.image" class="rounded" width="100" />
                 </div>
                 <div class="card-body">
-                  <h6>{{ member.name }} {{ member.lastname }}</h6>
+                  <h6 data-tippy-content="Click to learn more about them">
+                    <a target="_blank" :href="member.personal_site">
+                      {{ member.name }} {{ member.lastname }}
+                      <font-awesome-icon icon="fa fa-external-link-alt" />
+                    </a>
+                  </h6>
                   <p>{{ member.title }}</p>
                 </div>
               </div>
@@ -104,7 +109,13 @@
           <hr />
           <h5>Past Team Members</h5>
           <template v-for="person in pastContributors" :key="person.name">
-            <p>{{ person.name }} {{ person.lastname }}</p>
+            <p>
+              <a :href="person.github" target="_blank">
+                <font-awesome-icon icon="fab fa-github" /> {{ person.name }}
+                {{ person.lastname }}
+                <font-awesome-icon icon="fa fa-external-link-alt" />
+              </a>
+            </p>
           </template>
         </div>
       </div>

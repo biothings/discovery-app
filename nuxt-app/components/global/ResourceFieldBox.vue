@@ -1,15 +1,15 @@
 <template>
   <div
     v-if="name !== '_meta'"
-    class="m-0 rounded-0"
-    :class="[isChild ? 'p-1 border-left' : 'p-1 border-bottom']"
+    class="m-0 rounded-0 p-1"
+    :class="[isChild ? 'border-left' : 'border-bottom']"
   >
     <!-- 🌈 Array 🌈 -->
     <template v-if="type == 'array'">
       <div class="row m-0">
         <div class="text-left">
           <span
-            class="text-primary"
+            class="text-primary ml-1"
             @click="expandArray = !expandArray"
             style="cursor: pointer"
           >
@@ -35,12 +35,12 @@
                 <option value="25">25 per page</option>
                 <option value="100">100 per page</option>
               </select>
-              <div class="d-flex flex-wrap justify-content-center p-1 mt-2">
+              <div class="d-flex flex-wrap justify-content-center mt-2">
                 <div
                   class="page-item rounded-0"
                   :class="{ disabled: page <= 1 }"
                 >
-                  <a class="page-link p-1" @click.prevent="prevPage()"
+                  <a class="page-link" @click.prevent="prevPage()"
                     ><font-awesome-icon icon="fas fa-step-backward"
                   /></a>
                 </div>
@@ -51,7 +51,7 @@
                   >
                     <a
                       href="#"
-                      class="page-link p-1"
+                      class="page-link"
                       @click.prevent="previousGroup()"
                       >Previous 20</a
                     >
@@ -69,7 +69,7 @@
                   >
                     <a
                       href="#"
-                      class="page-link p-1"
+                      class="page-link"
                       @click.prevent="page = n"
                       v-text="n"
                     ></a>
@@ -77,10 +77,7 @@
                 </template>
                 <template v-if="groupPages">
                   <div class="page-item rounded-0" v-show="!endCapLimitReached">
-                    <a
-                      href="#"
-                      class="page-link p-1"
-                      @click.prevent="nextGroup()"
+                    <a href="#" class="page-link" @click.prevent="nextGroup()"
                       >Next 20</a
                     >
                   </div>
@@ -89,21 +86,25 @@
                   class="page-item rounded-0"
                   :class="{ disabled: page >= pages }"
                 >
-                  <a class="page-link p-1" @click.prevent="nextPage()"
+                  <a class="page-link" @click.prevent="nextPage()"
                     ><font-awesome-icon icon="fas fa-step-forward"
                   /></a>
                 </div>
               </div>
             </template>
           </div>
-          <template v-for="item in arrayResults">
-            <ResourceFieldBox
-              class="m-1"
-              name=""
-              :content="item"
-              isChild="true"
-            ></ResourceFieldBox>
-          </template>
+          <table class="table table-sm table-striped table-light">
+            <tbody>
+              <tr v-for="item in arrayResults">
+                <ResourceFieldBox
+                  class="m-1"
+                  name=""
+                  :content="item"
+                  isChild="true"
+                ></ResourceFieldBox>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </template>
@@ -112,7 +113,7 @@
       <div class="d-flex">
         <template v-if="isUrl(content)">
           <div class="text-left">
-            <span class="mainTextDark">
+            <span class="mainTextDark ml-1">
               <b v-text="readable_name"></b>
               <font-awesome-icon v-if="!readable_name" icon="fas fa-circle" />
               <span v-else>:</span>
@@ -175,7 +176,7 @@
     <template v-if="type == 'object'">
       <div class="d-flex">
         <div class="d-flex justify-content-start align-items-center">
-          <span class="mainTextDark">
+          <span class="mainTextDark ml-1">
             <b v-text="readable_name"></b>
             <font-awesome-icon icon="fas fa-chevron-right" class="mr-1" />
           </span>
@@ -195,17 +196,17 @@
     <template v-if="type == 'boolean'">
       <div class="d-flex">
         <div class="d-flex justify-content-start align-items-center">
-          <span class="mainTextDark">
+          <span class="mainTextDark ml-1">
             <b v-text="readable_name"></b> :&nbsp;
           </span>
         </div>
         <div>
           <span v-if="content === true"
-            ><font-awesome-icon icon="fas fa-check" class="text-success" />
+            ><font-awesome-icon icon="fas fa-check" class="text-success mr-1" />
             <span v-text="content"></span
           ></span>
           <span v-else
-            ><font-awesome-icon icon="fas fa-times" class="text-danger" />
+            ><font-awesome-icon icon="fas fa-times" class="text-danger mr-1" />
             <span v-text="content"></span
           ></span>
         </div>
