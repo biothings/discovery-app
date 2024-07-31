@@ -16,7 +16,7 @@ export const about = {
             bio: "",
             education: [],
             image: "https://sulab.org/images/Andrew_Su_smll.jpg",
-            personal_site: "https://sulab.org/",
+            personal_site: "https://sulab.org/members/andrew-su.html",
             links: [
               { title: "twitter", href: "https://twitter.com/chunleiwu" },
               { title: "github", href: "https://github.com/newgene" },
@@ -38,7 +38,7 @@ export const about = {
             ],
             image:
               "http://www.gravatar.com/avatar/108605daee6b3c24d02db9753637a66b?s=200",
-            personal_site: "https://wulab.io/",
+            personal_site: "https://wulab.io/the-team-chunlei-wu",
             links: [
               { title: "twitter", href: "https://twitter.com/chunleiwu" },
               { title: "github", href: "https://github.com/newgene" },
@@ -61,7 +61,7 @@ export const about = {
             ],
             image:
               "https://avatars1.githubusercontent.com/u/23092057?s=460&v=4",
-            personal_site: "http://www.marcodarko.com/",
+            personal_site: "https://wulab.io/the-team-marco-alvarado",
             links: [
               { title: "twitter", href: "" },
               { title: "github", href: "https://github.com/marcodarko" },
@@ -82,7 +82,7 @@ export const about = {
               "BSc. in Computer Science, Minor in Bioinformatics, UNC at Charlotte",
             ],
             image: "https://wulab.io/content/images/2021/09/nicholla.jpg",
-            personal_site: "#",
+            personal_site: "https://wulab.io/the-team-nichollette-acosta",
             links: [
               { title: "twitter", href: "" },
               { title: "github", href: "https://github.com/NikkiBytes" },
@@ -102,7 +102,8 @@ export const about = {
             education: ["M.S. Computer Science"],
             image:
               "https://wulab.io/content/images/2022/12/everaldo_rodolpho.jpeg",
-            personal_site: "#",
+            personal_site:
+              "https://wulab.io/the-team-everaldo-rodrigo-rodolpho",
             links: [
               { title: "twitter", href: "" },
               { title: "github", href: "" },
@@ -121,7 +122,7 @@ export const about = {
               "B.A. Northwestern University, Biology and Chemistry",
             ],
             image: "https://sulab.org/images/gtpic.jpg",
-            personal_site: "#",
+            personal_site: "https://wulab.io/the-team-ginger-tsueng",
             links: [
               { title: "twitter", href: "" },
               { title: "github", href: "" },
@@ -135,14 +136,17 @@ export const about = {
       {
         name: "Xinghua (Jerry)",
         lastname: "Zhou",
+        github: "https://github.com/namespacestd0",
       },
       {
         name: "Jiwen (Kevin)",
         lastname: "Xin",
+        github: "https://github.com/kevinxin90",
       },
       {
         name: "Laura",
         lastname: "Hughes",
+        github: "https://github.com/flaneuse",
       },
     ],
   }),

@@ -19,7 +19,11 @@ let menu = ref(false);
       class="navbar navbar-expand-md navbar-dark bg-dde-mid fixed-top shadow"
     >
       <nuxt-link class="navbar-brand" to="/">
-        <img src="@/assets/img/dde-logo-o-text.png" alt="DDE" height="50" />
+        <img
+          src="@/assets/img/dde-logo-o-text-back.png"
+          alt="DDE"
+          height="50"
+        />
       </nuxt-link>
       <button
         class="navbar-toggler alert-secondary"
