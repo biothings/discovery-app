@@ -218,11 +218,11 @@
     <div class="bg-light jumbotron m-0">
       <p class="text-center bold text-dde-dark">
         The Data Discovery Engine is a project from the
-        <a href="http://wulab.io/" rel="noreferrer" target="_blank">Wu Lab</a>
+        <a href="https://wulab.io/" rel="noreferrer" target="_blank">Wu Lab</a>
         and
-        <a href="http://sulab.org/" rel="noreferrer" target="_blank">Su Lab</a>
-        at Scripps Research and is supported by the National Cancer Institute
-        (75N91019D00024).
+        <a href="https://sulab.org/" rel="noreferrer" target="_blank">Su Lab</a>
+        at Scripps Research and is supported by the National Institutes of
+        Health (75N91019D00024).
       </p>
     </div>
   </div>
