@@ -58,7 +58,7 @@ export default {
         tabSize = new Compartment();
 
       let state = EditorState.create({
-        doc: JSON.stringify(self.item?.validation, null, 2),
+        doc: JSON.stringify(self.item?.validation || self.item, null, 2),
         extensions: [
           basicSetup,
           history(),
