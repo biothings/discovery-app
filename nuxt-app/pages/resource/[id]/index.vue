@@ -10,10 +10,12 @@ const route = useRoute();
 const store = useStore();
 const id = route.params.id;
 let metadata = ref({});
+let metadata_pure = ref({});
 let isN3C = ref(false);
 let meta_id = ref("");
 let n3c_status = ref("");
 let scriptText = ref("");
+let ready = ref(false);
 let color = ref("badge-light");
 
 function processMarkdown(txt) {
@@ -73,31 +75,6 @@ function download() {
   a.click();
 }
 
-function getPreview() {
-  let txt =
-    "&lt;sc" +
-    'ript type="application/ld+json" &gt;' +
-    JSON.stringify(metadata.value, null, 2) +
-    "&lt;/scr" +
-    "ipt&gt;";
-  $swal.fire({
-    position: "center",
-    confirmButtonColor: "#63296b",
-    cancelButtonColor: "#4a7d8f",
-    customClass: "scale-in-center",
-    html:
-      `<h6 class="text-center mainTextDark">Copy this code</h6><div class="text-left alert-secondary">
-                  <div>
-                    <span>
-                      <pre>` +
-      txt +
-      `</pre>
-                    </span>
-                  </div>
-                </div>`,
-  });
-}
-
 function getFeatured(meta) {
   if (meta.value?._meta?.guide.includes("n3c")) {
     return "https://i.postimg.cc/ry0C25bK/n3cfeatured.jpg";
@@ -119,6 +96,13 @@ function getMetadata(id) {
     .then((response) => response.json())
     .then((data) => {
       metadata.value = data;
+      setTimeout(() => {
+        ready.value = true;
+        let o = Object.assign({}, data);
+        delete o["_meta"];
+        delete o["_id"];
+        metadata_pure.value = o;
+      }, 200);
       useHead({
         title: "DDE | " + metadata.value.name,
         meta: [
@@ -218,6 +202,23 @@ function copyScript(id) {
     autoclose: true,
     autotimeout: 2000,
   });
+}
+
+function copyJsonToClipboard() {
+  const jsonString = JSON.stringify(metadata_pure.value, null, 2); // Convert JSON object to a pretty-printed string
+  navigator.clipboard
+    .writeText(jsonString)
+    .then(() => {
+      new Notify({
+        status: "success",
+        title: "Copied!",
+        autoclose: true,
+        autotimeout: 2000,
+      });
+    })
+    .catch((err) => {
+      console.error("Error copying JSON to clipboard: ", err);
+    });
 }
 
 const last_updated = computed(() => {
@@ -358,60 +359,78 @@ getMetadata(id);
             </template>
           </div>
         </div>
-        <div class="alert bg-dde-mid-muted text-dde-dark m-5">
-          <h5>Embed this structured dataset metadata on your website</h5>
-          <h6>Embedding options:</h6>
-          <div class="row">
-            <div class="col-sm-12 col-md-6 p-3">
-              <h6>Dynamic Embedding</h6>
-              <p>
-                <span
-                  >Leave it up to us! Just copy the following code and paste it
-                  anywhere before the closing <code>&lt;/head&gt;</code> tag on
-                  your website's code.</span
-                >
-              </p>
-              <p class="text-dde-mid bold">
-                <span>Changes to metadata will be applied automatically.</span>
-              </p>
-              <span class="d-block text-muted">
-                <b>CLICK TO COPY</b>
-              </span>
-              <input
-                id="myInput"
-                @click="copyScript('myInput')"
-                title="Learn More About FAIR Principles"
-                class="form-control p-2 w-75 m-auto pointer"
-                v-model="scriptText"
-                type="text"
-              />
-            </div>
-            <div class="col-sm-12 col-md-6 p-3">
-              <h6>Hard Coded</h6>
-              <p>
-                <span
-                  >In your website's code anywhere before the closing
-                  <code>&lt;/head&gt;</code> tag, paste the code below.</span
-                >
-              </p>
-              <p class="text-dde-mid bold">
-                <span>Changes to metadata need to be updated manually.</span>
-              </p>
-              <span class="d-block text-muted">
-                <b>COPY THIS CODE:</b>
-              </span>
-              <button
-                class="btn-secondary text-light btn m-auto"
-                @click="getPreview()"
-              >
-                View Code
-              </button>
-              <br />
+        <div class="alert alert-dark text-dde-dark mt-5">
+          <h5>
+            <b>For dataset owner:</b> Embed this structured dataset metadata on
+            your website describing this dataset
+            <span
+              class="text-info"
+              data-tippy-content="This enhances discoverability by making your data easily searchable and accessible through web search engines. This facilitates data sharing and collaboration among researchers and developers. Additionally, it provides clear context and provenance for the datasets, ensuring users understand the source, quality, and relevance of the data."
+              >[why?]</span
+            >
+          </h5>
+          <div class="p-3">
+            <h6>Dynamic Embedding</h6>
+            <hr />
+            <p>
               <span
-                ><a class="pointer" @click="download()">Download Code</a></span
+                >Leave it up to us! Just copy the following code and paste it
+                anywhere before the closing <code>&lt;/head&gt;</code> tag on
+                your website's code.</span
               >
-            </div>
+            </p>
+            <p class="text-dde-mid bold">
+              <span>Changes to metadata will be applied automatically.</span>
+            </p>
+            <span class="d-block text-muted text-center">
+              <b>CLICK THE INPUT FIELD TO COPY</b>
+            </span>
+            <input
+              id="myInput"
+              @click="copyScript('myInput')"
+              title="Learn More About FAIR Principles"
+              class="form-control p-2 w-75 m-auto pointer"
+              v-model="scriptText"
+              type="text"
+            />
           </div>
+          <div class="p-3">
+            <h6>Hard Coded Embedding</h6>
+            <hr />
+            <p>
+              <span
+                >In your website's code anywhere before the closing
+                <code>&lt;/head&gt;</code> tag, paste the code below inside of a
+                script tag like this:
+                <code
+                  >&lt;script type="application/ld+json" &gt; ...your
+                  metadata...&lt;/script&gt;</code
+                >.</span
+              >
+            </p>
+            <p class="text-dde-mid bold">
+              <span>Changes to metadata need to be updated manually.</span>
+            </p>
+          </div>
+        </div>
+        <div class="alert-light">
+          <div class="text-left p-1">
+            <a
+              class="btn btn-sm themeButton text-light mx-3"
+              @click="download()"
+              >Download Metadata</a
+            >
+            <a
+              class="btn btn-sm themeButton text-light mx-3"
+              @click="copyJsonToClipboard()"
+              >Copy Metadata</a
+            >
+          </div>
+          <template v-if="ready">
+            <div style="max-height: 600px; overflow-y: scroll">
+              <CodeEditorWithProp :item="metadata_pure"></CodeEditorWithProp>
+            </div>
+          </template>
         </div>
       </div>
       <div
