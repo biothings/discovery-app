@@ -245,7 +245,9 @@ export default {
       startCapLimitReached: true,
       endCapLimitReached: false,
       readable_labels: {
+        // Acronyms not easily detected or abbreviated
         contain_phi: "Contains PHI",
+        hasAPI: "has API",
         contain_geo_codes: "Contain Geological Codes",
         url: "URL",
       },

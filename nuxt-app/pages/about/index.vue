@@ -120,6 +120,17 @@
         </div>
       </div>
 
+      <div class="jumbotron alert-secondary">
+        <h6>Cite the Data Discovery Engine</h6>
+        <p>
+          Cano MA, Tsueng G, Zhou X, Xin J, Hughes LD, Mullen JL, Su AI, Wu C.
+          Data Discovery Engine a project for authoring, extending, and using
+          metadata schemas to improve FAIRness of biomedical data. BMC
+          Bioinformatics. 2023 Apr 20;24(1):159. doi:
+          10.1186/s12859-023-05258-4. PMID: 37081398; PMCID: PMC10116472.
+        </p>
+      </div>
+
       <div class="jumbotron bg-light text-muted text-center">
         <div class="container">
           <div class="row">

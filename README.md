@@ -1,6 +1,8 @@
-# Discovery
+<img src="https://discovery.biothings.io/dde-logo-o.png" alt="dde" width="100"/>
 
-A Web Schema Visualization App
+# Data Discovery Engine
+
+The Data Discovery Engine (DDE) is a project designed to promote the principles of FAIR (Findable, Accessible, Interoperable, Reusable) data sharing practices. Recognizing the importance of well-structured and easily discoverable data in advancing scientific research and technological development, this initiative advocates for the widespread adoption of schema.org schemas. By leveraging schema.org’s rich vocabulary for structured data and providing tools to easily extend this vocabulary to fit your research goals, the project aims to make biomedical research easily finable by humans and machines alike. The DDE does this by providing a comprehensive set of tools for data creators to annotate their datasets effectively, extend schemas easily and share your metadata efficiently. The ultimate goal is adopting FAIR data sharing practices enables data to be easily indexed by search engines like Google. This enhances the discoverability of datasets, making it simpler for researchers, developers, and other stakeholders to find relevant data quickly.
 
 ## Run a local dev server
 
@@ -78,3 +80,11 @@ docker-compose exec web git pull
 ```bash
 docker-compose down
 ```
+
+# Related Projects
+
+## BioThings Schema Package
+
+biothings_schema is a Python package for the creation, extension and exploration of the schemas defined using the schema.org standard.
+
+https://github.com/biothings/biothings_schema.py
