@@ -221,8 +221,9 @@
         <a href="https://wulab.io/" rel="noreferrer" target="_blank">Wu Lab</a>
         and
         <a href="https://sulab.org/" rel="noreferrer" target="_blank">Su Lab</a>
-        at Scripps Research and is supported by the National Institutes of
-        Health (75N91019D00024).
+        at Scripps Research and is supported by the funds from the National
+        Institutes of Health (U24TR002306, U19AI135995, P01AI177683,
+        75D30120C09795 and 75N91019D00024).
       </p>
     </div>
   </div>
