@@ -96,6 +96,30 @@
             href="https://github.com/biothings/discovery-app"
             ><font-awesome-icon icon="fab fa-github" /> GitHub</a
           >
+          <a
+            class="d-block text-light"
+            target="_blank"
+            href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&projects=&template=bug_report.md&title="
+            >Report a bug</a
+          >
+          <a
+            class="d-block text-light"
+            target="_blank"
+            href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=enhancement&projects=&template=feature_request.md&title="
+            >Request a feature</a
+          >
+          <a
+            class="d-block text-light"
+            target="_blank"
+            href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&projects=&template=metadata-registration-issue.md&title="
+            >Report a metadata registration issue</a
+          >
+          <a
+            class="d-block text-light"
+            target="_blank"
+            href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=bug&projects=&template=bulk-registration-issue.md&title=Issue+registering+some+metadata"
+            >Report a bulk metadata registration issue</a
+          >
         </div>
       </div>
       <div

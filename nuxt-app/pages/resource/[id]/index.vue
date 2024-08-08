@@ -16,6 +16,7 @@ let meta_id = ref("");
 let n3c_status = ref("");
 let scriptText = ref("");
 let ready = ref(false);
+let expand = ref(false);
 let color = ref("badge-light");
 
 function processMarkdown(txt) {
@@ -365,7 +366,8 @@ getMetadata(id);
             your website describing this dataset
             <span
               class="text-info"
-              data-tippy-content="This enhances discoverability by making your data easily searchable and accessible through web search engines. This facilitates data sharing and collaboration among researchers and developers. Additionally, it provides clear context and provenance for the datasets, ensuring users understand the source, quality, and relevance of the data."
+              data-tippy-content="TLDR: This makes your dataset easier to be found from multiple search engines (Google, Bing etc.)<hr>
+A longer explanation: This enhances discoverability by making your data easily searchable and accessible through web search engines like Google. The schema.org compatible, structured metadata in JSON-LD format is now recommended by Google and other search engines for better SEO (Search Engine Optimization). This capability facilitates data sharing and collaboration among researchers and developers. Additionally, it provides clear context and provenance for the datasets, ensuring users understand the source, quality, and relevance of the data."
               >[why?]</span
             >
           </h5>
@@ -411,26 +413,38 @@ getMetadata(id);
             <p class="text-dde-mid bold">
               <span>Changes to metadata need to be updated manually.</span>
             </p>
-          </div>
-        </div>
-        <div class="alert-light">
-          <div class="text-left p-1">
-            <a
-              class="btn btn-sm themeButton text-light mx-3"
-              @click="download()"
-              >Download Metadata</a
-            >
-            <a
-              class="btn btn-sm themeButton text-light mx-3"
-              @click="copyJsonToClipboard()"
-              >Copy Metadata</a
-            >
-          </div>
-          <template v-if="ready">
-            <div style="max-height: 600px; overflow-y: scroll">
-              <CodeEditorWithProp :item="metadata_pure"></CodeEditorWithProp>
+            <div class="alert-info">
+              <button
+                @click="expand = !expand"
+                class="btn d-block themeButton text-light w-100"
+              >
+                {{ expand ? "Close" : "Inspect Metadata" }}
+              </button>
+              <div v-if="expand">
+                <div
+                  class="text-left p-1 d-flex justify-content-end align-items-center alert-dark"
+                >
+                  <a
+                    class="btn btn-sm themeButton text-light mx-3"
+                    @click="download()"
+                    >Download Metadata</a
+                  >
+                  <a
+                    class="btn btn-sm themeButton text-light mx-3"
+                    @click="copyJsonToClipboard()"
+                    >Copy Metadata</a
+                  >
+                </div>
+                <template v-if="ready">
+                  <div style="max-height: 600px; overflow-y: scroll">
+                    <CodeEditorWithProp
+                      :item="metadata_pure"
+                    ></CodeEditorWithProp>
+                  </div>
+                </template>
+              </div>
             </div>
-          </template>
+          </div>
         </div>
       </div>
       <div
