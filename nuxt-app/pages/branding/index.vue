@@ -1,8 +1,6 @@
 <template>
   <div id="about" style="min-height: 100vh" class="reg-hero">
-    <div class="jumbotron p-5 mt-5 bg-dde-mid">
-      <h1 class="text-light">Branding</h1>
-    </div>
+    <Title title="Branding"></Title>
     <div class="jumbotron bg-light p-5 mt-5 text-dde-dark">
       <h2>Terms of Use</h2>
       <p>

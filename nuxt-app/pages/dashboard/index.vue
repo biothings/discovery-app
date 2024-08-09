@@ -1,21 +1,17 @@
 <template>
-  <section id="dashboard" class="bg-dde-dark">
-    <div
-      class="container"
-      style="min-height: 100vh; padding-top: 80px"
-      v-if="userInfo?.login"
-    >
-      <h1 class="text-light caps mt-5">
-        {{
+  <section id="dashboard" class="bg-light">
+    <div class="container min-100" v-if="userInfo?.login">
+      <Title
+        :title="
           userInfo?.name
-            ? "Hello, " + userInfo.name.split(" ")[0] + "!"
-            : "My Dashboard"
-        }}
-      </h1>
+            ? 'Hello, ' + userInfo.name.split(' ')[0] + '!'
+            : 'My Dashboard'
+        "
+      ></Title>
       <div class="dashboard">
         <div class="row mb-5">
           <!-- uSER BOX -->
-          <div class="col-sm-2 p-0 userInfo bg-dde-mid">
+          <div class="col-sm-2 p-0 bg-dde-mid">
             <div class="pRelative">
               <img
                 v-if="userInfo.avatar_url"
