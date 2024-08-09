@@ -1,9 +1,7 @@
 <template>
-  <div id="about" style="min-height: 100vh" class="bg-white">
-    <div class="container" style="margin-top: 40px">
-      <div class="jumbotron bg-white mt-5">
-        <h1 class="text-dde-dark mb-0">About the Data Discovery Project</h1>
-      </div>
+  <div id="about" class="min-100">
+    <div class="container">
+      <Title title="About the Data Discovery Project"></Title>
 
       <div class="p-1">
         <h5 class="mainTextDark caps">

@@ -43,18 +43,12 @@ useHead({
 </script>
 
 <template>
-  <div
-    id="portals"
-    class="container-fluid alert-dark py-5 text-dde-dark"
-    style="min-height: 80vh"
-  >
-    <div class="jumbotron bg-none mb-0 text-center">
-      <h1 class="text-dde-dark bold">Data Portals</h1>
-      <p class="w-75 m-auto">
-        Explore data portals and learn how you can contribute and access their
-        data.
-      </p>
-    </div>
+  <div id="portals" class="container-fluid bg-light text-dde-dark min-100">
+    <Title
+      title="Data Portals"
+      subtitle="Explore data portals and learn how you can contribute and access their
+        data."
+    ></Title>
     <div class="container">
       <div class="d-flex justify-content-center flex-wrap">
         <template v-for="portal in portals" :key="portal.name">

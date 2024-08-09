@@ -1,8 +1,8 @@
 <template>
-  <div id="registry" class="jumbotron bg-white" style="min-height: 80vh">
-    <div class="container mt-5">
+  <div id="registry" class="min-100 bg-white">
+    <Title title="Schema Registry"></Title>
+    <div class="container">
       <div>
-        <h1 class="text-center text-dde-dark mb-1 mt-5">Schema Registry</h1>
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
             <nuxt-link
