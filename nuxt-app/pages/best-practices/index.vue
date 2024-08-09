@@ -1,12 +1,6 @@
 <template>
-  <div
-    id="guides"
-    class="container-fluid text-dark"
-    style="min-height: 100vh; padding-top: 60px"
-  >
-    <div class="bg-light text-center mt-5 p-1">
-      <h1 class="mainTextLight">DATASET DISCOVERY BEST PRACTICES</h1>
-    </div>
+  <div id="guides" class="container-fluid text-dark min-100">
+    <Title title="Resource Discovery Best Practices"></Title>
     <div class="text-center mb-5">
       <div class="col-md-8 col-sm-12 m-auto p-3 container text-left text-dark">
         <p class="d-flex justify-content-center align-items-center">

@@ -1,40 +1,21 @@
 <template>
-  <div
-    id="login"
-    class="jumbotron text-center d-flex justify-content-center align-items-center"
-    style="min-height: 95vh"
-  >
-    <div class="p-2">
-      <div class="row m-0">
-        <div class="col-sm-12 text-center">
-          <img
-            src="@/assets/img/dde-logo-o.svg"
-            width="100"
-            height="100"
-            alt="DDE"
-          />
-          <h3 class="text-muted">Select the login method</h3>
-          <hr />
+  <div id="login" class="min-100">
+    <Title title="Select Login Method"></Title>
+    <div
+      class="jumbotron bg-light d-flex justify-content-center align-items-center"
+    >
+      <div class="row m-0 w-100">
+        <div class="col-sm-6 jumbotron text-center bg-dde-dark">
+          <a id="ghButton" role="button" class="btn btn-light mainTextDark"
+            >Login with Github
+            <font-awesome-icon icon="fa fa-chevron-right"></font-awesome-icon
+          ></a>
         </div>
-        <div class="col-sm-12" v-if="$route.fullPath.includes('n3c')">
-          <p class="m-0 text-info">
-            N3C members please use NCATS UNA to log in. Login with GitHub is
-            disabled.
-          </p>
-        </div>
-        <div class="col-sm-12 row m-0 opt-bg py-5">
-          <div class="col-sm-6 p-2">
-            <a id="ghButton" role="button" class="btn btn-light mainTextDark"
-              >Login with Github
-              <font-awesome-icon icon="fa fa-chevron-right"></font-awesome-icon
-            ></a>
-          </div>
-          <div class="col-sm-6 p-2">
-            <a id="samlLink" role="button" class="btn btn-light mainTextLight"
-              >Login with NCATS UNA
-              <font-awesome-icon icon="fa fa-chevron-right"></font-awesome-icon
-            ></a>
-          </div>
+        <div class="col-sm-6 jumbotron text-center bg-dde-mid">
+          <a id="samlLink" role="button" class="btn btn-light mainTextLight"
+            >Login with NCATS UNA
+            <font-awesome-icon icon="fa fa-chevron-right"></font-awesome-icon
+          ></a>
         </div>
       </div>
     </div>

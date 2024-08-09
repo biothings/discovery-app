@@ -7,7 +7,6 @@ import { useRouter, useRoute } from "vue-router";
 
 import CodeEditorWithProp from "../../components/CodeEditorWithProp";
 import InputBox from "../../components/guide/InputBox";
-import generator_img from "../../assets/img/generator.svg";
 
 const { $swal } = useNuxtApp();
 const runtimeConfig = useRuntimeConfig();
@@ -137,14 +136,9 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="mt-4 p-0 bg-light">
-    <div class="container text-left bg-light pt-2">
-      <div class="mt-5 text-center">
-        <h1 class="p-1 text-dde-dark">
-          <img :src="generator_img" width="100" height="100" alt="Generator" />
-          {{ searchTerm || "Markup Generator" }}
-        </h1>
-      </div>
+  <div class="bg-light min-100">
+    <div class="container text-left bg-light">
+      <Title :title="searchTerm || 'Markup Generator'"></Title>
       <div class="m-0 row p-1 bg-dde-mid">
         <div class="col-sm-12 bg-dde-dark p-2">
           <form @submit.prevent="handleSubmit()" class="d-flex col-sm-5">
