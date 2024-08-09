@@ -1,7 +1,7 @@
 <template>
-  <div class="container mt-5">
-    <div class="text-center jumbotron bg-light">
-      <h1 class="mainTextDark">SCHEMA PLAYGROUND</h1>
+  <div class="container min-100">
+    <div class="text-center bg-light">
+      <Title title="Schema Playground"></Title>
       <div class="d-flex justify-content-center align-items-center flex-wrap">
         <nuxt-link to="/registry">Schema Registry</nuxt-link>
         <span class="mx-2">|</span>

@@ -48,12 +48,9 @@ useHead({
 </script>
 
 <template>
-  <main class="bg-dde-mid text-light" style="min-height: 100vh">
-    <div
-      class="jumbotron bg-dde-dark text-center pt-5"
-      style="margin-top: 40px"
-    >
-      <h1 class="text-light" v-text="name"></h1>
+  <main class="bg-light text-dde-dark min-100">
+    <Title :title="name"></Title>
+    <div class="text-center p-2">
       <span>
         Jump To:
         <template v-for="section in faq" :key="section + '1'">

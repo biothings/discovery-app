@@ -1,10 +1,8 @@
 <template>
-  <div id="registry" class="jumbotron" style="min-height: 80vh">
+  <div id="registry" class="min-100">
+    <Title title="Resource Registry"></Title>
     <div class="col-md-10 col-sm-12 m-auto p-0">
-      <div class="text-dark mt-5">
-        <h1 class="text-center text-dde-dark mb-1 mt-2">
-          <span v-if="N3CView">N3C</span> Resource Registry
-        </h1>
+      <div class="text-dark">
         <p class="text-center text-muted" v-if="N3CView">
           For more general information about PPRL datasets, such as what this
           data is, and how to participate, please visit our

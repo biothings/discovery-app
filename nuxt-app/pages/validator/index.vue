@@ -289,15 +289,10 @@ onMounted(() => {
 </script>
 <template>
   <div
-    class="mt-5 p-0"
+    class="p-0 min-100"
     :class="[!expandedWide ? 'container' : 'container-fluid px-3']"
   >
-    <div class="jumbotron bg-light text-center p-2">
-      <h1 class="text-dde-mid mt-5">
-        <img :src="validator_img" width="100" height="100" alt="Generator" />
-        Metadata Validator
-      </h1>
-    </div>
+    <Title title="Metadata Validator"></Title>
     <div class="row p-2 bg-dde-mid rounded mb-5">
       <div class="col-sm-12 alert-info p-0">
         <div
