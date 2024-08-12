@@ -48,18 +48,14 @@
   --dde-accent: #d83f87;
   --dde-accent-muted: #ffd4e8;
   --dde-mid-muted: #dfd7ff;
+  --font-family-sans-serif: "Quicksand", sans-serif;
 }
 
-@font-face {
-  font-family: "Quick";
-  src: url("/fonts/Quicksand.ttf") format("ttf");
-  font-weight: ;
+body{
+  font-family: "Quicksand", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: normal;
   font-style: normal;
-  font-display: swap;
-}
-
-body {
-  font-family: "Quick" sans-serif !important;
 }
 
 .bg-dde-dark {
@@ -888,21 +884,6 @@ span.fa-stack:hover > svg:nth-child(1) {
 }
 .bg-10 {
   background: #000000 !important;
-}
-
-.gradientVertical {
-  background: #63296b;
-  background: -moz-linear-gradient(top, #63296b 0%, #4a7d8f 100%);
-  background: -webkit-linear-gradient(top, #63296b 0%, #4a7d8f 100%);
-  background: linear-gradient(to bottom, #63296b 0%, #4a7d8f 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient startColorstr=#63296b,endColorstr=#4a7d8f,GradientType=0;
-}
-.gradientHorizontal {
-  background: #63296b;
-  background: -moz-linear-gradient(left, #63296b 0%, #4a7d8f 100%);
-  background: -webkit-linear-gradient(left, #63296b 0%, #4a7d8f 100%);
-  background: linear-gradient(to right, #63296b 0%, #4a7d8f 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient startColorstr=#63296b,endColorstr=#4a7d8f,GradientType=1;
 }
 .animatedBack {
   background: linear-gradient(270deg, #63296b, #4a7d8f);
