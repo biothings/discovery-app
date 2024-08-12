@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   css: [
     "@fortawesome/fontawesome-svg-core/styles.css",
-    "@/assets/css/styles.css",
+    "@/assets/css/bootstrap.css",
     "tippy.js/dist/tippy.css",
     "tippy.js/animations/scale.css",
     "tippy.js/themes/light.css",
@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     "tabulator-tables/dist/css/tabulator.min.css",
     "simple-notify/dist/simple-notify.min.css",
     "aos/dist/aos.css",
+    "@/assets/css/styles.css",
   ],
   runtimeConfig: {
     // The private keys which are only available within server-side
