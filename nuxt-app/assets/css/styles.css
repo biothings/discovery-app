@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
   --vt-c-white: #ffffff;
@@ -48,8 +50,16 @@
   --dde-mid-muted: #dfd7ff;
 }
 
-* {
-  font-family: url("../fonts/Quicksand.ttf") sans-serif;
+@font-face {
+  font-family: "Quick";
+  src: url("/fonts/Quicksand.ttf") format("ttf");
+  font-weight: ;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: "Quick" sans-serif !important;
 }
 
 .bg-dde-dark {

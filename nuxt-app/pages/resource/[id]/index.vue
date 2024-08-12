@@ -367,7 +367,7 @@ getMetadata(id);
             <span
               class="text-info"
               data-tippy-content="TLDR: This makes your dataset easier to be found from multiple search engines (Google, Bing etc.)<hr>
-A longer explanation: This enhances discoverability by making your data easily searchable and accessible through web search engines like Google. The schema.org compatible, structured metadata in JSON-LD format is now recommended by Google and other search engines for better SEO (Search Engine Optimization). This capability facilitates data sharing and collaboration among researchers and developers. Additionally, it provides clear context and provenance for the datasets, ensuring users understand the source, quality, and relevance of the data."
+A longer explanation: This enhances discoverability by making your data easily searchable and accessible through web search engines like Google. The <a href='http://schema.org/' target='_blank'>schema.org</a> compatible, structured metadata in <a href='https://json-ld.org/' target='_blank'>JSON-LD</a> format is now <a target='_blank' href='https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'>recommended by Google</a> and other search engines for better SEO (Search Engine Optimization). This capability facilitates data sharing and collaboration among researchers and developers. Additionally, it provides clear context and provenance for the datasets, ensuring users understand the source, quality, and relevance of the data."
               >[why?]</span
             >
           </h5>

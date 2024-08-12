@@ -111,7 +111,7 @@ useHead({
     },
     {
       rel: "shortcut icon",
-      href: "@/assets/img/dde/favicon.ico",
+      href: "/favicon.ico",
     },
     {
       rel: "manifest",
@@ -119,10 +119,7 @@ useHead({
     },
     {
       rel: "stylesheet",
-      href: "https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css",
-      integrity:
-        "sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO",
-      crossorigin: "anonymous",
+      href: "https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap",
     },
     {
       src: "https://code.jquery.com/jquery-3.3.1.slim.min.js",
@@ -142,11 +139,6 @@ useHead({
         "sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy",
       crossorigin: "anonymous",
     },
-    // {
-    //   type: "text/css",
-    //   rel: "stylesheet",
-    //   href: "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css",
-    // },
   ],
   script: [
     {
