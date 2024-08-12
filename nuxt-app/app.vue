@@ -114,10 +114,6 @@ useHead({
       href: "/favicon.ico",
     },
     {
-      rel: "manifest",
-      href: "@/assets/img/dde/site.webmanifest",
-    },
-    {
       rel: "stylesheet",
       href: "https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap",
     },
