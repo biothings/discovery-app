@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@codemirror/autocomplete": "github:codemirror/autocomplete",
+    "@codemirror/lang-html": "^6.4.9",
     "@codemirror/lang-json": "github:codemirror/lang-json",
     "@codemirror/view": "github:codemirror/view",
     "@fortawesome/fontawesome-svg-core": "^6.2.0",

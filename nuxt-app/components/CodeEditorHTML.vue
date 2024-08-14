@@ -3,19 +3,14 @@
 </template>
 
 <script>
-import Notify from "simple-notify";
 import { basicSetup, EditorView } from "codemirror";
-import { EditorState, Compartment } from "@codemirror/state";
-import { json } from "@codemirror/lang-json";
-import { autocompletion } from "@codemirror/autocomplete";
-import {
-  defaultHighlightStyle,
-  syntaxHighlighting,
-} from "@codemirror/language";
-import { history } from "@codemirror/commands";
+import { EditorState } from "@codemirror/state";
+import { html } from "@codemirror/lang-html";
+import { keymap } from "@codemirror/view";
+import { defaultKeymap } from "@codemirror/commands";
 
 export default {
-  name: "CodeEditor",
+  name: "CodeEditorHTML",
   props: ["item"],
   data: function () {
     return {
@@ -25,25 +20,17 @@ export default {
   methods: {
     openEditor() {
       let self = this;
-      let language = new Compartment(),
-        tabSize = new Compartment();
 
       let state = EditorState.create({
-        doc: JSON.stringify(self.item?.validation || self.item, null, 2),
-        extensions: [
-          basicSetup,
-          history(),
-          autocompletion(),
-          language.of(json()),
-          tabSize.of(EditorState.tabSize.of(8)),
-          syntaxHighlighting(defaultHighlightStyle),
-        ],
+        doc: self.item,
+        extensions: [basicSetup, html(), keymap.of(defaultKeymap)],
       });
 
       this.editor = new EditorView({
         state,
         parent: document.body.querySelector("#CM-WP"),
       });
+      this.$store.commit("setLoading", { value: false });
     },
   },
   watch: {
@@ -60,6 +47,7 @@ export default {
     },
   },
   mounted: function () {
+    this.$store.commit("setLoading", { value: true });
     setTimeout(() => {
       this.openEditor();
     }, 1000);
