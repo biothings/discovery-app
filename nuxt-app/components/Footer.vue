@@ -15,7 +15,7 @@
             </li>
             <li>
               <nuxt-link class="d-block text-light" to="/portal"
-                >Data Portals</nuxt-link
+                >Data portals</nuxt-link
               >
             </li>
             <li>
@@ -75,6 +75,11 @@
             <li>
               <nuxt-link class="d-block text-light" to="/faq/dde"
                 >FAQ</nuxt-link
+              >
+            </li>
+            <li>
+              <nuxt-link class="d-block text-light" to="/how-to-cite"
+                >How to Cite</nuxt-link
               >
             </li>
           </ul>
