@@ -10,6 +10,7 @@ const route = useRoute();
 const store = useStore();
 const id = route.params.id;
 let metadata = ref({});
+let metadata_html = ref("");
 let metadata_pure = ref({});
 let isN3C = ref(false);
 let meta_id = ref("");
@@ -59,20 +60,31 @@ function formatDate(timestamp) {
   );
 }
 
-function download() {
+function download(format) {
   var a = document.createElement("a");
-  var file = new Blob(
-    [
+  var fileContent, fileType, fileName;
+
+  if (format === "html") {
+    fileContent =
       "<sc" +
-        'ript type="application/ld+json" >' +
-        JSON.stringify(metadata, null, 2) +
-        "</scr" +
-        "ipt>",
-    ],
-    { type: "text/plain" }
-  );
+      'ript type="application/ld+json" >' +
+      JSON.stringify(metadata.value, null, 2) +
+      "</scr" +
+      "ipt>";
+    fileType = "text/plain";
+    fileName = "meta-download.txt";
+  } else if (format === "json") {
+    fileContent = JSON.stringify(metadata.value, null, 2);
+    fileType = "application/json";
+    fileName = "meta-download.json";
+  } else {
+    console.error("Unsupported format. Please use 'html' or 'json'.");
+    return;
+  }
+
+  var file = new Blob([fileContent], { type: fileType });
   a.href = URL.createObjectURL(file);
-  a.download = "meta-download";
+  a.download = fileName;
   a.click();
 }
 
@@ -87,6 +99,7 @@ function getFeatured(meta) {
 }
 
 function getMetadata(id) {
+  store.commit("setLoading", { value: true });
   id = id.replace("/", "");
   generateScriptText(id);
   meta_id.value = id;
@@ -102,7 +115,16 @@ function getMetadata(id) {
         let o = Object.assign({}, data);
         delete o["_meta"];
         delete o["_id"];
+
+        let txt =
+          "<scr" +
+          'ipt type="applicat' +
+          'ion/ld+json">' +
+          JSON.stringify(o, null, 2) +
+          "<" +
+          "/script>";
         metadata_pure.value = o;
+        metadata_html.value = txt;
       }, 200);
       useHead({
         title: "DDE | " + metadata.value.name,
@@ -361,16 +383,16 @@ getMetadata(id);
           </div>
         </div>
         <div class="alert alert-dark text-dde-dark mt-5">
-          <h5>
+          <h4>
             <b>For dataset owner:</b> Embed this structured dataset metadata on
             your website describing this dataset
             <span
               class="text-info"
-              data-tippy-content="TLDR: This makes your dataset easier to be found from multiple search engines (Google, Bing etc.)<hr>
-A longer explanation: This enhances discoverability by making your data easily searchable and accessible through web search engines like Google. The <a href='http://schema.org/' target='_blank'>schema.org</a> compatible, structured metadata in <a href='https://json-ld.org/' target='_blank'>JSON-LD</a> format is now <a target='_blank' href='https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'>recommended by Google</a> and other search engines for better SEO (Search Engine Optimization). This capability facilitates data sharing and collaboration among researchers and developers. Additionally, it provides clear context and provenance for the datasets, ensuring users understand the source, quality, and relevance of the data."
+              data-tippy-content="<b>TLDR</b>: This makes your dataset easier to be found from multiple search engines (Google, Bing etc.)<hr>
+<b>A longer explanation</b>: This enhances discoverability by making your data easily searchable and accessible through web search engines like Google. The <a href='http://schema.org/' target='_blank'>schema.org</a> compatible, structured metadata in <a href='https://json-ld.org/' target='_blank'>JSON-LD</a> format is now <a target='_blank' href='https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'>recommended by Google</a> and other search engines for better SEO (Search Engine Optimization). This capability facilitates data sharing and collaboration among researchers and developers. Additionally, it provides clear context and provenance for the datasets, ensuring users understand the source, quality, and relevance of the data."
               >[why?]</span
             >
-          </h5>
+          </h4>
           <div class="p-3">
             <h6>Dynamic Embedding</h6>
             <hr />
@@ -382,7 +404,10 @@ A longer explanation: This enhances discoverability by making your data easily s
               >
             </p>
             <p class="text-dde-mid bold">
-              <span>Changes to metadata will be applied automatically.</span>
+              <span
+                >Changes made to this metadata via this website will be applied
+                to this script automatically.</span
+              >
             </p>
             <span class="d-block text-muted text-center">
               <b>CLICK THE INPUT FIELD TO COPY</b>
@@ -402,23 +427,22 @@ A longer explanation: This enhances discoverability by making your data easily s
             <p>
               <span
                 >In your website's code anywhere before the closing
-                <code>&lt;/head&gt;</code> tag, paste the code below inside of a
-                script tag like this:
-                <code
-                  >&lt;script type="application/ld+json" &gt; ...your
-                  metadata...&lt;/script&gt;</code
-                >.</span
+                <code>&lt;/head&gt;</code> tag, copy and paste the HTML code
+                below.</span
               >
             </p>
             <p class="text-dde-mid bold">
-              <span>Changes to metadata need to be updated manually.</span>
+              <span
+                >If you copy/paste this metadata manually all future changes to
+                it will need to be applied manually as well.</span
+              >
             </p>
             <div class="alert-info">
               <button
                 @click="expand = !expand"
                 class="btn d-block themeButton text-light w-100"
               >
-                {{ expand ? "Close" : "Inspect Metadata" }}
+                {{ expand ? "Close" : "View Metadata" }}
               </button>
               <div v-if="expand">
                 <div
@@ -426,20 +450,23 @@ A longer explanation: This enhances discoverability by making your data easily s
                 >
                   <a
                     class="btn btn-sm themeButton text-light mx-3"
-                    @click="download()"
-                    >Download Metadata</a
+                    @click="download('html')"
+                    >Download HTML</a
+                  >
+                  <a
+                    class="btn btn-sm themeButton text-light mx-3"
+                    @click="download('json')"
+                    >Download Metadata Alone</a
                   >
                   <a
                     class="btn btn-sm themeButton text-light mx-3"
                     @click="copyJsonToClipboard()"
-                    >Copy Metadata</a
+                    >Copy Metadata Alone</a
                   >
                 </div>
                 <template v-if="ready">
                   <div style="max-height: 600px; overflow-y: scroll">
-                    <CodeEditorWithProp
-                      :item="metadata_pure"
-                    ></CodeEditorWithProp>
+                    <CodeEditorHTML :item="metadata_html"></CodeEditorHTML>
                   </div>
                 </template>
               </div>

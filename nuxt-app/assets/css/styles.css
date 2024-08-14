@@ -51,10 +51,10 @@
   --font-family-sans-serif: "Quicksand", sans-serif;
 }
 
-body{
+body {
   font-family: "Quicksand", sans-serif;
   font-optical-sizing: auto;
-  font-weight: 600;
+  font-weight: 500;
   font-style: normal;
 }
 
@@ -512,6 +512,7 @@ body {
 .tippy-box[data-theme~="ddeDark"] {
   background-color: var(--dde-dark);
   color: white;
+  font-weight: 400;
 }
 
 .tippy-box[data-theme~="ddeDark"][data-placement^="top"]
