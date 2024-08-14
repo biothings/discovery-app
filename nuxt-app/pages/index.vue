@@ -108,27 +108,25 @@
           class="tool-card card text-center m-2 grad d-flex justify-content-center align-items-center"
         >
           <h4 class="text-center text-light">Data Portals Available:</h4>
-          <div class="row m-0 powered-hero">
+          <div
+            class="row m-0 powered-hero d-flex justify-content-center align-items-center flex-wrap"
+          >
             <template
               v-if="portals.length"
               v-for="(portal, i) in portals"
               :key="portal.name"
             >
-              <div
-                class="col-sm-2 col-md-4 p-1 d-flex justify-content-center align-items-center"
-              >
+              <div class="col-sm-2 col-md-4 p-1">
                 <NuxtLink :to="'/portal/' + portal.linkname">
                   <img
                     :src="portal.image"
                     class="w-75"
-                    data-aos="flip-left"
-                    :data-aos-delay="i * 100"
                     :data-tippy-content="portal.name"
                   />
                 </NuxtLink>
               </div>
             </template>
-            <div class="col-sm-12 d-flex justify-content-center">
+            <div class="col-sm-12 d-flex justify-content-center flex-wrap">
               <NuxtLink to="/portal">
                 <MoreButton
                   style="width: 200px"

@@ -273,7 +273,7 @@ useHead({
             <div v-if="portal.cite" class="alert alert-light text-dde-dark p-3">
               <hr />
               <h6>Cite {{ portal.name }}</h6>
-              <p>{{ portal.cite }}</p>
+              <p v-html="portal.cite"></p>
             </div>
           </div>
         </div>

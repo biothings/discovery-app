@@ -40,7 +40,8 @@ export const portals = {
         ],
         datasets: "/dataset?template=/guide/outbreak/dataset",
         colors: [{ hex: "#D13B62" }, { hex: "#0A253D" }],
-        cite: "Tsueng G, Mullen JL, Alkuzweny M, Cano M, Rush B, Haag E, Lin J, Welzel DJ, Zhou X, Qian Z, Latif AA, Hufbauer E, Zeller M, Andersen KG, Wu C, Su AI, Gangavarapu K, Hughes LD. Outbreak.info Research Library: a standardized, searchable platform to discover and explore COVID-19 resources. Nat Methods. 2023 Apr;20(4):536-540. doi: 10.1038/s41592-023-01770-w. Epub 2023 Feb 23. PMID: 36823331; PMCID: PMC10393269.",
+        cite: `Tsueng G, Mullen JL, Alkuzweny M, Cano M, Rush B, Haag E, Lin J, Welzel DJ, Zhou X, Qian Z, Latif AA, Hufbauer E, Zeller M, Andersen KG, Wu C, Su AI, Gangavarapu K, Hughes LD. Outbreak.info Research Library: a standardized, searchable platform to discover and explore COVID-19 resources. 
+        Nat Methods. 2023 Apr;20(4):536-540. doi: 10.1038/s41592-023-01770-w. Epub 2023 Feb 23. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/36823331" target="_blank">36823331</a>; PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC10393269" target="_blank">PMC10393269</a>.`,
       },
       {
         name: "NIAID Data Ecosystem",
@@ -118,7 +119,8 @@ export const portals = {
             link: "https://www.biorxiv.org/content/10.1101/2022.10.10.511492v1",
           },
         ],
-        cite: "Tsueng G, Cano MAA, Bento J, Czech C, Kang M, Pache L, Rasmussen LV, Savidge TC, Starren J, Wu Q, Xin J, Yeaman MR, Zhou X, Su AI, Wu C, Brown L, Shabman RS, Hughes LD; NIAID Systems Biology Data Dissemination Working Group. Developing a standardized but extendable framework to increase the findability of infectious disease datasets. Sci Data. 2023 Feb 23;10(1):99. doi: 10.1038/s41597-023-01968-9. PMID: 36823157; PMCID: PMC9950378.",
+        cite: `Tsueng G, Cano MAA, Bento J, Czech C, Kang M, Pache L, Rasmussen LV, Savidge TC, Starren J, Wu Q, Xin J, Yeaman MR, Zhou X, Su AI, Wu C, Brown L, Shabman RS, Hughes LD; NIAID Systems Biology Data Dissemination Working Group. Developing a standardized but extendable framework to increase the findability of infectious disease datasets. Sci Data. 
+        2023 Feb 23;10(1):99. doi: 10.1038/s41597-023-01968-9. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/36823157" target="_blank">36823157</a>; PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC9950378" target="_blank">PMC9950378</a>.`,
       },
       {
         name: "NIAID CREID Research Network Portal",
