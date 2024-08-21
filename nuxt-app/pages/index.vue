@@ -138,7 +138,7 @@
               <p>
                 Feature your project here.
                 <a
-                  href="https://github.com/biothings/discovery-app/issues/new/choose"
+                  href="https://github.com/biothings/discovery-app/issues/new?assignees=marcodarko&labels=feature&projects=&template=data-portal-request.md&title=Data+Portal+Application"
                   target="_blank"
                   rel="nonreferrer"
                   >Fill out an application to get started today</a
