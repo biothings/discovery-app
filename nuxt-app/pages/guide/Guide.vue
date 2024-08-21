@@ -1,7 +1,8 @@
 <template>
   <div
     id="guide"
-    class="container-fluid pt-5 m-auto col-sm-12 col-md-10 col-lg-10 col-xl-8"
+    class="pt-5"
+    :class="[!expandedWide ? 'container' : 'container-fluid px-3']"
     style="min-height: 90vh"
     v-cloak
   >
@@ -248,6 +249,31 @@
                 :class="[valid ? 'bg-success' : 'bg-danger']"
               ></span>
             </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-info ml-4"
+              data-tippy-content="Stretch/Shrink UI Horizontally"
+              @click="toggleUI()"
+            >
+              <template v-if="!expandedWide">
+                <font-awesome-icon
+                  icon="fas fa-chevron-left"
+                  class="mr-1"
+                ></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-chevron-right"
+                ></font-awesome-icon>
+              </template>
+              <template v-if="expandedWide">
+                <font-awesome-icon
+                  icon="fas fa-chevron-right"
+                  class="mr-1"
+                ></font-awesome-icon>
+                <font-awesome-icon
+                  icon="fas fa-chevron-left"
+                ></font-awesome-icon>
+              </template>
+            </button>
           </div>
         </div>
 
@@ -599,6 +625,7 @@ export default {
       fieldsleftRegistration: "fieldsLeft",
       userInfo: "userInfo",
       loading: "loading",
+      expandedWide: "expandUI",
     }),
   },
   watch: {
@@ -612,6 +639,9 @@ export default {
   methods: {
     startBulk() {
       this.$store.commit("toggleBeginBulkRegistration");
+    },
+    toggleUI() {
+      this.$store.commit("toggleExpandUI");
     },
     checkOverriddenID(id) {
       let self = this;

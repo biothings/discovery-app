@@ -136,7 +136,7 @@ export default {
       } else {
         // View and send analytics
         if (item && item.namespace && item.name) {
-          this.$router.push("/view/" + item.namespace + "/" + item.name);
+          this.$router.push("/ns/" + item.namespace + "/" + item.name);
         } else {
           this.$swal.fire("Oops!", "Action not available for this item");
         }

@@ -4,7 +4,6 @@ import { reactive, computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import Notify from "simple-notify";
 import { useRouter, useRoute } from "vue-router";
-import validator_img from "../../assets/img/validator.svg";
 
 const { $swal } = useNuxtApp();
 const store = useStore();
@@ -14,13 +13,13 @@ const runtimeConfig = useRuntimeConfig();
 let errors = ref(false);
 let valid = ref(false);
 let expanded = ref(false);
-let expandedWide = ref(false);
 let router = useRouter();
 let route = useRoute();
 
 let schema_namespaces = computed(() => store.getters.validationSchemaOptions);
 let userInfo = computed(() => store.getters.userInfo);
 let metaToValidate = computed(() => store.getters.getValidationMetadata);
+let expandedWide = computed(() => store.getters.expandUI);
 
 let searchTerm = ref("");
 
@@ -30,6 +29,10 @@ function handleSubmit() {
     query: { schema_class: searchTerm.value },
   });
   getClassValidation(searchTerm.value);
+}
+
+function toggleUI() {
+  store.commit("toggleExpandUI");
 }
 
 useHead({
@@ -335,6 +338,7 @@ onMounted(() => {
           ></font-awesome-icon>
           <button
             class="btn btn-sm rounded btn-info mr-2"
+            data-tippy-content="Open/Close"
             @click="expanded = !expanded"
           >
             <font-awesome-icon
@@ -349,7 +353,8 @@ onMounted(() => {
           <button
             type="button"
             class="btn btn-sm btn-info"
-            @click="expandedWide = !expandedWide"
+            data-tippy-content="Stretch/Shrink UI Horizontally"
+            @click="toggleUI()"
           >
             <template v-if="!expandedWide">
               <font-awesome-icon

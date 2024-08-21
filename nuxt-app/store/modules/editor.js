@@ -168,7 +168,7 @@ export const editor = {
     savePrefix(state, payload) {
       state.prefix = payload["prefix"];
       state.finalschema["@context"][state.prefix] =
-        "https://discovery.biothings.io/view/" + state.prefix + "/";
+        "https://discovery.biothings.io/ns/" + state.prefix + "/";
     },
     saveParent(state, payload) {
       let parent = payload["parent"];
@@ -705,7 +705,7 @@ export const editor = {
       //check if bioschemas is mentioned if so add bioschemas to context
       if (JSON.stringify(state.finalschema).includes("bioschemas")) {
         state.finalschema["@context"]["bioschemas"] =
-          "https://discovery.biothings.io/view/bioschemas/";
+          "https://discovery.biothings.io/ns/bioschemas/";
       }
     },
   },
