@@ -1,7 +1,7 @@
 <template>
-  <div class="p-3 mb-2 alert alert-light">
+  <div class="p-3 mb-2 alert alert-light shadow">
     <div v-if="q && q.name">
-      <a class="d-inline text-info" :href="'/ns/' + q.name.split(':')[0]">
+      <a class="d-inline text-primary" :href="'/ns/' + q.name.split(':')[0]">
         <h3
           class="bold d-inline"
           :id="q.name"
@@ -43,22 +43,20 @@
       <ul style="list-style: none">
         <li v-for="path in getPaths(q)">
           <span v-for="(item, index) in path">
-            <!-- <a
-              :class="[index !== path.length - 1 ? 'text-dark' : textColor]"
-              class="font-weight-bold"
-              :href="getBreadcrumbLink(item)"
-              v-text="item"
-            ></a> -->
             <span
-              :class="[index !== path.length - 1 ? 'text-dark' : textColor]"
-              class="font-weight-bold pointer"
+              :class="[
+                index !== path.length - 1
+                  ? 'text-dark'
+                  : 'text-dde-mid font-weight-bold',
+              ]"
+              class="pointer"
               @click="goTo(item)"
               v-text="item"
             ></span>
             <span v-if="index !== path.length - 1"
               >&nbsp;<font-awesome-icon
                 icon="fas fa-caret-right"
-                :class="textColor"
+                class="text-dde-mid"
               />&nbsp;</span
             >
           </span>
@@ -93,52 +91,68 @@
       </template>
     </template>
     <div v-if="q.properties && !validationView">
-      <div class="resultsTabFull mt-3 p-3 text-light" :class="backColor">
+      <div
+        class="resultsTabFull mt-3 p-3 text-light text-left"
+        :class="backColor"
+      >
         <h5 class="d-inline">
-          <span v-text="q.label + ' has '"></span>
-          <span class="badge badge-light" :class="textColor">
-            <span
+          <b class="mr-2" v-text="q.label"></b>
+          <span class="text-warning">
+            (<small
               v-if="q && q.properties"
               v-text="q.properties.length + ' properties'"
             >
-            </span>
-            <span v-else> </span>
+            </small
+            >)
           </span>
         </h5>
         <button
-          v-if="q && q.properties.length"
-          @click="toggleShowAll()"
+          @click="hide = !hide"
           style="border: 2px solid white"
-          class="btn text-light ml-5"
-          :class="backColor"
-          v-text="showAll ? 'Hide All' : 'Show All'"
+          class="btn btn-sm text-light ml-5 themeButton"
+          v-text="!hide ? 'Hide All' : 'Show All'"
         ></button>
+        <button
+          class="btn btn-sm themeButton text-light float-right"
+          @click="exportToCSV(q?.properties)"
+        >
+          Export to CSV
+        </button>
       </div>
       <table
-        v-show="showAll"
-        class="table mb-2"
-        :class="!parent ? 'table-striped-sec' : 'table-striped-main'"
+        v-show="!hide"
+        class="table mb-2 table-sm"
+        :class="!parent ? 'table-striped table-light' : 'table-striped-main'"
       >
+        <thead class="thead-dark">
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Expected Type</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr v-if="q && q.properties" v-for="(item, i) in q.properties">
+          <tr
+            v-if="q && q.properties"
+            v-for="(item, i) in reorderByLabel(q.properties)"
+          >
             <td>
               <a class="font-weight-bold" :href="'./' + item.label">
                 <span v-html="item.label"></span>
               </a>
-              <p>
-                <span
-                  class="text-dark"
-                  v-html="item.description || 'No description provided'"
-                ></span>
-              </p>
             </td>
+            <td
+              class="text-dark"
+              v-html="item.description || 'No description provided'"
+            ></td>
             <td>
-              <small class="mainTextDark bold">Expected Type: </small>
               <template v-for="(type, i) in item.range">
-                <a v-for="link in getLink(type)" :href="link" :key="link">
-                  <small>
-                    <span v-html="type"></span>
-                  </small>
+                <a
+                  v-for="link in getLink(type)"
+                  :href="link"
+                  :key="link"
+                  v-text="type"
+                >
                 </a>
                 <span v-if="i !== item.range.length - 1">, </span>
               </template>
@@ -148,8 +162,8 @@
       </table>
     </div>
     <div
-      v-if="!q.properties && !validationView"
-      class="jumbotron d-flex justify-content-center align-items-center"
+      v-if="!q.properties && !validationView && !q.domain"
+      class="jumbotron alert-primary d-flex justify-content-center align-items-center"
     >
       <div>
         <p class="m-4">
@@ -161,13 +175,21 @@
     <div v-if="validationView && q.validation">
       <ValidationBox :validation="q.validation"></ValidationBox>
     </div>
+    <div
+      v-if="validationView && !q.validation && !q.domain"
+      class="jumbotron alert-primary d-flex justify-content-center align-items-center"
+    >
+      <div>
+        <p class="m-4">This class does not define any validation rules.</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import ValidationBox from "./ValidationBox.vue";
 import { mapGetters, mapActions } from "vuex";
-import Notify from "simple-notify";
+import Papa from "papaparse";
 
 export default {
   name: "QueryBox",
@@ -179,11 +201,30 @@ export default {
       textColor: "",
       backColor: "",
       properties: [],
+      hide: false,
     };
   },
   props: ["q", "userSchema", "parent"],
   methods: {
     ...mapActions(["toggleShowAll"]),
+    exportToCSV(data) {
+      let csv = Papa.unparse(data);
+      // Create a blob from the CSV string
+      let blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+      // Create a temporary link element to trigger the download
+      let link = document.createElement("a");
+      if (link.download !== undefined) {
+        // Check if download attribute is supported
+        let url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", this.q.label + ".csv"); // Set the desired file name
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link); // Clean up by removing the link
+      }
+    },
     getPaths(classInfo) {
       // console.log('getting all possible paths...')
       let res = [];
@@ -258,34 +299,12 @@ export default {
     },
     goTo(string) {
       let res = "";
-      let arr = [];
       if (string.includes(":")) {
-        arr = string.split(":");
-        if (arr[0] == "schema") {
-          new Notify({
-            status: "warning",
-            title: "Navigation Unavailable",
-            text: "This class cannot be navigated to directly. Taking you to its homepage.",
-            effect: "fade",
-            speed: 300,
-            customClass: null,
-            customIcon: null,
-            showIcon: true,
-            showCloseButton: true,
-            autoclose: true,
-            autotimeout: 3000,
-            gap: 20,
-            distance: 20,
-            type: 1,
-            position: "right top",
-          });
-          this.$router.push("/ns/schema");
-          return;
-        }
-        res = `/ns/${arr[0]}/${arr[arr.length - 1]}`;
+        res = `/ns/${string.split(":")[0]}/${string}`;
       } else {
-        res = string;
+        res = "/ns/" + string;
       }
+      console.log("Going to ", res);
       this.$router.push(res);
     },
     getLink(qName) {
@@ -301,18 +320,39 @@ export default {
         }
       }
     },
+    reorderByLabel(objects) {
+      return objects.sort((a, b) => {
+        // Ensure that both objects have a 'label' property before comparing
+        if (a.label && b.label) {
+          return a.label.localeCompare(b.label);
+        }
+        return 0;
+      });
+    },
   },
   mounted: function () {
     if (this.parent) {
-      this.textColor = "mainTextLight";
-      this.backColor = "mainBackLight";
+      this.textColor = "text-dde-mid";
+      this.backColor = "bg-dde-mid";
     } else {
-      this.textColor = "mainTextDark";
-      this.backColor = "mainBackDark";
+      this.textColor = "text-dde-dark";
+      this.backColor = "bg-dde-dark";
     }
   },
   computed: {
     ...mapGetters(["validationView", "showAll"]),
+  },
+  watch: {
+    parent: {
+      handler: function (v) {
+        if (!v) {
+          this.hide = false;
+        } else {
+          this.hide = true;
+        }
+      },
+      immediate: true,
+    },
   },
 };
 </script>

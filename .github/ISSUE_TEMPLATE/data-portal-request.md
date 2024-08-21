@@ -1,3 +1,12 @@
+---
+name: Data Portal Application
+about: Request to add a portal to your project on the DDE.
+title: Data Portal Application
+labels: feature
+assignees: marcodarko
+
+---
+
 <img src="https://discovery.biothings.io/dde-logo-o.png" alt="dde" width="100"/>
 
 ### Data Discovery Engine | Data Portal Application

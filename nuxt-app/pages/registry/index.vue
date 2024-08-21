@@ -28,15 +28,9 @@
               <div class="alert alert-light jumbotron">
                 <h2 class="text-dde-dark">Classes</h2>
                 <p>
-                  Visualize (<font-awesome-icon
-                    icon="fas fa-eye"
-                    class="text-info"
-                  />), extend (<font-awesome-icon
-                    icon="fas fa-code-branch"
-                    class="mainTextLight"
-                  />) and compare (<font-awesome-icon
+                  View, extend and compare (<font-awesome-icon
                     icon="fas fa-not-equal"
-                    class="mainTextDark"
+                    class="text-primary"
                   />) available schema classes.
                 </p>
               </div>
@@ -104,7 +98,7 @@
                       >
                         <font-awesome-icon
                           icon="fas fa-circle"
-                          class="text-muted fa-stack-2x"
+                          class="text-primary fa-stack-2x"
                         />
                         <font-awesome-icon
                           icon="fas fa-not-equal"
@@ -296,7 +290,7 @@
                             </td>
                             <td>
                               <router-link
-                                :to="{ path: '/view/' + def.namespace }"
+                                :to="{ path: '/ns/' + def.namespace }"
                               >
                                 {{ def.namespace }}
                                 <font-awesome-icon

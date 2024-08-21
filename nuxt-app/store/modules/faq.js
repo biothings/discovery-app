@@ -144,7 +144,7 @@ export const faq = {
                                 If you do not need to extend a schema and would like to use it as is, you can download it by clicking the <b>source</b> link in that schema's home page.
                                 </p>
                                 <p>
-                                For example, here is the homepage of an extended Dataset schema you may want to re-use: <a target="_blank" href="/view/outbreak">https://discovery.biothings.io/view/outbreak</a>.
+                                For example, here is the homepage of an extended Dataset schema you may want to re-use: <a target="_blank" href="/ns/outbreak">https://discovery.biothings.io/ns/outbreak</a>.
                                 </p>`,
             },
             {
@@ -196,7 +196,7 @@ export const faq = {
               answer: `<p>
                                 During the process of extending an existing schema via the <a href="/schema-playground">Schema Playground</a>
                                 you are asked to choose a short name for new Class/property definitions. This name is also used to suggest the namespace registered with us when you visualize then register your schema.
-                                The namespace will be the new homepage for your schema. E.g. <span class="text-info">http://discovery.biothings.io/view/<b>&lt;namespace&gt;</b></span>.
+                                The namespace will be the new homepage for your schema. E.g. <span class="text-info">http://discovery.biothings.io/ns/<b>&lt;namespace&gt;</b></span>.
                                 </p>
                                 <p class="alert alert-secondary">
                                 <small>Your namespace must be unique and it can only contain lower-case web-safe characters.</small>
