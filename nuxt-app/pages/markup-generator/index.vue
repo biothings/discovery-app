@@ -16,6 +16,7 @@ let route = useRoute();
 
 let schema_namespaces = computed(() => store.getters.validationSchemaOptions);
 let validation = computed(() => store.getters.getValidation);
+let expandedWide = computed(() => store.getters.expandUI);
 let json = ref({});
 let searchTerm = ref("");
 
@@ -23,6 +24,10 @@ function updateEditor() {
   store.commit("setUsePrefilled", false);
   store.commit("formPreviewForGuide");
   json.value = store.getters.getPreview;
+}
+
+function toggleUI() {
+  store.commit("toggleExpandUI");
 }
 
 useHead({
@@ -137,10 +142,13 @@ onMounted(() => {
 </script>
 <template>
   <div class="bg-light min-100">
-    <div class="container text-left bg-light">
+    <div
+      class="text-left bg-light"
+      :class="[!expandedWide ? 'container' : 'container-fluid px-3']"
+    >
       <Title :title="searchTerm || 'Markup Generator'"></Title>
       <div class="m-0 row p-1 bg-dde-mid">
-        <div class="col-sm-12 bg-dde-dark p-2">
+        <div class="col-sm-12 bg-dde-dark p-2 d-flex">
           <form @submit.prevent="handleSubmit()" class="d-flex col-sm-5">
             <input
               type="text"
@@ -174,6 +182,29 @@ onMounted(() => {
               Clear
             </button>
           </form>
+          <button
+            type="button"
+            data-tippy-content="Stretch/Shrink UI Horizontally"
+            class="btn btn-sm btn-info"
+            @click="toggleUI()"
+          >
+            <template v-if="!expandedWide">
+              <font-awesome-icon
+                icon="fas fa-chevron-left"
+                class="mr-1"
+              ></font-awesome-icon>
+              <font-awesome-icon
+                icon="fas fa-chevron-right"
+              ></font-awesome-icon>
+            </template>
+            <template v-if="expandedWide">
+              <font-awesome-icon
+                icon="fas fa-chevron-right"
+                class="mr-1"
+              ></font-awesome-icon>
+              <font-awesome-icon icon="fas fa-chevron-left"></font-awesome-icon>
+            </template>
+          </button>
         </div>
         <div
           class="col-sm-12 col-md-7 p-0"

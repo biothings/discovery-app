@@ -67,9 +67,9 @@ function download(format) {
   if (format === "html") {
     fileContent =
       "<sc" +
-      'ript type="application/ld+json" >' +
+      'ript type="application/ld+json" >\n' +
       JSON.stringify(metadata.value, null, 2) +
-      "</scr" +
+      "\n</scr" +
       "ipt>";
     fileType = "text/plain";
     fileName = "meta-download.txt";
@@ -119,9 +119,9 @@ function getMetadata(id) {
         let txt =
           "<scr" +
           'ipt type="applicat' +
-          'ion/ld+json">' +
+          'ion/ld+json">\n' +
           JSON.stringify(o, null, 2) +
-          "<" +
+          "\n<" +
           "/script>";
         metadata_pure.value = o;
         metadata_html.value = txt;
@@ -227,10 +227,9 @@ function copyScript(id) {
   });
 }
 
-function copyJsonToClipboard() {
-  const jsonString = JSON.stringify(metadata_pure.value, null, 2); // Convert JSON object to a pretty-printed string
+function copyHTML() {
   navigator.clipboard
-    .writeText(jsonString)
+    .writeText(metadata_html.value)
     .then(() => {
       new Notify({
         status: "success",
@@ -240,7 +239,7 @@ function copyJsonToClipboard() {
       });
     })
     .catch((err) => {
-      console.error("Error copying JSON to clipboard: ", err);
+      console.error("Error copying HTML to clipboard: ", err);
     });
 }
 
@@ -286,7 +285,7 @@ const schemaLink = computed(() => {
     metadata.value["@type"].includes(":")
   ) {
     let parts = metadata.value["@type"].split(":");
-    return "/view/" + parts[0] + "/" + parts[1];
+    return "/ns/" + parts[0] + "/" + parts[1];
   }
   return false;
 });
@@ -451,17 +450,12 @@ getMetadata(id);
                   <a
                     class="btn btn-sm themeButton text-light mx-3"
                     @click="download('html')"
-                    >Download HTML</a
+                    >Download</a
                   >
                   <a
                     class="btn btn-sm themeButton text-light mx-3"
-                    @click="download('json')"
-                    >Download Metadata Alone</a
-                  >
-                  <a
-                    class="btn btn-sm themeButton text-light mx-3"
-                    @click="copyJsonToClipboard()"
-                    >Copy Metadata Alone</a
+                    @click="copyHTML()"
+                    >Copy</a
                   >
                 </div>
                 <template v-if="ready">

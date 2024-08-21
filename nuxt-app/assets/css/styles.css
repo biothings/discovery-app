@@ -1424,13 +1424,13 @@ pre code {
   vertical-align: middle;
 }
 .table-striped-main tbody tr:nth-of-type(odd) {
-  background-color: rgba(81, 187, 187, 0.2);
+  background-color: rgba(118, 100, 219, 0.2);
 }
 .table-striped-main tbody tr:nth-of-type(even) {
   background-color: rgba(187, 187, 187, 0.1);
 }
 .table-striped-sec tbody tr:nth-of-type(odd) {
-  background-color: rgba(169, 82, 187, 0.1);
+  background-color: rgba(112, 64, 189, 0.1);
 }
 .table-striped-sec tbody tr:nth-of-type(even) {
   background-color: rgba(187, 187, 187, 0.1);
