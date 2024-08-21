@@ -28,7 +28,7 @@ export const portals = {
         portalicon: outbreak_logo,
         api: "https://api.outbreak.info/",
         site: "https://outbreak.info/",
-        schema: "/view/outbreak",
+        schema: "/ns/outbreak",
         showCoverage: true,
         coverage: ["Dataset"],
         guides: [
@@ -54,7 +54,7 @@ export const portals = {
         image: nde,
         portalicon: nde,
         site: "https://data.niaid.nih.gov/portal",
-        schema: "/view/nde",
+        schema: "/ns/nde",
         showCoverage: false,
         coverage: ["Dataset", "ResourceCatalog"],
         guides: [
@@ -70,7 +70,7 @@ export const portals = {
           },
         ],
         datasets: "/dataset?template=nde:dataset",
-        colors: [{ hex: "#103b56" }, { hex: "#3684af" }],
+        colors: [{ hex: "#3684af" }, { hex: "#103b56" }],
         // publications: [
         //   // {
         //   //   name: "Developing a standardized but extendable framework to increase the findability of infectious disease datasets",
@@ -96,7 +96,7 @@ export const portals = {
         image: niaidIcon,
         portalicon: niaidIcon,
         site: "",
-        schema: "/view/niaid",
+        schema: "/ns/niaid",
         showCoverage: false,
         coverage: ["Dataset", "ComputationalTool"],
         guides: [
@@ -135,7 +135,7 @@ export const portals = {
         image: creiddIcon,
         portalicon: creiddIcon,
         site: "",
-        schema: "/view/creid",
+        schema: "/ns/creid",
         showCoverage: false,
         coverage: ["Dataset"],
         guides: [
@@ -166,7 +166,7 @@ export const portals = {
         image: cd2h,
         portalicon: dde,
         site: "https://ctsa.ncats.nih.gov/cd2h/",
-        schema: "/view/biomedical",
+        schema: "/ns/biomedical",
         showCoverage: true,
         coverage: ["Dataset"],
         guides: [
@@ -178,7 +178,7 @@ export const portals = {
         ],
         api: "https://crawler.biothings.io/",
         datasets: "/dataset?template=/guide",
-        colors: [{ hex: "#63296B" }, { hex: "#4A7D8F" }],
+        colors: [{ hex: "#00bcd4" }, { hex: "#4A7D8F" }],
       },
       {
         name: "The National COVID Cohort Collaborative (N3C)",
@@ -195,7 +195,7 @@ export const portals = {
         image: n3cLogo,
         portalicon: n3c,
         site: "https://covid.cd2h.org/N3C",
-        schema: "/view/n3c",
+        schema: "/ns/n3c",
         showCoverage: true,
         coverage: ["Dataset"],
         guides: [
@@ -206,7 +206,7 @@ export const portals = {
           },
         ],
         datasets: "/dataset?template=/guide/n3c/dataset",
-        colors: [{ hex: "#4B7E8F" }, { hex: "#64296B" }],
+        colors: [{ hex: "#00bcd4" }, { hex: "#64296B" }],
         faq_link: "/faq/n3c",
       },
     ],

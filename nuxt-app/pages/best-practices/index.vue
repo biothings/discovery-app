@@ -178,7 +178,7 @@
                   rel="nonreferrer"
                   >CD2H <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) biomedical dataset metadata based on this
-                <nuxt-link to="/view/biomedical/" rel="nonreferrer"
+                <nuxt-link to="/ns/biomedical/" rel="nonreferrer"
                   >schema <font-awesome-icon icon="fas fa-external-link-alt"
                 /></nuxt-link>
                 structure.
@@ -240,7 +240,7 @@
                       <small>Schema</small>
                     </td>
                     <td>
-                      <nuxt-link to="/view/biomedical"
+                      <nuxt-link to="/ns/biomedical"
                         ><small class="badge badge-light"
                           >Dataset</small
                         ></nuxt-link
@@ -270,7 +270,7 @@
                   rel="nonreferrer"
                   >N3C <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) dataset metadata based on this
-                <nuxt-link to="/view/n3c/" rel="nonreferrer"
+                <nuxt-link to="/ns/n3c/" rel="nonreferrer"
                   >schema <font-awesome-icon icon="fas fa-external-link-alt"
                 /></nuxt-link>
                 structure.
@@ -327,7 +327,7 @@
                       <small>Schema</small>
                     </td>
                     <td>
-                      <nuxt-link to="/view/n3c"
+                      <nuxt-link to="/ns/n3c"
                         ><small class="badge badge-light"
                           >Dataset</small
                         ></nuxt-link
@@ -359,7 +359,7 @@
                   >Outbreak.info
                   <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) COVID-19 epidimiology dataset metadata based on this
-                <nuxt-link to="/view/outbreak/" rel="nonreferrer"
+                <nuxt-link to="/ns/outbreak/" rel="nonreferrer"
                   >schema <font-awesome-icon icon="fas fa-external-link-alt"
                 /></nuxt-link>
                 structure.
@@ -416,7 +416,7 @@
                       <small>Schema</small>
                     </td>
                     <td>
-                      <nuxt-link to="/view/outbreak"
+                      <nuxt-link to="/ns/outbreak"
                         ><small class="badge badge-light"
                           >Dataset</small
                         ></nuxt-link
@@ -456,7 +456,7 @@
                   >NIAID Systems Biology
                   <font-awesome-icon icon="fas fa-external-link-alt" /></a
                 >) dataset metadata based on this
-                <nuxt-link to="/view/niaid/" rel="nonreferrer"
+                <nuxt-link to="/ns/niaid/" rel="nonreferrer"
                   >schema <font-awesome-icon icon="fas fa-external-link-alt"
                 /></nuxt-link>
                 structure.
@@ -516,7 +516,7 @@
                       <small>Schema</small>
                     </td>
                     <td>
-                      <nuxt-link to="/view/niaid"
+                      <nuxt-link to="/ns/niaid"
                         ><small class="badge badge-light"
                           >Dataset</small
                         ></nuxt-link

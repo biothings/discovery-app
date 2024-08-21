@@ -82,14 +82,14 @@
                 class="text-light"
                 v-text="namespace"
               ></h1>
-              <small class="text-info">(Temporary Namespace)</small>
+              <b class="text-warning">(Temporary Namespace)</b>
             </div>
           </template>
           <div class="row" v-show="!namespaceRegistered">
             <div class="col-sm-12 text-center p-3">
               <button
                 role="button"
-                class="btn btn-sm btn-success"
+                class="btn btn-lg btn-success"
                 @click="openRegistration()"
               >
                 <font-awesome-icon icon="fas fa-registered" /> Register This
@@ -129,7 +129,7 @@
               Classes
             </li>
             <li v-for="item in searchResults">
-              <nuxt-link :to="'/' + item['label']"
+              <nuxt-link :to="$route.fullPath + '/' + item['label']"
                 ><small v-text="item['label']"></small
               ></nuxt-link>
             </li>
@@ -145,7 +145,7 @@
               Properties
             </li>
             <li v-for="item in searchResultsProps">
-              <nuxt-link :to="'/' + item['label']"
+              <nuxt-link :to="$route.fullPath + '/' + item['label']"
                 ><small v-text="item['label']"></small
               ></nuxt-link>
             </li>
@@ -162,8 +162,9 @@
           >
             <h3 class="text-muted d-inline mr-2 text-dde-dark">Definitions</h3>
             <a
+              v-if="!$route.fullPath.includes('ns/schema')"
               role="button"
-              class="btn btn-sm mainBackDark pointer ml-2"
+              class="btn btn-sm themeButton pointer ml-2"
               @click="flipView()"
               >Change View <font-awesome-icon icon="fas fa-retweet"
             /></a>
@@ -263,7 +264,7 @@
                         <small v-html="def['description']"></small>
                       </p>
                     </div>
-                    <div>
+                    <div v-if="namespaceRegistered">
                       <font-awesome-icon
                         icon="fas fa-code-branch"
                         class="pointer tip text-light btn themeButton p-1"
@@ -287,8 +288,9 @@
               Definition Hierarchy
             </h3>
             <a
+              v-if="!$route.fullPath.includes('ns/schema')"
               role="button"
-              class="btn btn-sm mainBackDark pointer ml-2 text-light"
+              class="btn btn-sm themeButton pointer ml-2 text-light"
               @click="flipView()"
               >Change View <font-awesome-icon icon="fas fa-retweet"
             /></a>
@@ -441,7 +443,7 @@
     </div>
     <!-- QUERY MODE -->
     <div id="mainCont">
-      <div class="container mt-5 pt-3" v-if="query">
+      <div class="container mt-5 pt-5" v-if="query">
         <div
           class="w-100 p-2 bg-dde-dark d-flex align-items-center justify-content-around p-3"
         >
@@ -459,21 +461,6 @@
               class="text-light fa-stack-1x"
             />
           </span>
-          <div class="d-flex justify-content-around align-items-center">
-            <template v-if="!validationView">
-              <small class="text-center text-light mr-2"
-                >Expand Properties</small
-              >
-              <input
-                id="toggle"
-                class="form-control slider text-light m-auto tip"
-                @change="showAll()"
-                data-tippy-content="Expand or contract all property lists"
-                type="checkbox"
-                checked
-              />
-            </template>
-          </div>
           <div class="d-flex justify-content-around align-items-center">
             <small class="text-center text-light mr-2"
               ><img src="@/assets/img/cube.svg" width="25" /> Validation

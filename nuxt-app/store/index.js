@@ -37,15 +37,22 @@ export default createStore({
   },
   state: () => ({
     loading: false,
+    expandUI: false,
   }),
   mutations: {
     setLoading(state, payload) {
       state.loading = payload.value;
     },
+    toggleExpandUI(state) {
+      state.expandUI = !state.expandUI;
+    },
   },
   getters: {
     loading: (state) => {
       return state.loading;
+    },
+    expandUI: (state) => {
+      return state.expandUI;
     },
   },
   actions: {
