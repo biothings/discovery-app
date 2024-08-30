@@ -942,48 +942,47 @@ export default {
     },
     findClass(query) {
       let self = this;
-      if (self.namespace === "schema") {
-        console.log("SCHEMA.org case");
-        axios(
-          self.apiUrl +
-            "/api/registry/" +
-            self.namespace +
-            "/" +
-            self.query +
-            "?v"
-        )
-          .then((res) => {
-            var payload = {};
-            payload["schema"] = res.data;
-            self.$store.commit("saveSchemaForViewer", payload);
-            this.userSchema = res.data;
-            for (var i = 0; i < self.userSchema["hits"].length; i++) {
-              if (self.userSchema["hits"][i]["name"] === query) {
-                // console.log("MATCH",self.userSchema['hits'][i])
-                let q = self.userSchema["hits"][i];
-                self.getParentsOf(q);
-                var payload = {};
-                payload["queryContent"] = q;
-                self.$store.commit("checkIFValidationView", payload);
-              }
+      axios(
+        self.apiUrl +
+          "/api/registry/" +
+          self.namespace +
+          "/" +
+          self.query +
+          "?v"
+      )
+        .then((res) => {
+          var payload = {};
+          payload["schema"] = res.data;
+          self.$store.commit("saveSchemaForViewer", payload);
+          this.userSchema = res.data;
+          for (var i = 0; i < self.userSchema["hits"].length; i++) {
+            if (self.userSchema["hits"][i]["name"] === query) {
+              // console.log("MATCH",self.userSchema['hits'][i])
+              let q = self.userSchema["hits"][i];
+              self.getParentsOf(q);
+              var payload = {};
+              payload["queryContent"] = q;
+              self.$store.commit("checkIFValidationView", payload);
             }
-            return false;
-          })
-          .catch((err) => {
-            throw err;
-          });
-      } else {
-        for (var i = 0; i < self.userSchema["hits"].length; i++) {
-          if (
-            self.userSchema["hits"][i]["name"] === query ||
-            self.userSchema["hits"][i]["label"] == query
-          ) {
-            let found = self.userSchema["hits"][i];
-            return found;
           }
-        }
-        return false;
-      }
+          return false;
+        })
+        .catch((err) => {
+          throw err;
+        });
+      // else {
+      //   console.log('FINDING PARENT', query)
+      //   for (var i = 0; i < self.userSchema["hits"].length; i++) {
+      //     if (
+      //       self.userSchema["hits"][i]["name"] === query ||
+      //       self.userSchema["hits"][i]["label"] == query
+      //     ) {
+      //       let found = self.userSchema["hits"][i];
+      //       return found;
+      //     }
+      //   }
+      //   return false;
+      // }
     },
     findProp(query) {
       let self = this;
