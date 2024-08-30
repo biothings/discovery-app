@@ -412,6 +412,7 @@ body {
 
 .source-badge div:first-child {
   background: #ccc;
+  color: #000;
   background: -moz-linear-gradient(
     top,
     rgba(204, 204, 204, 1) 1%,
