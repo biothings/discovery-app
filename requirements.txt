@@ -1,6 +1,6 @@
 # git+https://github.com/biothings/biothings_schema.py@25a3c02#egg=biothings_schema
-git+https://github.com/biothings/biothings.api.git@0.12.x#egg=biothings
-#biothings==0.10.0
+# git+https://github.com/biothings/biothings.api.git@0.12.x#egg=biothings
+biothings==0.12.5
 #PyLD>=0.7.1
 #jsonschema>=2.6.0
 #torngithub==0.2.0
