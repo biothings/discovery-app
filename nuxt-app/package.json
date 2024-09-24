@@ -9,7 +9,7 @@
     "format": "prettier .  --write"
   },
   "devDependencies": {
-    "nuxt": "3.0.0-rc.10",
+    "nuxt": "3.13.2",
     "prettier": "^2.7.1"
   },
   "dependencies": {
