@@ -37,6 +37,7 @@ jobs:
             set -x
             echo "Installing backend requirements."
             cd /home/ubuntu/discovery
+            pip install --upgrade pip
             pip install -Ur requirements.txt --no-cache-dir --ignore-installed --force-reinstall
             echo "Restarting discovery backend services..."
             sudo systemctl restart discovery@8000
