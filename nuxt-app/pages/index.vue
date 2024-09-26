@@ -196,7 +196,7 @@
             >
               <img :src="res_reg" width="150" alt="resource registry" />
               <h3 class="text-light">
-                Metadata Registry
+                Resource Registry
                 <font-awesome-icon
                   icon="fas fa-chevron-right"
                   class="d-inline text-dde-light"

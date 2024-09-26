@@ -383,8 +383,8 @@ getMetadata(id);
         </div>
         <div class="alert alert-dark text-dde-dark mt-5">
           <h4>
-            <b>For dataset owner:</b> Embed this structured dataset metadata on
-            your website describing this dataset
+            <b>For the resource owner:</b> Embed this structured metadata on
+            your website describing this resource
             <span
               class="text-info"
               data-tippy-content="<b>TLDR</b>: This makes your dataset easier to be found from multiple search engines (Google, Bing etc.)<hr>
