@@ -14,7 +14,6 @@ from discovery.notify import update_n3c_routine
 from discovery.utils.backup import daily_backup_routine
 from discovery.utils.coverage import daily_coverage_update
 from discovery.utils.update import daily_schema_update
-from config_key import NO_BACKUP
 
 define("proxy_url", default="http://localhost:3000/", help="localhost port serving frontend")
 
@@ -43,7 +42,7 @@ def routine():
         logger.info("Schedule lock released successfully.")
 
 def run_routine():
-    thread = Thread(target=routine, kwargs={"no_backup": NO_BACKUP}, daemon=True)
+    thread = Thread(target=routine, daemon=True)
     thread.start()
 
 
