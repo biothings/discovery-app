@@ -4,7 +4,7 @@ If the backup file does not exist, a notification is sent to a Slack channel.
 
 Expected file format in the S3 bucket:
 - The file should be in the folder 'db_backup/' with the following naming pattern:
-  'discovery_YYYYMMDD.zip', where YYYYMMDD corresponds to the current date.
+  'dde_backup_YYYYMMDD.zip', where YYYYMMDD corresponds to the current date.
 
 Required Environment Variables:
 - AWS_ACCESS_KEY_ID: The AWS access key ID to read the AWS s3 bucket.
@@ -35,7 +35,7 @@ from datetime import datetime
 
 # Create the expected file name
 today_date = datetime.today().strftime("%Y%m%d")
-expected_file = f"{os.getenv('S3_FOLDER')}discovery_{today_date}.zip"
+expected_file = f"{os.getenv('S3_FOLDER')}dde_backup_{today_date}.zip"
 
 # Create the S3 client
 s3_client = boto3.client("s3", region_name=os.getenv("AWS_REGION"))
