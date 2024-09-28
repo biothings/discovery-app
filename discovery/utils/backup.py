@@ -102,8 +102,6 @@ def daily_backup_routine(format="zip"):
             data.update(_d)
 
         logger.info("Saving to S3 bucket...")
-        # with open('file.txt', 'w') as f:
-        #     f.write(str(data))
         s3_obj = save_to_s3(data, format=format)
         logger.info("Done. [%s]", s3_obj)
     except Exception as exc:
