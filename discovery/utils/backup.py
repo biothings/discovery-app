@@ -100,32 +100,49 @@ def daily_backup_routine():
         logger.error(str(exc))
 
 
-def backup_from_file(api):
-    """Restore index data from file"""
+def backup_from_file(api, update_schema=True, update_schema_class=True, update_dataset=True):
+    """
+    Restore index data from a file, with an option to update indices.
+    
+    
+    """
     logger = logging.getLogger("backup_from_file")
     if not api:
-        logger.error("failure to restore from file, no json object passed.")
-    else:
-        indices.reset()
-        api_schema = api["discover_schema"]
-        api_schema_class = api["discover_schema_class"]
-        api_dataset = api["discover_dataset"]
+        logger.error("Failure to restore from file, no JSON object passed.")
 
+    # Reset indices if any index is being updated
+    if update_schema or update_schema_class or update_dataset:
+        indices.reset()
+
+    # Update discover_schema if True
+    if update_schema:
+        api_schema = api["discover_schema"]
         for doc in api_schema["docs"]:
             file = Schema(**doc)
             file.meta.id = doc["_id"]
             file.save()
+    else:
+        logger.info("No discover_schema data found in the API backup")
 
+    # Update discover_schema_class if True
+    if update_schema_class:
+        api_schema_class = api["discover_schema_class"]
         for doc in api_schema_class["docs"]:
             file = SchemaClass(**doc)
             file.save()
-
+    else:
+        logger.info("No discover_schema_class data found in the API backup")
+    
+    # Update discover_dataset if True
+    if discover_dataset:
+        api_dataset = api["discover_dataset"]
         for doc in api_dataset["docs"]:
             file = Dataset(**doc)
             file.save()
+    else:
+        logger.info("No discover_dataset data found in the API backup")
 
-
-def restore_from_s3(filename=None, bucket="dde"):
+def restore_from_s3(filename=None, bucket="dde",update_schema=True, update_schema_class=True, update_dataset=True):
 
     s3 = boto3.client("s3")
 
@@ -144,10 +161,10 @@ def restore_from_s3(filename=None, bucket="dde"):
     )
 
     ddeapis = json.loads(obj['Body'].read())
-    backup_from_file(ddeapis)
+    backup_from_file(ddeapis, update_schema=update_schema, update_schema_class=update_schema_class, update_dataset=update_dataset)
 
 
-def restore_from_file(filename=None):
+def restore_from_file(filename=None, update_schema=True, update_schema_class=True, update_dataset=True):
     with open(filename) as file:
         ddeapis = json.load(file)
-        backup_from_file(ddeapis)
+        backup_from_file(ddeapis, update_schema=update_schema, update_schema_class=update_schema_class, update_dataset=update_dataset)
