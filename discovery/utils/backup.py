@@ -188,6 +188,7 @@ def backup_from_file(api: dict, indices: Union[str, List[str], Tupe[str, ...]] =
         else:
             logger.info("No discover_dataset data found in the API backup")
 
+def restore_from_s3(filename=None, bucket="dde",update_schema=True, update_schema_class=True, update_dataset=True):
 
 def restore_from_s3(filename: str = None, bucket: str = "dde", indices: Union[str, List[str], Tuple[str, ...]] = "all"):
     s3 = boto3.client("s3")
