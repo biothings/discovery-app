@@ -103,15 +103,19 @@ def daily_backup_routine():
 def backup_from_file(api, update_schema=True, update_schema_class=True, update_dataset=True):
     """
     Restore index data from a file, with an option to update indices.
-    
-    
+
+
     """
     logger = logging.getLogger("backup_from_file")
     if not api:
         logger.error("Failure to restore from file, no JSON object passed.")
 
     # Reset target indices
-    indices.reset(update_schema=update_schema, update_schema_class=update_schema_class, update_dataset=update_dataset)
+    indices.reset(
+        update_schema=update_schema,
+        update_schema_class=update_schema_class,
+        update_dataset=update_dataset,
+    )
 
     # Update discover_schema if True
     if update_schema:
@@ -131,7 +135,7 @@ def backup_from_file(api, update_schema=True, update_schema_class=True, update_d
             file.save()
     else:
         logger.info("No discover_schema_class data found in the API backup")
-    
+
     # Update discover_dataset if True
     if update_dataset:
         api_dataset = api["discover_dataset"]
@@ -141,7 +145,10 @@ def backup_from_file(api, update_schema=True, update_schema_class=True, update_d
     else:
         logger.info("No discover_dataset data found in the API backup")
 
-def restore_from_s3(filename=None, bucket="dde",update_schema=True, update_schema_class=True, update_dataset=True):
+
+def restore_from_s3(
+    filename=None, bucket="dde", update_schema=True, update_schema_class=True, update_dataset=True
+):
 
     s3 = boto3.client("s3")
 
@@ -154,16 +161,25 @@ def restore_from_s3(filename=None, bucket="dde",update_schema=True, update_schem
 
     logging.info("GET s3://%s/%s", bucket, filename)
 
-    obj = s3.get_object(
-        Bucket=bucket,
-        Key=filename
-    ) 
+    obj = s3.get_object(Bucket=bucket, Key=filename)
 
-    ddeapis = json.loads(obj['Body'].read())
-    backup_from_file(ddeapis, update_schema=update_schema, update_schema_class=update_schema_class, update_dataset=update_dataset)
+    ddeapis = json.loads(obj["Body"].read())
+    backup_from_file(
+        ddeapis,
+        update_schema=update_schema,
+        update_schema_class=update_schema_class,
+        update_dataset=update_dataset,
+    )
 
 
-def restore_from_file(filename=None, update_schema=True, update_schema_class=True, update_dataset=True):
+def restore_from_file(
+    filename=None, update_schema=True, update_schema_class=True, update_dataset=True
+):
     with open(filename) as file:
         ddeapis = json.load(file)
-        backup_from_file(ddeapis, update_schema=update_schema, update_schema_class=update_schema_class, update_dataset=update_dataset)
+        backup_from_file(
+            ddeapis,
+            update_schema=update_schema,
+            update_schema_class=update_schema_class,
+            update_dataset=update_dataset,
+        )
