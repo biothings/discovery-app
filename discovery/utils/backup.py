@@ -1,5 +1,7 @@
 import json
 import logging
+import zipfile
+import io
 from datetime import date, datetime
 
 import boto3
@@ -18,15 +20,23 @@ def json_serial(obj):
     raise TypeError("Type %s not serializable" % type(obj))
 
 
-def _default_filename():
-    return "dde_backup_" + datetime.today().strftime("%Y%m%d") + ".json"
+def _default_filename(extension=".json"):
+    return "dde_backup_" + datetime.today().strftime("%Y%m%d") + extension
 
 
-def save_to_s3(data, filename=None, bucket="dde"):
-    filename = filename or _default_filename()
-    s3 = boto3.client("s3")
+def save_to_s3(data, filename=None, bucket="dde", format="zip"):
+    filename = filename or _default_filename(f".{format}")
+    s3 = boto3.resource("s3")
     obj_key = f"db_backup/{filename}"
-    s3.put_object(Bucket=bucket, Key=obj_key, Body=json.dumps(data, indent=2, default=json_serial))
+    if format == "zip":
+        with zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED) as zfile:
+            json_data = json.dumps(data, indent=2, default=json_serial)
+            zfile.writestr(filename.replace(".zip", ".json"), json_data)
+        logging.info(f"Uploading {filename} to AWS S3")
+        s3.Bucket(bucket).upload_file(Filename=filename, Key=obj_key)
+    else:
+        logging.info(f"Uploading {filename} to AWS S3")
+        s3.Bucket(bucket).put_object(Key=obj_key, Body=json.dumps(data, indent=2))
     return obj_key
 
 
@@ -76,7 +86,7 @@ def backup_schema_class(outfile=None):
     return backup_es(SchemaClass, outfile=outfile)
 
 
-def daily_backup_routine():
+def daily_backup_routine(format="zip"):
     logger = logging.getLogger("daily_backup")
     data = {}
     try:
@@ -94,10 +104,11 @@ def daily_backup_routine():
             data.update(_d)
 
         logger.info("Saving to S3 bucket...")
-        s3_obj = save_to_s3(data)
+        s3_obj = save_to_s3(data, format=format)
         logger.info("Done. [%s]", s3_obj)
     except Exception as exc:
         logger.error(str(exc))
+        logger.error("Stack trace:", exc_info=True)
 
 
 def backup_from_file(api):
@@ -143,11 +154,38 @@ def restore_from_s3(filename=None, bucket="dde"):
         Key=filename
     )
 
-    ddeapis = json.loads(obj['Body'].read())
+    filename = filename.replace("db_backup/", "")
+
+    if filename.endswith(".zip"):
+        file_content = obj["Body"].read()
+        with zipfile.ZipFile(io.BytesIO(file_content)) as zfile:
+            # Search for a JSON file inside the ZIP
+            json_file = next((f for f in zfile.namelist() if f.endswith(".json")), None)
+            if not json_file:
+                raise ValueError("No JSON file found inside the ZIP archive.")
+            with zfile.open(json_file) as json_data:
+                ddeapis = json.load(json_data)
+    elif filename.endswith(".json"):
+        ddeapis = json.loads(obj['Body'].read())
+    else:
+        raise Exception("Unsupported backup file type!")
+
     backup_from_file(ddeapis)
 
 
 def restore_from_file(filename=None):
-    with open(filename) as file:
-        ddeapis = json.load(file)
-        backup_from_file(ddeapis)
+    if filename.endswith(".zip"):
+        with zipfile.ZipFile(filename, 'r') as zfile:
+            # Search for a JSON file inside the ZIP
+            json_file = next((f for f in zfile.namelist() if f.endswith(".json")), None)
+            if not json_file:
+                raise ValueError("No JSON file found inside the ZIP archive.")
+            with zfile.open(json_file) as json_data:
+                ddeapis = json.load(json_data)
+    elif filename.endswith(".json"):
+        with open(filename) as file:
+            ddeapis = json.load(file)
+    else:
+        raise Exception("Unsupported backup file type!")
+
+    backup_from_file(ddeapis)
