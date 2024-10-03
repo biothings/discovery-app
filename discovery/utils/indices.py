@@ -26,24 +26,44 @@ def refresh():
     Index(Dataset.Index.name).refresh()
 
 
-def reset():
+def reset(update_schema=True, update_schema_class=True, update_dataset=True):
 
-    index_1 = Index(Schema.Index.name)
-    index_2 = Index(SchemaClass.Index.name)
-    index_3 = Index(Dataset.Index.name)
+    # Reset discover_schema if update_schema is True (default behavior resets all)
+    if update_schema:
+        index_1 = Index(Schema.Index.name)
+        if index_1.exists():
+            index_1.delete()
+        Schema.init()
 
-    if index_1.exists():
-        index_1.delete()
+    # Reset discover_schema_class if update_schema_class is True
+    if update_schema_class:
+        index_2 = Index(SchemaClass.Index.name)
+        if index_2.exists():
+            index_2.delete()
+        SchemaClass.init()
 
-    if index_2.exists():
-        index_2.delete()
+    # Reset discover_dataset if update_dataset is True
+    if update_dataset:
+        index_3 = Index(Dataset.Index.name)
+        if index_3.exists():
+            index_3.delete()
+        Dataset.init()
+    # index_1 = Index(Schema.Index.name)
+    # index_2 = Index(SchemaClass.Index.name)
+    # index_3 = Index(Dataset.Index.name)
 
-    if index_3.exists():
-        index_3.delete()
+    # if index_1.exists():
+    #     index_1.delete()
 
-    Schema.init()
-    SchemaClass.init()
-    Dataset.init()
+    # if index_2.exists():
+    #     index_2.delete()
+
+    # if index_3.exists():
+    #     index_3.delete()
+
+    # Schema.init()
+    # SchemaClass.init()
+    # Dataset.init()
 
 
 def save_schema_index_meta(meta):

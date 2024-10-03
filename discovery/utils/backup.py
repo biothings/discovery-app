@@ -110,9 +110,8 @@ def backup_from_file(api, update_schema=True, update_schema_class=True, update_d
     if not api:
         logger.error("Failure to restore from file, no JSON object passed.")
 
-    # Reset indices if any index is being updated
-    if update_schema or update_schema_class or update_dataset:
-        indices.reset()
+    # Reset target indices
+    indices.reset(update_schema=update_schema, update_schema_class=update_schema_class, update_dataset=update_dataset)
 
     # Update discover_schema if True
     if update_schema:
@@ -134,7 +133,7 @@ def backup_from_file(api, update_schema=True, update_schema_class=True, update_d
         logger.info("No discover_schema_class data found in the API backup")
     
     # Update discover_dataset if True
-    if discover_dataset:
+    if update_dataset:
         api_dataset = api["discover_dataset"]
         for doc in api_dataset["docs"]:
             file = Dataset(**doc)
@@ -158,7 +157,7 @@ def restore_from_s3(filename=None, bucket="dde",update_schema=True, update_schem
     obj = s3.get_object(
         Bucket=bucket,
         Key=filename
-    )
+    ) 
 
     ddeapis = json.loads(obj['Body'].read())
     backup_from_file(ddeapis, update_schema=update_schema, update_schema_class=update_schema_class, update_dataset=update_dataset)
