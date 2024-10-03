@@ -30,10 +30,12 @@ def save_to_s3(data, filename=None, bucket="dde", format="zip"):
     obj_key = f"db_backup/{filename}"
     if format == "zip":
         with zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED) as zfile:
-            json_data = json.dumps(data, indent=2)
+            json_data = json.dumps(data, indent=2, default=json_serial)
             zfile.writestr(filename.replace(".zip", ".json"), json_data)
+        logging.info(f"Uploading {filename} to AWS S3")
         s3.Bucket(bucket).upload_file(Filename=filename, Key=obj_key)
     else:
+        logging.info(f"Uploading {filename} to AWS S3")
         s3.Bucket(bucket).put_object(Key=obj_key, Body=json.dumps(data, indent=2))
     return obj_key
 
