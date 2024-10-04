@@ -5,7 +5,7 @@ on:
   schedule:
     - cron: '0 13 * * *' # 5:00 AM PST (UTC-8)
 
-    jobs:
+jobs:
   check-backup:
     runs-on: ubuntu-latest
 
