@@ -25,8 +25,6 @@ def export(backup_file):
     data["discover_schema_class"]["docs"] = n3c_schema_classes
 
     infile = pathlib.Path(backup_file)
-    print(infile)
     outfile = infile.with_suffix("").with_name(infile.stem + "_n3c").with_suffix(infile.suffix)
-    print(outfile)
     with open(outfile, "w") as out_f:
         json.dump(data, out_f)

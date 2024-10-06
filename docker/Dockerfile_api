@@ -4,7 +4,7 @@ RUN apk update && \
     apk upgrade && \
     apk --no-cache add git gcc musl-dev libcurl curl-dev
 
-RUN git clone https://github.com/biothings/discovery-app.git
+RUN git clone https://github.com/biothings/discovery-app.git && git checkout odp_migration
 RUN pip install pip wheel -U && \
     pip install -r /discovery-app/requirements.txt && \
     pip cache purge && \
