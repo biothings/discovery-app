@@ -1,0 +1,53 @@
+name: discovery-app
+services:
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx_conf.d:/etc/nginx/conf.d
+    depends_on:
+      - api
+      - webapp
+    networks:
+      - net0
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile_api
+    environment:
+      - ES_HOST=http://es:9200
+    depends_on:
+      - es
+    ports:
+      - "8000"
+    restart: on-failure
+    networks:
+      - net0
+
+  es:
+    image: elasticsearch:8.15.2
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - http.cors.enabled=true
+      - http.cors.allow-origin=/https?:\/\/localhost(:[0-9]+)?/
+    ports:
+      - "9200"
+    networks:
+      - net0
+
+  webapp:
+    build:
+      dockerfile: Dockerfile_webapp
+    ports:
+      - "3000"
+    restart: on-failure
+    networks:
+      - net0
+
+networks:
+  net0:
+    driver: bridge
