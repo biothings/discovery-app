@@ -4,7 +4,7 @@ RUN apk update && \
     apk upgrade && \
     apk --no-cache add git
 
-RUN git clone https://github.com/biothings/discovery-app.git
+RUN git clone https://github.com/biothings/discovery-app.git && git checkout odp_migration
 WORKDIR /discovery-app/nuxt-app
 RUN npm install && \
     NODE_OPTIONS="--max-old-space-size=1512" npm run build && \
