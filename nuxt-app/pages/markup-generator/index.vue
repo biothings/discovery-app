@@ -141,7 +141,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="bg-light min-100">
+  <div class="bg-light min-100 mb-5">
     <div
       class="text-left bg-light"
       :class="[!expandedWide ? 'container' : 'container-fluid px-3']"
