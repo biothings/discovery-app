@@ -10,7 +10,7 @@ RUN pip install pip wheel -U && \
     pip cache purge && \
     apk del gcc musl-dev curl-dev && apk cache clean
 
-COPY ./config_key.py /discovery-app/config_key.py
+COPY ./config_key_example.py /discovery-app/config_key.py
 WORKDIR /discovery-app
 EXPOSE 8000
 
