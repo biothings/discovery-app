@@ -28,10 +28,13 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                             "query": {
                                 "dis_max": {
                                     "queries": [
-                                        {"term": {"_id": {"value": q, "boost": 15.0}}},
-                                        {"term": {"label.raw": {"value": q, "boost": 10.0}}},
+                                        # Prioritize phrase matches with a higher boost
+                                        {"match_phrase": {"label": {"query": q, "boost": 20.0, "case_insensitive": True}}},
+                                        {"match_phrase": {"name": {"query": q, "boost": 15.0, "case_insensitive": True}}},
+                                        # Fallback to term and match queries with lower priority
+                                        {"term": {"_id": {"value": q, "boost": 10.0}}},
+                                        {"term": {"label.raw": {"value": q, "boost": 8.0}}},
                                         {"term": {"_meta.username": {"value": q}}},
-                                        {"term": {"name": {"value": q}}},
                                         {"match": {"parent_classes": {"query": q}}},
                                         {"prefix": {"label": {"value": q}}},
                                         {"query_string": {"query": q}},
