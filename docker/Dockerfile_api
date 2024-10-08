@@ -1,0 +1,19 @@
+FROM python:3.10-alpine
+
+RUN apk update && \
+    apk upgrade && \
+    apk --no-cache add git gcc musl-dev libcurl curl-dev
+
+RUN git clone https://github.com/biothings/discovery-app.git
+RUN pip install pip wheel -U && \
+    pip install -r /discovery-app/requirements.txt && \
+    pip cache purge && \
+    apk del gcc musl-dev curl-dev && apk cache clean
+
+
+
+COPY ./config_key_example.py /discovery-app/config_key.py
+WORKDIR /discovery-app
+EXPOSE 8000
+
+ENTRYPOINT ["python", "index.py"]
