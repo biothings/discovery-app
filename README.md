@@ -52,33 +52,34 @@ You should now be able to access the homepage at <http://localhost:8000/>
 
 ## Run in Docker
 
-First refer to step 5 above to setup the credentials required to run the program.
+First refer to step 6 above to setup the credentials required to run the program.
 The following commands should be issued under the first level project folder.
-Make sure you have port `8000` and `9200` not in use when starting containers.
+Make sure you have port `8000` not in use when starting containers.
 
 ### Build
 
 ```bash
-docker-compose up --detach
+cd docker
+docker compose up --detach
 ```
 
 ### Stop and restart
 
 ```bash
-docker-compose stop
-docker-compose start
+docker compose stop
+docker compose start
 ```
 
 ### Update codebase
 
 ```bash
-docker-compose exec web git pull
+docker compose exec web git pull
 ```
 
 ### Remove containers
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 # Related Projects
