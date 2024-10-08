@@ -35,10 +35,10 @@ export const portals = {
           {
             guide: "/guide/outbreak/dataset",
             name: "Dataset",
-            registry: "/dataset?template=/guide/outbreak/dataset",
+            registry: "/resource?template=/guide/outbreak/dataset",
           },
         ],
-        datasets: "/dataset?template=/guide/outbreak/dataset",
+        datasets: "/resource?template=/guide/outbreak/dataset",
         colors: [{ hex: "#D13B62" }, { hex: "#0A253D" }],
         cite: `Tsueng G, Mullen JL, Alkuzweny M, Cano M, Rush B, Haag E, Lin J, Welzel DJ, Zhou X, Qian Z, Latif AA, Hufbauer E, Zeller M, Andersen KG, Wu C, Su AI, Gangavarapu K, Hughes LD. Outbreak.info Research Library: a standardized, searchable platform to discover and explore COVID-19 resources. 
         Nat Methods. 2023 Apr;20(4):536-540. doi: 10.1038/s41592-023-01770-w. Epub 2023 Feb 23. PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/36823331" target="_blank">36823331</a>; PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC10393269" target="_blank">PMC10393269</a>.`,
@@ -61,15 +61,15 @@ export const portals = {
           {
             guide: "/guide/nde/ResourceCatalog",
             name: "Resource Catalog",
-            registry: "/dataset?template=nde:ResourceCatalog",
+            registry: "/resource?template=nde:ResourceCatalog",
           },
           {
             guide: "/guide/nde/Dataset",
             name: "Dataset",
-            registry: "/dataset?template=nde:dataset",
+            registry: "/resource?template=nde:dataset",
           },
         ],
-        datasets: "/dataset?template=nde:dataset",
+        datasets: "/resource?template=nde:dataset",
         colors: [{ hex: "#3684af" }, { hex: "#103b56" }],
         // publications: [
         //   // {
@@ -103,15 +103,15 @@ export const portals = {
           {
             guide: "/guide/niaid",
             name: "Dataset",
-            registry: "/dataset?template=niaid:dataset",
+            registry: "/resource?template=niaid:dataset",
           },
           {
             guide: "/guide/niaid/ComputationalTool",
             name: "Computational Tool",
-            registry: "/dataset?template=niaid:computationaltool",
+            registry: "/resource?template=niaid:computationaltool",
           },
         ],
-        datasets: "/dataset?template=niaid:dataset",
+        datasets: "/resource?template=niaid:dataset",
         colors: [{ hex: "#7630dd" }, { hex: "#113B56" }],
         publications: [
           {
@@ -142,10 +142,10 @@ export const portals = {
           {
             guide: "/guide/creid",
             name: "Dataset",
-            registry: "/dataset?template=creid:dataset",
+            registry: "/resource?template=creid:dataset",
           },
         ],
-        datasets: "/dataset?template=creid:dataset",
+        datasets: "/resource?template=creid:dataset",
         colors: [{ hex: "#8c44b2" }, { hex: "#0c596b" }],
         // publications: [],
       },
@@ -173,11 +173,11 @@ export const portals = {
           {
             guide: "/guide",
             name: "Dataset",
-            registry: "/dataset?template=/guide",
+            registry: "/resource?template=/guide",
           },
         ],
         api: "https://crawler.biothings.io/",
-        datasets: "/dataset?template=/guide",
+        datasets: "/resource?template=/guide",
         colors: [{ hex: "#00bcd4" }, { hex: "#4A7D8F" }],
       },
       {
@@ -202,10 +202,10 @@ export const portals = {
           {
             guide: "/guide/n3c/dataset",
             name: "Dataset",
-            registry: "/dataset?template=/guide/n3c/dataset",
+            registry: "/resource?template=/guide/n3c/dataset",
           },
         ],
-        datasets: "/dataset?template=/guide/n3c/dataset",
+        datasets: "/resource?template=/guide/n3c/dataset",
         colors: [{ hex: "#00bcd4" }, { hex: "#64296B" }],
         faq_link: "/faq/n3c",
       },
