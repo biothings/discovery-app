@@ -1,0 +1,17 @@
+FROM node:18-alpine
+
+RUN apk update && \
+    apk upgrade && \
+    apk --no-cache add git
+
+RUN git clone https://github.com/biothings/discovery-app.git
+WORKDIR /discovery-app/nuxt-app
+RUN npm install && \
+    NODE_OPTIONS="--max-old-space-size=1512" npm run build && \
+    npm cache clean --force && \
+    rm -rf ./node_modules package-lock.json .cache
+
+ENV PORT=3000
+EXPOSE 3000
+
+ENTRYPOINT ["node", ".output/server/index.mjs"]
