@@ -311,49 +311,79 @@
               <li>
                 <nuxt-link
                   class="text-0"
-                  :to="'/ns/' + namespace + '/' + rootNode"
+                  :to="
+                    rootNode == 'schema:Thing'
+                      ? '/ns/schema/schema:Thing'
+                      : '/ns/' + namespace + '/' + rootNode
+                  "
                   v-text="rootNode"
                 ></nuxt-link>
                 <ul>
                   <li v-for="item in getNeighbors(rootNode)">
                     <nuxt-link
                       class="text-1"
-                      :to="'/ns/' + namespace + '/' + item"
+                      :to="
+                        '/ns/' + item.includes(':')
+                          ? item.split(':')[0] + '/' + item
+                          : namespace + '/' + item
+                      "
                       v-text="item"
                     ></nuxt-link>
                     <ul>
                       <li v-for="item2 in getNeighbors(item)">
                         <nuxt-link
                           class="text-2"
-                          :to="'/ns/' + namespace + '/' + item2"
+                          :to="
+                            '/ns/' + item2.includes(':')
+                              ? item2.split(':')[0] + '/' + item2
+                              : namespace + '/' + item2
+                          "
                           v-text="item2"
                         ></nuxt-link>
                         <ul>
                           <li v-for="item3 in getNeighbors(item2)">
                             <nuxt-link
                               class="text-3"
-                              :to="'/ns/' + namespace + '/' + item3"
+                              :to="
+                                '/ns/' + item3.includes(':')
+                                  ? item3.split(':')[0] + '/' + item3
+                                  : namespace + '/' + item3
+                              "
                               v-text="item3"
                             ></nuxt-link>
                             <ul>
                               <li v-for="item4 in getNeighbors(item3)">
                                 <nuxt-link
                                   class="text-4"
-                                  :to="'/ns/' + namespace + '/' + item4"
+                                  :to="
+                                    '/ns/' + item4.includes(':')
+                                      ? item4.split(':')[0] + '/' + item4
+                                      : namespace + '/' + item4
+                                  "
                                   v-text="item4"
                                 ></nuxt-link>
                                 <ul>
                                   <li v-for="item5 in getNeighbors(item4)">
                                     <nuxt-link
                                       class="text-5"
-                                      :to="'/ns/' + namespace + '/' + item5"
+                                      :to="
+                                        '/ns/' + item5.includes(':')
+                                          ? item5.split(':')[0] + '/' + item5
+                                          : namespace + '/' + item5
+                                      "
                                       v-text="item5"
                                     ></nuxt-link>
                                     <ul>
                                       <li v-for="item6 in getNeighbors(item5)">
                                         <nuxt-link
                                           class="text-6"
-                                          :to="'/ns/' + namespace + '/' + item6"
+                                          :to="
+                                            '/ns/' + item6.includes(':')
+                                              ? item6.split(':')[0] +
+                                                '/' +
+                                                item6
+                                              : namespace + '/' + item6
+                                          "
                                           v-text="item6"
                                         ></nuxt-link>
                                         <ul>
@@ -363,7 +393,11 @@
                                             <nuxt-link
                                               class="text-7"
                                               :to="
-                                                '/ns/' + namespace + '/' + item7
+                                                '/ns/' + item7.includes(':')
+                                                  ? item7.split(':')[0] +
+                                                    '/' +
+                                                    item7
+                                                  : namespace + '/' + item7
                                               "
                                               v-text="item7"
                                             ></nuxt-link>
@@ -376,10 +410,11 @@
                                                 <nuxt-link
                                                   class="text-8"
                                                   :to="
-                                                    '/ns/' +
-                                                    namespace +
-                                                    '/' +
-                                                    item8
+                                                    '/ns/' + item8.includes(':')
+                                                      ? item8.split(':')[0] +
+                                                        '/' +
+                                                        item8
+                                                      : namespace + '/' + item8
                                                   "
                                                   v-text="item8"
                                                 ></nuxt-link>
@@ -393,9 +428,15 @@
                                                       class="text-9"
                                                       :to="
                                                         '/ns/' +
-                                                        namespace +
-                                                        '/' +
-                                                        item9
+                                                        item9.includes(':')
+                                                          ? item9.split(
+                                                              ':'
+                                                            )[0] +
+                                                            '/' +
+                                                            item9
+                                                          : namespace +
+                                                            '/' +
+                                                            item9
                                                       "
                                                       v-text="item9"
                                                     ></nuxt-link>
@@ -409,9 +450,15 @@
                                                           class="text-10"
                                                           :to="
                                                             '/ns/' +
-                                                            namespace +
-                                                            '/' +
-                                                            item10
+                                                            item10.includes(':')
+                                                              ? item10.split(
+                                                                  ':'
+                                                                )[0] +
+                                                                '/' +
+                                                                item10
+                                                              : namespace +
+                                                                '/' +
+                                                                item10
                                                           "
                                                           v-text="item10"
                                                         ></nuxt-link>
