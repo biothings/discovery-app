@@ -1,7 +1,7 @@
 <template>
   <div id="registry" class="min-100 bg-white">
     <Title title="Schema Registry"></Title>
-    <div class="container">
+    <div class="container mb-4">
       <div>
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
