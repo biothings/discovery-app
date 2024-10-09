@@ -23,7 +23,8 @@
         <div class="d-inline mr-1">
           <div class="mr-1 d-none d-md-inline"></div>
           <h6 class="m-1 mainTextDark d-inline">
-            {{ item.label }}
+            <small class="text-muted">{{ item.namespace }}:</small
+            ><b>{{ item.label }}</b>
           </h6>
         </div>
         <p class="m-0 text-muted d-none d-md-inline">

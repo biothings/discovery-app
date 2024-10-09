@@ -28,11 +28,14 @@ class DiscoveryQueryBuilder(ESQueryBuilder):
                             "query": {
                                 "dis_max": {
                                     "queries": [
-                                        {"term": {"_id": {"value": q, "boost": 15.0}}},
-                                        {"term": {"label.raw": {"value": q, "boost": 10.0}}},
-                                        {"term": {"_meta.username": {"value": q}}},
-                                        {"term": {"name": {"value": q}}},
-                                        {"match": {"parent_classes": {"query": q}}},
+                                        {"term": {"_id": {"value": q, "boost": 10.0}}},
+                                        {"term": {"label.raw": {"value": q, "boost": 8.0}}},
+                                        # schemas
+                                        {"match_phrase": {"label": {"query": q, "boost": 7.0}}},
+                                        # resources
+                                        {"match_phrase": {"name": {"query": q, "boost": 7.0}}},
+                                        {"term": {"_meta.username": {"value": q, "boost": 2.0}}},
+                                        {"match": {"parent_classes": {"query": q, "boost": 2.0}}},
                                         {"prefix": {"label": {"value": q}}},
                                         {"query_string": {"query": q}},
                                     ]

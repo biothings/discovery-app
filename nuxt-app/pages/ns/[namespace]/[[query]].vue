@@ -832,7 +832,7 @@ export default {
       var self = this;
       // if (!self.query) {
       self.nxG = new jsnx.DiGraph();
-      if (self.userSchema["hits"].length > 1) {
+      if (self.userSchema["hits"].length) {
         for (var i = 0; i < self.userSchema["hits"].length; i++) {
           // console.log('CLASS: ',i,self.userSchema['hits'][i]["label"])
           let topLevel = self.userSchema["hits"][i]["name"];
