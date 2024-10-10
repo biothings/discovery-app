@@ -3,6 +3,7 @@ import logging
 import zipfile
 import io
 from datetime import date, datetime
+from typing import Union, List, Tuple
 
 import boto3
 
@@ -111,33 +112,84 @@ def daily_backup_routine(format="zip"):
         logger.error("Stack trace:", exc_info=True)
 
 
-def backup_from_file(api):
-    """Restore index data from file"""
+def backup_from_file(api: dict, indices: Union[str, List[str], Tupe[str, ...]] = "all") -> None:   
+    """
+    Restore index data from a file, with an option to update selected indices
+
+    Parameters:
+    - api: dict - JSON object containing the backup data.
+    - indices: Union[str, List[str], Tuple[str, ...]] - Specifies which indices to update.
+        Accepts 'all' or any combination of ['schema', 'schema_class', 'dataset'].
+    """
     logger = logging.getLogger("backup_from_file")
     if not api:
-        logger.error("failure to restore from file, no json object passed.")
+        logger.error("Failure to restore from file, no JSON object passed.")
+        return
+
+    # Validate the 'indices' parameter
+    valid_indices = {"dataset", "schema", "schema_class"}
+    if isinstance(indices, str):
+        if indices != "all":
+            logger.error(f"Invalid string value for 'indices': {indices}. Must be 'all'")
+            return
+    elif isinstance(indices, (list, tuple)):
+        if not all(index in valid_indices for index in indices):
+            # Ensure all elements in the list/tuple are valid ***** 
+            # explicit information about the invalid elements would be helpful
+            logger.error(f"Invalid list/tuple value for 'indices': {indices}. Must be a subset of {valid_indices}")
+            return
     else:
-        indices.reset()
-        api_schema = api["discover_schema"]
-        api_schema_class = api["discover_schema_class"]
-        api_dataset = api["discover_dataset"]
+        logger.error(f"Invalid type for 'indices': {type(indices)}. Must be a string, list, or tuple.")
+        return
 
-        for doc in api_schema["docs"]:
-            file = Schema(**doc)
-            file.meta.id = doc["_id"]
-            file.save()
+    # Selectively reset indices based on the indices parameter
+    if indices == "all":
+        indices_to_reset = ["schema", "schema_class", "dataset"]
+    else:
+        # Ensure indices is a list or tuple and contains valid entries
+        indices_to_reset = [index for index in valid_indices if index in indices]
 
-        for doc in api_schema_class["docs"]:
-            file = SchemaClass(**doc)
-            file.save()
+    # Reset each relevant index
+    for index in indices_to_reset:
+        indices.reset(index=index)
 
-        for doc in api_dataset["docs"]:
-            file = Dataset(**doc)
-            file.save()
+    # Reset and update target indices based on the indices parameter
+    if indices == "all" or "schema" in indices:
+        # Update discover_schema
+        if "discover_schema" in api:
+            api_schema = api["discover_schema"]
+            for doc in api_schema["docs"]:
+                file = Schema(**doc)
+                file.meta.id = doc["_id"]
+                file.save()
+            logger.info("The discover_schema index data was updated successfully.")
+        else:
+            logger.info("No discover_schema data found in the API backup")
+        return
 
+    if indices == "all" or "schema_class" in indices:
+        # Update discover_schema_class
+        if "discover_schema_class" in api:
+            api_schema_class = api["discover_schema_class"]
+            for doc in api_schema_class["docs"]:
+                file = SchemaClass(**doc)
+                file.save()
+            logger.info("The discover_schema_class index data was updated successfully.")
+        else:
+            logger.info("No discover_schema_class data found in the API backup")
 
-def restore_from_s3(filename=None, bucket="dde"):
+    if indices == "all" or "dataset" in indices:
+        # Update discover_dataset
+        if "discover_dataset" in api:
+            api_dataset = api["discover_dataset"]
+            for doc in api_dataset["docs"]:
+                file = Dataset(**doc)
+                file.save()
+            logger.info("The discover_dataset index data was updated successfully.")
+        else:
+            logger.info("No discover_dataset data found in the API backup")
 
+def restore_from_s3(filename: str = None, bucket: str = "dde", indices: Union[str, List[str], Tuple[str, ...]] = "all"):
     s3 = boto3.client("s3")
 
     if not filename:
@@ -153,7 +205,6 @@ def restore_from_s3(filename=None, bucket="dde"):
         Bucket=bucket,
         Key=filename
     )
-
     filename = filename.replace("db_backup/", "")
 
     if filename.endswith(".zip"):
@@ -166,14 +217,14 @@ def restore_from_s3(filename=None, bucket="dde"):
             with zfile.open(json_file) as json_data:
                 ddeapis = json.load(json_data)
     elif filename.endswith(".json"):
-        ddeapis = json.loads(obj['Body'].read())
+        ddeapis = json.loads(obj["Body"].read())
     else:
         raise Exception("Unsupported backup file type!")
 
-    backup_from_file(ddeapis)
+    backup_from_file(ddeapis, indices=indices)
 
 
-def restore_from_file(filename=None):
+def restore_from_file(filename: str = None, indices: Union[str, List[str], Tuple[str, ...]] = "all"):
     if filename.endswith(".zip"):
         with zipfile.ZipFile(filename, 'r') as zfile:
             # Search for a JSON file inside the ZIP
@@ -188,4 +239,4 @@ def restore_from_file(filename=None):
     else:
         raise Exception("Unsupported backup file type!")
 
-    backup_from_file(ddeapis)
+    backup_from_file(ddeapis, indices=indices)
