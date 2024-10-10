@@ -302,3 +302,4 @@ def restore_from_file(filename: str = None, indices: Union[str, List[str], Tuple
         raise Exception("Unsupported backup file type!")
 
     backup_from_file(ddeapis, indices=indices)
+    
