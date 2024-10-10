@@ -263,8 +263,10 @@ def restore_from_s3(filename: str = None, bucket: str = "dde", indices: Union[st
 
     logging.info("GET s3://%s/%s", bucket, filename)
 
-    obj = s3.get_object(Bucket=bucket, Key=filename)
-
+    obj = s3.get_object(
+        Bucket=bucket,
+        Key=filename
+    )
     filename = filename.replace("db_backup/", "")
 
     if filename.endswith(".zip"):
