@@ -113,9 +113,7 @@ def daily_backup_routine(format="zip"):
 
 
 def backup_from_file(api: dict, indices: Union[str, List[str], Tupe[str, ...]] = "all") -> None:   
-def backup_from_file(api: dict, indices: Union[str, List[str], Tupe[str, ...]] = "all") -> None:   
     """
-    Restore index data from a file, with an option to update selected indices
     Restore index data from a file, with an option to update selected indices
 
     Parameters:
@@ -169,56 +167,6 @@ def backup_from_file(api: dict, indices: Union[str, List[str], Tupe[str, ...]] =
             logger.info("No discover_schema data found in the API backup")
         return
 
-    # Validate the 'indices' parameter
-    valid_indices = {"dataset", "schema", "schema_class"}
-    if isinstance(indices, str):
-        if indices != "all":
-            logger.error(f"Invalid string value for 'indices': {indices}. Must be 'all'")
-            return
-    elif isinstance(indices, (list, tuple)):
-        if not all(index in valid_indices for index in indices):
-            # Ensure all elements in the list/tuple are valid ***** 
-            # explicit information about the invalid elements would be helpful
-            logger.error(f"Invalid list/tuple value for 'indices': {indices}. Must be a subset of {valid_indices}")
-            return
-    else:
-        logger.error(f"Invalid type for 'indices': {type(indices)}. Must be a string, list, or tuple.")
-        return
-
-    # Selectively reset indices based on the indices parameter
-    if indices == "all":
-        indices_to_reset = ["schema", "schema_class", "dataset"]
-    else:
-        # Ensure indices is a list or tuple and contains valid entries
-        indices_to_reset = [index for index in valid_indices if index in indices]
-
-    # Reset each relevant index
-    for index in indices_to_reset:
-        indices.reset(index=index)
-
-    # Reset and update target indices based on the indices parameter
-    if indices == "all" or "schema" in indices:
-        # Update discover_schema
-        if "discover_schema" in api:
-            api_schema = api["discover_schema"]
-            for doc in api_schema["docs"]:
-                file = Schema(**doc)
-                file.meta.id = doc["_id"]
-                file.save()
-            logger.info("The discover_schema index data was updated successfully.")
-        else:
-            logger.info("No discover_schema data found in the API backup")
-
-    if indices == "all" or "schema_class" in indices:
-        # Update discover_schema_class
-        if "discover_schema_class" in api:
-            api_schema_class = api["discover_schema_class"]
-            for doc in api_schema_class["docs"]:
-                file = SchemaClass(**doc)
-                file.save()
-            logger.info("The discover_schema_class index data was updated successfully.")
-        else:
-            logger.info("No discover_schema_class data found in the API backup")
     if indices == "all" or "schema_class" in indices:
         # Update discover_schema_class
         if "discover_schema_class" in api:
@@ -230,16 +178,6 @@ def backup_from_file(api: dict, indices: Union[str, List[str], Tupe[str, ...]] =
         else:
             logger.info("No discover_schema_class data found in the API backup")
 
-    if indices == "all" or "dataset" in indices:
-        # Update discover_dataset
-        if "discover_dataset" in api:
-            api_dataset = api["discover_dataset"]
-            for doc in api_dataset["docs"]:
-                file = Dataset(**doc)
-                file.save()
-            logger.info("The discover_dataset index data was updated successfully.")
-        else:
-            logger.info("No discover_dataset data found in the API backup")
     if indices == "all" or "dataset" in indices:
         # Update discover_dataset
         if "discover_dataset" in api:
@@ -302,4 +240,3 @@ def restore_from_file(filename: str = None, indices: Union[str, List[str], Tuple
         raise Exception("Unsupported backup file type!")
 
     backup_from_file(ddeapis, indices=indices)
-    
