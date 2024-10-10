@@ -57,28 +57,6 @@ def reset(indices: Union[str, List[str], Tuple[str, ...]] = "all") -> None:
             index.delete()
         model.init()
 
-    # # Reset discover_schema if update_schema is True (default behavior resets all)
-    # if update_schema:
-    #     index_1 = Index(Schema.Index.name)
-    #     if index_1.exists():
-    #         index_1.delete()
-    #     Schema.init()
-
-    # # Reset discover_schema_class if update_schema_class is True
-    # if update_schema_class:
-    #     index_2 = Index(SchemaClass.Index.name)
-    #     if index_2.exists():
-    #         index_2.delete()
-    #     SchemaClass.init()
-
-    # # Reset discover_dataset if update_dataset is True
-    # if update_dataset:
-    #     index_3 = Index(Dataset.Index.name)
-    #     if index_3.exists():
-    #         index_3.delete()
-    #     Dataset.init()
-
-
 def save_schema_index_meta(meta):
     """save index metadata to Schema ES index"""
     return Index(Schema.Index.name).put_mapping(body={"_meta": meta})
