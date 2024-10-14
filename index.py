@@ -9,7 +9,6 @@ from filelock import FileLock, Timeout
 from tornado.options import define, options
 
 from discovery.handlers import HANDLERS
-from discovery.handlers.proxy import ProxyHandler
 from discovery.notify import update_n3c_routine
 from discovery.utils.backup import daily_backup_routine
 from discovery.utils.coverage import daily_coverage_update
@@ -48,10 +47,6 @@ def run_routine():
 
 if __name__ == "__main__":
     options.parse_command_line()
-    if options.debug:
-        # Add proxy handler for dev purposes only
-        _handlers = HANDLERS + [(r"/(.*)", ProxyHandler, {"proxy_url": options.proxy_url})]
-        main(_handlers, use_curl=True)
-    else:
+    if not options.debug:
         crontab("0 0 * * *", func=run_routine, start=True)  # run daily at mid-night
-        main(HANDLERS, use_curl=True)
+    main(HANDLERS, use_curl=True)
