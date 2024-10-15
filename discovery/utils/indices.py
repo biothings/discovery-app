@@ -37,22 +37,22 @@ def reset(indices: Union[str, List[str], Tuple[str, ...]] = "all") -> None:
 
     # Define index mapping
     index_mapping = {
-        "schema": (Schema.Index.name, Schema),
-        "schema_class": (SchemaClass.Index.name, SchemaClass),
-        "dataset": (Dataset.Index.name, Dataset),
+        "schema": Schema,
+        "schema_class": SchemaClass,
+        "dataset": Dataset,
     }
 
-    # Determine which indices to reset
-    if indices == "all":
-        indices_to_reset = ["schema", "schema_class", "dataset"]
-    else:
-        valid_indices = {"schema", "schema_class", "dataset"}
-        indices_to_reset = [index for index in indices if index in valid_indices]
+    if isinstance(indices, str):
+        indices = list(index_mapping.keys()) if indices == "all" else [indices]
+    elif not isinstance(indices, (list, tuple)):
+        return
 
-        # Loop through indices and reset them
+    # Filter valid indices and reset them
+    indices_to_reset = [index for index in indices if index in index_mapping]
+
     for index_name in indices_to_reset:
-        index_value, model = index_mapping[index_name]
-        index = Index(index_value)
+        model = index_mapping[index_name]
+        index = Index(model.Index.name)
         if index.exists():
             index.delete()
         model.init()
