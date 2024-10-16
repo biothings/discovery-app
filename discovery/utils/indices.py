@@ -1,4 +1,5 @@
 from elasticsearch_dsl import Index
+from typing import Union, List, Tuple
 
 from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
@@ -26,25 +27,35 @@ def refresh():
     Index(Dataset.Index.name).refresh()
 
 
-def reset():
+def reset(indices: Union[str, List[str], Tuple[str, ...]] = "all") -> None:
+    """
+    Reset selected indices. Default is to reset all indices.
+    Parameters:
+    - indices: Union[str, List[str], Tuple[str, ...]] - Specifies which indices to reset.
+        Accepts 'all' or any combination of ["schema", "schema_class", "dataset"].
+    """
 
-    index_1 = Index(Schema.Index.name)
-    index_2 = Index(SchemaClass.Index.name)
-    index_3 = Index(Dataset.Index.name)
+    # Define index mapping
+    index_mapping = {
+        "schema": Schema,
+        "schema_class": SchemaClass,
+        "dataset": Dataset,
+    }
 
-    if index_1.exists():
-        index_1.delete()
+    if isinstance(indices, str):
+        indices = list(index_mapping.keys()) if indices == "all" else [indices]
+    elif not isinstance(indices, (list, tuple)):
+        return
 
-    if index_2.exists():
-        index_2.delete()
+    # Filter valid indices and reset them
+    indices_to_reset = [index for index in indices if index in index_mapping]
 
-    if index_3.exists():
-        index_3.delete()
-
-    Schema.init()
-    SchemaClass.init()
-    Dataset.init()
-
+    for index_name in indices_to_reset:
+        model = index_mapping[index_name]
+        index = Index(model.Index.name)
+        if index.exists():
+            index.delete()
+        model.init()
 
 def save_schema_index_meta(meta):
     """save index metadata to Schema ES index"""
