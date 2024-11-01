@@ -49,7 +49,9 @@
         </button>
         <table class="table table-sm table-striped text-left">
           <thead>
-            <th>Examples:</th>
+            <tr>
+              <th>Examples:</th>
+            </tr>
           </thead>
           <tbody>
             <tr v-for="(example, i) in ontologyExamples" :key="i + 'ont'">
