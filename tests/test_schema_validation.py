@@ -100,3 +100,50 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         """
         self.request("schema/nc:Dataset/validation",  method="GET", expect=400)
 
+    def test_06_get_schema(self):
+        """
+        Test case: Retrieve schema namespace data and check specific structure fields.
+        """
+        res = self.request("schema/n3c", method="GET").json()
+        
+        # Assertions based on JSON-LD structure
+        assert "@context" in res, "Expected '@context' key in response"
+        assert "@id" in res, "Expected '@id' key in response"
+        assert "@graph" in res, "Expected '@graph' key in response"
+        
+        # Checking for details within @graph array (assuming first item is relevant)
+        graph_item = res["@graph"][0]
+        assert "@id" in graph_item, "Expected '@id' within first @graph item"
+        assert "rdfs:label" in graph_item, "Expected 'rdfs:label' in first @graph item"
+        assert "$validation" in graph_item, "Expected '$validation' in first @graph item"
+
+        # Further checks within the validation schema if needed
+        validation = graph_item["$validation"]
+        assert "properties" in validation, "Expected 'properties' in validation schema"
+        assert "name" in validation["properties"], "Expected 'name' property in validation schema"
+
+
+    def test_07_get_invalid_namespace(self):
+        """
+        Test case: Invalid namespace provided.
+        {
+            "code": 400,
+            "success": false,
+            "error": "Namespace not found in schema metadata."
+        }
+        """
+        self.request("schema/invalid_namespace", method="GET", expect=400)
+
+    def test_08_get_valid_class(self):
+        res = self.request("schema/n3c:Dataset/validation", method="GET").json()
+        # Assert that 'properties' key exists
+        assert 'properties' in res
+        # Further assertions on specific properties, if necessary
+        assert 'name' in res['properties']
+
+    def test_09_get_namespace_with_meta(self):
+        """
+        Test case: Retrieve namespace metadata with 'meta' flag.
+        """
+        res = self.request("schema/n3c?meta=1", method="GET").json()
+        assert "_meta" in res
