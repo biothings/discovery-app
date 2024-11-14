@@ -1,0 +1,5 @@
+# docker-compose.override.yml
+services:
+  webapp:
+    volumes:
+      - ../nuxt-app:/discovery-app/nuxt-app  # Enable hot reloading in development
