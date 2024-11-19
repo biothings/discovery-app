@@ -37,11 +37,11 @@ def setup():
     for doc in api_schema_class["docs"]:
         file = SchemaClass(**doc)
     file.save()
-    
+
     if not schemas.exists("n3c"):
         schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
 
-class DiscoverySchemaValidationTests(DiscoveryTestCase):
+class DiscoverySchemaValidationTests(Disco`veryTestCase):
     TEST_DATA_DIR_NAME = "test_schema"
     def refresh(self):
         indices.refresh()
@@ -107,20 +107,20 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         res = self.request("schema/n3c", method="GET").json()
         
         # Assertions based on JSON-LD structure
-        assert "@context" in res, "Expected '@context' key in response"
-        assert "@id" in res, "Expected '@id' key in response"
-        assert "@graph" in res, "Expected '@graph' key in response"
+        assert "@context" in res, "Expected '@context' key in response" # codacy: ignore
+        assert "@id" in res, "Expected '@id' key in response" # codacy: ignore
+        assert "@graph" in res, "Expected '@graph' key in response" # codacy: ignore
         
         # Checking for details within @graph array (assuming first item is relevant)
         graph_item = res["@graph"][0]
-        assert "@id" in graph_item, "Expected '@id' within first @graph item"
-        assert "rdfs:label" in graph_item, "Expected 'rdfs:label' in first @graph item"
-        assert "$validation" in graph_item, "Expected '$validation' in first @graph item"
+        assert "@id" in graph_item, "Expected '@id' within first @graph item" # codacy: ignore
+        assert "rdfs:label" in graph_item, "Expected 'rdfs:label' in first @graph item" # codacy: ignore
+        assert "$validation" in graph_item, "Expected '$validation' in first @graph item" # codacy: ignore
 
         # Further checks within the validation schema if needed
         validation = graph_item["$validation"]
-        assert "properties" in validation, "Expected 'properties' in validation schema"
-        assert "name" in validation["properties"], "Expected 'name' property in validation schema"
+        assert "properties" in validation, "Expected 'properties' in validation schema" # codacy: ignore
+        assert "name" in validation["properties"], "Expected 'name' property in validation schema" # codacy: ignore
 
 
     def test_07_get_invalid_namespace(self):
@@ -137,13 +137,13 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
     def test_08_get_valid_class(self):
         res = self.request("schema/n3c:Dataset/validation", method="GET").json()
         # Assert that 'properties' key exists
-        assert 'properties' in res
+        assert 'properties' in res # codacy: ignore
         # Further assertions on specific properties, if necessary
-        assert 'name' in res['properties']
+        assert 'name' in res['properties'] # codacy: ignore
 
     def test_09_get_namespace_with_meta(self):
         """
         Test case: Retrieve namespace metadata with 'meta' flag.
         """
         res = self.request("schema/n3c?meta=1", method="GET").json()
-        assert "_meta" in res
+        assert "_meta" in res # codacy: ignore
