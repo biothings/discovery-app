@@ -37,11 +37,11 @@ def setup():
     for doc in api_schema_class["docs"]:
         file = SchemaClass(**doc)
     file.save()
-
+    
     if not schemas.exists("n3c"):
         schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
 
-class DiscoverySchemaValidationTests(Disco`veryTestCase):
+class DiscoverySchemaValidationTests(DiscoveryTestCase):
     TEST_DATA_DIR_NAME = "test_schema"
     def refresh(self):
         indices.refresh()
