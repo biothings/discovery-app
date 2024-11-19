@@ -37,7 +37,7 @@ def setup():
     for doc in api_schema_class["docs"]:
         file = SchemaClass(**doc)
     file.save()
-    
+
     if not schemas.exists("n3c"):
         schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
 
@@ -56,10 +56,10 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         }
         """
         self.request("schema/n3c:Thing/validation", method="GET", expect=400)
-    
+
     def test_02_get(self):
         """
-        Test case: a given schema exists(is not schema.org) and class does not exist. 
+        Test case: a given schema exists(is not schema.org) and class does not exist.
         {
         "code": 400,
         "success": false,
@@ -82,7 +82,7 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
 
     def test_04_get(self):
         """
-        Test case: given curie exists, check for accuracy. 
+        Test case: given curie exists, check for accuracy.
         """
         res = self.request("schema/n3c:Dataset/validation").json()
         assert res['properties']['name']
@@ -105,12 +105,12 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         Test case: Retrieve schema namespace data and check specific structure fields.
         """
         res = self.request("schema/n3c", method="GET").json()
-        
+
         # Assertions based on JSON-LD structure
         assert "@context" in res, "Expected '@context' key in response" # codacy: ignore
         assert "@id" in res, "Expected '@id' key in response" # codacy: ignore
         assert "@graph" in res, "Expected '@graph' key in response" # codacy: ignore
-        
+
         # Checking for details within @graph array (assuming first item is relevant)
         graph_item = res["@graph"][0]
         assert "@id" in graph_item, "Expected '@id' within first @graph item" # codacy: ignore
