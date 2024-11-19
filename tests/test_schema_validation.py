@@ -1,6 +1,8 @@
 """
     Schemas by Namespace Endpoint Tester
 """
+# pylint: disable=assert-used
+
 import json
 import os
 
@@ -85,9 +87,9 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         Test case: given curie exists, check for accuracy.
         """
         res = self.request("schema/n3c:Dataset/validation").json()
-        assert res['properties']['name']
-        assert res['properties']['description']
-        assert res['properties']['author']
+        assert res['properties']['name'] # codacy: ignore
+        assert res['properties']['description'] # codacy: ignore
+        assert res['properties']['author'] # codacy: ignore
 
     def test_05_get(self):
         """
