@@ -1,8 +1,0 @@
-engines:
-  pylint:
-    enabled: true
-    config:
-      disable:
-        - "assert-used"
-    patterns:
-      - pattern: "tests/test_schema_validation.py"
