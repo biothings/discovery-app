@@ -554,7 +554,7 @@ class SchemaHandler(APIBaseHandler):
 
         validation_dict = {}
         class_match_found = False
-        property = curie.split(":")[1]
+        curie_property = curie.split(":")[1]
 
         for data_dict in schema_metadata["@graph"]:
             if data_dict["@id"] == curie:
@@ -564,7 +564,7 @@ class SchemaHandler(APIBaseHandler):
 
         if not class_match_found:
             raise HTTPError(
-                400, reason=f"The given property: '{property}' was not found in schema: {ns}"
+                400, reason=f"The given property: '{curie_property}' was not found in schema: {ns}"
             )
         self.finish(validation_dict)
 
