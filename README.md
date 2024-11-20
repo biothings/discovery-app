@@ -16,19 +16,40 @@ At the top level of the repository create a file *config_key.py* with:
     GITHUB_CLIENT_ID = '<your Github application Client ID>'
     GITHUB_CLIENT_SECRET = '<your Github application Client Secret>'
     ```
+    
+Follow [this instruction](https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/) to create your Github Client ID and Secret.
 
 ## (Option 1) Run the DDE API in Docker
 
-First refer to step 6 above to setup the credentials required to run the program.
 The following commands should be issued under the first level project folder.
-Make sure you have port `8000` not in use when starting containers.
+Make sure port `8000` is not in use when starting the containers.
 
-### Build
+**Note: You can build the complete application with Docker and choose to run the frontend in either development mode or production mode (default). The main difference is that in production mode, the frontend code is not editable, and what you see in the browser reflects a compiled build.**
+
+### Build and start with webapp in production mode. (not editable frontend)
 
 ```bash
 cd docker
-docker compose up --detach
+ WEB_APP_MODE=production docker compose up --detach
 ```
+
+### Build and start with webapp in development mode. (editable frontend)
+
+```bash
+cd docker
+WEB_APP_MODE=development docker compose -f docker-compose.yml -f docker-compose.override.yml up --detach
+```
+
+**NOTE: If at some point you wish to switch from one version to another you must stop the container and remove all images associated and rebuild the project to avoid issues.**
+
+To remove the container and its images run this command:
+
+```bash
+docker compose down --rmi all
+```
+
+
+## Additional useful docker compose commands
 
 ### Stop and restart
 
@@ -73,12 +94,12 @@ docker compose down
     ```
 
  5. Install python dependencies
+ 
+    It's recommended to set up a Python virtual environment first. <add link>
 
     ```bash
     pip install -r requirements.txt
     ```
-
-    Follow [this instruction](https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/) to create your Github Client ID and Secret.
 
  6. Run dev server
 
@@ -101,14 +122,22 @@ Look at the [nuxt 3 documentation](https://v3.nuxtjs.org) to learn more.
 
 ## Setup
 
-Make sure to install the dependencies:
+Go to project folder
+
+note Node version needed.
+
+Make sure to install the dependencies with your preferred method:
 
 ```bash
 # yarn
 yarn install
 
+OR
+
 # npm
 npm install
+
+OR
 
 # pnpm
 pnpm install --shamefully-hoist
@@ -139,19 +168,19 @@ npm run preview
 Checkout the [deployment documentation](https://v3.nuxtjs.org/guide/deploy/presets) for more information.
 
 
-# Develop with both a dev backend and dev frontend services running together
+# Develop with both a dev backend and dev frontend services running together (local setup only)
 
 To test some functionality in the web app the frontend requires authentication and we need the API to handle this without any CORS issues, to do so we need a proxy server to delegate requests to our two running services.
 
-In the production environment, this setup functions as follows: an NginX server is required to manage incoming HTTP requests and route them appropriately to their respective services. The application architecture consists of two separate servers: one for the backend API, built with Python, typically running on port 8000, and another for the frontend, built with Node.js, running on port 3000. NginX acts as a reverse proxy, directing requests to the correct service based on the URL path or other routing rules. This setup ensures efficient request handling, load balancing, and secure communication between the frontend and backend services.
+In the production environment, this setup functions as follows: an Nginx server is required to manage incoming HTTP requests and route them appropriately to their respective services. The application architecture consists of two separate servers: one for the backend API, built with Python, typically running on port 8000, and another for the frontend, built with Node.js, running on port 3000. Nginx acts as a reverse proxy, directing requests to the correct service based on the URL path or other routing rules. This setup ensures efficient request handling, load balancing, and secure communication between the frontend and backend services.
 
 ## Step 1. Run the API and web app
 
-Run both services as described above.
+Run both services locally as described above. If you chose to run all services through Docker: Docker will run all the services needed. Please refer to the instructions above for that configuration.
 
-## Step 2. Run NginX
+## Step 2. Run Nginx
 
-Run NginX with the configuration file [here](https://github.com/biothings/discovery-app/blob/main/docker/nginx_conf.d/discovery-app.conf).
+Run Nginx with the configuration file [here](https://github.com/biothings/discovery-app/blob/main/docker/nginx_conf.d/discovery-app.conf).
 
 ## Step 3. Ready to dev
 
