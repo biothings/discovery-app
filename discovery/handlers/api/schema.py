@@ -482,9 +482,12 @@ class SchemaHandler(APIBaseHandler):
         Traverse the `@graph` data and filter data based on requested query
         """
 
+        found = False  # Track if a match is found
+
         for i in range(len(metadata["@graph"])):
             try:
                 if curie in metadata["@graph"][i]["@id"]:
+                    found = True
                     # property search
                     if metadata["@graph"][i]["@type"] == "rdf:Property":
                         property_list.append(metadata["@graph"][i])
@@ -497,6 +500,11 @@ class SchemaHandler(APIBaseHandler):
                         break
             except Exception as error:
                 raise HTTPError(400, reason=f"{error}")
+            
+        # If no match is found, raise an error
+        if not found:
+            raise HTTPError(404, reason=f"'{curie}' not found in metadata.")
+
         return property_list
 
     def get_curie(self, metadata, curie):
@@ -512,6 +520,11 @@ class SchemaHandler(APIBaseHandler):
                 property_list = self.graph_data_filter(metadata, curie_str, property_list)
         else:
             raise HTTPError(400, reason="Unidentified curie input request")
+
+        # Check if the filtering result is empty
+        if not property_list:
+            raise HTTPError(404, reason=f"Requested CURIE '{curie}' not found in the schema metadata.")
+
         metadata["@graph"] = property_list
         return metadata
 
@@ -534,7 +547,7 @@ class SchemaHandler(APIBaseHandler):
                 )
             else:
                 raise HTTPError(
-                    400,
+                    404,
                     reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.",
                 )
 
@@ -634,6 +647,7 @@ class SchemaHandler(APIBaseHandler):
                     raise HTTPError(400, reason="Too many schemas(namespaces) requested")
             else:
                 ns = curie.split(":")[0]
+
             # get the schema from given namespace
             try:
                 schema_metadata = schemas.get(ns)
