@@ -564,7 +564,7 @@ class SchemaHandler(APIBaseHandler):
 
         if not class_match_found:
             raise HTTPError(
-                400, reason=f"The given property: '{curie_property}' was not found in schema: {ns}"
+                404, reason=f"The given property: '{curie_property}' was not found in schema: {ns}"
             )
         self.finish(validation_dict)
 
@@ -586,7 +586,7 @@ class SchemaHandler(APIBaseHandler):
                 schema_metadata["_meta"] = schema_metadata.meta
             schema_metadata.pop("_id")
         except KeyError:
-            raise HTTPError(400, reason=f"Namespace {curie} not found in the schema metadata.")
+            raise HTTPError(404, reason=f"Namespace {curie} not found in the schema metadata.")
         except Exception as ns_error:
             raise HTTPError(400, reason=f"Error retrieving namespace {curie}: {ns_error}")
         self.finish(json.dumps(schema_metadata, indent=4, default=str))
