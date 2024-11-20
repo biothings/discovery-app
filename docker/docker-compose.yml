@@ -21,13 +21,13 @@ services:
     depends_on:
       - es
     ports:
-      - "8000"
+      - "8000:8000"
     restart: on-failure
     networks:
       - net0
 
   es:
-    image: elasticsearch:8.15.2
+    image: elasticsearch:8.15.3
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -51,8 +51,8 @@ services:
     environment:
       - NODE_ENV=${WEB_APP_MODE:-production}
     ports:
-      - "3000:3000"
-      - "24679:24679"    # expose HMR port for dev
+      - "3000"    # fully functional webapp accessed on nginx port, (optional) 3000:3000 port is for frontend ONLY with no API access
+      - "24679:24679"    # expose HMR port for development
     restart: on-failure
     networks:
       - net0

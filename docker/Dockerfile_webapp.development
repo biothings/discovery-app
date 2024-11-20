@@ -15,7 +15,11 @@ RUN npm install
 ENV PORT=3000
 ENV NODE_ENV=development
 
-EXPOSE 3000
+EXPOSE ${PORT}
+EXPOSE 24679
+
+# Define a mount point for the local webapp source code
+VOLUME ["/discovery-app/nuxt-app"]
 
 # Run in development mode
 CMD ["npm", "run", "dev"]
