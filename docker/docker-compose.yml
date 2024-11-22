@@ -3,7 +3,7 @@ services:
   nginx:
     image: nginx:stable-alpine
     ports:
-      - "8080:8080"
+      - "80:8080" # expose to make /oauth endpoint work
     volumes:
       - ./nginx_conf.d:/etc/nginx/conf.d
     depends_on:
@@ -42,7 +42,7 @@ services:
 # To run in development mode:
 # WEB_APP_MODE=development docker compose -f docker-compose.yml -f docker-compose.override.yml up --detach
 
-# To run in prodction mode:
+# To run in production mode:
 # WEB_APP_MODE=production docker compose up --detach
 
   webapp:
