@@ -1,0 +1,25 @@
+# Use Node 18 Alpine for a minimal environment
+FROM node:18-alpine
+
+RUN echo "Running Nuxt App in DEVELOPMENT mode" && \
+    apk update && \
+    apk upgrade && \
+    apk --no-cache add git
+
+RUN git clone https://github.com/biothings/discovery-app.git
+
+WORKDIR /discovery-app/nuxt-app
+
+RUN npm install
+
+ENV PORT=3000
+ENV NODE_ENV=development
+
+EXPOSE ${PORT}
+EXPOSE 24679
+
+# Define a mount point for the local webapp source code
+VOLUME ["/discovery-app/nuxt-app"]
+
+# Run in development mode
+CMD ["npm", "run", "dev"]
