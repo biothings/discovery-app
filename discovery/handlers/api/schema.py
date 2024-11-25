@@ -500,7 +500,7 @@ class SchemaHandler(APIBaseHandler):
                         break
             except Exception as error:
                 raise HTTPError(400, reason=f"{error}")
-            
+
         # If no match is found, raise an error
         if not found:
             raise HTTPError(404, reason=f"'{curie}' not found in metadata.")
