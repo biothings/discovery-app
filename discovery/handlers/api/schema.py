@@ -500,7 +500,7 @@ class SchemaHandler(APIBaseHandler):
                         break
             except Exception as error:
                 raise HTTPError(400, reason=f"{error}")
-
+            
         # If no match is found, raise an error
         if not found:
             raise HTTPError(404, reason=f"'{curie}' not found in metadata.")
@@ -601,7 +601,7 @@ class SchemaHandler(APIBaseHandler):
         except KeyError:
             raise HTTPError(404, reason=f"Namespace {curie} not found in the schema metadata.")
         except Exception as ns_error:
-            raise HTTPError(400, reason=f"Error retrieving namespace {curie}: {ns_error}")
+            raise HTTPError(404, reason=f"Error retrieving namespace {curie}: {ns_error}")
         self.finish(json.dumps(schema_metadata, indent=4, default=str))
 
     def handle_class_request(self, curie, schema_metadata):
