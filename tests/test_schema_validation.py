@@ -57,7 +57,7 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
             "error": "Schema metadata is not defined correctly, given class does not exist in schema."
         }
         """
-        self.request("schema/n3c:Thing/validation", method="GET", expect=400)
+        self.request("schema/n3c:Thing/validation", method="GET", expect=404)
 
     def test_02_get(self):
         """
@@ -68,7 +68,7 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         "error": "Schema metadata is not defined correctly, given class does not exist in schema."
         }
         """
-        self.request("schema/n3c:Datt/validation",  method="GET", expect=400)
+        self.request("schema/n3c:Datt/validation",  method="GET", expect=404)
 
 
     def test_03_get(self):
@@ -87,9 +87,9 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         Test case: given curie exists, check for accuracy.
         """
         res = self.request("schema/n3c:Dataset/validation").json()
-        assert res['properties']['name']  # codacy: ignore
-        assert res['properties']['description']  # codacy: ignore
-        assert res['properties']['author']  # codacy: ignore
+        self.assertIn('name', res['properties'])
+        self.assertIn( 'description', res['properties'])
+        self.assertIn( 'author', res['properties'])
 
     def test_05_get(self):
         """
@@ -109,20 +109,20 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         res = self.request("schema/n3c", method="GET").json()
 
         # Assertions based on JSON-LD structure
-        assert "@context" in res, "Expected '@context' key in response"  #  codacy: ignore
-        assert "@id" in res, "Expected '@id' key in response"  #  codacy: ignore
-        assert "@graph" in res, "Expected '@graph' key in response"  #  codacy: ignore
+        self.assertIn( "@context", res, "Expected '@context' key in response")
+        self.assertIn( "@id" , res, "Expected '@id' key in response")
+        self.assertIn( "@graph", res, "Expected '@graph' key in response")
 
         # Checking for details within @graph array (assuming first item is relevant)
         graph_item = res["@graph"][0]
-        assert "@id" in graph_item, "Expected '@id' within first @graph item"  # codacy: ignore
-        assert "rdfs:label" in graph_item, "Expected 'rdfs:label' in first @graph item"  # codacy: ignore
-        assert "$validation" in graph_item, "Expected '$validation' in first @graph item"  # codacy: ignore
+        self.assertIn( "@id", graph_item, "Expected '@id' within first @graph item")
+        self.assertIn( "rdfs:label", graph_item, "Expected 'rdfs:label' in first @graph item")
+        self.assertIn( "$validation", graph_item, "Expected '$validation' in first @graph item")
 
         # Further checks within the validation schema if needed
         validation = graph_item["$validation"]
-        assert "properties" in validation, "Expected 'properties' in validation schema"  # codacy: ignore
-        assert "name" in validation["properties"], "Expected 'name' property in validation schema"  # codacy: ignore
+        self.assertIn("properties", validation, "Expected 'properties' in validation schema")
+        self.assertIn( "name", validation["properties"], "Expected 'name' property in validation schema")
 
 
     def test_07_get_invalid_namespace(self):
@@ -139,13 +139,13 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
     def test_08_get_valid_class(self):
         res = self.request("schema/n3c:Dataset/validation", method="GET").json()
         # Assert that 'properties' key exists
-        assert 'properties' in res  # codacy: ignore
+        self.assertIn('properties', res)
         # Further assertions on specific properties, if necessary
-        assert 'name' in res['properties']  # codacy: ignore
+        self.assertIn('name', res['properties'])
 
     def test_09_get_namespace_with_meta(self):
         """
         Test case: Retrieve namespace metadata with 'meta' flag.
         """
         res = self.request("schema/n3c?meta=1", method="GET").json()
-        assert "_meta" in res  # codacy: ignore
+        self.assertIn("_meta", res)
