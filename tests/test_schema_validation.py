@@ -109,9 +109,9 @@ class DiscoverySchemaValidationTests(DiscoveryTestCase):
         res = self.request("schema/n3c", method="GET").json()
 
         # Assertions based on JSON-LD structure
-        assert "@context" in res, "Expected '@context' key in response"  # codacy: ignore
-        assert "@id" in res, "Expected '@id' key in response"  # codacy: ignore
-        assert "@graph" in res, "Expected '@graph' key in response"  # codacy: ignore
+        assert "@context" in res, "Expected '@context' key in response"  #  codacy: ignore
+        assert "@id" in res, "Expected '@id' key in response"  #  codacy: ignore
+        assert "@graph" in res, "Expected '@graph' key in response"  #  codacy: ignore
 
         # Checking for details within @graph array (assuming first item is relevant)
         graph_item = res["@graph"][0]
