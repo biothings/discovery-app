@@ -476,6 +476,28 @@ class SchemaHandler(APIBaseHandler):
                         )
         return property_list
 
+    def filter_schema_class_with_properties(self, metadata, property_list):
+        class_dict={
+            "@id": metadata["_id"].replace("schema::", "", 1),
+            "@type": "rdfs:Class",
+            "rdfs:comment": metadata["description"],
+            "rdfs:label": metadata["label"],
+            "rdfs:subClassOf": [{"@id": value} for value in metadata["parent_classes"]],
+        }
+        property_list.append(class_dict)
+        for data_dict in metadata['properties']:
+            temp_dict={
+                "@id": data_dict['curie'],
+                "@type": "rdf:Property",
+                "rdfs:comment": data_dict['description'],
+                "rdfs:label": data_dict['label'],
+                "schema:domainIncludes": [{"@id": value} for value in data_dict['domain']],
+                "schema:rangeIncludes": [{"@id": value} for value in data_dict['range']],
+
+            }
+            property_list.append(temp_dict)
+        return property_list
+
     def graph_data_filter(self, metadata, curie, property_list):
         """
         Filter the requested schema(namespace) metadata
@@ -507,14 +529,20 @@ class SchemaHandler(APIBaseHandler):
 
         return property_list
 
-    def get_curie(self, metadata, curie):
+    def get_curie(self, metadata, curie, ns):
         """
         Take input curie and initiate metadata search request
         """
+
         property_list = []
         if isinstance(curie, str):
             for curie_str in curie.split(","):
-                property_list = self.graph_data_filter(metadata, curie_str, property_list)
+                # class_id=curie_str.split(":")[1]
+                if ns == "schema":
+                    klass = schemas.get_class("schema", curie_str)
+                    property_list = self.filter_schema_class_with_properties(klass, property_list)
+                else:
+                    property_list = self.graph_data_filter(metadata, curie_str, property_list)
         elif isinstance(curie, list):
             for curie_str in curie:
                 property_list = self.graph_data_filter(metadata, curie_str, property_list)
@@ -541,15 +569,17 @@ class SchemaHandler(APIBaseHandler):
             HTTPError: If the key is not present in the schema metadata.
         """
         if key not in schema_metadata:
-            if ns == "schema":
-                raise HTTPError(
-                    404, reason="Metadata from schema.org cannot be retrieved this way."
-                )
-            else:
-                raise HTTPError(
-                    404,
-                    reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.",
-                )
+            # if ns == "schema":
+            #     for class_ in schemas.get_class("schema", key):
+            #         print("\n\n\n", class_)
+            #     # raise HTTPError(
+            #     #     404, reason="Metadata from schema.org cannot be retrieved this way."
+            #     # )
+            # else:
+            raise HTTPError(
+                404,
+                reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.",
+            )
 
     def handle_validation_request(self, curie, schema_metadata):
         """
@@ -614,8 +644,10 @@ class SchemaHandler(APIBaseHandler):
         """
         ns = curie.split(":")[0]
         schema_metadata.pop("_id")
-        self.check_key_presence(schema_metadata, "@graph", ns)
-        self.finish(self.get_curie(schema_metadata, curie))
+
+        if ns != "schema":
+            self.check_key_presence(schema_metadata, "@graph", ns)
+        self.finish(self.get_curie(schema_metadata, curie, ns))
 
     def get(self, curie=None, validation=None):
         """
