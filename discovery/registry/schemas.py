@@ -421,6 +421,42 @@ def get_class(namespace, curie, raise_on_error=True):
         raise NoEntityError(f"schema class {_id} does not exist.")
 
 
+def get_schema_org_property(property_label, raise_on_error=True):
+    """
+    Retrieve a specific property from schema.org class based on the given property label.
+    If the property is not found, an exception is raised or None is returned based on the raise_on_error flag.
+    """
+
+    search = ESSchemaClass.search()
+    search = search.source(["_id", "properties"])  # Retrieve only the _id and properties fields
+
+    # Use a script query to filter documents where _id starts with "schema:"
+    script_query = {
+        "script_score": {
+            "query": {
+                "match_all": {}
+            },
+            "script": {
+                "source": "doc['_id'].value.startsWith('schema:') ? 1 : 0"
+            }
+        }
+    }
+    search = search.query(script_query)
+
+    response = search.scan()  # Use scan to retrieve all documents
+
+    for hit in response:
+        properties = hit.properties if hasattr(hit, 'properties') else []
+        for prop in properties:
+            if hasattr(prop, 'label') and prop.label == property_label:
+                return prop.to_dict() if hasattr(prop, 'to_dict') else prop
+
+    if raise_on_error:
+        raise NoEntityError(f"Property with label {property_label} does not exist.")
+    else:
+        return None
+
+
 def delete_classes(namespace):
     """
     Delete all classes of the specified namespace.
@@ -474,17 +510,19 @@ def get_all_contexts():
 
 
 def store_schema_org_version():
-    """Store the given schema_org schema version to Schema index metadata
-       for future use.
-       Make sure you call this function right after you have added the schema_org schema
-       (e.g. after add_core is called)
+    """
+    Store the given schema_org schema version to Schema index metadata
+    for future use.
+    Make sure you call this function right after you have added the schema_org schema
+    (e.g. after add_core is called)
     """
     ver = _get_schema_org_version()
     save_schema_index_meta({"schema_org_version": ver})
 
 
 def get_schema_org_version():
-    """Get the stored schema_org schema version from Schema index metadata.
-       Return None if not found.
+    """
+    Get the stored schema_org schema version from Schema index metadata.
+    Return None if not found.
     """
     return get_schema_index_meta().get("schema_org_version")
