@@ -26,6 +26,7 @@ from discovery.model.schema import Schema
 from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
 from discovery.utils.adapters import SchemaAdapter
+from discovery.registry.common import NoEntityError
 
 from .base import APIBaseHandler, authenticated, registryOperation
 
@@ -476,7 +477,81 @@ class SchemaHandler(APIBaseHandler):
                         )
         return property_list
 
-    def filter_schema_class_with_properties(self, metadata, property_list):
+    def get_context_matches(self, metadata, context_dict):
+        import re
+        # from https://schema.org/version/latest/schemaorg-current-https.jsonld
+        matches = []
+        pattern = re.compile(r"^([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)$")  # Regex to match STRINGA:STRINGB
+
+        def recursive_search(data):
+            if isinstance(data, dict):
+                for key, value in data.items():
+                    recursive_search(key)
+                    recursive_search(value)
+            elif isinstance(data, list):
+                for item in data:
+                    recursive_search(item)
+            elif isinstance(data, str):
+                match = pattern.match(data)
+                if match:
+                    prefix = match.group(1)
+                    if prefix in context_dict:
+                        matches.append(prefix)
+        recursive_search(metadata)
+
+        if "rdf" not in matches:
+            matches.append("rdf")
+        if "rdfs" not in matches:
+            matches.append("rdfs")
+
+        return set(matches)
+
+    def build_schema_org_context_dict(self, metadata):
+        context_dict = {
+            "brick": "https://brickschema.org/schema/Brick#",
+            "csvw": "http://www.w3.org/ns/csvw#",
+            "dc": "http://purl.org/dc/elements/1.1/",
+            "dcam": "http://purl.org/dc/dcam/",
+            "dcat": "http://www.w3.org/ns/dcat#",
+            "dcmitype": "http://purl.org/dc/dcmitype/",
+            "dcterms": "http://purl.org/dc/terms/",
+            "doap": "http://usefulinc.com/ns/doap#",
+            "foaf": "http://xmlns.com/foaf/0.1/",
+            "odrl": "http://www.w3.org/ns/odrl/2/",
+            "org": "http://www.w3.org/ns/org#",
+            "owl": "http://www.w3.org/2002/07/owl#",
+            "prof": "http://www.w3.org/ns/dx/prof/",
+            "prov": "http://www.w3.org/ns/prov#",
+            "qb": "http://purl.org/linked-data/cube#",
+            "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+            "schema": "https://schema.org/",
+            "sh": "http://www.w3.org/ns/shacl#",
+            "skos": "http://www.w3.org/2004/02/skos/core#",
+            "sosa": "http://www.w3.org/ns/sosa/",
+            "ssn": "http://www.w3.org/ns/ssn/",
+            "time": "http://www.w3.org/2006/time#",
+            "vann": "http://purl.org/vocab/vann/",
+            "void": "http://rdfs.org/ns/void#",
+            "xsd": "http://www.w3.org/2001/XMLSchema#"
+        }
+
+        matches = self.get_context_matches(metadata, context_dict)
+        new_context_dict = {key: context_dict[key] for key in matches}
+        return new_context_dict
+
+    def add_property_to_list(self, data_dict, property_list):
+        temp_dict = {
+            "@id": data_dict['curie'],
+            "@type": "rdf:Property",
+            "rdfs:comment": data_dict['description'],
+            "rdfs:label": data_dict['label'],
+            "schema:domainIncludes": [{"@id": value} for value in data_dict['domain']],
+            "schema:rangeIncludes": [{"@id": value} for value in data_dict['range']],
+        }
+        property_list.append(temp_dict)
+
+    def filter_schema_org_class_with_properties(self, metadata, property_list):
         class_dict={
             "@id": metadata["_id"].replace("schema::", "", 1),
             "@type": "rdfs:Class",
@@ -484,18 +559,14 @@ class SchemaHandler(APIBaseHandler):
             "rdfs:label": metadata["label"],
             "rdfs:subClassOf": [{"@id": value} for value in metadata["parent_classes"]],
         }
+
         property_list.append(class_dict)
         for data_dict in metadata['properties']:
-            temp_dict={
-                "@id": data_dict['curie'],
-                "@type": "rdf:Property",
-                "rdfs:comment": data_dict['description'],
-                "rdfs:label": data_dict['label'],
-                "schema:domainIncludes": [{"@id": value} for value in data_dict['domain']],
-                "schema:rangeIncludes": [{"@id": value} for value in data_dict['range']],
+            self.add_property_to_list(data_dict, property_list)
+        return property_list
 
-            }
-            property_list.append(temp_dict)
+    def filter_schema_org_property(self, metadata, property_list):
+        self.add_property_to_list(metadata, property_list)
         return property_list
 
     def graph_data_filter(self, metadata, curie, property_list):
@@ -537,10 +608,17 @@ class SchemaHandler(APIBaseHandler):
         property_list = []
         if isinstance(curie, str):
             for curie_str in curie.split(","):
-                # class_id=curie_str.split(":")[1]
                 if ns == "schema":
-                    klass = schemas.get_class("schema", curie_str)
-                    property_list = self.filter_schema_class_with_properties(klass, property_list)
+                    try:
+                        klass = schemas.get_class("schema", curie_str)
+                        property_list = self.filter_schema_org_class_with_properties(klass, property_list)
+                        metadata["@context"] = self.build_schema_org_context_dict(metadata)
+                    except NoEntityError as e:
+                        logger.info(f"Error retrieving schema class: {e}, attempting to retrieve property instead...")
+                        property_label = curie_str.split(":")[1]
+                        klass=schemas.get_schema_org_property(property_label)
+                        property_list = self.filter_schema_org_property(klass, property_list)
+                        metadata["@context"] = self.build_schema_org_context_dict(metadata)
                 else:
                     property_list = self.graph_data_filter(metadata, curie_str, property_list)
         elif isinstance(curie, list):
@@ -694,7 +772,6 @@ class SchemaHandler(APIBaseHandler):
             # curie: /{ns}:{search_key}
             else:
                 self.handle_class_request(curie, schema_metadata)
-
 
 class CoverageHandler(APIBaseHandler):
     """
