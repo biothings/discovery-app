@@ -540,7 +540,7 @@ class SchemaHandler(APIBaseHandler):
         new_context_dict = {key: context_dict[key] for key in matches}
         return new_context_dict
 
-    def add_property_to_list(self, data_dict, property_list):
+    def add_schema_org_property_to_list(self, data_dict, property_list):
         temp_dict = {
             "@id": data_dict['curie'],
             "@type": "rdf:Property",
@@ -562,11 +562,11 @@ class SchemaHandler(APIBaseHandler):
 
         property_list.append(class_dict)
         for data_dict in metadata['properties']:
-            self.add_property_to_list(data_dict, property_list)
+            self.add_schema_org_property_to_list(data_dict, property_list)
         return property_list
 
     def filter_schema_org_property(self, metadata, property_list):
-        self.add_property_to_list(metadata, property_list)
+        self.add_schema_org_property_to_list(metadata, property_list)
         return property_list
 
     def graph_data_filter(self, metadata, curie, property_list):
