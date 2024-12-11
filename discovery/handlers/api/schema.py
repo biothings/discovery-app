@@ -15,6 +15,7 @@
 """
 
 import json
+import re
 import logging
 from datetime import date, datetime
 
@@ -478,7 +479,6 @@ class SchemaHandler(APIBaseHandler):
         return property_list
 
     def get_context_matches(self, metadata, context_dict):
-        import re
         # from https://schema.org/version/latest/schemaorg-current-https.jsonld
         matches = []
         pattern = re.compile(r"^([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)$")  # Regex to match STRINGA:STRINGB
@@ -647,13 +647,6 @@ class SchemaHandler(APIBaseHandler):
             HTTPError: If the key is not present in the schema metadata.
         """
         if key not in schema_metadata:
-            # if ns == "schema":
-            #     for class_ in schemas.get_class("schema", key):
-            #         print("\n\n\n", class_)
-            #     # raise HTTPError(
-            #     #     404, reason="Metadata from schema.org cannot be retrieved this way."
-            #     # )
-            # else:
             raise HTTPError(
                 404,
                 reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.",
