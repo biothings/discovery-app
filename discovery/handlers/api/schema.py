@@ -479,7 +479,6 @@ class SchemaHandler(APIBaseHandler):
         return property_list
 
     def get_context_matches(self, metadata, context_dict):
-        # from https://schema.org/version/latest/schemaorg-current-https.jsonld
         matches = []
         pattern = re.compile(r"^([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)$")  # Regex to match STRINGA:STRINGB
 
@@ -501,6 +500,7 @@ class SchemaHandler(APIBaseHandler):
         return set(matches)
 
     def build_schema_org_context_dict(self, metadata):
+        # from https://schema.org/version/latest/schemaorg-current-https.jsonld
         context_dict = {
             "brick": "https://brickschema.org/schema/Brick#",
             "csvw": "http://www.w3.org/ns/csvw#",
