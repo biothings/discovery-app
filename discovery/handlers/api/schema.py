@@ -498,12 +498,6 @@ class SchemaHandler(APIBaseHandler):
                     if prefix in context_dict:
                         matches.append(prefix)
         recursive_search(metadata)
-
-        if "rdf" not in matches:
-            matches.append("rdf")
-        if "rdfs" not in matches:
-            matches.append("rdfs")
-
         return set(matches)
 
     def build_schema_org_context_dict(self, metadata):
@@ -533,7 +527,8 @@ class SchemaHandler(APIBaseHandler):
             "time": "http://www.w3.org/2006/time#",
             "vann": "http://purl.org/vocab/vann/",
             "void": "http://rdfs.org/ns/void#",
-            "xsd": "http://www.w3.org/2001/XMLSchema#"
+            "xsd": "http://www.w3.org/2001/XMLSchema#",
+            "cvisb": "https://data.cvisb.org/schema"
         }
 
         matches = self.get_context_matches(metadata, context_dict)
@@ -612,13 +607,13 @@ class SchemaHandler(APIBaseHandler):
                     try:
                         klass = schemas.get_class("schema", curie_str)
                         property_list = self.filter_schema_org_class_with_properties(klass, property_list)
-                        metadata["@context"] = self.build_schema_org_context_dict(metadata)
+                        metadata["@context"] = self.build_schema_org_context_dict(property_list)
                     except NoEntityError as e:
                         logger.info(f"Error retrieving schema class: {e}, attempting to retrieve property instead...")
                         property_label = curie_str.split(":")[1]
                         klass=schemas.get_schema_org_property(property_label)
                         property_list = self.filter_schema_org_property(klass, property_list)
-                        metadata["@context"] = self.build_schema_org_context_dict(metadata)
+                        metadata["@context"] = self.build_schema_org_context_dict(property_list)
                 else:
                     property_list = self.graph_data_filter(metadata, curie_str, property_list)
         elif isinstance(curie, list):
