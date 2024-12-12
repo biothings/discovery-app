@@ -427,29 +427,23 @@ def get_schema_org_property(property_label, raise_on_error=True):
     If the property is not found, an exception is raised or None is returned based on the raise_on_error flag.
     """
 
-    search = ESSchemaClass.search()
-    search = search.source(["_id", "properties"])  # Retrieve only the _id and properties fields
-
-    # Use a script query to filter documents where _id starts with "schema:"
-    script_query = {
-        "script_score": {
-            "query": {
-                "match_all": {}
-            },
-            "script": {
-                "source": "doc['_id'].value.startsWith('schema:') ? 1 : 0"
+    # Build the Elasticsearch query
+    query = {
+        "query": {
+            "query_string": {
+                "query": f"properties.label:{property_label}",
             }
-        }
+        },
+        "size": 1
     }
-    search = search.query(script_query)
-
-    response = search.scan()  # Use scan to retrieve all documents
-
-    for hit in response:
-        properties = hit.properties if hasattr(hit, 'properties') else []
-        for prop in properties:
-            if hasattr(prop, 'label') and prop.label == property_label:
-                return prop.to_dict() if hasattr(prop, 'to_dict') else prop
+    # Execute the search query
+    search = ESSchemaClass.search()
+    response = search.update_from_dict(query).execute()
+    # Process the search results
+    if response.hits.total.value > 0:
+        # Assuming we want the first matching property
+        hit = next((prop_dict for prop_dict in response.hits[0]['properties'] if prop_dict['label'] == property_label), None)
+        return hit.to_dict() if hasattr(hit, "to_dict") else hit
 
     if raise_on_error:
         raise NoEntityError(f"Property with label {property_label} does not exist.")
