@@ -595,6 +595,12 @@ class SchemaHandler(APIBaseHandler):
 
         return property_list
 
+    def raise_404_not_found_error(self, curie):
+        raise HTTPError(404, reason=f"Requested CURIE: {curie} not found in any schema.")
+
+    def raise_404_no_validation_error(self, curie):
+        raise HTTPError(404, reason="Validation schema is not provided for this class.")
+
     def get_curie(self, metadata, curie, ns):
         """
         Take input curie and initiate metadata search request
@@ -617,7 +623,7 @@ class SchemaHandler(APIBaseHandler):
                             metadata["@context"] = self.build_schema_org_context_dict(property_list)
                         except NoEntityError as no_property_error:
                             logger.info(f"Error retrieving schema class: {no_property_error}, attempting to retrieve property instead...")
-                            raise HTTPError(404, reason=f"Requested CURIE '{curie}' not found in the schema metadata.")
+                            self.raise_404_not_found_error(curie)
                 else:
                     property_list = self.graph_data_filter(metadata, curie_str, property_list)
         elif isinstance(curie, list):
@@ -628,7 +634,7 @@ class SchemaHandler(APIBaseHandler):
 
         # Check if the filtering result is empty
         if not property_list:
-            raise HTTPError(404, reason=f"Requested CURIE '{curie}' not found in the schema metadata.")
+            self.raise_404_not_found_error(curie)
 
         metadata["@graph"] = property_list
         return metadata
@@ -667,7 +673,6 @@ class SchemaHandler(APIBaseHandler):
 
         validation_dict = {}
         class_match_found = False
-        curie_property = curie.split(":")[1]
 
         for data_dict in schema_metadata["@graph"]:
             if data_dict["@id"] == curie:
@@ -676,11 +681,9 @@ class SchemaHandler(APIBaseHandler):
                 break
 
         if not class_match_found:
-            raise HTTPError(
-                404, reason=f"The given property: '{curie_property}' was not found in schema: {ns}"
-            )
+            self.raise_404_not_found_error(curie)
         if not validation_dict:
-            raise HTTPError(404, reason=f"No data not available for {curie}/validation")
+            self.raise_404_no_validation_error(curie)
         self.finish(validation_dict)
 
     def handle_namespace_request(self, curie):
@@ -701,9 +704,10 @@ class SchemaHandler(APIBaseHandler):
                 schema_metadata["_meta"] = schema_metadata.meta
             schema_metadata.pop("_id")
         except KeyError:
-            raise HTTPError(404, reason=f"Namespace {curie} not found in the schema metadata.")
+            self.raise_404_not_found_error(curie)
         except Exception as ns_error:
-            raise HTTPError(404, reason=f"Error retrieving namespace {curie}: {ns_error}")
+            logger.info(f"Error retrieving namespace {curie}: {ns_error}")
+            self.raise_404_not_found_error(curie)
         self.finish(json.dumps(schema_metadata, indent=4, default=str))
 
     def handle_class_request(self, curie, schema_metadata):
@@ -757,11 +761,12 @@ class SchemaHandler(APIBaseHandler):
                 schema_metadata = schemas.get(ns)
             # catch errors and return feedback
             except Exception as ns_error:
-                raise HTTPError(400, reason=f"Error retrieving namespace {ns}: {ns_error}")
+                logger.info(f"Error retrieving namespace {curie}: {ns_error}")
+                self.raise_404_not_found_error(curie)
             # curie: /{ns}:{class_id}/validation
             if validation:
                 if ns == "schema":
-                    raise HTTPError(404, reason="Validation unavailable for schema.org.")
+                    self.raise_404_no_validation_error(curie)
                 self.handle_validation_request(curie, schema_metadata)
 
             # curie: /{ns}:{search_key}
