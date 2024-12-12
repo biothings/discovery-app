@@ -608,12 +608,16 @@ class SchemaHandler(APIBaseHandler):
                         klass = schemas.get_class("schema", curie_str)
                         property_list = self.filter_schema_org_class_with_properties(klass, property_list)
                         metadata["@context"] = self.build_schema_org_context_dict(property_list)
-                    except NoEntityError as e:
-                        logger.info(f"Error retrieving schema class: {e}, attempting to retrieve property instead...")
-                        property_label = curie_str.split(":")[1]
-                        klass=schemas.get_schema_org_property(property_label)
-                        property_list = self.filter_schema_org_property(klass, property_list)
-                        metadata["@context"] = self.build_schema_org_context_dict(property_list)
+                    except NoEntityError as no_class_error:
+                        try:
+                            logger.info(f"Error retrieving schema class: {no_class_error}, attempting to retrieve property instead...")
+                            property_label = curie_str.split(":")[1]
+                            klass=schemas.get_schema_org_property(property_label)
+                            property_list = self.filter_schema_org_property(klass, property_list)
+                            metadata["@context"] = self.build_schema_org_context_dict(property_list)
+                        except NoEntityError as no_property_error:
+                            logger.info(f"Error retrieving schema class: {no_property_error}, attempting to retrieve property instead...")
+                            raise HTTPError(404, reason=f"Requested CURIE '{curie}' not found in the schema metadata.")
                 else:
                     property_list = self.graph_data_filter(metadata, curie_str, property_list)
         elif isinstance(curie, list):
@@ -675,6 +679,8 @@ class SchemaHandler(APIBaseHandler):
             raise HTTPError(
                 404, reason=f"The given property: '{curie_property}' was not found in schema: {ns}"
             )
+        if not validation_dict:
+            raise HTTPError(404, reason=f"No data not available for {curie}/validation")
         self.finish(validation_dict)
 
     def handle_namespace_request(self, curie):
@@ -752,9 +758,10 @@ class SchemaHandler(APIBaseHandler):
             # catch errors and return feedback
             except Exception as ns_error:
                 raise HTTPError(400, reason=f"Error retrieving namespace {ns}: {ns_error}")
-
             # curie: /{ns}:{class_id}/validation
             if validation:
+                if ns == "schema":
+                    raise HTTPError(404, reason="Validation unavailable for schema.org.")
                 self.handle_validation_request(curie, schema_metadata)
 
             # curie: /{ns}:{search_key}
