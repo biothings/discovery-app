@@ -421,6 +421,36 @@ def get_class(namespace, curie, raise_on_error=True):
         raise NoEntityError(f"schema class {_id} does not exist.")
 
 
+def get_schema_org_property(property_label, raise_on_error=True):
+    """
+    Retrieve a specific property from schema.org class based on the given property label.
+    If the property is not found, an exception is raised or None is returned based on the raise_on_error flag.
+    """
+
+    # Build the Elasticsearch query
+    query = {
+        "query": {
+            "query_string": {
+                "query": f"properties.label:{property_label}",
+            }
+        },
+        "size": 1
+    }
+    # Execute the search query
+    search = ESSchemaClass.search()
+    response = search.update_from_dict(query).execute()
+    # Process the search results
+    if response.hits.total.value > 0:
+        # Assuming we want the first matching property
+        hit = next((prop_dict for prop_dict in response.hits[0]['properties'] if prop_dict['label'] == property_label), None)
+        return hit.to_dict() if hasattr(hit, "to_dict") else hit
+
+    if raise_on_error:
+        raise NoEntityError(f"Property with label {property_label} does not exist.")
+    else:
+        return None
+
+
 def delete_classes(namespace):
     """
     Delete all classes of the specified namespace.
@@ -474,17 +504,19 @@ def get_all_contexts():
 
 
 def store_schema_org_version():
-    """Store the given schema_org schema version to Schema index metadata
-       for future use.
-       Make sure you call this function right after you have added the schema_org schema
-       (e.g. after add_core is called)
+    """
+    Store the given schema_org schema version to Schema index metadata
+    for future use.
+    Make sure you call this function right after you have added the schema_org schema
+    (e.g. after add_core is called)
     """
     ver = _get_schema_org_version()
     save_schema_index_meta({"schema_org_version": ver})
 
 
 def get_schema_org_version():
-    """Get the stored schema_org schema version from Schema index metadata.
-       Return None if not found.
+    """
+    Get the stored schema_org schema version from Schema index metadata.
+    Return None if not found.
     """
     return get_schema_index_meta().get("schema_org_version")
