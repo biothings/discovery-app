@@ -591,7 +591,7 @@ class SchemaHandler(APIBaseHandler):
 
         # If no match is found, raise an error
         if not found:
-            raise HTTPError(404, reason=f"'{curie}' not found in metadata.")
+            self.raise_404_not_found_error(curie)
 
         return property_list
 
@@ -603,7 +603,17 @@ class SchemaHandler(APIBaseHandler):
 
     def get_curie(self, metadata, curie, ns):
         """
-        Take input curie and initiate metadata search request
+        Retrieve metadata and properties based on the provided CURIE.
+        Args:
+            metadata (dict): schema metadata.
+            curie (str or list): A CURIE (e.g., "schema:Property").
+            ns (str): Namespace for the CURIE (e.g., "schema").
+
+        Returns:
+            dict: Updated metadata containing the filtered properties and context.
+
+        Raises:
+            HTTPError: If the CURIE is invalid or cannot be resolved.
         """
 
         property_list = []
@@ -613,17 +623,17 @@ class SchemaHandler(APIBaseHandler):
                     try:
                         klass = schemas.get_class("schema", curie_str)
                         property_list = self.filter_schema_org_class_with_properties(klass, property_list)
-                        metadata["@context"] = self.build_schema_org_context_dict(property_list)
                     except NoEntityError as no_class_error:
                         try:
                             logger.info(f"Error retrieving schema class: {no_class_error}, attempting to retrieve property instead...")
                             property_label = curie_str.split(":")[1]
                             klass=schemas.get_schema_org_property(property_label)
                             property_list = self.filter_schema_org_property(klass, property_list)
-                            metadata["@context"] = self.build_schema_org_context_dict(property_list)
                         except NoEntityError as no_property_error:
                             logger.info(f"Error retrieving schema class: {no_property_error}, attempting to retrieve property instead...")
                             self.raise_404_not_found_error(curie)
+                    # set the context property for schema.org
+                    metadata["@context"] = self.build_schema_org_context_dict(property_list)
                 else:
                     property_list = self.graph_data_filter(metadata, curie_str, property_list)
         elif isinstance(curie, list):
@@ -722,6 +732,7 @@ class SchemaHandler(APIBaseHandler):
         schema_metadata.pop("_id")
 
         if ns != "schema":
+            print("\n\nhere\n\n")
             self.check_key_presence(schema_metadata, "@graph", ns)
         self.finish(self.get_curie(schema_metadata, curie, ns))
 
@@ -768,7 +779,6 @@ class SchemaHandler(APIBaseHandler):
                 if ns == "schema":
                     self.raise_404_no_validation_error(curie)
                 self.handle_validation_request(curie, schema_metadata)
-
             # curie: /{ns}:{search_key}
             else:
                 self.handle_class_request(curie, schema_metadata)
