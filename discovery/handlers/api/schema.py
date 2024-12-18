@@ -599,7 +599,7 @@ class SchemaHandler(APIBaseHandler):
         raise HTTPError(404, reason=f"Requested CURIE: {curie} not found in any schema.")
 
     def raise_404_no_validation_error(self, curie):
-        raise HTTPError(404, reason="Validation schema is not provided for this class.")
+        raise HTTPError(404, reason="Validation schema is not provided for this class or property.")
 
     def get_curie(self, metadata, curie, ns):
         """
@@ -732,7 +732,6 @@ class SchemaHandler(APIBaseHandler):
         schema_metadata.pop("_id")
 
         if ns != "schema":
-            print("\n\nhere\n\n")
             self.check_key_presence(schema_metadata, "@graph", ns)
         self.finish(self.get_curie(schema_metadata, curie, ns))
 
@@ -752,7 +751,10 @@ class SchemaHandler(APIBaseHandler):
             )
 
         # curie: /{ns}
-        if ":" not in curie:
+        if ":" not in curie and validation:
+            raise(HTTPError(400, reason="Validation request must be for a class, not a namespace."))
+
+        elif ":" not in curie:
             self.handle_namespace_request(curie)
 
         # curie: /{ns}:{class_id|property_id}
