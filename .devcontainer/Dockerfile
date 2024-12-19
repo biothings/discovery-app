@@ -1,5 +1,5 @@
 # Use the latest Ubuntu image
-FROM ubuntu:latest
+FROM ubuntu
 
 # Install system dependencies
 RUN apt update -o Acquire::Check-Date=false && \
@@ -25,6 +25,3 @@ WORKDIR /discovery-app
 # Expose the API and Elasticsearch ports
 EXPOSE 8000
 EXPOSE 9200
-
-# Start with a bash shell for interactive use
-CMD ["/bin/bash"]

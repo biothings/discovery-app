@@ -4,8 +4,11 @@
     "dockerfile": "Dockerfile",
     "context": "."
   },
-  "runArgs": ["-p", "8000:8000", "-p", "9200:9200"],
+  "runArgs": [
+    "-p", "8000:8000", 
+    "-p", "9200:9200", 
+    "-e", "ES_HOST=http://localhost:9200"
+  ],
   "forwardPorts": [8000, 9200],
-  "remoteUser": "vscode",
-  "postCreateCommand": "echo 'Shell is running in the container...'"
+  "postCreateCommand": ""  // Leave this empty or remove it entirely
 }
