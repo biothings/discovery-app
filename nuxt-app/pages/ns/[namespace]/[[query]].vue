@@ -988,6 +988,24 @@ export default {
       }
     },
     findClass(query) {
+      let found = this.findClassInSchema(query);
+      if (found) {
+        console.log("found in schema provided: ", query);
+        return found;
+      } else {
+        this.findClassInRegistry(query);
+        console.log("found in registry: ", query);
+      }
+    },
+    findClassInSchema(query) {
+      for (var i = 0; i < this.userSchema["hits"].length; i++) {
+        if (this.userSchema["hits"][i]["name"] === query) {
+          return this.userSchema["hits"][i];
+        }
+      }
+      return false;
+    },
+    findClassInRegistry(query) {
       let self = this;
       axios(
         self.apiUrl +
@@ -1017,19 +1035,6 @@ export default {
         .catch((err) => {
           throw err;
         });
-      // else {
-      //   console.log('FINDING PARENT', query)
-      //   for (var i = 0; i < self.userSchema["hits"].length; i++) {
-      //     if (
-      //       self.userSchema["hits"][i]["name"] === query ||
-      //       self.userSchema["hits"][i]["label"] == query
-      //     ) {
-      //       let found = self.userSchema["hits"][i];
-      //       return found;
-      //     }
-      //   }
-      //   return false;
-      // }
     },
     findProp(query) {
       let self = this;
