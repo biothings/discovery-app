@@ -1,0 +1,14 @@
+{
+  "name": "Discovery App",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "runArgs": [
+    "-p", "8000:8000", 
+    "-p", "9200:9200", 
+    "-e", "ES_HOST=http://localhost:9200"
+  ],
+  "forwardPorts": [8000, 9200],
+  "postCreateCommand": ""  // Leave this empty or remove it entirely
+}
