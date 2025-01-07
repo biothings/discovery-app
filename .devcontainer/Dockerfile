@@ -1,5 +1,5 @@
 # Use the latest Ubuntu image
-FROM ubuntu
+FROM ubuntu:20.04
 
 # Install system dependencies
 RUN apt update -o Acquire::Check-Date=false && \
