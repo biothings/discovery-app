@@ -24,36 +24,5 @@ Your environment is pre-configured using `devcontainer.json`, which includes:
 
 ### 3. Running Elasticsearch
 Elasticsearch is managed using `docker-compose.yml`:
-```sh
 # Start Elasticsearch
 docker-compose up -d
-```
-- This runs Elasticsearch version `8.10.2` (update to `8.17.XX` as needed).
-- Ports are mapped to `localhost:9200`.
-- Security features like `xpack.security.enabled` are disabled for ease of development.
-
-To stop the container:
-```sh
-docker-compose down
-```
-
-### 4. Running the Backend
-Once Elasticsearch is running, you can start the Discovery App backend:
-```sh
-python run_and_restore.py  # Adjust command as needed
-```
-
-### 5. Verifying Setup
-To check if Elasticsearch is running, use:
-```sh
-curl http://localhost:9200
-```
-Expected output should display Elasticsearch version details.
-
-## Notes
-- Ensure your Elasticsearch version matches the expected API compatibility.
-- Data persistence is handled via the mounted volume (`es_data`).
-- Update `docker-compose.yml` to change the Elasticsearch version if needed.
-
-Happy coding! 🚀
-
