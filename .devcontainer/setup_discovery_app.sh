@@ -34,3 +34,19 @@ source venv/bin/activate
 echo "📦 Installing dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
+
+echo "🔹 Starting Elasticsearch with Docker Compose..."
+
+# Navigate to the directory containing docker-compose.yml
+COMPOSE_DIR="$HOME/discovery-app/docker"
+cd "$COMPOSE_DIR"
+
+# Start Elasticsearch service
+docker-compose up -d es
+
+echo "✅ Elasticsearch is now running!"
+
+# Verify Elasticsearch is up
+echo "🔎 Checking Elasticsearch status..."
+sleep 10  # Give it time to start
+curl -X GET "http://localhost:9200" || echo "⚠️ Elasticsearch is not responding!"
