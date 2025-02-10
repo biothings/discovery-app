@@ -27,7 +27,7 @@ services:
       - net0
 
   es:
-    image: elasticsearch:8.17.16
+    image: elasticsearch:8.17.0
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -35,7 +35,7 @@ services:
       - http.cors.enabled=true
       - http.cors.allow-origin=/https?:\/\/localhost(:[0-9]+)?/
     ports:
-      - "9200"
+      - "9200:9200"
     networks:
       - net0
 
