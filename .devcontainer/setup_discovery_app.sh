@@ -6,8 +6,6 @@ set -o pipefail  # Exit if any command in a pipeline fails
 # Variables
 INSTALL_DIR="/workspaces/discovery-app"
 COMPOSE_DIR="$INSTALL_DIR/docker"
-FILENAME="$INSTALL_DIR/.devcontainer/smartapi_20240725.json"
-INDEX_NAME="smartapi_metakg_docs"
 
 cd $INSTALL_DIR
 
@@ -38,7 +36,7 @@ echo "📦 Installing dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
-echo "🔹 Starting Elasticsearch with Docker Compose..."
+echo "🐳 Starting Elasticsearch with Docker Compose..."
 
 # Start Elasticsearch service
 docker compose -f $COMPOSE_DIR/docker-compose.yml up -d es
