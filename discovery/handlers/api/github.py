@@ -60,7 +60,7 @@ class GHHandler(APIBaseHandler):
             repo_list = []
             if auth_user.login:
                 try:
-                    repos = auth_user.get_repos()
+                    repos = auth_user.get_repos(affiliation="owner")
                 except GithubException:
                     self.finish(
                         {

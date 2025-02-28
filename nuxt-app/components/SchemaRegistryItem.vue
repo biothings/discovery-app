@@ -23,13 +23,17 @@
         <div class="d-inline mr-1">
           <div class="mr-1 d-none d-md-inline"></div>
           <h6 class="m-1 mainTextDark d-inline">
-            <small class="text-muted">{{ item.namespace }}:</small
+            <small class="text-dde-dark">
+              <NuxtLink :to="'/ns/' + item.namespace">{{
+                item.namespace
+              }}</NuxtLink
+              >:</small
             ><b>{{ item.label }}</b>
           </h6>
         </div>
-        <p class="m-0 text-muted d-none d-md-inline">
+        <p class="m-0 text-dde-dark d-none d-md-inline">
           <small class="pointer" @click="expand = !expand">
-            <span :class="[propTotal > 0 ? 'text-primary' : 'text-muted']"
+            <span :class="[propTotal > 0 ? 'text-primary' : 'text-dde-dark']"
               ><span v-text="propTotal"></span> Properties</span
             >
             <template v-show="propTotal">
@@ -46,29 +50,29 @@
             </template>
           </small>
           |
-          <small><font-awesome-icon icon="fas fa-home" />: </small>
-          <small class="text-muted">
-            <a v-text="item.namespace" :href="'/view/' + item.namespace"></a>
-          </small>
-          |
-          <small>Subclass of:</small>
-          <small class="mb-1" v-text="getSubclass(item.parent_classes)"></small>
-          <img
-            v-if="item && item.validation"
-            src="@/assets/img/cube.svg"
-            width="15"
-            title="validation available"
-            class="ml-1 tip"
-            data-tippy-content="Validation available"
-          />
+          <small class="text-muted">Subclass of:</small>
+          <small
+            class="mb-1 text-muted"
+            v-text="getSubclass(item.parent_classes)"
+          ></small>
+          <template v-if="item.validation">
+            <img
+              src="@/assets/img/cube.svg"
+              width="15"
+              title="validation available"
+              class="ml-1 tip"
+              data-tippy-content="Validation available"
+            />
+            <small class="text-info"> Validation available</small>
+          </template>
         </p>
       </div>
       <div
-        class="p-1 bg-dde-dark d-flex align-items-center justify-content-around"
+        class="p-1 bg-dde-mid d-flex align-items-center justify-content-around"
       >
         <div>
           <button
-            class="btn btn-sm btn-info m-1"
+            class="btn btn-sm themeButton text-light m-1"
             @click.prevent="saveDataAndRedirect(item)"
             data-tippy-content="Visualize class in detail"
           >
@@ -76,13 +80,10 @@
           </button>
         </div>
         <div>
-          <button
-            class="btn btn-sm bg-dde-light text-light m-1"
-            @click.prevent="saveDataAndRedirect(item, 'editor')"
-            data-tippy-content="Extend using this class as a subclass"
-          >
-            Extend
-          </button>
+          <ExtendClassBtn
+            :ns="item.namespace"
+            :curie="item.prefix + ':' + item.label"
+          ></ExtendClassBtn>
         </div>
       </div>
       <div
@@ -105,6 +106,7 @@
 <script>
 import axios from "axios";
 import Notify from "simple-notify";
+import ExtendClassBtn from "./ExtendClassBtn.vue";
 
 export default {
   name: "SchemaRegistryItem",
@@ -214,6 +216,8 @@ export default {
             distance: 20,
             type: 1,
             position: "right top",
+            autoclose: true, // Enable auto close
+            autotimeout: 3000, // Set timeout in milliseconds (3 seconds)
           });
           throw err;
         });

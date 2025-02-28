@@ -109,7 +109,7 @@ export default {
             title: {
               display: false,
               text: `${this.name} (N=${this.totals.count || "N/A"})`,
-              color: "#63296b",
+              color: "#43318d",
               font: {
                 size: 22,
                 weight: "normal",

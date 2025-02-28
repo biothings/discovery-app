@@ -59,11 +59,11 @@ useHead({
     },
     {
       name: "theme-color",
-      content: "#63296b",
+      content: "#43318d",
     },
     {
       name: "msapplication-TileColor",
-      content: "#63296b",
+      content: "#43318d",
     },
     {
       property: "og:image:type",

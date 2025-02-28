@@ -8,7 +8,7 @@
           <!-- 🍏 TABS 🍏-->
           <template v-for="(value, name) in parsed_options">
             <div
-              class="pointer m-1 text-center text-light rounded"
+              class="pointer m-1 text-center text-light rounded mb-3"
               @click="select(name)"
               :class="[
                 type_selected == name
@@ -935,8 +935,8 @@ export default {
           inputAttributes: {
             id: "hideThis",
           },
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
           customClass: "scale-in-center",
           html: html,
           didOpen: () => {

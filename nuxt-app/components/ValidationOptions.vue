@@ -268,7 +268,7 @@ onMounted(() => filterAllOptions(valSelect.value));
 </script>
 
 <template>
-  <div class="rounded alert-secondary p-1">
+  <div class="rounded bg-dde-mid-muted p-1 text-dde-dark">
     <div class="row m-0">
       <div class="col-sm-8 d-flex justify-content-start align-items-center">
         <h6 class="m-0 font-weight-bold">Validation Options</h6>

@@ -3,6 +3,9 @@
     <h4 class="text-dde-dark text-center m-2">
       <font-awesome-icon icon="fab fa-github-alt" /> Save your work to GitHub
     </h4>
+    <h5 class="text-center text-info" v-if="loading">
+      Working, Please wait...
+    </h5>
     <p class="text-dark w-50 m-auto mb-2">
       <small
         ><font-awesome-icon
@@ -10,9 +13,8 @@
           class="text-info"
         />
         By continuing with this process you are giving us permission to access
-        your GitHub account to create/edit <b>public</b> repos/files. This might
-        include public organizations and repos that you are part of. If you DO
-        NOT accept this please close this window and choose the
+        your GitHub account to create/edit repos/files you own. If you DO NOT
+        accept this please close this window and choose the
         <b>Download</b> option to save manually.</small
       >
     </p>
@@ -287,7 +289,7 @@ export default {
   methods: {
     resetFields() {
       let self = this;
-      this.$store.commit("setLoading", { state: true });
+      this.$store.commit("setLoading", { value: true });
       setTimeout(function () {
         self.repo_selected = "";
         self.name_selected = "";
@@ -297,15 +299,15 @@ export default {
         self.files_available = [];
         self.file_selected = "";
       }, 1000);
-      this.$store.commit("setLoading", { state: false });
+      this.$store.commit("setLoading", { value: false });
     },
     checkRepo() {
       let self = this;
-      this.$store.commit("setLoading", { state: true });
+      this.$store.commit("setLoading", { value: true });
       axios
         .get(self.apiUrl + "/api/gh/" + self.repoName)
         .then((res) => {
-          this.$store.commit("setLoading", { state: false });
+          this.$store.commit("setLoading", { value: false });
           if (res.data.success) {
             return "https://github.com/" + res.data.msg;
           } else {
@@ -317,7 +319,7 @@ export default {
           }
         })
         .catch((err) => {
-          this.$store.commit("setLoading", { state: false });
+          this.$store.commit("setLoading", { value: false });
           self.$swal.fire({
             type: "error",
             title: "Oops...Something went really wrong!",
@@ -328,11 +330,11 @@ export default {
     },
     getRepos() {
       var self = this;
-      this.$store.commit("setLoading", { state: true });
+      this.$store.commit("setLoading", { value: true });
       axios
         .get(self.apiUrl + "/api/gh")
         .then((res) => {
-          this.$store.commit("setLoading", { state: false });
+          this.$store.commit("setLoading", { value: false });
           if (res.data.success) {
             self.repos = res.data.msg;
           } else {
@@ -344,7 +346,7 @@ export default {
           }
         })
         .catch((err) => {
-          this.$store.commit("setLoading", { state: false });
+          this.$store.commit("setLoading", { value: false });
           self.$swal.fire({
             type: "error",
             title: "Oops!",
@@ -356,7 +358,7 @@ export default {
     updateFile() {
       let self = this;
 
-      data = {
+      let data = {
         name: self.repo_selected,
         file: self.name_selected,
         data: this.$store.getters.getFinalSchema,
@@ -371,12 +373,12 @@ export default {
         },
       };
 
-      this.$store.commit("setLoading", { state: true });
+      this.$store.commit("setLoading", { value: true });
 
       return axios
         .put(self.apiUrl + "/api/gh", data, config)
         .then((res) => {
-          this.$store.commit("setLoading", { state: false });
+          this.$store.commit("setLoading", { value: false });
           if (res.data.success) {
             self.repo_saved = true;
             self.repo_link = "https://github.com/" + res.data.msg;
@@ -390,7 +392,7 @@ export default {
           }
         })
         .catch((err) => {
-          this.$store.commit("setLoading", { state: false });
+          this.$store.commit("setLoading", { value: false });
           self.repo_saved = false;
           self.$swal.fire({
             type: "error",
@@ -407,7 +409,7 @@ export default {
         console.log("updating file");
         self.updateFile();
       } else {
-        data = {
+        let data = {
           name: self.repo_selected,
           file: self.name_selected + ".jsonld",
           data: this.$store.getters.getFinalSchema,
@@ -421,12 +423,12 @@ export default {
           },
         };
 
-        this.$store.commit("setLoading", { state: true });
+        this.$store.commit("setLoading", { value: true });
 
         return axios
           .post(self.apiUrl + "/api/gh", data, config)
           .then((res) => {
-            this.$store.commit("setLoading", { state: false });
+            this.$store.commit("setLoading", { value: false });
             if (res.data.success) {
               self.repo_saved = true;
               self.repo_link = "https://github.com/" + res.data.msg;
@@ -440,7 +442,7 @@ export default {
             }
           })
           .catch((err) => {
-            this.$store.commit("setLoading", { state: false });
+            this.$store.commit("setLoading", { value: false });
             self.repo_saved = false;
             self.$swal.fire({
               type: "error",
@@ -470,13 +472,13 @@ export default {
     },
     sendRequest(url, backupURL = "") {
       let self = this;
-      this.$store.commit("setLoading", { state: true });
+      this.$store.commit("setLoading", { value: true });
       axios
         .get(self.apiUrl + "/api/view?url=" + url)
         .then((res) => {
           console.log(res.data);
           self.data = res.data;
-          this.$store.commit("setLoading", { state: false });
+          this.$store.commit("setLoading", { value: false });
           localStorage.setItem(
             "user-schema-classes",
             JSON.stringify(self.data)
@@ -485,7 +487,7 @@ export default {
           self.assignTempName(res.data.hits);
         })
         .catch((err) => {
-          this.$store.commit("setLoading", { state: false });
+          this.$store.commit("setLoading", { value: false });
           if (backupURL) {
             self.sendRequest(backupURL);
           } else {
@@ -568,7 +570,7 @@ export default {
 
         self.input = master_url;
 
-        let main_url = master.replace("/master/", "/main/");
+        let main_url = master_url.replace("/master/", "/main/");
 
         self.sendRequest(master_url, main_url);
 
@@ -613,11 +615,11 @@ export default {
     repo_selected: function (name, oldname) {
       let self = this;
       if (self.repos.length && self.repos.includes(name)) {
-        this.$store.commit("setLoading", { state: true });
+        this.$store.commit("setLoading", { value: true });
         return axios
           .get(self.apiUrl + "/api/gh/" + name)
           .then((res) => {
-            this.$store.commit("setLoading", { state: false });
+            this.$store.commit("setLoading", { value: false });
             if (res.data.success) {
               self.files_available = res.data.msg;
             } else {
@@ -629,7 +631,7 @@ export default {
             }
           })
           .catch((err) => {
-            this.$store.commit("setLoading", { state: false });
+            this.$store.commit("setLoading", { value: false });
             self.$swal.fire({
               icon: "error",
               title: "Oops...Something went wrong!",

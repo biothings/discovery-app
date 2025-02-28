@@ -358,8 +358,8 @@ export default {
     getPreview(item) {
       this.$swal.fire({
         position: "center",
-        confirmButtonColor: "#63296b",
-        cancelButtonColor: "#4a7d8f",
+        confirmButtonColor: "#43318d",
+        cancelButtonColor: "#d83f87",
         customClass: "scale-in-center",
         html: `<div class="text-left p-1 previewBox bg-dark"><pre id="previewJSON"></pre></div>`,
         didOpen: function () {

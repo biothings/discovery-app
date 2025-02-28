@@ -189,7 +189,7 @@ export const schema_registry = {
 
       let elements = document.querySelectorAll(".tabulator-col");
       for (var i = 0; i < elements.length; i++) {
-        elements[i].style.backgroundColor = "#4a7d8f";
+        elements[i].style.backgroundColor = "#d83f87";
         elements[i].style.color = "white";
       }
 
@@ -341,7 +341,7 @@ export const schema_registry = {
 
       let elements = document.querySelectorAll(".tabulator-col");
       for (var i = 0; i < elements.length; i++) {
-        elements[i].style.backgroundColor = "#63296b";
+        elements[i].style.backgroundColor = "#43318d";
         elements[i].style.color = "white";
       }
 
