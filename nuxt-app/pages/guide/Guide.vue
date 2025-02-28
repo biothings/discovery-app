@@ -18,6 +18,13 @@
           >Browse other registered metadata using this guide
           <font-awesome-icon icon="fas fa-chevron-right"></font-awesome-icon
         ></a>
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLSfm7i9gl_1Q8icofI1T4PhEPh5sEycPUuUXuh-7RZnnAkYozA/viewform?usp=header"
+          target="_blank"
+          class="float-right btn btn-sm btn-warning"
+          data-tippy-content="Help us improve this tool with a quick survey"
+          >😀 Give us your feedback</a
+        >
       </div>
       <h4
         v-text="readableName(schemaName)"

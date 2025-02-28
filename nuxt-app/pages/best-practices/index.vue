@@ -159,374 +159,63 @@
         <div
           class="d-flex justify-content-center align-items-stretch flex-wrap"
         >
-          <div class="card text-center m-1" style="width: 18rem">
-            <div class="card-header">
-              Data Portal | <nuxt-link to="/portal/cd2h">CD2H</nuxt-link>
-            </div>
-            <img
-              src="@/assets/img/cd2h-logo.png"
-              alt="CD2H"
-              class="w-50 m-auto"
-              width="50px"
-            />
-            <div class="card-body d-flex flex-column justify-content-around">
-              <h5 class="card-title">CD2H</h5>
-              <p class="card-text">
-                <b> CTSA National Center for Data to Health </b> (<a
-                  href="https://ctsa.ncats.nih.gov/cd2h/"
-                  target="_blank"
-                  rel="nonreferrer"
-                  >CD2H <font-awesome-icon icon="fas fa-external-link-alt" /></a
-                >) biomedical dataset metadata based on this
-                <nuxt-link to="/ns/biomedical/" rel="nonreferrer"
-                  >schema <font-awesome-icon icon="fas fa-external-link-alt"
-                /></nuxt-link>
-                structure.
-                <small
-                  class="text-info more"
-                  data-tippy-content="You can choose data portals you are interested in and add their requirements"
-                  >Customizable</small
+          <template v-for="portal in portals" :key="portal.shortName">
+            <div class="card text-center m-1" style="width: 18rem">
+              <div
+                class="card-header text-light"
+                :style="{ backgroundColor: portal.colors[1].hex }"
+              >
+                <h5>
+                  <nuxt-link
+                    class="text-light"
+                    :to="'/portal/' + portal.linkName"
+                    >{{ portal.shortName }}</nuxt-link
+                  >
+                </h5>
+              </div>
+              <img
+                :src="portal.portalicon"
+                :alt="portal.shortName"
+                class="w-25 m-auto"
+                width="50px"
+              />
+              <div class="card-body d-flex flex-column justify-content-around">
+                <h5 class="card-title">{{ portal.shortName }}</h5>
+                <div class="card-text text-left" v-html="portal.header"></div>
+                <small class="text-left text-muted p-1 mt-2">
+                  In this portal you can register the following resources:
+                </small>
+                <ul class="list-group list-group-flush text-left">
+                  <li
+                    class="list-group-item"
+                    v-for="guide in portal.guides"
+                    :key="guide.name"
+                  >
+                    <nuxt-link
+                      :to="guide.quide"
+                      @click="
+                        $gtag.event('click', {
+                          event_category: 'portal_guide',
+                          event_label: '/guide',
+                          event_value: 1,
+                        })
+                      "
+                      class="btn btn-sm text-light"
+                      :style="{ backgroundColor: portal.colors[0].hex }"
+                      role="button"
+                    >
+                      <font-awesome-icon icon="fas fa-plus" /> Add
+                      {{ guide.name }}
+                    </nuxt-link>
+                  </li>
+                </ul>
+                <nuxt-link class="card-link" :to="'/portal/' + portal.linkName"
+                  >Learn More</nuxt-link
                 >
-              </p>
-              <nuxt-link
-                to="/guide"
-                @click="
-                  $gtag.event('click', {
-                    event_category: 'portal_guide',
-                    event_label: '/guide',
-                    event_value: 1,
-                  })
-                "
-                class="btn btn-lg themeButton text-light"
-                role="button"
-              >
-                <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
-              </nuxt-link>
+              </div>
+              <div class="card-footer text-light"></div>
             </div>
-            <div class="card-footer text-light bg-dde-mid">
-              <b>About this guide:</b>
-              <table class="table table-sm table-dark table-striped">
-                <tbody>
-                  <tr>
-                    <td>
-                      <small>Intend</small>
-                    </td>
-                    <td>
-                      <small class="badge badge-dark">General Purpose</small>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Topics</small>
-                    </td>
-                    <td>
-                      <small class="badge badge-light">Biomedical</small>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Associations</small>
-                    </td>
-                    <td>
-                      <nuxt-link to="/portal/cd2h"
-                        ><small class="badge badge-light"
-                          >CD2H</small
-                        ></nuxt-link
-                      >
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Schema</small>
-                    </td>
-                    <td>
-                      <nuxt-link to="/ns/biomedical"
-                        ><small class="badge badge-light"
-                          >Dataset</small
-                        ></nuxt-link
-                      >
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card text-center m-1" style="width: 18rem">
-            <div class="card-header">
-              Data Portal | <nuxt-link to="/portal/n3c">N3C</nuxt-link>
-            </div>
-            <img
-              src="@/assets/img/N3C.png"
-              alt="CD2H"
-              class="w-50 m-auto"
-              width="50px"
-            />
-            <div class="card-body d-flex flex-column justify-content-around">
-              <h5 class="card-title">N3C</h5>
-              <p class="card-text">
-                <b> The National COVID Cohort Collaborative </b> (<a
-                  href="https://covid.cd2h.org/N3C"
-                  target="_blank"
-                  rel="nonreferrer"
-                  >N3C <font-awesome-icon icon="fas fa-external-link-alt" /></a
-                >) dataset metadata based on this
-                <nuxt-link to="/ns/n3c/" rel="nonreferrer"
-                  >schema <font-awesome-icon icon="fas fa-external-link-alt"
-                /></nuxt-link>
-                structure.
-              </p>
-              <nuxt-link
-                to="/guide/n3c/dataset"
-                @click="
-                  $gtag.event('click', {
-                    event_category: 'portal_guide',
-                    event_label: '/guide/n3c/dataset',
-                    event_value: 1,
-                  })
-                "
-                class="btn btn-lg themeButton text-light"
-                role="button"
-              >
-                <font-awesome-icon icon="fas fa-plus" /> Submit Request
-              </nuxt-link>
-            </div>
-            <div class="card-footer text-light bg-dde-mid">
-              <b>About this guide:</b>
-              <table class="table table-sm table-dark table-striped">
-                <tbody>
-                  <tr>
-                    <td>
-                      <small>Intend</small>
-                    </td>
-                    <td>
-                      <small class="badge badge-info">Portal Specific</small>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Topics</small>
-                    </td>
-                    <td>
-                      <small class="badge badge-light">COVID-19</small>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Associations</small>
-                    </td>
-                    <td>
-                      <nuxt-link to="/portal/cd2h"
-                        ><small class="badge badge-light"
-                          >CD2H</small
-                        ></nuxt-link
-                      >
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Schema</small>
-                    </td>
-                    <td>
-                      <nuxt-link to="/ns/n3c"
-                        ><small class="badge badge-light"
-                          >Dataset</small
-                        ></nuxt-link
-                      >
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card text-center m-1" style="width: 18rem">
-            <div class="card-header">
-              Data Portal |
-              <nuxt-link to="/portal/outbreak">Outbreak.info</nuxt-link>
-            </div>
-            <img
-              src="@/assets/img/outbreak.svg"
-              alt="outbreak.info"
-              class="card-img-top p-2"
-              width="150px"
-            />
-            <div class="card-body d-flex flex-column justify-content-around">
-              <h5 class="card-title">Outbreak.info</h5>
-              <p class="card-text">
-                <b>Outbreak.info</b> (<a
-                  href="https://outbreak.info/"
-                  target="_blank"
-                  rel="nonreferrer"
-                  >Outbreak.info
-                  <font-awesome-icon icon="fas fa-external-link-alt" /></a
-                >) COVID-19 epidimiology dataset metadata based on this
-                <nuxt-link to="/ns/outbreak/" rel="nonreferrer"
-                  >schema <font-awesome-icon icon="fas fa-external-link-alt"
-                /></nuxt-link>
-                structure.
-              </p>
-              <nuxt-link
-                to="/guide/outbreak/dataset"
-                @click="
-                  $gtag.event('click', {
-                    event_category: 'portal_guide',
-                    event_label: '/guide/outbreak/dataset',
-                    event_value: 1,
-                  })
-                "
-                class="btn btn-lg themeButton text-light"
-                role="button"
-              >
-                <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
-              </nuxt-link>
-            </div>
-            <div class="card-footer text-light bg-dde-mid">
-              <b>About this guide:</b>
-              <table class="table table-sm table-dark table-striped">
-                <tbody>
-                  <tr>
-                    <td>
-                      <small>Intend</small>
-                    </td>
-                    <td>
-                      <small class="badge badge-info">Portal Specific</small>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Topics</small>
-                    </td>
-                    <td>
-                      <small class="badge badge-light">COVID-19</small>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Associations</small>
-                    </td>
-                    <td>
-                      <nuxt-link to="/portal/outbreak"
-                        ><small class="badge badge-light"
-                          >Outbreak.info</small
-                        ></nuxt-link
-                      >
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Schema</small>
-                    </td>
-                    <td>
-                      <nuxt-link to="/ns/outbreak"
-                        ><small class="badge badge-light"
-                          >Dataset</small
-                        ></nuxt-link
-                      >
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card text-center m-1" style="width: 18rem">
-            <div class="card-header">
-              Data Portal | <nuxt-link to="/portal/niaid">NIAID</nuxt-link>
-            </div>
-            <img
-              src="@/assets/img/niaid/logo.svg"
-              alt="NIAID"
-              class="card-img-top p-2"
-              width="150px"
-            />
-            <div class="card-body d-flex flex-column justify-content-around">
-              <h5 class="card-title">NIAID Systems Biology</h5>
-              <p class="card-text">
-                <b
-                  >National Institute of Allergy and Infectious Diseases (<a
-                    href="https://www.niaid.nih.gov/"
-                    target="_blank"
-                    rel="nonreferrer"
-                    >NIAID
-                    <font-awesome-icon icon="fas fa-external-link-alt" /></a
-                  >)</b
-                >
-                (<a
-                  href="https://discovery.biothings.io/niaid/"
-                  target="_blank"
-                  rel="nonreferrer"
-                  >NIAID Systems Biology
-                  <font-awesome-icon icon="fas fa-external-link-alt" /></a
-                >) dataset metadata based on this
-                <nuxt-link to="/ns/niaid/" rel="nonreferrer"
-                  >schema <font-awesome-icon icon="fas fa-external-link-alt"
-                /></nuxt-link>
-                structure.
-              </p>
-              <nuxt-link
-                to="/guide/niaid"
-                @click="
-                  $gtag.event('click', {
-                    event_category: 'portal_guide',
-                    event_label: '/guide/niaid',
-                    event_value: 1,
-                  })
-                "
-                class="btn btn-lg themeButton text-light"
-                role="button"
-              >
-                <font-awesome-icon icon="fas fa-plus" /> Add Dataset Metadata
-              </nuxt-link>
-            </div>
-            <div class="card-footer text-light bg-dde-mid">
-              <b>About this guide:</b>
-              <table class="table table-sm table-dark table-striped">
-                <tbody>
-                  <tr>
-                    <td>
-                      <small>Intend</small>
-                    </td>
-                    <td>
-                      <small class="badge badge-info">Portal Specific</small>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Topics</small>
-                    </td>
-                    <td>
-                      <small class="badge badge-light">Allergies</small>
-                      <small class="badge badge-light"
-                        >Infectious Diseases</small
-                      >
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Associations</small>
-                    </td>
-                    <td>
-                      <nuxt-link to="/portal/niaid"
-                        ><small class="badge badge-light"
-                          >NIAID</small
-                        ></nuxt-link
-                      >
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <small>Schema</small>
-                    </td>
-                    <td>
-                      <nuxt-link to="/ns/niaid"
-                        ><small class="badge badge-light"
-                          >Dataset</small
-                        ></nuxt-link
-                      >
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          </template>
         </div>
       </div>
     </div>
@@ -573,6 +262,11 @@ export default {
         },
       ],
     };
+  },
+  computed: {
+    portals: function () {
+      return this.$store.getters.getPortals;
+    },
   },
 };
 </script>

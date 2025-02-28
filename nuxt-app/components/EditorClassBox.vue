@@ -1,57 +1,55 @@
 <template>
+  <div v-if="item.special" class="text-dde-dark">
+    <h5>Your New Extended Class:</h5>
+    <small> <i class="text-danger">Required</i></small> Here you can add new
+    properties to include in your schema.
+  </div>
   <div
-    class="row m-1 cBox actions"
+    class="row m-1 cBox actions text-dde-dark shadow"
     :class="{
-      'alert-warning mb-3': item.special,
-      'alert-primary': !item.special,
+      'bg-dde-mid-muted mb-3': item.special,
+      'alert-light': !item.special,
     }"
   >
-    <div class="col-sm-10 p-2">
+    <div class="col-sm-9 p-2">
       <div>
-        <font-awesome-icon
-          v-if="item.special"
-          icon="fas fa-star"
-          class="text-warning mr-1"
-        ></font-awesome-icon>
-        <font-awesome-icon
-          v-else
-          icon="fas fa-circle"
-          class="text-primary mr-1"
-        ></font-awesome-icon>
-        <template v-if="item?.parent_classes?.length">
+        <details>
+          <summary class="text-dde-dark">
+            <b>{{ item?.name }}</b>
+          </summary>
           <template v-for="tree in item?.parent_classes">
             <template v-for="(name, i) in getSubclass(tree)" :key="i + 'sc'">
-              <small v-text="name"></small>
-              <small
+              <span v-text="name"></span>
+              <span
                 ><font-awesome-icon
                   icon="fas fa-chevron-right"
                   class="mr-1"
                 ></font-awesome-icon
-              ></small>
+              ></span>
             </template>
+            <span class="text-dde-dark"
+              ><b v-text="item.name"></b>
+              <font-awesome-icon
+                icon="fas fa-info-circle"
+                class="text-info cTip pointer ml-1"
+                :data-tippy-content="item.description"
+              ></font-awesome-icon
+            ></span>
           </template>
-        </template>
-        <small class="bold"
-          ><span v-text="item.label"></span>
-          <font-awesome-icon
-            icon="fas fa-info-circle"
-            class="text-info cTip pointer ml-1"
-            :data-tippy-content="item.description"
-          ></font-awesome-icon
-        ></small>
+        </details>
         <!-- 🌈 prop totals 🌈 -->
-        <div v-if="totals" class="col-sm-12">
-          <table>
+        <div v-if="totals" class="col-sm-12 p-0">
+          <table style="font-size: small">
             <tr>
               <td v-for="(val, name) in totals" class="px-1">
-                <small>
+                <span v-if="val">
                   <template v-if="name == 'required'">
                     <font-awesome-icon
                       title="required"
                       icon="fas fa-asterisk"
                       class="text-danger"
                     ></font-awesome-icon>
-                    req
+                    required
                   </template>
                   <template v-else-if="name == 'selected'">
                     <font-awesome-icon
@@ -59,7 +57,7 @@
                       icon="fas fa-check-circle"
                       class="text-success"
                     ></font-awesome-icon>
-                    sel
+                    selected
                   </template>
                   <template v-else-if="name == 'optional'">
                     <font-awesome-icon
@@ -67,7 +65,7 @@
                       icon="fas fa-square"
                       class="text-info"
                     ></font-awesome-icon>
-                    opt
+                    optional
                   </template>
                   <template v-else-if="name == 'recommended'">
                     <font-awesome-icon
@@ -75,19 +73,19 @@
                       icon="fas fa-circle"
                       class="text-warning"
                     ></font-awesome-icon>
-                    rec
+                    recommended
                   </template>
                   <i v-else v-text="name"></i> :
                   <b
                     v-text="val"
                     :class="[val ? 'text-primary' : 'text-muted']"
                   ></b>
-                </small>
+                </span>
               </td>
             </tr>
           </table>
         </div>
-        <small
+        <span
           style="clear: both"
           v-if="item.special && !item.properties"
           class="text-muted float-right"
@@ -96,22 +94,22 @@
             icon="fas fa-arrow-right"
             class="text-danger"
           ></font-awesome-icon
-        ></small>
+        ></span>
         <template v-if="showDesc">
-          <small
+          <span
             class="d-block text-muted"
             v-html="item.description || 'No description provided'"
-          ></small>
+          ></span>
         </template>
       </div>
 
       <!-- 🌈 selected list 🌈 -->
-      <div v-if="!item.special" class="">
+      <div v-if="!item.special">
         <template
           v-if="item && item.properties"
           v-for="prop in item.properties"
         >
-          <small v-if="prop.selected" class="badge badge-success m-1">
+          <span v-if="prop.selected" class="badge text-dark border-success m-1">
             <font-awesome-icon
               v-if="prop && prop.isRequired"
               icon="fas fa-asterisk"
@@ -127,8 +125,8 @@
               icon="fas fa-square"
               class="text-info mr-1"
             ></font-awesome-icon>
-            <span v-text="prop.label"></span>
-          </small>
+            <strong>{{ prop.label }}</strong>
+          </span>
         </template>
       </div>
 
@@ -151,7 +149,7 @@
           <template v-for="prop in filtered">
             <div class="row m-1 alert-secondary pBox actions">
               <div class="col-sm-9">
-                <small class="text-dark">
+                <span class="text-dark">
                   <span v-text="prop.label"></span>
                   <font-awesome-icon
                     icon="fas fa-info-circle"
@@ -159,12 +157,12 @@
                     :data-tippy-content="prop.description"
                   ></font-awesome-icon>
                   <template v-if="showDesc">
-                    <small
+                    <span
                       class="d-block text-muted"
                       v-html="prop.description || 'No description provided'"
-                    ></small>
+                    ></span>
                   </template>
-                </small>
+                </span>
               </div>
               <div
                 class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around"
@@ -222,22 +220,22 @@
 
         <!-- 🌈 results 🌈 -->
         <template v-for="prop in paginatedResults">
-          <div class="row m-1 alert-light pBox actions">
+          <div class="row m-1 alert-secondary pBox actions">
             <div class="col-sm-9">
-              <small class="mainTextDark">
+              <span class="mainTextDark">
                 <span v-text="prop.label"></span>
                 <font-awesome-icon
                   icon="fas fa-info-circle"
-                  class="cTip pointer text-info"
+                  class="cTip pointer text-info ml-1"
                   :data-tippy-content="prop.description"
                 ></font-awesome-icon>
                 <template v-if="showDesc">
-                  <small
+                  <span
                     class="d-block text-muted"
                     v-html="prop.description || 'No description provided'"
-                  ></small>
+                  ></span>
                 </template>
-              </small>
+              </span>
             </div>
             <div
               class="col-sm-3 bg-dark actions d-flex align-items-center justify-content-around"
@@ -269,7 +267,7 @@
               <font-awesome-icon
                 icon="fas fa-asterisk"
                 class="pointer unselectable"
-                data-tippy-content="Mark As Required"
+                data-tippy-content="Mark As Required (Select First)"
                 @click="markRequired(prop.label)"
                 :class="{
                   'text-muted': !prop.isRequired,
@@ -279,7 +277,7 @@
               <font-awesome-icon
                 icon="fas fa-circle"
                 class="recommended pointer unselectable"
-                data-tippy-content="Mark As Recommended"
+                data-tippy-content="Mark As Recommended (Select First)"
                 @click="markRecommended(prop.label)"
                 :class="{
                   'text-muted': !prop.isRecommended,
@@ -289,7 +287,7 @@
               <font-awesome-icon
                 icon="fas fa-square"
                 class="pointer unselectable"
-                data-tippy-content="Mark As Optional"
+                data-tippy-content="Mark As Optional (Select First)"
                 @click="markOptional(prop.label)"
                 :class="{
                   'text-muted': !prop.isOptional,
@@ -361,7 +359,7 @@
     </div>
 
     <div
-      class="col-sm-2 p-2 bg-dde-dark actions d-flex align-items-center justify-content-around"
+      class="col-sm-3 p-2 bg-dde-mid actions d-flex align-items-center justify-content-around"
     >
       <span
         v-if="item.special"
@@ -388,28 +386,15 @@
           class="text-light fa-stack-1x"
         ></font-awesome-icon>
       </span>
-      <span
-        class="fa-stack fa-1x pointer unselectable"
-        data-tippy-content="Show/Hide Properties"
-        @click="expand = !expand"
+      <button
         v-if="item && item.properties"
+        type="button"
+        class="btn btn-sm themeButton text-light"
+        @click="expand = !expand"
       >
-        <font-awesome-icon
-          icon="fas fa-circle"
-          class="fa-stack-2x"
-          :class="{ 'text-muted': !expand, 'text-success': expand }"
-        ></font-awesome-icon>
-        <font-awesome-icon
-          v-if="expand"
-          icon="fas fa-list-ul"
-          class="text-light fa-stack-1x"
-        ></font-awesome-icon>
-        <font-awesome-icon
-          v-else
-          icon="fas fa-ellipsis-h"
-          class="text-light fa-stack-1x"
-        ></font-awesome-icon>
-      </span>
+        {{ expand ? "Hide" : "Show" }}
+        <span class="text-warning">({{ item.properties.length }})</span>
+      </button>
     </div>
 
     <div
@@ -434,18 +419,18 @@
               id="name"
               placeholder="name of new property eg. myProperty"
             />
-            <small class="d-block my-1 text-info"
+            <span class="d-block my-1 text-info"
               >Learn about naming conventions
               <a
                 href="https://schema.org/docs/styleguide.html"
                 target="_blank"
                 rel="nonreferrer"
                 >here</a
-              ></small
+              ></span
             >
-            <small v-if="propExists" class="text-danger"
+            <span v-if="propExists" class="text-danger"
               >A property with this name already exists, any changes will
-              replace existing value unless the property name changes.</small
+              replace existing value unless the property name changes.</span
             >
           </div>
           <div class="form-group">
@@ -538,6 +523,14 @@
         </form>
       </div>
     </div>
+  </div>
+  <div v-if="item.special" class="text-dde-dark">
+    <h5>Inherited Classes and Properties:</h5>
+    <small>
+      <i class="text-danger">Required</i> Here you can view and select
+      properties from parent classes to include in your schema. If you extended
+      a class with validation rules, they will be auto populated here.
+    </small>
   </div>
 </template>
 
@@ -689,7 +682,7 @@ export default {
     },
     updateTotals() {
       let totals = {
-        properties: 0,
+        // properties: 0,
         selected: 0,
         required: 0,
         recommended: 0,
@@ -697,7 +690,7 @@ export default {
       };
       if (this.item.hasOwnProperty("properties")) {
         this.item.properties.forEach((prop) => {
-          totals.properties++;
+          // totals.properties++;
           if (prop && prop.selected) {
             totals.selected++;
           }
@@ -721,8 +714,8 @@ export default {
           title: "Are you sure you want to delete " + propLabel + "?",
           text: "You won't be able to revert this",
           showCancelButton: true,
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
           animation: false,
           customClass: "scale-in-center",
           confirmButtonText: "Yes, Delete it!",
@@ -883,6 +876,8 @@ export default {
         title: "New Property",
         text: "Added: " + self.newPropName,
         position: "right",
+        autoclose: true, // Enable auto close
+        autotimeout: 3000, // Set timeout in milliseconds (3 seconds)
       });
       self.newPropName = "";
       self.newPropDescription = "";
@@ -931,8 +926,8 @@ export default {
             "Start typing to check for existing classes. If none found specify it's context prefix and name. eg. prefix:Name (Multiple separated by commas)",
           html: '<datalist id="myCustomList"></datalist>',
           input: "text",
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
           confirmButtonText: "Add",
           animation: false,
           customClass: "scale-in-center",
@@ -974,8 +969,8 @@ export default {
           input: "text",
           confirmButtonText: "Next &rarr;",
           showCancelButton: true,
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
           animation: false,
           customClass: "scale-in-center",
           progressSteps: ["1", "2", "3"],
@@ -1069,8 +1064,8 @@ export default {
                 title: "Add Property " + result.value[0] + "?",
                 text: result.value[2],
                 showCancelButton: true,
-                confirmButtonColor: "#63296b",
-                cancelButtonColor: "#4a7d8f",
+                confirmButtonColor: "#43318d",
+                cancelButtonColor: "#d83f87",
                 confirmButtonText: "Yes, Add It!",
                 animation: false,
                 customClass: "scale-in-center",
@@ -1082,6 +1077,8 @@ export default {
                     title: "Success",
                     text: result.value[0] + " added",
                     position: "right",
+                    autoclose: true, // Enable auto close
+                    autotimeout: 3000, // Set timeout in milliseconds (3 seconds)
                   });
                   let payload = {};
                   payload["name"] = result.value[0];
