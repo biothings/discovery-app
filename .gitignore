@@ -124,3 +124,6 @@ biothings_schema
 
 # notebook tests
 *.ipynb
+
+# codespace
+.devcontainer/
