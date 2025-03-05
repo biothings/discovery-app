@@ -168,7 +168,7 @@
                 <h5>
                   <nuxt-link
                     class="text-light"
-                    :to="'/portal/' + portal.linkName"
+                    :to="'/portal/' + portal.linkname"
                     >{{ portal.shortName }}</nuxt-link
                   >
                 </h5>
@@ -192,7 +192,7 @@
                     :key="guide.name"
                   >
                     <nuxt-link
-                      :to="guide.quide"
+                      :to="guide.guide"
                       @click="
                         $gtag.event('click', {
                           event_category: 'portal_guide',
@@ -209,7 +209,7 @@
                     </nuxt-link>
                   </li>
                 </ul>
-                <nuxt-link class="card-link" :to="'/portal/' + portal.linkName"
+                <nuxt-link class="card-link" :to="'/portal/' + portal.linkname"
                   >Learn More</nuxt-link
                 >
               </div>
