@@ -1,5 +1,5 @@
 <template>
-  <div class="row m-0 valBox bg-dark m-1">
+  <div class="row m-0 valBox bg-dde-dark m-1">
     <div class="col-sm-12 col-md-5">
       <div class="row">
         <div class="col-sm-12">

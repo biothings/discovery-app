@@ -125,8 +125,8 @@ export default {
           title: self.name,
           text: "Search for an existing term here:",
           input: "text",
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
           animation: false,
           customClass: "scale-in-center",
           inputAttributes: {
@@ -200,8 +200,8 @@ export default {
             self.$swal.fire({
               title: "Top 10 Results",
               html: html,
-              confirmButtonColor: "#63296b",
-              cancelButtonColor: "#4a7d8f",
+              confirmButtonColor: "#43318d",
+              cancelButtonColor: "#d83f87",
               animation: false,
               customClass: "scale-in-center",
             });
