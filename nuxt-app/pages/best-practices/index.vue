@@ -144,7 +144,7 @@
         </div>
       </div>
       <div class="container px-5" id="choose">
-        <h1 class="text-dde-dark">Choose a Template</h1>
+        <h1 class="text-dde-dark">Data Portals</h1>
         <div class="container">
           <p class="text-muted">
             Learn how this metadata will be available via our
@@ -191,22 +191,7 @@
                     v-for="guide in portal.guides"
                     :key="guide.name"
                   >
-                    <nuxt-link
-                      :to="guide.guide"
-                      @click="
-                        $gtag.event('click', {
-                          event_category: 'portal_guide',
-                          event_label: '/guide',
-                          event_value: 1,
-                        })
-                      "
-                      class="btn btn-sm text-light"
-                      :style="{ backgroundColor: portal.colors[0].hex }"
-                      role="button"
-                    >
-                      <font-awesome-icon icon="fas fa-plus" /> Add
-                      {{ guide.name }}
-                    </nuxt-link>
+                    <font-awesome-icon icon="fas fa-check" class="text-dde-accent" /> {{ guide.name }}
                   </li>
                 </ul>
                 <nuxt-link class="card-link" :to="'/portal/' + portal.linkname"
