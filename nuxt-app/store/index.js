@@ -96,7 +96,7 @@ export default createStore({
               });
           } else {
             let html =
-              '<table class="table table-sm table-borderless m-0 text-light">';
+              '<table class="table table-sm table-borderless m-0 text-light text-left">';
             try {
               if (instance.reference.dataset.tippyContent.includes("{")) {
                 let json = JSON.parse(instance.reference.dataset.tippyContent);

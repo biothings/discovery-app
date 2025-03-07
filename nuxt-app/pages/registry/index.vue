@@ -67,7 +67,7 @@
                       >
                         <font-awesome-icon
                           icon="fas fa-circle"
-                          class="text-muted fa-stack-2x"
+                          class="text-success fa-stack-2x"
                         />
                         <font-awesome-icon
                           icon="fas fa-search"
@@ -92,18 +92,15 @@
                         />
                       </span>
                       <span
-                        class="fa-stack fa-1x pointer unselectable tip"
+                        class="btn btn-sm bg-dde-mid text-light tip"
                         data-tippy-content="Compare Schemas"
                         @click="openModal()"
                       >
                         <font-awesome-icon
-                          icon="fas fa-circle"
-                          class="text-primary fa-stack-2x"
-                        />
-                        <font-awesome-icon
                           icon="fas fa-not-equal"
-                          class="fa-stack-1x text-light"
+                          class="text-light"
                         />
+                        Compare
                       </span>
                     </div>
                   </div>
@@ -266,7 +263,7 @@
                   <a :href="'#' + item.group" v-text="item.group"></a>
                 </li>
               </ul>
-              <div style="overflow-y: scroll; max-height: 600px">
+              <div>
                 <ul class="list-group mt-3" v-if="classesGroupByLetter">
                   <li
                     class="list-group-item list-group-item-action"

@@ -1,5 +1,8 @@
 <template>
-  <button class="btn btn-sm btn-info mt-4 mb-1" @click="handleEdit()">
+  <button
+    class="btn btn-sm themeButton text-light mt-4 mb-1"
+    @click="handleEdit()"
+  >
     <small>edit description <i class="fas fa-pen-square"></i></small>
   </button>
 </template>
@@ -22,6 +25,8 @@ export default {
           title: "Editing",
           text: "Adding new description",
           position: "right",
+          autoclose: true, // Enable auto close
+          autotimeout: 3000, // Set timeout in milliseconds (3 seconds)
         });
       }
       self.$swal

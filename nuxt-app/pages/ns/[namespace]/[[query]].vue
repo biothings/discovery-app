@@ -265,12 +265,7 @@
                       </p>
                     </div>
                     <div v-if="namespaceRegistered">
-                      <font-awesome-icon
-                        icon="fas fa-code-branch"
-                        class="pointer tip text-light btn themeButton p-1"
-                        @click.prevent="saveDataAndRedirect(def['name'])"
-                        :data-tippy-content="'Extend ' + def['name']"
-                      />
+                      <ExtendClassBtn :ns="namespace" :curie="def['name']" />
                     </div>
                   </li>
                 </ul>
@@ -569,6 +564,7 @@ import { mapGetters } from "vuex";
 import axios from "axios";
 import QueryBox from "~~/components/QueryBox.vue";
 import moment from "moment";
+import ExtendClassBtn from "~~/components/ExtendClassBtn.vue";
 
 import "@/assets/js/networkx.js";
 

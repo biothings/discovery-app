@@ -1,15 +1,19 @@
 <script setup>
 import Notify from "simple-notify";
 
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
+import axios from "axios";
 
 let store = useStore();
 let portals = store.getters.getPortals;
+const runtimeConfig = useRuntimeConfig();
 
 let portal = {};
 let featuredImg = "";
 let colors = ref([]);
+let ndeCheck = ref(false);
+let ndeCheckMessage = ref("");
 
 let route = useRoute();
 let portal_name = route.params.portal_name;
@@ -40,6 +44,10 @@ if (portal_name) {
       portal = portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/ry0C25bK/n3cfeatured.jpg";
       break;
+    case "move":
+      portal = portals.find((item) => item.keyName == portal_name);
+      featuredImg = "https://i.postimg.cc/ry0C25bK/n3cfeatured.jpg";
+      break;
     default:
       redirect();
   }
@@ -47,11 +55,17 @@ if (portal_name) {
 colors.value = portal["colors"];
 
 const gradient = computed(() => {
+  if (!colors.value.length) return "linear-gradient(45deg, #000 100%)"; // Default in case no colors
+
+  let step = 100 / (colors.value.length - 1); // Calculate percentage step
   let color = "linear-gradient(45deg";
-  colors.value.forEach(function (e) {
-    color += "," + e.hex;
+
+  colors.value.forEach((e, index) => {
+    let percentage = index * step;
+    color += `, ${e.hex} ${percentage}%`;
   });
-  color += " 30%)";
+
+  color += ")";
   return color;
 });
 
@@ -77,6 +91,34 @@ function redirect() {
     navigateTo({ path: "/portal" });
   }, 2000);
 }
+
+function checkPermission() {
+  store.commit("setLoading", { value: true });
+  axios.get(runtimeConfig.public.apiUrl + "/nde-check")
+    .then((res) => {
+      store.commit("setLoading", { value: false });
+      if (res.data?.success == true) {
+        ndeCheck.value = true;
+      } else {
+        ndeCheck.value = false;
+        ndeCheckMessage.value = res.data?.message;
+      }
+    })
+    .catch((error) => {
+      store.commit("setLoading", { value: false });
+      ndeCheck.value = false;
+      ndeCheckMessage.value = error.response.data?.message;
+      return false;
+    });
+}
+
+onMounted(() => {
+  if (portal_name == "nde") {
+    checkPermission();
+  }else{
+    ndeCheck.value = true;
+  }
+});
 
 // let coverage = reactive({})
 // let result = {}
@@ -170,10 +212,10 @@ useHead({
         >
           <div class="lines p-5 mt-5" style="min-height: 250px">
             <img
-              class="mt-4"
+              class="mt-4 mb-1"
               :src="portal?.image"
               :alt="portal?.name"
-              width="300"
+              width="200"
             />
             <div>
               <nuxt-link to="/portal" class="btn btn-sm btn-light text-dark"
@@ -237,36 +279,56 @@ useHead({
             </template>
             <template v-else>
               <div
-                class="border-top text-center text-dde-dark p-5 bg-dde-mid-muted"
+                class="border-top text-center text-dde-dark p-2 bg-dde-mid-muted"
               >
                 <h4>Contribute</h4>
                 <p>
-                  Follow an easy-to-follow guide to help you contribute metadata
-                  for <span v-text="portal.name"></span> following this schema's
-                  <nuxt-link :to="{ path: portal.schema }">structure</nuxt-link
-                  >:
+                  Follow an easy-to-follow guide to help you register resources
+                  for <span v-text="portal.name"></span> following this metadata
+                  <nuxt-link :to="{ path: portal.schema }">schema</nuxt-link>:
                 </p>
                 <div
-                  v-for="(g, i) in portal.guides"
-                  :key="i + 'g'"
-                  class="text-center p-2 m-1 rounded p-3"
+                  class="d-flex justify-content-center align-items-stretch flex-wrap"
                 >
-                  <nuxt-link
-                    role="button"
-                    :style="{ background: portal.colors[0].hex }"
-                    @click="
-                      $gtag.event('click', {
-                        event_category: 'portal_guide',
-                        event_label: g.guide,
-                        event_value: 1,
-                      })
-                    "
-                    class="btn text-light btn-lg nd mt-2 tip"
-                    :to="{ path: g.guide }"
-                  >
-                    <font-awesome-icon icon="fas fa-plus" /> Add
-                    <b v-text="g.name"></b> Metadata
-                  </nuxt-link>
+                  <template v-if="!ndeCheck">
+                    <div class="alert bg-dde-accent text-light">
+                      <h5>You can't register resources for this portal</h5>
+                      <p>Reason: {{ ndeCheckMessage }}</p>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div
+                      v-for="(g, i) in portal.guides"
+                      :key="i + 'g'"
+                      class="card m-1"
+                      :style="{ border: portal.colors[0].hex + ' solid 2px' }"
+                      style="width: 15rem; min-height: 150px"
+                    >
+                      <div
+                        class="card-body d-flex flex-column justify-content-between align-items-center"
+                      >
+                        <p class="card-text m-0">
+                          Register <b v-text="g.name"></b>
+                        </p>
+                        <nuxt-link
+                          role="button"
+                          :style="{ background: portal.colors[0].hex }"
+                          @click="
+                            $gtag.event('click', {
+                              event_category: 'portal_guide',
+                              event_label: g.guide,
+                              event_value: 1,
+                            })
+                          "
+                          class="btn text-light btn-lg nd mt-2 tip"
+                          :to="{ path: g.guide }"
+                        >
+                          Continue
+                          <font-awesome-icon icon="fas fa-chevron-right" />
+                        </nuxt-link>
+                      </div>
+                    </div>
+                  </template>
                 </div>
               </div>
             </template>
@@ -278,7 +340,7 @@ useHead({
           </div>
         </div>
         <div
-          class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch bg-dde-dark p-5"
+          class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch grad-dark p-5"
           :style="{ borderLeft: portal.colors[0].hex + ' solid 5px' }"
         >
           <div class="text-center p-2 m-1 rounded p-3" v-if="portal.site">

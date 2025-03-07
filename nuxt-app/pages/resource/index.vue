@@ -33,7 +33,7 @@
                 >
                   <font-awesome-icon
                     icon="fas fa-circle"
-                    class="text-info fa-stack-2x"
+                    class="text-success fa-stack-2x"
                   />
                   <font-awesome-icon
                     icon="fas fa-search"
@@ -62,17 +62,17 @@
           </form>
         </div>
         <div class="bg-dde-muted m-0 p-1" v-if="!N3CView">
-          <div style="width: 120px" class="text-dde-dark d-inline-block">
-            <b>Filter by Portal:</b>
+          <div class="text-dde-dark d-inline-block">
+            <small>Filter by Portal/Resource:</small>
           </div>
           <template
             v-for="filter in all_filters['_meta.guide']"
             :key="filter.name"
           >
             <span
-              class="badge pointer m-1 fade-in"
+              class="badge pointer m-1 fade-in text-light"
               @click="toggleFilter(filter)"
-              :class="[filter.active ? 'btn-info' : 'btn-secondary']"
+              :class="[filter.active ? 'bg-dde-accent' : 'btn-secondary']"
             >
               <img
                 :src="filter.icon"
@@ -390,6 +390,15 @@ export default {
       all_filters: {
         "_meta.guide": [
           {
+            name: "MOVE:Dataset",
+            value: "/guide/move/dataset",
+            // works wth 'template' url parameter
+            template_aliases: ["move:dataset"],
+            active: false,
+            icon: dde,
+            type: "_meta.guide",
+          },
+          {
             name: "N3C:Dataset",
             value: "/guide/n3c/dataset",
             // works wth 'template' url parameter
@@ -410,6 +419,22 @@ export default {
             name: "NDE:ResourceCatalog",
             value: "/guide/nde/ResourceCatalog",
             template_aliases: ["nde:resourcecatalog"],
+            active: false,
+            icon: nde,
+            type: "_meta.guide",
+          },
+          {
+            name: "NDE:Dataset",
+            value: "/guide/nde/Dataset",
+            template_aliases: ["nde:dataset"],
+            active: false,
+            icon: nde,
+            type: "_meta.guide",
+          },
+          {
+            name: "NDE:ComputationalTool",
+            value: "/guide/nde/CoputationalTool",
+            template_aliases: ["nde:computationaltool"],
             active: false,
             icon: nde,
             type: "_meta.guide",
@@ -484,8 +509,8 @@ export default {
           footer: "Note: Documents will be flattened for CSV file.",
           inputPlaceholder: "Select Output",
           showCancelButton: true,
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
           customClass: "scale-in-center",
           confirmButtonText: "Next",
           showLoaderOnConfirm: true,
@@ -756,10 +781,12 @@ export default {
           gf?.template_aliases?.includes(item.value.toLowerCase())
         ) {
           gf.active = !gf.active;
-          // console.log(gf);
+          console.log(gf, "FOUND");
           if (gf.name.includes("N3C") && gf.active == true) {
             self.N3CView = true;
           }
+        } else {
+          console.log("no match");
         }
         if (gf.active) {
           self.sendGAEvent("dataset_portal_filter", item.value);
@@ -967,7 +994,6 @@ export default {
     searchForFilterAndToggle(url, param, filter_name) {
       let self = this;
       let items = url.searchParams.get(param);
-
       if (items) {
         items = items.includes(",") ? items.split(",") : [items];
         if (items.length) {

@@ -1,7 +1,7 @@
 <template>
   <section
     id="editor"
-    class="container-fluid m-auto col-sm-12 col-md-10 col-lg-10 col-xl-8"
+    class="container"
     style="min-height: 80vh; padding-top: 60px"
     v-cloak
   >
@@ -9,13 +9,13 @@
     <div>
       <div class="jumbotron bg-light text-center m-1 p-2">
         <h1 class="text-dde-dark">Schema Editor</h1>
-        <small class="text-muted"
+        <small class="text-dde-dark"
           >Extend an existing schema to create your own.</small
         >
       </div>
       <div id="widget">
         <div
-          class="actions bg-dark p-2 rounded d-flex align-items-center justify-content-start rounded-0"
+          class="actions bg-dde-mid p-2 rounded d-flex align-items-center justify-content-start rounded-0"
         >
           <span
             class="badge bg-success text-light tip mr-2"
@@ -45,7 +45,7 @@
           </a>
           <template v-if="newClassAdded">
             <span
-              class="badge mainBackDark text-light pointer tip mr-2"
+              class="badge themeButton text-light pointer tip mr-2"
               data-tippy-content="Preview"
               @click="getPreview()"
             >
@@ -56,7 +56,7 @@
               Preview
             </span>
             <span
-              class="badge btn-success text-light pointer tip mr-2"
+              class="badge themeButton text-light pointer tip mr-2"
               data-tippy-content="Download your schema"
               @click="downloadSchema()"
             >
@@ -67,7 +67,7 @@
               Download
             </span>
             <span
-              class="badge btn-primary text-light pointer tip mr-2"
+              class="badge themeButton text-light pointer tip mr-2"
               data-tippy-content="Requires GitHub Login"
               @click.prevent="githubOptions()"
             >
@@ -78,7 +78,7 @@
               Save to GitHub*
             </span>
             <span
-              class="badge btn-secondary text-light pointer tip mr-2"
+              class="badge themeButton text-light pointer tip mr-2"
               data-tippy-content="Learn about this editor"
               @click.prevent="showHelp()"
             >
@@ -88,10 +88,21 @@
               ></font-awesome-icon>
               Help
             </span>
+            <span
+              class="badge themeButton text-light pointer tip mr-2"
+              data-tippy-content="Show all text descriptions for classes"
+              @click.prevent="toggleDesc()"
+            >
+              <font-awesome-icon
+                icon="fas fa-eye"
+                class="text-light"
+              ></font-awesome-icon>
+              Toggle Descriptions
+            </span>
           </template>
           <span
             v-if="userInfo && userInfo.login"
-            class="badge btn-primary text-light pointer tip mr-2"
+            class="badge themeButton text-light pointer tip mr-2"
             data-tippy-content="Save Progress Locally"
             @click.prevent="handleProgress()"
           >
@@ -116,25 +127,37 @@
           v-if="newClassAdded && !removeValidation"
           class="actions p-2 rounded d-flex align-items-center justify-content-center rounded-0"
           :class="[
-            validationView ? 'bg-info text-light' : 'alert-info text-dark',
+            validationView ? 'bg-info text-light' : 'alert-warning text-dark',
           ]"
         >
           <div
             class="col-sm-5 mr-1 d-flex align-items-center justify-content-center"
           >
             <div class="mr-2">
-              <small
-                ><img src="@/assets/img/cube.svg" width="30px" /> Validation
-                Editor</small
-              >
+              <b>Validation Editor</b>
             </div>
             <div>
-              <input
-                class="form-control slider m-auto tip"
+              <button
+                type="button"
+                class="btn btn-sm themeButton text-light"
                 @click="editValidation()"
-                data-tippy-content="Edit Schema Validation"
-                type="checkbox"
-              />
+              >
+                <font-awesome-icon
+                  v-if="validationView"
+                  icon="fas fa-chevron-left"
+                  class="mr-1"
+                ></font-awesome-icon>
+                {{
+                  !validationView
+                    ? "Continue to Validation Editor"
+                    : "Back to Schema Editor"
+                }}
+                <font-awesome-icon
+                  v-if="!validationView"
+                  icon="fas fa-chevron-right"
+                  class="mr-1"
+                ></font-awesome-icon>
+              </button>
             </div>
           </div>
         </div>
@@ -144,23 +167,23 @@
           class="v-container p-0 bg-dark justify-content-center d-flex align-items-center"
         >
           <div class="w-100 row m-0">
-            <div class="bg-info p-1 col-sm-12">
-              <p class="text-center text-light m-0">
-                <small class="text-light"
-                  ><font-awesome-icon
-                    icon="fas fa-info-circle"
-                    class="text-light"
-                  ></font-awesome-icon>
-                  Define how the input for each property should be validated,
-                  drag and drop common rules or create your own.</small
-                >
-              </p>
+            <div class="grad-dark p-1 col-sm-12">
+              <h1 class="text-center text-info m-0">Drag & Drop</h1>
             </div>
             <div
-              class="col-sm-12 col-md-6 bg-secondary border-right"
+              class="col-sm-12 col-md-6 bg-dark border-right"
               style="max-height: 800px; overflow-y: scroll"
             >
-              <h4 class="text-light text-center m-0 pt-2">Your Validation</h4>
+              <div
+                class="d-flex justify-content-around align-items-center text-light"
+              >
+                <div class="text-center">
+                  <h3 class="m-1">Property</h3>
+                </div>
+                <div class="text-center">
+                  <h3 class="m-1">Drop Zone</h3>
+                </div>
+              </div>
               <template
                 v-for="(val, propname) in validation_props"
                 :key="propname"
@@ -171,17 +194,18 @@
                 ></ValidationDropzone>
               </template>
             </div>
-            <div class="col-sm-12 col-md-6 bg-dark border-left pb-2">
-              <h4 class="text-light text-left m-0 pt-2">Options</h4>
+            <div class="col-sm-12 col-md-6 grad-dark border-left pb-2">
+              <h3 class="text-light text-center pt-2">Options</h3>
+              <ValidationOptions></ValidationOptions>
               <!-- CARDINALITY -->
-              <div class="my-1 alert alert-primary">
+              <div class="my-1 alert bg-dde-mid-muted text-dde-dark">
                 <h6 class="text-left font-weight-bold">Cardinality</h6>
                 <small class="text-dark text-left d-block"
                   >Refers to the number of elements in a set or other grouping,
                   as a property of that grouping.</small
                 >
                 <div class="py-1">
-                  <label class="text-muted m-0" for="ac"
+                  <label class="text-dde-dark m-0" for="ac"
                     >Enable Cardinality</label
                   >
                   <input
@@ -193,15 +217,14 @@
                   />
                 </div>
               </div>
-              <ValidationOptions></ValidationOptions>
             </div>
           </div>
         </div>
         <!-- LOGGED IN DASHBOARD -->
         <template v-if="userInfo && userInfo.login">
           <!-- NAMESPACE -->
-          <div class="jumbotron alert-secondary" v-if="!prefix">
-            <p class="text-center text-muted">
+          <div class="jumbotron bg-dde-mid-muted" v-if="!prefix">
+            <p class="text-center text-dde-dark">
               <small
                 >Extending:
                 <span class="text-dark" v-text="startingPoint"></span
@@ -218,16 +241,16 @@
                 Choose a namespace</small
               >
             </p>
-            <h4 class="text-info text-center">
+            <h4 class="text-dark text-center">
               Choose a short name used to identify new definitions
             </h4>
-            <p class="text-center text-muted">
-              <small class="text-muted"
+            <p class="text-center text-dde-dark">
+              <small class="text-dde-dark"
                 ><font-awesome-icon
                   icon="fas fa-info-circle"
                   class="text-info"
                 ></font-awesome-icon>
-                For example: <b>myname</b>:ClassName
+                For example: <b class="text-dde-accent">test</b>:ClassName
               </small>
             </p>
             <div
@@ -259,8 +282,8 @@
                     </button>
                   </div>
                 </div>
-                <small class="text-muted"
-                  >Choose a short namespace (a-z) 3 chars minimum
+                <small class="text-dde-dark"
+                  >Choose a short namespace (a-z, 0-9) 3 chars minimum
                   recommended.</small
                 >
               </form>
@@ -269,21 +292,21 @@
 
           <!-- Custom Class -->
           <div
-            class="jumbotron alert-secondary p-2 text-center text-muted"
+            class="jumbotron bg-dde-mid-muted p-2 text-center text-dde-dark"
             v-if="prefix && !newClassAdded"
           >
-            <p class="text-center text-muted">
+            <p class="text-center text-dde-dark">
               <small
                 >Extending schema:
                 <span class="text-info" v-text="startingPoint"></span
               ></small>
-              <small class="text-muted"
+              <small class="text-dde-dark"
                 ><font-awesome-icon
                   icon="fas fa-chevron-right"
                 ></font-awesome-icon>
                 namespace: <span class="text-info" v-text="prefix"></span
               ></small>
-              <small class="text-muted bold"
+              <small class="text-dde-dark bold"
                 ><font-awesome-icon
                   icon="fas fa-chevron-right"
                 ></font-awesome-icon>
@@ -295,7 +318,7 @@
               class="m-auto col-sm-12 col-md-9 py-2 bg-light rounded fade-in text-left"
               @submit.prevent="addClass()"
             >
-              <h4 class="text-info">Create a new class</h4>
+              <h4 class="text-dark">Create a new class</h4>
               <small>
                 <p>
                   <font-awesome-icon
@@ -363,59 +386,15 @@
 
           <!-- PARENT CLASSES -->
           <div
-            class="jumbotron alert-secondary p-2"
+            class="jumbotron shadow p-2"
             v-if="newClassAdded && !validationView"
             id="editorTippy"
           >
-            <div class="row m-0">
-              <div class="col-sm-12">
-                <h6 class="text-info text-left">
-                  Select and create properties for your schema
-                </h6>
-                <p class="text-left">
-                  <small class="text-muted d-block"
-                    >1.
-                    <font-awesome-icon
-                      icon="fas fa-circle"
-                      class="text-primary"
-                    ></font-awesome-icon>
-                    Reuse properties from parents
-                    <i class="text-danger">Required</i></small
-                  >
-                  <small class="text-muted d-block"
-                    >2.
-                    <font-awesome-icon
-                      icon="fas fa-star"
-                      class="text-warning"
-                    ></font-awesome-icon>
-                    Add new properties
-                    <i class="text-danger">Required</i></small
-                  >
-                  <small class="text-muted d-block"
-                    >3. (<img src="@/assets/img/cube.svg" width="15px" />
-                    Complete Validation Editor) <b>OR</b> (<i
-                      class="fas fa-times text-danger mr-1"
-                    ></i>
-                    Remove Validation)
-                    <i class="text-danger">Required</i></small
-                  >
-                  <small class="text-muted d-block"
-                    >4.
-                    <font-awesome-icon
-                      icon="fab fa-github"
-                      class="text-success"
-                    ></font-awesome-icon>
-                    Save/Download schema</small
-                  >
-                </p>
-              </div>
-            </div>
-
             <!-- REMOVE VALIDATION -->
             <div
               class="col-sm-12 d-flex align-items-center justify-content-around"
             >
-              <div class="mt-2">
+              <div>
                 <input
                   v-model="removeValidation"
                   id="rv"
@@ -424,29 +403,21 @@
                   data-tippy-content="Remove Validation"
                   type="checkbox"
                 />
-                <label class="text-muted" for="rv"
-                  ><font-awesome-icon
-                    icon="fas fa-times"
-                    class="text-danger mr-1"
-                  ></font-awesome-icon
+                <label
+                  class="text-dde-dark"
+                  for="rv"
+                  data-tippy-content="Click on Preview option to see the changes"
                   >Remove Validation</label
-                >
-              </div>
-              <div class="mt-2">
-                <input
-                  type="checkbox"
-                  class="slider mr-2"
-                  id="customControlInline"
-                  @click="toggleDesc()"
-                />
-                <label for="customControlInline" class="text-muted"
-                  >Show Descriptions</label
                 >
               </div>
             </div>
             <template v-for="(item, index) in classesAvailable" :key="index">
               <EditorClassBox :item="item"></EditorClassBox>
             </template>
+            <div class="alert alert-info">
+              Happy with your result? Save your progress, download or save to
+              GitHub using the toolbar above.
+            </div>
             <div class="w-100 p-1">
               <NGXGraph></NGXGraph>
             </div>
@@ -706,8 +677,8 @@ export default {
           inputPlaceholder: "Select Action",
           showCancelButton: true,
 
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
           customClass: "scale-in-center",
           confirmButtonText: "Next",
           showLoaderOnConfirm: true,
@@ -758,8 +729,8 @@ export default {
             inputPlaceholder: "Select Option",
             showCancelButton: true,
 
-            confirmButtonColor: "#63296b",
-            cancelButtonColor: "#4a7d8f",
+            confirmButtonColor: "#43318d",
+            cancelButtonColor: "#d83f87",
             customClass: "scale-in-center",
             confirmButtonText: "Next",
             showLoaderOnConfirm: true,
@@ -892,8 +863,8 @@ export default {
             inputPlaceholder: "Select Option",
             showCancelButton: true,
 
-            confirmButtonColor: "#63296b",
-            cancelButtonColor: "#4a7d8f",
+            confirmButtonColor: "#43318d",
+            cancelButtonColor: "#d83f87",
             customClass: "scale-in-center",
             confirmButtonText: "Next",
             showLoaderOnConfirm: true,
@@ -987,8 +958,8 @@ export default {
           inputLabel: "Enter description",
           inputPlaceholder: "Type here",
 
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
           customClass: "scale-in-center",
         });
 
@@ -1075,8 +1046,8 @@ export default {
           inputPlaceholder: "Select item",
           showCancelButton: true,
 
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
           customClass: "scale-in-center",
           confirmButtonText: "Next",
           showLoaderOnConfirm: true,
@@ -1107,6 +1078,8 @@ export default {
                 distance: 20,
                 type: 1,
                 position: "right top",
+                autoclose: true, // Enable auto close
+                autotimeout: 3000, // Set timeout in milliseconds (3 seconds)
               });
             } else {
               new Notify({
@@ -1125,6 +1098,8 @@ export default {
                 distance: 20,
                 type: 1,
                 position: "right top",
+                autoclose: true, // Enable auto close
+                autotimeout: 3000, // Set timeout in milliseconds (3 seconds)
               });
             }
           }
@@ -1190,9 +1165,9 @@ export default {
         this.$store.commit("formPreview");
         self.$swal.fire({
           position: "center",
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
-
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
+          width: "50vw", // Set your desired width
           customClass: "scale-in-center",
           html: `<h6 class="text-center mainTextDark">Preview</h6><div class="text-left p-1 previewBox bg-dark"><pre id="previewJSON"></pre></div>`,
           didOpen: function () {
@@ -1222,8 +1197,8 @@ export default {
             "<p>You have not selected a schema to start with.</p> " +
             '<p>Search the <a href="/registry">Registry</a> for a schema to start from.</p>',
           showCancelButton: false,
-          confirmButtonColor: "#63296b",
-          cancelButtonColor: "#4a7d8f",
+          confirmButtonColor: "#43318d",
+          cancelButtonColor: "#d83f87",
         });
       }
     },
@@ -1308,8 +1283,8 @@ export default {
                   </small>`,
         footer: "",
         width: "52em",
-        confirmButtonColor: "#63296b",
-        cancelButtonColor: "#4a7d8f",
+        confirmButtonColor: "#43318d",
+        cancelButtonColor: "#d83f87",
         confirmButtonText: "Ready!",
         imageUrl: editorImg,
         imageAlt: "Metadata Editor",

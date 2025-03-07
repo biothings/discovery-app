@@ -15,8 +15,8 @@ function deleteDefinitionOption(item) {
       title: "Are you sure?",
       html: `<b>Warning</b>: deleting this definition will remove it from your library entirely. <br>Definitions that are not referenced will not appear in your json schema validation. Continue?`,
       showCancelButton: true,
-      confirmButtonColor: "#63296b",
-      cancelButtonColor: "#4a7d8f",
+      confirmButtonColor: "#43318d",
+      cancelButtonColor: "#d83f87",
       customClass: {
         popup: "scale-in-center",
       },

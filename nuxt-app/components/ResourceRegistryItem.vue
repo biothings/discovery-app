@@ -66,6 +66,7 @@ import n3cLogo from "~~/assets/img/N3Co.png";
 import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import outbreakIcon from "~~/assets/img/icon-01.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
+import creidIcon from "~~/assets/img/creid/icon.svg";
 
 export default {
   name: "ResourceRegistryItem",
@@ -128,6 +129,8 @@ export default {
         return n3cLogo;
       } else if (guide.includes("nde")) {
         return nde;
+      } else if (guide.includes("creid")) {
+        return creidIcon;
       } else {
         return dde;
       }
