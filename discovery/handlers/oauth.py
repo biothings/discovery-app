@@ -102,27 +102,27 @@ class NDEGitHubHandler(RequestHandler):
         Check if the user is logged in via GitHub and belongs to an organization with "nde" in its name.
         """
         user = self.get_secure_cookie("user")
-        
+
         if not user:
             self.finish({"success": False, "message": "User not authenticated"})
-        
+
         user = json.loads(user)
-        
+
         if "access_token" not in user:
             self.finish({"success": False, "message": "Must login with GitHub to access this feature"})
-        
+
         headers = {
             "Authorization": f"token {user['access_token']}",
             "Accept": "application/vnd.github+json",
         }
-        
+
         response = requests.get("https://api.github.com/user/orgs", headers=headers)
-        
+
         if response.status_code != 200:
             raise HTTPError(500, reason="Failed to fetch GitHub organizations")
                 
         orgs = [org["login"] for org in response.json()]
-        
+
         if any(NDE_ORG_NAME is org for org in orgs):
             self.finish({"success": True, "message": f"User is part of the {NDE_ORG_NAME} organization"})
         else:
