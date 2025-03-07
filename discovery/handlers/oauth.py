@@ -116,12 +116,12 @@ class NDEGitHubHandler(RequestHandler):
             "Accept": "application/vnd.github+json",
         }
 
-        response = requests.get("https://api.github.com/user/orgs", headers=headers)
+        response = requests.get("https://api.github.com/user/memberships/orgs", headers=headers)
 
         if response.status_code != 200:
             raise HTTPError(500, reason="Failed to fetch GitHub organizations")
-
-        orgs = [org["login"] for org in response.json()]
+        
+        orgs = [org["organization"]["login"] for org in response.json()]
 
         if any(NDE_ORG_NAME is org for org in orgs):
             self.finish({"success": True, "message": f"User is part of the {NDE_ORG_NAME} organization"})
