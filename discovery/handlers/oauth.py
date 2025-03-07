@@ -120,7 +120,7 @@ class NDEGitHubHandler(RequestHandler):
 
         if response.status_code != 200:
             raise HTTPError(500, reason="Failed to fetch GitHub organizations")
-                
+
         orgs = [org["login"] for org in response.json()]
 
         if any(NDE_ORG_NAME is org for org in orgs):
