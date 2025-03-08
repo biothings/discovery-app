@@ -112,16 +112,17 @@ class NDEGitHubHandler(RequestHandler):
             self.finish({"success": False, "message": "Must login with GitHub to access this feature"})
 
         headers = {
-            "Authorization": f"token {user['access_token']}",
+            "Authorization": f"Bearer {user['access_token']}",
             "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28"
         }
 
-        response = requests.get("https://api.github.com/user/memberships/orgs", headers=headers)
+        response = requests.get(f"https://api.github.com/user/orgs", headers=headers)
 
         if response.status_code != 200:
             raise HTTPError(500, reason="Failed to fetch GitHub organizations")
         
-        orgs = [org["organization"]["login"] for org in response.json()]
+        orgs = [org["login"] for org in response.json()]
 
         if any(NDE_ORG_NAME is org for org in orgs):
             self.finish({"success": True, "message": f"User is part of the {NDE_ORG_NAME} organization"})
