@@ -73,7 +73,6 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
                 client_secret=self.biothings.config.GITHUB_CLIENT_SECRET,
                 code=code,
             )
-            print("Token received:", token)
             user = await self.github_get_authenticated_user(token["access_token"])
             if user:
                 logging.info("logged in user from github: %s", user)
