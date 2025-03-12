@@ -191,7 +191,11 @@
                     v-for="guide in portal.guides"
                     :key="guide.name"
                   >
-                    <font-awesome-icon icon="fas fa-check" class="text-dde-accent" /> {{ guide.name }}
+                    <font-awesome-icon
+                      icon="fas fa-check"
+                      class="text-dde-accent"
+                    />
+                    {{ guide.name }}
                   </li>
                 </ul>
                 <nuxt-link class="card-link" :to="'/portal/' + portal.linkname"

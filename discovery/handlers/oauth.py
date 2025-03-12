@@ -12,8 +12,9 @@ from .base import DiscoveryBaseHandler
 logger = logging.getLogger(__name__)
 
 GITHUB_CALLBACK_PATH = "/oauth"
-GITHUB_SCOPES = ("read:user", "user:email", "public_repo", "read:org")
+GITHUB_SCOPES = ("read:org", "read:user", "user:email", "public_repo")
 NDE_ORG_NAME = "NIAID Data Ecosystem"
+GITHUB_API_URL = "https://api.github.com/user/orgs"
 
 """
 from torngithub import GithubMixin, json_encode
@@ -72,6 +73,7 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
                 client_secret=self.biothings.config.GITHUB_CLIENT_SECRET,
                 code=code,
             )
+            print("Token received:", token)
             user = await self.github_get_authenticated_user(token["access_token"])
             if user:
                 logging.info("logged in user from github: %s", user)
@@ -96,20 +98,34 @@ class GithubLoginHandler(DiscoveryBaseHandler, GithubOAuth2Mixin):
         )
 
 
-class NDEGitHubHandler(RequestHandler):
-    def get(self):
+class OrganizationMembershipHandler(RequestHandler):
+    def post(self):
         """
-        Check if the user is logged in via GitHub and belongs to an organization with "nde" in its name.
+        Check if the user is logged in via GitHub and belongs to the given organization.
         """
         user = self.get_secure_cookie("user")
 
         if not user:
             self.finish({"success": False, "message": "User not authenticated"})
+            return
 
         user = json.loads(user)
 
         if "access_token" not in user:
             self.finish({"success": False, "message": "Must login with GitHub to access this feature"})
+            return
+
+        # Parse request body for organization_name
+        try:
+            body = json.loads(self.request.body)
+            organization_name = body.get("organization_name")
+        except json.JSONDecodeError:
+            self.finish({"success": False, "message": "Invalid JSON in request body"})
+            return
+
+        if not organization_name:
+            self.finish({"success": False, "message": "Missing required parameter: organization_name"})
+            return
 
         headers = {
             "Authorization": f"Bearer {user['access_token']}",
@@ -117,20 +133,20 @@ class NDEGitHubHandler(RequestHandler):
             "X-GitHub-Api-Version": "2022-11-28"
         }
 
-        response = requests.get(f"https://api.github.com/user/orgs", headers=headers)
+        response = requests.get(GITHUB_API_URL, headers=headers)
 
         if response.status_code != 200:
             raise HTTPError(500, reason="Failed to fetch GitHub organizations")
-        
+
         orgs = [org["login"] for org in response.json()]
 
-        if any(NDE_ORG_NAME is org for org in orgs):
-            self.finish({"success": True, "message": f"User is part of the {NDE_ORG_NAME} organization"})
+        if organization_name in orgs:
+            self.finish({"success": True, "message": f"User is part of the {organization_name} organization"})
         else:
-            self.finish({"success": False, "message": f"User is not part of the {NDE_ORG_NAME} organization. Your orgs: {orgs}"})
+            self.finish({"success": False, "message": f"You are not part of the {organization_name} organization."})
 
 
 HANDLERS = [
     (GITHUB_CALLBACK_PATH + "/?", GithubLoginHandler),
-    ("/nde-check", NDEGitHubHandler),
+    ("/org-check", OrganizationMembershipHandler),
 ]

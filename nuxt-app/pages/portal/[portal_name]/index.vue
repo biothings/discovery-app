@@ -94,7 +94,10 @@ function redirect() {
 
 function checkPermission() {
   store.commit("setLoading", { value: true });
-  axios.get(runtimeConfig.public.apiUrl + "/nde-check")
+  axios
+    .post(runtimeConfig.public.apiUrl + "/org-check", {
+      organization_name: portal.privateOrganization.name,
+    })
     .then((res) => {
       store.commit("setLoading", { value: false });
       if (res.data?.success == true) {
@@ -102,6 +105,23 @@ function checkPermission() {
       } else {
         ndeCheck.value = false;
         ndeCheckMessage.value = res.data?.message;
+        new Notify({
+          status: "error",
+          title: "Submissions by members only",
+          text: res.data?.message,
+          effect: "fade",
+          speed: 300,
+          customClass: null,
+          customIcon: null,
+          showIcon: true,
+          showCloseButton: true,
+          autoclose: true,
+          autotimeout: 3000,
+          gap: 20,
+          distance: 20,
+          type: 1,
+          position: "right top",
+        });
       }
     })
     .catch((error) => {
@@ -113,9 +133,9 @@ function checkPermission() {
 }
 
 onMounted(() => {
-  if (portal_name == "nde") {
+  if (portal.privateSubmissionsOnly) {
     checkPermission();
-  }else{
+  } else {
     ndeCheck.value = true;
   }
 });
@@ -282,6 +302,13 @@ useHead({
                 class="border-top text-center text-dde-dark p-2 bg-dde-mid-muted"
               >
                 <h4>Contribute</h4>
+                <span
+                  v-if="portal.privateSubmissionsOnly && !ndeCheck"
+                  data-tippy-content="Only users that belong to this organization on GitHub can register resources for this portal"
+                  class="badge badge-sm bg-dde-accent text-light mr-2"
+                >
+                  Organization Members Only
+                </span>
                 <p>
                   Follow an easy-to-follow guide to help you register resources
                   for <span v-text="portal.name"></span> following this metadata
