@@ -14,6 +14,10 @@ export const portals = {
       {
         name: "Outbreak.info",
         shortName: "Outbreak.info",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
         keyName: "outbreak",
         header:
           "During outbreaks of emerging diseases such as COVID-19, efficiently collecting, sharing, and integrating data is critical to scientific research. Outbreak.info is a resource to aggregate all this information into a single location.",
@@ -45,6 +49,10 @@ export const portals = {
       {
         name: "NIAID Data Ecosystem",
         shortName: "NIAID Data Ecosystem",
+        privateSubmissionsOnly: true,
+        privateOrganization: {
+          name: "NIAID-Data-Ecosystem",
+        },
         keyName: "nde",
         header:
           "Find, access and understand datasets and tools across infectious disease and immune-mediated data repositories.",
@@ -79,6 +87,9 @@ export const portals = {
       {
         name: "NIAID Systems Biology",
         shortName: "NIAID SysBio",
+        privateOrganization: {
+          name: "",
+        },
         keyName: "niaid",
         header:
           "The NIAID Systems Biology Consortium for Infectious Diseases Data Dissemination Working Group works to make our research outputs more FAIR.",
@@ -123,6 +134,10 @@ export const portals = {
       {
         name: "NIAID CREID Research Network Portal",
         shortName: "NIAID CREID",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
         keyName: "creid",
         header:
           "Register your CREID Network datasets for inclusion in the NIAID Data Ecosystem Discovery Portal",
@@ -150,6 +165,10 @@ export const portals = {
       {
         name: "CTSA National Center for Data to Health",
         shortName: "CD2H",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
         keyName: "cd2h",
         header:
           "A CD2H project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.",
@@ -181,6 +200,10 @@ export const portals = {
       {
         name: "The National COVID Cohort Collaborative (N3C)",
         shortName: "N3C",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
         keyName: "n3c",
         header:
           "The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.",
@@ -210,6 +233,10 @@ export const portals = {
       {
         name: "Multi-Omics Vaccine Evaluation (MOVE)",
         shortName: "MOVE",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
         keyName: "move",
         header: "Driving Progress in HIV Vaccine Research",
         linkname: "move",
