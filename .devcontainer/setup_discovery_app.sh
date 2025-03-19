@@ -18,6 +18,8 @@ sudo apt-get update && sudo apt-get install -y \
     git \
     python3-venv \
     python3-dev \
+    libxmlsec1-dev \
+    pkg-config 
 
 echo "🐍 Creating Python virtual environment..."
 python3 -m venv $INSTALL_DIR/.venv
