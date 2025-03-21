@@ -1,7 +1,7 @@
 # Discovery App Backend with Elasticsearch
 
 ## Overview  
-This folder is used to set up a development environment for the Data Discovery Engine (DDE) App in a GitHub Codespace. The current configuration initializes the backend, setting up an Elasticsearch (ES) database and populating it with data in:  
+This folder is used to set up a development environment for the Data Discovery Engine (DDE) App in a GitHub Codespace. The current configuration initializes the backend, setting up an Elasticsearch (ES) database and populating it with data in three ES indices:  
 - `smartapi_docs`  
 - `smartapi_metakg_docs`  
 - `smartapi_metakg_consolidated`  
@@ -82,13 +82,13 @@ After running the setup, you can verify that Elasticsearch is up and running.
 #### Option 1: Using `curl`
 Run the following command in your terminal to check if Elasticsearch is responding:
 ```
-curl -X GET "http://localhost:9200"
+curl "http://localhost:9200"
 ```  
 
 
 
 #### Option 2: Viewing in the Browser
-You can also view the Elasticsearch status directly in your web browser. Open your browser and navigate to:
+You can also view the Elasticsearch status directly in your web browser. Open your browser and navigate to: http://localhost:9200.
 
 If it responds with cluster information, the setup was successful! ✅
 
@@ -117,7 +117,7 @@ Restore completed from [your backup filename]
 ```
 
 ### Optional: Restore from S3 Instead of Local Files
-To avoid manually handling backup files, you can modify the restore script to pull the backup directly from an S3 bucket.
+To avoid manually handling backup files, you can modify the restore script to pull the backup directly from an S3 bucket. This requires a working AWS credential with proper S3 read permission.
 
 To do this use this edit the `setup_index.sh`:
 
