@@ -1,7 +1,7 @@
 # Discovery App Backend with Elasticsearch
 
 ## Overview  
-This repository sets up a development environment for the Discovery Data App in a GitHub Codespace. The current configuration initializes the backend, setting up an Elasticsearch (ES) database and populating it with data in:  
+This folder is used to set up a development environment for the Data Discovery Engine (DDE) App in a GitHub Codespace. The current configuration initializes the backend, setting up an Elasticsearch (ES) database and populating it with data in:  
 - `smartapi_docs`  
 - `smartapi_metakg_docs`  
 - `smartapi_metakg_consolidated`  
