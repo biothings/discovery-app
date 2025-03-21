@@ -30,8 +30,6 @@ ls -l $INSTALL_DIR/.venv/bin/activate
 echo "✅ Activating virtual environment..."
 source $INSTALL_DIR/.venv/bin/activate
 echo "🐍 Python Path: $(which python)"
-# echo $PS1  # Check if PS1 is set
-# export PS1="(.venv) $PS1"
 
 # Install dependencies
 echo "📦 Installing dependencies..."
@@ -46,6 +44,19 @@ docker compose -f $COMPOSE_DIR/docker-compose.yml up -d es
 echo "✅ Elasticsearch is now running!"
 
 # Verify Elasticsearch is up
-echo "🔎 Checking Elasticsearch status..."
-sleep 50  # Give it time to start
-curl -X GET "http://localhost:9200" || echo "⚠️ Elasticsearch is not responding!"
+echo "🔎 Checking Elasticsearch (ES) status..."
+TIMEOUT=60   # Set timeout in seconds (e.g., 60 seconds)
+START_TIME=$(date +%s)  # Record start time in seconds since epoch
+ELAPSED_TIME=0
+until curl -X GET "http://localhost:9200"; do
+    CURRENT_TIME=$(date +%s)
+    ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
+    # Check if elapsed time exceeds timeout
+    if [ "$ELAPSED_TIME" -ge "$TIMEOUT" ]; then
+        echo "⚠️ Failed to start ES within $TIMEOUT seconds. Check manually to make sure it's running properly."
+        exit 1
+    fi
+    echo "ES is not running yet, retrying... (Elapsed: $ELAPSED_TIME seconds)"
+    sleep 2  # Wait 2 seconds before retrying
+done
+echo "ES is started successfully after $ELAPSED_TIME seconds!"
