@@ -142,17 +142,6 @@ python -c "from discovery.utils.backup import restore_from_s3; restore_from_s3()
 
 Then run: ```/.setup_index.sh```
   
-
-## **Running the Application**  
-When the environment is setup the application is available to run.  
-  
-With ES running, navigate to the `/discovery-app` folder and run the `index.py` file from the terminal:  
-```
-python index.py
-```
-
-Here’s the updated section with instructions on **viewing from the Ports panel and clicking the globe icon for port 8000**:  
-
 ---
 
 ### **Viewing Running Ports and Application**   
