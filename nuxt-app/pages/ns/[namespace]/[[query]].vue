@@ -638,7 +638,7 @@ export default {
       filterLetters: [],
       topProp: {},
       filter: "",
-      queryContentParents: [],
+      // queryContentParents: [],
       checkbox: null,
       treeBuildErr: false,
       apiUrl: "",
@@ -693,29 +693,29 @@ export default {
         this.searchResultsProps = [];
       }
     },
-    queryContent: {
-      handler: function (klass) {
-        var self = this;
-        let res = [];
-        if (klass.hasOwnProperty("parent_classes")) {
-          for (var i = 0; i < klass["parent_classes"].length; i++) {
-            if (klass["parent_classes"][i]) {
-              let parents = klass["parent_classes"][i].split(", ");
-              for (var x = 0; x < parents.length; x++) {
-                let name = self.getName(parents[x]);
-                res.push(name);
-              }
-            }
-          }
-          if (res.length) {
-            self.queryContentParents = res;
-          } else {
-            self.queryContentParents = [];
-          }
-        }
-      },
-      deep: true,
-    },
+    // queryContent: {
+    //   handler: function (klass) {
+    //     var self = this;
+    //     let res = [];
+    //     if (klass.hasOwnProperty("parent_classes")) {
+    //       for (var i = 0; i < klass["parent_classes"].length; i++) {
+    //         if (klass["parent_classes"][i]) {
+    //           let parents = klass["parent_classes"][i].split(", ");
+    //           for (var x = 0; x < parents.length; x++) {
+    //             let name = self.getName(parents[x]);
+    //             res.push(name);
+    //           }
+    //         }
+    //       }
+    //       if (res.length) {
+    //         self.queryContentParents = res;
+    //       } else {
+    //         self.queryContentParents = [];
+    //       }
+    //     }
+    //   },
+    //   deep: true,
+    // },
   },
   methods: {
     saveDataAndRedirect(item) {
@@ -1068,55 +1068,44 @@ export default {
           );
       }
     },
-    getUniqueContent(paths) {
-      var finalArr = [];
-      let mergedpaths = [];
-      for (var i = 0; i < paths.length; i++) {
-        mergedpaths = mergedpaths.concat(paths[i]);
+    async queryRegistry(query) {
+      try {
+        const response = await axios.get(
+          `${this.apiUrl}/api/registry/${query.split(":")[0]}/${query}?v`
+        );
+        // console.log("Parent found: ", response.data.hits[0]?.name);
+        return response.data.hits[0]; // Ensure the function actually returns data
+      } catch (error) {
+        console.error("Error fetching registry: ", error);
+        throw error; // Re-throw for handling elsewhere if needed
       }
-
-      function onlyUnique(value, index, self) {
-        return self.indexOf(value) === index;
-      }
-
-      finalArr = mergedpaths.filter(onlyUnique);
-      // console.log('Unique Arr Elements ',finalArr)
-      return finalArr;
     },
     getParentsOf(classInfo) {
-      // console.log("Getting parents of ",classInfo)
-      var self = this;
-      let res = [];
+      // console.log("Getting parents of ", classInfo?.name);
+
       if (classInfo.hasOwnProperty("parent_classes")) {
-        for (var i = 0; i < classInfo["parent_classes"].length; i++) {
-          if (classInfo["parent_classes"][i]) {
-            let parents = classInfo["parent_classes"][i].split(", ");
-            res.push(parents);
-          }
-        }
-        // console.log('ALL PATHS',res)
-        self.queryContentParents = self.getUniqueContent(res).reverse();
-        // console.log('TOP CLASS PARENTS...',self.queryContentParents)
-        self.getParentsInfo(self.queryContentParents);
+        let parent_names = classInfo["parent_classes"][0].split(", ").reverse();
+        this.getParentsInfo(parent_names); // Call the async function
+        return parent_names; // This might return before getParentsInfo finishes
       }
-      return res;
+      return []; // Return empty array if no parent_classes
     },
-    getParentsInfo(list) {
-      var self = this;
-      let res = [];
-      for (var i = 0; i < list.length; i++) {
-        for (var x = 0; x < self.userSchema["hits"].length; x++) {
-          let parentName = list[i];
-          // compare name not label as there might be duplicates
-          if (self.userSchema["hits"][x].name === parentName) {
-            // console.log("GOT PARENT FULL INFO...",self.userSchema['hits'][x].label,parentName)
-            res.push(self.userSchema["hits"][x]);
+    async getParentsInfo(list) {
+      this.userSchemaParents = []; // Clear previous data before appending
+
+      for (const name of list) {
+        try {
+          let res = await this.queryRegistry(name);
+          if (res) {
+            this.userSchemaParents.push(res);
           }
+        } catch (error) {
+          console.error(`Failed to get parent info for ${name}:`, error);
         }
       }
-      self.userSchemaParents = res;
-      //   console.log('ALL PARENTS INFO', self.userSchemaParents)
+      // console.log("All parents info complete: ", this.userSchemaParents);
     },
+
     changeView() {
       console.log("changing view...");
     },
