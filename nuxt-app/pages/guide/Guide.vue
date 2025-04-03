@@ -1281,7 +1281,7 @@ export default {
           cancelButtonColor: "#006476",
 
           customClass: "scale-in-center",
-          footer: `<p class="text-danger"><strong>🚨 Please note there is a 100 document limit.</strong></p>`,
+          footer: `<p class="text-danger"><strong>🚨 Please note there is a 100 document limit and a 2 document minimum.</strong></p>`,
           inputAttributes: {
             accept: "json",
             "aria-label": "Upload your file",
@@ -1303,9 +1303,8 @@ export default {
               } else {
                 self.$swal.fire({
                   icon: "error",
-                  title: "Over Limit",
-                  text:
-                    json.length + " items. Please submit 100 items at a time.",
+                  title: "Invalid file",
+                  text: "Please upload a file with a valid number of documents.",
                 });
               }
             });
