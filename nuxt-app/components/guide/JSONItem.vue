@@ -279,9 +279,8 @@ export default {
       let itemFields = Object.keys(item);
       let validationFields = Object.keys(self.validation.properties);
       let requiredFields = self.validation.required;
-      // ensure all items have @type and @context
+      // ensure all items have @type
       requiredFields.push("@type");
-      requiredFields.push("@context");
       requiredFields.forEach((field) => {
         if (!itemFields.includes(field)) {
           self.missingRequired.push(field);
