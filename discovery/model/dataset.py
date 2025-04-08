@@ -84,5 +84,10 @@ class Dataset(DiscoveryUserDoc):
 
     def encode_id(self):
         if self.identifier:
-            self.meta.id = hashlib.blake2b(self.identifier.encode(), digest_size=8).hexdigest()
-        return self.meta.id
+            if isinstance(self.identifier, list):
+                id_string = "|".join(self.identifier)
+            else:
+                id_string = str(self.identifier)
+
+            self.meta.id = hashlib.blake2b(id_string.encode(), digest_size=8).hexdigest()
+            return self.meta.id
