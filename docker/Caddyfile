@@ -1,0 +1,5 @@
+localhost {
+	reverse_proxy @api_urls api:8000
+	reverse_proxy webapp:3000
+	@api_urls path /api/* /user* /logout* /sitemap/*.xml /oauth* /saml*
+}
