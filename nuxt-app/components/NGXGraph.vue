@@ -98,9 +98,9 @@ export default {
       let edges = [];
       let nodes = [];
 
-      let blue = "#057BFE";
-      let green = "#28A745";
-      let yellow = "#FFC007";
+      let purple = "#8d5bd4";
+      let green = "#4bc0c0";
+      let yellow = "red";
 
       for (let i = 0; i < self.classesAvailable.length; i++) {
         if (
@@ -123,7 +123,7 @@ export default {
             data: {
               id: self.classesAvailable[i].name,
               type: "ellipse",
-              color: blue,
+              color: purple,
               size: "1em",
             },
           };
@@ -189,7 +189,7 @@ export default {
               data: {
                 source: self.propsSelected[i]["from"],
                 target: self.propsSelected[i]["name"],
-                color: blue,
+                color: purple,
               },
             };
             edges.push(edge);

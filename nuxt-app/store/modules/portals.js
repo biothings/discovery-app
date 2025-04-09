@@ -2,12 +2,11 @@ import cd2h from "~~/assets/img/cd2h-logo-white.png";
 import dde from "~~/assets/img/dde-logo-o.svg";
 import n3c from "~~/assets/img/N3Co.png";
 import n3cLogo from "~~/assets/img/N3Cwhite.png";
-import outbreak from "~~/assets/img/outbreak_white.svg";
 import outbreak_logo from "~~/assets/img/outbreak/outbreak_logo.svg";
 import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import creiddIcon from "~~/assets/img/creid/icon.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
-import outbreakIcon from "~~/assets/img/icon-01.svg";
+import move from "~~/assets/img/move.png";
 
 export const portals = {
   state: () => ({
@@ -15,6 +14,10 @@ export const portals = {
       {
         name: "Outbreak.info",
         shortName: "Outbreak.info",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
         keyName: "outbreak",
         header:
           "During outbreaks of emerging diseases such as COVID-19, efficiently collecting, sharing, and integrating data is critical to scientific research. Outbreak.info is a resource to aggregate all this information into a single location.",
@@ -46,6 +49,10 @@ export const portals = {
       {
         name: "NIAID Data Ecosystem",
         shortName: "NIAID Data Ecosystem",
+        privateSubmissionsOnly: true,
+        privateOrganization: {
+          name: "NIAID-Data-Ecosystem",
+        },
         keyName: "nde",
         header:
           "Find, access and understand datasets and tools across infectious disease and immune-mediated data repositories.",
@@ -56,31 +63,33 @@ export const portals = {
         site: "https://data.niaid.nih.gov/portal",
         schema: "/ns/nde",
         showCoverage: false,
-        coverage: ["Dataset", "ResourceCatalog"],
+        coverage: ["Dataset", "ResourceCatalog", "ComputationalTool"],
         guides: [
           {
             guide: "/guide/nde/ResourceCatalog",
             name: "Resource Catalog",
-            registry: "/resource?template=nde:ResourceCatalog",
+            registry: "/resource?template=nde:resourcecatalog",
           },
           {
             guide: "/guide/nde/Dataset",
             name: "Dataset",
             registry: "/resource?template=nde:dataset",
           },
+          {
+            guide: "/guide/nde/ComputationalTool",
+            name: "Computational Tool",
+            registry: "/resource?template=nde:computationaltool",
+          },
         ],
         datasets: "/resource?template=nde:dataset",
         colors: [{ hex: "#3684af" }, { hex: "#103b56" }],
-        // publications: [
-        //   // {
-        //   //   name: "Developing a standardized but extendable framework to increase the findability of infectious disease datasets",
-        //   //   link: "https://www.biorxiv.org/content/10.1101/2022.10.10.511492v1",
-        //   // },
-        // ],
       },
       {
         name: "NIAID Systems Biology",
         shortName: "NIAID SysBio",
+        privateOrganization: {
+          name: "",
+        },
         keyName: "niaid",
         header:
           "The NIAID Systems Biology Consortium for Infectious Diseases Data Dissemination Working Group works to make our research outputs more FAIR.",
@@ -125,6 +134,10 @@ export const portals = {
       {
         name: "NIAID CREID Research Network Portal",
         shortName: "NIAID CREID",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
         keyName: "creid",
         header:
           "Register your CREID Network datasets for inclusion in the NIAID Data Ecosystem Discovery Portal",
@@ -152,9 +165,13 @@ export const portals = {
       {
         name: "CTSA National Center for Data to Health",
         shortName: "CD2H",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
         keyName: "cd2h",
         header:
-          "A CD2H PROJECT TO PROMOTE FAIR DATA-SHARING BEST PRACTICES & MAXIMIZE THE RESEARCH IMPACT OF CTSA HUBS",
+          "A CD2H project to promote FAIR data-sharing best practices & maximize the research impact of CTSA hubs.",
         linkname: "cd2h",
         description: `<p>
               Informatics advancements, coupled with a shift towards open science, are in the process of fundamentally transforming how we approach translational research and clinical care. The CTSA Program is poised to help realize precision medicine by leveraging informatics tools and expertise within CTSA hubs to solve key informatics challenges across the translational spectrum.
@@ -183,6 +200,10 @@ export const portals = {
       {
         name: "The National COVID Cohort Collaborative (N3C)",
         shortName: "N3C",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
         keyName: "n3c",
         header:
           "The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.",
@@ -208,6 +229,40 @@ export const portals = {
         datasets: "/resource?template=/guide/n3c/dataset",
         colors: [{ hex: "#00bcd4" }, { hex: "#64296B" }],
         faq_link: "/faq/n3c",
+      },
+      {
+        name: "Multi-Omics Vaccine Evaluation (MOVE)",
+        shortName: "MOVE",
+        privateSubmissionsOnly: false,
+        privateOrganization: {
+          name: "",
+        },
+        keyName: "move",
+        header: "Driving Progress in HIV Vaccine Research",
+        linkname: "move",
+        description: `<p>
+              The overall mission of the Multi-Omics Vaccine Evaluation (MOVE) Consortium is to accelerate development of an HIV vaccine by parallelizing the design and testing of a matrix of complementary immunogens that reliably induce broad, durable immunity.
+            </p>`,
+        image: move,
+        portalicon: move,
+        site: "",
+        schema: "/ns/move",
+        showCoverage: true,
+        coverage: ["Dataset"],
+        guides: [
+          {
+            guide: "/guide/move/dataset",
+            name: "Dataset",
+            registry: "/resource?template=/guide/move/dataset",
+          },
+        ],
+        datasets: "/resource?template=/guide/move/dataset",
+        colors: [
+          { hex: "#7f63a5" },
+          { hex: "#e25ea4" },
+          { hex: "#5fb5e5" },
+          { hex: "#6ac6bb" },
+        ],
       },
     ],
   }),

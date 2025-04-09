@@ -253,7 +253,7 @@ export default {
         if (err && err.warning) {
           warning = `🟡`;
         } else {
-          warning = `🟡`;
+          warning = `🔴`;
         }
         //field
         if (err && err.field) {

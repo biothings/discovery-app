@@ -119,6 +119,12 @@ export const editor = {
             state.addCardinality = true;
           }
         }
+        if (state.schema[0] && state.schema[0]?.["@context"]) {
+          console.log("✅ @context Updated", state.schema[0]?.["@context"]);
+          state.finalschema["@context"] = state.schema[0]["@context"];
+        } else {
+          console.warn("🚫 @context not found");
+        }
         console.log("✅ saved schema...", state.schema);
       } else {
         console.warn("🚫 Class already exists", payload["schema"].name);

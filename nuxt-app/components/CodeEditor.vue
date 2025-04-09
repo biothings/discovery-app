@@ -54,6 +54,8 @@ export default {
           distance: 20,
           type: 1,
           position: "right top",
+          autoclose: true, // Enable auto close
+          autotimeout: 3000, // Set timeout in milliseconds (3 seconds)
         });
       }
     },
