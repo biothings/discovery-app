@@ -1,5 +1,18 @@
 name: discovery-app
 services:
+  caddy:
+    image: caddy:2.8-alpine
+    ports:
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    restart: unless-stopped
+    depends_on:
+      - api
+      - webapp
+    networks:
+      - net0
+
   nginx:
     image: nginx:stable-alpine
     ports:
