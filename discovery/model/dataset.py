@@ -85,7 +85,7 @@ class Dataset(DiscoveryUserDoc):
     def encode_id(self):
         if self.identifier:
             if isinstance(self.identifier, list):
-                # Use only the first item as the url as the canonical identifier
+                # Use only the first item as the canonical identifier
                 id_string = str(self.identifier[0])
             else:
                 id_string = str(self.identifier)
