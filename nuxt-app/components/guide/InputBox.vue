@@ -29,6 +29,10 @@
                   <small class="mainTextLight">
                     (<span v-text="name"></span>)
                   </small>
+                  <br>
+                  <small class="text-dark" v-if="name === 'identifier'">
+                    Note: Identifier is a unique identifier for the resource. If multiple are provided, all will be saved but only the first will be used as the canonical identifier.
+                  </small>
                 </h6>
               </div>
               <h6 v-show="loading" class="text-primary">
