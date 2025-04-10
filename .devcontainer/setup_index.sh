@@ -4,7 +4,7 @@ set -e  # Exit on error
 set -o pipefail  # Exit if any command in a pipeline fails
 
 # Define the backup file path
-BACKUP_FILE= #UPDATE WITH YOUR FILENAME HERE 
+BACKUP_FILE= #UPDATE WITH YOUR FILENAME HERE
 
 # Activate the virtual environment (if not already active)
 source /workspaces/discovery-app/.venv/bin/activate
