@@ -596,10 +596,10 @@ class SchemaHandler(APIBaseHandler):
         return property_list
 
     def raise_404_not_found_error(self, curie):
-        raise HTTPError(404, reason=f"Requested CURIE: {curie} not found in any schema.")
+        raise HTTPError(404, reason=f"The requested namespace or class, {curie}, does not exist in registry.")
 
     def raise_404_no_validation_error(self, curie):
-        raise HTTPError(404, reason="Validation schema is not provided for this class or property.")
+        raise HTTPError(404, reason=f"The validation schema is not provided for this class or property: {curie}")
 
     def get_curie(self, metadata, curie, ns):
         """
@@ -667,6 +667,20 @@ class SchemaHandler(APIBaseHandler):
                 reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.",
             )
 
+    def set_meta(self, schema_metadata):
+        """
+        Set _meta info on schema_metadata if ?meta=1 is in the request.
+
+        Args:
+            schema_metadata (dict): The schema metadata dictionary.
+
+        Returns:
+            dict: Updated schema_metadata with _meta if applicable.
+        """
+        if self.get_argument("meta", None) == "1" and hasattr(schema_metadata, "meta"):
+            schema_metadata["_meta"] = schema_metadata.meta
+        return schema_metadata
+
     def handle_validation_request(self, curie, schema_metadata):
         """
         Handle validation request for a CURIE.
@@ -707,17 +721,15 @@ class SchemaHandler(APIBaseHandler):
             HTTPError: If the namespace is not found or there's an error.
         """
         try:
-            # get schema from the given namespace and return schema metadata
             schema_metadata = schemas.get(curie)
-            # when the meta arg is passed, ?meta=1, display the _status
-            if self.get_argument("meta", None) == "1":
-                schema_metadata["_meta"] = schema_metadata.meta
+            schema_metadata = self.set_meta(schema_metadata)
             schema_metadata.pop("_id")
         except KeyError:
             self.raise_404_not_found_error(curie)
         except Exception as ns_error:
             logger.info(f"Error retrieving namespace {curie}: {ns_error}")
             self.raise_404_not_found_error(curie)
+        self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.finish(json.dumps(schema_metadata, indent=4, default=str))
 
     def handle_class_request(self, curie, schema_metadata):
@@ -730,10 +742,12 @@ class SchemaHandler(APIBaseHandler):
         """
         ns = curie.split(":")[0]
         schema_metadata.pop("_id")
-
         if ns != "schema":
             self.check_key_presence(schema_metadata, "@graph", ns)
-        self.finish(self.get_curie(schema_metadata, curie, ns))
+        schema_metadata = self.get_curie(schema_metadata, curie, ns)
+        schema_metadata = self.set_meta(schema_metadata)
+        self.set_header("Content-Type", "application/json; charset=UTF-8")
+        self.finish(json.dumps(schema_metadata, indent=4, default=str))
 
     def get(self, curie=None, validation=None):
         """
@@ -752,7 +766,7 @@ class SchemaHandler(APIBaseHandler):
 
         # curie: /{ns}
         if ":" not in curie and validation:
-            raise(HTTPError(400, reason="Validation request must be for a class, not a namespace."))
+            raise(HTTPError(400, reason="A validation request must be for a class or property, not a namespace."))
 
         elif ":" not in curie:
             self.handle_namespace_request(curie)

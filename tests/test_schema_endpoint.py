@@ -47,13 +47,13 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
 
     def test_01_get(self):
         """Invalid Namespace
-        {
-            "code": 400,
-            "success": false,
-            "error": "Error retrieving namespace, bt, with exception schema 'bt' does not exist."
+       {
+        "code": 404,
+        "success": false,
+        "error": "The requested namespace or class, bt, does not exist in registry."
         }
         """
-        self.request("schema/bt", method="GET", expect=400)
+        self.request("schema/bt", method="GET", expect=404)
 
     def test_10_get(self):
         """GET /api/schema/<namespace>
