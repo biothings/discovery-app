@@ -116,14 +116,12 @@ class DiscoverySchemaEndpointTest(DiscoveryTestCase):
         """Invalid Property (non-existing)
         GET /api/schema/<namespace>:<class_id>
         {
-            "@context": {<-->},
-            "@graph": [],           // empty items
-            "@id": "http://schema.biothings.io/#0.1"
+            "code": 404,
+            "success": false,
+            "error": "The requested namespace or class, bts:fds, does not exist in registry."
         }
         """
-        res = self.request("schema/bts:fds")
-        res_data = res.json()
-        assert res_data["@graph"] == []
+        res = self.request("schema/bts:fds", method="GET", expect=404)
 
     def test_14_get(self):
         """GET /api/schema/<namespace>:<class_id>/validation
