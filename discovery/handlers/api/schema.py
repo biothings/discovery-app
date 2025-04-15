@@ -729,8 +729,7 @@ class SchemaHandler(APIBaseHandler):
         except Exception as ns_error:
             logger.info(f"Error retrieving namespace {curie}: {ns_error}")
             self.raise_404_not_found_error(curie)
-        self.set_header("Content-Type", "application/json; charset=UTF-8")
-        self.finish(json.dumps(schema_metadata, indent=4, default=str))
+        self.finish(schema_metadata)
 
     def handle_class_request(self, curie, schema_metadata):
         """
@@ -746,8 +745,7 @@ class SchemaHandler(APIBaseHandler):
             self.check_key_presence(schema_metadata, "@graph", ns)
         schema_metadata = self.get_curie(schema_metadata, curie, ns)
         schema_metadata = self.set_meta(schema_metadata)
-        self.set_header("Content-Type", "application/json; charset=UTF-8")
-        self.finish(json.dumps(schema_metadata, indent=4, default=str))
+        self.finish(schema_metadata)
 
     def get(self, curie=None, validation=None):
         """
