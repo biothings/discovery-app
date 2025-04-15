@@ -564,7 +564,7 @@ export default {
       let res = [];
       const runtimeConfig = useRuntimeConfig();
       axios
-        .get(runtimeConfig.public.apiUrl + "/api/registry?field=_meta&size=20")
+        .get(runtimeConfig.public.apiUrl + "/api/registry?field=_meta&size=100")
         .then((res) => {
           let unordered = {};
           res.data.hits.forEach((hit) => {
