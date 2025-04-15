@@ -125,7 +125,7 @@ class SchemaRegistryHandler(APIBaseHandler):
             "field": {"type": str, "default": "*", "aslias": "fields"},
             "verbose": {"type": bool, "default": False, "alias": ["v"]},
             "start": {"type": int, "default": 0, "alias": ["from", "skip"]},
-            "size": {"type": int, "default": 10, "max": 20, "alias": "skip"},
+            "size": {"type": int, "default": 10, "max": 100, "alias": "skip"},
             "context": {"type": bool, "default": True},  # consider not default in future
             "source": {"type": bool, "default": True},
         },
