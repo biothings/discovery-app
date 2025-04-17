@@ -446,6 +446,13 @@ class SchemaHandler(APIBaseHandler):
     kwargs = {
         "GET": {
             "meta": {"type": bool},  # meta field used to display metadata and status
+        },
+        "*": {
+            "format": {
+                "type": str,
+                "default": "json",
+                "enum": ("json", "yaml", "html", "msgpack"),
+            }
         }
     }
 
@@ -677,7 +684,7 @@ class SchemaHandler(APIBaseHandler):
         Returns:
             dict: Updated schema_metadata with _meta if applicable.
         """
-        if self.get_argument("meta", None) == "1" and hasattr(schema_metadata, "meta"):
+        if self.args.meta:
             schema_metadata["_meta"] = schema_metadata.meta
         return schema_metadata
 
