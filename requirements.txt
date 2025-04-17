@@ -10,6 +10,8 @@ PyGithub>=1.53
 certifi
 pyadf==0.2.29       # create rich text in Jira
 aiocron==1.8
+lxml==4.9.3
+xmlsec==1.3.13
 
 # use in index.routine to lock file
 filelock
