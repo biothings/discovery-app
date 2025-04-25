@@ -34,6 +34,7 @@ services:
       - xpack.security.http.ssl.enabled=false
       - http.cors.enabled=true
       - http.cors.allow-origin=/https?:\/\/localhost(:[0-9]+)?/
+      - ES_JAVA_OPTS=-Xms1g -Xms1g
     ports:
       - "9200:9200"
     networks:
