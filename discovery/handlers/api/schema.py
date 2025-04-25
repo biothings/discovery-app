@@ -15,6 +15,7 @@
 """
 
 import json
+import re
 import logging
 from datetime import date, datetime
 
@@ -22,10 +23,11 @@ import certifi
 from tornado.httpclient import AsyncHTTPClient
 from tornado.web import Finish, HTTPError
 
+from discovery.model.schema import Schema
 from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
 from discovery.utils.adapters import SchemaAdapter
-from discovery.model.schema import Schema
+from discovery.registry.common import NoEntityError
 
 from .base import APIBaseHandler, authenticated, registryOperation
 
@@ -351,7 +353,6 @@ class SchemaRegistryHandler(APIBaseHandler):
 
 
 class SchemaViewHandler(APIBaseHandler):
-
     name = "view"
     kwargs = {
         "GET": {
@@ -445,14 +446,23 @@ class SchemaHandler(APIBaseHandler):
     kwargs = {
         "GET": {
             "meta": {"type": bool},  # meta field used to display metadata and status
+        },
+        "*": {
+            "format": {
+                "type": str,
+                "default": "json",
+                "enum": ("json", "yaml", "html", "msgpack"),
+            }
         }
     }
 
     def class_property_filter(self, metadata, class_id):
-        """Filter Schema Properties by class(domain)
+        """
+        Filter Schema Properties by class(domain)
         Extract the properties that belong to the requested (schema)class,
         and append that to a property list to return.
         """
+
         property_list = []
         for data_dict in metadata["@graph"]:
             if data_dict["@type"] == "rdf:Property":
@@ -475,16 +485,106 @@ class SchemaHandler(APIBaseHandler):
                         )
         return property_list
 
+    def get_context_matches(self, metadata, context_dict):
+        matches = []
+        pattern = re.compile(r"^([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)$")  # Regex to match STRINGA:STRINGB
+
+        def recursive_search(data):
+            if isinstance(data, dict):
+                for key, value in data.items():
+                    recursive_search(key)
+                    recursive_search(value)
+            elif isinstance(data, list):
+                for item in data:
+                    recursive_search(item)
+            elif isinstance(data, str):
+                match = pattern.match(data)
+                if match:
+                    prefix = match.group(1)
+                    if prefix in context_dict:
+                        matches.append(prefix)
+        recursive_search(metadata)
+        return set(matches)
+
+    def build_schema_org_context_dict(self, metadata):
+        # from https://schema.org/version/latest/schemaorg-current-https.jsonld
+        context_dict = {
+            "brick": "https://brickschema.org/schema/Brick#",
+            "csvw": "http://www.w3.org/ns/csvw#",
+            "dc": "http://purl.org/dc/elements/1.1/",
+            "dcam": "http://purl.org/dc/dcam/",
+            "dcat": "http://www.w3.org/ns/dcat#",
+            "dcmitype": "http://purl.org/dc/dcmitype/",
+            "dcterms": "http://purl.org/dc/terms/",
+            "doap": "http://usefulinc.com/ns/doap#",
+            "foaf": "http://xmlns.com/foaf/0.1/",
+            "odrl": "http://www.w3.org/ns/odrl/2/",
+            "org": "http://www.w3.org/ns/org#",
+            "owl": "http://www.w3.org/2002/07/owl#",
+            "prof": "http://www.w3.org/ns/dx/prof/",
+            "prov": "http://www.w3.org/ns/prov#",
+            "qb": "http://purl.org/linked-data/cube#",
+            "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+            "schema": "https://schema.org/",
+            "sh": "http://www.w3.org/ns/shacl#",
+            "skos": "http://www.w3.org/2004/02/skos/core#",
+            "sosa": "http://www.w3.org/ns/sosa/",
+            "ssn": "http://www.w3.org/ns/ssn/",
+            "time": "http://www.w3.org/2006/time#",
+            "vann": "http://purl.org/vocab/vann/",
+            "void": "http://rdfs.org/ns/void#",
+            "xsd": "http://www.w3.org/2001/XMLSchema#",
+            "cvisb": "https://data.cvisb.org/schema"
+        }
+
+        matches = self.get_context_matches(metadata, context_dict)
+        new_context_dict = {key: context_dict[key] for key in matches}
+        return new_context_dict
+
+    def add_schema_org_property_to_list(self, data_dict, property_list):
+        temp_dict = {
+            "@id": data_dict['curie'],
+            "@type": "rdf:Property",
+            "rdfs:comment": data_dict['description'],
+            "rdfs:label": data_dict['label'],
+            "schema:domainIncludes": [{"@id": value} for value in data_dict['domain']],
+            "schema:rangeIncludes": [{"@id": value} for value in data_dict['range']],
+        }
+        property_list.append(temp_dict)
+
+    def filter_schema_org_class_with_properties(self, metadata, property_list):
+        class_dict={
+            "@id": metadata["_id"].replace("schema::", "", 1),
+            "@type": "rdfs:Class",
+            "rdfs:comment": metadata["description"],
+            "rdfs:label": metadata["label"],
+            "rdfs:subClassOf": [{"@id": value} for value in metadata["parent_classes"]],
+        }
+
+        property_list.append(class_dict)
+        for data_dict in metadata['properties']:
+            self.add_schema_org_property_to_list(data_dict, property_list)
+        return property_list
+
+    def filter_schema_org_property(self, metadata, property_list):
+        self.add_schema_org_property_to_list(metadata, property_list)
+        return property_list
+
     def graph_data_filter(self, metadata, curie, property_list):
-        """Filter the requested schema(namespace) metadata
+        """
+        Filter the requested schema(namespace) metadata
         Traverse the `@graph` data and filter data based on requested query
         """
+
+        found = False  # Track if a match is found
+
         for i in range(len(metadata["@graph"])):
             try:
                 if curie in metadata["@graph"][i]["@id"]:
+                    found = True
                     # property search
                     if metadata["@graph"][i]["@type"] == "rdf:Property":
-                        print(metadata["@graph"][i])
                         property_list.append(metadata["@graph"][i])
                         break
                     # class search
@@ -495,24 +595,164 @@ class SchemaHandler(APIBaseHandler):
                         break
             except Exception as error:
                 raise HTTPError(400, reason=f"{error}")
+
+        # If no match is found, raise an error
+        if not found:
+            self.raise_404_not_found_error(curie)
+
         return property_list
 
-    def get_curie(self, metadata, curie):
+    def raise_404_not_found_error(self, curie):
+        raise HTTPError(404, reason=f"The requested namespace or class, {curie}, does not exist in registry.")
+
+    def raise_404_no_validation_error(self, curie):
+        raise HTTPError(404, reason=f"The validation schema is not provided for this class or property: {curie}")
+
+    def get_curie(self, metadata, curie, ns):
         """
-        Take input curie and initiate metadata search request
+        Retrieve metadata and properties based on the provided CURIE.
+        Args:
+            metadata (dict): schema metadata.
+            curie (str or list): A CURIE (e.g., "schema:Property").
+            ns (str): Namespace for the CURIE (e.g., "schema").
+
+        Returns:
+            dict: Updated metadata containing the filtered properties and context.
+
+        Raises:
+            HTTPError: If the CURIE is invalid or cannot be resolved.
         """
+
         property_list = []
         if isinstance(curie, str):
             for curie_str in curie.split(","):
-                property_list = self.graph_data_filter(metadata, curie_str, property_list)
+                if ns == "schema":
+                    try:
+                        klass = schemas.get_class("schema", curie_str)
+                        property_list = self.filter_schema_org_class_with_properties(klass, property_list)
+                    except NoEntityError as no_class_error:
+                        try:
+                            logger.info(f"Error retrieving schema class: {no_class_error}, attempting to retrieve property instead...")
+                            property_label = curie_str.split(":")[1]
+                            klass=schemas.get_schema_org_property(property_label)
+                            property_list = self.filter_schema_org_property(klass, property_list)
+                        except NoEntityError as no_property_error:
+                            logger.info(f"Error retrieving schema class: {no_property_error}, attempting to retrieve property instead...")
+                            self.raise_404_not_found_error(curie)
+                    # set the context property for schema.org
+                    metadata["@context"] = self.build_schema_org_context_dict(property_list)
+                else:
+                    property_list = self.graph_data_filter(metadata, curie_str, property_list)
         elif isinstance(curie, list):
             for curie_str in curie:
                 property_list = self.graph_data_filter(metadata, curie_str, property_list)
-        # elif isinstance(curie, tuple): -- may need to add expection for tuple input? (discussed vaguely w/ Dr. Wu)
         else:
             raise HTTPError(400, reason="Unidentified curie input request")
+
+        # Check if the filtering result is empty
+        if not property_list:
+            self.raise_404_not_found_error(curie)
+
         metadata["@graph"] = property_list
         return metadata
+
+    def check_key_presence(self, schema_metadata, key, ns):
+        """
+        Check the presence of a key in the schema metadata.
+
+        Args:
+            schema_metadata (dict): The schema metadata dictionary.
+            key (str): The key to check for presence.
+            ns (str): The namespace.
+
+        Raises:
+            HTTPError: If the key is not present in the schema metadata.
+        """
+        if key not in schema_metadata:
+            raise HTTPError(
+                404,
+                reason=f"Schema metadata is not defined correctly, {ns} missing '{key}' field.",
+            )
+
+    def set_meta(self, schema_metadata):
+        """
+        Set _meta info on schema_metadata if ?meta=1 is in the request.
+
+        Args:
+            schema_metadata (dict): The schema metadata dictionary.
+
+        Returns:
+            dict: Updated schema_metadata with _meta if applicable.
+        """
+        if self.args.meta:
+            schema_metadata["_meta"] = schema_metadata.meta
+        return schema_metadata
+
+    def handle_validation_request(self, curie, schema_metadata):
+        """
+        Handle validation request for a CURIE.
+
+        Args:
+            curie (str): The CURIE to validate.
+            schema_metadata (dict): The schema metadata dictionary.
+
+        Raises:
+            HTTPError: If validation data is not found or property doesn't match.
+        """
+        ns = curie.split(":")[0]
+        self.check_key_presence(schema_metadata, "@graph", ns)
+
+        validation_dict = {}
+        class_match_found = False
+
+        for data_dict in schema_metadata["@graph"]:
+            if data_dict["@id"] == curie:
+                validation_dict = data_dict.get("$validation", {})
+                class_match_found = True
+                break
+
+        if not class_match_found:
+            self.raise_404_not_found_error(curie)
+        if not validation_dict:
+            self.raise_404_no_validation_error(curie)
+        self.finish(validation_dict)
+
+    def handle_namespace_request(self, curie):
+        """
+        Handle namespace request.
+
+        Args:
+            curie (str): The CURIE representing the namespace.
+
+        Raises:
+            HTTPError: If the namespace is not found or there's an error.
+        """
+        try:
+            schema_metadata = schemas.get(curie)
+            schema_metadata = self.set_meta(schema_metadata)
+            schema_metadata.pop("_id")
+        except KeyError:
+            self.raise_404_not_found_error(curie)
+        except Exception as ns_error:
+            logger.info(f"Error retrieving namespace {curie}: {ns_error}")
+            self.raise_404_not_found_error(curie)
+        self.finish(schema_metadata)
+
+    def handle_class_request(self, curie, schema_metadata):
+        """
+        Handle class request for a CURIE.
+
+        Args:
+            curie (str): The CURIE representing the class.
+            schema_metadata (dict): The schema metadata dictionary.
+        """
+        ns = curie.split(":")[0]
+        schema_metadata.pop("_id")
+        if ns != "schema":
+            self.check_key_presence(schema_metadata, "@graph", ns)
+        schema_metadata = self.get_curie(schema_metadata, curie, ns)
+        schema_metadata = self.set_meta(schema_metadata)
+        self.finish(schema_metadata)
 
     def get(self, curie=None, validation=None):
         """
@@ -522,63 +762,60 @@ class SchemaHandler(APIBaseHandler):
         Fetch  - GET ./api/schema/{ns}:{property_id}
         Fetch  - GET ./api/schema/{ns}?meta=1
         """
+
+        # if no curie is given, throw error
         if curie is None:
             raise HTTPError(
                 400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'"
             )
-        # ./api/schema/{ns}
+
+        # curie: /{ns}
+        if ":" not in curie and validation:
+            raise(HTTPError(400, reason="A validation request must be for a class or property, not a namespace."))
+
         elif ":" not in curie:
-            try:
-                schema_metadata = schemas.get(curie)  # use registry to get schema
-                # when the meta arg is passed, ?meta=1, display the _status
-                if self.args.meta == 1:
-                    schema_metadata["_meta"] = schema_metadata.meta
-                schema_metadata.pop("_id")
-            except Exception as ns_error:
-                raise HTTPError(
-                    400, reason=f"Error retrieving namespace, {curie}, with exception {ns_error}"
-                )
-            self.finish(json.dumps(schema_metadata, indent=4, default=str))
+            self.handle_namespace_request(curie)
+
+        # curie: /{ns}:{class_id|property_id}
         else:
             # get namespace from user request -- expect only one
             if "," in curie:
                 ns = curie.split(",")[0].split(":")[0]  # n3c:prop1, n3c:prop2
+                # check if request has too many ns fields
                 ns_list = list(set([x.split(":")[0] for x in curie.split(",")]))
                 if len(ns_list) > 1:
                     raise HTTPError(400, reason="Too many schemas(namespaces) requested")
             else:
                 ns = curie.split(":")[0]
+
+            # get the schema from given namespace
             try:
                 schema_metadata = schemas.get(ns)
+            # catch errors and return feedback
             except Exception as ns_error:
-                raise HTTPError(
-                    400, reason=f"Error retrieving namespace, {ns}, with exception {ns_error}"
-                )
-            # ./api/schema/{ns}:{class_id}/validation
+                logger.info(f"Error retrieving namespace {curie}: {ns_error}")
+                self.raise_404_not_found_error(curie)
+            # curie: /{ns}:{class_id}/validation
             if validation:
-                for data_dict in schema_metadata["@graph"]:
-                    if data_dict["@id"] == curie:
-                        validation_dict = data_dict.get("$validation", {})
-                        break
-                self.finish(validation_dict)
-            # ./api/schema/{ns}:{search_key}
+                if ns == "schema":
+                    self.raise_404_no_validation_error(curie)
+                self.handle_validation_request(curie, schema_metadata)
+            # curie: /{ns}:{search_key}
             else:
-                schema_metadata.pop("_id")
-                self.finish(self.get_curie(schema_metadata, curie))
-
+                self.handle_class_request(curie, schema_metadata)
 
 class CoverageHandler(APIBaseHandler):
     """
-        Fetch  - GET ./api/coverage
-        Fetch  - GET ./api/coverage/{curie}
+    Fetch  - GET ./api/coverage
+    Fetch  - GET ./api/coverage/{curie}
     """
 
     name = "metadata_coverage"
 
     def get(self, curie=None):
         """
-            Fetch  - GET ./api/coverage
-            Fetch  - GET ./api/coverage/{curie}
+        Fetch  - GET ./api/coverage
+        Fetch  - GET ./api/coverage/{curie}
         """
         try:
             s = Schema()
