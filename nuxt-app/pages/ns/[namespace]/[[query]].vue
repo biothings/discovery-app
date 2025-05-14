@@ -984,14 +984,16 @@ export default {
       }
     },
     findClass(query) {
-      let found = this.findClassInSchema(query);
-      if (found) {
-        console.log("found in schema provided: ", query);
-        return found;
-      } else {
-        this.findClassInRegistry(query);
-        console.log("found in registry: ", query);
-      }
+      // let found = this.findClassInSchema(query);
+      // if (found) {
+      //   console.log("found in schema provided: ", query);
+      //   return found;
+      // } else {
+      //   this.queryForItem(query);
+      //   console.log("found in registry: ", query);
+      // }
+      // always use API to find class/property info
+      this.queryForItem(query);
     },
     findClassInSchema(query) {
       for (var i = 0; i < this.userSchema["hits"].length; i++) {
@@ -1001,14 +1003,18 @@ export default {
       }
       return false;
     },
-    findClassInRegistry(query) {
+    queryForItem(query) {
       let self = this;
+      if (!query.includes(":")) {
+        query = self.namespace + ":" + query;
+        console.log("Updated query, trying for: ", query);
+      }
       axios(
         self.apiUrl +
           "/api/registry/" +
           self.namespace +
           "/" +
-          self.query +
+          query +
           "?v"
       )
         .then((res) => {
