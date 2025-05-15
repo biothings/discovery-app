@@ -19,8 +19,10 @@ from discovery.model import Dataset
 
 def updateDocs(type=None):
     '''
-    Update documents to replace "/view/" with "/ns/" in specific values of @context.
+    Update schemas to replace "/view/" with "/ns/" in specific values of @context.
     Only modify necessary values, preserving the rest of the context as-is.
+    Update discovery.biothings.io URLs to use HTTPS.
+    Update datasets to replace "/view/" with "/ns/" in specific values of @context.
     '''
     if type == "dataset":
         docs = Dataset.search()
@@ -28,6 +30,8 @@ def updateDocs(type=None):
         docs = Schema.search()
     updated_count = 0
     scanned_count = 0
+    # docs that need to change http to https
+    protocol_count = 0
 
     for doc in docs.scan():
         scanned_count += 1
@@ -43,6 +47,11 @@ def updateDocs(type=None):
                     updated = True
                     logging.info(f'Will update @context[{key}] for document {doc.meta.id}')
                     print(f'Will update @context[{key}] for document {doc.meta.id}')
+                if "http://" in value and "discovery.biothings.io" in value:
+                    context[key] = value.replace("http", "https")
+                    protocol_count += 1
+                    updated = True
+                    print(f'Protocol changed: {value}')
 
             if updated:
                 # Uncomment when ready to update
@@ -56,6 +65,7 @@ def updateDocs(type=None):
 
     print(f"Total documents scanned: {scanned_count}")
     print(f"Total documents updated: {updated_count}")
+    print(f"Total documents with protocol change: {protocol_count}")
     logging.info(f"Total documents scanned: {scanned_count}")
     logging.info(f"Total documents updated: {updated_count}")
 
