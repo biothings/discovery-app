@@ -670,25 +670,25 @@ export default {
           self.registry = response.data.hits;
           self.total = response.data.total;
           self.calculatePages();
-          console.log("%c Query executed", "color:violet");
-          console.log(
-            "%c " +
-              JSON.stringify(
-                {
-                  q: query,
-                  size: self.perPage,
-                  from:
-                    self.page == 1
-                      ? self.page - 1
-                      : (self.page - 1) * self.perPage,
-                  sorting: self.sortChange,
-                },
-                null,
-                2
-              ),
-            "color:orange"
-          );
-          console.log("%c hits: " + response.data.total, "color:limegreen");
+          // console.log("%c Query executed", "color:violet");
+          // console.log(
+          //   "%c " +
+          //     JSON.stringify(
+          //       {
+          //         q: query,
+          //         size: self.perPage,
+          //         from:
+          //           self.page == 1
+          //             ? self.page - 1
+          //             : (self.page - 1) * self.perPage,
+          //         sorting: self.sortChange,
+          //       },
+          //       null,
+          //       2
+          //     ),
+          //   "color:orange"
+          // );
+          // console.log("%c hits: " + response.data.total, "color:limegreen");
           self.$store.commit("setLoading", { value: false });
         })
         .catch((err) => {
