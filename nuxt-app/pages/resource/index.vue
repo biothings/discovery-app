@@ -624,7 +624,7 @@ export default {
                   return doc;
                 });
                 docs = docs.map(self.flatten);
-                console.log(docs);
+                // console.log(docs);
                 let csv = Papa.unparse(docs, {
                   header: true,
                   delimiter: ",",
@@ -781,7 +781,7 @@ export default {
           gf?.template_aliases?.includes(item.value.toLowerCase())
         ) {
           gf.active = !gf.active;
-          console.log(gf, "FOUND");
+          // console.log(gf, "FOUND");
           if (gf.name.includes("N3C") && gf.active == true) {
             self.N3CView = true;
           }
@@ -915,9 +915,9 @@ export default {
         .get(url, config)
         .then(function (response) {
           self.hits = response.data.hits;
-          console.log("%c Query executed", "color:hotpink");
-          console.log("%c " + JSON.stringify(config, null, 2), "color:blue");
-          console.log("%c hits: " + response.data.total, "color:limegreen");
+          // console.log("%c Query executed", "color:hotpink");
+          // console.log("%c " + JSON.stringify(config, null, 2), "color:blue");
+          // console.log("%c hits: " + response.data.total, "color:limegreen");
           self.$store.commit("setLoading", { value: false });
           self.total = response.data.total;
           self.calculatePages();
