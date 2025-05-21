@@ -511,7 +511,6 @@
             <input
               id="showButton"
               class="form-control slider m-auto"
-              @change="changeView()"
               title="Show this class only and any validation included"
               type="checkbox"
               v-model="validationView"
@@ -643,6 +642,7 @@ export default {
       treeBuildErr: false,
       apiUrl: "",
       schemaMeta: {},
+      tempView: false
     };
   },
   computed: {
@@ -798,6 +798,9 @@ export default {
           self.$store.commit("saveSchemaForViewer", payload);
           this.orderAlphabetically();
 
+          console.log('temp view')
+          self.tempView = true;
+
           if (self.query) {
             self.handleQuery();
           }
@@ -915,7 +918,7 @@ export default {
 
         self.rootNode = rootNode;
       } catch (e) {
-        console.log("Oh no...", e);
+        // console.log("Oh no...", e);
         self.treeBuildErr = true;
       } finally {
       }
@@ -980,20 +983,23 @@ export default {
         payload["queryContent"] = prop;
         self.$store.commit("checkIFValidationView", payload);
       } else {
-        console.log("NO MATCH: " + self.query);
+        // console.log("NO MATCH: " + self.query);
       }
     },
     findClass(query) {
-      // let found = this.findClassInSchema(query);
-      // if (found) {
-      //   console.log("found in schema provided: ", query);
-      //   return found;
-      // } else {
-      //   this.queryForItem(query);
-      //   console.log("found in registry: ", query);
-      // }
-      // always use API to find class/property info
-      this.queryForItem(query);
+      if(this.tempView){
+        let found = this.findClassInSchema(query);
+        if (found) {
+          // console.log("found in schema provided: ", query);
+          return found;
+        } else {
+          this.queryForItem(query);
+          // console.log("found in registry: ", query);
+        }
+      }else{
+        // always use API to find class/property info
+        this.queryForItem(query);
+      }
     },
     findClassInSchema(query) {
       for (var i = 0; i < this.userSchema["hits"].length; i++) {
@@ -1007,7 +1013,7 @@ export default {
       let self = this;
       if (!query.includes(":")) {
         query = self.namespace + ":" + query;
-        console.log("Updated query, trying for: ", query);
+        // console.log("Updated query, trying for: ", query);
       }
       axios(
         self.apiUrl +
@@ -1110,10 +1116,6 @@ export default {
         }
       }
       // console.log("All parents info complete: ", this.userSchemaParents);
-    },
-
-    changeView() {
-      console.log("changing view...");
     },
     drawGraph(g, container) {
       jsnx.draw(g, {
@@ -1323,7 +1325,7 @@ export default {
         .then((result) => {
           if (result.value) {
             let q = self.findClass(itemname);
-            console.log("q", q);
+            // console.log("q", q);
             if (q) {
               axios
                 .get(
@@ -1392,14 +1394,14 @@ export default {
       allowHTML: true,
       theme: "light",
     });
-    console.log(
-      "%c NAMESPACe: " + this.namespace,
-      "background: hotpink; color:white; padding:4px;"
-    );
-    console.log(
-      "%c QUERY " + this.query,
-      "background: blue; color:white; padding:4px;"
-    );
+    // console.log(
+    //   "%c NAMESPACe: " + this.namespace,
+    //   "background: hotpink; color:white; padding:4px;"
+    // );
+    // console.log(
+    //   "%c QUERY " + this.query,
+    //   "background: blue; color:white; padding:4px;"
+    // );
     self.checkIfNamespaceIsRegistered(self.namespace);
   },
 };
