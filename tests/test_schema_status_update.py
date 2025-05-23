@@ -1,16 +1,15 @@
 """
-    Tests for updating the schema status.
+    Tests for updating the schema status in the discovery registry.
+    Each test exercises a different outcome of attempting to update a schema's metadata from a remote JSON-LD file.
 """
-
-import pytest # for testing ?
+import pytest
 import datetime
 
 from discovery.registry import schemas
 from discovery.utils import indices
 from discovery.model import Schema as ESSchemaFile
 
-from .test_base import DiscoveryTestCase # Biothings Testing import here 
-
+from .test_base import DiscoveryTestCase
 
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld" # schema example
@@ -29,14 +28,13 @@ class TestSchemaStatus(DiscoveryTestCase):
     def refresh(self):
         indices.refresh()
     
-    def test_01(self):
+    def test_successful_schema_update_200(self):
         """
-        Success case: 
-        {
-            'refresh_status': 200,
-            'refresh_ts': datetime.datetime(...)
-        }
-        --
+        ✅ Success case: schema is updated from valid remote JSON-LD.
+
+        Expected:
+        - refresh_status: 200
+        - refresh_ts: datetime
         """
         success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
         schemas.update('n3c', user=self.test_user, url=success_url)         # update schema
@@ -44,14 +42,13 @@ class TestSchemaStatus(DiscoveryTestCase):
         assert test_schema._status.refresh_status == 200 or 299
         assert isinstance(test_schema._status.refresh_ts, datetime.datetime) 
 
-    def test_02(self):
+    def test_update_failure_invalid_url_400(self):
         """
-        Fail Case 1: URL failure
-                {
-            'refresh_status': 400,
-            'refresh_ts': datetime.datetime(...),
-            'refresh_msg': 'invalid url or protocol'
-        }
+        ❌ Fail case: Invalid schema URL (missing protocol).
+
+        Expected:
+        - refresh_status: 400
+        - refresh_msg: 'invalid url or protocol'
         """
         fail_url = '//raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
         schemas.update('n3c', user=self.test_user, url=fail_url)
@@ -59,14 +56,13 @@ class TestSchemaStatus(DiscoveryTestCase):
         assert test_schema._status.refresh_status == 400
         assert test_schema._status.refresh_msg == 'invalid url or protocol'
 
-    def test_03(self):
+    def test_update_failure_invalid_username_400(self):
         """
-        Fail Case 2: Username failure
-        {
-            'refresh_status': 400,
-            'refresh_ts': datetime.datetime(...),
-            'refresh_msg': 'user name is required'
-        }
+        ❌ Fail case: Invalid user type (int instead of str).
+
+        Expected:
+        - refresh_status: 400
+        - refresh_msg: 'user name is required'
         """
         fail_user = 65653
         schemas.update(self.test_namespace, user=fail_user, url=self.test_url)
@@ -75,14 +71,13 @@ class TestSchemaStatus(DiscoveryTestCase):
         assert test_schema._status.refresh_msg == 'user name is required'
 
 
-    def test_04(self):
+    def test_update_failure_404_not_found(self):
         """
-        Fail Case 3: 404 Error
-        {
-            'refresh_status': 404,
-            'refresh_ts': datetime.datetime(...),
-            'refresh_msg': '404 Client Error: Not Found for url: [URL]'
-        }
+        ❌ Fail case: Remote schema URL returns 404.
+
+        Expected:
+        - refresh_status: 404
+        - refresh_msg includes: '404 Client Error'
         """
         fail_url = 'https://www.google.com/gjreoghjerioe'
         schemas.update(self.test_namespace, user=self.test_user, url=fail_url)
@@ -90,15 +85,13 @@ class TestSchemaStatus(DiscoveryTestCase):
         assert test_schema._status.refresh_status == 404
         assert isinstance(test_schema._status.refresh_msg, str)
 
-    def test_05(self):
+    def test_update_failure_invalid_doc_499(self):
         """
-        Fail Case 4: 499 Error - INVALID
-        {
-            "refresh_status": 499,
-            "refresh_ts": datetime.datetime(...),
-            "refresh_msg": "invalid document"
-        }
-        
+        ❌ Fail case: Manually passed `doc` is not valid JSON.
+
+        Expected:
+        - refresh_status: 499
+        - refresh_msg: 'invalid document'
         """
         fail_doc = "FAIL_TYPE_STRING"
         success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
@@ -107,13 +100,13 @@ class TestSchemaStatus(DiscoveryTestCase):
         assert test_schema._status.refresh_status == 499
         assert test_schema._status.refresh_msg == 'invalid document'
 
-    def test_06(self):
-        """Unique 299 code
-        {
-            "refresh_status": 299,
-            "refresh_ts": datetime.datetime(...),
-            "refresh_msg": "invalid document"
-        }
+    def test_update_success_with_new_version_299(self):
+        """
+        ✅ Success case: Schema updated with valid new version manually via `doc`.
+
+        Expected:
+        - refresh_status: 299
+        - refresh_msg: 'new version available and update successful'
         """
         import json 
         test_doc = "./tests/test_schema/mock_updated_schema.json"
@@ -122,5 +115,5 @@ class TestSchemaStatus(DiscoveryTestCase):
         success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
         schemas.update('n3c', user=self.test_user, url=success_url, doc=_doc)  # update schema
         test_schema = ESSchemaFile.get(id='n3c')
-        assert test_schema._status.refresh_status == 499
-        assert test_schema._status.refresh_msg == 'invalid document'
+        assert test_schema._status.refresh_status == 299
+        assert test_schema._status.refresh_msg == 'new version available and update successful'
