@@ -3,10 +3,8 @@
 """
 import json
 import os
-
 import pytest
 
-from discovery.model.schema import Schema, SchemaClass
 from discovery.registry import schemas
 from discovery.utils import indices
 
@@ -21,136 +19,74 @@ BACKUP_FILE_SCHEMA = os.path.join(dir_path,"test_schema/dde_test_schema.json")
 
 @pytest.fixture(scope="module", autouse=True)
 def setup():
-    schema_file = open(BACKUP_FILE_SCHEMA)
-    schema_class_file = open(BACKUP_FILE_SCHEMA_CLASS)
-    schema_dict = json.load(schema_file)
-    schema_class_dict = json.load(schema_class_file)
-    api_schema = schema_dict["discover_schema"]
-    api_schema_class = schema_class_dict["discover_schema_class"]
-
-    for doc in api_schema["docs"]:
-        file = Schema(**doc)
-        file.meta.id = doc["_id"]
-    file.save()
-
-    for doc in api_schema_class["docs"]:
-        file = SchemaClass(**doc)
-    file.save()
-    
     if not schemas.exists("n3c"):
-        schemas.add(namespace="n3c", url=N3C_URL, user="minions@example.com")
+        print("added n3c schema")
+        schemas.add("n3c", N3C_URL, "minions@example.com")
+    if not schemas.exists("bts"):
+        schemas.add("bts", BTS_URL, "minions@example.com")
 
 class DiscoverySchemaEndpointTest(DiscoveryTestCase):
-    TEST_DATA_DIR_NAME = "test_schema"
+    @staticmethod
+    def get_dataset(filename):
+        with open(f"tests/test_schema/{filename}") as dataset:
+            return json.load(dataset)
+
     def refresh(self):
         indices.refresh()
 
-    def test_01_get(self):
-        """Invalid Namespace
-       {
-        "code": 404,
-        "success": false,
-        "error": "The requested namespace or class, bt, does not exist in registry."
-        }
-        """
+    @pytest.mark.invalid_namespace
+    def test_invalid_namespace_returns_404(self):
+        """GET /schema/bt — Expect 404 for invalid namespace"""
         self.request("schema/bt", method="GET", expect=404)
 
-    def test_10_get(self):
-        """GET /api/schema/<namespace>
-        {
-            "@context": {
-                "bts": "http://schema.biothings.io/",
-                "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-                "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-                "schema": "http://schema.org/",
-                "xsd": "http://www.w3.org/2001/XMLSchema#"
-            },
-            "@graph": [ ... ],      // items
-            "@id": "http://schema.biothings.io/#0.1"
-        }
-        """
+    @pytest.mark.valid_namespace
+    def test_valid_namespace_returns_context_graph_id(self):
+        """GET /schema/bts — Expect valid JSON-LD with @id, @context, @graph"""
         res = self.request("schema/bts").json()
         assert res["@id"] == "http://schema.biothings.io/#0.1"
         assert res["@context"]
         assert res["@graph"]  # add property//size check
 
-    def test_11_get(self):
-        """GET /api/schema/<namespace>?meta=1
-        {
-            "@context": {
-                "bts": "http://schema.biothings.io/",
-                "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-                "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-                "schema": "http://schema.org/",
-                "xsd": "http://www.w3.org/2001/XMLSchema#"
-            },
-            "@graph": [ ... ],      // items
-            "@id": "http://schema.biothings.io/#0.1",
-            "_meta": {
-                "url": "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld",
-                "username": "cwu@scripps.edu",
-                "last_updated": "2023-02-16 13:23:17.766097-05:00",
-                "date_created": "2023-02-16 13:23:17.766124-05:00",
-                "refresh_status": 200,
-                "refresh_ts": "2023-02-16 13:23:17.766071-05:00"
-            }
-        }
-        """
+    @pytest.mark.meta_namespace
+    def test_meta_query_returns_metadata_block(self):
+        """GET /schema/bts?meta=1 — Expect _meta block with source URL"""
         res = self.request("schema/bts?meta=1").json()
-        assert res["_meta"]  # // check for existing expected 4 data points in dict
-        assert res["_meta"]["url"] == BTS_URL
+        meta = res["_meta"]
 
-    def test_12_get(self):
-        """GET /api/schema/<namespace>:<class_id>
-        {
-            "@context": {<-->},
-            "@id": "https://discovery.biothings.io/view/niaid/",
-            "@graph": [<-->]        // items
-        }
-        """
+        assert meta, "_meta block should not be empty"
+        assert meta["url"] == BTS_URL, "Unexpected _meta.url"
+        assert "username" in meta and isinstance(meta["username"], str), "_meta.username should be present"
+        assert "date_created" in meta and isinstance(meta["date_created"], str), "_meta.date_created should be present"
+        assert "last_updated" in meta and isinstance(meta["last_updated"], str), "_meta.last_updated should be present"
+
+    @pytest.mark.class_id
+    def test_valid_class_id_returns_biological_entity(self):
+        """GET /schema/bts:BiologicalEntity — Expect class with matching @id"""
         res = self.request("schema/bts:BiologicalEntity")
         res_data = res.json()
         assert res_data["@graph"][0]["@id"] == "bts:BiologicalEntity"
 
-    def test_13_get(self):
-        """Invalid Property (non-existing)
-        GET /api/schema/<namespace>:<class_id>
-        {
-            "code": 404,
-            "success": false,
-            "error": "The requested namespace or class, bts:fds, does not exist in registry."
-        }
-        """
+    @pytest.mark.invalid_class_id
+    def test_invalid_class_id_returns_404(self):
+        """GET /schema/bts:fds — Expect 404 for unknown class"""
         res = self.request("schema/bts:fds", method="GET", expect=404)
 
-    def test_14_get(self):
-        """GET /api/schema/<namespace>:<class_id>/validation
-        {
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "type": "object",
-            "properties": [<-->],   //items
-            "required": [<-->],     //items
-            "recommended": [<-->]   //items
-        }
-
-        """
+    @pytest.mark.validation_schema
+    def test_class_validation_schema_returns_properties(self):
+        """GET /schema/n3c:Dataset/validation — Expect validation schema with properties"""
         res = self.request("schema/n3c:Dataset/validation")
         res_data = res.json()
-        assert res_data["properties"]  # add field check in properties -- any other unique values
 
-    def test_15_get(self):
-        """GET /api/schema/schema?meta=1
-        {
-            "$comment": "internally provided by biothings.schema",
-            "@context": {
-                "schema": "http://schema.org/"
-                },
-            "_meta": {
-                "url": "https://schema.org/docs/tree.jsonld",
-                "version": "15.0"
-                }
-        }
-        """
+        assert "properties" in res_data, "'properties' key is missing in validation schema"
+        props = res_data["properties"]
+
+        # Check for presence of key top-level metadata fields
+        for field in ["name", "description", "author", "license", "identifier"]:
+            assert field in props, f"Expected field '{field}' not found in properties"
+
+    @pytest.mark.meta_schema
+    def test_schema_meta_returns_version(self):
+        """GET /schema/schema?meta=1 — Expect built-in meta block with version string"""
         res = self.request("schema/schema?meta=1")
         res_data = res.json()
         assert res_data["_meta"]["version"]
