@@ -14,6 +14,7 @@ from discovery.utils.backup import daily_backup_routine
 from discovery.utils.coverage import daily_coverage_update
 from discovery.utils.update import daily_schema_update
 
+define("prod", default=False, help="Run in production mode", type=bool)
 define("proxy_url", default="http://localhost:3000/", help="localhost port serving frontend")
 
 # Create a lock can only be acquired by one process.
@@ -47,6 +48,6 @@ def run_routine():
 
 if __name__ == "__main__":
     options.parse_command_line()
-    if not options.debug:
+    if not options.debug and options.prod:
         crontab("0 0 * * *", func=run_routine, start=True)  # run daily at mid-night
     main(HANDLERS, use_curl=True)
