@@ -13,9 +13,6 @@ from .test_base import DiscoveryTestCase
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-BACKUP_FILE_SCHEMA_CLASS = os.path.join(dir_path,"test_schema/dde_test_schema_class.json")
-BACKUP_FILE_SCHEMA = os.path.join(dir_path,"test_schema/dde_test_schema.json")
 
 @pytest.fixture(scope="module", autouse=True)
 def setup():
@@ -26,11 +23,6 @@ def setup():
         schemas.add("bts", BTS_URL, "minions@example.com")
 
 class DiscoverySchemaEndpointTest(DiscoveryTestCase):
-    @staticmethod
-    def get_dataset(filename):
-        with open(f"tests/test_schema/{filename}") as dataset:
-            return json.load(dataset)
-
     def refresh(self):
         indices.refresh()
 
