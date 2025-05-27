@@ -37,14 +37,29 @@ class TestSchemaViewer(BiothingsTestCase):
     def test_02(self):
         """Fail Validation
         {
-            "code": 400,
+            "code": 200,
             "success": false,
-            "error": "field doi in $validation is not correctly documented"
+            "errors": [
+                {
+                "message": "field \"doi\" in \"$validation\" is not defined in this class or any of its parent classes",
+                "error_type": "invalid_validation_schema",
+                "field": "doi",
+                "record_id": "https://discovery.biothings.io/view/outbreak/Dataset"
+                },....
         }
         """
         url = "https://raw.githubusercontent.com/biothings/discovery-app/master/tests/test_schema/dataset_invalid_1.jsonld"
-        res = self.request("/api/view?url=" + url, expect=400).json()
-        assert res["error"] == "field doi in $validation is not correctly documented"
+        res = self.request("/api/view?url=" + url, expect=200).json()  # 200 since validation is returned in JSON
+
+        assert "validation" in res
+        assert not res["validation"]["valid"]
+
+        error_fields = [e["field"] for e in res["validation"]["errors"]]
+        assert "doi" in error_fields
+
+        # Optional: check specific error message for clarity
+        messages = [e["message"] for e in res["validation"]["errors"]]
+        assert any("field \"doi\" in \"$validation\" is not defined" in msg for msg in messages)
 
     def test_03(self):
         """Invalid Json

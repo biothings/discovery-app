@@ -70,7 +70,6 @@ class TestSchemaStatus(DiscoveryTestCase):
         assert test_schema._status.refresh_status == 400
         assert test_schema._status.refresh_msg == 'user name is required'
 
-
     def test_update_failure_404_not_found(self):
         """
         ❌ Fail case: Remote schema URL returns 404.
