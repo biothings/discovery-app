@@ -4,12 +4,15 @@ from tornado.web import create_signed_value
 
 
 class DiscoveryTestCase(BiothingsWebAppTest):
-    @classmethod
-    def cookie_header(cls, username):
+    # @classmethod
+    def cookie_header(self, username):
         cookie_name, cookie_value = "user", {"login": username}
         secure_cookie = create_signed_value(
-            cls.settings.COOKIE_SECRET, cookie_name, json_encode(cookie_value)
+            self.config.COOKIE_SECRET,  # loaded from config.py
+            cookie_name,
+            json_encode(cookie_value)
         )
+        # print(f"{'='.join((cookie_name, secure_cookie.decode()))}")
         return {"Cookie": "=".join((cookie_name, secure_cookie.decode()))}
 
     @property
@@ -22,5 +25,7 @@ class DiscoveryTestCase(BiothingsWebAppTest):
 
     def get_app(self):
         app = super().get_app()
+        # app.settings["COOKIE_SECRET"] = self.config.COOKIE_SECRET 
         app.settings["debug"] = True
         return app
+
