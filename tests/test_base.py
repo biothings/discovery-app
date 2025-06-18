@@ -12,7 +12,6 @@ class DiscoveryTestCase(BiothingsWebAppTest):
             cookie_name,
             json_encode(cookie_value)
         )
-        # print(f"{'='.join((cookie_name, secure_cookie.decode()))}")
         return {"Cookie": "=".join((cookie_name, secure_cookie.decode()))}
 
     @property
@@ -25,7 +24,6 @@ class DiscoveryTestCase(BiothingsWebAppTest):
 
     def get_app(self):
         app = super().get_app()
-        # app.settings["COOKIE_SECRET"] = self.config.COOKIE_SECRET 
         app.settings["debug"] = True
         return app
 
