@@ -805,27 +805,14 @@ export default {
             self.handleQuery();
           }
         } else {
-          // IF NO SCHEMA AT ALL
-          if (sessionStorage.getItem(self.namespace)) {
-            // Last VIEWED DAT MATCHES url
-            localStorage.setItem(
-              "user-schema-classes",
-              sessionStorage.getItem(self.namespace)
-            );
-            localStorage.setItem(
-              "user-schema-url",
-              sessionStorage.getItem(self.namespace + "-url")
-            );
-            self.loadSchema();
-          } else {
-            // DATA DOES NOT EXIST AT All
+            // reroute to plauground if no schema found
             let timerInterval;
             self.$swal.fire({
               icon: "error",
-              title: "Page Does Not Exist",
+              title: "Namespace does not exist or expired",
               html: "Taking you to the Schema Playground in <b></b> seconds...",
-
-              timer: 3000,
+              footer:"Temporary namespaces are cleared when you navigate away from the temporary page.",
+              timer: 5000,
               didClose: () => {
                 self.$router.push({ path: "/schema-playground" });
               },
@@ -840,7 +827,6 @@ export default {
                 clearInterval(timerInterval);
               },
             });
-          }
         }
       }
     },
