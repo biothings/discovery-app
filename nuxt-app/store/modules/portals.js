@@ -7,6 +7,8 @@ import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import creiddIcon from "~~/assets/img/creid/icon.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
 import move from "~~/assets/img/move.png";
+import revampp_color from "~~/assets/img/revampp-color.png";
+import revampp_white from "~~/assets/img/revampp-white.png";
 
 export const portals = {
   state: () => ({
@@ -83,6 +85,37 @@ export const portals = {
         ],
         datasets: "/resource?template=nde:dataset",
         colors: [{ hex: "#3684af" }, { hex: "#103b56" }],
+      },
+      {
+        name: "NIAID ReVAMPP Research Network Portal",
+        shortName: "NIAID ReVAMPP Research Network Portal",
+        privateSubmissionsOnly: true,
+        privateOrganization: {
+          name: "NIAID-Data-Ecosystem",
+        },
+        keyName: "revampp",
+        header:
+          "Register your ReVAMPP Network datasets for inclusion in the NIAID Data Ecosystem Discovery Portal",
+        linkname: "revampp",
+        description: `<p>The Research and Development of Vaccines and Monoclonal Antibodies for Pandemic Preparedness (ReVAMPP) Network Data Access Portal allows ReVAMPP members to upload details on research datasets they have submitted to external repositories.</p>
+        <p>Information submitted here will automatically be ingested into the NIAID Data Ecosystem Discovery Portal. The NIAID Data Ecosystem Discovery Portal harvests metadata from dataset repositories to enable easy cross-platform dataset searching and filtering of data on infectious and immune-mediated diseases.</p>
+        <p>ReVAMPP researchers who do not already deposit data in repositories accessible to the NIAID Data Ecosystem Discovery Portal can register their datasets using this platform.</p>
+        <p></p>`,
+        image: revampp_color,
+        portalicon: revampp_white,
+        site: "https://revampp.org ",
+        schema: "/ns/revampp",
+        showCoverage: false,
+        coverage: ["Dataset"],
+        guides: [
+          {
+            guide: "/guide/revampp/Dataset",
+            name: "Dataset",
+            registry: "/resource?template=revampp:dataset",
+          },
+        ],
+        datasets: "/resource?template=revampp:dataset",
+        colors: [{ hex: "#0f222f" }, { hex: "#10426c" }, { hex: "#05af55" }],
       },
       {
         name: "NIAID Systems Biology",
