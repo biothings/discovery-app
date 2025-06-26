@@ -1,3 +1,8 @@
+"""
+    Tests for dataset metadata registration and update using SmartAPI and NIAID schemas.
+    These integration tests simulate realistic API interactions and are meant to be run in sequence.
+"""
+
 import json
 
 import pytest
