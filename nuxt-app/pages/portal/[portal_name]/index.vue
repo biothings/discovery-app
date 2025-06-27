@@ -50,7 +50,7 @@ if (portal_name) {
       break;
     case "revampp":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/ry0C25bK/niaid.jpg";
+      featuredImg = "https://i.postimg.cc/9Mms0J6P/niaid.jpg";
       break;
     default:
       redirect();
