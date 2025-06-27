@@ -324,6 +324,7 @@ import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import creidIcon from "~~/assets/img/creid/icon.svg";
 import outbreakIcon from "~~/assets/img/icon-01.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
+import revampp from "~~/assets/img/revampp.png";
 
 import { mapGetters } from "vuex";
 
@@ -389,6 +390,15 @@ export default {
       //value is the final val set to ES
       all_filters: {
         "_meta.guide": [
+          {
+            name: "ReVAMPP:Dataset",
+            value: "/guide/revampp/dataset",
+            // works wth 'template' url parameter
+            template_aliases: ["revampp:dataset"],
+            active: false,
+            icon: revampp,
+            type: "_meta.guide",
+          },
           {
             name: "MOVE:Dataset",
             value: "/guide/move/dataset",
