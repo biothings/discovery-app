@@ -108,7 +108,7 @@ class TestSchemaStatus(DiscoveryTestCase):
         - refresh_msg: 'new version available and update successful'
         """
         import json 
-        test_doc = "./tests/test_schema/mock_updated_schema.json"
+        test_doc = "./tests/test_data/test_schema/mock_updated_schema.json"
         f = open(test_doc)
         _doc = json.load(f)
         success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
