@@ -5,10 +5,15 @@ import json
 import os
 import pytest
 
+from biothings.tests.web import BiothingsWebAppTest
 from discovery.registry import schemas
 from discovery.utils import indices
 
 from .test_base import DiscoveryTestCase
+
+from elasticsearch import Elasticsearch
+
+
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
@@ -22,7 +27,8 @@ def setup():
     if not schemas.exists("bts"):
         schemas.add("bts", BTS_URL, "minions@example.com")
 
-class DiscoverySchemaEndpointTest(DiscoveryTestCase):
+class DiscoverySchemaEndpointTest(BiothingsWebAppTest):
+    # TEST_DATA_DIR_NAME = 'schema'
     def refresh(self):
         indices.refresh()
 
