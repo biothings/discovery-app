@@ -22,8 +22,6 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
-        with:
-          ref: schema-update-status
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
