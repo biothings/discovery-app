@@ -27,7 +27,7 @@ class TestSchemaStatus(DiscoveryTestCase):
 
     def refresh(self):
         indices.refresh()
-    
+
     def test_successful_schema_update_200(self):
         """
         ✅ Success case: schema is updated from valid remote JSON-LD.
@@ -40,7 +40,7 @@ class TestSchemaStatus(DiscoveryTestCase):
         schemas.update('n3c', user=self.test_user, url=success_url)         # update schema
         test_schema = ESSchemaFile.get(id='n3c')              # get newly updated schema
         assert test_schema._status.refresh_status == 200 or 299
-        assert isinstance(test_schema._status.refresh_ts, datetime.datetime) 
+        assert isinstance(test_schema._status.refresh_ts, datetime.datetime)
 
     def test_update_failure_invalid_url_400(self):
         """
@@ -107,7 +107,7 @@ class TestSchemaStatus(DiscoveryTestCase):
         - refresh_status: 299
         - refresh_msg: 'new version available and update successful'
         """
-        import json 
+        import json
         test_doc = "./tests/test_data/test_schema/mock_updated_schema.json"
         f = open(test_doc)
         _doc = json.load(f)
