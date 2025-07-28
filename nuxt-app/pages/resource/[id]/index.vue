@@ -287,7 +287,7 @@ const schemaLink = computed(() => {
     let parts = metadata.value["@type"].split(":");
     return "/ns/" + parts[0] + "/" + parts[1];
   }
-  return false;
+  return "/ns/schema/" + metadata.value["@type"];
 });
 
 getMetadata(id);

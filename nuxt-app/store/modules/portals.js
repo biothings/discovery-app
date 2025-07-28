@@ -86,7 +86,7 @@ export const portals = {
         icon_color: "#5fb5e5",
       },
       {
-        name: "The National COVID Cohort Collaborative (N3C)",
+        name: "The National Clinical Cohort Collaborative (N3C)",
         shortName: "N3C",
         privateSubmissionsOnly: false,
         privateOrganization: {
@@ -97,13 +97,13 @@ export const portals = {
           "The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.",
         linkname: "n3c",
         description: `<p>
-              The National COVID Cohort Collaborative (N3C) is a complementary and synergistic partnership among the <a href="https://ncats.nih.gov/ctsa" target="_blank">Clinical and Translational Science Awards (CTSA) Program</a> hubs, the <a href="https://cd2h.org/" target="_blank">National Center for Data to Health (CD2H)</a>, distributed clinical data networks (PCORnet, OHDSI, ACT/i2b2, TriNetX), and other partner organizations, with overall stewardship by NIH’s  <a href="https://ncats.nih.gov/" target="_blank">National Center for Advancing Translational Sciences (NCATS)</a>.
+              The National Clinical Cohort Collaborative (N3C) is a complementary and synergistic partnership among the <a href="https://ncats.nih.gov/ctsa" target="_blank">Clinical and Translational Science Awards (CTSA) Program</a> hubs, the <a href="https://cd2h.org/" target="_blank">National Center for Data to Health (CD2H)</a>, distributed clinical data networks (PCORnet, OHDSI, ACT/i2b2, TriNetX), and other partner organizations, with overall stewardship by NIH’s  <a href="https://ncats.nih.gov/" target="_blank">National Center for Advancing Translational Sciences (NCATS)</a>.
             </p><p>
               The N3C aims to improve the efficiency and accessibility of analyses using a very large row-level (patient-level) COVID-19 clinical dataset and demonstrate a novel approach for collaborative pandemic data sharing.
             </p>`,
         image: n3cLogo,
         portalicon: n3c,
-        site: "https://covid.cd2h.org/N3C",
+        site: "https://n3c.ncats.nih.gov/clinical-cohort",
         schema: "/ns/n3c",
         showCoverage: true,
         coverage: ["Dataset"],
