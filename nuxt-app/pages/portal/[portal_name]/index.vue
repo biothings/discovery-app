@@ -42,7 +42,7 @@ if (portal_name) {
       break;
     case "n3c":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/ry0C25bK/n3cfeatured.jpg";
+      featuredImg = "https://i.postimg.cc/SRbxhC4k/n3cfeatured.jpg";
       break;
     case "move":
       portal = portals.find((item) => item.keyName == portal_name);
