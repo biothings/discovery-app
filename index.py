@@ -1,6 +1,8 @@
 """ Tornado Web Server Starting Script - Application Entry Point """
 
 import logging
+import secrets
+import time
 from threading import Thread
 
 from aiocron import crontab
@@ -24,22 +26,39 @@ _lock = FileLock(".lock", timeout=0)
 
 def routine():
     logger = logging.getLogger("routine")
+
+    # Add jitter: random delay between 100 and 500 milliseconds (adjust range as needed)
+    jitter_ms = secrets.randbelow(401) + 100 # Jitter in milliseconds (100 to 500)
+    jitter_seconds = jitter_ms / 1000  # Convert milliseconds to seconds
+    logger.info(f"Applying jitter delay of {jitter_ms:.2f} milliseconds before acquiring lock.")
+    time.sleep(jitter_seconds)
+
     try:
-        _lock.acquire()
-        logger.info("Schedule lock acquired successfully.")
+        # if previously acquired,
+        # it won't block here
+        lock_acquired = _lock.acquire()
+        if lock_acquired:
+            logger.info("Schedule lock acquired successfully.")
+            logger.info("update_n3c_routine()")
+            update_n3c_routine()
+            logger.info("daily_backup_routine()")
+            daily_backup_routine()
+            logger.info("daily_schema_update()")
+            daily_schema_update()
+            logger.info("daily_coverage_update()")
+            daily_coverage_update()
+            _lock.release()
+            logger.info("Schedule lock released successfully.")
     except Timeout:
         logger.warning("Schedule lock acquired by another process. No need to run it in this process.")
-    else:
-        logger.info("update_n3c_routine()")
-        update_n3c_routine()
-        logger.info("daily_backup_routine()")
-        daily_backup_routine()
-        logger.info("daily_schema_update()")
-        daily_schema_update()
-        logger.info("daily_coverage_update()")
-        daily_coverage_update()
-        _lock.release()
-        logger.info("Schedule lock released successfully.")
+    except Exception as e:
+        logger.error(f"An error occurred during the routine: {e}")
+        logger.error("Stack trace:", exc_info=True)
+    finally:
+        if lock_acquired:
+            _lock.release()
+            logger.info("Schedule lock released successfully.")
+
 
 def run_routine():
     thread = Thread(target=routine, daemon=True)
