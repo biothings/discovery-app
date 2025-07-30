@@ -1,7 +1,7 @@
 """ Tornado Web Server Starting Script - Application Entry Point """
 
 import logging
-import random
+import secrets
 import time
 from threading import Thread
 
@@ -28,7 +28,7 @@ def routine():
     logger = logging.getLogger("routine")
 
     # Add jitter: random delay between 100 and 500 milliseconds (adjust range as needed)
-    jitter_ms = random.uniform(100, 500)  # Jitter in milliseconds
+    jitter_ms = secrets.randbelow(401) + 100 # Jitter in milliseconds (100 to 500)
     jitter_seconds = jitter_ms / 1000  # Convert milliseconds to seconds
     logger.info(f"Applying jitter delay of {jitter_ms:.2f} milliseconds before acquiring lock.")
     time.sleep(jitter_seconds)
