@@ -8,7 +8,6 @@ it restores them from a backup JSON file.
 
 import os
 import pytest
-import time
 from elasticsearch import Elasticsearch
 
 from discovery.utils.backup import restore_from_file
