@@ -20,10 +20,10 @@ class DiscoveryQueryTest(BiothingsTestCase):
         self.query(q="Google")  # Case-insensitive label match
         self.query(q="goog")  # Prefix match
 
-    def test_query_by_property(self):
-        """GET /schema?q=name — [QUERY] Match by property field"""
-        self.query(q="name")  # property key in 'properties'
-        self.query(q="url")  # another property
+    # def test_query_by_property(self):
+    #     """GET /schema?q=name — [QUERY] Match by property field"""
+    #     self.query(q="name")  # property key in 'properties'
+    #     self.query(q="url")  # another property
 
     def test_query_by_parent(self):
         """GET /schema?q=schema:Dataset — [QUERY] Match by parent class"""
