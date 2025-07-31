@@ -8,6 +8,7 @@ it restores them from a backup JSON file.
 
 import os
 import pytest
+import time
 from elasticsearch import Elasticsearch
 
 from discovery.utils.backup import restore_from_file
@@ -65,17 +66,3 @@ def setup_indices_and_schemas() -> None:
         print(f"⚠️  Missing or empty indices detected: {', '.join(missing_or_empty)}")
         print("🔧 Restoring test data into Elasticsearch...")
         restore_from_file(BACKUP_FILE)
-
-    # if not schemas.exists("niaid"):
-    #     print("📚 Registering NIAID schema...")
-    #     schemas.add("niaid", NIAID_SCHEMA_URL, "minions@example.com")
-
-    # # ✅ Check if CTSA schema is already registered
-    # if not schemas.exists("ctsa"):
-    #     print("📚 Registering CTSA schema...")
-    #     schemas._add_schema_class(CTSA_SCHEMA_URL, "ctsa", "minions@example.com")
-    #     print("⏳ Waiting for Elasticsearch to process the restored data...")
-    #     # time.sleep(5)  # Adjust the wait time as needed
-    #     print("✅ Test data setup complete.")
-    # else:
-    #     print("📚 CTSA schema already exists. Skipping schema registration.")

@@ -3,7 +3,8 @@ git+https://github.com/biothings/biothings_schema.py@70ae38a#egg=biothings_schem
 
 biothings==1.0.1
 #PyLD>=0.7.1
-#jsonschema>=2.6.0
+# For JSON Schema validation
+jsonschema[format]>=4.18.0
 #torngithub==0.2.0
 pycurl>=7.19
 python3-saml==1.9.0  # SAML SSO
