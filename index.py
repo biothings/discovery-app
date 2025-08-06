@@ -1,6 +1,7 @@
 """ Tornado Web Server Starting Script - Application Entry Point """
 
 import logging
+import os
 import secrets
 import time
 from threading import Thread
@@ -19,13 +20,13 @@ from discovery.utils.update import daily_schema_update
 define("prod", default=False, help="Run in production mode", type=bool)
 define("proxy_url", default="http://localhost:3000/", help="localhost port serving frontend")
 
-# Create a lock can only be acquired by one process.
-# Make sure only one process should perform backup routines
-_lock = FileLock(".lock", timeout=0)
-
 
 def routine():
     logger = logging.getLogger("routine")
+
+    # Create a lock can only be acquired by one process.
+    # Make sure only one process should perform backup routines
+    _lock = FileLock(".lock", timeout=0)
 
     # Add jitter: random delay between 100 and 500 milliseconds (adjust range as needed)
     jitter_ms = secrets.randbelow(401) + 100 # Jitter in milliseconds (100 to 500)
@@ -58,6 +59,15 @@ def routine():
         if lock_acquired:
             _lock.release()
             logger.info("Schedule lock released successfully.")
+
+        # Try to delete the .lock file manually if it still exists
+        lock_file_path = ".lock"
+        if os.path.exists(lock_file_path):
+            try:
+                os.remove(lock_file_path)
+                logger.info(".lock file manually deleted.")
+            except Exception as e:
+                logger.warning(f"Could not delete .lock file: {e}")
 
 
 def run_routine():
