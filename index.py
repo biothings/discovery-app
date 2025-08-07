@@ -29,7 +29,7 @@ def get_lock_pid():
             with open(lock_file_path, "r") as f:
                 pid = f.read().strip()
                 return int(pid) if pid.isdigit() else None
-        except Exception:
+        except Exception as e:
             logging.warning(f"Could not read PID from {lock_file_path}: {e}")
             return None
     return None
