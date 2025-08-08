@@ -293,10 +293,11 @@ useHead({
                     role="button"
                     :style="{ background: portal.colors[0].hex }"
                     class="btn text-light btn-lg nd mt-2 tip"
-                    to="/guide/n3c/dataset"
-                    :data-tippy-content="'Add a dataset for ' + portal.name"
+                    to="https://n3c-help.atlassian.net/servicedesk/customer/portal/2/group/3/create/142"
+                    target="_blank"
+                    data-tippy-content="Go to N3C to submit a request"
                   >
-                    Submit Request
+                    Submit Request <font-awesome-icon icon="fas fa-external-link-alt"/>
                   </nuxt-link>
                 </div>
               </div>
