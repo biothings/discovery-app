@@ -26,4 +26,3 @@ class DiscoveryTestCase(BiothingsWebAppTest):
         app = super().get_app()
         app.settings["debug"] = True
         return app
-

@@ -46,10 +46,10 @@ def index_exists_and_has_docs(es: Elasticsearch, index_name: str) -> bool:
 @pytest.fixture(scope="session", autouse=True)
 def setup_indices_and_schemas() -> None:
     """
-    Restore test data into Elasticsearch and ensure CTSA schema is registered.
+    Restore test data into Elasticsearch.
     Automatically runs once per test session.
     """
-    es = Elasticsearch(hosts=["localhost"])
+    es = Elasticsearch(hosts=["http://localhost:9200"])
 
     # ✅ Check if ES indices exist and restore if needed
     missing_or_empty = [
@@ -58,9 +58,6 @@ def setup_indices_and_schemas() -> None:
 
     if not missing_or_empty:
         print("✅ All required indices exist and contain data. Skipping ES restore.")
-        # indices.refresh()
-        # print("🔧 Restoring test data into Elasticsearch...")
-        # restore_from_file(BACKUP_FILE)
     else:
         print(f"⚠️  Missing or empty indices detected: {', '.join(missing_or_empty)}")
         print("🔧 Restoring test data into Elasticsearch...")
