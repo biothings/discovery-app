@@ -21,3 +21,5 @@ _spec.loader.exec_module(_config)
 for _k, _v in _config.__dict__.items():
     if not _k.startswith('_'):
         globals()[_k] = _v
+
+ES_HOST = "http://localhost:9200"
