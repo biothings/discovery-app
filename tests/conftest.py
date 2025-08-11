@@ -8,6 +8,7 @@ it restores them from a backup JSON file.
 
 import os
 import pytest
+
 from elasticsearch import Elasticsearch
 
 from discovery.utils.backup import restore_from_file
@@ -15,7 +16,7 @@ from discovery.utils.backup import restore_from_file
 # Constants
 BACKUP_FILE = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
-    "test_data/dde_backup_simple.json"
+    "test_schema/dde_backup_simple.json"
 )
 INDEX_NAMES = [
     "discover_schema",
@@ -58,6 +59,7 @@ def setup_indices_and_schemas() -> None:
 
     if not missing_or_empty:
         print("✅ All required indices exist and contain data. Skipping ES restore.")
+
     else:
         print(f"⚠️  Missing or empty indices detected: {', '.join(missing_or_empty)}")
         print("🔧 Restoring test data into Elasticsearch...")

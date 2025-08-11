@@ -9,7 +9,6 @@ import pytest
 from discovery.registry import datasets, schemas
 from discovery.utils import indices
 
-
 from .test_base import DiscoveryTestCase
 
 NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/SuLab/niaid-data-portal/master/schema/NIAIDDataset.json"
@@ -54,33 +53,33 @@ class TestDatasetMetadata(DiscoveryTestCase):
         doc = self.get_dataset("wellderly.json")
         self.request("dataset", method="POST", json=doc, headers=self.auth_user)
 
-    # # # register infection
+    # register infection
 
     def test_004_post(self):
         # unsuccessful attempt to register infection
         doc = self.get_dataset("niaid_infection.json")
         self.request("dataset", method="POST", json=doc, headers=self.auth_user, expect=400)
 
-    # def test_005_post(self): # TODO fix niaid schema issue
-    #     # successful attempt to register infection
-    #     doc = self.get_dataset("niaid_infection.json")
-    #     self.request(
-    #         "dataset?schema=niaid::niaid:NiaidDataset",
-    #         method="POST",
-    #         json=doc,
-    #         headers=self.auth_user,
-    #     )
+    def test_005_post(self):
+        # successful attempt to register infection
+        doc = self.get_dataset("niaid_infection.json")
+        self.request(
+            "dataset?schema=niaid::niaid:Dataset",
+            method="POST",
+            json=doc,
+            headers=self.auth_user,
+        )
 
-    # # register human (private)
+    # register human (private)
 
-    # def test_006_post(self): # TODO fix niaid schema issue
-    #     doc = self.get_dataset("niaid_human.json")
-    #     self.request(
-    #         "dataset?schema=niaid::niaid:NiaidDataset&private",
-    #         method="POST",
-    #         json=doc,
-    #         headers=self.auth_user,
-    #     )
+    def test_006_post(self):
+        doc = self.get_dataset("niaid_human.json")
+        self.request(
+            "dataset?schema=niaid::niaid:Dataset&private",
+            method="POST",
+            json=doc,
+            headers=self.auth_user,
+        )
 
     # update wellderly
 
@@ -140,7 +139,7 @@ class TestDatasetMetadata(DiscoveryTestCase):
 
     def test_021_get_public(self):
         res = self.request("dataset?user=minions@example.com").json()
-        assert res["total"] == 1
+        assert res["total"] == 2
 
     def test_022_get_public(self):
         res = self.request("dataset?user=villain@example.com").json()
@@ -160,32 +159,32 @@ class TestDatasetMetadata(DiscoveryTestCase):
             "dataset?private&user=minions@example.com", headers=self.evil_user, expect=403
         )
 
-    # def test_034_get_all_private(self): # TODO will fix with niaid schema fix
-    #     # my private dataset implicit form
-    #     res = self.request("dataset?private", headers=self.auth_user).json()
-    #     assert res["hits"]
+    def test_034_get_all_private(self):
+        # my private dataset implicit form
+        res = self.request("dataset?private", headers=self.auth_user).json()
+        assert res["hits"]
 
-    # def test_035_get_all_private(self):
-    #     # my private dataset explicit form
-    #     res = self.request(
-    #         "dataset?private&user=minions@example.com", headers=self.auth_user
-    #     ).json()
-    #     assert res["hits"]
+    def test_035_get_all_private(self):
+        # my private dataset explicit form
+        res = self.request(
+            "dataset?private&user=minions@example.com", headers=self.auth_user
+        ).json()
+        assert res["hits"]
 
     def test_041_get_id(self):
         # public
         res = self.request("dataset/83dc3401f86819de").json()
         assert res["identifier"] == "EGAD00001003941"
 
-    # def test_042_get_id(self): -- apart of niaid data will fix when previous error fixed
-    #     # private (id as token)
-    #     res = self.request("dataset/e87b433020414bad").json()
-    #     assert res["identifier"] == "systems_bio_cdiff_0002"
+    def test_042_get_id(self):
+        # private (id as token)
+        res = self.request("dataset/e87b433020414bad").json()
+        assert res["identifier"] == "systems_bio_cdiff_0002"
 
     def test_043_get_id(self):
         self.request("dataset/nonexist", expect=404)
 
-    # # delete
+    # delete
 
     def test_050_delete(self):
         # not logged in

@@ -3,6 +3,7 @@
     Each test exercises a different outcome of attempting to update a schema's metadata from a remote JSON-LD file.
 """
 import pytest
+import json
 import datetime
 
 from discovery.registry import schemas
@@ -12,11 +13,11 @@ from discovery.model import Schema as ESSchemaFile
 from .test_base import DiscoveryTestCase
 
 
-BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld" # schema example
+BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 
 
-@pytest.fixture(scope="module", autouse=True)   # scope allows sharing fixtures across classes when using connections
-def setup():                                    # setting up sample schema here ?
+@pytest.fixture(scope="module", autouse=True)
+def setup():
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
 
@@ -107,7 +108,6 @@ class TestSchemaStatus(DiscoveryTestCase):
         - refresh_status: 299
         - refresh_msg: 'new version available and update successful'
         """
-        import json
         test_doc = "./tests/test_schema/mock_updated_schema.json"
         f = open(test_doc)
         _doc = json.load(f)
