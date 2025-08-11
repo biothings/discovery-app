@@ -20,7 +20,6 @@ def setup():
         schemas.add("bts", BTS_URL, "minions@example.com")
 
 class DiscoverySchemaEndpointTest(BiothingsWebAppTest):
-    # TEST_DATA_DIR_NAME = 'schema'
     def refresh(self):
         indices.refresh()
 
@@ -46,8 +45,8 @@ class DiscoverySchemaEndpointTest(BiothingsWebAppTest):
         assert meta, "_meta block should not be empty"
         assert meta["url"] == BTS_URL, "Unexpected _meta.url"
         assert "username" in meta and isinstance(meta["username"], str), "_meta.username should be present"
-        # assert "date_created" in meta and isinstance(meta["date_created"], str), "_meta.date_created should be present"
-        # assert "last_updated" in meta and isinstance(meta["last_updated"], str), "_meta.last_updated should be present"
+        assert "date_created" in meta and isinstance(meta["date_created"], str), "_meta.date_created should be present"
+        assert "last_updated" in meta and isinstance(meta["last_updated"], str), "_meta.last_updated should be present"
 
     @pytest.mark.class_id
     def test_valid_class_id_returns_biological_entity(self):
