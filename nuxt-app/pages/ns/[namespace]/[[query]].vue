@@ -1079,14 +1079,17 @@ export default {
       }
     },
     getParentsOf(classInfo) {
-      // console.log("Getting parents of ", classInfo?.name);
+      const pcs = classInfo?.parent_classes;
+      if (!Array.isArray(pcs) || pcs.length === 0) return [];
 
-      if (classInfo.hasOwnProperty("parent_classes")) {
-        let parent_names = classInfo["parent_classes"][0].split(", ").reverse();
-        this.getParentsInfo(parent_names); // Call the async function
-        return parent_names; // This might return before getParentsInfo finishes
-      }
-      return []; // Return empty array if no parent_classes
+      const names = pcs.flatMap(s =>
+        s.split(/\s*,\s*/).map(t => t.trim()).filter(Boolean)
+      );
+
+      const parent_names = [...new Set(names)].reverse();
+
+      void this.getParentsInfo(parent_names);
+      return parent_names;
     },
     async getParentsInfo(list) {
       this.userSchemaParents = []; // Clear previous data before appending
