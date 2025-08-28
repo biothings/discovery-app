@@ -14,10 +14,13 @@ from .test_base import DiscoveryTestCase
 
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
+N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup():
+def setup(ensure_test_data):
+    if not schemas.exists("n3c"):
+        schemas.add("n3c", N3C_URL, "minions@example.com")
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
 
