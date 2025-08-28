@@ -11,21 +11,17 @@ from discovery.utils import indices
 
 from .test_base import DiscoveryTestCase
 
+
 NIAID_SCHEMA_URL = "https://raw.githubusercontent.com/SuLab/niaid-data-portal/master/schema/NIAIDDataset.json"
 
-@pytest.fixture(scope="module", autouse=True)
-def setup():
+
+pytestmark = pytest.mark.usefixtures("with_clean_datasets")
+
+@pytest.fixture(scope="module")
+def setup_schema(ensure_test_data):  # ensures ES is prepped
     if not schemas.exists("niaid"):
         schemas.add("niaid", NIAID_SCHEMA_URL, "minions@example.com")
-    if datasets.exists("83dc3401f86819de"):  # wellderly
-        datasets.delete("83dc3401f86819de")
-    if datasets.exists("e87b433020414bad"):  # systems_bio_cdiff_0002
-        datasets.delete("e87b433020414bad")
-    if datasets.exists("ecf3767159a74988"):  # systems_bio_cdiff_0001
-        datasets.delete("ecf3767159a74988")
 
-
-# TODO fix auth issue
 class TestDatasetMetadata(DiscoveryTestCase):
     # Test cases represent ordered HTTP requests,
     # They are not designed as unit tests.
