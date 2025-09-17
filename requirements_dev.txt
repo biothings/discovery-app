@@ -1,0 +1,6 @@
+# for default imports
+-r requirements.txt
+
+aioresponses
+pytest
+pytest-asyncio
