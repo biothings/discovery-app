@@ -1,4 +1,4 @@
-# for default imports
+# Base dependencies
 -r requirements.txt
 
 aioresponses>=0.7.4,<0.8.0
