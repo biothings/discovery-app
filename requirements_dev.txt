@@ -1,6 +1,6 @@
 # for default imports
 -r requirements.txt
 
-aioresponses
-pytest
-pytest-asyncio
+aioresponses>=0.7.4,<0.8.0
+pytest>=7.0,<8.0
+pytest-asyncio>=0.20.0,<0.21.0
