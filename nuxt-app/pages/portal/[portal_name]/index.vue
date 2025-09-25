@@ -42,11 +42,15 @@ if (portal_name) {
       break;
     case "n3c":
       portal = portals.find((item) => item.keyName == portal_name);
-      featuredImg = "https://i.postimg.cc/ry0C25bK/n3cfeatured.jpg";
+      featuredImg = "https://i.postimg.cc/SRbxhC4k/n3cfeatured.jpg";
       break;
     case "move":
       portal = portals.find((item) => item.keyName == portal_name);
       featuredImg = "https://i.postimg.cc/ry0C25bK/n3cfeatured.jpg";
+      break;
+    case "revampp":
+      portal = portals.find((item) => item.keyName == portal_name);
+      featuredImg = "https://i.postimg.cc/9Mms0J6P/niaid.jpg";
       break;
     default:
       redirect();
@@ -251,9 +255,9 @@ useHead({
           <div class="container">
             <div class="d-flex justify-content-start align-items-center">
               <img
-                :src="portal.portalicon"
+                :src="portal?.alt_image || portal.portalicon"
                 :alt="portal.name"
-                width="100"
+                width="160"
                 class="mr-2"
               />
               <h1 :style="{ color: portal.colors[1].hex }">
@@ -289,17 +293,18 @@ useHead({
                     role="button"
                     :style="{ background: portal.colors[0].hex }"
                     class="btn text-light btn-lg nd mt-2 tip"
-                    to="/guide/n3c/dataset"
-                    :data-tippy-content="'Add a dataset for ' + portal.name"
+                    to="https://n3c-help.atlassian.net/servicedesk/customer/portal/2/group/3/create/142"
+                    target="_blank"
+                    data-tippy-content="Go to N3C to submit a request"
                   >
-                    Submit Request
+                    Submit Request <font-awesome-icon icon="fas fa-external-link-alt"/>
                   </nuxt-link>
                 </div>
               </div>
             </template>
             <template v-else>
               <div
-                class="border-top text-center text-dde-dark p-2 bg-dde-mid-muted"
+                class="text-center text-dde-dark p-2 alert-secondary shadow"
               >
                 <h4>Contribute</h4>
                 <span
@@ -328,7 +333,7 @@ useHead({
                       v-for="(g, i) in portal.guides"
                       :key="i + 'g'"
                       class="card m-1"
-                      :style="{ border: portal.colors[0].hex + ' solid 2px' }"
+                      :style="{ border: (portal?.icon_color || portal.colors[0].hex) + ' solid 2px' }"
                       style="width: 15rem; min-height: 150px"
                     >
                       <div
@@ -339,7 +344,7 @@ useHead({
                         </p>
                         <nuxt-link
                           role="button"
-                          :style="{ background: portal.colors[0].hex }"
+                          :style="{ background: portal?.icon_color || portal.colors[0].hex }"
                           @click="
                             $gtag.event('click', {
                               event_category: 'portal_guide',
@@ -367,11 +372,11 @@ useHead({
           </div>
         </div>
         <div
-          class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch grad-dark p-5"
-          :style="{ borderLeft: portal.colors[0].hex + ' solid 5px' }"
+          class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch p-5"
+          :style="{ borderLeft: portal.colors[0].hex + ' solid 5px', background: portal.colors[1].hex }"
         >
           <div class="text-center p-2 m-1 rounded p-3" v-if="portal.site">
-            <WebsiteIcon :color="portal?.colors[0]?.hex"></WebsiteIcon>
+            <WebsiteIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></WebsiteIcon>
             <a
               :href="portal.site"
               target="_blank"
@@ -383,7 +388,7 @@ useHead({
             </a>
           </div>
           <div class="text-center p-2 m-1 rounded p-3">
-            <SchemaIcon :color="portal?.colors[0]?.hex"></SchemaIcon>
+            <SchemaIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></SchemaIcon>
             <nuxt-link
               :to="{ path: portal.schema }"
               class="nd mt-2 tip text-light"
@@ -397,7 +402,7 @@ useHead({
             :key="i + 'gg'"
             class="text-center p-2 m-1 rounded p-3"
           >
-            <MetadataIcon :color="portal?.colors[0]?.hex"></MetadataIcon>
+            <MetadataIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></MetadataIcon>
             <nuxt-link
               :to="g.registry"
               class="nd mt-2 tip text-light"
@@ -415,7 +420,7 @@ useHead({
             class="text-center p-2 m-1 rounded p-3"
             v-if="portal.showCoverage"
           >
-            <CoverageIcon :color="portal?.colors[0]?.hex"></CoverageIcon>
+            <CoverageIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></CoverageIcon>
             <nuxt-link
               :to="{ path: '/coverage' }"
               rel="noreferrer"
@@ -431,7 +436,7 @@ useHead({
             v-if="portal && portal.api"
             class="text-center p-2 m-1 rounded p-3"
           >
-            <APIIcon :color="portal?.colors[0]?.hex"></APIIcon>
+            <APIIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></APIIcon>
             <a
               :href="portal.api"
               target="_blank"
@@ -446,7 +451,7 @@ useHead({
             v-if="portal && portal.faq_link"
             class="text-center p-2 m-1 rounded p-3"
           >
-            <FAQIcon :color="portal?.colors[0]?.hex"></FAQIcon>
+            <FAQIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></FAQIcon>
             <nuxt-link
               :to="{ path: portal.faq_link }"
               class="nd mt-2 tip text-light"

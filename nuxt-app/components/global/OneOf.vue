@@ -29,8 +29,12 @@
         ></small>
       </div>
       <small
-        class="badge badge-pill badge-dark text-warning m-2"
-        v-text="option.type == 'string' ? 'string' : ''"
+        class="badge badge-pill badge-info m-2"
+        v-text="option?.type"
+      ></small>
+      <small
+        class="badge badge-pill badge-secondary m-2"
+        v-text="option?.format"
       ></small>
       <!-- 🌈 VOCAB 🌈 -->
       <div v-if="option && option.vocabulary" class="text-center p-1">

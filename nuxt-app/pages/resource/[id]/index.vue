@@ -90,7 +90,7 @@ function download(format) {
 
 function getFeatured(meta) {
   if (meta.value?._meta?.guide.includes("n3c")) {
-    return "https://i.postimg.cc/ry0C25bK/n3cfeatured.jpg";
+    return "https://i.postimg.cc/SRbxhC4k/n3cfeatured.jpg";
   }
   if (meta.value?._meta?.guide.includes("outbreak")) {
     return "https://i.postimg.cc/brs2gRj1/outbreakfeatured.jpg";
@@ -287,7 +287,7 @@ const schemaLink = computed(() => {
     let parts = metadata.value["@type"].split(":");
     return "/ns/" + parts[0] + "/" + parts[1];
   }
-  return false;
+  return "/ns/schema/" + metadata.value["@type"];
 });
 
 getMetadata(id);

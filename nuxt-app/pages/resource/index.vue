@@ -324,6 +324,7 @@ import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import creidIcon from "~~/assets/img/creid/icon.svg";
 import outbreakIcon from "~~/assets/img/icon-01.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
+import revampp from "~~/assets/img/revampp.png";
 
 import { mapGetters } from "vuex";
 
@@ -389,6 +390,15 @@ export default {
       //value is the final val set to ES
       all_filters: {
         "_meta.guide": [
+          {
+            name: "ReVAMPP:Dataset",
+            value: "/guide/revampp/dataset",
+            // works wth 'template' url parameter
+            template_aliases: ["revampp:dataset"],
+            active: false,
+            icon: revampp,
+            type: "_meta.guide",
+          },
           {
             name: "MOVE:Dataset",
             value: "/guide/move/dataset",
@@ -624,7 +634,7 @@ export default {
                   return doc;
                 });
                 docs = docs.map(self.flatten);
-                console.log(docs);
+                // console.log(docs);
                 let csv = Papa.unparse(docs, {
                   header: true,
                   delimiter: ",",
@@ -781,7 +791,7 @@ export default {
           gf?.template_aliases?.includes(item.value.toLowerCase())
         ) {
           gf.active = !gf.active;
-          console.log(gf, "FOUND");
+          // console.log(gf, "FOUND");
           if (gf.name.includes("N3C") && gf.active == true) {
             self.N3CView = true;
           }
@@ -915,9 +925,9 @@ export default {
         .get(url, config)
         .then(function (response) {
           self.hits = response.data.hits;
-          console.log("%c Query executed", "color:hotpink");
-          console.log("%c " + JSON.stringify(config, null, 2), "color:blue");
-          console.log("%c hits: " + response.data.total, "color:limegreen");
+          // console.log("%c Query executed", "color:hotpink");
+          // console.log("%c " + JSON.stringify(config, null, 2), "color:blue");
+          // console.log("%c hits: " + response.data.total, "color:limegreen");
           self.$store.commit("setLoading", { value: false });
           self.total = response.data.total;
           self.calculatePages();

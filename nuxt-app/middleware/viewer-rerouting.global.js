@@ -9,6 +9,13 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   if (to.path.includes("/dataset") && !to.fullPath.includes("/api")) {
     return navigateTo(to.path.replace("/dataset", "/resource"));
   }
+  // Client-only storage logic
+  if (!to.path.includes("/ns") && process.client) {
+    localStorage.removeItem("user-schema-classes");
+    localStorage.removeItem("user-schema-url");
+    sessionStorage.clear();
+    return;
+  }
   // Check if user belongs to organization
   if (to.path.startsWith("/guide/nde")) {
     try {

@@ -474,6 +474,7 @@ export default {
           if (result.dismiss === self.$swal.DismissReason.timer) {
             this.number = Math.floor(Math.random() * 90000) + 10000;
             this.setLastViewed();
+            self.$store.commit("setTempViewMode", true);
             navigateTo({ path: "/ns/" + this.slug + this.number });
           }
         });

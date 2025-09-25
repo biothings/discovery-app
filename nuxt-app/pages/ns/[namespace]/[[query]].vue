@@ -511,7 +511,6 @@
             <input
               id="showButton"
               class="form-control slider m-auto"
-              @change="changeView()"
               title="Show this class only and any validation included"
               type="checkbox"
               v-model="validationView"
@@ -643,6 +642,7 @@ export default {
       treeBuildErr: false,
       apiUrl: "",
       schemaMeta: {},
+      tempView: false
     };
   },
   computed: {
@@ -798,31 +798,21 @@ export default {
           self.$store.commit("saveSchemaForViewer", payload);
           this.orderAlphabetically();
 
+          console.log('temp view')
+          self.tempView = true;
+
           if (self.query) {
             self.handleQuery();
           }
         } else {
-          // IF NO SCHEMA AT ALL
-          if (sessionStorage.getItem(self.namespace)) {
-            // Last VIEWED DAT MATCHES url
-            localStorage.setItem(
-              "user-schema-classes",
-              sessionStorage.getItem(self.namespace)
-            );
-            localStorage.setItem(
-              "user-schema-url",
-              sessionStorage.getItem(self.namespace + "-url")
-            );
-            self.loadSchema();
-          } else {
-            // DATA DOES NOT EXIST AT All
+            // reroute to plauground if no schema found
             let timerInterval;
             self.$swal.fire({
               icon: "error",
-              title: "Page Does Not Exist",
+              title: "Namespace does not exist or expired",
               html: "Taking you to the Schema Playground in <b></b> seconds...",
-
-              timer: 3000,
+              footer:"Temporary namespaces are cleared when you navigate away from the temporary page.",
+              timer: 5000,
               didClose: () => {
                 self.$router.push({ path: "/schema-playground" });
               },
@@ -837,7 +827,6 @@ export default {
                 clearInterval(timerInterval);
               },
             });
-          }
         }
       }
     },
@@ -915,7 +904,7 @@ export default {
 
         self.rootNode = rootNode;
       } catch (e) {
-        console.log("Oh no...", e);
+        // console.log("Oh no...", e);
         self.treeBuildErr = true;
       } finally {
       }
@@ -980,20 +969,23 @@ export default {
         payload["queryContent"] = prop;
         self.$store.commit("checkIFValidationView", payload);
       } else {
-        console.log("NO MATCH: " + self.query);
+        // console.log("NO MATCH: " + self.query);
       }
     },
     findClass(query) {
-      // let found = this.findClassInSchema(query);
-      // if (found) {
-      //   console.log("found in schema provided: ", query);
-      //   return found;
-      // } else {
-      //   this.queryForItem(query);
-      //   console.log("found in registry: ", query);
-      // }
-      // always use API to find class/property info
-      this.queryForItem(query);
+      if(this.tempView){
+        let found = this.findClassInSchema(query);
+        if (found) {
+          // console.log("found in schema provided: ", query);
+          return found;
+        } else {
+          this.queryForItem(query);
+          // console.log("found in registry: ", query);
+        }
+      }else{
+        // always use API to find class/property info
+        this.queryForItem(query);
+      }
     },
     findClassInSchema(query) {
       for (var i = 0; i < this.userSchema["hits"].length; i++) {
@@ -1007,7 +999,7 @@ export default {
       let self = this;
       if (!query.includes(":")) {
         query = self.namespace + ":" + query;
-        console.log("Updated query, trying for: ", query);
+        // console.log("Updated query, trying for: ", query);
       }
       axios(
         self.apiUrl +
@@ -1087,14 +1079,17 @@ export default {
       }
     },
     getParentsOf(classInfo) {
-      // console.log("Getting parents of ", classInfo?.name);
+      const pcs = classInfo?.parent_classes;
+      if (!Array.isArray(pcs) || pcs.length === 0) return [];
 
-      if (classInfo.hasOwnProperty("parent_classes")) {
-        let parent_names = classInfo["parent_classes"][0].split(", ").reverse();
-        this.getParentsInfo(parent_names); // Call the async function
-        return parent_names; // This might return before getParentsInfo finishes
-      }
-      return []; // Return empty array if no parent_classes
+      const names = pcs.flatMap(s =>
+        s.split(/\s*,\s*/).map(t => t.trim()).filter(Boolean)
+      );
+
+      const parent_names = [...new Set(names)].reverse();
+
+      void this.getParentsInfo(parent_names);
+      return parent_names;
     },
     async getParentsInfo(list) {
       this.userSchemaParents = []; // Clear previous data before appending
@@ -1110,10 +1105,6 @@ export default {
         }
       }
       // console.log("All parents info complete: ", this.userSchemaParents);
-    },
-
-    changeView() {
-      console.log("changing view...");
     },
     drawGraph(g, container) {
       jsnx.draw(g, {
@@ -1323,7 +1314,7 @@ export default {
         .then((result) => {
           if (result.value) {
             let q = self.findClass(itemname);
-            console.log("q", q);
+            // console.log("q", q);
             if (q) {
               axios
                 .get(
@@ -1392,14 +1383,14 @@ export default {
       allowHTML: true,
       theme: "light",
     });
-    console.log(
-      "%c NAMESPACe: " + this.namespace,
-      "background: hotpink; color:white; padding:4px;"
-    );
-    console.log(
-      "%c QUERY " + this.query,
-      "background: blue; color:white; padding:4px;"
-    );
+    // console.log(
+    //   "%c NAMESPACe: " + this.namespace,
+    //   "background: hotpink; color:white; padding:4px;"
+    // );
+    // console.log(
+    //   "%c QUERY " + this.query,
+    //   "background: blue; color:white; padding:4px;"
+    // );
     self.checkIfNamespaceIsRegistered(self.namespace);
   },
 };
