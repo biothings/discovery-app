@@ -13,6 +13,7 @@ PyGithub>=1.53
 certifi
 aiocron==1.8
 
+# pyadf (pyadf==0.2.29) is not on pypi anymore, so we install it from a vendor directory
 -e ./vendor/pyadf  # create rich text in Jira
 
 # use in index.routine to lock file
