@@ -8,8 +8,8 @@ jsonschema[format]>=4.18.0
 #torngithub==0.2.0
 pycurl>=7.19
 python3-saml==1.9.0  # SAML SSO
-lxml==4.9.3          # XML parsing (required by python3-saml)
-xmlsec==1.3.13       # XML signature support (required by python3-saml)
+lxml==6.0.0          # XML parsing (required by python3-saml)
+xmlsec==1.3.16       # XML signature support (required by python3-saml)
 PyGithub>=1.53
 certifi
 aiocron==1.8

@@ -66,11 +66,11 @@ def with_clean_datasets(ensure_test_data, es_client):
     """Delete specific dataset docs before the module runs, refresh, then teardown."""
     target_ids = ("83dc3401f86819de", "e87b433020414bad", "ecf3767159a74988")
 
-    # Prefer your application’s delete API with refresh='wait_for' if supported.
-    # Fallback shown here: Delete By Query on a keyword field (adjust field name).
+    # Prefer your application's delete API with refresh='wait_for' if supported.
+    # Fallback shown here: Delete By Query on document _id field.
     def _delete_ids(ids):
-        # Change 'id' to your actual doc ID field; or use document _id if that’s how you index.
-        query = {"query": {"terms": {"id": list(ids)}}}
+        # Use the document _id field to delete by Elasticsearch document ID
+        query = {"query": {"ids": {"values": list(ids)}}}
         es_client.delete_by_query(
             index="discover_dataset",
             body=query,
@@ -83,7 +83,6 @@ def with_clean_datasets(ensure_test_data, es_client):
 
     yield
 
-    # teardown: ensure they’re gone (idempotent)
+    # teardown: ensure they're gone (idempotent)
     _delete_ids(target_ids)
     es_client.indices.refresh(index="discover_dataset")
-
