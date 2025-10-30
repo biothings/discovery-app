@@ -13,8 +13,7 @@ const q = route.params.guide_query;
         prefix: 'revampp',
         name: 'Dataset',
         guide: '/guide/revampp',
-        description:
-          'Dataset schema for the NIAID ReVAMPP Network',
+        description: 'Dataset schema for the NIAID ReVAMPP Network',
       },
     ]"
   ></Guide>

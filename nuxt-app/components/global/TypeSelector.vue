@@ -563,8 +563,11 @@ export default {
       var self = this;
       // ratingVAlue from NDE is string
       // identifier made up of numbers
-      if (this.isNumeric(event.target.value) && prop !== "ratingValue"
-      && prop !== "identifier") {
+      if (
+        this.isNumeric(event.target.value) &&
+        prop !== "ratingValue" &&
+        prop !== "identifier"
+      ) {
         self.userObject[prop] = parseInt(event.target.value);
       } else {
         self.userObject[prop] = event.target.value;
