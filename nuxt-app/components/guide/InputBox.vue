@@ -23,15 +23,17 @@
                       : 'text-dark',
                   ]"
                 >
-                  <span
-                    v-html="info.description || 'No description provided'"
-                  ></span>
+                  <MarkdownParser
+                    :description="info?.description"
+                  ></MarkdownParser>
                   <small class="mainTextLight">
                     (<span v-text="name"></span>)
                   </small>
-                  <br>
+                  <br />
                   <small class="text-dark" v-if="name === 'identifier'">
-                    Note: Identifier is a unique identifier for the resource. If multiple are provided, all will be saved but only the first will be used as the canonical identifier.
+                    Note: Identifier is a unique identifier for the resource. If
+                    multiple are provided, all will be saved but only the first
+                    will be used as the canonical identifier.
                   </small>
                 </h6>
               </div>
@@ -665,6 +667,7 @@ import BooleanInput from "./BooleanInput.vue";
 import IdentifierSpecial from "./IdentifierSpecial.vue";
 import InputPreview from "./InputPreview.vue";
 import NameSpecial from "./NameSpecial.vue";
+import MarkdownParser from "../MarkdownParser.vue";
 
 export default {
   name: "InputBox",

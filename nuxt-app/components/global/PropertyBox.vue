@@ -22,9 +22,8 @@
       </span>
     </div>
     <div class="col-sm-12 col-md-9 text-dark bg-light">
-      <small class="p-1"
-        ><b>{{ fullInfo["description"] }}</b></small
-      >
+      <!-- Validation view descriptions -->
+      <MarkdownParser :description="fullInfo?.description"></MarkdownParser>
       <div class="rounded-0">
         <div class="p-1 rounded-0 d-flex">
           <!-- HAS TYPE -->
@@ -157,6 +156,8 @@
 </template>
 
 <script>
+import MarkdownParser from "../MarkdownParser.vue";
+
 export default {
   name: "PropertyBox",
   data: function () {

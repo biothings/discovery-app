@@ -148,7 +148,7 @@ export const portals = {
           },
         ],
         datasets: "/resource?template=revampp:dataset",
-        colors: [{ hex: "#0f222f" }, { hex: "#10426c" } ],
+        colors: [{ hex: "#0f222f" }, { hex: "#10426c" }],
         icon_color: "#05af55",
       },
       {

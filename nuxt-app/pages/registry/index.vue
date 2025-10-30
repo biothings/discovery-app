@@ -580,7 +580,7 @@ export default {
           });
           self.classesGroupByLetter = self.$_.orderBy(
             Object.values(unordered),
-            [item => item.group.toLowerCase()],
+            [(item) => item.group.toLowerCase()],
             ["asc"]
           );
         })
