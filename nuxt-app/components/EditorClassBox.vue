@@ -96,10 +96,9 @@
           ></font-awesome-icon
         ></span>
         <template v-if="showDesc">
-          <span
-            class="d-block text-muted"
-            v-html="item.description || 'No description provided'"
-          ></span>
+          <span class="d-block text-muted">
+            <MarkdownParser :description="item?.description"></MarkdownParser>
+          </span>
         </template>
       </div>
 
@@ -230,10 +229,11 @@
                   :data-tippy-content="prop.description"
                 ></font-awesome-icon>
                 <template v-if="showDesc">
-                  <span
-                    class="d-block text-muted"
-                    v-html="prop.description || 'No description provided'"
-                  ></span>
+                  <small class="d-block text-muted">
+                    <MarkdownParser
+                      :description="prop?.description"
+                    ></MarkdownParser>
+                  </small>
                 </template>
               </span>
             </div>
@@ -539,6 +539,7 @@ import axios from "axios";
 import { mapGetters } from "vuex";
 
 import Notify from "simple-notify";
+import MarkdownParser from "./MarkdownParser.vue";
 
 export default {
   name: "EditorClassBox",
