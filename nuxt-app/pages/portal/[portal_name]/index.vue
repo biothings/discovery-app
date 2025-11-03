@@ -297,15 +297,14 @@ useHead({
                     target="_blank"
                     data-tippy-content="Go to N3C to submit a request"
                   >
-                    Submit Request <font-awesome-icon icon="fas fa-external-link-alt"/>
+                    Submit Request
+                    <font-awesome-icon icon="fas fa-external-link-alt" />
                   </nuxt-link>
                 </div>
               </div>
             </template>
             <template v-else>
-              <div
-                class="text-center text-dde-dark p-2 alert-secondary shadow"
-              >
+              <div class="text-center text-dde-dark p-2 alert-secondary shadow">
                 <h4>Contribute</h4>
                 <span
                   v-if="portal.privateSubmissionsOnly && !ndeCheck"
@@ -333,7 +332,11 @@ useHead({
                       v-for="(g, i) in portal.guides"
                       :key="i + 'g'"
                       class="card m-1"
-                      :style="{ border: (portal?.icon_color || portal.colors[0].hex) + ' solid 2px' }"
+                      :style="{
+                        border:
+                          (portal?.icon_color || portal.colors[0].hex) +
+                          ' solid 2px',
+                      }"
                       style="width: 15rem; min-height: 150px"
                     >
                       <div
@@ -344,7 +347,10 @@ useHead({
                         </p>
                         <nuxt-link
                           role="button"
-                          :style="{ background: portal?.icon_color || portal.colors[0].hex }"
+                          :style="{
+                            background:
+                              portal?.icon_color || portal.colors[0].hex,
+                          }"
                           @click="
                             $gtag.event('click', {
                               event_category: 'portal_guide',
@@ -373,10 +379,15 @@ useHead({
         </div>
         <div
           class="col-sm-12 col-md-4 d-flex flex-column justify-content-center align-items-stretch p-5"
-          :style="{ borderLeft: portal.colors[0].hex + ' solid 5px', background: portal.colors[1].hex }"
+          :style="{
+            borderLeft: portal.colors[0].hex + ' solid 5px',
+            background: portal.colors[1].hex,
+          }"
         >
           <div class="text-center p-2 m-1 rounded p-3" v-if="portal.site">
-            <WebsiteIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></WebsiteIcon>
+            <WebsiteIcon
+              :color="portal?.icon_color || portal?.colors[0]?.hex"
+            ></WebsiteIcon>
             <a
               :href="portal.site"
               target="_blank"
@@ -388,7 +399,9 @@ useHead({
             </a>
           </div>
           <div class="text-center p-2 m-1 rounded p-3">
-            <SchemaIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></SchemaIcon>
+            <SchemaIcon
+              :color="portal?.icon_color || portal?.colors[0]?.hex"
+            ></SchemaIcon>
             <nuxt-link
               :to="{ path: portal.schema }"
               class="nd mt-2 tip text-light"
@@ -402,7 +415,9 @@ useHead({
             :key="i + 'gg'"
             class="text-center p-2 m-1 rounded p-3"
           >
-            <MetadataIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></MetadataIcon>
+            <MetadataIcon
+              :color="portal?.icon_color || portal?.colors[0]?.hex"
+            ></MetadataIcon>
             <nuxt-link
               :to="g.registry"
               class="nd mt-2 tip text-light"
@@ -420,7 +435,9 @@ useHead({
             class="text-center p-2 m-1 rounded p-3"
             v-if="portal.showCoverage"
           >
-            <CoverageIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></CoverageIcon>
+            <CoverageIcon
+              :color="portal?.icon_color || portal?.colors[0]?.hex"
+            ></CoverageIcon>
             <nuxt-link
               :to="{ path: '/coverage' }"
               rel="noreferrer"
@@ -436,7 +453,9 @@ useHead({
             v-if="portal && portal.api"
             class="text-center p-2 m-1 rounded p-3"
           >
-            <APIIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></APIIcon>
+            <APIIcon
+              :color="portal?.icon_color || portal?.colors[0]?.hex"
+            ></APIIcon>
             <a
               :href="portal.api"
               target="_blank"
@@ -451,7 +470,9 @@ useHead({
             v-if="portal && portal.faq_link"
             class="text-center p-2 m-1 rounded p-3"
           >
-            <FAQIcon :color="portal?.icon_color || portal?.colors[0]?.hex"></FAQIcon>
+            <FAQIcon
+              :color="portal?.icon_color || portal?.colors[0]?.hex"
+            ></FAQIcon>
             <nuxt-link
               :to="{ path: portal.faq_link }"
               class="nd mt-2 tip text-light"

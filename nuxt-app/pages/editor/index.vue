@@ -403,12 +403,7 @@
                   data-tippy-content="Remove Validation"
                   type="checkbox"
                 />
-                <label
-                  class="text-dde-dark"
-                  for="rv"
-                  data-tippy-content="Click on Preview option to see the changes"
-                  >Remove Validation</label
-                >
+                <label class="text-dde-dark" for="rv">Remove Validation</label>
               </div>
             </div>
             <template v-for="(item, index) in classesAvailable" :key="index">
