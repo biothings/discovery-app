@@ -190,10 +190,12 @@
             >
               <table class="table table-sm table-light text-muted my-2">
                 <thead>
-                  <td><small>Date Added</small></td>
-                  <td><small>Last Updated</small></td>
-                  <td><small>Schema Status</small></td>
-                  <td><small>Schema Source</small></td>
+                  <tr>
+                    <td><small>Date Added</small></td>
+                    <td><small>Last Updated</small></td>
+                    <td><small>Schema Status</small></td>
+                    <td><small>Schema Source</small></td>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr>
