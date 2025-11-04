@@ -7,7 +7,6 @@
 
 from biothings.tests.web import BiothingsTestCase
 
-
 class DiscoveryQueryTest(BiothingsTestCase):
     def test_query_all(self):
         """GET /query/— [QUERY] Basic functionality"""
