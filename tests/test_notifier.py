@@ -44,9 +44,10 @@ def mock_settings(monkeypatch):
 class MockEvent:
     pass
 
-@pytest.mark.skip(reason="Notifier broadcast logic excludes N3C channels from test assertions")
 @pytest.mark.asyncio
 async def test_notifier_send(mock_settings):
+    from discovery.notify import N3CChannel
+    
     notifier = DatasetNotifier(mock_settings)
     event = MockEvent()
 
@@ -59,7 +60,13 @@ async def test_notifier_send(mock_settings):
 
     await notifier.broadcast(event)
 
-    # Verify that handles and send were called for each channel
+    # Verify that handles and send were called for non-N3C channels only
+    # broadcast() filters out N3C channels before calling handles/send
     for channel in notifier.channels:
-        channel.handles.assert_called_once_with(event)
-        channel.send.assert_called_once_with(event)
+        if not isinstance(channel, N3CChannel):
+            channel.handles.assert_called_once_with(event)
+            channel.send.assert_called_once_with(event)
+        else:
+            # N3C channels are skipped in broadcast()
+            channel.handles.assert_not_called()
+            channel.send.assert_not_called()

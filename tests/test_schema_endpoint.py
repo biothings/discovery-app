@@ -3,6 +3,7 @@
 """
 import pytest
 
+import asyncio
 from biothings.tests.web import BiothingsWebAppTest
 from discovery.registry import schemas
 from discovery.utils import indices
@@ -22,6 +23,12 @@ def setup(ensure_test_data):
 class DiscoverySchemaEndpointTest(BiothingsWebAppTest):
     def refresh(self):
         indices.refresh()
+
+    async def asyncTearDown(self):
+        if hasattr(self, 'client') and self.client and not self.client.closed:
+            await self.client.close()
+        await asyncio.sleep(0.1)
+        await super().asyncTearDown()
 
     @pytest.mark.invalid_namespace
     def test_invalid_namespace_returns_404(self):

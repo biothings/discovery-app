@@ -6,12 +6,19 @@ with test data before any tests are run. If indices are missing or empty,
 it restores them from a backup JSON file.
 """
 
-# conftest.py
 import os
+os.environ["AIOHTTP_NO_EXTENSIONS"] = "1" # Disable aiohttp C extensions for compatibility in test env
+
+# Ensure Tornado uses the asyncio event loop (project-wide, before anything else)
+from tornado.platform.asyncio import AsyncIOMainLoop
+AsyncIOMainLoop().install()
+
+# conftest.py
 import time
 import pytest
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionError as ESConnectionError
+
 
 BACKUP_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                            "test_schema/dde_backup_simple.json")
@@ -81,8 +88,81 @@ def with_clean_datasets(ensure_test_data, es_client):
     _delete_ids(target_ids)
     es_client.indices.refresh(index="discover_dataset")
 
-    yield
 
-    # teardown: ensure they're gone (idempotent)
-    _delete_ids(target_ids)
-    es_client.indices.refresh(index="discover_dataset")
+# -----------------------------------------------------------------------------
+# Async test support without pytest-asyncio plugin
+# -----------------------------------------------------------------------------
+import asyncio
+import inspect
+
+# Keep a single asyncio event loop alive for the entire test session
+_SESSION_LOOP = None
+
+
+def pytest_sessionstart(session):
+    global _SESSION_LOOP
+    _SESSION_LOOP = asyncio.new_event_loop()
+    asyncio.set_event_loop(_SESSION_LOOP)
+    # Ensure Tornado binds to this loop
+    AsyncIOMainLoop().install()
+
+
+def pytest_sessionfinish(session, exitstatus):
+    global _SESSION_LOOP
+    try:
+        if _SESSION_LOOP is not None and not _SESSION_LOOP.is_closed():
+            # Run any remaining tasks before closing
+            pending = asyncio.all_tasks(_SESSION_LOOP)
+            if pending:
+                _SESSION_LOOP.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+            _SESSION_LOOP.run_until_complete(_SESSION_LOOP.shutdown_asyncgens())
+            _SESSION_LOOP.close()
+    except Exception:
+        pass
+    finally:
+        _SESSION_LOOP = None
+
+
+def pytest_configure(config):
+    """Register custom asyncio marker for async tests."""
+    config.addinivalue_line("markers", "asyncio: run test in asyncio event loop")
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Provide the session-scoped event loop for async tests."""
+    global _SESSION_LOOP
+    if _SESSION_LOOP is None:
+        _SESSION_LOOP = asyncio.new_event_loop()
+        asyncio.set_event_loop(_SESSION_LOOP)
+    yield _SESSION_LOOP
+
+
+def pytest_pyfunc_call(pyfuncitem):
+    """Run @pytest.mark.asyncio tests on the persistent session event loop."""
+    asyncio_marker = pyfuncitem.get_closest_marker("asyncio")
+    if not asyncio_marker:
+        return None
+
+    testfunction = pyfuncitem.obj
+    
+    # Check if the test function is actually a coroutine function
+    if not inspect.iscoroutinefunction(testfunction):
+        return None  # Let pytest handle it normally
+
+    # Build kwargs from available fixtures limited to function signature
+    funcargs = {}
+    sig = inspect.signature(testfunction)
+    for name in sig.parameters.keys():
+        if name in pyfuncitem.funcargs:
+            funcargs[name] = pyfuncitem.funcargs[name]
+
+    coro = testfunction(**funcargs)
+
+    # Execute on the session loop (do not close it per test)
+    if _SESSION_LOOP and not _SESSION_LOOP.is_closed():
+        _SESSION_LOOP.run_until_complete(coro)
+    else:
+        raise RuntimeError("Event loop is closed or not available")
+
+    return True
