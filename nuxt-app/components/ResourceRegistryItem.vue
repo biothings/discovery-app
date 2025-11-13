@@ -67,6 +67,7 @@ import niaidIcon from "~~/assets/img/niaid/icon.svg";
 import outbreakIcon from "~~/assets/img/icon-01.svg";
 import nde from "~~/assets/img/niaid/nde.svg";
 import creidIcon from "~~/assets/img/creid/icon.svg";
+import revampp from "~~/assets/img/revampp.png";
 
 export default {
   name: "ResourceRegistryItem",
@@ -131,6 +132,8 @@ export default {
         return nde;
       } else if (guide.includes("creid")) {
         return creidIcon;
+      } else if (guide.includes("revampp")) {
+        return revampp;
       } else {
         return dde;
       }
