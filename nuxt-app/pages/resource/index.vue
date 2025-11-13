@@ -392,7 +392,7 @@ export default {
         "_meta.guide": [
           {
             name: "ReVAMPP:Dataset",
-            value: "/guide/revampp/dataset",
+            value: "/guide/revampp",
             // works wth 'template' url parameter
             template_aliases: ["revampp:dataset"],
             active: false,
