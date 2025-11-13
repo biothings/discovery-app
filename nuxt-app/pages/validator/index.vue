@@ -295,7 +295,7 @@ onMounted(() => {
     class="p-0 min-100"
     :class="[!expandedWide ? 'container' : 'container-fluid px-3']"
   >
-    <Title title="Metadata Validator"></Title>
+    <PageTitle title="Metadata Validator"></PageTitle>
     <div class="row p-2 bg-dde-mid rounded mb-5">
       <div class="col-sm-12 alert-info p-0">
         <div
