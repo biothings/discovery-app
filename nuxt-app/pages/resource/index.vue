@@ -1,6 +1,6 @@
 <template>
   <div id="registry" class="min-100">
-    <Title title="Resource Registry"></Title>
+    <PageTitle title="Resource Registry"></PageTitle>
     <div class="col-md-10 col-sm-12 m-auto p-0">
       <div class="text-dark">
         <p class="text-center text-muted" v-if="N3CView">

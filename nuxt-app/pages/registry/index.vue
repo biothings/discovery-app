@@ -1,6 +1,6 @@
 <template>
   <div id="registry" class="min-100 bg-white">
-    <Title title="Schema Registry"></Title>
+    <PageTitle title="Schema Registry"></PageTitle>
     <div class="container mb-4">
       <div>
         <ul class="nav nav-tabs" id="myTab" role="tablist">
