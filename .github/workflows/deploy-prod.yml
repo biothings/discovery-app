@@ -17,7 +17,7 @@ jobs:
       - name: Step 2 - Install Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: '17.9.1'
+          node-version: '20.19.0'
 
       - name: Step 3 - Build Frontend
         run: |
