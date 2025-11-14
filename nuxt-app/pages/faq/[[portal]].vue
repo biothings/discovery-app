@@ -49,7 +49,7 @@ useHead({
 
 <template>
   <main class="bg-light text-dde-dark min-100">
-    <Title :title="name"></Title>
+    <PageTitle :title="name"></PageTitle>
     <div class="text-center p-2">
       <span>
         Jump To:

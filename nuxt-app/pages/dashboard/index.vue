@@ -1,13 +1,13 @@
 <template>
   <section id="dashboard" class="bg-light">
     <div class="container min-100" v-if="userInfo?.login">
-      <Title
+      <PageTitle
         :title="
           userInfo?.name
             ? 'Hello, ' + userInfo.name.split(' ')[0] + '!'
             : 'My Dashboard'
         "
-      ></Title>
+      ></PageTitle>
       <div class="dashboard">
         <div class="row mb-5">
           <!-- uSER BOX -->

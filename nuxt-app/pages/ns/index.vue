@@ -1,9 +1,9 @@
 <template>
   <div class="min-100 bg-light">
-    <Title
+    <PageTitle
       title="Schema Viewer"
       subtitle="Visualize and Register Your Own Schema"
-    ></Title>
+    ></PageTitle>
     <div class="d-flex justify-content-center align-items-center mt-5">
       <div class="col-sm-10 text-center">
         <div class="jumbotron grad-dark text-light text-left shadow">

@@ -42,7 +42,7 @@ useHead({
 
 <template>
   <div class="min-100">
-    <Title title="Search"></Title>
+    <PageTitle title="Search"></PageTitle>
     <div
       class="jumbotron bg-light d-flex justify-content-center align-items-center"
     >
