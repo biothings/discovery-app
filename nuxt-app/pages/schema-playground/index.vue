@@ -1,7 +1,7 @@
 <template>
   <div class="container min-100">
     <div class="text-center bg-light">
-      <Title title="Schema Playground"></Title>
+      <PageTitle title="Schema Playground"></PageTitle>
       <div class="d-flex justify-content-center align-items-center flex-wrap">
         <nuxt-link to="/registry">Schema Registry</nuxt-link>
         <span class="mx-2">|</span>
