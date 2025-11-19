@@ -87,7 +87,7 @@ function handleSubmit() {
 function getClassValidation(curie) {
   store.commit("setLoading", { value: true });
   axios
-    .get(runtimeConfig.apiUrl + `/api/registry/${curie.split(":")[0]}/${curie}`)
+    .get(runtimeConfig.public.apiUrl + `/api/registry/${curie.split(":")[0]}/${curie}`)
     .then((res) => {
       store.commit("setStartingPoint", {
         namespace: "n3c",
