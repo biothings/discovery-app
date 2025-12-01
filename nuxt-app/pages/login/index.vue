@@ -1,6 +1,6 @@
 <template>
   <div id="login" class="min-100">
-    <Title title="Select Login Method"></Title>
+    <PageTitle title="Select Login Method"></PageTitle>
     <div
       class="jumbotron bg-light d-flex justify-content-center align-items-center"
     >

@@ -87,7 +87,7 @@ function handleSubmit() {
 function getClassValidation(curie) {
   store.commit("setLoading", { value: true });
   axios
-    .get(runtimeConfig.apiUrl + `/api/registry/${curie.split(":")[0]}/${curie}`)
+    .get(runtimeConfig.public.apiUrl + `/api/registry/${curie.split(":")[0]}/${curie}`)
     .then((res) => {
       store.commit("setStartingPoint", {
         namespace: "n3c",
@@ -146,7 +146,7 @@ onMounted(() => {
       class="text-left bg-light"
       :class="[!expandedWide ? 'container' : 'container-fluid px-3']"
     >
-      <Title :title="searchTerm || 'Markup Generator'"></Title>
+      <PageTitle :title="searchTerm || 'Markup Generator'"></PageTitle>
       <div class="m-0 row p-1 bg-dde-mid">
         <div class="col-sm-12 bg-dde-dark p-2 d-flex">
           <form @submit.prevent="handleSubmit()" class="d-flex col-sm-5">

@@ -42,7 +42,7 @@ useHead({
 
 <template>
   <div class="min-100">
-    <Title title="Validate and Create Metadata"></Title>
+    <PageTitle title="Validate and Create Metadata"></PageTitle>
     <div
       class="jumbotron bg-light d-flex justify-content-center align-items-center"
     >

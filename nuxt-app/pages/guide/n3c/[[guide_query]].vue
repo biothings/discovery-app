@@ -5,8 +5,5 @@ const q = route.params.guide_query;
 </script>
 
 <template>
-  <Guide
-    :guide_query="q"
-    :presets="[]"
-  ></Guide>
+  <Guide :guide_query="q" :presets="[]"></Guide>
 </template>

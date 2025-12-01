@@ -1,7 +1,7 @@
 <script setup></script>
 <template>
   <div class="min-100 container">
-    <Title title="How to cite Data Discovery Engine"></Title>
+    <PageTitle title="How to cite Data Discovery Engine"></PageTitle>
     <div class="d-flex justify-content-center align-items-center">
       <div class="jumbotron bg-dde-dark text-light">
         <div class="text-center mb-4">

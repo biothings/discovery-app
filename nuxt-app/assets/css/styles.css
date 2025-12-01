@@ -1889,38 +1889,6 @@ meter {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-#navbar #logo {
-  font-size: 1em;
-  font-weight: bold;
-  transition: 0.4s;
-}
-.navbar {
-  background: #7e7e7e;
-  color: white !important;
-  transition: all 0.3s;
-}
-.navbar {
-  bottom: 0;
-  top: auto;
-}
-@media only screen and (min-width: 992px) {
-  .navbar {
-    top: 0;
-    bottom: auto;
-  }
-}
-.navbar.compressed {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  background: white;
-  color: red !important;
-  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
-}
-.navbar-brand {
-  font-size: 1em;
-  margin-right: 0.2em;
-}
-
 .sectionHeader {
   top: 45%;
   left: -13px;

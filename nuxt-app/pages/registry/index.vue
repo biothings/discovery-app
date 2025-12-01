@@ -1,6 +1,6 @@
 <template>
   <div id="registry" class="min-100 bg-white">
-    <Title title="Schema Registry"></Title>
+    <PageTitle title="Schema Registry"></PageTitle>
     <div class="container mb-4">
       <div>
         <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -279,23 +279,25 @@
                     <ul style="list-style: none">
                       <li v-for="def in item.children" :key="def">
                         <table>
-                          <tr>
-                            <td>
-                              <SourceBadge
-                                :status="def?.refresh_status"
-                              ></SourceBadge>
-                            </td>
-                            <td>
-                              <router-link
-                                :to="{ path: '/ns/' + def.namespace }"
-                              >
-                                {{ def.namespace }}
-                                <font-awesome-icon
-                                  icon="fas fa-chevron-right"
-                                />
-                              </router-link>
-                            </td>
-                          </tr>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <SourceBadge
+                                  :status="def?.refresh_status"
+                                ></SourceBadge>
+                              </td>
+                              <td>
+                                <router-link
+                                  :to="{ path: '/ns/' + def.namespace }"
+                                >
+                                  {{ def.namespace }}
+                                  <font-awesome-icon
+                                    icon="fas fa-chevron-right"
+                                  />
+                                </router-link>
+                              </td>
+                            </tr>
+                          </tbody>
                         </table>
                       </li>
                     </ul>
@@ -580,7 +582,7 @@ export default {
           });
           self.classesGroupByLetter = self.$_.orderBy(
             Object.values(unordered),
-            [item => item.group.toLowerCase()],
+            [(item) => item.group.toLowerCase()],
             ["asc"]
           );
         })
