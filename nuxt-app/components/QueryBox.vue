@@ -63,11 +63,9 @@
         </li>
       </ul>
     </template>
-    <p
-      v-html="q['description'] || 'No Description Provided'"
-      class="p-2 description"
-      :class="textColor"
-    ></p>
+    <p class="p-2 description" :class="textColor">
+      <MarkdownParser :description="q['description']"></MarkdownParser>
+    </p>
     <template v-if="q && q.range">
       <small class="text-dark"
         >Values expected to be one of these types:
@@ -141,10 +139,9 @@
                 <span v-html="item.label"></span>
               </a>
             </td>
-            <td
-              class="text-dark"
-              v-html="item.description || 'No description provided'"
-            ></td>
+            <td class="text-dark">
+              <MarkdownParser :description="item.description"></MarkdownParser>
+            </td>
             <td>
               <template v-for="(type, i) in item.range">
                 <a
@@ -190,6 +187,7 @@
 import ValidationBox from "./ValidationBox.vue";
 import { mapGetters, mapActions } from "vuex";
 import Papa from "papaparse";
+import MarkdownParser from "./MarkdownParser.vue";
 
 export default {
   name: "QueryBox",

@@ -190,10 +190,12 @@
             >
               <table class="table table-sm table-light text-muted my-2">
                 <thead>
-                  <td><small>Date Added</small></td>
-                  <td><small>Last Updated</small></td>
-                  <td><small>Schema Status</small></td>
-                  <td><small>Schema Source</small></td>
+                  <tr>
+                    <td><small>Date Added</small></td>
+                    <td><small>Last Updated</small></td>
+                    <td><small>Schema Status</small></td>
+                    <td><small>Schema Source</small></td>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr>
@@ -642,7 +644,7 @@ export default {
       treeBuildErr: false,
       apiUrl: "",
       schemaMeta: {},
-      tempView: false
+      tempView: false,
     };
   },
   computed: {
@@ -798,35 +800,36 @@ export default {
           self.$store.commit("saveSchemaForViewer", payload);
           this.orderAlphabetically();
 
-          console.log('temp view')
+          console.log("temp view");
           self.tempView = true;
 
           if (self.query) {
             self.handleQuery();
           }
         } else {
-            // reroute to plauground if no schema found
-            let timerInterval;
-            self.$swal.fire({
-              icon: "error",
-              title: "Namespace does not exist or expired",
-              html: "Taking you to the Schema Playground in <b></b> seconds...",
-              footer:"Temporary namespaces are cleared when you navigate away from the temporary page.",
-              timer: 5000,
-              didClose: () => {
-                self.$router.push({ path: "/schema-playground" });
-              },
-              didOpen: () => {
-                self.$swal.showLoading();
-                const b = self.$swal.getHtmlContainer().querySelector("b");
-                timerInterval = setInterval(() => {
-                  b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000);
-                }, 100);
-              },
-              willClose: () => {
-                clearInterval(timerInterval);
-              },
-            });
+          // reroute to plauground if no schema found
+          let timerInterval;
+          self.$swal.fire({
+            icon: "error",
+            title: "Namespace does not exist or expired",
+            html: "Taking you to the Schema Playground in <b></b> seconds...",
+            footer:
+              "Temporary namespaces are cleared when you navigate away from the temporary page.",
+            timer: 5000,
+            didClose: () => {
+              self.$router.push({ path: "/schema-playground" });
+            },
+            didOpen: () => {
+              self.$swal.showLoading();
+              const b = self.$swal.getHtmlContainer().querySelector("b");
+              timerInterval = setInterval(() => {
+                b.textContent = Math.ceil(self.$swal.getTimerLeft() / 1000);
+              }, 100);
+            },
+            willClose: () => {
+              clearInterval(timerInterval);
+            },
+          });
         }
       }
     },
@@ -973,7 +976,7 @@ export default {
       }
     },
     findClass(query) {
-      if(this.tempView){
+      if (this.tempView) {
         let found = this.findClassInSchema(query);
         if (found) {
           // console.log("found in schema provided: ", query);
@@ -982,7 +985,7 @@ export default {
           this.queryForItem(query);
           // console.log("found in registry: ", query);
         }
-      }else{
+      } else {
         // always use API to find class/property info
         this.queryForItem(query);
       }
@@ -1002,12 +1005,7 @@ export default {
         // console.log("Updated query, trying for: ", query);
       }
       axios(
-        self.apiUrl +
-          "/api/registry/" +
-          self.namespace +
-          "/" +
-          query +
-          "?v"
+        self.apiUrl + "/api/registry/" + self.namespace + "/" + query + "?v"
       )
         .then((res) => {
           var payload = {};
@@ -1082,8 +1080,11 @@ export default {
       const pcs = classInfo?.parent_classes;
       if (!Array.isArray(pcs) || pcs.length === 0) return [];
 
-      const names = pcs.flatMap(s =>
-        s.split(/\s*,\s*/).map(t => t.trim()).filter(Boolean)
+      const names = pcs.flatMap((s) =>
+        s
+          .split(/\s*,\s*/)
+          .map((t) => t.trim())
+          .filter(Boolean)
       );
 
       const parent_names = [...new Set(names)].reverse();

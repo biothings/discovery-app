@@ -1,7 +1,7 @@
 <template>
   <div id="jsoneditor" class="container min-100">
     <div class="bg-light text-center">
-      <Title title="JSON Schema Viewer"></Title>
+      <PageTitle title="JSON Schema Viewer"></PageTitle>
       <div class="mb-1">
         <form id="linkForm" class="col-sm-10 m-auto" @submit="loadSchema()">
           <small v-html="loadMsg"></small>

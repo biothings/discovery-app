@@ -44,11 +44,11 @@ useHead({
 
 <template>
   <div id="portals" class="container-fluid bg-light text-dde-dark min-100">
-    <Title
+    <PageTitle
       title="Data Portals"
       subtitle="Explore data portals and learn how you can contribute and access their
         data."
-    ></Title>
+    ></PageTitle>
     <div class="container">
       <div class="d-flex justify-content-center flex-wrap">
         <template v-for="portal in portals" :key="portal.name">

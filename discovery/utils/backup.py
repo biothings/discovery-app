@@ -2,6 +2,8 @@ import json
 import logging
 import zipfile
 import io
+import os
+import glob
 from datetime import date, datetime
 from typing import Union, List, Tuple
 
@@ -25,7 +27,49 @@ def _default_filename(extension=".json"):
     return "dde_backup_" + datetime.today().strftime("%Y%m%d") + extension
 
 
-def save_to_s3(data, filename=None, bucket="dde", format="zip"):
+def cleanup_backup_files(pattern="dde_backup_*.zip", keep_last=10):
+    """
+    Clean up old backup files, keeping only the most recent ones.
+
+    Args:
+        pattern (str): Glob pattern to match backup files
+        keep_last (int): Number of recent files to keep
+
+    Returns:
+        tuple: (number of files kept, number of files deleted)
+    """
+    # Get all files matching the pattern
+    backup_files = glob.glob(pattern)
+
+    # If no files found, nothing to do
+    if not backup_files:
+        return 0, 0
+
+    # Sort files by filename in descending order (newest first)
+    # Assuming filenames follow the pattern dde_backup_YYYYMMDD.zip
+    backup_files.sort(reverse=True)
+
+    # Files to keep (the most recent ones)
+    files_to_keep = backup_files[:keep_last]
+
+    # Files to delete (older ones beyond the limit)
+    files_to_delete = backup_files[keep_last:]
+
+    deleted_count = 0
+
+    # Delete older files beyond the keep_last limit
+    for old_file in files_to_delete:
+        if os.path.exists(old_file):
+            os.remove(old_file)
+            logging.info(f"Deleted old backup file: {old_file}")
+            deleted_count += 1
+
+    kept_count = len(files_to_keep)
+
+    return kept_count, deleted_count
+
+
+def save_to_s3(data, filename=None, bucket="dde", format="zip", keep_last=10):
     filename = filename or _default_filename(f".{format}")
     s3 = boto3.resource("s3")
     obj_key = f"db_backup/{filename}"
@@ -33,8 +77,26 @@ def save_to_s3(data, filename=None, bucket="dde", format="zip"):
         with zipfile.ZipFile(filename, 'w', zipfile.ZIP_DEFLATED) as zfile:
             json_data = json.dumps(data, indent=2, default=json_serial)
             zfile.writestr(filename.replace(".zip", ".json"), json_data)
-        logging.info(f"Uploading {filename} to AWS S3")
-        s3.Bucket(bucket).upload_file(Filename=filename, Key=obj_key)
+
+        # Upload to S3 with error handling
+        upload_success = False
+        try:
+            logging.info(f"Uploading {filename} to AWS S3")
+            s3.Bucket(bucket).upload_file(Filename=filename, Key=obj_key)
+            upload_success = True
+            logging.info(f"Upload of {filename} to S3 successful")
+        except Exception as e:
+            logging.error(f"Failed to upload {filename} to S3: {str(e)}")
+
+        # Only clean up old backup files if upload was successful
+        if upload_success:
+            kept, deleted = cleanup_backup_files(
+                pattern="dde_backup_*.zip",
+                keep_last=keep_last
+            )
+            logging.info(f"Backup file cleanup: kept {kept} recent files, deleted {deleted} old files")
+        else:
+            logging.warning(f"Skipping backup file cleanup due to failed upload")
     else:
         logging.info(f"Uploading {filename} to AWS S3")
         s3.Bucket(bucket).put_object(Key=obj_key, Body=json.dumps(data, indent=2))
@@ -87,7 +149,7 @@ def backup_schema_class(outfile=None):
     return backup_es(SchemaClass, outfile=outfile)
 
 
-def daily_backup_routine(format="zip"):
+def daily_backup_routine(format="zip", keep_last=10):
     logger = logging.getLogger("daily_backup")
     data = {}
     try:
@@ -105,7 +167,7 @@ def daily_backup_routine(format="zip"):
             data.update(_d)
 
         logger.info("Saving to S3 bucket...")
-        s3_obj = save_to_s3(data, format=format)
+        s3_obj = save_to_s3(data, format=format, keep_last=keep_last)
         logger.info("Done. [%s]", s3_obj)
     except Exception as exc:
         logger.error(str(exc))

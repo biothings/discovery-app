@@ -79,10 +79,12 @@
               class="m-0 table table-sm table-light table-hover table-striped text-dark"
             >
               <thead>
-                <th>Name</th>
-                <th>Result/Details</th>
-                <th>Options</th>
-                <th>Status</th>
+                <tr>
+                  <th>Name</th>
+                  <th>Result/Details</th>
+                  <th>Options</th>
+                  <th>Status</th>
+                </tr>
               </thead>
               <colgroup>
                 <col span="1" style="width: 30%" />

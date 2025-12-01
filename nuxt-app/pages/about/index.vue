@@ -1,7 +1,7 @@
 <template>
   <div id="about" class="min-100">
     <div class="container">
-      <Title title="About the Data Discovery Project"></Title>
+      <PageTitle title="About the Data Discovery Project"></PageTitle>
 
       <div class="p-1">
         <h5 class="mainTextDark caps">
