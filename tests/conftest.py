@@ -116,9 +116,9 @@ def pytest_sessionfinish(session, exitstatus):
             if pending:
                 _SESSION_LOOP.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
             _SESSION_LOOP.run_until_complete(_SESSION_LOOP.shutdown_asyncgens())
-            _SESSION_LOOP.close()
-    except Exception:
-        pass
+    #         _SESSION_LOOP.close()
+    # except Exception:
+    #     pass
     finally:
         _SESSION_LOOP = None
 
@@ -145,7 +145,7 @@ def pytest_pyfunc_call(pyfuncitem):
         return None
 
     testfunction = pyfuncitem.obj
-    
+
     # Check if the test function is actually a coroutine function
     if not inspect.iscoroutinefunction(testfunction):
         return None  # Let pytest handle it normally
