@@ -5,6 +5,7 @@ export const schema_viewer = {
     userSchemaProps: Array,
     queryContent: Object,
     showAll: true,
+    userSchemaData: null
   },
   strict: true,
   mutations: {
@@ -37,8 +38,15 @@ export const schema_viewer = {
       }
       // console.log('saved Query Content 🌎...',state.queryContent)
     },
+    SetUserSchemaClasses(state, payload) {
+      state.userSchemaData = payload.value;
+      console.log('saved userSchemaData ...', state.userSchemaData)
+    },
   },
   getters: {
+    userSchemaData: (state) => {
+      return state.userSchemaData;
+    },
     // exposed as store.getters.nameOfGetter
     queryContent: (state) => {
       return state.queryContent;
