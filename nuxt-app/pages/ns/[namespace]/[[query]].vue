@@ -648,7 +648,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["loading", "userInfo", "queryContent"]),
+    ...mapGetters(["loading", "userInfo", "queryContent", "userSchemaData"]),
     validationView: {
       get() {
         return this.$store.getters.validationView;
@@ -784,23 +784,16 @@ export default {
             throw err;
           });
       } else if (!namespace) {
-        this.userSchema = JSON.parse(
-          localStorage.getItem("user-schema-classes")
-        );
+        this.userSchema = this.userSchemaData
         this.userSchemaURL = localStorage.getItem("user-schema-url");
 
         var payload = {};
-        payload["schema"] = JSON.parse(
-          localStorage.getItem("user-schema-classes")
-        );
+        payload["schema"] = this.userSchemaData
 
-        // CHECK IF LS ITEM EXISTS AT ALL
-        if (localStorage.getItem("user-schema-classes") !== null) {
+        if (this.userSchemaData !== null) {
           // console.log('LS loaded')
           self.$store.commit("saveSchemaForViewer", payload);
           this.orderAlphabetically();
-
-          console.log("temp view");
           self.tempView = true;
 
           if (self.query) {
