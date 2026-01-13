@@ -127,7 +127,6 @@ def total(**metafilter):
     search = _build(metafilter)
     return search.count()
 
-
 def validate(document, schema="ctsa::bts:CTSADataset"):
     """
     Validate a document against a json schema.
@@ -136,12 +135,11 @@ def validate(document, schema="ctsa::bts:CTSADataset"):
     try:
         document = ensure_document(document)
         schema = ensure_schema(schema)
-
     except (TypeError, ValueError) as err:
         raise DatasetValidationError(err)
 
     try:
-        validator = jsonschema.Draft7Validator(schema)
+        validator = jsonschema.Draft7Validator(schema, format_checker=jsonschema.FormatChecker())
         if not validator.is_valid(document):
             errors = []
             for error in sorted(validator.iter_errors(document), key=str):

@@ -13,10 +13,9 @@ BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/bioth
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup():
+def setup(ensure_test_data):
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
-
 
 class DiscoveryAPITest(DiscoveryTestCase):
     def refresh(self):
@@ -29,6 +28,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.request("registry/does_not_exist", method="HEAD", expect=404)
 
     def test_10_get(self):
+        self.refresh()
         res = self.request("registry?user=minions@example.com").json()
         for hit in res["hits"]:
             if hit["namespace"] == "bts":
