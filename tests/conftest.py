@@ -58,7 +58,7 @@ def index_exists_and_has_docs(es: Elasticsearch, idx: str) -> bool:
 def ensure_test_data(es_client):
     """Prepare ES indices once per test session."""
     # Always restore to ensure clean state - don't skip based on existing data
-    print(f"⚠️  Restoring test data for clean state")
+    print("⚠️  Restoring test data for clean state")
     restore_from_file(BACKUP_FILE)
     es_client.indices.refresh(index=",".join(INDEX_NAMES))
 
@@ -84,9 +84,9 @@ def with_clean_datasets(ensure_test_data, es_client):
     # Setup: delete target docs before tests
     _delete_ids(target_ids)
     es_client.indices.refresh(index="discover_dataset")
-    
+
     yield  # Run the tests
-    
+
     # Teardown: restore clean state after tests complete
     # This ensures next run starts fresh
     restore_from_file(BACKUP_FILE)
@@ -121,8 +121,9 @@ def pytest_sessionfinish(session, exitstatus):
                 _SESSION_LOOP.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
             _SESSION_LOOP.run_until_complete(_SESSION_LOOP.shutdown_asyncgens())
             _SESSION_LOOP.close()
-    except Exception:
-        pass
+    except Exception as e:
+        # Log cleanup errors but don't fail the test session
+        print(f"Warning: Error during event loop cleanup: {e}")
     finally:
         _SESSION_LOOP = None
 
