@@ -1,4 +1,4 @@
-git+https://github.com/biothings/biothings_schema.py@70ae38a#egg=biothings_schema
+git+https://github.com/biothings/biothings_schema.py@5322c07#egg=biothings_schema
 # git+https://github.com/biothings/biothings.api.git@0.12.x#egg=biothings
 
 biothings==1.0.2
