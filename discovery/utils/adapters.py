@@ -28,9 +28,7 @@ import logging
 
 from biothings_schema import Schema as SchemaParser
 from biothings_schema.dataload import BaseSchemaLoader, get_schemaorg_version as _get_schemaorg_version
-
-
-from discovery.registry import schemas
+from biothings_schema.settings import SCHEMAORG_DEFAULT_VERSION
 
 # the underlying package uses warnings
 logging.captureWarnings(True)
@@ -38,6 +36,7 @@ logging.captureWarnings(True)
 
 def get_schema_org_version():
     """return the current schema_org schema version"""
+    print(f'{_get_schemaorg_version()}')
     return _get_schemaorg_version()
 
 
@@ -46,13 +45,26 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
        within the DDE app. By default biothings_schema load base schemas via DDE API,
        but within the DDE app itself, we can load them directly from model.schema module.
     """
+    
+    @property
+    def schema_org_version(self):
+        """Get the schema.org version stored in DDE, fallback to default if not found"""
+        from discovery.registry.schemas import get_schema_org_version as get_stored_version
+        stored_version = get_stored_version()
+        if stored_version:
+            return stored_version
+        # Fallback to default if not stored yet
+        return SCHEMAORG_DEFAULT_VERSION
+    
     @property
     def registered_dde_schemas(self):
         """Return a list of schema namespaces registered in DDE"""
+        from discovery.registry import schemas
         return [s["_id"] for s in schemas.get_all(size=100)]
 
     def load_dde_schemas(self, schema):
         """Load a registered schema"""
+        from discovery.registry import schemas
         if self.verbose:
             print(f'Loading registered DDE schema "{schema}"')
         schema_source = schemas.get(schema)
