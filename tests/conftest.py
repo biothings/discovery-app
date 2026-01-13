@@ -57,14 +57,10 @@ def index_exists_and_has_docs(es: Elasticsearch, idx: str) -> bool:
 @pytest.fixture(scope="session")
 def ensure_test_data(es_client):
     """Prepare ES indices once per test session."""
-    missing_or_empty = [i for i in INDEX_NAMES if not index_exists_and_has_docs(es_client, i)]
-    if missing_or_empty:
-        print(f"⚠️  Restoring test data for: {', '.join(missing_or_empty)}")
-        restore_from_file(BACKUP_FILE)
-        es_client.indices.refresh(index=",".join(INDEX_NAMES))
-    else:
-        print("✅ Indices present with data; skipping restore.")
-    # Nothing to yield/teardown; state is shared for the session.
+    # Always restore to ensure clean state - don't skip based on existing data
+    print(f"⚠️  Restoring test data for clean state")
+    restore_from_file(BACKUP_FILE)
+    es_client.indices.refresh(index=",".join(INDEX_NAMES))
 
 # conftest.py (continued)
 
@@ -85,7 +81,15 @@ def with_clean_datasets(ensure_test_data, es_client):
             conflicts="proceed", # avoid 409s if racing
         )
 
+    # Setup: delete target docs before tests
     _delete_ids(target_ids)
+    es_client.indices.refresh(index="discover_dataset")
+    
+    yield  # Run the tests
+    
+    # Teardown: restore clean state after tests complete
+    # This ensures next run starts fresh
+    restore_from_file(BACKUP_FILE)
     es_client.indices.refresh(index="discover_dataset")
 
 
@@ -116,9 +120,9 @@ def pytest_sessionfinish(session, exitstatus):
             if pending:
                 _SESSION_LOOP.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
             _SESSION_LOOP.run_until_complete(_SESSION_LOOP.shutdown_asyncgens())
-    #         _SESSION_LOOP.close()
-    # except Exception:
-    #     pass
+            _SESSION_LOOP.close()
+    except Exception:
+        pass
     finally:
         _SESSION_LOOP = None
 
