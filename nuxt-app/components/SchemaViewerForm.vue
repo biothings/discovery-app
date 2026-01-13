@@ -138,7 +138,7 @@ export default {
     },
     handleGoodSchema(data) {
       let self = this;
-      localStorage.setItem("user-schema-classes", JSON.stringify(data));
+      self.$store.commit("SetUserSchemaClasses", {value: data});
       localStorage.setItem("user-schema-url", self.input);
       if (data.hits.length) {
         if (data.hits[0].hasOwnProperty("namespace")) {
@@ -403,46 +403,23 @@ export default {
         .catch((err) => {
           self.$store.commit("setLoading", { value: false });
           console.log(err);
-          let culprit = "<h6>" + err.response.data.error + "</h6>";
-          if (err.response.data && err.response.data.path) {
-            culprit +=
-              "<h5>Culprit -> <b class='text-danger'>" +
-              err.response.data.path +
-              "</b></h5>";
-          }
-          if (err.response.data.parent && err.response.data.parent.path) {
-            if (true) {
-              culprit +=
-                "<h5>Under -> <b class='text-danger'>" +
-                err.response.data.parent.path +
-                "</b></h5>";
-            }
-            if (err.response.data.parent && err.response.data.parent.reason) {
-              culprit +=
-                "<div class='alert alert-warning'><small>" +
-                err.response.data.parent.reason +
-                "</small></div>";
-            }
-          }
-          if (
-            err.response.data.hasOwnProperty("validator_value") &&
-            err.response.data.validator_value.length
-          ) {
-            culprit +=
-              "<div class='alert alert-info'><small> Hint: " +
-              err.response.data.validator_value +
-              "</small></div>";
-          }
+
+          const errorText =
+            err?.response?.data?.error ||
+            err?.response?.data?.message ||
+            err?.message ||
+            "An unknown error occurred";
+
           this.$swal.fire({
             imageUrl: oh_no,
             imageHeight: 200,
-
-            customClass: "scale-in-center",
+            customClass: "scale-in-center text-left",
             imageAlt: "Error",
             position: "center",
-            title: "Details: ",
-            html: culprit,
+            title: "Details:",
+            html: `<pre>${errorText}</pre>`,
           });
+
           throw err;
         });
     },
@@ -474,7 +451,6 @@ export default {
           if (result.dismiss === self.$swal.DismissReason.timer) {
             this.number = Math.floor(Math.random() * 90000) + 10000;
             this.setLastViewed();
-            self.$store.commit("setTempViewMode", true);
             navigateTo({ path: "/ns/" + this.slug + this.number });
           }
         });
