@@ -362,6 +362,10 @@ class SchemaViewHandler(APIBaseHandler):
             "ns": {
                 "type": str
             },  # indicates the special target namespace of the schema, e.g. schema.org or bioschemas.
+            "validation_merge": {
+                "type": bool,
+                "default": False
+            },  # whether to merge validation schemas from parent classes
         }
     }
 
@@ -395,7 +399,9 @@ class SchemaViewHandler(APIBaseHandler):
                 doc = self.request.body
             if doc:
                 doc = json.loads(doc)
-                validator_options = {"validation_merge": False, "raise_on_validation_error": False}
+                # Use the validation_merge parameter from query args, defaults to False
+                validation_merge = getattr(self.args, 'validation_merge', False)
+                validator_options = {"validation_merge": validation_merge, "raise_on_validation_error": False}
                 if self.args.ns:
                     if self.args.ns == "schema.org":
                         # do no load any base schemas
