@@ -244,3 +244,62 @@ class TestSchemaViewer(BiothingsTestCase):
         assert "childProp1" in required_fields, "Child's own required field should be present"
         assert "parentProp1" in required_fields, "Parent's required field SHOULD be inherited"
         # Note: parentProp2 is not required in parent, so shouldn't be in required fields
+
+
+    def test_10_validation_deep_inheritance_with_merge(self):
+        """Test validation_merge=True with 3-level deep inheritance (grandparent -> parent -> child)
+        This test specifically exposes the bug where grandparent validation would leak to
+        the wrong class due to using parent_index instead of schema_index in recursion.
+        """
+        schema_path = Path(__file__).parent / "test_schema" / "validation_merge_test_schema.json"
+        with open(schema_path) as f:
+            schema_content = f.read()
+
+        # Send with validation_merge=true query parameter
+        res = self.request("/api/view?validation_merge=true", method="GET", data=schema_content).json()
+
+        # Find ChildClass (GrandParentClass -> ParentClass -> ChildClass)
+        child_class = None
+        for hit in res["hits"]:
+            if hit.get("label") == "ChildClass":
+                child_class = hit
+                break
+
+        assert child_class is not None, "ChildClass not found in schema"
+
+        # With validation_merge=True, child should inherit from ALL ancestors:
+        # - its own: childProp1
+        # - parent: parentProp1, parentProp2
+        # - grandparent: grandParentProp1
+        validation_schema = child_class.get("validation", {})
+        required_fields = validation_schema.get("required", [])
+
+        # Should have the child's own required field
+        assert "childProp1" in required_fields, "Child's own required field should be present"
+
+        # Should have parent's required fields
+        assert "parentProp1" in required_fields, "Parent's required field should be inherited"
+        assert "parentProp2" in required_fields, "Parent's required field should be inherited"
+
+        # CRITICAL: Should have grandparent's required field
+        # This is where the bug would manifest - if the recursion used parent_index
+        # instead of schema_index, the grandparent validation would leak to ParentClass
+        # instead of being correctly applied to ChildClass
+        assert "grandParentProp1" in required_fields, "Grandparent's required field should be inherited through full ancestry chain"
+
+        # With validation_merge=True, ParentClass SHOULD also have inherited grandparent validation
+        # because the validator processes each class and merges parent validations into it
+        parent_class = None
+        for hit in res["hits"]:
+            if hit.get("label") == "ParentClass":
+                parent_class = hit
+                break
+
+        assert parent_class is not None, "ParentClass not found in schema"
+        parent_validation = parent_class.get("validation", {})
+        parent_required = parent_validation.get("required", [])
+
+        # ParentClass should have its own validation + grandparent's (when validation_merge=True)
+        assert "parentProp1" in parent_required, "ParentClass should have its own required field"
+        assert "parentProp2" in parent_required, "ParentClass should have its own required field"
+        assert "grandParentProp1" in parent_required, "ParentClass should inherit grandparent's required field when validation_merge=True"
