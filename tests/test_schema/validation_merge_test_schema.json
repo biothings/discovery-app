@@ -1,0 +1,255 @@
+{
+  "@context": {
+    "schema": "http://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "test": "http://discovery.biothings.io/test/"
+  },
+  "@graph": [
+    {
+      "@id": "test:GrandParentClass",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A grandparent class with validation",
+      "rdfs:label": "GrandParentClass",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "grandParentProp1": {
+            "description": "First property from grandparent",
+            "type": "string"
+          },
+          "grandParentProp2": {
+            "description": "Second property from grandparent",
+            "type": "number"
+          }
+        },
+        "required": ["grandParentProp1"]
+      }
+    },
+    {
+      "@id": "test:grandParentProp1",
+      "@type": "rdf:Property",
+      "rdfs:comment": "First property from grandparent",
+      "rdfs:label": "grandParentProp1",
+      "schema:domainIncludes": {
+        "@id": "test:GrandParentClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "test:grandParentProp2",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Second property from grandparent",
+      "rdfs:label": "grandParentProp2",
+      "schema:domainIncludes": {
+        "@id": "test:GrandParentClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Number"
+      }
+    },
+    {
+      "@id": "test:ParentClass",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A parent class with some properties",
+      "rdfs:label": "ParentClass",
+      "rdfs:subClassOf": {
+        "@id": "test:GrandParentClass"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "parentProp1": {
+            "description": "First property from parent",
+            "type": "string"
+          },
+          "parentProp2": {
+            "description": "Second property from parent",
+            "type": "string"
+          },
+          "parentProp3": {
+            "description": "Third property from parent",
+            "type": "integer"
+          }
+        },
+        "required": ["parentProp1", "parentProp2"]
+      }
+    },
+    {
+      "@id": "test:parentProp1",
+      "@type": "rdf:Property",
+      "rdfs:comment": "First property from parent",
+      "rdfs:label": "parentProp1",
+      "schema:domainIncludes": {
+        "@id": "test:ParentClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "test:parentProp2",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Second property from parent",
+      "rdfs:label": "parentProp2",
+      "schema:domainIncludes": {
+        "@id": "test:ParentClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "test:parentProp3",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Third property from parent",
+      "rdfs:label": "parentProp3",
+      "schema:domainIncludes": {
+        "@id": "test:ParentClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Integer"
+      }
+    },
+    {
+      "@id": "test:ChildClass",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A child class that extends ParentClass",
+      "rdfs:label": "ChildClass",
+      "rdfs:subClassOf": {
+        "@id": "test:ParentClass"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "childProp1": {
+            "description": "First property specific to child",
+            "type": "string"
+          },
+          "childProp2": {
+            "description": "Second property specific to child",
+            "type": "boolean"
+          }
+        },
+        "required": ["childProp1"]
+      }
+    },
+    {
+      "@id": "test:childProp1",
+      "@type": "rdf:Property",
+      "rdfs:comment": "First property specific to child",
+      "rdfs:label": "childProp1",
+      "schema:domainIncludes": {
+        "@id": "test:ChildClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "test:childProp2",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Second property specific to child",
+      "rdfs:label": "childProp2",
+      "schema:domainIncludes": {
+        "@id": "test:ChildClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Boolean"
+      }
+    },
+    {
+      "@id": "test:SecondParentClass",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A second parent class with different properties",
+      "rdfs:label": "SecondParentClass",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "secondParentProp1": {
+            "description": "First property from second parent",
+            "type": "string"
+          },
+          "secondParentProp2": {
+            "description": "Second property from second parent",
+            "type": "number"
+          }
+        },
+        "required": ["secondParentProp1"]
+      }
+    },
+    {
+      "@id": "test:secondParentProp1",
+      "@type": "rdf:Property",
+      "rdfs:comment": "First property from second parent",
+      "rdfs:label": "secondParentProp1",
+      "schema:domainIncludes": {
+        "@id": "test:SecondParentClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "test:secondParentProp2",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Second property from second parent",
+      "rdfs:label": "secondParentProp2",
+      "schema:domainIncludes": {
+        "@id": "test:SecondParentClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Number"
+      }
+    },
+    {
+      "@id": "test:MultiParentChildClass",
+      "@type": "rdfs:Class",
+      "rdfs:comment": "A child class that extends BOTH ParentClass and SecondParentClass",
+      "rdfs:label": "MultiParentChildClass",
+      "rdfs:subClassOf": [
+        {
+          "@id": "test:ParentClass"
+        },
+        {
+          "@id": "test:SecondParentClass"
+        }
+      ],
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "multiChildProp1": {
+            "description": "Property specific to multi-parent child",
+            "type": "string"
+          }
+        },
+        "required": ["multiChildProp1"]
+      }
+    },
+    {
+      "@id": "test:multiChildProp1",
+      "@type": "rdf:Property",
+      "rdfs:comment": "Property specific to multi-parent child",
+      "rdfs:label": "multiChildProp1",
+      "schema:domainIncludes": {
+        "@id": "test:MultiParentChildClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    }
+  ]
+}
