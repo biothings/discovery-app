@@ -9,6 +9,38 @@
     {
       "@id": "test:GrandParentClass",
       "@type": "rdfs:Class",
+      "rdfs:comment": "A grandparent class for testing deep inheritance",
+      "rdfs:label": "GrandParentClass",
+      "rdfs:subClassOf": {
+        "@id": "schema:Thing"
+      },
+      "$validation": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "grandParentProp1": {
+            "description": "First property from grandparent",
+            "type": "string"
+          }
+        },
+        "required": ["grandParentProp1"]
+      }
+    },
+    {
+      "@id": "test:grandParentProp1",
+      "@type": "rdf:Property",
+      "rdfs:comment": "First property from grandparent",
+      "rdfs:label": "grandParentProp1",
+      "schema:domainIncludes": {
+        "@id": "test:GrandParentClass"
+      },
+      "schema:rangeIncludes": {
+        "@id": "schema:Text"
+      }
+    },
+    {
+      "@id": "test:ParentClass",
+      "@type": "rdfs:Class",
       "rdfs:comment": "A grandparent class with validation",
       "rdfs:label": "GrandParentClass",
       "rdfs:subClassOf": {
