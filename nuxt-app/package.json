@@ -31,7 +31,7 @@
     "codemirror": "^6.0.1",
     "cytoscape": "^3.22.1",
     "cytoscape-dagre": "^2.4.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "mark.js": "^8.11.1",
     "marked": "^16.4.1",
     "moment": "^2.29.4",
