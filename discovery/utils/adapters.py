@@ -45,12 +45,43 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
     """
 
     def __init__(self, schemas_module=None, **kwargs):
-        """Initialize with optional schemas dependency injection to avoid circular imports."""
+        """
+        Initialize with optional schemas dependency injection to avoid circular imports.
+
+        Args:
+            schemas_module: Optional pre-loaded discovery.registry.schemas module.
+                If not provided, will be lazy-loaded on first use.
+                This parameter allows callers to break circular imports
+                by passing the module directly.
+            **kwargs: Additional arguments passed to BaseSchemaLoader parent class.
+
+        Example:
+            # Without injection (lazy loads on first call):
+            loader = DDEBaseSchemaLoader()
+
+            # With injection (useful in SchemaAdapter or tests):
+            from discovery.registry import schemas
+            loader = DDEBaseSchemaLoader(schemas_module=schemas)
+        """
         super().__init__(**kwargs)
         self._schemas = schemas_module
 
     def _get_schemas(self):
-        """Lazily load schemas module if not provided at init time."""
+        """
+        Lazily load schemas module if not provided at init time.
+
+        This approach avoids circular imports:
+        - discovery/handlers/api/schema.py imports adapters.py
+        - adapters.py needs discovery/registry/schemas.py
+        - discovery/registry/schemas.py may import from handlers
+
+        By deferring the import to runtime (when called), Python has already
+        loaded all modules, breaking the circular dependency chain.
+        We cache the module to avoid repeated imports.
+
+        Alternative: schemas_module can be passed to __init__ (dependency injection)
+        to avoid even the runtime import (useful for testing).
+        """
         if self._schemas is None:
             from discovery.registry import schemas
             self._schemas = schemas
