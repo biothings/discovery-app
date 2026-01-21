@@ -45,43 +45,18 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
     """
 
     def __init__(self, schemas_module=None, **kwargs):
-        """
-        Initialize with optional schemas dependency injection to avoid circular imports.
+        """Initialize with schemas dependency injection to avoid circular imports.
 
         Args:
-            schemas_module: Optional pre-loaded discovery.registry.schemas module.
-                If not provided, will be lazy-loaded on first use.
-                This parameter allows callers to break circular imports
-                by passing the module directly.
+            schemas_module: Pre-loaded discovery.registry.schemas module.
+                          SchemaAdapter will pass this to break circular dependency.
             **kwargs: Additional arguments passed to BaseSchemaLoader parent class.
-
-        Example:
-            # Without injection (lazy loads on first call):
-            loader = DDEBaseSchemaLoader()
-
-            # With injection (useful in SchemaAdapter or tests):
-            from discovery.registry import schemas
-            loader = DDEBaseSchemaLoader(schemas_module=schemas)
         """
         super().__init__(**kwargs)
         self._schemas = schemas_module
 
-    def _get_schemas(self):
-        """
-        Lazily load schemas module if not provided at init time.
-
-        This approach avoids circular imports:
-        - discovery/handlers/api/schema.py imports adapters.py
-        - adapters.py needs discovery/registry/schemas.py
-        - discovery/registry/schemas.py may import from handlers
-
-        By deferring the import to runtime (when called), Python has already
-        loaded all modules, breaking the circular dependency chain.
-        We cache the module to avoid repeated imports.
-
-        Alternative: schemas_module can be passed to __init__ (dependency injection)
-        to avoid even the runtime import (useful for testing).
-        """
+    def _ensure_schemas(self):
+        """Ensure schemas module is available, lazy load if needed."""
         if self._schemas is None:
             from discovery.registry import schemas
             self._schemas = schemas
@@ -93,7 +68,7 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
         This ensures DDEBaseSchemaLoader uses the same version of schema.org
         as DDE stores (set when add_core() is called).
         """
-        return self._get_schemas().get_schema_org_version()
+        return self._ensure_schemas().get_schema_org_version()
 
     @schema_org_version.setter
     def schema_org_version(self, value):
@@ -105,11 +80,11 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
     @property
     def registered_dde_schemas(self):
         """Return a list of schema namespaces registered in DDE"""
-        return [s["_id"] for s in self._get_schemas().get_all(size=100)]
+        return [s["_id"] for s in self._ensure_schemas().get_all(size=100)]
 
     def load_dde_schemas(self, schema):
         """Load a registered schema"""
-        schemas = self._get_schemas()
+        schemas = self._ensure_schemas()
         if self.verbose:
             print(f'Loading registered DDE schema "{schema}"')
         schema_source = schemas.get(schema)
