@@ -1,17 +1,19 @@
 """
-Test schema.org version handling in adapters.py
+Test schema.org version handling in adapters.py and monthly updates
 
 This tests:
 1. The get_schema_org_version() function from biothings_schema
 2. The DDEBaseSchemaLoader.schema_org_version property
 3. That the property correctly returns DDE's stored version
 4. That the setter is a no-op (ignores set values)
+5. The monthly_schemaorg_update() function for automatic updates
 """
 
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from discovery.utils.adapters import DDEBaseSchemaLoader, get_schema_org_version
+from discovery.utils.update import monthly_schemaorg_update
 from biothings_schema.dataload import get_schemaorg_version
 from biothings_schema.settings import SCHEMAORG_DEFAULT_VERSION
 
@@ -94,3 +96,198 @@ class TestSchemaOrgVersion:
         
         # 'schemas' should not be in module namespace (lazy import)
         assert 'schemas' not in dir(adapters_module)
+
+
+class TestMonthlySchemaOrgUpdate:
+    """Test monthly schema.org update functionality"""
+
+    def test_no_update_when_versions_match(self):
+        """Test that no update occurs when current version matches latest version"""
+        with patch('discovery.utils.update.schemas.get_schema_org_version') as mock_current, \
+             patch('discovery.utils.update.get_schema_org_version') as mock_latest, \
+             patch('discovery.utils.update.schemas.add_core') as mock_add_core:
+            
+            # Both versions are the same
+            mock_current.return_value = "29.3"
+            mock_latest.return_value = "29.3"
+            
+            # Run the update
+            monthly_schemaorg_update()
+            
+            # Verify add_core was never called
+            mock_add_core.assert_not_called()
+            
+            # Verify both version checks were made
+            assert mock_current.called
+            assert mock_latest.called
+
+    def test_successful_update_when_new_version_available(self):
+        """Test successful update when a new schema.org version is available"""
+        with patch('discovery.utils.update.schemas.get_schema_org_version') as mock_current, \
+             patch('discovery.utils.update.get_schema_org_version') as mock_latest, \
+             patch('discovery.utils.update.SchemaParser') as mock_parser, \
+             patch('discovery.utils.update.schemas.add_core') as mock_add_core:
+            
+            # Current version is older than latest
+            mock_current.side_effect = ["29.3", "29.4"]  # Before and after update
+            mock_latest.return_value = "29.4"
+            
+            # Mock successful validation
+            mock_parser.return_value = MagicMock()
+            
+            # Run the update
+            monthly_schemaorg_update()
+            
+            # Verify validation was attempted
+            mock_parser.assert_called_once_with(base_schema=["schema.org"])
+            
+            # Verify add_core was called twice (dry-run + actual)
+            assert mock_add_core.call_count == 2
+            mock_add_core.assert_any_call(update=True, dryrun=True)
+            mock_add_core.assert_any_call(update=True)
+            
+            # Verify version was checked after update
+            assert mock_current.call_count == 2  # Once before, once after
+
+    def test_update_aborted_when_validation_fails(self):
+        """Test that update is aborted when schema validation fails"""
+        with patch('discovery.utils.update.schemas.get_schema_org_version') as mock_current, \
+             patch('discovery.utils.update.get_schema_org_version') as mock_latest, \
+             patch('discovery.utils.update.SchemaParser') as mock_parser, \
+             patch('discovery.utils.update.schemas.add_core') as mock_add_core:
+            
+            # Current version is older than latest
+            mock_current.return_value = "29.3"
+            mock_latest.return_value = "29.4"
+            
+            # Mock validation failure
+            mock_parser.side_effect = Exception("Validation error: invalid schema format")
+            
+            # Run the update
+            monthly_schemaorg_update()
+            
+            # Verify validation was attempted
+            mock_parser.assert_called_once_with(base_schema=["schema.org"])
+            
+            # Verify add_core was NOT called because validation failed
+            mock_add_core.assert_not_called()
+
+    def test_handles_none_current_version(self):
+        """Test handling when current version is None (schema.org not yet initialized)"""
+        with patch('discovery.utils.update.schemas.get_schema_org_version') as mock_current, \
+             patch('discovery.utils.update.get_schema_org_version') as mock_latest, \
+             patch('discovery.utils.update.SchemaParser') as mock_parser, \
+             patch('discovery.utils.update.schemas.add_core') as mock_add_core:
+            
+            # Current version is None (not initialized)
+            mock_current.side_effect = [None, "29.4"]  # Before and after update
+            mock_latest.return_value = "29.4"
+            
+            # Mock successful validation
+            mock_parser.return_value = MagicMock()
+            
+            # Run the update
+            monthly_schemaorg_update()
+            
+            # Verify validation was attempted
+            mock_parser.assert_called_once()
+            
+            # Verify add_core was called twice (dry-run + actual)
+            assert mock_add_core.call_count == 2
+            mock_add_core.assert_any_call(update=True, dryrun=True)
+            mock_add_core.assert_any_call(update=True)
+
+    def test_gracefully_handles_add_core_exception(self):
+        """Test that exceptions during dry-run are caught and logged"""
+        with patch('discovery.utils.update.schemas.get_schema_org_version') as mock_current, \
+             patch('discovery.utils.update.get_schema_org_version') as mock_latest, \
+             patch('discovery.utils.update.SchemaParser') as mock_parser, \
+             patch('discovery.utils.update.schemas.add_core') as mock_add_core:
+            
+            # Current version is older than latest
+            mock_current.return_value = "29.3"
+            mock_latest.return_value = "29.4"
+            
+            # Mock successful validation
+            mock_parser.return_value = MagicMock()
+            
+            # Mock dry-run to raise exception (fails during validation)
+            mock_add_core.side_effect = Exception("Elasticsearch connection failed")
+            
+            # Run the update - should not raise exception
+            monthly_schemaorg_update()
+            
+            # Verify add_core was called for dry-run and raised
+            mock_add_core.assert_called_once_with(update=True, dryrun=True)
+
+    def test_version_comparison_with_different_formats(self):
+        """Test version comparison with different version string formats"""
+        with patch('discovery.utils.update.schemas.get_schema_org_version') as mock_current, \
+             patch('discovery.utils.update.get_schema_org_version') as mock_latest, \
+             patch('discovery.utils.update.SchemaParser') as mock_parser, \
+             patch('discovery.utils.update.schemas.add_core') as mock_add_core:
+            
+            # Different version formats
+            mock_current.side_effect = ["29.3", "30.0"]
+            mock_latest.return_value = "30.0"
+            
+            # Mock successful validation
+            mock_parser.return_value = MagicMock()
+            
+            # Run the update
+            monthly_schemaorg_update()
+            
+            # Verify update proceeded
+            mock_add_core.assert_called_with(update=True)
+
+    def test_dryrun_performed_before_actual_update(self):
+        """Test that a dry-run is performed before the actual update"""
+        with patch('discovery.utils.update.schemas.get_schema_org_version') as mock_current, \
+             patch('discovery.utils.update.get_schema_org_version') as mock_latest, \
+             patch('discovery.utils.update.SchemaParser') as mock_parser, \
+             patch('discovery.utils.update.schemas.add_core') as mock_add_core:
+            
+            # Current version is older than latest
+            mock_current.side_effect = ["29.3", "29.4"]
+            mock_latest.return_value = "29.4"
+            
+            # Mock successful validation
+            mock_parser.return_value = MagicMock()
+            
+            # Run the update
+            monthly_schemaorg_update()
+            
+            # Verify add_core was called twice: once for dryrun, once for real
+            assert mock_add_core.call_count == 2
+            
+            # First call should be dry-run
+            mock_add_core.assert_any_call(update=True, dryrun=True)
+            
+            # Second call should be the actual update
+            mock_add_core.assert_any_call(update=True)
+
+    def test_update_aborted_when_dryrun_fails(self):
+        """Test that update is aborted when dry-run validation fails"""
+        with patch('discovery.utils.update.schemas.get_schema_org_version') as mock_current, \
+             patch('discovery.utils.update.get_schema_org_version') as mock_latest, \
+             patch('discovery.utils.update.SchemaParser') as mock_parser, \
+             patch('discovery.utils.update.schemas.add_core') as mock_add_core:
+            
+            # Current version is older than latest
+            mock_current.return_value = "29.3"
+            mock_latest.return_value = "29.4"
+            
+            # Mock successful schema validation
+            mock_parser.return_value = MagicMock()
+            
+            # Mock dry-run failure
+            mock_add_core.side_effect = [Exception("Dry-run failed: invalid class"), None]
+            
+            # Run the update
+            monthly_schemaorg_update()
+            
+            # Verify add_core was only called once (dry-run failed)
+            mock_add_core.assert_called_once_with(update=True, dryrun=True)
+            
+            # Verify the actual update was never attempted
+            assert mock_add_core.call_count == 1
