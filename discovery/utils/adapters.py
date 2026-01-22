@@ -152,7 +152,6 @@ class SchemaAdapter:
         # self._schema = SchemaParser(schema=doc, context=contexts, **kwargs)
         if "base_schema_loader" not in kwargs:
             # Import schemas here (when actually needed) to avoid circular imports
-            from discovery.registry import schemas
             kwargs["base_schema_loader"] = DDEBaseSchemaLoader() #schemas_module=schemas
         self._schema = SchemaParser(schema=doc, **kwargs)
         self._classes_defs = self._schema.list_all_defined_classes()
