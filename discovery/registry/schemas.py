@@ -358,11 +358,12 @@ def total(user=None):
     return search.count()
 
 
-def add_core(update=False):
+def add_core(update=False, dryrun=False):
     """add schema.org main schema."""
     if not exists("schema") or update:
-        _add_schema_class(None, "schema")
-        store_schema_org_version()
+        _add_schema_class(None, "schema", dryrun=dryrun)
+        if not dryrun:
+            store_schema_org_version()
 
 
 def add_core_extension(schema, update=False):
