@@ -29,6 +29,8 @@ import logging
 from biothings_schema import Schema as SchemaParser
 from biothings_schema.dataload import BaseSchemaLoader, get_schemaorg_version as _get_schemaorg_version
 
+from discovery.registry import schemas
+
 # the underlying package uses warnings
 logging.captureWarnings(True)
 
@@ -44,48 +46,28 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
        but within the DDE app itself, we can load them directly from model.schema module.
     """
 
-    def __init__(self, schemas_module=None, **kwargs):
-        """Initialize with schemas dependency injection to avoid circular imports.
-
-        Args:
-            schemas_module: Pre-loaded discovery.registry.schemas module.
-                          SchemaAdapter will pass this to break circular dependency.
-            **kwargs: Additional arguments passed to BaseSchemaLoader parent class.
-        """
-        super().__init__(**kwargs)
-        self._schemas = schemas_module
-
-    def _ensure_schemas(self):
-        """Ensure schemas module is available, lazy load if needed."""
-        if self._schemas is None:
-            from discovery.registry import schemas
-            self._schemas = schemas
-        return self._schemas
-
     @property
     def schema_org_version(self):
         """Get the schema.org version stored in DDE.
         This ensures DDEBaseSchemaLoader uses the same version of schema.org
         as DDE stores (set when add_core() is called).
         """
-        return self._ensure_schemas().get_schema_org_version()
+        return schemas.get_schema_org_version()
 
     @schema_org_version.setter
     def schema_org_version(self, value):
-        """Allow setting schema_org_version for compatibility with BaseSchemaLoader.
-        
-        BaseSchemaLoader may try to set this attribute, so we provide a setter
-        but we ignore the value since we always use DDE's stored version.
-        """
+        """Allow setting schema_org_version for compatibility with BaseSchemaLoader."""
+        # BaseSchemaLoader may try to set this attribute, so we provide a setter
+        # but we ignore the value since we always use DDE's stored version
+
 
     @property
     def registered_dde_schemas(self):
         """Return a list of schema namespaces registered in DDE"""
-        return [s["_id"] for s in self._ensure_schemas().get_all(size=100)]
+        return [s["_id"] for s in schemas.get_all(size=100)]
 
     def load_dde_schemas(self, schema):
         """Load a registered schema"""
-        schemas = self._ensure_schemas()
         if self.verbose:
             print(f'Loading registered DDE schema "{schema}"')
         schema_source = schemas.get(schema)
@@ -171,7 +153,7 @@ class SchemaAdapter:
         if "base_schema_loader" not in kwargs:
             # Import schemas here (when actually needed) to avoid circular imports
             from discovery.registry import schemas
-            kwargs["base_schema_loader"] = DDEBaseSchemaLoader(schemas_module=schemas)
+            kwargs["base_schema_loader"] = DDEBaseSchemaLoader() #schemas_module=schemas
         self._schema = SchemaParser(schema=doc, **kwargs)
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
