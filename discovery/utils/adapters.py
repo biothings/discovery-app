@@ -72,10 +72,11 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
 
     @schema_org_version.setter
     def schema_org_version(self, value):
-        """Allow setting schema_org_version for compatibility with BaseSchemaLoader."""
-        # BaseSchemaLoader may try to set this attribute, so we provide a setter
-        # but we ignore the value since we always use DDE's stored version
-        pass
+        """Allow setting schema_org_version for compatibility with BaseSchemaLoader.
+        
+        BaseSchemaLoader may try to set this attribute, so we provide a setter
+        but we ignore the value since we always use DDE's stored version.
+        """
 
     @property
     def registered_dde_schemas(self):
