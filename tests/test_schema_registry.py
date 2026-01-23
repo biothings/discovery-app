@@ -3,9 +3,11 @@
 """
 
 import pytest
+# from unittest.mock import patch
 
 from discovery.registry import schemas
 from discovery.utils import indices
+from discovery.utils.adapters import SchemaAdapter, DDEBaseSchemaLoader
 
 from .test_base import DiscoveryTestCase
 
@@ -109,3 +111,44 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.request("registry/bts", expect=200)
         self.refresh()
         self.query(q="BiologicalEntity")
+
+    def test_40_schema_org_version_pinning(self):
+        """Test that schema validation uses DDE's stored schema.org version
+
+        This test verifies issue #359 fix:
+        When validating schemas with biothings_schema, the version used should be
+        the one DDE stores, not the latest version of schema.org.
+        """
+        # Ensure we have a schema registered
+        if not schemas.exists("bts"):
+            schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
+
+        # Get the DDE stored schema.org version
+        dde_version = schemas.get_schema_org_version()
+
+        # Create a schema adapter with a test schema
+        test_schema = {
+            "@context": {"schema": "http://schema.org/"},
+            "@graph": [
+                {
+                    "@id": "http://example.org/TestClass",
+                    "@type": "rdfs:Class",
+                    "rdfs:label": "TestClass",
+                    "rdfs:comment": "A test class"
+                }
+            ]
+        }
+
+        # Create SchemaAdapter with DDEBaseSchemaLoader
+        adapter = SchemaAdapter(test_schema)
+
+        # Verify that the loader is DDEBaseSchemaLoader
+        assert isinstance(adapter._schema.base_schema_loader, DDEBaseSchemaLoader)
+
+        # Verify that the loader's schema_org_version returns DDE's stored version
+        loader_version = adapter._schema.base_schema_loader.schema_org_version
+        assert loader_version == dde_version
+
+        # Verify the loader is a proper BaseSchemaLoader instance
+        from biothings_schema.dataload import BaseSchemaLoader
+        assert isinstance(adapter._schema.base_schema_loader, BaseSchemaLoader)
