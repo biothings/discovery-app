@@ -29,11 +29,10 @@ import logging
 from biothings_schema import Schema as SchemaParser
 from biothings_schema.dataload import BaseSchemaLoader, get_schemaorg_version as _get_schemaorg_version
 
-
-from discovery.registry import schemas
-
 # the underlying package uses warnings
 logging.captureWarnings(True)
+
+logger = logging.getLogger(__name__)
 
 
 def get_schema_org_version():
@@ -46,13 +45,55 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
        within the DDE app. By default biothings_schema load base schemas via DDE API,
        but within the DDE app itself, we can load them directly from model.schema module.
     """
+
+
+    def __init__(self, schemas_module=None, **kwargs):
+        """Initialize with optional schemas dependency injection to avoid circular imports."""
+        super().__init__(**kwargs)
+        self._schemas = schemas_module
+
+    def _get_schemas(self):
+        """Lazily load schemas module if not provided at init time."""
+        if self._schemas is None:
+            from discovery.registry import schemas
+            self._schemas = schemas
+        return self._schemas
+
+    @property
+    def schema_org_version(self):
+        """Get the schema.org version stored in DDE.
+        This ensures DDEBaseSchemaLoader uses the same version of schema.org
+        as DDE stores (set when add_core() is called).
+        """
+        version = self._get_schemas().get_schema_org_version()
+        if version is None:
+            logger.warning(
+                "schema.org version not initialized in DDE. "
+                "Ensure add_core() has been called and store_schema_org_version() was executed."
+            )
+        return version
+
+    @schema_org_version.setter
+    def schema_org_version(self, value):
+        """Allow setting schema_org_version for compatibility with BaseSchemaLoader.
+
+        Note: This setter is a no-op. The value is ignored because DDEBaseSchemaLoader
+        always uses the schema.org version stored in DDE's registry.
+        """
+        logger.debug(
+            f"Ignoring attempt to set schema_org_version to '{value}'. "
+            "DDEBaseSchemaLoader always uses the version stored in DDE registry."
+        )
+
+
     @property
     def registered_dde_schemas(self):
         """Return a list of schema namespaces registered in DDE"""
-        return [s["_id"] for s in schemas.get_all(size=100)]
+        return [s["_id"] for s in self._get_schemas().get_all(size=100)]
 
     def load_dde_schemas(self, schema):
         """Load a registered schema"""
+        schemas = self._get_schemas()
         if self.verbose:
             print(f'Loading registered DDE schema "{schema}"')
         schema_source = schemas.get(schema)
@@ -136,7 +177,8 @@ class SchemaAdapter:
         # contexts = ESSchema.gather_field('@context')
         # self._schema = SchemaParser(schema=doc, context=contexts, **kwargs)
         if "base_schema_loader" not in kwargs:
-            kwargs["base_schema_loader"] = DDEBaseSchemaLoader()
+            # Import schemas here (when actually needed) to avoid circular imports
+            kwargs["base_schema_loader"] = DDEBaseSchemaLoader() #schemas_module=schemas
         self._schema = SchemaParser(schema=doc, **kwargs)
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
