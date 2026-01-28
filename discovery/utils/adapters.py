@@ -29,8 +29,6 @@ import logging
 from biothings_schema import Schema as SchemaParser
 from biothings_schema.dataload import BaseSchemaLoader, get_schemaorg_version as _get_schemaorg_version
 
-from discovery.registry import schemas
-
 # the underlying package uses warnings
 logging.captureWarnings(True)
 
@@ -52,6 +50,7 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
         This ensures DDEBaseSchemaLoader uses the same version of schema.org
         as DDE stores (set when add_core() is called).
         """
+        from discovery.registry import schemas
         return schemas.get_schema_org_version()
 
     @schema_org_version.setter
@@ -64,10 +63,12 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
     @property
     def registered_dde_schemas(self):
         """Return a list of schema namespaces registered in DDE"""
+        from discovery.registry import schemas
         return [s["_id"] for s in schemas.get_all(size=100)]
 
     def load_dde_schemas(self, schema):
         """Load a registered schema"""
+        from discovery.registry import schemas
         if self.verbose:
             print(f'Loading registered DDE schema "{schema}"')
         schema_source = schemas.get(schema)
