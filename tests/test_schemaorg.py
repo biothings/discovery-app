@@ -4,27 +4,32 @@ Test DDEBaseSchemaLoader schema_org_version property
 This tests that DDEBaseSchemaLoader correctly returns DDE's stored schema.org version
 when accessed by biothings_schema, ensuring version consistency during validation.
 """
+import pytest
 from unittest.mock import patch, MagicMock
 
 
 class TestDDEBaseSchemaLoader:
-    def test_schema_org_version_returns_none_when_not_initialized(self):
-        """Test that schema_org_version returns None when version not stored"""
+    def test_get_dde_schema_org_version_raises_error_when_not_initialized(self):
+        """Test that get_dde_schema_org_version raises RegistryError when version not stored"""
         from discovery.utils.adapters import DDEBaseSchemaLoader
+        from discovery.registry.common import RegistryError
+
         loader = DDEBaseSchemaLoader()
 
         # Mock the registry to return None (version not initialized)
         with patch('discovery.registry.schemas.get_schema_org_version') as mock_get_version:
             mock_get_version.return_value = None
 
-            version = loader.schema_org_version
+            # Should raise RegistryError when trying to get the version
+            with pytest.raises(RegistryError) as exc_info:
+                _ = loader.get_dde_schema_org_version()
 
-            # Should return None
-            assert version is None
+            # Verify error message is informative
+            assert "schema.org version not found in DDE" in str(exc_info.value)
             assert mock_get_version.called
 
-    def test_schema_org_version_with_different_versions(self):
-        """Test schema_org_version with various version strings"""
+    def test_get_dde_schema_org_version_with_different_versions(self):
+        """Test get_dde_schema_org_version with various version strings"""
         from discovery.utils.adapters import DDEBaseSchemaLoader
         loader = DDEBaseSchemaLoader()
 
@@ -34,7 +39,7 @@ class TestDDEBaseSchemaLoader:
             with patch('discovery.registry.schemas.get_schema_org_version') as mock_get_version:
                 mock_get_version.return_value = test_version
 
-                version = loader.schema_org_version
+                version = loader.get_dde_schema_org_version()
 
                 # Verify each version is returned correctly
                 assert version == test_version
@@ -42,17 +47,21 @@ class TestDDEBaseSchemaLoader:
     def test_biothings_schema_compatibility(self):
         """Test that DDEBaseSchemaLoader is compatible with biothings_schema BaseSchemaLoader"""
         from discovery.utils.adapters import DDEBaseSchemaLoader
+        from biothings_schema.dataload import BaseSchemaLoader
+
         loader = DDEBaseSchemaLoader()
 
         # Verify it's an instance of BaseSchemaLoader
-        from biothings_schema.dataload import BaseSchemaLoader
         assert isinstance(loader, BaseSchemaLoader)
 
-        # Verify the schema_org_version attribute exists and is accessible
-        assert hasattr(loader, 'schema_org_version')
+        # Verify the get_dde_schema_org_version method exists
+        assert hasattr(loader, 'get_dde_schema_org_version')
+        assert callable(loader.get_dde_schema_org_version)
 
-        # Verify it's a property (not a regular attribute)
-        assert isinstance(type(loader).schema_org_version, property)
+        # Verify schema_org_version can be set as an attribute (for BaseSchemaLoader compatibility)
+        # BaseSchemaLoader expects to be able to set this attribute
+        loader.schema_org_version = "15.0"
+        assert loader.schema_org_version == "15.0"
 
     def test_registered_dde_schemas_property(self):
         """Test that registered_dde_schemas property works"""
@@ -107,24 +116,85 @@ class TestDDEBaseSchemaLoader:
             assert "@context" in schema
             assert "@graph" in schema
 
-    def test_schema_org_version_ensures_biothings_schema_uses_dde_version(self):
+    def test_schema_adapter_sets_version_from_dde(self):
         """
-        Integration test: Here we verify the complete flow - biothings_schema
-        reads schema_org_version from the loader
+        Integration test: Verify that SchemaAdapter sets the version from DDE registry
+        onto the loader when initialized.
         """
-        from discovery.utils.adapters import DDEBaseSchemaLoader
-        loader = DDEBaseSchemaLoader()
+        from discovery.utils.adapters import SchemaAdapter, DDEBaseSchemaLoader
 
-        # Simulate what biothings_schema does internally
         with patch('discovery.registry.schemas.get_schema_org_version') as mock_get_version:
             # Setup: DDE has stored version 29.3
             mock_get_version.return_value = "29.3"
 
-            # When biothings_schema checks the loader's version
-            version_for_biothings = loader.schema_org_version
+            # Create a simple test schema
+            test_schema = {
+                "@context": {"test": "http://example.org/test/"},
+                "@graph": []
+            }
 
-            # It should get DDE's version (29.3), not the latest
-            assert version_for_biothings == "29.3"
+            # Create loader
+            loader = DDEBaseSchemaLoader()
 
-            # Verify this is the stable version (property is accessed consistently)
-            assert loader.schema_org_version == version_for_biothings
+            # Before SchemaAdapter is created, version is not set
+            assert not hasattr(loader, 'schema_org_version') or loader.schema_org_version is None
+
+            # Create SchemaAdapter with the loader
+            adapter = SchemaAdapter(doc=test_schema, base_schema_loader=loader)
+
+            # After SchemaAdapter is created, the version should be set on the loader
+            assert adapter._schema.base_schema_loader.schema_org_version == "29.3"
+
+            # Verify the version was retrieved from DDE registry
+            assert mock_get_version.called
+
+    def test_schema_validation_with_specific_version(self):
+        """
+        Integration test: Validate that SchemaAdapter uses DDEBaseSchemaLoader's
+        schema_org_version when parsing and validating schemas.
+
+        This ensures that when DDE has stored a specific schema.org version,
+        the biothings_schema validation uses that exact version.
+        """
+        from discovery.utils.adapters import SchemaAdapter, DDEBaseSchemaLoader
+
+        # Mock DDE's stored version
+        with patch('discovery.registry.schemas.get_schema_org_version') as mock_get_version:
+            mock_get_version.return_value = "15.0"
+
+            # Create a test schema that uses schema.org classes
+            test_schema = {
+                "@context": {
+                    "schema": "http://schema.org/",
+                    "test": "http://example.org/test/"
+                },
+                "@graph": [
+                    {
+                        "@id": "test:TestClass",
+                        "@type": "rdfs:Class",
+                        "rdfs:label": "TestClass",
+                        "rdfs:comment": "A test class for validation",
+                        "rdfs:subClassOf": {
+                            "@id": "schema:Thing"
+                        }
+                    }
+                ]
+            }
+
+            # Create a custom loader
+            loader = DDEBaseSchemaLoader()
+
+            # Create SchemaAdapter with the loader
+            # SchemaAdapter should set the version on the loader from DDE's registry
+            adapter = SchemaAdapter(doc=test_schema, base_schema_loader=loader)
+
+            # Verify the adapter's underlying schema parser has access to the loader
+            assert adapter._schema.base_schema_loader is loader
+
+            # Verify that the version was set on the loader by SchemaAdapter
+            # This is what biothings_schema will read when validating
+            schema_version = adapter._schema.base_schema_loader.schema_org_version
+            assert schema_version == "15.0"
+
+            # Verify the version was retrieved from DDE registry
+            assert mock_get_version.called
