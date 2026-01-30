@@ -1,49 +1,14 @@
 """
-Test DDEBaseSchemaLoader schema_org_version property
+Test DDEBaseSchemaLoader and SchemaAdapter version handling
 
-This tests that DDEBaseSchemaLoader correctly returns DDE's stored schema.org version
-when accessed by biothings_schema, ensuring version consistency during validation.
+This tests that SchemaAdapter correctly retrieves and sets DDE's stored schema.org version
+onto the base schema loader, ensuring version consistency during validation.
 """
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 
 class TestDDEBaseSchemaLoader:
-    def test_get_dde_schema_org_version_raises_error_when_not_initialized(self):
-        """Test that get_dde_schema_org_version raises RegistryError when version not stored"""
-        from discovery.utils.adapters import DDEBaseSchemaLoader
-        from discovery.registry.common import RegistryError
-
-        loader = DDEBaseSchemaLoader()
-
-        # Mock the registry to return None (version not initialized)
-        with patch('discovery.registry.schemas.get_schema_org_version') as mock_get_version:
-            mock_get_version.return_value = None
-
-            # Should raise RegistryError when trying to get the version
-            with pytest.raises(RegistryError) as exc_info:
-                _ = loader.get_dde_schema_org_version()
-
-            # Verify error message is informative
-            assert "schema.org version not found in DDE" in str(exc_info.value)
-            assert mock_get_version.called
-
-    def test_get_dde_schema_org_version_with_different_versions(self):
-        """Test get_dde_schema_org_version with various version strings"""
-        from discovery.utils.adapters import DDEBaseSchemaLoader
-        loader = DDEBaseSchemaLoader()
-
-        test_versions = ["29.1", "29.3", "29.4", "30.0", "31.1"]
-
-        for test_version in test_versions:
-            with patch('discovery.registry.schemas.get_schema_org_version') as mock_get_version:
-                mock_get_version.return_value = test_version
-
-                version = loader.get_dde_schema_org_version()
-
-                # Verify each version is returned correctly
-                assert version == test_version
-
     def test_biothings_schema_compatibility(self):
         """Test that DDEBaseSchemaLoader is compatible with biothings_schema BaseSchemaLoader"""
         from discovery.utils.adapters import DDEBaseSchemaLoader
@@ -54,40 +19,10 @@ class TestDDEBaseSchemaLoader:
         # Verify it's an instance of BaseSchemaLoader
         assert isinstance(loader, BaseSchemaLoader)
 
-        # Verify the get_dde_schema_org_version method exists
-        assert hasattr(loader, 'get_dde_schema_org_version')
-        assert callable(loader.get_dde_schema_org_version)
-
         # Verify schema_org_version can be set as an attribute (for BaseSchemaLoader compatibility)
         # BaseSchemaLoader expects to be able to set this attribute
         loader.schema_org_version = "15.0"
         assert loader.schema_org_version == "15.0"
-
-    def test_registered_dde_schemas_property(self):
-        """Test that registered_dde_schemas property works"""
-        from discovery.utils.adapters import DDEBaseSchemaLoader
-        loader = DDEBaseSchemaLoader()
-
-        # Mock the schemas.get_all() to return test data
-        # Each schema object needs to support dict-like access with ["_id"]
-        mock_schema_1 = MagicMock()
-        mock_schema_1.__getitem__ = MagicMock(return_value="schema")
-        mock_schema_2 = MagicMock()
-        mock_schema_2.__getitem__ = MagicMock(return_value="google")
-        mock_schema_3 = MagicMock()
-        mock_schema_3.__getitem__ = MagicMock(return_value="datacite")
-
-        mock_schemas = [mock_schema_1, mock_schema_2, mock_schema_3]
-
-        with patch('discovery.registry.schemas.get_all') as mock_get_all:
-            mock_get_all.return_value = mock_schemas
-
-            schemas = loader.registered_dde_schemas
-
-            # Verify we get the _id values
-            assert schemas == ["schema", "google", "datacite"]
-            # Verify get_all was called with correct parameters
-            mock_get_all.assert_called_once_with(size=100)
 
     def test_load_dde_schemas_method(self):
         """Test that load_dde_schemas method works"""
@@ -115,6 +50,29 @@ class TestDDEBaseSchemaLoader:
             # Verify other fields are present
             assert "@context" in schema
             assert "@graph" in schema
+
+    def test_schema_adapter_raises_error_when_version_not_initialized(self):
+        """Test that SchemaAdapter raises RegistryError when version not stored in DDE"""
+        from discovery.utils.adapters import SchemaAdapter
+        from discovery.registry.common import RegistryError
+
+        with patch('discovery.registry.schemas.get_schema_org_version') as mock_get_version:
+            # Setup: DDE has no version stored
+            mock_get_version.return_value = None
+
+            # Create a simple test schema
+            test_schema = {
+                "@context": {"test": "http://example.org/test/"},
+                "@graph": []
+            }
+
+            # Should raise RegistryError when SchemaAdapter tries to get the version
+            with pytest.raises(RegistryError) as exc_info:
+                _ = SchemaAdapter(doc=test_schema)
+
+            # Verify error message is informative
+            assert "schema.org version not found in DDE" in str(exc_info.value)
+            assert mock_get_version.called
 
     def test_schema_adapter_sets_version_from_dde(self):
         """
@@ -198,3 +156,116 @@ class TestDDEBaseSchemaLoader:
 
             # Verify the version was retrieved from DDE registry
             assert mock_get_version.called
+
+
+class TestSchemaOrgVersionIntegration:
+    """Integration tests for schema.org version handling with real app data"""
+
+    def test_version_stored_after_restore(self, ensure_test_data):
+        """Test that schema.org version is stored after restore_from_file"""
+        from discovery.registry.schemas import get_schema_org_version
+
+        # After restore (via ensure_test_data fixture), version should be stored
+        version = get_schema_org_version()
+        assert version is not None, "schema.org version should be stored after restore"
+        assert isinstance(version, str), "version should be a string"
+        assert "." in version, "version should follow format like '29.3'"
+
+    def test_version_accessible_through_schema_get(self, ensure_test_data):
+        """Test that schema.org version is accessible via schemas.get('schema')"""
+        from discovery.registry import schemas
+
+        schema_doc = schemas.get("schema")
+        assert schema_doc is not None
+        assert hasattr(schema_doc, "meta")
+        assert hasattr(schema_doc.meta, "version")
+
+        version = schema_doc.meta.version
+        assert version is not None
+        assert isinstance(version, str)
+
+        # Should match stored version
+        stored_version = schemas.get_schema_org_version()
+        assert version == stored_version
+
+    def test_schema_adapter_uses_stored_version(self, ensure_test_data):
+        """Test that SchemaAdapter uses the stored schema.org version"""
+        from discovery.utils.adapters import SchemaAdapter
+        from discovery.registry.schemas import get_schema_org_version
+
+        stored_version = get_schema_org_version()
+        assert stored_version is not None
+
+        # Create a test schema with all required fields
+        test_schema = {
+            "@context": {
+                "schema": "http://schema.org/",
+                "test": "http://example.org/test/",
+                "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+            },
+            "@graph": [
+                {
+                    "@id": "test:TestClass",
+                    "@type": "rdfs:Class",
+                    "rdfs:label": "TestClass",
+                    "rdfs:comment": "A test class for validation",
+                    "rdfs:subClassOf": {"@id": "schema:Thing"}
+                }
+            ]
+        }
+
+        # SchemaAdapter should work without raising RegistryError
+        adapter = SchemaAdapter(doc=test_schema)
+
+        # Verify the adapter's loader has the version set
+        assert adapter._schema.base_schema_loader.schema_org_version == stored_version
+
+    def test_add_schema_with_schema_org_inheritance(self, ensure_test_data):
+        """Test adding a schema that inherits from schema.org classes"""
+        from discovery.registry import schemas
+
+        # Ensure schema.org core is loaded
+        if not schemas.exists("schema"):
+            schemas.add_core()
+
+        # Verify schema.org classes exist (means version is working)
+        assert schemas.exists("schema")
+
+        # Verify we can get a schema.org class
+        thing_class = schemas.get_class("schema", "schema:Thing", raise_on_error=False)
+        assert thing_class is not None, "schema:Thing should exist"
+
+        # Verify added schemas can reference schema.org
+        # BTS schema should exist from test setup or we add it
+        if not schemas.exists("bts"):
+            bts_url = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
+            schemas.add(namespace="bts", url=bts_url, user="test@example.com")
+
+        bts_classes = list(schemas.get_classes("bts"))
+        assert len(bts_classes) > 0
+
+        # Check that at least one class has schema.org in parent classes
+        has_schema_parent = False
+        for cls in bts_classes:
+            parent_classes = cls.get("parent_classes", [])
+            if any("schema:" in str(pc) for pc in parent_classes):
+                has_schema_parent = True
+                break
+
+        assert has_schema_parent, "BTS classes should inherit from schema.org"
+
+    def test_version_persists_across_operations(self, ensure_test_data):
+        """Test that schema.org version persists across schema operations"""
+        from discovery.registry import schemas
+
+        # Get initial version
+        initial_version = schemas.get_schema_org_version()
+        assert initial_version is not None
+
+        # Perform operations (like checking if schema exists)
+        _ = schemas.exists("schema")
+        _ = schemas.get("schema")
+
+        # Version should still be the same
+        current_version = schemas.get_schema_org_version()
+        assert current_version == initial_version

@@ -46,46 +46,23 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
     but within the DDE app itself, we can load them directly from model.schema module.
     """
 
-
     def __init__(self, schemas_module=None, **kwargs):
         """Initialize with optional schemas dependency injection to avoid circular imports."""
         super().__init__(**kwargs)
-        self._schemas = schemas_module
-        # schema_org_version will be set by SchemaAdapter after getting it from DDE registry
-        # BaseSchemaLoader expects this attribute to exist
+        self._schemas_module = schemas_module
 
     def _get_schemas(self):
         """Lazily load schemas module if not provided at init time."""
-        if self._schemas is None:
+        if self._schemas_module is None:
             from discovery.registry import schemas
-            self._schemas = schemas
-        return self._schemas
-
-    def get_dde_schema_org_version(self):
-        """Get the schema.org version stored in DDE registry.
-
-        Returns:
-            str: The schema.org version stored in DDE
-
-        Raises:
-            RegistryError: If schema.org version is not found in DDE registry
-        """
-        from discovery.registry.common import RegistryError
-
-        schemas = self._get_schemas()
-        version = schemas.get_schema_org_version()
-
-        if version is None:
-            raise RegistryError("schema.org version not found in DDE registry. "
-                                "Please initialize it first by calling store_schema_org_version().")
-
-        return version
-
+            self._schemas_module = schemas
+        return self._schemas_module
 
     @property
     def registered_dde_schemas(self):
         """Return a list of schema namespaces registered in DDE"""
-        return [s["_id"] for s in self._get_schemas().get_all(size=100)]
+        schemas = self._get_schemas()
+        return [s["_id"] for s in schemas.get_all(size=100)]
 
     def load_dde_schemas(self, schema):
         """Load a registered schema"""
@@ -179,14 +156,16 @@ class SchemaAdapter:
 
         # Set the schema.org version on the loader from DDE's stored version
         # This ensures biothings_schema uses the exact version DDE has stored
-        if hasattr(self._schema.base_schema_loader, 'get_dde_schema_org_version'):
-            try:
-                version = self._schema.base_schema_loader.get_dde_schema_org_version()
-                self._schema.base_schema_loader.schema_org_version = version
-            except Exception as e:
-                # If version is not initialized, log a warning and continue
-                # The schema loader will use the default version
-                logger.warning(f"Could not set schema.org version from DDE registry: {e}")
+        if isinstance(self._schema.base_schema_loader, DDEBaseSchemaLoader):
+            from discovery.registry.common import RegistryError
+
+            schemas = self._schema.base_schema_loader._get_schemas()
+            version = schemas.get_schema_org_version()
+            if version is None:
+                raise RegistryError("schema.org version not found in DDE registry. "
+                                    "Please initialize it first by calling store_schema_org_version().")
+
+            self._schema.base_schema_loader.schema_org_version = version
 
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
