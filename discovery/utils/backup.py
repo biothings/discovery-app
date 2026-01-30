@@ -222,12 +222,18 @@ def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] =
                 file.save()
             logger.info("The discover_schema index data was updated successfully.")
 
-            # After restoring schema index, ensure schema.org version is stored
-            # This is critical for SchemaAdapter to work when loading schemas
-            from discovery.registry.schemas import get_schema_org_version, store_schema_org_version
-            if get_schema_org_version() is None:
-                logger.info("Storing schema.org version after restore...")
-                store_schema_org_version()
+            # Restore _meta from backup if it exists
+            if "mappings" in api_schema and "_meta" in api_schema["mappings"]:
+                from discovery.utils.indices import save_schema_index_meta
+                meta = api_schema["mappings"]["_meta"]
+                save_schema_index_meta(meta)
+                logger.info(f"Restored schema index metadata: {meta}")
+            else:
+                # Fallback: extract version from restored schema document
+                from discovery.registry.schemas import get_schema_org_version, store_schema_org_version
+                if get_schema_org_version() is None:
+                    logger.info("No _meta in backup, storing schema.org version from schema document...")
+                    store_schema_org_version()
         else:
             logger.info("No discover_schema data found in the API backup")
 
