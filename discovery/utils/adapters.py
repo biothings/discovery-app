@@ -26,14 +26,16 @@
 
 import logging
 
+from discovery.registry.common import RegistryError
+
 from biothings_schema import Schema as SchemaParser
 from biothings_schema.dataload import BaseSchemaLoader, get_schemaorg_version as _get_schemaorg_version
 
 
-from discovery.registry import schemas
-
 # the underlying package uses warnings
 logging.captureWarnings(True)
+
+logger = logging.getLogger(__name__)
 
 
 def get_schema_org_version():
@@ -43,16 +45,31 @@ def get_schema_org_version():
 
 class DDEBaseSchemaLoader(BaseSchemaLoader):
     """This is a customized class for biothings_schema package to load base schemas
-       within the DDE app. By default biothings_schema load base schemas via DDE API,
-       but within the DDE app itself, we can load them directly from model.schema module.
+    within the DDE app. By default biothings_schema load base schemas via DDE API,
+    but within the DDE app itself, we can load them directly from model.schema module.
     """
+
+    def __init__(self, schemas_module=None, **kwargs):
+        """Initialize with optional schemas dependency injection to avoid circular imports."""
+        super().__init__(**kwargs)
+        self._schemas_module = schemas_module
+
+    def _get_schemas(self):
+        """Lazily load schemas module if not provided at init time."""
+        if self._schemas_module is None:
+            from discovery.registry import schemas
+            self._schemas_module = schemas
+        return self._schemas_module
+
     @property
     def registered_dde_schemas(self):
         """Return a list of schema namespaces registered in DDE"""
+        schemas = self._get_schemas()
         return [s["_id"] for s in schemas.get_all(size=100)]
 
     def load_dde_schemas(self, schema):
         """Load a registered schema"""
+        schemas = self._get_schemas()
         if self.verbose:
             print(f'Loading registered DDE schema "{schema}"')
         schema_source = schemas.get(schema)
@@ -136,8 +153,22 @@ class SchemaAdapter:
         # contexts = ESSchema.gather_field('@context')
         # self._schema = SchemaParser(schema=doc, context=contexts, **kwargs)
         if "base_schema_loader" not in kwargs:
-            kwargs["base_schema_loader"] = DDEBaseSchemaLoader()
+            # Import schemas here (when actually needed) to avoid circular imports
+            kwargs["base_schema_loader"] = DDEBaseSchemaLoader() #schemas_module=schemas
         self._schema = SchemaParser(schema=doc, **kwargs)
+
+        # Set the schema.org version on the loader from DDE's stored version
+        # This ensures biothings_schema uses the exact version DDE has stored
+        if isinstance(self._schema.base_schema_loader, DDEBaseSchemaLoader):
+
+            schemas = self._schema.base_schema_loader._get_schemas()
+            version = schemas.get_schema_org_version()
+            if version is None:
+                raise RegistryError("schema.org version not found in DDE registry. "
+                                    "Please initialize it first by calling store_schema_org_version().")
+
+            self._schema.base_schema_loader.schema_org_version = version
+
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
 
