@@ -12,6 +12,8 @@ import boto3
 from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
 from discovery.utils.indices import reset
+from discovery.registry.schemas import get_schema_org_version, store_schema_org_version
+from discovery.utils.indices import save_schema_index_meta
 
 logger = logging.getLogger("backup")
 
@@ -224,13 +226,11 @@ def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] =
 
             # Restore _meta from backup if it exists
             if "mappings" in api_schema and "_meta" in api_schema["mappings"]:
-                from discovery.utils.indices import save_schema_index_meta
                 meta = api_schema["mappings"]["_meta"]
                 save_schema_index_meta(meta)
                 logger.info(f"Restored schema index metadata: {meta}")
             else:
                 # Fallback: extract version from restored schema document
-                from discovery.registry.schemas import get_schema_org_version, store_schema_org_version
                 if get_schema_org_version() is None:
                     logger.info("No _meta in backup, storing schema.org version from schema document...")
                     store_schema_org_version()
