@@ -96,7 +96,7 @@ def save_to_s3(data, filename=None, bucket="dde", format="zip", keep_last=10):
             )
             logging.info(f"Backup file cleanup: kept {kept} recent files, deleted {deleted} old files")
         else:
-            logging.warning(f"Skipping backup file cleanup due to failed upload")
+            logging.warning("Skipping backup file cleanup due to failed upload")
     else:
         logging.info(f"Uploading {filename} to AWS S3")
         s3.Bucket(bucket).put_object(Key=obj_key, Body=json.dumps(data, indent=2))
@@ -221,6 +221,13 @@ def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] =
                 file.meta.id = doc["_id"]
                 file.save()
             logger.info("The discover_schema index data was updated successfully.")
+
+            # After restoring schema index, ensure schema.org version is stored
+            # This is critical for SchemaAdapter to work when loading schemas
+            from discovery.registry.schemas import get_schema_org_version, store_schema_org_version
+            if get_schema_org_version() is None:
+                logger.info("Storing schema.org version after restore...")
+                store_schema_org_version()
         else:
             logger.info("No discover_schema data found in the API backup")
 

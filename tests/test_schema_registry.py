@@ -109,3 +109,80 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.request("registry/bts", expect=200)
         self.refresh()
         self.query(q="BiologicalEntity")
+
+    def test_40_schema_org_version_stored(self):
+        """Test that schema.org version is stored and accessible"""
+        version = schemas.get_schema_org_version()
+        assert version is not None, "schema.org version should be stored"
+        assert isinstance(version, str), "version should be a string"
+        # Schema.org versions follow format like "15.0", "29.3", etc.
+        assert "." in version, "version should contain a dot separator"
+
+    def test_43_schema_metadata_includes_version(self):
+        """Test that schema namespace returns version in metadata"""
+        # Get the "schema" namespace (schema.org)
+        schema_doc = schemas.get("schema")
+        assert schema_doc is not None
+        assert hasattr(schema_doc, "meta")
+        assert hasattr(schema_doc.meta, "version")
+
+        # Version should match stored version
+        stored_version = schemas.get_schema_org_version()
+        assert schema_doc.meta.version == stored_version
+
+    def test_44_change_schema_version_and_add_schema(self):
+        """Test changing schema.org version and adding a schema with that version"""
+        from discovery.utils.indices import save_schema_index_meta
+
+        # Get original version
+        original_version = schemas.get_schema_org_version()
+        assert original_version is not None
+
+        # Change to a different version
+        test_version = "15.0"
+        save_schema_index_meta({"schema_org_version": test_version})
+
+        # Verify version was changed
+        current_version = schemas.get_schema_org_version()
+        assert current_version == test_version, f"Version should be {test_version}"
+
+        # Add a new schema - it should use the updated version
+        test_url = "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json"
+
+        # Clean up if exists
+        if schemas.exists("ctsa_test"):
+            schemas.delete("ctsa_test")
+
+        # Add schema (this internally creates SchemaAdapter which reads the version)
+        try:
+            # Add schema and capture any errors
+            try:
+                count = schemas.add(namespace="ctsa_test", url=test_url, user="test@example.com")
+            except Exception as e:
+                # If there's an error, make sure to restore version before re-raising
+                save_schema_index_meta({"schema_org_version": original_version})
+                raise AssertionError(f"Failed to add schema with version {test_version}: {e}")
+
+            assert count > 0, f"Schema should have classes, got count={count}"
+
+            # Verify schema was added
+            assert schemas.exists("ctsa_test"), "Schema should exist after adding"
+
+            # Refresh indices to ensure classes are available
+            self.refresh()
+
+            # Get classes to verify SchemaAdapter worked with the version
+            classes = list(schemas.get_classes("ctsa_test"))
+            assert len(classes) > 0, f"Added schema should have classes, got {len(classes)} classes"
+
+        finally:
+            # Clean up test schema
+            if schemas.exists("ctsa_test"):
+                schemas.delete("ctsa_test")
+
+            # Restore original version
+            save_schema_index_meta({"schema_org_version": original_version})
+
+            # Verify restoration
+            restored_version = schemas.get_schema_org_version()
+            assert restored_version == original_version, "Version should be restored"
