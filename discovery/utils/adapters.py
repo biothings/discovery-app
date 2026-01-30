@@ -26,8 +26,11 @@
 
 import logging
 
+from discovery.registry.common import RegistryError
+
 from biothings_schema import Schema as SchemaParser
 from biothings_schema.dataload import BaseSchemaLoader, get_schemaorg_version as _get_schemaorg_version
+
 
 # the underlying package uses warnings
 logging.captureWarnings(True)
@@ -157,7 +160,6 @@ class SchemaAdapter:
         # Set the schema.org version on the loader from DDE's stored version
         # This ensures biothings_schema uses the exact version DDE has stored
         if isinstance(self._schema.base_schema_loader, DDEBaseSchemaLoader):
-            from discovery.registry.common import RegistryError
 
             schemas = self._schema.base_schema_loader._get_schemas()
             version = schemas.get_schema_org_version()
