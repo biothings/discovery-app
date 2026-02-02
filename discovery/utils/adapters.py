@@ -1,41 +1,38 @@
 """
-    BiothingsSchema Adapter
+BiothingsSchema Adapter
 
-    Schema JSON
+Schema JSON
+{
+    "@context": { ... },
+    "@graph": [ ... ]
+}
+↓
+biothings_schema.Schema
+biothings_schema.SchemaClass
+↓
+Schema Viewer JSON
+[
     {
-        "@context": { ... },
-        "@graph": [ ... ]
-    }
-    ↓
-    biothings_schema.Schema
-    biothings_schema.SchemaClass
-    ↓
-    Schema Viewer JSON
-    [
-        {
-            "name": ... ,
-            "description": ... ,
-            "validation": { ... },
-            "parent_classes": [ ... ],
-            "properties": [ ... ],
-            ...
-        }, ...
-    ]
+        "name": ... ,
+        "description": ... ,
+        "validation": { ... },
+        "parent_classes": [ ... ],
+        "properties": [ ... ],
+        ...
+    }, ...
+]
 """
-
 
 import logging
 
-from discovery.registry.common import RegistryError
-
 from biothings_schema import Schema as SchemaParser
-from biothings_schema.dataload import BaseSchemaLoader, get_schemaorg_version as _get_schemaorg_version
+from biothings_schema.dataload import BaseSchemaLoader
+from biothings_schema.dataload import get_schemaorg_version as _get_schemaorg_version
 
+from discovery.registry import schemas
 
 # the underlying package uses warnings
 logging.captureWarnings(True)
-
-logger = logging.getLogger(__name__)
 
 
 def get_schema_org_version():
@@ -49,27 +46,13 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
     but within the DDE app itself, we can load them directly from model.schema module.
     """
 
-    def __init__(self, schemas_module=None, **kwargs):
-        """Initialize with optional schemas dependency injection to avoid circular imports."""
-        super().__init__(**kwargs)
-        self._schemas_module = schemas_module
-
-    def _get_schemas(self):
-        """Lazily load schemas module if not provided at init time."""
-        if self._schemas_module is None:
-            from discovery.registry import schemas
-            self._schemas_module = schemas
-        return self._schemas_module
-
     @property
     def registered_dde_schemas(self):
         """Return a list of schema namespaces registered in DDE"""
-        schemas = self._get_schemas()
         return [s["_id"] for s in schemas.get_all(size=100)]
 
     def load_dde_schemas(self, schema):
         """Load a registered schema"""
-        schemas = self._get_schemas()
         if self.verbose:
             print(f'Loading registered DDE schema "{schema}"')
         schema_source = schemas.get(schema)
@@ -109,7 +92,8 @@ class SchemaClassWrapper:
         }
         """
         return [
-            ", ".join(map(str, parent_line)) for parent_line in self._parser_class.parent_classes
+            ", ".join(map(str, parent_line))
+            for parent_line in self._parser_class.parent_classes
         ]
 
     @property
@@ -131,7 +115,9 @@ class SchemaClassWrapper:
             ...
         ]
         """
-        properties = self._parser_class.list_properties(class_specific=True, group_by_class=False)
+        properties = self._parser_class.list_properties(
+            class_specific=True, group_by_class=False
+        )
 
         for property_ in properties:
             property_.pop("object")
@@ -150,25 +136,11 @@ class SchemaAdapter:
     """
 
     def __init__(self, doc=None, **kwargs):
-        # contexts = ESSchema.gather_field('@context')
-        # self._schema = SchemaParser(schema=doc, context=contexts, **kwargs)
         if "base_schema_loader" not in kwargs:
-            # Import schemas here (when actually needed) to avoid circular imports
-            kwargs["base_schema_loader"] = DDEBaseSchemaLoader() #schemas_module=schemas
+            kwargs["base_schema_loader"] = DDEBaseSchemaLoader()
+        # an optional schema_org_version can be passed in kwargs to set
+        # a specific version to load as base schemas.
         self._schema = SchemaParser(schema=doc, **kwargs)
-
-        # Set the schema.org version on the loader from DDE's stored version
-        # This ensures biothings_schema uses the exact version DDE has stored
-        if isinstance(self._schema.base_schema_loader, DDEBaseSchemaLoader):
-
-            schemas = self._schema.base_schema_loader._get_schemas()
-            version = schemas.get_schema_org_version()
-            if version is None:
-                raise RegistryError("schema.org version not found in DDE registry. "
-                                    "Please initialize it first by calling store_schema_org_version().")
-
-            self._schema.base_schema_loader.schema_org_version = version
-
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
 
