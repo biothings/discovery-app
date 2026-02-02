@@ -1,9 +1,9 @@
 """
-    Schema Registry
+Schema Registry
 
-    Support core schemas from schema.org.
-    Support core extensions from google, datacite, etc.
-    Manage the relationship between schema class and main schema.
+Support core schemas from schema.org.
+Support core extensions from google, datacite, etc.
+Manage the relationship between schema class and main schema.
 
 """
 
@@ -13,11 +13,19 @@ from datetime import datetime
 
 import requests
 
-from discovery.model import Schema as ESSchemaFile, SchemaClass as ESSchemaClass
-from discovery.utils.adapters import SchemaAdapter, get_schema_org_version as _get_schema_org_version
+from discovery.model import Schema as ESSchemaFile
+from discovery.model import SchemaClass as ESSchemaClass
+from discovery.utils.adapters import SchemaAdapter
+from discovery.utils.adapters import get_schema_org_version as _get_schema_org_version
 from discovery.utils.indices import get_schema_index_meta, save_schema_index_meta
 
-from .common import ConflictError, NoEntityError, RegistryDocument, RegistryError, ValidatedDict
+from .common import (
+    ConflictError,
+    NoEntityError,
+    RegistryDocument,
+    RegistryError,
+    ValidatedDict,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,19 +45,24 @@ EXTENSION_OWNER = "cwu@scripps.edu"
 
 
 def _add_schema_class(schema, namespace, dryrun=False):
-
     assert isinstance(schema, (ValidatedDict, type(None)))
+
+    # set the stored schema.org version to load base schemas
+    schema_org_version = get_schema_org_version()
 
     if schema is None and namespace == "schema":
         # handling "schema" namespace (from schema.org) differently
         # since it's the pre-loaded default base/core schema
-        schema = SchemaAdapter(base_schema=["schema.org"])  # load only schema.org
+        schema = SchemaAdapter(
+            base_schema=["schema.org"],  # load only schema.org
+            schema_org_version=schema_org_version,
+        )
         # set defined class list as all schema.org classes
         schema._classes_defs = schema._schema.list_all_classes(include_base=True)
         schema_classes = schema.get_classes()
     else:
         try:
-            schema = SchemaAdapter(schema)
+            schema = SchemaAdapter(schema, schema_org_version=schema_org_version)
             schema_classes = schema.get_classes(
                 include_ref=False
             )  # only get those defined classes
@@ -190,7 +203,9 @@ def add(namespace, url, user, doc=None, overwrite=False):
         file._meta.username = user
         file.meta.id = namespace
         file._meta.url = url
-        file._meta.date_created = original_date_created or original_last_updated or current_date
+        file._meta.date_created = (
+            original_date_created or original_last_updated or current_date
+        )
         file.save()
         count = _add_schema_class(doc, namespace)
         return count
@@ -434,7 +449,7 @@ def get_schema_org_property(property_label, raise_on_error=True):
                 "query": f"properties.label:{property_label}",
             }
         },
-        "size": 1
+        "size": 1,
     }
     # Execute the search query
     search = ESSchemaClass.search()
@@ -442,7 +457,14 @@ def get_schema_org_property(property_label, raise_on_error=True):
     # Process the search results
     if response.hits.total.value > 0:
         # Assuming we want the first matching property
-        hit = next((prop_dict for prop_dict in response.hits[0]['properties'] if prop_dict['label'] == property_label), None)
+        hit = next(
+            (
+                prop_dict
+                for prop_dict in response.hits[0]["properties"]
+                if prop_dict["label"] == property_label
+            ),
+            None,
+        )
         return hit.to_dict() if hasattr(hit, "to_dict") else hit
 
     if raise_on_error:
