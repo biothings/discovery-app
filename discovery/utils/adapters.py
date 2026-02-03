@@ -136,18 +136,9 @@ class SchemaAdapter:
     """
 
     def __init__(self, doc=None, **kwargs):
-        # Extract schema_org_version from kwargs if provided
-        schema_org_version = kwargs.pop("schema_org_version", None)
 
-        # Create or get the base_schema_loader
         if "base_schema_loader" not in kwargs:
             kwargs["base_schema_loader"] = DDEBaseSchemaLoader()
-
-        # If schema_org_version is provided, set it on the loader
-        # biothings_schema.BaseSchemaLoader reads this attribute to determine
-        # which version of schema.org to load
-        if schema_org_version is not None:
-            kwargs["base_schema_loader"].schema_org_version = schema_org_version
 
         self._schema = SchemaParser(schema=doc, **kwargs)
         self._classes_defs = self._schema.list_all_defined_classes()
