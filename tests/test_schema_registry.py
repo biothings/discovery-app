@@ -131,7 +131,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
         assert schema_doc.meta.version == stored_version
 
     def test_44_change_schema_version_and_add_schema(self):
-        """Test changing schema.org version and adding a schema with that version"""
+        """Test that schemas are added using the stored schema.org version"""
         from discovery.registry.common import NoEntityError
         from discovery.utils.indices import save_schema_index_meta
 
@@ -142,12 +142,13 @@ class DiscoveryAPITest(DiscoveryTestCase):
         # Change to a different version
         test_version = "15.0"
         save_schema_index_meta({"schema_org_version": test_version})
+        self.refresh()
 
         # Verify version was changed
         current_version = schemas.get_schema_org_version()
         assert current_version == test_version, f"Version should be {test_version}"
 
-        # Add a new schema - it should use the updated version
+        # Add a new schema - _add_schema_class will pass this version to SchemaAdapter
         test_url = "https://raw.githubusercontent.com/data2health/schemas/master/Dataset/CTSADataset.json"
 
         # Clean up if exists
@@ -156,28 +157,32 @@ class DiscoveryAPITest(DiscoveryTestCase):
         except NoEntityError:
             pass  # Schema doesn't exist, which is fine
 
-        # Add schema (this internally creates SchemaAdapter which reads the version)
+        # Add schema - internally calls SchemaAdapter with schema_org_version parameter
         try:
             count = schemas.add(namespace="ctsa_test", url=test_url, user="test@example.com")
             assert count > 0, f"Schema should have classes, got count={count}"
 
-            # Verify the version is still what we set (SchemaAdapter should have used it)
+            # Verify the version hasn't changed
             current_version_after_add = schemas.get_schema_org_version()
             assert current_version_after_add == test_version, (
-                f"Schema.org version changed during add operation. "
-                f"Expected {test_version}, got {current_version_after_add}"
+                f"Schema.org version should remain {test_version}, got {current_version_after_add}"
             )
 
-            # Refresh and verify schema was added
+            # Refresh and verify schema was added successfully
             self.refresh()
             assert schemas.exists("ctsa_test"), "Schema should exist after adding"
+
+            # Verify classes were created (means SchemaAdapter worked correctly)
+            classes = list(schemas.get_classes("ctsa_test"))
+            assert len(classes) > 0, "Schema should have classes"
 
         finally:
             # Clean up test schema
             try:
                 schemas.delete("ctsa_test")
             except NoEntityError:
-                pass  # Schema doesn't exist, which is fine
+                pass
 
             # Restore original version
             save_schema_index_meta({"schema_org_version": original_version})
+            self.refresh()
