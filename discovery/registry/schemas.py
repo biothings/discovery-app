@@ -19,13 +19,7 @@ from discovery.utils.adapters import SchemaAdapter
 from discovery.utils.adapters import get_schema_org_version as _get_schema_org_version
 from discovery.utils.indices import get_schema_index_meta, save_schema_index_meta
 
-from .common import (
-    ConflictError,
-    NoEntityError,
-    RegistryDocument,
-    RegistryError,
-    ValidatedDict,
-)
+from .common import ConflictError, NoEntityError, RegistryDocument, RegistryError, ValidatedDict
 
 logger = logging.getLogger(__name__)
 
@@ -255,7 +249,7 @@ def get_meta(namespace):
 def get_all(start=0, size=10, user=None, fields="_meta.url"):
     """
     Retrieve all schema files. See usage of fields parameter here:
-    https://elasticsearch-dsl.readthedocs.io/en/latest/api.html#elasticsearch_dsl.Search.source
+    https://elasticsearch-py.readthedocs.io/en/latest/dsl.html#elasticsearch.dsl.Search.source
 
     List all ids:
     >>> list(schemas.get_all(size=None))

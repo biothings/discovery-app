@@ -8,7 +8,7 @@ Should continue to evaluate if this is appropriate as new features are developed
 
 
 from biothings.web.query import ESQueryBuilder
-from elasticsearch_dsl import Search
+from elasticsearch.dsl import Search
 
 
 class DiscoveryQueryBuilder(ESQueryBuilder):
