@@ -7,7 +7,7 @@
 """
 import hashlib
 
-from elasticsearch_dsl import Boolean, Date, InnerDoc, Keyword, Object, Text, normalizer
+from elasticsearch.dsl import Boolean, Date, InnerDoc, Keyword, Object, Text, normalizer
 
 from .common import DiscoveryMeta, DiscoveryUserDoc
 

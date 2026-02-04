@@ -12,7 +12,7 @@
 """
 import os
 
-from elasticsearch_dsl import connections
+from elasticsearch.dsl import connections
 
 from .dataset import Dataset
 from .schema import Schema, SchemaClass

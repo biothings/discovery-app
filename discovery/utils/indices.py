@@ -1,6 +1,6 @@
 from typing import List, Tuple, Union
 
-from elasticsearch_dsl import Index
+from elasticsearch.dsl import Index
 
 from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass

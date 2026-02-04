@@ -1,4 +1,4 @@
-from elasticsearch_dsl import Document, InnerDoc, Keyword, MetaField, Object
+from elasticsearch.dsl import Document, InnerDoc, Keyword, MetaField, Object
 
 
 class DiscoveryDoc(Document):

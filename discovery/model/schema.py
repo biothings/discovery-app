@@ -9,17 +9,9 @@
 import functools
 from datetime import datetime
 
-from elasticsearch_dsl import (
-    Boolean,
-    Date,
-    Index as ESIndex,
-    InnerDoc,
-    Integer,
-    Keyword,
-    Object,
-    Text,
-)
-from elasticsearch_dsl.exceptions import ValidationException
+from elasticsearch.dsl import Boolean, Date, InnerDoc, Integer, Keyword, Object, Text
+from elasticsearch.dsl import Index as ESIndex
+from elasticsearch.dsl.exceptions import ValidationException
 
 from .common import DiscoveryDoc, DiscoveryMeta, DiscoveryUserDoc
 
