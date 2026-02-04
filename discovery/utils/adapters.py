@@ -137,8 +137,11 @@ class SchemaAdapter:
 
     def __init__(self, doc=None, **kwargs):
 
+        # Create or get the base_schema_loader
         if "base_schema_loader" not in kwargs:
             kwargs["base_schema_loader"] = DDEBaseSchemaLoader()
+        # an optional schema_org_version can be passed in kwargs to set
+        # a specific version to load as base schemas.
 
         self._schema = SchemaParser(schema=doc, **kwargs)
         self._classes_defs = self._schema.list_all_defined_classes()
