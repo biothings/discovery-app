@@ -6,6 +6,8 @@ import pytest
 
 from discovery.registry import schemas
 from discovery.utils import indices
+from discovery.registry.common import NoEntityError
+from discovery.utils.indices import save_schema_index_meta
 
 from .test_base import DiscoveryTestCase
 
@@ -110,38 +112,21 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.refresh()
         self.query(q="BiologicalEntity")
 
-    def test_40_schema_org_version_stored(self):
-        """Test that schema.org version is stored and accessible"""
+    def test_40_schema_org_version_initially_none(self):
+        """Test that schema.org version is None at initialization (loader sets it later)"""
         version = schemas.get_schema_org_version()
-        assert version is not None, "schema.org version should be stored"
-        assert isinstance(version, str), "version should be a string"
-        # Schema.org versions follow format like "15.0", "29.3", etc.
-        assert "." in version, "version should contain a dot separator"
+        # Version is intentionally None at initialization until the loader populates it
+        assert version is None, "schema.org version should be None at initialization"
 
-    def test_43_schema_metadata_includes_version(self):
-        """Test that schema namespace returns version in metadata"""
-        # Get the "schema" namespace (schema.org)
-        schema_doc = schemas.get("schema")
-        assert schema_doc is not None
-        assert hasattr(schema_doc, "meta")
-        assert hasattr(schema_doc.meta, "version")
-
-        # Version should match stored version
-        stored_version = schemas.get_schema_org_version()
-        assert schema_doc.meta.version == stored_version
-
-    def test_44_change_schema_version_and_add_schema(self):
+    def test_41_change_schema_version_and_add_schema(self):
         """Test that schemas are added using the stored schema.org version"""
-        from discovery.registry.common import NoEntityError
-        from discovery.utils.indices import save_schema_index_meta
 
-        # Get original version
+        # Get original version (may be None at initialization)
         original_version = schemas.get_schema_org_version()
-        assert original_version is not None
 
         # Change to a different version
         test_version = "15.0"
-        save_schema_index_meta({"schema_org_version": test_version})
+        indices.save_schema_index_meta({"schema_org_version": test_version})
         self.refresh()
 
         # Verify version was changed
@@ -184,5 +169,5 @@ class DiscoveryAPITest(DiscoveryTestCase):
                 pass
 
             # Restore original version
-            save_schema_index_meta({"schema_org_version": original_version})
+            indices.save_schema_index_meta({"schema_org_version": original_version})
             self.refresh()

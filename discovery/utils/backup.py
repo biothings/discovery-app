@@ -12,8 +12,6 @@ import boto3
 from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
 from discovery.utils.indices import reset
-from discovery.registry.schemas import get_schema_org_version, store_schema_org_version
-from discovery.utils.indices import save_schema_index_meta
 
 logger = logging.getLogger("backup")
 
@@ -98,7 +96,7 @@ def save_to_s3(data, filename=None, bucket="dde", format="zip", keep_last=10):
             )
             logging.info(f"Backup file cleanup: kept {kept} recent files, deleted {deleted} old files")
         else:
-            logging.warning("Skipping backup file cleanup due to failed upload")
+            logging.warning(f"Skipping backup file cleanup due to failed upload")
     else:
         logging.info(f"Uploading {filename} to AWS S3")
         s3.Bucket(bucket).put_object(Key=obj_key, Body=json.dumps(data, indent=2))
@@ -223,17 +221,6 @@ def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] =
                 file.meta.id = doc["_id"]
                 file.save()
             logger.info("The discover_schema index data was updated successfully.")
-
-            # Restore _meta from backup if it exists
-            if "mappings" in api_schema and "_meta" in api_schema["mappings"]:
-                meta = api_schema["mappings"]["_meta"]
-                save_schema_index_meta(meta)
-                logger.info(f"Restored schema index metadata: {meta}")
-            else:
-                # Fallback: extract version from restored schema document
-                if get_schema_org_version() is None:
-                    logger.info("No _meta in backup, storing schema.org version from schema document...")
-                    store_schema_org_version()
         else:
             logger.info("No discover_schema data found in the API backup")
 
