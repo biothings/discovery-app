@@ -1,5 +1,6 @@
-from elasticsearch_dsl import Index
-from typing import Union, List, Tuple
+from typing import List, Tuple, Union
+
+from elasticsearch.dsl import Index
 
 from discovery.model.dataset import Dataset
 from discovery.model.schema import Schema, SchemaClass
@@ -59,7 +60,10 @@ def reset(indices: Union[str, List[str], Tuple[str, ...]] = "all") -> None:
 
 def save_schema_index_meta(meta):
     """save index metadata to Schema ES index"""
-    return Index(Schema.Index.name).put_mapping(body={"_meta": meta})
+    _index = Index(Schema.Index.name)
+    res = _index.put_mapping(body={"_meta": meta})
+    _index.refresh()
+    return res
 
 
 def get_schema_index_meta():

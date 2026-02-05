@@ -1,22 +1,22 @@
 """
-    Schema APIs
+Schema APIs
 
-    Logical document structure in this module:
-    {
-        "url": <schema_url>,
-        "namespace": <schema_name>,
-        "source": { ... } // only in returned docs for now
-    }
+Logical document structure in this module:
+{
+    "url": <schema_url>,
+    "namespace": <schema_name>,
+    "source": { ... } // only in returned docs for now
+}
 
-    Add read-only protection to cores schemas.
-    Add authentication and permission control.
-    Add convenience features to assist frontend rendering.
+Add read-only protection to cores schemas.
+Add authentication and permission control.
+Add convenience features to assist frontend rendering.
 
 """
 
 import json
-import re
 import logging
+import re
 from datetime import date, datetime
 
 import certifi
@@ -26,8 +26,8 @@ from tornado.web import Finish, HTTPError
 from discovery.model.schema import Schema
 from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
-from discovery.utils.adapters import SchemaAdapter
 from discovery.registry.common import NoEntityError
+from discovery.utils.adapters import SchemaAdapter
 
 from .base import APIBaseHandler, authenticated, registryOperation
 
@@ -88,7 +88,9 @@ def trace_root(klass):
     while index < len(queue):
         for parent_line_string in klass.get("parent_classes", []):
             parents = parent_line_string.split(", ")
-            ids = [(parent.split(":")[0], parent) for parent in parents if ":" in parent][::-1]
+            ids = [
+                (parent.split(":")[0], parent) for parent in parents if ":" in parent
+            ][::-1]
             for _id in ids:
                 klass = schemas.get_class(_id[0], _id[1])
                 if klass and klass not in queue:
@@ -128,7 +130,10 @@ class SchemaRegistryHandler(APIBaseHandler):
             "verbose": {"type": bool, "default": False, "alias": ["v"]},
             "start": {"type": int, "default": 0, "alias": ["from", "skip"]},
             "size": {"type": int, "default": 10, "max": 100, "alias": "skip"},
-            "context": {"type": bool, "default": True},  # consider not default in future
+            "context": {
+                "type": bool,
+                "default": True,
+            },  # consider not default in future
             "source": {"type": bool, "default": True},
         },
     }
@@ -225,7 +230,7 @@ class SchemaRegistryHandler(APIBaseHandler):
                 _fields = [x.strip() for x in self.args.field.split(",")]
                 if not ("_meta" in _fields or "_meta.url" in _fields):
                     _fields.append("_meta")  # always include _meta.url in the response
-                if not ("_status" in _fields):
+                if "_status" not in _fields:
                     _fields.append("_status")
             hits = [
                 to_api_doc_repr(schema)
@@ -364,7 +369,7 @@ class SchemaViewHandler(APIBaseHandler):
             },  # indicates the special target namespace of the schema, e.g. schema.org or bioschemas.
             "validation_merge": {
                 "type": bool,
-                "default": False
+                "default": False,
             },  # whether to merge validation schemas from parent classes
         }
     }
@@ -392,7 +397,9 @@ class SchemaViewHandler(APIBaseHandler):
             doc = None
             if self.args.url:
                 # load doc from url
-                response = await AsyncHTTPClient().fetch(self.args.url, ca_certs=certifi.where())
+                response = await AsyncHTTPClient().fetch(
+                    self.args.url, ca_certs=certifi.where()
+                )
                 doc = response.body
             elif self.request.body:
                 # load doc from request body
@@ -400,23 +407,29 @@ class SchemaViewHandler(APIBaseHandler):
             if doc:
                 doc = json.loads(doc)
                 # Use the validation_merge parameter from query args, defaults to False
-                validation_merge = getattr(self.args, 'validation_merge', False)
-                validator_options = {"validation_merge": validation_merge, "raise_on_validation_error": False}
+                validation_merge = getattr(self.args, "validation_merge", False)
+                validator_options = {
+                    "validation_merge": validation_merge,
+                    "raise_on_validation_error": False,
+                }
+                schema_org_version = schemas.get_schema_org_version()
+                _kwargs = {
+                    "validator_options": validator_options,
+                    "schema_org_version": schema_org_version,
+                }
                 if self.args.ns:
                     if self.args.ns == "schema.org":
                         # do no load any base schemas
-                        schema = SchemaAdapter(
-                            doc, base_schema=[], validator_options=validator_options
-                        )
+                        schema = SchemaAdapter(doc, base_schema=[], **_kwargs)
                     # elif self.args.ns == "bioschemas":
                     #     # do not load bioschemas, only schema.org
                     #     schema = SchemaAdapter(
-                    #         doc, base_schema=["schema.org"], validator_options=validator_options
+                    #         doc, base_schema=["schema.org"], **_kwargs
                     #     )
                     else:
-                        schema = SchemaAdapter(doc, validator_options=validator_options)
+                        schema = SchemaAdapter(doc, **_kwargs)
                 else:
-                    schema = SchemaAdapter(doc, validator_options=validator_options)
+                    schema = SchemaAdapter(doc, **_kwargs)
             else:
                 self.finish({})
                 return
@@ -459,7 +472,7 @@ class SchemaHandler(APIBaseHandler):
                 "default": "json",
                 "enum": ("json", "yaml", "html", "msgpack"),
             }
-        }
+        },
     }
 
     def class_property_filter(self, metadata, class_id):
@@ -482,7 +495,9 @@ class SchemaHandler(APIBaseHandler):
                                 property_list.append(data_dict)
                                 break
                     elif "schema:domainIncludes" not in data_dict:
-                        raise HTTPError(400, reason="No key 'schema:domainIncludes' found.")
+                        raise HTTPError(
+                            400, reason="No key 'schema:domainIncludes' found."
+                        )
                     else:
                         # odd case -- error exception case
                         raise HTTPError(
@@ -493,7 +508,9 @@ class SchemaHandler(APIBaseHandler):
 
     def get_context_matches(self, metadata, context_dict):
         matches = []
-        pattern = re.compile(r"^([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)$")  # Regex to match STRINGA:STRINGB
+        pattern = re.compile(
+            r"^([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)$"
+        )  # Regex to match STRINGA:STRINGB
 
         def recursive_search(data):
             if isinstance(data, dict):
@@ -509,6 +526,7 @@ class SchemaHandler(APIBaseHandler):
                     prefix = match.group(1)
                     if prefix in context_dict:
                         matches.append(prefix)
+
         recursive_search(metadata)
         return set(matches)
 
@@ -541,7 +559,7 @@ class SchemaHandler(APIBaseHandler):
             "vann": "http://purl.org/vocab/vann/",
             "void": "http://rdfs.org/ns/void#",
             "xsd": "http://www.w3.org/2001/XMLSchema#",
-            "cvisb": "https://data.cvisb.org/schema"
+            "cvisb": "https://data.cvisb.org/schema",
         }
 
         matches = self.get_context_matches(metadata, context_dict)
@@ -550,17 +568,17 @@ class SchemaHandler(APIBaseHandler):
 
     def add_schema_org_property_to_list(self, data_dict, property_list):
         temp_dict = {
-            "@id": data_dict['curie'],
+            "@id": data_dict["curie"],
             "@type": "rdf:Property",
-            "rdfs:comment": data_dict['description'],
-            "rdfs:label": data_dict['label'],
-            "schema:domainIncludes": [{"@id": value} for value in data_dict['domain']],
-            "schema:rangeIncludes": [{"@id": value} for value in data_dict['range']],
+            "rdfs:comment": data_dict["description"],
+            "rdfs:label": data_dict["label"],
+            "schema:domainIncludes": [{"@id": value} for value in data_dict["domain"]],
+            "schema:rangeIncludes": [{"@id": value} for value in data_dict["range"]],
         }
         property_list.append(temp_dict)
 
     def filter_schema_org_class_with_properties(self, metadata, property_list):
-        class_dict={
+        class_dict = {
             "@id": metadata["_id"].replace("schema::", "", 1),
             "@type": "rdfs:Class",
             "rdfs:comment": metadata["description"],
@@ -569,7 +587,7 @@ class SchemaHandler(APIBaseHandler):
         }
 
         property_list.append(class_dict)
-        for data_dict in metadata['properties']:
+        for data_dict in metadata["properties"]:
             self.add_schema_org_property_to_list(data_dict, property_list)
         return property_list
 
@@ -609,10 +627,16 @@ class SchemaHandler(APIBaseHandler):
         return property_list
 
     def raise_404_not_found_error(self, curie):
-        raise HTTPError(404, reason=f"The requested namespace or class, {curie}, does not exist in registry.")
+        raise HTTPError(
+            404,
+            reason=f"The requested namespace or class, {curie}, does not exist in registry.",
+        )
 
     def raise_404_no_validation_error(self, curie):
-        raise HTTPError(404, reason=f"The validation schema is not provided for this class or property: {curie}")
+        raise HTTPError(
+            404,
+            reason=f"The validation schema is not provided for this class or property: {curie}",
+        )
 
     def get_curie(self, metadata, curie, ns):
         """
@@ -635,23 +659,37 @@ class SchemaHandler(APIBaseHandler):
                 if ns == "schema":
                     try:
                         klass = schemas.get_class("schema", curie_str)
-                        property_list = self.filter_schema_org_class_with_properties(klass, property_list)
+                        property_list = self.filter_schema_org_class_with_properties(
+                            klass, property_list
+                        )
                     except NoEntityError as no_class_error:
                         try:
-                            logger.info(f"Error retrieving schema class: {no_class_error}, attempting to retrieve property instead...")
+                            logger.info(
+                                f"Error retrieving schema class: {no_class_error}, attempting to retrieve property instead..."
+                            )
                             property_label = curie_str.split(":")[1]
-                            klass=schemas.get_schema_org_property(property_label)
-                            property_list = self.filter_schema_org_property(klass, property_list)
+                            klass = schemas.get_schema_org_property(property_label)
+                            property_list = self.filter_schema_org_property(
+                                klass, property_list
+                            )
                         except NoEntityError as no_property_error:
-                            logger.info(f"Error retrieving schema class: {no_property_error}, attempting to retrieve property instead...")
+                            logger.info(
+                                f"Error retrieving schema class: {no_property_error}, attempting to retrieve property instead..."
+                            )
                             self.raise_404_not_found_error(curie)
                     # set the context property for schema.org
-                    metadata["@context"] = self.build_schema_org_context_dict(property_list)
+                    metadata["@context"] = self.build_schema_org_context_dict(
+                        property_list
+                    )
                 else:
-                    property_list = self.graph_data_filter(metadata, curie_str, property_list)
+                    property_list = self.graph_data_filter(
+                        metadata, curie_str, property_list
+                    )
         elif isinstance(curie, list):
             for curie_str in curie:
-                property_list = self.graph_data_filter(metadata, curie_str, property_list)
+                property_list = self.graph_data_filter(
+                    metadata, curie_str, property_list
+                )
         else:
             raise HTTPError(400, reason="Unidentified curie input request")
 
@@ -772,12 +810,18 @@ class SchemaHandler(APIBaseHandler):
         # if no curie is given, throw error
         if curie is None:
             raise HTTPError(
-                400, reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'"
+                400,
+                reason="A curie with a namespace prefix is required, i.e 'n3c:Dataset'",
             )
 
         # curie: /{ns}
         if ":" not in curie and validation:
-            raise(HTTPError(400, reason="A validation request must be for a class or property, not a namespace."))
+            raise (
+                HTTPError(
+                    400,
+                    reason="A validation request must be for a class or property, not a namespace.",
+                )
+            )
 
         elif ":" not in curie:
             self.handle_namespace_request(curie)
@@ -790,7 +834,9 @@ class SchemaHandler(APIBaseHandler):
                 # check if request has too many ns fields
                 ns_list = list(set([x.split(":")[0] for x in curie.split(",")]))
                 if len(ns_list) > 1:
-                    raise HTTPError(400, reason="Too many schemas(namespaces) requested")
+                    raise HTTPError(
+                        400, reason="Too many schemas(namespaces) requested"
+                    )
             else:
                 ns = curie.split(":")[0]
 
@@ -809,6 +855,7 @@ class SchemaHandler(APIBaseHandler):
             # curie: /{ns}:{search_key}
             else:
                 self.handle_class_request(curie, schema_metadata)
+
 
 class CoverageHandler(APIBaseHandler):
     """
@@ -836,5 +883,7 @@ class CoverageHandler(APIBaseHandler):
         except (ValueError, KeyError) as error:
             raise HTTPError(400, reason=f"No coverage found because: {error}")
         except Exception as error:
-            raise HTTPError(400, reason=f"Error retrieving coverage with exception {error}")
+            raise HTTPError(
+                400, reason=f"Error retrieving coverage with exception {error}"
+            )
         self.finish(coverage)

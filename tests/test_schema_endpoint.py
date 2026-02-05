@@ -6,8 +6,6 @@ import pytest
 import asyncio
 from biothings.tests.web import BiothingsWebAppTest
 from discovery.registry import schemas
-from discovery.utils import indices
-
 
 BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
 N3C_URL = "https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json"
@@ -21,8 +19,6 @@ def setup(ensure_test_data):
         schemas.add("bts", BTS_URL, "minions@example.com")
 
 class DiscoverySchemaEndpointTest(BiothingsWebAppTest):
-    def refresh(self):
-        indices.refresh()
 
     async def asyncTearDown(self):
         if hasattr(self, 'client') and self.client and not self.client.closed:

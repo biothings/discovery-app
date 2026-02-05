@@ -119,7 +119,6 @@ venv.bak/
 
 # Dev fixture
 biothings
-elasticsearch_dsl
 biothings_schema
 
 # notebook tests

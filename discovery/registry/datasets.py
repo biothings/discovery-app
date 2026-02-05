@@ -31,11 +31,12 @@ from datetime import datetime, timezone
 from types import MappingProxyType
 
 import elasticsearch
-import elasticsearch_dsl
+import elasticsearch.dsl
 import jsonschema
 import requests
 
-from discovery.model import Dataset as ESDataset, SchemaClass as ESSchemaClass
+from discovery.model import Dataset as ESDataset
+from discovery.model import SchemaClass as ESSchemaClass
 
 from .common import (
     ConflictError,
@@ -236,7 +237,7 @@ def _index(doc, metadata, op_type="index", _addon=MappingProxyType({})):
 
     try:
         dataset.save(op_type=op_type)
-    except elasticsearch_dsl.ValidationException as exc:
+    except elasticsearch.dsl.ValidationException as exc:
         raise DatasetValidationError(str(exc))
     except elasticsearch.exceptions.ConflictError:
         raise ConflictError("document already exists.")
