@@ -7,7 +7,6 @@ import json
 import datetime
 
 from discovery.registry import schemas
-from discovery.utils import indices
 from discovery.model import Schema as ESSchemaFile
 
 from .test_base import DiscoveryTestCase
@@ -28,9 +27,6 @@ class TestSchemaStatus(DiscoveryTestCase):
     test_user = "minions@example.com"
     test_namespace = "n3c"
     test_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
-
-    def refresh(self):
-        indices.refresh()
 
     def test_successful_schema_update_200(self):
         """

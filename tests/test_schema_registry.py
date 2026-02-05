@@ -7,7 +7,6 @@ import pytest
 from discovery.registry import schemas
 from discovery.utils import indices
 from discovery.registry.common import NoEntityError
-from discovery.utils.indices import save_schema_index_meta
 
 from .test_base import DiscoveryTestCase
 
@@ -30,7 +29,6 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.request("registry/does_not_exist", method="HEAD", expect=404)
 
     def test_10_get(self):
-        self.refresh()
         res = self.request("registry?user=minions@example.com").json()
         for hit in res["hits"]:
             if hit["namespace"] == "bts":
@@ -109,7 +107,6 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.request("registry/bts", expect=404)
         self.request("registry", method="POST", json=doc, headers=self.auth_user)
         self.request("registry/bts", expect=200)
-        self.refresh()
         self.query(q="BiologicalEntity")
 
     def test_40_schema_org_version_initially_none(self):
