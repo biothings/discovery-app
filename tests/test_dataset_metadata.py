@@ -6,8 +6,7 @@
 import json
 import pytest
 
-from discovery.registry import datasets, schemas
-from discovery.utils import indices
+from discovery.registry import schemas
 
 from .test_base import DiscoveryTestCase
 
@@ -126,7 +125,6 @@ class TestDatasetMetadata(DiscoveryTestCase):
             "83dc3401f86819de"  # ctsa_wellderly
             # "ecf3767159a74988",  # niaid_infection
         ]
-        indices.refresh()
         res = self.request("dataset").json()
         for hit in res["hits"]:
             if hit["_id"] in expected_ids:

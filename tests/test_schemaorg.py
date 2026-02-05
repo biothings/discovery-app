@@ -6,13 +6,16 @@ onto the base schema loader, ensuring version consistency during validation.
 """
 from unittest.mock import patch
 
+from discovery.registry import schemas
+from discovery.registry.common import NoEntityError
+from discovery.utils.indices import save_schema_index_meta, refresh
+from discovery.utils.adapters import DDEBaseSchemaLoader
+
+from biothings_schema.dataload import BaseSchemaLoader
 
 class TestDDEBaseSchemaLoader:
     def test_biothings_schema_compatibility(self):
         """Test that DDEBaseSchemaLoader is compatible with biothings_schema BaseSchemaLoader"""
-        from discovery.utils.adapters import DDEBaseSchemaLoader
-        from biothings_schema.dataload import BaseSchemaLoader
-
         loader = DDEBaseSchemaLoader()
 
         # Verify it's an instance of BaseSchemaLoader
@@ -147,14 +150,10 @@ class TestSchemaOrgVersionIntegration:
 
     def test_add_schema_passes_version_correctly(self, ensure_test_data):
         """Test that adding a schema uses the stored schema.org version"""
-        from discovery.registry import schemas
-        from discovery.registry.common import NoEntityError
-        from discovery.utils.indices import save_schema_index_meta, refresh
 
         # Store a specific version
         test_version = "15.0"
         save_schema_index_meta({"schema_org_version": test_version})
-        refresh()
 
         # Verify it was stored
         stored_version = schemas.get_schema_org_version()
@@ -174,8 +173,6 @@ class TestSchemaOrgVersionIntegration:
             # Add schema - this should internally create SchemaAdapter with schema_org_version
             count = schemas.add(namespace=test_namespace, url=test_url, user="test@example.com")
             assert count > 0, f"Schema should have classes, got count={count}"
-
-            refresh()
 
             # Verify schema was added
             assert schemas.exists(test_namespace)
@@ -202,8 +199,6 @@ class TestSchemaOrgVersionIntegration:
 
     def test_version_accessible_through_schema_get(self, ensure_test_data):
         """Test that schema.org version is accessible via schemas.get('schema')"""
-        from discovery.registry import schemas
-        from discovery.utils.indices import save_schema_index_meta, refresh
 
         # Ensure the stored version matches what we expect from the core schema
         schema_doc = schemas.get("schema")
@@ -217,7 +212,6 @@ class TestSchemaOrgVersionIntegration:
         # Update stored version to match schema version if they differ,
         # as previous tests might have changed the stored version
         save_schema_index_meta({"schema_org_version": version})
-        refresh()
 
         # Should now match stored version
         stored_version = schemas.get_schema_org_version()
@@ -291,7 +285,6 @@ class TestSchemaOrgVersionIntegration:
 
     def test_version_persists_across_operations(self, ensure_test_data):
         """Test that schema.org version persists across schema operations"""
-        from discovery.registry import schemas
 
         # Get initial version
         initial_version = schemas.get_schema_org_version()
