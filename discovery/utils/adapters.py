@@ -1,34 +1,33 @@
 """
-    BiothingsSchema Adapter
+BiothingsSchema Adapter
 
-    Schema JSON
+Schema JSON
+{
+    "@context": { ... },
+    "@graph": [ ... ]
+}
+↓
+biothings_schema.Schema
+biothings_schema.SchemaClass
+↓
+Schema Viewer JSON
+[
     {
-        "@context": { ... },
-        "@graph": [ ... ]
-    }
-    ↓
-    biothings_schema.Schema
-    biothings_schema.SchemaClass
-    ↓
-    Schema Viewer JSON
-    [
-        {
-            "name": ... ,
-            "description": ... ,
-            "validation": { ... },
-            "parent_classes": [ ... ],
-            "properties": [ ... ],
-            ...
-        }, ...
-    ]
+        "name": ... ,
+        "description": ... ,
+        "validation": { ... },
+        "parent_classes": [ ... ],
+        "properties": [ ... ],
+        ...
+    }, ...
+]
 """
-
 
 import logging
 
 from biothings_schema import Schema as SchemaParser
-from biothings_schema.dataload import BaseSchemaLoader, get_schemaorg_version as _get_schemaorg_version
-
+from biothings_schema.dataload import BaseSchemaLoader
+from biothings_schema.dataload import get_schemaorg_version as _get_schemaorg_version
 
 from discovery.registry import schemas
 
@@ -43,9 +42,10 @@ def get_schema_org_version():
 
 class DDEBaseSchemaLoader(BaseSchemaLoader):
     """This is a customized class for biothings_schema package to load base schemas
-       within the DDE app. By default biothings_schema load base schemas via DDE API,
-       but within the DDE app itself, we can load them directly from model.schema module.
+    within the DDE app. By default biothings_schema load base schemas via DDE API,
+    but within the DDE app itself, we can load them directly from model.schema module.
     """
+
     @property
     def registered_dde_schemas(self):
         """Return a list of schema namespaces registered in DDE"""
@@ -92,7 +92,8 @@ class SchemaClassWrapper:
         }
         """
         return [
-            ", ".join(map(str, parent_line)) for parent_line in self._parser_class.parent_classes
+            ", ".join(map(str, parent_line))
+            for parent_line in self._parser_class.parent_classes
         ]
 
     @property
@@ -114,7 +115,9 @@ class SchemaClassWrapper:
             ...
         ]
         """
-        properties = self._parser_class.list_properties(class_specific=True, group_by_class=False)
+        properties = self._parser_class.list_properties(
+            class_specific=True, group_by_class=False
+        )
 
         for property_ in properties:
             property_.pop("object")
@@ -133,10 +136,13 @@ class SchemaAdapter:
     """
 
     def __init__(self, doc=None, **kwargs):
-        # contexts = ESSchema.gather_field('@context')
-        # self._schema = SchemaParser(schema=doc, context=contexts, **kwargs)
+
+        # Create or get the base_schema_loader
         if "base_schema_loader" not in kwargs:
             kwargs["base_schema_loader"] = DDEBaseSchemaLoader()
+        # an optional schema_org_version can be passed in kwargs to set
+        # a specific version to load as base schemas.
+
         self._schema = SchemaParser(schema=doc, **kwargs)
         self._classes_defs = self._schema.list_all_defined_classes()
         self._classes_refs = self._schema.list_all_referenced_classes()
