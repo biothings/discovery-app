@@ -7,9 +7,10 @@ onto the base schema loader, ensuring version consistency during validation.
 from unittest.mock import patch
 
 from discovery.registry import schemas
-from discovery.registry.common import NoEntityError
+from discovery.registry.common import NoEntityError, RegistryError
 from discovery.utils.indices import save_schema_index_meta, refresh
-from discovery.utils.adapters import DDEBaseSchemaLoader
+from discovery.utils.adapters import DDEBaseSchemaLoader, get_schema_org_version
+from discovery.utils.update import monthly_schemaorg_update
 
 from biothings_schema.dataload import BaseSchemaLoader
 
@@ -174,6 +175,7 @@ class TestSchemaOrgVersionIntegration:
             count = schemas.add(namespace=test_namespace, url=test_url, user="test@example.com")
             assert count > 0, f"Schema should have classes, got count={count}"
 
+            refresh()
             # Verify schema was added
             assert schemas.exists(test_namespace)
 
@@ -293,3 +295,82 @@ class TestSchemaOrgVersionIntegration:
         # Version should still be the same
         current_version = schemas.get_schema_org_version()
         assert current_version == initial_version
+
+
+class TestMonthlySchemaOrgUpdate:
+    """Tests for the monthly schema.org update functionality"""
+
+    def test_dryrun_validation(self, ensure_schema_org):
+        """Test that dry-run validation works without modifying data"""
+
+        # Get current class count (schema.org loaded via fixture)
+        initial_classes = list(schemas.get_classes("schema"))
+        initial_count = len(initial_classes)
+
+        # Run dry-run validation
+        class_count = schemas._add_schema_class(None, "schema", dryrun=True)
+
+        # Verify dry-run returns class count
+        assert class_count > 0, "Dry-run should return number of validated classes"
+
+        # Verify no classes were modified (count should be same)
+        final_classes = list(schemas.get_classes("schema"))
+        assert len(final_classes) == initial_count, "Dry-run should not modify existing classes"
+
+    def test_monthly_update_skips_when_current(self, ensure_test_data):
+        """Test that monthly update skips when already at latest version"""
+
+        # Set stored version to match latest available
+        latest_version = get_schema_org_version()
+        save_schema_index_meta({"schema_org_version": latest_version})
+
+        # Verify versions match
+        stored_version = schemas.get_schema_org_version()
+        assert stored_version == latest_version
+
+        # Run monthly update - should skip since versions match
+        monthly_schemaorg_update()
+
+        # Version should remain unchanged
+        assert schemas.get_schema_org_version() == latest_version
+
+    def test_monthly_update_validates_before_update(self, ensure_test_data):
+        """Test that monthly update performs validation before updating"""
+
+        # Store a fake old version to trigger update attempt
+        save_schema_index_meta({"schema_org_version": "1.0"})
+
+        # Get initial state
+        initial_version = schemas.get_schema_org_version()
+        assert initial_version == "1.0"
+
+        # Run monthly update
+        monthly_schemaorg_update()
+
+        # Version should be updated to latest
+        new_version = schemas.get_schema_org_version()
+        latest_version = get_schema_org_version()
+        assert new_version == latest_version, f"Expected {latest_version}, got {new_version}"
+
+    def test_monthly_update_handles_registry_error(self, ensure_test_data):
+        """Test that monthly update handles RegistryError during validation"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "1.0"})
+
+        # Mock _add_schema_class to raise RegistryError during dry-run
+        with patch('discovery.utils.update._add_schema_class') as mock_add:
+            mock_add.side_effect = RegistryError("Validation failed: invalid schema")
+
+            # Should not raise - error should be caught and logged
+            monthly_schemaorg_update()
+
+            # Verify dry-run was attempted
+            mock_add.assert_called_once()
+            # Verify dryrun=True was passed
+            call_kwargs = mock_add.call_args[1]
+            assert call_kwargs.get('dryrun') is True
+
+        # Version should remain unchanged (update was aborted)
+        from discovery.registry import schemas
+        assert schemas.get_schema_org_version() == "1.0"
