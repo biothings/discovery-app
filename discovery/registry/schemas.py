@@ -38,11 +38,12 @@ EXTENSION_OWNER = "cwu@scripps.edu"
 # ----------------
 
 
-def _add_schema_class(schema, namespace, dryrun=False):
+def _add_schema_class(schema, namespace, dryrun=False, schema_org_version=None):
     assert isinstance(schema, (ValidatedDict, type(None)))
 
-    # set the stored schema.org version to load base schemas
-    schema_org_version = get_schema_org_version()
+    # set the stored schema.org version to load base schemas (unless overridden)
+    if schema_org_version is None:
+        schema_org_version = get_schema_org_version()
 
     if schema is None and namespace == "schema":
         # handling "schema" namespace (from schema.org) differently
@@ -367,10 +368,13 @@ def total(user=None):
     return search.count()
 
 
-def add_core(update=False):
+def add_core(update=False, schema_org_versoin=None):
     """add schema.org main schema."""
     if not exists("schema") or update:
-        _add_schema_class(None, "schema")
+        # Use the latest schema.org version from biothings_schema when updating
+        if schema_org_versoin is None:
+            latest_version = _get_schema_org_version()
+        _add_schema_class(None, "schema", schema_org_version=latest_version)
         store_schema_org_version()
 
 
