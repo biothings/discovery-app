@@ -368,11 +368,11 @@ def total(user=None):
     return search.count()
 
 
-def add_core(update=False, schema_org_versoin=None):
+def add_core(update=False, schema_org_version=None):
     """add schema.org main schema."""
     if not exists("schema") or update:
         # Use the latest schema.org version from biothings_schema when updating
-        if schema_org_versoin is None:
+        if schema_org_version is None:
             latest_version = _get_schema_org_version()
         _add_schema_class(None, "schema", schema_org_version=latest_version)
         store_schema_org_version()

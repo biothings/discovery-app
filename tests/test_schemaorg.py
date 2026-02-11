@@ -12,7 +12,7 @@ import logging
 from discovery.registry import schemas
 from discovery.registry.common import NoEntityError, RegistryError
 from discovery.utils.indices import save_schema_index_meta, refresh
-from discovery.utils.adapters import DDEBaseSchemaLoader, get_schema_org_version
+from discovery.utils.adapters import DDEBaseSchemaLoader, SchemaAdapter, get_schema_org_version
 from discovery.utils.update import monthly_schemaorg_update
 
 from biothings_schema.dataload import BaseSchemaLoader
@@ -32,7 +32,6 @@ class TestDDEBaseSchemaLoader:
 
     def test_load_dde_schemas_method(self):
         """Test that load_dde_schemas method works"""
-        from discovery.utils.adapters import DDEBaseSchemaLoader
         loader = DDEBaseSchemaLoader(verbose=False)
 
         # Mock the schema data
@@ -59,7 +58,6 @@ class TestDDEBaseSchemaLoader:
 
     def test_schema_adapter_accepts_version_parameter(self):
         """Test that SchemaAdapter accepts schema_org_version as a parameter"""
-        from discovery.utils.adapters import SchemaAdapter
 
         # Create a simple test schema
         test_schema = {
@@ -83,7 +81,6 @@ class TestDDEBaseSchemaLoader:
         Test that SchemaAdapter passes schema_org_version parameter to the underlying
         SchemaParser, which then sets it on the base_schema_loader.
         """
-        from discovery.utils.adapters import SchemaAdapter, DDEBaseSchemaLoader
 
         # Create a simple test schema
         test_schema = {
@@ -109,7 +106,6 @@ class TestDDEBaseSchemaLoader:
         Test that SchemaAdapter correctly passes schema_org_version parameter
         to ensure biothings_schema uses the specified version for validation.
         """
-        from discovery.utils.adapters import SchemaAdapter, DDEBaseSchemaLoader
 
         # Create a test schema that uses schema.org classes
         test_schema = {
@@ -194,7 +190,6 @@ class TestSchemaOrgVersionIntegration:
 
     def test_version_stored_after_restore(self, ensure_test_data):
         """Test that schema.org version is stored after restore_from_file"""
-        from discovery.registry.schemas import get_schema_org_version
 
         # After restore (via ensure_test_data fixture), version should be stored
         version = get_schema_org_version()
@@ -224,8 +219,6 @@ class TestSchemaOrgVersionIntegration:
 
     def test_schema_adapter_with_stored_version(self, ensure_test_data):
         """Test that SchemaAdapter works when passed the stored schema.org version"""
-        from discovery.utils.adapters import SchemaAdapter
-        from discovery.registry.schemas import get_schema_org_version
 
         stored_version = get_schema_org_version()
         assert stored_version is not None
@@ -256,7 +249,6 @@ class TestSchemaOrgVersionIntegration:
 
     def test_add_schema_with_schema_org_inheritance(self, ensure_test_data):
         """Test adding a schema that inherits from schema.org classes"""
-        from discovery.registry import schemas
 
         # Ensure schema.org core is loaded
         if not schemas.exists("schema"):
@@ -439,7 +431,7 @@ class TestMonthlySchemaOrgUpdate:
         assert any("Full traceback:" in record.message for record in debug_records)
         assert any("RegistryError" in record.message for record in debug_records)
 
-    def test_monthly_update_handles_attribute_error(self, ensure_test_data, caplog):
+    def test_monthly_update_handles_attribute_error(self, caplog):
         """Test that monthly update handles AttributeError from schema class validation"""
 
         # Set an old version to trigger the update path
