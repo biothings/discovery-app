@@ -8,8 +8,7 @@ from discovery.model import Schema
 from discovery.utils.adapters import get_schema_org_version
 from discovery.registry.common import RegistryError
 
-logging.basicConfig(level="INFO")
-logger = logging.getLogger("daily-schema-update")
+logger = logging.getLogger(__name__)
 
 def schema_update(namespace):
     """ Update registered schemas by namespace.
