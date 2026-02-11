@@ -5,6 +5,9 @@ This tests that SchemaAdapter correctly retrieves and sets DDE's stored schema.o
 onto the base schema loader, ensuring version consistency during validation.
 """
 from unittest.mock import patch
+import pytest
+import logging
+
 
 from discovery.registry import schemas
 from discovery.registry.common import NoEntityError, RegistryError
@@ -297,6 +300,7 @@ class TestSchemaOrgVersionIntegration:
         assert current_version == initial_version
 
 
+@pytest.mark.monthly
 class TestMonthlySchemaOrgUpdate:
     """Tests for the monthly schema.org update functionality"""
 
@@ -338,11 +342,11 @@ class TestMonthlySchemaOrgUpdate:
         """Test that monthly update performs validation before updating"""
 
         # Store a fake old version to trigger update attempt
-        save_schema_index_meta({"schema_org_version": "1.0"})
+        save_schema_index_meta({"schema_org_version": "23.9"})
 
         # Get initial state
         initial_version = schemas.get_schema_org_version()
-        assert initial_version == "1.0"
+        assert initial_version == "23.9"
 
         # Run monthly update
         monthly_schemaorg_update()
@@ -356,7 +360,7 @@ class TestMonthlySchemaOrgUpdate:
         """Test that monthly update handles RegistryError during validation"""
 
         # Set an old version to trigger the update path
-        save_schema_index_meta({"schema_org_version": "1.0"})
+        save_schema_index_meta({"schema_org_version": "23.9"})
 
         # Mock _add_schema_class to raise RegistryError during dry-run
         with patch('discovery.utils.update._add_schema_class') as mock_add:
@@ -372,5 +376,84 @@ class TestMonthlySchemaOrgUpdate:
             assert call_kwargs.get('dryrun') is True
 
         # Version should remain unchanged (update was aborted)
-        from discovery.registry import schemas
-        assert schemas.get_schema_org_version() == "1.0"
+        assert schemas.get_schema_org_version() == "23.9"
+
+    def test_monthly_update_logs_error_type(self, ensure_test_data, caplog):
+        """Test that monthly update logs the specific error type"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "23.0"})
+
+        with caplog.at_level(logging.ERROR):
+            with patch('discovery.utils.update._add_schema_class') as mock_add:
+                mock_add.side_effect = RegistryError("Test error message")
+                monthly_schemaorg_update()
+
+        # Verify error type is logged
+        assert any("Error type: RegistryError" in record.message for record in caplog.records)
+        assert any("Error message: Test error message" in record.message for record in caplog.records)
+
+    def test_monthly_update_logs_subclass_error_type(self, ensure_test_data, caplog):
+        """Test that monthly update distinguishes between RegistryError subclasses"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "23.0"})
+
+        with caplog.at_level(logging.ERROR):
+            with patch('discovery.utils.update._add_schema_class') as mock_add:
+                mock_add.side_effect = NoEntityError("Entity not found")
+                monthly_schemaorg_update()
+
+        # Verify specific subclass type is logged (not just RegistryError)
+        assert any("Error type: NoEntityError" in record.message for record in caplog.records)
+
+    def test_monthly_update_logs_status_code_when_present(self, ensure_test_data, caplog):
+        """Test that monthly update logs status_code if present on error"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "23.0"})
+
+        with caplog.at_level(logging.ERROR):
+            with patch('discovery.utils.update._add_schema_class') as mock_add:
+                error = RegistryError("HTTP error occurred")
+                error.status_code = 404
+                mock_add.side_effect = error
+                monthly_schemaorg_update()
+
+        # Verify status code is logged
+        assert any("Status code: 404" in record.message for record in caplog.records)
+
+    def test_monthly_update_logs_traceback_at_debug(self, caplog):
+        """Test that monthly update logs full traceback at DEBUG level"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "23.0"})
+
+        with caplog.at_level(logging.DEBUG):
+            with patch('discovery.utils.update._add_schema_class') as mock_add:
+                mock_add.side_effect = RegistryError("Traceback test error")
+                monthly_schemaorg_update()
+
+        # Verify traceback is logged at DEBUG level
+        debug_records = [r for r in caplog.records if r.levelno == logging.DEBUG]
+        assert any("Full traceback:" in record.message for record in debug_records)
+        assert any("RegistryError" in record.message for record in debug_records)
+
+    def test_monthly_update_handles_attribute_error(self, ensure_test_data, caplog):
+        """Test that monthly update handles AttributeError from schema class validation"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "23.0"})
+
+        with caplog.at_level(logging.ERROR):
+            with patch('discovery.utils.update._add_schema_class') as mock_add:
+                # AttributeError is raised when cls.full_clean() fails in _add_schema_class
+                mock_add.side_effect = AttributeError("'NoneType' object has no attribute 'name'")
+                monthly_schemaorg_update()
+
+        # Verify error type is logged
+        assert any("Error type: AttributeError" in record.message for record in caplog.records)
+        assert any("invalid attributes" in record.message for record in caplog.records)
+
+        # Version should remain unchanged (update was aborted)
+        assert schemas.get_schema_org_version() == "23.0"
