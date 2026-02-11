@@ -7,3 +7,9 @@ profile = "black"
 combine_as_imports = true
 line_length = 159
 src_paths = ["."]
+
+[tool.pytest.ini_options]
+markers = [
+    'monthly: marks tests as monthly update tests (skipped by default, run with "-m monthly")',
+]
+addopts = "-m 'not monthly'"

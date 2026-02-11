@@ -1,10 +1,12 @@
 import logging
 import time
+import traceback
 
 from discovery.registry import schemas
 from discovery.registry.schemas import _add_schema_class
 from discovery.model import Schema
 from discovery.utils.adapters import get_schema_org_version
+from discovery.registry.common import RegistryError
 
 logging.basicConfig(level="INFO")
 logger = logging.getLogger("daily-schema-update")
@@ -70,12 +72,24 @@ def monthly_schemaorg_update():
         # Validate by performing a dry-run before actual update
         logger.info(f"Validating schema.org version {latest_version} (dry-run)...")
         try:
-            from discovery.registry.common import RegistryError
             class_count = _add_schema_class(None, "schema", dryrun=True, schema_org_version=latest_version)
             logger.info(f"Validation passed - {class_count} schema classes validated")
-        except RegistryError as registry_error: # capture individual errors
-            logger.error(f"Validation failed: {registry_error}")
+        except RegistryError as registry_error:
+            logger.error(f"Validation failed for schema.org version {latest_version}")
+            logger.error(f"Error type: {type(registry_error).__name__}")
+            logger.error(f"Error message: {registry_error}")
+            if hasattr(registry_error, 'status_code'):
+                logger.error(f"Status code: {registry_error.status_code}")
+            logger.debug(f"Full traceback:\n{traceback.format_exc()}")
             logger.error("DDE schema.org will not be updated")
+            return
+        except AttributeError as attr_error:
+            # Raised from _add_schema_class when cls.full_clean() fails during validation
+            logger.error(f"Schema class validation failed for schema.org version {latest_version}")
+            logger.error(f"Error type: {type(attr_error).__name__}")
+            logger.error(f"Error message: {attr_error}")
+            logger.debug(f"Full traceback:\n{traceback.format_exc()}")
+            logger.error("DDE schema.org will not be updated - schema class has invalid attributes")
             return
 
         # Validation passed - perform the actual update
