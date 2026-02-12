@@ -291,6 +291,31 @@ class TestSchemaOrgVersionIntegration:
         current_version = schemas.get_schema_org_version()
         assert current_version == initial_version
 
+    def test_add_core_with_explicit_version(self, ensure_test_data):
+        """Test add_core with an explicit schema_org_version argument.
+
+        This ensures the code path where schema_org_version is provided
+        (not None) works correctly without a NameError.
+        """
+        # Use a known valid version
+        explicit_version = "29.0"
+
+        # Call add_core with explicit version and update=True to force re-add
+        schemas.add_core(update=True, schema_org_version=explicit_version)
+
+        # refresh()
+
+        # Verify schema.org was added
+        assert schemas.exists("schema")
+
+        # Verify classes were loaded
+        schema_classes = list(schemas.get_classes("schema"))
+        assert len(schema_classes) > 0, "schema.org should have classes"
+
+        # Verify schema:Thing exists (a fundamental schema.org class)
+        thing_class = schemas.get_class("schema", "schema:Thing", raise_on_error=False)
+        assert thing_class is not None, "schema:Thing should exist"
+
 
 @pytest.mark.monthly
 class TestMonthlySchemaOrgUpdate:
