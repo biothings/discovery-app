@@ -412,7 +412,7 @@ class SchemaViewHandler(APIBaseHandler):
                     "validation_merge": validation_merge,
                     "raise_on_validation_error": False,
                 }
-                schema_org_version = schemas.get_schema_org_version()
+                schema_org_version = schemas.get_stored_schema_org_version()
                 _kwargs = {
                     "validator_options": validator_options,
                     "schema_org_version": schema_org_version,

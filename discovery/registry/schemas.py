@@ -16,7 +16,7 @@ import requests
 from discovery.model import Schema as ESSchemaFile
 from discovery.model import SchemaClass as ESSchemaClass
 from discovery.utils.adapters import SchemaAdapter
-from discovery.utils.adapters import get_schema_org_version as _get_schema_org_version
+from discovery.utils.adapters import get_latest_schema_org_version
 from discovery.utils.indices import get_schema_index_meta, save_schema_index_meta
 
 from .common import ConflictError, NoEntityError, RegistryDocument, RegistryError, ValidatedDict
@@ -43,7 +43,7 @@ def _add_schema_class(schema, namespace, dryrun=False, schema_org_version=None):
 
     # set the stored schema.org version to load base schemas (unless overridden)
     if schema_org_version is None:
-        schema_org_version = get_schema_org_version()
+        schema_org_version = get_latest_schema_org_version()
 
     if schema is None and namespace == "schema":
         # handling "schema" namespace (from schema.org) differently
@@ -222,7 +222,7 @@ def get(namespace):
     if namespace == "schema":
         schema = RegistryDocument(_id="schema")
         schema.meta.url = "https://schema.org/docs/tree.jsonld"
-        schema.meta.version = _get_schema_org_version()
+        schema.meta.version = get_latest_schema_org_version()
         schema["$comment"] = "internally provided by biothings.schema"
         schema["@context"] = {"schema": "http://schema.org/"}
         return schema
@@ -373,7 +373,7 @@ def add_core(update=False, schema_org_version=None):
     if not exists("schema") or update:
         # Use the latest schema.org version from biothings_schema when updating
         if schema_org_version is None:
-            schema_org_version = _get_schema_org_version()
+            schema_org_version = get_latest_schema_org_version()
         _add_schema_class(None, "schema", schema_org_version=schema_org_version)
         store_schema_org_version()
 
@@ -530,11 +530,11 @@ def store_schema_org_version():
     Make sure you call this function right after you have added the schema_org schema
     (e.g. after add_core is called)
     """
-    ver = _get_schema_org_version()
+    ver = get_latest_schema_org_version()
     save_schema_index_meta({"schema_org_version": ver})
 
 
-def get_schema_org_version():
+def get_stored_schema_org_version():
     """
     Get the stored schema_org schema version from Schema index metadata.
     Return None if not found.

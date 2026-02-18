@@ -5,7 +5,7 @@ import traceback
 from discovery.registry import schemas
 from discovery.registry.schemas import _add_schema_class
 from discovery.model import Schema
-from discovery.utils.adapters import get_schema_org_version
+from discovery.utils.adapters import get_latest_schema_org_version
 from discovery.registry.common import RegistryError
 
 logger = logging.getLogger(__name__)
@@ -56,11 +56,11 @@ def monthly_schemaorg_update():
 
     try:
         # Get current schema.org version stored in DDE
-        current_version = schemas.get_schema_org_version()
+        current_version = schemas.get_stored_schema_org_version()
         logger.info(f"Current schema.org version in DDE: {current_version}")
 
         # Get the latest available schema.org version from biothings_schema
-        latest_version = get_schema_org_version()
+        latest_version = get_latest_schema_org_version()
         logger.info(f"Latest schema.org version available: {latest_version}")
 
         # Check if update is needed
@@ -93,10 +93,10 @@ def monthly_schemaorg_update():
 
         # Validation passed - perform the actual update
         logger.info(f"Updating schema.org from {current_version} to {latest_version}")
-        schemas.add_core(update=True)
+        schemas.add_core(update=True, schema_org_version=latest_version)
 
         # Verify the update
-        new_version = schemas.get_schema_org_version()
+        new_version = schemas.get_stored_schema_org_version()
         if new_version == latest_version:
             logger.info(f"Update verified - schema.org is now at version {new_version}")
         else:

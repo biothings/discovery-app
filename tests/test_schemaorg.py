@@ -12,7 +12,7 @@ import logging
 from discovery.registry import schemas
 from discovery.registry.common import NoEntityError, RegistryError
 from discovery.utils.indices import save_schema_index_meta, refresh
-from discovery.utils.adapters import DDEBaseSchemaLoader, SchemaAdapter, get_schema_org_version
+from discovery.utils.adapters import DDEBaseSchemaLoader, SchemaAdapter, get_latest_schema_org_version
 from discovery.utils.update import monthly_schemaorg_update
 
 from biothings_schema.dataload import BaseSchemaLoader
@@ -156,7 +156,7 @@ class TestSchemaOrgVersionIntegration:
         save_schema_index_meta({"schema_org_version": test_version})
 
         # Verify it was stored
-        stored_version = schemas.get_schema_org_version()
+        stored_version = schemas.get_stored_schema_org_version()
         assert stored_version == test_version
 
         # Now add a test schema - it should use this version internally
@@ -179,7 +179,7 @@ class TestSchemaOrgVersionIntegration:
             assert schemas.exists(test_namespace)
 
             # Verify the version hasn't changed
-            assert schemas.get_schema_org_version() == test_version
+            assert schemas.get_stored_schema_org_version() == test_version
 
         finally:
             # Clean up
@@ -192,7 +192,7 @@ class TestSchemaOrgVersionIntegration:
         """Test that schema.org version is stored after restore_from_file"""
 
         # After restore (via ensure_test_data fixture), version should be stored
-        version = get_schema_org_version()
+        version = get_latest_schema_org_version()
         assert version is not None, "schema.org version should be stored after restore"
         assert isinstance(version, str), "version should be a string"
         assert "." in version, "version should follow format like '29.3'"
@@ -214,13 +214,13 @@ class TestSchemaOrgVersionIntegration:
         save_schema_index_meta({"schema_org_version": version})
 
         # Should now match stored version
-        stored_version = schemas.get_schema_org_version()
+        stored_version = schemas.get_stored_schema_org_version()
         assert version == stored_version
 
     def test_schema_adapter_with_stored_version(self, ensure_test_data):
         """Test that SchemaAdapter works when passed the stored schema.org version"""
 
-        stored_version = get_schema_org_version()
+        stored_version = get_latest_schema_org_version()
         assert stored_version is not None
 
         # Create a test schema with all required fields
@@ -284,11 +284,11 @@ class TestSchemaOrgVersionIntegration:
         """Test that schema.org version persists across schema operations"""
 
         # Get initial version
-        initial_version = schemas.get_schema_org_version()
+        initial_version = schemas.get_stored_schema_org_version()
         assert initial_version is not None
 
         # Version should still be the same
-        current_version = schemas.get_schema_org_version()
+        current_version = schemas.get_stored_schema_org_version()
         assert current_version == initial_version
 
     def test_add_core_with_explicit_version(self, ensure_test_data):
@@ -342,18 +342,18 @@ class TestMonthlySchemaOrgUpdate:
         """Test that monthly update skips when already at latest version"""
 
         # Set stored version to match latest available
-        latest_version = get_schema_org_version()
+        latest_version = get_latest_schema_org_version()
         save_schema_index_meta({"schema_org_version": latest_version})
 
         # Verify versions match
-        stored_version = schemas.get_schema_org_version()
+        stored_version = schemas.get_stored_schema_org_version()
         assert stored_version == latest_version
 
         # Run monthly update - should skip since versions match
         monthly_schemaorg_update()
 
         # Version should remain unchanged
-        assert schemas.get_schema_org_version() == latest_version
+        assert schemas.get_stored_schema_org_version() == latest_version
 
     def test_monthly_update_validates_before_update(self, ensure_test_data):
         """Test that monthly update performs validation before updating"""
@@ -362,15 +362,15 @@ class TestMonthlySchemaOrgUpdate:
         save_schema_index_meta({"schema_org_version": "23.9"})
 
         # Get initial state
-        initial_version = schemas.get_schema_org_version()
+        initial_version = schemas.get_stored_schema_org_version()
         assert initial_version == "23.9"
 
         # Run monthly update
         monthly_schemaorg_update()
 
         # Version should be updated to latest
-        new_version = schemas.get_schema_org_version()
-        latest_version = get_schema_org_version()
+        new_version = schemas.get_stored_schema_org_version()
+        latest_version = get_latest_schema_org_version()
         assert new_version == latest_version, f"Expected {latest_version}, got {new_version}"
 
     def test_monthly_update_handles_registry_error(self, ensure_test_data):
@@ -393,7 +393,7 @@ class TestMonthlySchemaOrgUpdate:
             assert call_kwargs.get('dryrun') is True
 
         # Version should remain unchanged (update was aborted)
-        assert schemas.get_schema_org_version() == "23.9"
+        assert schemas.get_stored_schema_org_version() == "23.9"
 
     def test_monthly_update_logs_error_type(self, ensure_test_data, caplog):
         """Test that monthly update logs the specific error type"""
@@ -473,4 +473,4 @@ class TestMonthlySchemaOrgUpdate:
         assert any("invalid attributes" in record.message for record in caplog.records)
 
         # Version should remain unchanged (update was aborted)
-        assert schemas.get_schema_org_version() == "23.0"
+        assert schemas.get_stored_schema_org_version() == "23.0"
