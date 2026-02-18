@@ -111,7 +111,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
 
     def test_40_schema_org_version_initially_none(self):
         """Test that schema.org version is None at initialization (loader sets it later)"""
-        version = schemas.get_schema_org_version()
+        version = schemas.get_stored_schema_org_version()
         # Version is intentionally None at initialization until the loader populates it
         assert version is None, "schema.org version should be None at initialization"
 
@@ -119,7 +119,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
         """Test that schemas are added using the stored schema.org version"""
 
         # Get original version (may be None at initialization)
-        original_version = schemas.get_schema_org_version()
+        original_version = schemas.get_stored_schema_org_version()
 
         # Change to a different version
         test_version = "15.0"
@@ -127,7 +127,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
         self.refresh()
 
         # Verify version was changed
-        current_version = schemas.get_schema_org_version()
+        current_version = schemas.get_stored_schema_org_version()
         assert current_version == test_version, f"Version should be {test_version}"
 
         # Add a new schema - _add_schema_class will pass this version to SchemaAdapter
@@ -145,7 +145,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
             assert count > 0, f"Schema should have classes, got count={count}"
 
             # Verify the version hasn't changed
-            current_version_after_add = schemas.get_schema_org_version()
+            current_version_after_add = schemas.get_stored_schema_org_version()
             assert current_version_after_add == test_version, (
                 f"Schema.org version should remain {test_version}, got {current_version_after_add}"
             )

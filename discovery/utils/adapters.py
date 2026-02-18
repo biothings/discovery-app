@@ -27,7 +27,7 @@ import logging
 
 from biothings_schema import Schema as SchemaParser
 from biothings_schema.dataload import BaseSchemaLoader
-from biothings_schema.dataload import get_schemaorg_version as _get_schemaorg_version
+from biothings_schema.dataload import get_schemaorg_version as get_latest_schemaorg_version
 
 from discovery.registry import schemas
 
@@ -35,9 +35,9 @@ from discovery.registry import schemas
 logging.captureWarnings(True)
 
 
-def get_schema_org_version():
+def get_latest_schema_org_version():
     """return the current schema_org schema version"""
-    return _get_schemaorg_version()
+    return get_latest_schemaorg_version()
 
 
 class DDEBaseSchemaLoader(BaseSchemaLoader):
