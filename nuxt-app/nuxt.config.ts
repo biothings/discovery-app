@@ -35,19 +35,19 @@ export default defineNuxtConfig({
       // 'lodash'
     ],
   },
-  compatibilityDate: '2025-11-03',
+  compatibilityDate: "2025-11-03",
   vite: {
     server: {
       hmr: {
-        protocol: 'ws',
-        host: 'localhost', // the same host you use in the browser
-        port: 80,          // or whatever port your proxy serves
+        protocol: "ws",
+        host: "localhost", // the same host you use in the browser
+        port: 80, // or whatever port your proxy serves
       },
     },
   },
   imports: {
     dirs: [
-      '~/compoonents',  // Scan components directory
-    ]
-  }
+      "~/compoonents", // Scan components directory
+    ],
+  },
 });

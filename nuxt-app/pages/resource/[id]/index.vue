@@ -290,7 +290,6 @@ const schemaLink = computed(() => {
   return "/ns/schema/" + metadata.value["@type"];
 });
 
-
 onMounted(() => {
   getMetadata(id);
 });

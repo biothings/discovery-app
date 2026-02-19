@@ -113,9 +113,9 @@ export const schema_registry = {
             let propName = main.properties[i]["curie"];
             let propLabel = main.properties[i]["label"];
             if (propName.includes("schema:")) {
-              propLabel = "🔴 " + main.properties[i]["label"];
+              propLabel = "🟧 " + main.properties[i]["label"];
             } else {
-              propLabel = "<span>🔵 " + main.properties[i]["curie"] + "</span>";
+              propLabel = "<span>🟪 " + main.properties[i]["curie"] + "</span>";
             }
             // look for prop in others
             let tableRow = { Property: propLabel };
@@ -206,12 +206,25 @@ export const schema_registry = {
           let props = main.validation.properties;
           for (const prop in props) {
             let propName = prop;
-            let propLabel = prop;
+            let propLabel;
 
-            let tableRow = { Property: propLabel };
             if (main.validation.required.includes(prop)) {
-              //mark required todo
+              propLabel = "🔴 " + prop;
+            } else if (
+              main.validation.recommended &&
+              main.validation.recommended.includes(prop)
+            ) {
+              propLabel = "🟡 " + prop;
+            } else if (
+              main.validation.optional &&
+              main.validation.optional.includes(prop)
+            ) {
+              propLabel = "🟦 " + prop;
+            } else {
+              propLabel = prop;
             }
+            let tableRow = { Property: propLabel };
+
             tableRow[main["name"]] = true;
 
             for (var o = 0; o < other.length; o++) {

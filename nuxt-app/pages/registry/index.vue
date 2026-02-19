@@ -20,6 +20,14 @@
               >Browse By Namespace</nuxt-link
             >
           </li>
+          <li class="nav-item" role="presentation">
+            <nuxt-link
+              class="nav-link"
+              :class="{ 'bg-dde-accent text-light': choice == 'compare' }"
+              to="/registry?search=compare"
+              >Compare Classes</nuxt-link
+            >
+          </li>
         </ul>
         <div class="tab-content p-0 m-0" id="myTabContent">
           <!-- 🌈  CLASS SEARCH 🌈 -->
@@ -27,12 +35,7 @@
             <div class="p-2 alert-secondary">
               <div class="alert alert-light jumbotron">
                 <h2 class="text-dde-dark">Classes</h2>
-                <p>
-                  View, extend and compare (<font-awesome-icon
-                    icon="fas fa-not-equal"
-                    class="text-primary"
-                  />) available schema classes.
-                </p>
+                <p>View, extend and compare available schema classes.</p>
               </div>
               <div>
                 <form @submit.prevent="search()">
@@ -91,22 +94,11 @@
                           class="fa-stack-1x text-light"
                         />
                       </span>
-                      <span
-                        class="btn btn-sm bg-dde-mid text-light tip"
-                        data-tippy-content="Compare Schemas"
-                        @click="openModal()"
-                      >
-                        <font-awesome-icon
-                          icon="fas fa-not-equal"
-                          class="text-light"
-                        />
-                        Compare
-                      </span>
                     </div>
                   </div>
                 </form>
               </div>
-              <div class="text-right d-none d-md-block">
+              <div class="text-right d-none d-md-block p-1">
                 <label class="text-muted mr-2" for="exampleFormControlSelect1"
                   ><small>Order</small></label
                 >
@@ -125,7 +117,6 @@
               <div
                 class="d-flex align-item-center justify-content-between px-3 text-muted"
               >
-                <small>Compare (Max 4)</small>
                 <small
                   >Details |
                   <img src="@/assets/img/cube.svg" width="15" /> (validation
@@ -306,6 +297,21 @@
               </div>
             </div>
           </div>
+          <div v-if="choice == 'compare'">
+            <CompareClasses></CompareClasses>
+            <div
+              class="text-center bg-dde-dark p-3"
+              v-if="compareItems.length > 1"
+            >
+              <button
+                class="btn btn-lg bg-success text-light"
+                data-tippy-content="View Comparison"
+                @click="openModal()"
+              >
+                Compare Now
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -314,87 +320,80 @@
     <div id="compareResults" class="modal" style="z-index: 1000">
       <!-- Modal content -->
       <div class="modal-content">
-        <div>
-          <span id="closeBtn" class="close">&times;</span>
-        </div>
-        <div>
-          <h5 class="text-center text-dde-dark">Compare Schemas</h5>
-        </div>
         <div
-          class="d-flex justify-content-center p-2"
-          v-if="compareItems.length > 1"
+          class="p-2 rounded text-light"
+          :class="comparing == 'used' ? 'bg-dde-mid' : 'bg-dde-dark'"
         >
-          <div class="w-50 border-right p-1 text-muted text-center">
-            <h6 class="mainTextLight">
-              Compare All Properties (Extended and Inherited)
-            </h6>
-            <small class="d-block"
-              ><font-awesome-icon
-                icon="fas fa-dot-circle"
-                class="text-danger"
-              />
-              Inherited from Schema.org</small
-            >
-            <small class="d-block"
-              ><font-awesome-icon icon="fas fa-circle" class="text-info" />
-              Extended Definition</small
-            >
-            <button
-              @click="compareAll()"
-              class="btn mainBackLight text-light m-auto"
-            >
-              <font-awesome-icon icon="fas fa-list-ul" /> Compare All
-            </button>
+          <div>
+            <span id="closeBtn" class="close text-danger">&times;</span>
           </div>
-          <div class="w-50 border-left p-1 text-muted text-center">
-            <h6 class="mainTextDark">
-              Compare Used Properties By Schema (If Specified)
-            </h6>
-            <small class="d-block"
-              >Only properties used as specified in validation</small
-            >
-            <small v-if="!compareUsedAvailable" class="text-danger d-block"
-              >Not available: One or more of these items do no specify used
-              properties. ( <span class="badge badge-success">V</span> )</small
-            >
-            <small v-else class="d-block"
-              >(embedded JSON-schema validation)</small
-            >
-            <button
-              :disabled="!compareUsedAvailable"
-              @click="compareUsed()"
-              class="btn mainBackDark text-light m-auto"
-            >
-              <font-awesome-icon icon="fas fa-tasks" /> Compare Used
-            </button>
+          <div>
+            <h5 class="text-center">Compare Classes</h5>
           </div>
-        </div>
-        <p v-else class="text-center text-muted alert alert-light p-2 mt-2">
-          <font-awesome-icon
-            icon="fas fa-exclamation-circle"
-            class="text-danger"
-          />
-          Please select at least 2 items to compare. <br />Select any items to
-          compare ALL properties or items with validation available (
-          <small class="badge badge-success">V</small> ) to compare USED
-          properties only.
-        </p>
-        <div>
-          <small class="text-muted">
-            <b v-text="results.length"></b> properties were compared
-          </small>
-        </div>
-        <div id="example-table"></div>
-        <div
-          v-if="compareItems.length > 1"
-          class="p-1 alert-secondary text-center"
-        >
-          <a id="downloadCSV" href="#" class="text-muted">
-            <small
-              ><font-awesome-icon icon="fas fa-file-download" /> Download
-              CSV</small
-            >
-          </a>
+          <div
+            class="d-flex justify-content-center p-2"
+            v-if="compareItems.length > 1"
+          >
+            <div class="w-50 p-1 text-left">
+              <h6>Compare All Properties (Extended and Inherited)</h6>
+              <small class="d-block">
+                (🟧 Inherited from Schema.org, 🟪 Extended Definition)</small
+              >
+              <button
+                @click="compareAll()"
+                class="btn text-light mt-2"
+                :class="comparing == 'used' ? 'themeButton' : 'btn-success'"
+              >
+                <font-awesome-icon icon="fas fa-list-ul" /> Compare All
+              </button>
+            </div>
+            <div class="w-50 p-1 text-left">
+              <h6>Compare Validation Properties</h6>
+              <small class="d-block"
+                >(🔴 Required, 🟡 Recommended, 🟦 Optional)</small
+              >
+              <small v-if="!compareUsedAvailable" class="text-danger d-block"
+                >Not available: One or more of these items do no specify used
+                properties. (
+                <span class="badge badge-success">V</span> )</small
+              >
+              <button
+                :disabled="!compareUsedAvailable"
+                @click="compareUsed()"
+                class="btn text-light mt-2"
+                :class="comparing == 'all' ? 'themeButton' : 'btn-success'"
+              >
+                <font-awesome-icon icon="fas fa-tasks" /> Compare Used
+              </button>
+            </div>
+          </div>
+          <p v-else class="text-center alert alert-light p-2 mt-2">
+            <font-awesome-icon
+              icon="fas fa-exclamation-circle"
+              class="text-danger"
+            />
+            Please select at least 2 items to compare. <br />Select any items to
+            compare ALL properties or items with validation available (
+            <small class="badge badge-success">V</small> ) to compare USED
+            properties only.
+          </p>
+          <div class="text-center">
+            <small>
+              <b v-text="results.length"></b> properties were compared
+            </small>
+          </div>
+          <div id="example-table"></div>
+          <div
+            v-if="compareItems.length > 1"
+            class="p-1 alert-secondary text-center"
+          >
+            <a id="downloadCSV" href="#" class="text-muted">
+              <small
+                ><font-awesome-icon icon="fas fa-file-download" /> Download
+                CSV</small
+              >
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -406,6 +405,7 @@ import Mark from "mark.js";
 import axios from "axios";
 import { mapGetters } from "vuex";
 import SchemaRegistryItem from "~~/components/SchemaRegistryItem.vue";
+import CompareClasses from "~~/components/CompareClasses.vue";
 
 export default {
   name: "SchemaRegistry",
@@ -533,6 +533,7 @@ export default {
       pageLimit: 20,
       startCapLimitReached: true,
       endCapLimitReached: false,
+      comparing: "all",
     };
   },
   watch: {
@@ -754,9 +755,11 @@ export default {
       this.sort = e.target.value;
     },
     compareAll() {
+      this.comparing = "all";
       this.$store.commit("compareAll");
     },
     compareUsed() {
+      this.comparing = "used";
       this.$store.commit("compareUsed");
     },
     resetItems() {

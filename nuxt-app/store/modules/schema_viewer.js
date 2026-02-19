@@ -5,7 +5,7 @@ export const schema_viewer = {
     userSchemaProps: Array,
     queryContent: Object,
     showAll: true,
-    userSchemaData: null
+    userSchemaData: null,
   },
   strict: true,
   mutations: {
@@ -40,7 +40,7 @@ export const schema_viewer = {
     },
     SetUserSchemaClasses(state, payload) {
       state.userSchemaData = payload.value;
-      console.log('saved userSchemaData ...', state.userSchemaData)
+      console.log("saved userSchemaData ...", state.userSchemaData);
     },
   },
   getters: {

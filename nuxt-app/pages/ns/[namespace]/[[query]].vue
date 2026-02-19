@@ -784,11 +784,11 @@ export default {
             throw err;
           });
       } else if (!namespace) {
-        this.userSchema = this.userSchemaData
+        this.userSchema = this.userSchemaData;
         this.userSchemaURL = localStorage.getItem("user-schema-url");
 
         var payload = {};
-        payload["schema"] = this.userSchemaData
+        payload["schema"] = this.userSchemaData;
 
         if (this.userSchemaData !== null) {
           // console.log('LS loaded')
