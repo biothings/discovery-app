@@ -138,7 +138,7 @@ export default {
     },
     handleGoodSchema(data) {
       let self = this;
-      self.$store.commit("SetUserSchemaClasses", {value: data});
+      self.$store.commit("SetUserSchemaClasses", { value: data });
       localStorage.setItem("user-schema-url", self.input);
       if (data.hits.length) {
         if (data.hits[0].hasOwnProperty("namespace")) {
