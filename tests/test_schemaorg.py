@@ -395,35 +395,6 @@ class TestMonthlySchemaOrgUpdate:
         # Version should remain unchanged (update was aborted)
         assert schemas.get_stored_schema_org_version() == "23.9"
 
-    def test_monthly_update_logs_error_type(self, ensure_test_data, caplog):
-        """Test that monthly update logs the specific error type"""
-
-        # Set an old version to trigger the update path
-        save_schema_index_meta({"schema_org_version": "23.0"})
-
-        with caplog.at_level(logging.ERROR):
-            with patch('discovery.utils.update._add_schema_class') as mock_add:
-                mock_add.side_effect = RegistryError("Test error message")
-                monthly_schemaorg_update()
-
-        # Verify error type is logged
-        assert any("Error type: RegistryError" in record.message for record in caplog.records)
-        assert any("Error message: Test error message" in record.message for record in caplog.records)
-
-    def test_monthly_update_logs_subclass_error_type(self, ensure_test_data, caplog):
-        """Test that monthly update distinguishes between RegistryError subclasses"""
-
-        # Set an old version to trigger the update path
-        save_schema_index_meta({"schema_org_version": "23.0"})
-
-        with caplog.at_level(logging.ERROR):
-            with patch('discovery.utils.update._add_schema_class') as mock_add:
-                mock_add.side_effect = NoEntityError("Entity not found")
-                monthly_schemaorg_update()
-
-        # Verify specific subclass type is logged (not just RegistryError)
-        assert any("Error type: NoEntityError" in record.message for record in caplog.records)
-
     def test_monthly_update_logs_status_code_when_present(self, ensure_test_data, caplog):
         """Test that monthly update logs status_code if present on error"""
 
@@ -440,21 +411,22 @@ class TestMonthlySchemaOrgUpdate:
         # Verify status code is logged
         assert any("Status code: 404" in record.message for record in caplog.records)
 
-    def test_monthly_update_logs_traceback_at_debug(self, caplog):
-        """Test that monthly update logs full traceback at DEBUG level"""
+    def test_monthly_update_exception_includes_traceback(self, caplog):
+        """Test that logger.exception() captures full traceback at ERROR level"""
 
         # Set an old version to trigger the update path
         save_schema_index_meta({"schema_org_version": "23.0"})
 
-        with caplog.at_level(logging.DEBUG):
+        with caplog.at_level(logging.ERROR):
             with patch('discovery.utils.update._add_schema_class') as mock_add:
                 mock_add.side_effect = RegistryError("Traceback test error")
                 monthly_schemaorg_update()
 
-        # Verify traceback is logged at DEBUG level
-        debug_records = [r for r in caplog.records if r.levelno == logging.DEBUG]
-        assert any("Full traceback:" in record.message for record in debug_records)
-        assert any("RegistryError" in record.message for record in debug_records)
+        # logger.exception() logs at ERROR level with exc_info attached
+        error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
+        exception_records = [r for r in error_records if r.exc_info is not None]
+        assert len(exception_records) > 0, "logger.exception() should attach exc_info"
+        assert exception_records[0].exc_info[0] is RegistryError
 
     def test_monthly_update_handles_attribute_error(self, caplog):
         """Test that monthly update handles AttributeError from schema class validation"""
@@ -468,9 +440,12 @@ class TestMonthlySchemaOrgUpdate:
                 mock_add.side_effect = AttributeError("'NoneType' object has no attribute 'name'")
                 monthly_schemaorg_update()
 
-        # Verify error type is logged
-        assert any("Error type: AttributeError" in record.message for record in caplog.records)
-        assert any("invalid attributes" in record.message for record in caplog.records)
+        # Verify exception was caught and logged via logger.exception()
+        error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
+        assert any("Validation failed" in r.message for r in error_records)
+        exception_records = [r for r in error_records if r.exc_info is not None]
+        assert len(exception_records) > 0, "logger.exception() should attach exc_info"
+        assert exception_records[0].exc_info[0] is AttributeError
 
         # Version should remain unchanged (update was aborted)
         assert schemas.get_stored_schema_org_version() == "23.0"
