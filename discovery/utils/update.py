@@ -1,6 +1,5 @@
 import logging
 import time
-import traceback
 
 from discovery.registry import schemas
 from discovery.registry.schemas import _add_schema_class
@@ -73,22 +72,10 @@ def monthly_schemaorg_update():
         try:
             class_count = _add_schema_class(None, "schema", dryrun=True, schema_org_version=latest_version)
             logger.info(f"Validation passed - {class_count} schema classes validated")
-        except RegistryError as registry_error:
-            logger.error(f"Validation failed for schema.org version {latest_version}")
-            logger.error(f"Error type: {type(registry_error).__name__}")
-            logger.error(f"Error message: {registry_error}")
-            if hasattr(registry_error, 'status_code'):
-                logger.error(f"Status code: {registry_error.status_code}")
-            logger.debug(f"Full traceback:\n{traceback.format_exc()}")
-            logger.error("DDE schema.org will not be updated")
-            return
-        except AttributeError as attr_error:
-            # Raised from _add_schema_class when cls.full_clean() fails during validation
-            logger.error(f"Schema class validation failed for schema.org version {latest_version}")
-            logger.error(f"Error type: {type(attr_error).__name__}")
-            logger.error(f"Error message: {attr_error}")
-            logger.debug(f"Full traceback:\n{traceback.format_exc()}")
-            logger.error("DDE schema.org will not be updated - schema class has invalid attributes")
+        except (AttributeError, RegistryError) as exc:
+            if hasattr(exc, 'status_code'):
+                logger.error(f"Status code: {exc.status_code}")
+            logger.exception(f"Validation failed for schema.org version {latest_version}. DDE schema.org will not be updated.")
             return
 
         # Validation passed - perform the actual update
