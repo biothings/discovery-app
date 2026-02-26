@@ -2,10 +2,12 @@ import logging
 import time
 
 from discovery.registry import schemas
+from discovery.registry.schemas import _add_schema_class
 from discovery.model import Schema
+from discovery.utils.adapters import get_latest_schema_org_version
+from discovery.registry.common import RegistryError
 
-logging.basicConfig(level="INFO")
-logger = logging.getLogger("daily-schema-update")
+logger = logging.getLogger(__name__)
 
 def schema_update(namespace):
     """ Update registered schemas by namespace.
@@ -37,3 +39,55 @@ def daily_schema_update():
             schema_count += 1
     total_time = time.process_time() - start
     logger.info(f'update process complete, total processing time was {total_time} seconds for {schema_count} schemas')
+
+
+def monthly_schemaorg_update():
+    """ Monthly schema.org schema update.
+    Validates the newer schema.org schema using biothings_schema package
+    before any update. If validation fails, DDE schema.org is not updated.
+
+    To run manually:
+        from discovery.utils.update import monthly_schemaorg_update
+        monthly_schemaorg_update()
+    """
+    logger.info("Starting monthly schema.org update process")
+    start = time.process_time()
+
+
+    # Get current schema.org version stored in DDE
+    current_version = schemas.get_stored_schema_org_version()
+    logger.info(f"Current schema.org version in DDE: {current_version}")
+
+    # Get the latest available schema.org version from biothings_schema
+    latest_version = get_latest_schema_org_version()
+    logger.info(f"Latest schema.org version available: {latest_version}")
+
+    # Check if update is needed
+    if current_version == latest_version:
+        logger.info("Schema.org is already at the latest version. No update needed.")
+        return
+
+    # Validate by performing a dry-run before actual update
+    logger.info(f"Validating schema.org version {latest_version} (dry-run)...")
+    try:
+        class_count = _add_schema_class(None, "schema", dryrun=True, schema_org_version=latest_version)
+        logger.info(f"Validation passed - {class_count} schema classes validated")
+    except (AttributeError, RegistryError) as exc:
+        if hasattr(exc, 'status_code'):
+            logger.error(f"Status code: {exc.status_code}")
+        logger.exception(f"Validation failed for schema.org version {latest_version}. DDE schema.org will not be updated.")
+        return
+
+    # Validation passed - perform the actual update
+    logger.info(f"Updating schema.org from {current_version} to {latest_version}")
+    schemas.add_core(update=True, schema_org_version=latest_version)
+
+    # Verify the update
+    new_version = schemas.get_stored_schema_org_version()
+    if new_version == latest_version:
+        logger.info(f"Update verified - schema.org is now at version {new_version}")
+    else:
+        logger.warning(f"Version mismatch: expected {latest_version}, got {new_version}")
+
+    total_time = time.process_time() - start
+    logger.info(f'Monthly schema.org update complete, processing time: {total_time:.2f} seconds')

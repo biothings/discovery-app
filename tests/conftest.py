@@ -58,9 +58,24 @@ def index_exists_and_has_docs(es: Elasticsearch, idx: str) -> bool:
 def ensure_test_data(es_client):
     """Prepare ES indices once per test session."""
     # Always restore to ensure clean state - don't skip based on existing data
-    print("⚠️  Restoring test data for clean state")
+    print("Restoring test data for clean state")
     restore_from_file(BACKUP_FILE)
     es_client.indices.refresh(index=",".join(INDEX_NAMES))
+
+
+@pytest.fixture(scope="session")
+def ensure_schema_org(ensure_test_data, es_client):
+    """Ensure schema.org core is loaded once per test session.
+
+    This is separate from ensure_test_data because loading schema.org
+    is slow (fetches and processes thousands of classes from the network).
+    """
+    from discovery.registry import schemas
+    if not schemas.exists("schema"):
+        print("Loading schema.org core (this may take a few minutes)...")
+        schemas.add_core()
+        es_client.indices.refresh(index=",".join(INDEX_NAMES))
+        print("Schema.org core loaded")
 
 # conftest.py (continued)
 
