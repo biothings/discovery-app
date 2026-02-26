@@ -15,7 +15,7 @@ from discovery.handlers import HANDLERS
 from discovery.notify import update_n3c_routine
 from discovery.utils.backup import daily_backup_routine
 from discovery.utils.coverage import daily_coverage_update
-from discovery.utils.update import daily_schema_update
+from discovery.utils.update import daily_schema_update, monthly_schemaorg_update
 
 define("prod", default=False, help="Run in production mode", type=bool)
 define("proxy_url", default="http://localhost:3000/", help="localhost port serving frontend")
@@ -102,8 +102,15 @@ def run_routine():
     thread.start()
 
 
+def run_monthly_schemaorg_update():
+    """Run the monthly schema.org update routine in a separate thread."""
+    thread = Thread(target=monthly_schemaorg_update, daemon=True)
+    thread.start()
+
+
 if __name__ == "__main__":
     options.parse_command_line()
     if not options.debug and options.prod:
         crontab("0 0 * * *", func=run_routine, start=True)  # run daily at mid-night
+        crontab("0 2 1 * *", func=run_monthly_schemaorg_update, start=True)  # run monthly on the 1st at 2 AM
     main(HANDLERS, use_curl=True)

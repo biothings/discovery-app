@@ -5,11 +5,15 @@ This tests that SchemaAdapter correctly retrieves and sets DDE's stored schema.o
 onto the base schema loader, ensuring version consistency during validation.
 """
 from unittest.mock import patch
+import pytest
+import logging
+
 
 from discovery.registry import schemas
-from discovery.registry.common import NoEntityError
+from discovery.registry.common import NoEntityError, RegistryError
 from discovery.utils.indices import save_schema_index_meta, refresh
-from discovery.utils.adapters import DDEBaseSchemaLoader
+from discovery.utils.adapters import DDEBaseSchemaLoader, SchemaAdapter, get_latest_schema_org_version
+from discovery.utils.update import monthly_schemaorg_update
 
 from biothings_schema.dataload import BaseSchemaLoader
 
@@ -28,7 +32,6 @@ class TestDDEBaseSchemaLoader:
 
     def test_load_dde_schemas_method(self):
         """Test that load_dde_schemas method works"""
-        from discovery.utils.adapters import DDEBaseSchemaLoader
         loader = DDEBaseSchemaLoader(verbose=False)
 
         # Mock the schema data
@@ -55,7 +58,6 @@ class TestDDEBaseSchemaLoader:
 
     def test_schema_adapter_accepts_version_parameter(self):
         """Test that SchemaAdapter accepts schema_org_version as a parameter"""
-        from discovery.utils.adapters import SchemaAdapter
 
         # Create a simple test schema
         test_schema = {
@@ -79,7 +81,6 @@ class TestDDEBaseSchemaLoader:
         Test that SchemaAdapter passes schema_org_version parameter to the underlying
         SchemaParser, which then sets it on the base_schema_loader.
         """
-        from discovery.utils.adapters import SchemaAdapter, DDEBaseSchemaLoader
 
         # Create a simple test schema
         test_schema = {
@@ -105,7 +106,6 @@ class TestDDEBaseSchemaLoader:
         Test that SchemaAdapter correctly passes schema_org_version parameter
         to ensure biothings_schema uses the specified version for validation.
         """
-        from discovery.utils.adapters import SchemaAdapter, DDEBaseSchemaLoader
 
         # Create a test schema that uses schema.org classes
         test_schema = {
@@ -156,7 +156,7 @@ class TestSchemaOrgVersionIntegration:
         save_schema_index_meta({"schema_org_version": test_version})
 
         # Verify it was stored
-        stored_version = schemas.get_schema_org_version()
+        stored_version = schemas.get_stored_schema_org_version()
         assert stored_version == test_version
 
         # Now add a test schema - it should use this version internally
@@ -174,11 +174,12 @@ class TestSchemaOrgVersionIntegration:
             count = schemas.add(namespace=test_namespace, url=test_url, user="test@example.com")
             assert count > 0, f"Schema should have classes, got count={count}"
 
+            refresh()
             # Verify schema was added
             assert schemas.exists(test_namespace)
 
             # Verify the version hasn't changed
-            assert schemas.get_schema_org_version() == test_version
+            assert schemas.get_stored_schema_org_version() == test_version
 
         finally:
             # Clean up
@@ -189,10 +190,9 @@ class TestSchemaOrgVersionIntegration:
 
     def test_version_stored_after_restore(self, ensure_test_data):
         """Test that schema.org version is stored after restore_from_file"""
-        from discovery.registry.schemas import get_schema_org_version
 
         # After restore (via ensure_test_data fixture), version should be stored
-        version = get_schema_org_version()
+        version = get_latest_schema_org_version()
         assert version is not None, "schema.org version should be stored after restore"
         assert isinstance(version, str), "version should be a string"
         assert "." in version, "version should follow format like '29.3'"
@@ -214,15 +214,13 @@ class TestSchemaOrgVersionIntegration:
         save_schema_index_meta({"schema_org_version": version})
 
         # Should now match stored version
-        stored_version = schemas.get_schema_org_version()
+        stored_version = schemas.get_stored_schema_org_version()
         assert version == stored_version
 
     def test_schema_adapter_with_stored_version(self, ensure_test_data):
         """Test that SchemaAdapter works when passed the stored schema.org version"""
-        from discovery.utils.adapters import SchemaAdapter
-        from discovery.registry.schemas import get_schema_org_version
 
-        stored_version = get_schema_org_version()
+        stored_version = get_latest_schema_org_version()
         assert stored_version is not None
 
         # Create a test schema with all required fields
@@ -251,7 +249,6 @@ class TestSchemaOrgVersionIntegration:
 
     def test_add_schema_with_schema_org_inheritance(self, ensure_test_data):
         """Test adding a schema that inherits from schema.org classes"""
-        from discovery.registry import schemas
 
         # Ensure schema.org core is loaded
         if not schemas.exists("schema"):
@@ -287,9 +284,168 @@ class TestSchemaOrgVersionIntegration:
         """Test that schema.org version persists across schema operations"""
 
         # Get initial version
-        initial_version = schemas.get_schema_org_version()
+        initial_version = schemas.get_stored_schema_org_version()
         assert initial_version is not None
 
         # Version should still be the same
-        current_version = schemas.get_schema_org_version()
+        current_version = schemas.get_stored_schema_org_version()
         assert current_version == initial_version
+
+    def test_add_core_with_explicit_version(self, ensure_test_data):
+        """Test add_core with an explicit schema_org_version argument.
+
+        This ensures the code path where schema_org_version is provided
+        (not None) works correctly without a NameError.
+        """
+        # Use a known valid version
+        explicit_version = "29.0"
+
+        # Call add_core with explicit version and update=True to force re-add
+        schemas.add_core(update=True, schema_org_version=explicit_version)
+
+        # refresh()
+
+        # Verify schema.org was added
+        assert schemas.exists("schema")
+
+        # Verify classes were loaded
+        schema_classes = list(schemas.get_classes("schema"))
+        assert len(schema_classes) > 0, "schema.org should have classes"
+
+        # Verify schema:Thing exists (a fundamental schema.org class)
+        thing_class = schemas.get_class("schema", "schema:Thing", raise_on_error=False)
+        assert thing_class is not None, "schema:Thing should exist"
+
+
+@pytest.mark.monthly
+class TestMonthlySchemaOrgUpdate:
+    """Tests for the monthly schema.org update functionality"""
+
+    def test_dryrun_validation(self, ensure_schema_org):
+        """Test that dry-run validation works without modifying data"""
+
+        # Get current class count (schema.org loaded via fixture)
+        initial_classes = list(schemas.get_classes("schema"))
+        initial_count = len(initial_classes)
+
+        # Run dry-run validation
+        class_count = schemas._add_schema_class(None, "schema", dryrun=True)
+
+        # Verify dry-run returns class count
+        assert class_count > 0, "Dry-run should return number of validated classes"
+
+        # Verify no classes were modified (count should be same)
+        final_classes = list(schemas.get_classes("schema"))
+        assert len(final_classes) == initial_count, "Dry-run should not modify existing classes"
+
+    def test_monthly_update_skips_when_current(self, ensure_test_data):
+        """Test that monthly update skips when already at latest version"""
+
+        # Set stored version to match latest available
+        latest_version = get_latest_schema_org_version()
+        save_schema_index_meta({"schema_org_version": latest_version})
+
+        # Verify versions match
+        stored_version = schemas.get_stored_schema_org_version()
+        assert stored_version == latest_version
+
+        # Run monthly update - should skip since versions match
+        monthly_schemaorg_update()
+
+        # Version should remain unchanged
+        assert schemas.get_stored_schema_org_version() == latest_version
+
+    def test_monthly_update_validates_before_update(self, ensure_test_data):
+        """Test that monthly update performs validation before updating"""
+
+        # Store a fake old version to trigger update attempt
+        save_schema_index_meta({"schema_org_version": "23.9"})
+
+        # Get initial state
+        initial_version = schemas.get_stored_schema_org_version()
+        assert initial_version == "23.9"
+
+        # Run monthly update
+        monthly_schemaorg_update()
+
+        # Version should be updated to latest
+        new_version = schemas.get_stored_schema_org_version()
+        latest_version = get_latest_schema_org_version()
+        assert new_version == latest_version, f"Expected {latest_version}, got {new_version}"
+
+    def test_monthly_update_handles_registry_error(self, ensure_test_data):
+        """Test that monthly update handles RegistryError during validation"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "23.9"})
+
+        # Mock _add_schema_class to raise RegistryError during dry-run
+        with patch('discovery.utils.update._add_schema_class') as mock_add:
+            mock_add.side_effect = RegistryError("Validation failed: invalid schema")
+
+            # Should not raise - error should be caught and logged
+            monthly_schemaorg_update()
+
+            # Verify dry-run was attempted
+            mock_add.assert_called_once()
+            # Verify dryrun=True was passed
+            call_kwargs = mock_add.call_args[1]
+            assert call_kwargs.get('dryrun') is True
+
+        # Version should remain unchanged (update was aborted)
+        assert schemas.get_stored_schema_org_version() == "23.9"
+
+    def test_monthly_update_logs_status_code_when_present(self, ensure_test_data, caplog):
+        """Test that monthly update logs status_code if present on error"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "23.0"})
+
+        with caplog.at_level(logging.ERROR):
+            with patch('discovery.utils.update._add_schema_class') as mock_add:
+                error = RegistryError("HTTP error occurred")
+                error.status_code = 404
+                mock_add.side_effect = error
+                monthly_schemaorg_update()
+
+        # Verify status code is logged
+        assert any("Status code: 404" in record.message for record in caplog.records)
+
+    def test_monthly_update_exception_includes_traceback(self, caplog):
+        """Test that logger.exception() captures full traceback at ERROR level"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "23.0"})
+
+        with caplog.at_level(logging.ERROR):
+            with patch('discovery.utils.update._add_schema_class') as mock_add:
+                mock_add.side_effect = RegistryError("Traceback test error")
+                monthly_schemaorg_update()
+
+        # logger.exception() logs at ERROR level with exc_info attached
+        error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
+        exception_records = [r for r in error_records if r.exc_info is not None]
+        assert len(exception_records) > 0, "logger.exception() should attach exc_info"
+        assert exception_records[0].exc_info[0] is RegistryError
+
+    def test_monthly_update_handles_attribute_error(self, caplog):
+        """Test that monthly update handles AttributeError from schema class validation"""
+
+        # Set an old version to trigger the update path
+        save_schema_index_meta({"schema_org_version": "23.0"})
+
+        with caplog.at_level(logging.ERROR):
+            with patch('discovery.utils.update._add_schema_class') as mock_add:
+                # AttributeError is raised when cls.full_clean() fails in _add_schema_class
+                mock_add.side_effect = AttributeError("'NoneType' object has no attribute 'name'")
+                monthly_schemaorg_update()
+
+        # Verify exception was caught and logged via logger.exception()
+        error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
+        assert any("Validation failed" in r.message for r in error_records)
+        exception_records = [r for r in error_records if r.exc_info is not None]
+        assert len(exception_records) > 0, "logger.exception() should attach exc_info"
+        assert exception_records[0].exc_info[0] is AttributeError
+
+        # Version should remain unchanged (update was aborted)
+        assert schemas.get_stored_schema_org_version() == "23.0"
