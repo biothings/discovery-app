@@ -87,8 +87,8 @@
 <script>
 import axios from "axios";
 
-import DefinitionBox from "~~/components/JS_DefinitionBox.vue";
-import JS_PropertyBox from "~~/components/JS_PropertyBox.vue";
+import DefinitionBox from "~/components/JS_DefinitionBox.vue";
+import JS_PropertyBox from "~/components/JS_PropertyBox.vue";
 
 export default {
   name: "JSONSchemaViewer",
