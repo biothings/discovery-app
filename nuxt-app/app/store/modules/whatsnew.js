@@ -1,5 +1,5 @@
-import newFeature from "~~/assets/img/new-feature-01.svg";
-import fix from "~~/assets/img/fix-01.svg";
+import newFeature from "~/assets/img/new-feature-01.svg";
+import fix from "~/assets/img/fix-01.svg";
 
 export const news = {
   state: () => ({

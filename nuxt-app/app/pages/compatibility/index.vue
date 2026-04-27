@@ -124,8 +124,8 @@
 <script>
 import axios from "axios";
 
-import CompatibilityResult from "~~/components/CompatibilityResult.vue";
-import Flowchart from "~~/components/Flowchart.vue";
+import CompatibilityResult from "~/components/CompatibilityResult.vue";
+import Flowchart from "~/components/Flowchart.vue";
 
 export default {
   name: "Compatibility",
