@@ -457,7 +457,7 @@
 
 <script>
 import tippy from "tippy.js";
-import Vocabulary from "~~/components/guide/Vocabulary.vue";
+import Vocabulary from "~/components/guide/Vocabulary.vue";
 import Notify from "simple-notify";
 
 export default {

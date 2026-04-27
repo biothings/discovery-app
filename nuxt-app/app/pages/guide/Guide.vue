@@ -546,9 +546,9 @@ import moment from "moment";
 import popSound from "@/assets/img/pop.wav";
 import metaPic from "@/assets/img/metadata.png";
 
-import Property from "~~/components/guide/Property.vue";
-import Category from "~~/components/guide/Category.vue";
-import JSONItem from "~~/components/guide/JSONItem.vue";
+import Property from "~/components/guide/Property.vue";
+import Category from "~/components/guide/Category.vue";
+import JSONItem from "~/components/guide/JSONItem.vue";
 
 export default {
   name: "Guide",

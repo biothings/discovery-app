@@ -270,7 +270,7 @@
 </template>
 
 <script>
-import PresetBox from "~~/components/PresetBox.vue";
+import PresetBox from "~/components/PresetBox.vue";
 
 export default {
   name: "SchemaPlayground",

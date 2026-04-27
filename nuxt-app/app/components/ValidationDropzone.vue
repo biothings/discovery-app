@@ -48,8 +48,8 @@
 
 <script>
 import { mapGetters } from "vuex";
-import EditDescription from "~~/components/EditDescription.vue";
-import CardinalitySelector from "~~/components/CardinalitySelector.vue";
+import EditDescription from "~/components/EditDescription.vue";
+import CardinalitySelector from "~/components/CardinalitySelector.vue";
 
 import cubePlus from "@/assets/img/cubeplus.svg";
 

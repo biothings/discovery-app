@@ -61,13 +61,13 @@
 
 <script>
 import moment from "moment";
-import dde from "~~/assets/img/dde-logo-o.svg";
-import n3cLogo from "~~/assets/img/N3Co.png";
-import niaidIcon from "~~/assets/img/niaid/icon.svg";
-import outbreakIcon from "~~/assets/img/icon-01.svg";
-import nde from "~~/assets/img/niaid/nde.svg";
-import creidIcon from "~~/assets/img/creid/icon.svg";
-import revampp from "~~/assets/img/revampp.png";
+import dde from "~/assets/img/dde-logo-o.svg";
+import n3cLogo from "~/assets/img/N3Co.png";
+import niaidIcon from "~/assets/img/niaid/icon.svg";
+import outbreakIcon from "~/assets/img/icon-01.svg";
+import nde from "~/assets/img/niaid/nde.svg";
+import creidIcon from "~/assets/img/creid/icon.svg";
+import revampp from "~/assets/img/revampp.png";
 
 export default {
   name: "ResourceRegistryItem",
