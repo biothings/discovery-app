@@ -473,10 +473,10 @@ import Notify from "simple-notify";
 import editorImg from "@/assets/img/editor.png";
 import dropSound from "@/assets/img/tinybutton.wav";
 
-import NGXGraph from "~~/components/NGXGraph.vue";
-import ValidationDropzone from "~~/components/ValidationDropzone.vue";
-import GitHubSaver from "~~/components/GitHubSaver.vue";
-import EditorClassBox from "~~/components/EditorClassBox.vue";
+import NGXGraph from "~/components/NGXGraph.vue";
+import ValidationDropzone from "~/components/ValidationDropzone.vue";
+import GitHubSaver from "~/components/GitHubSaver.vue";
+import EditorClassBox from "~/components/EditorClassBox.vue";
 
 export default {
   name: "SchemaEditor",

@@ -318,17 +318,17 @@ import Mark from "mark.js";
 import Papa from "papaparse";
 import Notify from "simple-notify";
 
-import dde from "~~/assets/img/dde-logo-o.svg";
-import n3cLogo from "~~/assets/img/N3Co.png";
-import niaidIcon from "~~/assets/img/niaid/icon.svg";
-import creidIcon from "~~/assets/img/creid/icon.svg";
-import outbreakIcon from "~~/assets/img/icon-01.svg";
-import nde from "~~/assets/img/niaid/nde.svg";
-import revampp from "~~/assets/img/revampp.png";
+import dde from "~/assets/img/dde-logo-o.svg";
+import n3cLogo from "~/assets/img/N3Co.png";
+import niaidIcon from "~/assets/img/niaid/icon.svg";
+import creidIcon from "~/assets/img/creid/icon.svg";
+import outbreakIcon from "~/assets/img/icon-01.svg";
+import nde from "~/assets/img/niaid/nde.svg";
+import revampp from "~/assets/img/revampp.png";
 
 import { mapGetters } from "vuex";
 
-import ResourceRegistryItem from "~~/components/ResourceRegistryItem.vue";
+import ResourceRegistryItem from "~/components/ResourceRegistryItem.vue";
 
 export default {
   name: "ResourceRegistry",

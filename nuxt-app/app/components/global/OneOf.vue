@@ -8,7 +8,7 @@
       v-if="!isChild"
       @click="expand = !expand"
       :class="[expand ? 'btn-primary' : 'btn-dark']"
-      class="btn btn-sm w-100 rounded-0"
+      class="btn btn-sm d-block w-100 rounded-0"
     >
       <b v-text="optionName"></b>
       <small
@@ -29,8 +29,12 @@
         ></small>
       </div>
       <small
-        class="badge badge-pill badge-dark text-warning m-1"
-        v-text="option.type == 'string' ? 'string' : ''"
+        class="badge badge-pill badge-info m-2"
+        v-text="option?.type"
+      ></small>
+      <small
+        class="badge badge-pill badge-secondary m-2"
+        v-text="option?.format"
       ></small>
       <!-- 🌈 VOCAB 🌈 -->
       <div v-if="option && option.vocabulary" class="text-center p-1">
@@ -79,21 +83,20 @@
       <!-- 🌈 LIST OF 🌈 -->
       <div v-if="option.items" class="bg-light p-1">
         <b class="text-muted font-weight-bold">LIST OF:</b>
-        <OneOf :name="name" :option="option.items" isChild="true"></OneOf>
+        <OneOf :name="name" :option="option.items" :isChild="true"></OneOf>
       </div>
     </template>
   </div>
 </template>
 
 <script>
-import tippy from "tippy.js";
 import axios from "axios";
-
-import Enumeration from "~~/components/Enumeration.vue";
-import ObjectBox from "~~/components/ObjectBox.vue";
+import tippy from "tippy.js";
+import Enumeration from "~/components/Enumeration.vue";
+import ObjectBox from "~/components/ObjectBox.vue";
 
 export default {
-  name: "AnyOf",
+  name: "OneOF",
   components: {
     Enumeration,
     ObjectBox,
@@ -260,13 +263,17 @@ export default {
         self.option.hasOwnProperty("type")
       ) {
         return self.option["@type"] || self.option["type"];
+      } else if (self.option.hasOwnProperty("enum")) {
+        return "enum item";
       } else {
-        return "Option";
+        return "item";
       }
     },
   },
   mounted: function () {
     var self = this;
+    // console.log(self.name, self.option)
+
     if (self.isChild) {
       self.style = {
         "border-color": "#e1e1e1",
