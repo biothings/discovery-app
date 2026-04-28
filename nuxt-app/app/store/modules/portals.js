@@ -1,15 +1,15 @@
-import cd2h from "~~/assets/img/cd2h-logo-white.png";
-import dde from "~~/assets/img/dde-logo-o.svg";
-import n3c from "~~/assets/img/N3Co.png";
-import n3cLogo from "~~/assets/img/N3Cwhite.png";
-import outbreak_logo from "~~/assets/img/outbreak/outbreak_logo.svg";
-import niaidIcon from "~~/assets/img/niaid/icon.svg";
-import creiddIcon from "~~/assets/img/creid/icon.svg";
-import nde from "~~/assets/img/niaid/nde.svg";
-import move from "~~/assets/img/move.png";
-import revampp_color from "~~/assets/img/revampp-color.png";
-import revampp_white from "~~/assets/img/revampp-white.png";
-import revampp from "~~/assets/img/revampp.png";
+import cd2h from "~/assets/img/cd2h-logo-white.png";
+import dde from "~/assets/img/dde-logo-o.svg";
+import n3c from "~/assets/img/N3Co.png";
+import n3cLogo from "~/assets/img/N3Cwhite.png";
+import outbreak_logo from "~/assets/img/outbreak/outbreak_logo.svg";
+import niaidIcon from "~/assets/img/niaid/icon.svg";
+import creiddIcon from "~/assets/img/creid/icon.svg";
+import nde from "~/assets/img/niaid/nde.svg";
+import move from "~/assets/img/move.png";
+import revampp_color from "~/assets/img/revampp-color.png";
+import revampp_white from "~/assets/img/revampp-white.png";
+import revampp from "~/assets/img/revampp.png";
 
 export const portals = {
   state: () => ({

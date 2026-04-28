@@ -563,9 +563,9 @@
 import tippy from "tippy.js";
 import { mapGetters } from "vuex";
 import axios from "axios";
-import QueryBox from "~~/components/QueryBox.vue";
+import QueryBox from "~/components/QueryBox.vue";
 import moment from "moment";
-import ExtendClassBtn from "~~/components/ExtendClassBtn.vue";
+import ExtendClassBtn from "~/components/ExtendClassBtn.vue";
 
 import "@/assets/js/networkx.js";
 

@@ -404,8 +404,8 @@
 import Mark from "mark.js";
 import axios from "axios";
 import { mapGetters } from "vuex";
-import SchemaRegistryItem from "~~/components/SchemaRegistryItem.vue";
-import CompareClasses from "~~/components/CompareClasses.vue";
+import SchemaRegistryItem from "~/components/SchemaRegistryItem.vue";
+import CompareClasses from "~/components/CompareClasses.vue";
 
 export default {
   name: "SchemaRegistry",
