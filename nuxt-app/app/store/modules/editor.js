@@ -435,7 +435,7 @@ export const editor = {
         }
       }
     },
-    formPreview(state) {
+    formPreview(state, { definition_options } = {}) {
       try {
         state.previousPreviewProps =
           state.finalschema["@graph"][0]["$validation"]["properties"];
@@ -544,7 +544,7 @@ export const editor = {
               if (state.schema[i].properties[y].selected) {
                 let propValue = {};
                 let prop_label = state.schema[i].properties[y]["label"];
-                if (state.previousPreviewProps.hasOwnProperty(prop_label)) {
+                if (state.previousPreviewProps && state.previousPreviewProps.hasOwnProperty(prop_label)) {
                   // keep existing validation if any
                   propValue = Object.assign(
                     {},
@@ -651,14 +651,16 @@ export const editor = {
                 let defs = [...defs_found];
                 state.validation["definitions"] = {};
                 defs.forEach((def) => {
-                  state.definition_options.forEach((val) => {
-                    if (val.title == def) {
-                      // console.log('validation found',)
-                      if (Object.hasOwnProperty.call(val, "validation")) {
-                        state.validation.definitions[def] = val.validation;
+                  if(definition_options){
+                    definition_options.forEach((val) => {
+                      if (val.title == def) {
+                        // console.log('validation found',)
+                        if (Object.hasOwnProperty.call(val, "validation")) {
+                          state.validation.definitions[def] = val.validation;
+                        }
                       }
-                    }
-                  });
+                    });
+                  }
                 });
               }
               //Once done add temp validation to finalschema

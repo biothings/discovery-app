@@ -643,11 +643,11 @@ export default {
     editValidation() {
       let self = this;
       self.validationView = !self.validationView;
-      this.$store.commit("formPreview");
+      this.$store.commit("formPreview", { definition_options: this.$store.state.editor_validation.definition_options });
     },
     githubOptions() {
       // show modal
-      this.$store.commit("formPreview");
+      this.$store.commit("formPreview", { definition_options: this.$store.state.editor_validation.definition_options });
       var modal = document.getElementById("ghOptions");
       modal.style.display = "block";
       var span = document.getElementById("closeBtn");
@@ -833,7 +833,7 @@ export default {
     saveProgress() {
       let self = this;
 
-      this.$store.commit("formPreview");
+      this.$store.commit("formPreview", { definition_options: this.$store.state.editor_validation.definition_options });
       let schema = this.$store.getters.getFinalSchema;
 
       var progress = localStorage.getItem("EditorProgress");
@@ -1157,7 +1157,7 @@ export default {
     getPreview() {
       let self = this;
       if (self.prefix) {
-        this.$store.commit("formPreview");
+        this.$store.commit("formPreview", { definition_options: this.$store.state.editor_validation.definition_options });
         self.$swal.fire({
           position: "center",
           confirmButtonColor: "#43318d",
@@ -1207,7 +1207,7 @@ export default {
     downloadSchema() {
       var self = this;
       if (self.prefix) {
-        this.$store.commit("formPreview");
+        this.$store.commit("formPreview", { definition_options: this.$store.state.editor_validation.definition_options });
         self.$swal
           .fire({
             title: "Name your file",

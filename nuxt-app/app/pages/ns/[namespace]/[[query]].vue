@@ -116,7 +116,7 @@
       </div>
 
       <div
-        class="row w-100 alert alert-light m-0"
+        class="container m-auto row w-100 alert alert-light m-0"
         v-if="searchResults.length || searchResultsProps.length"
       >
         <div class="col-sm-12 col-md-6 p-4">
@@ -263,7 +263,7 @@
                         <font-awesome-icon icon="fas fa-chevron-right" />
                       </nuxt-link>
                       <p class="text-muted">
-                        <small v-html="def['description']"></small>
+                        <MarkdownParser :description="def['description']"></MarkdownParser>
                       </p>
                     </div>
                     <div v-if="namespaceRegistered">
@@ -566,6 +566,7 @@ import axios from "axios";
 import QueryBox from "~/components/QueryBox.vue";
 import moment from "moment";
 import ExtendClassBtn from "~/components/ExtendClassBtn.vue";
+import MarkdownParser from "~/components/MarkdownParser.vue";
 
 import "@/assets/js/networkx.js";
 
