@@ -387,7 +387,7 @@ onMounted(() => filterAllOptions(valSelect.value));
             <summary
               class="m-0 font-weight-bold text-dark border-bottom border-dark"
             >
-              {{ g.group.toUpperCase() }}
+              {{ g.group.startsWith("(") ? "CUSTOM DEFINITIONS" : g.group.toUpperCase() }}
               <small class="text-muted">({{ g.children.length }})</small>
             </summary>
             <template v-for="item in g.children" :key="item._id">
