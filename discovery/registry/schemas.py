@@ -338,7 +338,9 @@ def is_schema_updated(namespace, current_doc):
     """
     existing_doc = get(namespace)
     for key in current_doc:
-        if current_doc[key] != existing_doc[key]:
+        current_val = json.dumps(current_doc[key], sort_keys=True)
+        existing_val = json.dumps(existing_doc.get(key), sort_keys=True)
+        if current_val != existing_val:
             return True
     return False
 

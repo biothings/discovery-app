@@ -115,3 +115,39 @@ class TestSchemaStatus(DiscoveryTestCase):
         test_schema = ESSchemaFile.get(id='n3c')
         assert test_schema._status.refresh_status == 299
         assert test_schema._status.refresh_msg == 'new version available and update successful'
+
+    def test_update_ownership_change_299(self):
+        """
+        ✅ Success case: schema content is unchanged but the owner (username) differs.
+
+        The update should transfer ownership without altering the schema content.
+
+        Expected:
+        - _meta.username: updated to the new owner
+        - refresh_status: 299
+        - refresh_msg: 'ownership updated, no content changes'
+        """
+        success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
+
+        namespace = "ownership_test"
+        original_owner = "minions@example.com"
+        new_owner = "newowner@example.com"
+
+        with open("./tests/test_schema/mock_updated_schema.json") as f:
+            _doc = json.load(f)
+
+        # Start from a clean state and register the schema under the original owner.
+        if schemas.exists(namespace):
+            schemas.delete(namespace)
+        schemas.add(namespace, url=self.test_url, user=original_owner, doc=_doc)
+        ESSchemaFile._index.refresh()  # ensure the new doc is searchable before update
+        # is_ownership_changed should detect the differing user.
+        assert schemas.is_ownership_changed(namespace, new_owner) is True
+        assert schemas.is_ownership_changed(namespace, original_owner) is False
+
+        # Update with identical content but a new owner -> ownership transfer branch.
+        schemas.update(namespace, user=new_owner, url=self.test_url, doc=_doc)
+
+        test_schema = ESSchemaFile.get(id=namespace)
+        assert test_schema._meta.username == new_owner
+        assert test_schema._status.refresh_status == 299
