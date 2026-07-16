@@ -189,6 +189,14 @@ def add(namespace, url, user, doc=None, overwrite=False):
             file.save()
             count = _add_schema_class(doc, namespace)
             return count
+        elif is_ownership_changed(namespace, user):
+            schema = ESSchemaFile.get(id=namespace)
+            schema._meta.username = user
+            schema._status.refresh_ts = current_date
+            schema._status.refresh_status = 299
+            schema._status.refresh_msg = "ownership updated, no content changes"
+            schema.save(skip_ts=True)
+            return len(list(get_classes(namespace)))
         else:
             return 0
 
@@ -330,9 +338,21 @@ def is_schema_updated(namespace, current_doc):
     """
     existing_doc = get(namespace)
     for key in current_doc:
-        if current_doc[key] != existing_doc[key]:
+        current_val = json.dumps(current_doc[key], sort_keys=True)
+        existing_val = json.dumps(existing_doc.get(key), sort_keys=True)
+        if current_val != existing_val:
             return True
     return False
+
+
+def is_ownership_changed(namespace, user):
+    """
+    Comparison method
+    Compare the existing schema's registered owner (username) with the given user.
+    Return True if the owner differs (ownership change), else False.
+    """
+    meta_data = get_meta(namespace)
+    return meta_data.get("username") != user
 
 
 def delete(namespace):
