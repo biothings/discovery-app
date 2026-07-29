@@ -18,24 +18,29 @@
         <div>
           <font-awesome-icon
             icon="fas fa-asterisk"
-            class="text-danger"
+            class="text-danger mr-1"
           ></font-awesome-icon>
           <b>{{ cls.validation?.required?.length || 0 }}</b> Required
         </div>
         <div>
           <font-awesome-icon
             icon="fas fa-circle"
-            class="text-warning"
+            class="text-warning mr-1"
           ></font-awesome-icon>
           <b>{{ cls.validation?.recommended?.length || 0 }}</b> Recommended
         </div>
         <div>
           <font-awesome-icon
             icon="fas fa-square"
-            class="text-info"
+            class="text-info mr-1"
           ></font-awesome-icon>
           <b>{{ cls.validation?.optional?.length || 0 }}</b> Optional
         </div>
+      </div>
+    </template>
+    <template v-else>
+      <div class="text-secondary py-4">
+        Validation Not Specified
       </div>
     </template>
   </div>
