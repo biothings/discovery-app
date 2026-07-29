@@ -61,12 +61,12 @@ import Notify from "simple-notify";
 import CompareItemDetails from "./CompareItemDetails.vue";
 
 const store = useStore();
-let schema_namespaces = computed(() => store.getters.validationSchemaOptions);
+let schema_namespaces = computed(() => store.getters.comparison_options);
 let compared_items = computed(() => store.getters.getCompareItems);
 let searchTerm = ref("");
 
 onMounted(() => {
-  store.dispatch("getValidationOptions");
+  store.dispatch("getComparisonOptions");
 });
 
 watch(

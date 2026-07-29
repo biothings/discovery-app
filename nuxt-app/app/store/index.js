@@ -14,6 +14,7 @@ import { portals } from "./modules/portals";
 import { validator } from "./modules/validator";
 import { news } from "./modules/whatsnew";
 import { mg } from "./modules/markup_generator";
+import { comparison } from "./modules/comparison";
 import { delegate } from "tippy.js";
 import axios from "axios";
 
@@ -34,6 +35,7 @@ export default createStore({
     news,
     mg,
     about,
+    comparison,
   },
   state: () => ({
     loading: false,
