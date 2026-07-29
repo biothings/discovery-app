@@ -113,7 +113,7 @@ export const schema_registry = {
             let propName = main.properties[i]["curie"];
             let propLabel = main.properties[i]["label"];
             if (propName.includes("schema:")) {
-              propLabel = "🟧 " + main.properties[i]["label"];
+              propLabel = "🟧 " + main.properties[i]["curie"];
             } else {
               propLabel = "<span>🟪 " + main.properties[i]["curie"] + "</span>";
             }
