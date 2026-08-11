@@ -81,7 +81,9 @@ def ensure_schema_org(ensure_test_data, es_client):
 
 @pytest.fixture(scope="module")
 def with_clean_schema_state(ensure_test_data, es_client):
-    """Restore a clean backup immediately before and after this module's tests run.
+    """
+    Restore a clean backup immediately before and after this module's tests run.
+
     ensure_test_data only restores once per pytest session. Several test modules
     add/delete/update schema namespaces and mutate registry-wide metadata (e.g.
     schema_org_version), which is fine when a module runs alone in its own session,
