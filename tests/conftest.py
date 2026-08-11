@@ -80,7 +80,27 @@ def ensure_schema_org(ensure_test_data, es_client):
 # conftest.py (continued)
 
 @pytest.fixture(scope="module")
-def with_clean_datasets(ensure_test_data, es_client):
+def with_clean_schema_state(ensure_test_data, es_client):
+    """Restore a clean backup immediately before and after this module's tests run.
+
+    ensure_test_data only restores once per pytest session. Several test modules
+    add/delete/update schema namespaces and mutate registry-wide metadata (e.g.
+    schema_org_version), which is fine when a module runs alone in its own session,
+    but leaks into whichever module happens to run next when many files share one
+    session (e.g. `pytest tests/test_*`). Restoring before AND after keeps each
+    module self-contained regardless of what ran before or after it.
+    """
+    restore_from_file(BACKUP_FILE)
+    es_client.indices.refresh(index=",".join(INDEX_NAMES))
+
+    yield
+
+    restore_from_file(BACKUP_FILE)
+    es_client.indices.refresh(index=",".join(INDEX_NAMES))
+
+
+@pytest.fixture(scope="module")
+def with_clean_datasets(with_clean_schema_state, es_client):
     """Delete specific dataset docs before the module runs, refresh, then teardown."""
     target_ids = ("83dc3401f86819de", "e87b433020414bad", "ecf3767159a74988")
 

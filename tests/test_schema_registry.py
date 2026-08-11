@@ -14,7 +14,7 @@ BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/bioth
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup(ensure_test_data):
+def setup(with_clean_schema_state):
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
 
