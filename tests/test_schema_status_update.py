@@ -127,7 +127,7 @@ class TestSchemaStatus(DiscoveryTestCase):
         - refresh_status: 299
         - refresh_msg: 'ownership updated, no content changes'
         """
-        success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
+        # success_url = 'https://raw.githubusercontent.com/data2health/schemas/master/N3C/N3CDataset.json'
 
         namespace = "ownership_test"
         original_owner = "minions@example.com"
