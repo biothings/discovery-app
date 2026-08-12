@@ -62,10 +62,19 @@ def monthly_schemaorg_update():
     latest_version = get_latest_schema_org_version()
     logger.info(f"Latest schema.org version available: {latest_version}")
 
-    # Check if update is needed
-    if current_version == latest_version:
+    # Check if update is needed. The stored version lives on the Schema
+    # index's mapping metadata, which is separate from the actual class
+    # documents in the SchemaClass index. If those documents were ever lost
+    # (index reset, migration, etc.) without the version metadata being
+    # cleared, a version match here would wrongly skip reloading schema.org.
+    if current_version == latest_version and schemas.exists("schema"):
         logger.info("Schema.org is already at the latest version. No update needed.")
         return
+    elif current_version == latest_version:
+        logger.warning(
+            "Stored schema.org version matches latest, but no schema.org "
+            "classes are indexed. Reloading schema.org to repair the index."
+        )
 
     # Validate by performing a dry-run before actual update
     logger.info(f"Validating schema.org version {latest_version} (dry-run)...")

@@ -5,7 +5,10 @@
 
 """
 
+import pytest
 from biothings.tests.web import BiothingsTestCase
+
+pytestmark = pytest.mark.usefixtures("with_clean_schema_state")
 
 class DiscoveryQueryTest(BiothingsTestCase):
     def test_query_all(self):
