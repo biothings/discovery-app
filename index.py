@@ -102,9 +102,27 @@ def run_routine():
     thread.start()
 
 
+def monthly_schemaorg_update_job():
+    """
+    Run monthly_schemaorg_update(), logging any exception that escapes it.
+
+    monthly_schemaorg_update() already logs and swallows its own expected
+    failure modes (validation errors, update errors). This wrapper is a
+    safety net for anything else: without it, an uncaught exception raised
+    in this daemon thread is only ever printed by Python's default thread
+    excepthook, with no application log line and no alerting.
+    """
+    logger = logging.getLogger("monthly_schemaorg_update")
+    try:
+        monthly_schemaorg_update()
+    except Exception as e:
+        logger.error(f"An error occurred during the monthly schema.org update: {e}")
+        logger.error("Stack trace:", exc_info=True)
+
+
 def run_monthly_schemaorg_update():
     """Run the monthly schema.org update routine in a separate thread."""
-    thread = Thread(target=monthly_schemaorg_update, daemon=True)
+    thread = Thread(target=monthly_schemaorg_update_job, daemon=True)
     thread.start()
 
 
