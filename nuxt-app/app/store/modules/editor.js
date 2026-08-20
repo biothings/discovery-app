@@ -131,6 +131,7 @@ export const editor = {
       }
     },
     setValidation(state, payload) {
+      console.log("🟢 Setting Validation for: ", payload["name"]);
       let item = payload["validation"];
       let name = payload["name"];
       let newval = Object.assign(
