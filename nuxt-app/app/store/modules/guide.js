@@ -1,6 +1,7 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import Notify from "simple-notify";
+import Swal from "sweetalert2";
 
 export const guide = {
   state: {
