@@ -103,15 +103,8 @@ def run_routine():
 
 
 def monthly_schemaorg_update_job():
-    """
-    Run monthly_schemaorg_update(), logging any exception that escapes it.
+    """Run monthly_schemaorg_update(), logging any exception that escapes it."""
 
-    monthly_schemaorg_update() already logs and swallows its own expected
-    failure modes (validation errors, update errors). This wrapper is a
-    safety net for anything else: without it, an uncaught exception raised
-    in this daemon thread is only ever printed by Python's default thread
-    excepthook, with no application log line and no alerting.
-    """
     logger = logging.getLogger("monthly_schemaorg_update")
     try:
         monthly_schemaorg_update()
