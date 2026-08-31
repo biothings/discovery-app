@@ -103,7 +103,8 @@ def run_routine():
 
 
 def monthly_schemaorg_update_job():
-    """Run monthly_schemaorg_update(), logging any exception that escapes it.
+    """
+    Run monthly_schemaorg_update(), logging any exception that escapes it.
 
     monthly_schemaorg_update() already logs and swallows its own expected
     failure modes (validation errors, update errors). This wrapper is a
