@@ -104,7 +104,6 @@ def run_routine():
 
 def monthly_schemaorg_update_job():
     """Run monthly_schemaorg_update(), logging any exception that escapes it."""
-
     logger = logging.getLogger("monthly_schemaorg_update")
     try:
         monthly_schemaorg_update()
