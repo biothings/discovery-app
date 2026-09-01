@@ -1,6 +1,20 @@
 <template>
   <div class="d-block w-100">
     <div class="row m-0 p-relative">
+      <template v-if="main_name == 'identifier'">
+        <div class="alert-info p-2 mb-2 rounded my-3">
+          <small class="text-dark">
+            <span class="badge badge-info">Important</span> The "Identifier" field is a unique identifier for the resource. If
+            multiple are provided, all will be saved but only the first
+            will be used as the canonical identifier.
+          </small>
+          <br>
+          <small class="text-dark"
+            >If one or multiple identifiers are present, append new identifiers to the existing list while preserving the first identifier. 
+            Changing the first identifier will result in a new entry being registered.</small
+          >
+        </div>
+      </template>
       <div class="col-sm-12 w-100">
         <div
           class="d-flex justify-content-center align-items-stretch flex-wrap"

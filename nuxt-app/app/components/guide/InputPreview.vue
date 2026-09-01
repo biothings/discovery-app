@@ -7,7 +7,7 @@
         class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc"
         title="remove"
       >
-        <font-awesome-icon icon="fas fa-check"></font-awesome-icon>
+        <font-awesome-icon icon="fas fa-check" class="mr-1"></font-awesome-icon>
         <template v-if="userInput && userInput.name">
           <span v-text="userInput.name"></span>
         </template>
@@ -30,27 +30,27 @@
         ></span>
       </span>
     </template>
-    <template v-else-if="type == 'arr'" v-for="(person, i) in userInput">
+    <template v-else-if="type == 'arr'" v-for="(item, i) in userInput">
       <span
-        :data-tippy-content="JSON.stringify(person, null, 2)"
+        :data-tippy-content="JSON.stringify(item, null, 2)"
         :data-tippy-id="i"
         class="badge kwbadge badge-success mr-1 pointer slit-in-vertical desc"
         title="remove"
       >
-        <font-awesome-icon icon="fas fa-check"></font-awesome-icon>
-        <template v-if="person && person.name">
-          <span v-text="person.name" class="mr-1"></span>
+        <font-awesome-icon icon="fas fa-check" class="mr-1"></font-awesome-icon>
+        <template v-if="item && item.name">
+          <span v-text="item.name" class="mr-1"></span>
         </template>
-        <template v-else-if="person && person.constructor == String">
-          <span v-text="person" class="mr-1"></span>
+        <template v-else-if="item && item.constructor == String">
+          <span v-text="item" class="mr-1"></span>
         </template>
-        <span v-else v-text="name + ' ' + (i + 1)"></span>
+        <span v-else v-text="name + ' ' + (i + 1) + '  '"></span>
         <span
           style="opacity: 0"
           class="d-inline"
-          @click="removeItem($event, person)"
+          @click="removeItem($event, item)"
         >
-          <font-awesome-icon icon="fas fa-times"></font-awesome-icon
+          <font-awesome-icon icon="fas fa-times m-1"></font-awesome-icon
         ></span>
       </span>
     </template>

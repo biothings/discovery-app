@@ -303,7 +303,7 @@ export const guide = {
       let field = payload["from"]; //name of prop
       let item = payload["item"]; //full info
       let props = state.schema.validation.properties;
-
+      console.log("removing item from " + field, item);
       if (
         typeof props[field]?.value === "object" &&
         !Array.isArray(props[field]?.value)
@@ -453,6 +453,8 @@ export const guide = {
           state.schema.validation.properties[field]["value"].constructor ===
           Array
         ) {
+          console.log("%c Adding to array for " + field, "color:hotpink");
+          console.log(state.schema.validation.properties[field]["value"])
           state.schema.validation.properties[field]["value"].push(item);
         } else {
           state.schema.validation.properties[field]["value"] = [
