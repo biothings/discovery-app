@@ -34,6 +34,7 @@ import elasticsearch
 import elasticsearch.dsl
 import jsonschema
 import requests
+from elasticsearch.dsl.utils import AttrList
 
 from discovery.model import Dataset as ESDataset
 from discovery.model import SchemaClass as ESSchemaClass
@@ -219,7 +220,7 @@ def _clean(metadict, defdict=None):
     return AliasDict(_metadata)
 
 
-def _index(doc, metadata, op_type="index", _addon=MappingProxyType({})):
+def _index(doc, metadata, op_type="index", _addon=MappingProxyType({}), _id=None):
 
     assert isinstance(doc, ValidatedDict)
     assert isinstance(metadata, ValidatedDict)
@@ -227,6 +228,12 @@ def _index(doc, metadata, op_type="index", _addon=MappingProxyType({})):
     _now = datetime.now(timezone.utc)
 
     dataset = ESDataset(**doc)
+    if _id:
+        # Pin the _id explicitly for updates so it can never drift from
+        # the document being updated, even if it doesn't match the hash
+        # Dataset.encode_id() would otherwise derive from the identifier
+        # field (e.g. for documents whose _id predates that scheme).
+        dataset.meta.id = _id
     dataset["_meta"] = metadata
     dataset["_n3c"] = {
         "url": _addon.get("n3c_url"),
@@ -349,6 +356,21 @@ def get_meta(_id):
     raise NoEntityError(f"dataset {_id} does not exist.")
 
 
+def _canonical_identifier(identifier):
+    """
+    Return the canonical (first) identifier value used to compute _id.
+    Mirrors the logic in discovery.model.dataset.Dataset.encode_id.
+    """
+    # elasticsearch_dsl wraps list fields (e.g. dataset.identifier read
+    # back from ES) in AttrList, which is list-like but not a list
+    # subclass, so it must be detected separately from plain lists.
+    if not isinstance(identifier, str) and isinstance(identifier, (list, AttrList)):
+        return str(identifier[0]) if len(identifier) else None
+    if identifier:
+        return str(identifier)
+    return None
+
+
 def update(_id, new_doc, **metadata):
     """
     Update a dataset metadata document.
@@ -364,9 +386,11 @@ def update(_id, new_doc, **metadata):
     if not dataset:
         raise NoEntityError(f"dataset {_id} does not exist.")
 
-    # Cannot change the identifier field, because it would result
-    # in changing the document _id. Delete and add again instead.
-    if new_doc.get("identifier") != dataset.identifier:
+    # Only the canonical (first) identifier determines the document _id
+    # (see Dataset.encode_id). Additional identifiers can be freely added
+    # as long as the canonical one is unchanged. Changing the canonical
+    # identifier would change the _id, so delete and add again instead.
+    if _canonical_identifier(new_doc.get("identifier")) != _canonical_identifier(dataset.identifier):
         raise ConflictError("cannot change identifier field.")
 
     # NOTE **important**
@@ -381,6 +405,7 @@ def update(_id, new_doc, **metadata):
     dataset = _index(
         new_doc,
         _meta,
+        _id=_id,
         _addon={
             # Carry over our internal metadata like
             # N3C ticket info and creation timestamp.
