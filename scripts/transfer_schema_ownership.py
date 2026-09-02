@@ -1,5 +1,4 @@
-"""
-Transfer ownership of a registered schema namespace.
+"""Transfer ownership of a registered schema namespace.
 
     from scripts.transfer_schema_ownership import transfer
     transfer("nde", "gtsueng")
