@@ -370,7 +370,7 @@ def transfer_ownership(namespace, new_owner):
 
     The change is recorded in _meta.previous_username and
     _meta.owner_changed_ts. _meta.last_updated is deliberately left alone:
-    the content did not change, and it is the field used to compare an index
+    because the content did not change, and it is the field used to compare an index
     against a backup.
 
     Return the previous owner. If new_owner already owns the namespace this
