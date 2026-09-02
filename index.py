@@ -102,9 +102,19 @@ def run_routine():
     thread.start()
 
 
+def monthly_schemaorg_update_job():
+    """Run monthly_schemaorg_update(), logging any exception that escapes it."""
+    logger = logging.getLogger("monthly_schemaorg_update")
+    try:
+        monthly_schemaorg_update()
+    except Exception as e:
+        logger.error(f"An error occurred during the monthly schema.org update: {e}")
+        logger.error("Stack trace:", exc_info=True)
+
+
 def run_monthly_schemaorg_update():
     """Run the monthly schema.org update routine in a separate thread."""
-    thread = Thread(target=monthly_schemaorg_update, daemon=True)
+    thread = Thread(target=monthly_schemaorg_update_job, daemon=True)
     thread.start()
 
 
