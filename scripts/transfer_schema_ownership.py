@@ -1,11 +1,9 @@
-"""Transfer ownership of a registered schema namespace.
+# Transfer ownership of a registered schema namespace.
+#     from scripts.transfer_schema_ownership import transfer
+#     transfer("nde", "gtsueng")
+# The write is read back and verified. Do not trust a transfer that did not
+# print VERIFIED.
 
-    from scripts.transfer_schema_ownership import transfer
-    transfer("nde", "gtsueng")
-
-The write is read back and verified. Do not trust a transfer that did not
-print VERIFIED.
-"""
 
 import logging
 
