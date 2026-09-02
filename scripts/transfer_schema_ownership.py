@@ -1,20 +1,16 @@
 """
-    Transfer ownership of a registered schema namespace.
+Transfer ownership of a registered schema namespace.
 
-        from scripts.transfer_schema_ownership import transfer
-        transfer("nde", "gtsueng")
+    from scripts.transfer_schema_ownership import transfer
+    transfer("nde", "gtsueng")
 
-    The write is read back and verified. Do not trust a transfer that did not
-    print VERIFIED.
+The write is read back and verified. Do not trust a transfer that did not
+print VERIFIED.
 """
 
 import logging
 
 from discovery.registry import schemas
-
-logging.basicConfig(level="INFO")
-logging.getLogger("elasticsearch").setLevel("WARNING")
-logger = logging.getLogger("schema_ownership")
 
 
 def transfer(namespace, new_owner):
@@ -23,7 +19,7 @@ def transfer(namespace, new_owner):
 
     stored = schemas.get_meta(namespace).get("username")
     if stored != new_owner:
-        logger.error(
+        logging.error(
             "NOT VERIFIED: %s reads as %s, expected %s. The write did not persist.",
             namespace,
             stored,
@@ -31,5 +27,5 @@ def transfer(namespace, new_owner):
         )
         return False
 
-    logger.info("VERIFIED: %s transferred %s -> %s", namespace, previous, new_owner)
+    logging.info("VERIFIED: %s transferred %s -> %s", namespace, previous, new_owner)
     return True
