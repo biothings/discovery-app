@@ -174,14 +174,64 @@ def daily_backup_routine(format="zip", keep_last=10):
         logger.error("Stack trace:", exc_info=True)
 
 
-def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] = "all") -> None:
+# Indices whose docs carry an owner in _meta.username. discover_schema_class is
+# excluded: classes are owned via their namespace, not individually.
+OWNED_INDICES = {
+    "schema": ("discover_schema", Schema),
+    "dataset": ("discover_dataset", Dataset),
+}
+
+
+def ownership_conflicts(backup_data: dict, indices) -> list:
+    """
+    Documents whose owner the backup would overwrite, as
+    [(index_name, _id, live_owner, backup_owner), ...].
+
+    A restore deletes each index and rebuilds it from the file, so an
+    ownership change made after the snapshot is silently lost. Read-only.
+    """
+    conflicts = []
+    for index_key, (index_name, doc_class) in OWNED_INDICES.items():
+        if index_key not in indices or index_name not in backup_data:
+            continue
+
+        backup_owners = {
+            doc["_id"]: (doc.get("_meta") or {}).get("username")
+            for doc in backup_data[index_name].get("docs", [])
+            if "_id" in doc
+        }
+        if not doc_class._index.exists():
+            continue
+
+        for hit in doc_class.search().source(["_meta.username"]).scan():
+            live = getattr(getattr(hit, "_meta", None), "username", None)
+            backup_owner = backup_owners.get(hit.meta.id)
+            if hit.meta.id in backup_owners and live != backup_owner:
+                conflicts.append((index_name, hit.meta.id, live, backup_owner))
+
+    return sorted(conflicts)
+
+
+def _backup(
+    backup_data: dict,
+    indices: Union[str, List[str], Tuple[str, ...]] = "all",
+    force: bool = False,
+    source: str = None,
+) -> None:
     """
     Restore index data, with an option to update selected indices.
+
+    This DELETES each selected index and rebuilds it from backup_data, so
+    anything changed since the snapshot is lost. Aborts if any document would
+    change owner, unless force=True.
 
     Parameters:
     - backup_data: dict - JSON object containing the backup data.
     - indices: Union[str, List[str], Tuple[str, ...]] - Specifies which indices to update.
         Accepts 'all' or any combination of ['schema', 'schema_class', 'dataset'].
+    - force: bool - Proceed even when the restore would overwrite an owner.
+        The conflicts are still logged.
+    - source: str - Where backup_data came from, recorded in the audit log.
     """
 
     # Validate backup_data
@@ -207,6 +257,30 @@ def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] =
 
     indices_to_reset = list(valid_indices & indices)
 
+    # Compare owners BEFORE anything is deleted. A restore is not a merge:
+    # reset() drops each index outright, so this is the only chance to notice
+    # that an ownership change made since the snapshot is about to be undone.
+    conflicts = ownership_conflicts(backup_data, indices_to_reset)
+    for index_name, _id, live, backup_owner in conflicts:
+        logger.warning(
+            "OWNERSHIP CONFLICT %s/%s: live owner is %s, backup would set %s.",
+            index_name, _id, live, backup_owner,
+        )
+
+    if conflicts and not force:
+        logger.error(
+            "Restore ABORTED: %s document(s) would change owner. Nothing was "
+            "changed. Pass force=True to overwrite them anyway.",
+            len(conflicts),
+        )
+        return
+
+    # skip_ts leaves no in-band trace of a restore, so record it here.
+    logger.info(
+        "Restoring %s from %s (%s ownership conflict(s) overwritten).",
+        sorted(indices_to_reset), source or "an in-memory backup", len(conflicts),
+    )
+
     # Reset selected indices
     for index in indices_to_reset:
         reset(indices=index)
@@ -219,7 +293,11 @@ def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] =
             for doc in api_schema["docs"]:
                 file = Schema(**doc)
                 file.meta.id = doc["_id"]
-                file.save()
+                # skip_ts: a restore is not a content change. Without this,
+                # every document gets last_updated=now, which both destroys
+                # the real history and makes the field useless for comparing
+                # an index against a backup. Only Schema.save() supports it.
+                file.save(skip_ts=True)
             logger.info("The discover_schema index data was updated successfully.")
         else:
             logger.info("No discover_schema data found in the API backup")
@@ -246,7 +324,12 @@ def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] =
         else:
             logger.info("No discover_dataset data found in the API backup")
 
-def restore_from_s3(filename: str = None, bucket: str = "dde", indices: Union[str, List[str], Tuple[str, ...]] = "all"):
+def restore_from_s3(
+    filename: str = None,
+    bucket: str = "dde",
+    indices: Union[str, List[str], Tuple[str, ...]] = "all",
+    force: bool = False,
+):
     s3 = boto3.client("s3")
 
     if not filename:
@@ -278,10 +361,14 @@ def restore_from_s3(filename: str = None, bucket: str = "dde", indices: Union[st
     else:
         raise Exception("Unsupported backup file type!")
 
-    _backup(ddeapis, indices=indices)
+    _backup(ddeapis, indices=indices, force=force, source=f"s3://{bucket}/db_backup/{filename}")
 
 
-def restore_from_file(filename: str = None, indices: Union[str, List[str], Tuple[str, ...]] = "all"):
+def restore_from_file(
+    filename: str = None,
+    indices: Union[str, List[str], Tuple[str, ...]] = "all",
+    force: bool = False,
+):
     if filename.endswith(".zip"):
         with zipfile.ZipFile(filename, 'r') as zfile:
             # Search for a JSON file inside the ZIP
@@ -296,4 +383,4 @@ def restore_from_file(filename: str = None, indices: Union[str, List[str], Tuple
     else:
         raise Exception("Unsupported backup file type!")
 
-    _backup(ddeapis, indices=indices)
+    _backup(ddeapis, indices=indices, force=force, source=filename)
