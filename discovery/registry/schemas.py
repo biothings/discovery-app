@@ -64,16 +64,13 @@ def _add_schema_class(schema, namespace, dryrun=False, schema_org_version=None):
         except Exception as exc:  # TODO not sure what could go wrong
             raise RegistryError(str(exc))
 
-    # TODO: validate all classes first before deleting the namespace
-    # delete the existing classes under the namespace
-    if dryrun:
-        logger.info(
-            f'Deleting existing "{namespace}" classes... (Dryrun only, not actually deleting anything.'
-        )
-    else:
-        delete_classes(namespace)
-        logger.debug(f'"{namespace}" classes were deleted.')
-    # save classes
+    # Save the new/updated classes first, then prune only the classes that
+    # no longer exist in the new version. Since each class's _id is
+    # deterministic (f"{namespace}::{prefix}:{label}"), re-saving a class
+    # that already exists is a no-op upsert. This avoids ever leaving the
+    # namespace with zero classes if saving fails partway through: nothing
+    # is deleted until every new class has been saved successfully.
+    saved_ids = []
     for schema_class in schema_classes:
         cls = ESSchemaClass(namespace=namespace, **schema_class)
         if dryrun:
@@ -85,8 +82,15 @@ def _add_schema_class(schema, namespace, dryrun=False, schema_org_version=None):
                 raise
         else:
             cls.save()
+            saved_ids.append(cls.meta.id)
+
     if dryrun:
-        logger.info("This is a dryrun, no classes are actually saved")
+        logger.info("This is a dryrun, no classes are actually saved or deleted")
+    else:
+        # remove classes that existed under this namespace previously but
+        # are not part of the newly saved set (e.g. types removed upstream)
+        delete_classes(namespace, exclude_ids=saved_ids)
+        logger.debug(f'Stale "{namespace}" classes were pruned.')
 
     return len(schema_classes)
 
@@ -491,18 +495,27 @@ def get_schema_org_property(property_label, raise_on_error=True):
         return None
 
 
-def delete_classes(namespace):
+def delete_classes(namespace, exclude_ids=None):
     """
-    Delete all classes of the specified namespace.
+    Delete classes of the specified namespace.
     Operation only applies to the class index.
+
+    If `exclude_ids` is given, only classes whose _id is NOT in that
+    collection are deleted (used to prune stale classes after a reload
+    without ever leaving the namespace empty). Otherwise all classes
+    under the namespace are deleted.
     """
     search = ESSchemaClass.search()
     search = search.query("match", namespace=namespace)
+    if exclude_ids:
+        search = search.exclude("ids", values=list(exclude_ids))
+
+    count = search.count()
     search.delete()
 
-    logging.info("Deleted %s classes from namespace %s.", search.count(), namespace)
+    logging.info("Deleted %s classes from namespace %s.", count, namespace)
 
-    return search.count()
+    return count
 
 
 def get_all_contexts():

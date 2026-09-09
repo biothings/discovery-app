@@ -89,7 +89,14 @@ def monthly_schemaorg_update():
 
     # Validation passed - perform the actual update
     logger.info(f"Updating schema.org from {current_version} to {latest_version}")
-    schemas.add_core(update=True, schema_org_version=latest_version)
+    try:
+        schemas.add_core(update=True, schema_org_version=latest_version)
+    except Exception:
+        logger.exception(
+            f"Update failed while reloading schema.org version {latest_version}. "
+            "DDE schema.org may be left in a partially updated state."
+        )
+        return
 
     # Verify the update
     new_version = schemas.get_stored_schema_org_version()
