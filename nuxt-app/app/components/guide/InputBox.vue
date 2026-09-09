@@ -1,5 +1,5 @@
 <template>
-  <div class="m-0 inputbox fade-in" :id="name" v-if="!isInputHidden">
+  <div class="m-0 inputbox fade-in" :id="name" v-if="!isInputHidden" :class="name == 'identifier' ? 'border border-info' : ''">
     <div class="row m-0">
       <div
         class="col-sm-10 p-1 text-left d-flex align-items-center justify-content-center"
@@ -28,12 +28,6 @@
                   ></MarkdownParser>
                   <small class="mainTextLight">
                     (<span v-text="name"></span>)
-                  </small>
-                  <br />
-                  <small class="text-dark" v-if="name === 'identifier'">
-                    Note: Identifier is a unique identifier for the resource. If
-                    multiple are provided, all will be saved but only the first
-                    will be used as the canonical identifier.
                   </small>
                 </h6>
               </div>

@@ -1,23 +1,15 @@
 <template>
   <div>
-    <div class="d-flex p-2" v-if="editingID">
-      <span class="fa-stack mr-2">
-        <font-awesome-icon
-          icon="fas fa-circle"
-          class="fa-stack-2x text-info"
-        ></font-awesome-icon>
-        <font-awesome-icon
-          icon="fas fa-lock"
-          class="fa-stack-1x fa-inverse"
-        ></font-awesome-icon>
-      </span>
-      <small class="text-primary"
-        ><b class="text-danger">Edit Mode:</b> This field is disabled in order
-        to override existing record.</small
-      >
+    <div class="alert-info p-2 mb-2 rounded my-3">
+      <small class="text-dark">
+        <span class="badge badge-info">IMPORTANT</span> This field will be used to identify your resource. Please make sure that it is unique and not already in use by another resource.
+      </small>
+    </div>
+    <span class="badge badge-info m-1" v-if="info?.oneOf">MULTIPLE ALLOWED</span>
+    <div class="d-flex p-2 text-info" v-if="editingID">
+      <small>This identifier is already in use.</small>
     </div>
     <input
-      :disabled="editingID"
       type="text"
       v-model="userInput"
       class="form-control"
@@ -33,11 +25,8 @@
       </div>
       <div class="col-sm-12" style="max-height: 200px; overflow-y: scroll">
         <h6 class="text-muted mt-2">
-          <font-awesome-icon
-            icon="fas fa-exclamation-circle"
-            class="text-danger"
-          ></font-awesome-icon>
-          Looks like a dataset with this identifier already exists:
+          <span class="badge badge-danger m-1">WARNING</span>
+          Looks like a resource with this identifier already exists:
         </h6>
         <table class="table table-sm table-striped">
           <tbody>
@@ -60,10 +49,9 @@
             </template>
           </tbody>
         </table>
-        <h6 class="text-dark mt-1">
+        <h6 class="text-danger mt-1">
           <small
-            >If you are the owner of this entry this operation will result in an
-            overwrite, for all others this submission will be rejected.</small
+            >If you are the user that registered this resource: continuing will result in updating the resource with your changes. For all others this submission will be rejected. If you are unsure on what to do please stop and contact us.</small
           >
         </h6>
       </div>

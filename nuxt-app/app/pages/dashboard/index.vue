@@ -335,6 +335,22 @@
                       </span>
                     </div>
                     <div>
+                      <router-link
+                        :to="item._meta.guide + '?edit=' + item._id"
+                        class="fa-stack fa-1x pointer tip"
+                        data-tippy-content="Edit With Guide"
+                      >
+                        <font-awesome-icon
+                          icon="fas fa-circle"
+                          class="text-muted fa-stack-2x"
+                        />
+                        <font-awesome-icon
+                          icon="fas fa-pen-square"
+                          class="fa-stack-1x text-light"
+                        />
+                      </router-link>
+                    </div>
+                    <div>
                       <span
                         class="fa-stack fa-1x pointer tip"
                         @click="handlePrivacy(item, 'public')"
@@ -752,6 +768,7 @@ export default {
               "includedInDataCatalog",
               "_id",
               "_meta",
+              "identifier"
             ];
             for (let key in self.meta) {
               if (!notAllowed.includes(key)) {
@@ -871,7 +888,7 @@ export default {
                                   if (r.value) {
                                     self.edit(id);
                                   } else {
-                                    location.reload(true);
+                                    self.getAll();
                                   }
                                 });
                             }
@@ -1072,7 +1089,7 @@ export default {
                   switch (res.status) {
                     case 200:
                       //reload with no cache
-                      location.reload(true);
+                      self.getAll();
                       break;
                     case 401:
                       v;
@@ -1129,6 +1146,7 @@ export default {
               : (self.page_NS - 1) * self.perPage_NS,
           meta: true,
           user: self.userInfo.login,
+          timestamp: Date.now()
         },
       };
       //SCHEMA NAMESPACES
@@ -1160,7 +1178,7 @@ export default {
           },
         };
 
-        params.params.q = `q="${self.datasetQuery}" AND _meta.private:${self.privateOnly} AND _meta.username:${self.userInfo.login}`;
+        params.params.q = `q="${self.datasetQuery}" AND _meta.private:${self.privateOnly} AND _meta.username:${self.userInfo.login}&timestamp=${Date.now()}`;
 
         axios
           .get(self.apiUrl + "/api/dataset/query", params)
@@ -1201,6 +1219,7 @@ export default {
       }
     },
     handlePrivacy(item, privacyStatus) {
+      let self = this;
       var title = () =>
         privacyStatus === "private"
           ? "<h4>Make this item PUBLIC?</h4>"
@@ -1238,7 +1257,7 @@ export default {
               .then((res) => {
                 //reload with no cache
                 setTimeout(function () {
-                  location.reload(true);
+                  self.getAll();
                 }, 1000);
               })
               .catch((err) => {

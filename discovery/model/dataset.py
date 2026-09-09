@@ -8,6 +8,7 @@
 import hashlib
 
 from elasticsearch.dsl import Boolean, Date, InnerDoc, Keyword, Object, Text, normalizer
+from elasticsearch.dsl.utils import AttrList
 
 from .common import DiscoveryMeta, DiscoveryUserDoc
 
@@ -77,14 +78,20 @@ class Dataset(DiscoveryUserDoc):
 
     def save(self, *args, **kwargs):
         """
-        Create _id basing on identifier field.
+        Create _id basing on identifier field, unless one has already
+        been explicitly assigned (e.g. by the registry layer to pin an
+        update to the document being updated).
         """
-        self.encode_id()
+        if not getattr(self.meta, "id", None):
+            self.encode_id()
         return super().save(*args, **kwargs)
 
     def encode_id(self):
         if self.identifier:
-            if isinstance(self.identifier, list):
+            # elasticsearch_dsl wraps list-valued field access in AttrList,
+            # which is list-like but not a list subclass, even for values
+            # that were just assigned in memory (not read back from ES).
+            if not isinstance(self.identifier, str) and isinstance(self.identifier, (list, AttrList)):
                 # Use only the first item as the canonical identifier
                 id_string = str(self.identifier[0])
             else:

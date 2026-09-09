@@ -8,57 +8,33 @@
 </template>
 
 <script>
-import Notify from "simple-notify";
 
 export default {
   name: "EditDescription",
   props: ["propname", "val"],
   methods: {
-    handleEdit() {
+    async handleEdit(){
       let self = this;
-      let hasDesc = false;
-      if (Object.hasOwnProperty.call(self.val, "description")) {
-        hasDesc = true;
-      } else {
-        new Notify({
-          status: "warning",
-          title: "Editing",
-          text: "Adding new description",
-          position: "right",
-          autoclose: true, // Enable auto close
-          autotimeout: 3000, // Set timeout in milliseconds (3 seconds)
-        });
-      }
-      self.$swal
-        .fire({
+      const { value: newDescription } = await self.$swal.fire({
           title: "Edit description",
-          text: hasDesc
-            ? "Current: " + self.val.description
-            : "Enter new description",
           input: "textarea",
-          inputPlaceholder: "Enter text here",
-          showCancelButton: true,
-          animation: false,
-          confirmButtonColor: "{{color_main}}",
-          cancelButtonColor: "{{color_sec}}",
-          customClass: "scale-in-center",
-          confirmButtonText: "Save",
-          showLoaderOnConfirm: true,
-          preConfirm: (method) => {
-            return method;
+          text: self.val?.description
+              ? "Current: " + self.val.description
+              : "Enter new description",
+          inputPlaceholder: "enter text here",
+          customClass: {
+            popup: "scale-in-center",
           },
-          allowOutsideClick: () => !Swal.isLoading(),
-          backdrop: true,
-        })
-        .then((result) => {
-          let payload = {
-            // follow structure of val options
-            validation: { validation: { description: result.value } },
+        });
+
+        if (newDescription) {
+           let payload = {
+            validation: { validation: { description: newDescription } },
             name: self.propname,
           };
           self.$store.commit("setValidation", payload);
-        });
-    },
+        }
+    }
   },
 };
 </script>

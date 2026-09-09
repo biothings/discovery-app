@@ -61,7 +61,7 @@ export const about = {
             ],
             image:
               "https://avatars1.githubusercontent.com/u/23092057?s=460&v=4",
-            personal_site: "https://wulab.io/the-team-marco-alvarado",
+            personal_site: "https://wulab.io/the-team-marco-cano",
             links: [
               { title: "twitter", href: "" },
               { title: "github", href: "https://github.com/marcodarko" },

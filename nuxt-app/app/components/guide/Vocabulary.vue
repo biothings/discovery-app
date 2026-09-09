@@ -157,7 +157,7 @@ export default {
         })
         .catch((err) => {
           self.loading = false;
-          Swal.showValidationMessage(`Request failed: ${err}`);
+          self.$swal.showValidationMessage(`Request failed: ${err}`);
         });
     },
     addResult(r) {
