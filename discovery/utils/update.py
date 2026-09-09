@@ -18,7 +18,9 @@ def schema_update(namespace):
     logger.info(f"starting updating process for {namespace} schema")
     meta = schemas.get_meta(namespace)
     try:
-        schemas.update(namespace, meta['username'], meta["url"])
+        # deliberately does not pass a user: a content refresh must not be
+        # able to reassign ownership. See registry.schemas.transfer_ownership.
+        schemas.update(namespace, url=meta["url"])
         logger.info(f'update of {namespace} schema complete')
     except Exception as e:
         logger.error(e)
