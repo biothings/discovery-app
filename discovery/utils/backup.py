@@ -1,6 +1,7 @@
 import json
 import logging
 import zipfile
+from collections import namedtuple
 import io
 import os
 import glob
@@ -174,22 +175,67 @@ def daily_backup_routine(format="zip", keep_last=10):
         logger.error("Stack trace:", exc_info=True)
 
 
-def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] = "all") -> None:
+# Indices whose docs carry an owner in _meta.username. discover_schema_class is
+# excluded: classes are owned via their namespace, not individually.
+OWNED_INDICES = {
+    "schema": ("discover_schema", Schema),
+    "dataset": ("discover_dataset", Dataset),
+}
+
+
+def ownership_conflicts(backup_data: dict, indices) -> list:
     """
-    Restore index data, with an option to update selected indices.
+    Return the documents whose owner the backup would overwrite.
 
-    Parameters:
-    - backup_data: dict - JSON object containing the backup data.
-    - indices: Union[str, List[str], Tuple[str, ...]] - Specifies which indices to update.
-        Accepts 'all' or any combination of ['schema', 'schema_class', 'dataset'].
+    Each item is (index_name, _id, live_owner, backup_owner). A restore
+    deletes each index and rebuilds it from the file, so an ownership change
+    made after the snapshot is silently lost. Read-only.
     """
+    conflicts = []
+    for index_key, (index_name, doc_class) in OWNED_INDICES.items():
+        if index_key not in indices or index_name not in backup_data:
+            continue
 
-    # Validate backup_data
-    if not backup_data:
-        logger.error("Failure to restore from file, no JSON object passed.")
-        return
+        backup_owners = {
+            doc["_id"]: (doc.get("_meta") or {}).get("username")
+            for doc in backup_data[index_name].get("docs", [])
+            if "_id" in doc
+        }
+        if not doc_class._index.exists():
+            continue
 
-    # Validate 'indices'
+        for hit in doc_class.search().source(["_meta.username"]).scan():
+            live = getattr(getattr(hit, "_meta", None), "username", None)
+            backup_owner = backup_owners.get(hit.meta.id)
+            if hit.meta.id in backup_owners and live != backup_owner:
+                conflicts.append((index_name, hit.meta.id, live, backup_owner))
+
+    return sorted(conflicts)
+
+
+# What each restorable index needs, so the restore loop has one implementation
+# instead of one copy per index.
+RestoreSpec = namedtuple(
+    "RestoreSpec", "short_name index_name doc_class set_id save_kwargs"
+)
+
+# skip_ts: a restore is not a content change. Without it every document gets
+# last_updated=now, which destroys the real history and makes the field
+# useless for comparing an index against a backup. Only Schema.save()
+# supports it -- Dataset and SchemaClass do not touch their timestamps.
+RESTORE_PLAN = (
+    RestoreSpec("schema", "discover_schema", Schema, set_id=True, save_kwargs={"skip_ts": True}),
+    RestoreSpec("schema_class", "discover_schema_class", SchemaClass, set_id=False, save_kwargs={}),
+    RestoreSpec("dataset", "discover_dataset", Dataset, set_id=False, save_kwargs={}),
+)
+
+
+def _resolve_indices(indices: Union[str, List[str], Tuple[str, ...]]):
+    """
+    Normalise the indices argument to a set of short names.
+
+    Return None if it is invalid, having logged why.
+    """
     valid_indices = {"schema", "schema_class", "dataset"}
 
     if isinstance(indices, str):
@@ -198,55 +244,111 @@ def _backup(backup_data: dict, indices: Union[str, List[str], Tuple[str, ...]] =
         indices = set(indices)
     else:
         logger.error(f"Invalid type for 'indices': {type(indices)}. Must be string, list, or tuple.")
-        return
+        return None
 
     if not indices.issubset(valid_indices):
         invalid_elements = indices - valid_indices
         logger.error(f"Invalid elements in 'indices': {invalid_elements}. Must be a subset of {valid_indices}.")
+        return None
+
+    return indices
+
+
+def _restore_index(backup_data: dict, spec: RestoreSpec) -> None:
+    """Re-index every document the backup holds for one index."""
+    if spec.index_name not in backup_data:
+        logger.info("No %s data found in the API backup", spec.index_name)
         return
 
-    indices_to_reset = list(valid_indices & indices)
+    for doc in backup_data[spec.index_name]["docs"]:
+        file = spec.doc_class(**doc)
+        if spec.set_id:
+            file.meta.id = doc["_id"]
+        file.save(**spec.save_kwargs)
 
-    # Reset selected indices
+    logger.info("The %s index data was updated successfully.", spec.index_name)
+
+
+def _check_ownership(backup_data: dict, indices_to_reset: list, force: bool) -> bool:
+    """
+    Report any owners the backup would overwrite, before anything is deleted.
+
+    Return False if the restore should not proceed. A restore is not a merge:
+    reset() drops each index outright, so this is the only chance to notice
+    that an ownership change made since the snapshot is about to be undone.
+    """
+    conflicts = ownership_conflicts(backup_data, indices_to_reset)
+
+    for index_name, _id, live, backup_owner in conflicts:
+        logger.warning(
+            "OWNERSHIP CONFLICT %s/%s: live owner is %s, backup would set %s.",
+            index_name, _id, live, backup_owner,
+        )
+
+    if conflicts and not force:
+        logger.error(
+            "Restore ABORTED: %s document(s) would change owner. Nothing was "
+            "changed. Pass force=True to overwrite them anyway.",
+            len(conflicts),
+        )
+        return False
+
+    return True
+
+
+def _backup(
+    backup_data: dict,
+    indices: Union[str, List[str], Tuple[str, ...]] = "all",
+    force: bool = False,
+    source: str = None,
+) -> None:
+    """
+    Restore index data, with an option to update selected indices.
+
+    This DELETES each selected index and rebuilds it from backup_data, so
+    anything changed since the snapshot is lost. Aborts if any document would
+    change owner, unless force=True.
+
+    Parameters:
+    - backup_data: dict - JSON object containing the backup data.
+    - indices: Union[str, List[str], Tuple[str, ...]] - Specifies which indices to update.
+        Accepts 'all' or any combination of ['schema', 'schema_class', 'dataset'].
+    - force: bool - Proceed even when the restore would overwrite an owner.
+        The conflicts are still logged.
+    - source: str - Where backup_data came from, recorded in the audit log.
+    """
+    if not backup_data:
+        logger.error("Failure to restore from file, no JSON object passed.")
+        return
+
+    indices = _resolve_indices(indices)
+    if indices is None:
+        return
+
+    indices_to_reset = list(indices)
+
+    if not _check_ownership(backup_data, indices_to_reset, force):
+        return
+
+    # skip_ts leaves no in-band trace of a restore, so record it here.
+    logger.info(
+        "Restoring %s from %s.", sorted(indices_to_reset), source or "an in-memory backup"
+    )
+
     for index in indices_to_reset:
         reset(indices=index)
 
-    # Reset and update target indices based on the indices parameter
-    if indices == "all" or "schema" in indices_to_reset:
-        # Update discover_schema
-        if "discover_schema" in backup_data:
-            api_schema = backup_data["discover_schema"]
-            for doc in api_schema["docs"]:
-                file = Schema(**doc)
-                file.meta.id = doc["_id"]
-                file.save()
-            logger.info("The discover_schema index data was updated successfully.")
-        else:
-            logger.info("No discover_schema data found in the API backup")
+    for spec in RESTORE_PLAN:
+        if spec.short_name in indices_to_reset:
+            _restore_index(backup_data, spec)
 
-    if indices == "all" or "schema_class" in indices_to_reset:
-        # Update discover_schema_class
-        if "discover_schema_class" in backup_data:
-            api_schema_class = backup_data["discover_schema_class"]
-            for doc in api_schema_class["docs"]:
-                file = SchemaClass(**doc)
-                file.save()
-            logger.info("The discover_schema_class index data was updated successfully.")
-        else:
-            logger.info("No discover_schema_class data found in the API backup")
 
-    if indices == "all" or "dataset" in indices_to_reset:
-        # Update discover_dataset
-        if "discover_dataset" in backup_data:
-            api_dataset = backup_data["discover_dataset"]
-            for doc in api_dataset["docs"]:
-                file = Dataset(**doc)
-                file.save()
-            logger.info("The discover_dataset index data was updated successfully.")
-        else:
-            logger.info("No discover_dataset data found in the API backup")
-
-def restore_from_s3(filename: str = None, bucket: str = "dde", indices: Union[str, List[str], Tuple[str, ...]] = "all"):
+def restore_from_s3(
+    filename: str = None,
+    bucket: str = "dde",
+    indices: Union[str, List[str], Tuple[str, ...]] = "all",
+    force: bool = False,
+):
     s3 = boto3.client("s3")
 
     if not filename:
@@ -278,10 +380,14 @@ def restore_from_s3(filename: str = None, bucket: str = "dde", indices: Union[st
     else:
         raise Exception("Unsupported backup file type!")
 
-    _backup(ddeapis, indices=indices)
+    _backup(ddeapis, indices=indices, force=force, source=f"s3://{bucket}/db_backup/{filename}")
 
 
-def restore_from_file(filename: str = None, indices: Union[str, List[str], Tuple[str, ...]] = "all"):
+def restore_from_file(
+    filename: str = None,
+    indices: Union[str, List[str], Tuple[str, ...]] = "all",
+    force: bool = False,
+):
     if filename.endswith(".zip"):
         with zipfile.ZipFile(filename, 'r') as zfile:
             # Search for a JSON file inside the ZIP
@@ -296,4 +402,4 @@ def restore_from_file(filename: str = None, indices: Union[str, List[str], Tuple
     else:
         raise Exception("Unsupported backup file type!")
 
-    _backup(ddeapis, indices=indices)
+    _backup(ddeapis, indices=indices, force=force, source=filename)
