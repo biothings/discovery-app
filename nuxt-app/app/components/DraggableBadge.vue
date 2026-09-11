@@ -41,7 +41,8 @@ function deleteValidationOption(item) {
 <template>
   <div
     class="badge drag-el m-1 shadow"
-    :class="[item.title.includes('DEF') ? 'bg-dde-mid' : 'badge-primary']"
+    :class="[item.title.includes('DEF') ? 'bg-dde-mid' : '']"
+    :style="{'background-color': item?.color || '#007dff'}"
     draggable="true"
     @dragstart="startDrag($event, item)"
   >

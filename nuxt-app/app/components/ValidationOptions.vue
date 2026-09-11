@@ -10,6 +10,7 @@ let search_active = ref(false);
 let filter_options = ref([]);
 let valSelect = ref("default");
 let ordered_options = ref([]);
+let toggleDetails = ref(true);
 
 let editItem = computed(() => store.getters.getEditItem);
 let editDefintionItem = computed(() => store.getters.getEditDefinitionItem);
@@ -30,7 +31,11 @@ function filterAllOptions(filter) {
       (item) => item.belongs_to == "bioschemas"
     );
     filterBioSchemasMostUsed();
-  } else {
+  } 
+  else if (filter == "all") {
+    filter_options.value = valOps.value;
+  }
+  else {
     filter_options.value = valOps.value.filter(
       (item) => item.belongs_to == "default"
     );
@@ -293,6 +298,7 @@ onMounted(() => filterAllOptions(valSelect.value));
         >
           <option value="default" selected>Default</option>
           <option value="bioschemas">Bioschemas</option>
+          <option value="all">All</option>
         </select>
         <font-awesome-icon
           icon="fas fa-rotate"
@@ -300,6 +306,14 @@ onMounted(() => filterAllOptions(valSelect.value));
           class="pointer text-primary ml-2"
           @click="reset()"
         ></font-awesome-icon>
+      </div>
+      <div class="text-center col-sm-12 p-1">
+        <button
+          class="btn btn-sm btn-outline-light text-dark mt-1"
+          @click="toggleDetails = !toggleDetails"
+        >
+          {{ toggleDetails ? "Collapse" : "Show" }} all options
+        </button>
       </div>
     </div>
     <div v-if="search_active" class="fade-in">
@@ -383,7 +397,7 @@ onMounted(() => filterAllOptions(valSelect.value));
       >
       <div class="val-options-container">
         <div v-for="g in ordered_options" :key="g.group">
-          <details open>
+          <details :open="toggleDetails">
             <summary
               class="m-0 font-weight-bold text-dark border-bottom border-dark"
             >
