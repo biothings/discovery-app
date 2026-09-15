@@ -123,11 +123,7 @@
               </span>
             </h4>
             <small class="d-inline-block">
-              <b class="text-danger">Edit Mode:</b> You are editing an existing
-              record. You can add or change any allowed field.
-              <code>identifier</code> field is disabled as this is the unique
-              identifier for each entry. If this is not what you intend to do
-              please start over.
+              <b class="text-danger">Edit Mode:</b> The identifier you provided already exists in the system. You are now editing this existing record. If you are the owner of this record, your changes will be saved. If you are not the owner, your changes will be rejected.
             </small>
           </div>
         </div>
@@ -325,7 +321,7 @@
               Select the portals you are interested in. Each will add fields
               required in order to be discovered by that portal.
             </p>
-            <form @submit.prevent="getFormValues()">
+            <form @submit.prevent="getFormValues();">
               <template v-for="item in portals">
                 <div class="p-2 text-left w-50 m-auto">
                   <input
@@ -415,7 +411,7 @@
                       'disabled text-muted notallowed': !isComplete,
                       'bg-success text-light pointer': isComplete,
                     }"
-                    @click="handleRegistration()"
+                    @click="handleSubmitRequest()"
                   >
                     <small>
                       <font-awesome-icon
@@ -440,7 +436,7 @@
                       'disabled text-muted notallowed': !isComplete,
                       'bg-success text-light pointer': isComplete,
                     }"
-                    @click="handleRegistration()"
+                    @click="handleSubmitRequest()"
                     :data-tippy-content="[
                       !isComplete
                         ? 'Available when all required fields are complete'
@@ -654,12 +650,17 @@ export default {
     },
     checkOverriddenID(id) {
       let self = this;
+      // check if id is string or array
+      // if array take first element
+      if (Array.isArray(id)) {
+        id = id[0];
+      }
       axios
         .get(
           self.apiUrl +
             `/api/dataset/query?size=100&q=identifier:"${encodeURIComponent(
               id
-            )}"&meta=true`
+            )}"&meta=true`+'&timestamp=' + new Date().getTime()
         )
         .then((res) => {
           if (
@@ -668,8 +669,10 @@ export default {
           ) {
             //turn on edit mode
             self.$store.commit("setEditMode", { id: res.data.hits[0]["_id"] });
+            console.log("Edit mode enabled for ID: ", res.data.hits[0]["_id"]);
             return true;
           } else {
+            console.log("No existing record found for identifier: ", id);
             return false;
           }
         })
@@ -714,7 +717,7 @@ export default {
                 cancelButtonColor: "#006476",
 
                 customClass: "scale-in-center",
-                html: "Taking you to your dataset page in <strong></strong> seconds.",
+                html: "Redirecting to your resource...<b></b>",
                 timer: 3000,
                 didOpen: () => {
                   self.$swal.showLoading();
@@ -726,7 +729,7 @@ export default {
                 didClose: () => {
                   clearInterval(timerInterval);
                   self.$store.dispatch("reset");
-                  self.$router.push({ path: "/dataset/" + self.editingID });
+                  self.$router.push({ path: "/resource/" + self.editingID });
                 },
               });
             } else {
@@ -1043,6 +1046,14 @@ export default {
             .appendChild(renderjson(self.$store.getters.getPreview));
         },
       });
+    },
+    handleSubmitRequest() {
+      // check if updating existing record or creating new one
+      if (this.editingID) {
+        this.handleEdits();
+      } else {
+        this.handleRegistration();
+      }
     },
     handleRegistration() {
       var self = this;
@@ -1402,11 +1413,11 @@ export default {
           inputOptions: {
             giturl: "Hosted metadata on GitHub (raw url)",
             registered:
-              "Copy metadata from an existing dataset authored by you",
+              "Load an existing resource authored by you",
             text: "JSON metadata text",
           },
           footer:
-            "Note: If you are loading an already registered item, this will trigger edit mode in which you are only allowed to change allowed fields.",
+            "Note: If you are loading an already registered item authored by you, this will trigger edit mode in which you can make changes to the existing record.",
           inputPlaceholder: "Select method",
           showCancelButton: true,
 
@@ -1455,21 +1466,12 @@ export default {
                                 self.checkOverriddenID(selected[key]);
                               }
                               var payload = {};
-                              if (typeof selected[key] === "object") {
-                                let value = [selected[key]];
-                                payload["completed"] = {
-                                  name: key,
-                                  value: value,
-                                };
-                                self.$store.commit("markCompleted", payload);
-                              } else {
-                                let value = selected[key];
-                                payload["completed"] = {
-                                  name: key,
-                                  value: value,
-                                };
-                                self.$store.commit("markCompleted", payload);
-                              }
+                              let value = selected[key];
+                              payload["completed"] = {
+                                name: key,
+                                value: value,
+                              };
+                              self.$store.commit("markCompleted", payload);
                             }
                           }
                         })
@@ -1488,6 +1490,7 @@ export default {
                 axios
                   .get(
                     self.apiUrl + "/api/dataset?&user=" + self.userInfo.login
+                    + '&timestamp=' + new Date().getTime() + "&size=100"
                   )
                   .then((publicres) => {
                     let list = publicres.data.hits;
@@ -1496,7 +1499,7 @@ export default {
                       .get(
                         self.apiUrl +
                           "/api/dataset?private=true&user=" +
-                          self.userInfo.login
+                          self.userInfo.login + '&timestamp=' + new Date().getTime() + "&size=100"
                       )
                       .then((privateres) => {
                         self.$store.commit("setLoading", { value: false });
@@ -1516,7 +1519,7 @@ export default {
 
                             customClass: "scale-in-center",
                             footer: `<p>
-                        WARNING: <span class='text-danger'>You are loading already registered metadata.</span> If -identifier- field <b>IS NOT</b> changed, changes will override current saved data. If -identifier- field <b>IS</b> changed this this create a new entry.
+                        WARNING: <span class='text-danger'>You are loading already registered metadata.</span> If -identifier- field <b>IS NOT</b> changed, changes will be saved to the existing record. If -identifier- field <b>IS</b> changed this this create a new entry.
                         </p>`,
                             customClass: "scale-in-center",
                             inputPlaceholder: "Select an item",
@@ -1538,27 +1541,15 @@ export default {
                                         self.checkOverriddenID(selected[key]);
                                       }
                                       var payload = {};
-                                      if (typeof selected[key] === "object") {
-                                        let value = [selected[key]];
-                                        payload["completed"] = {
-                                          name: key,
-                                          value: value,
-                                        };
-                                        self.$store.commit(
-                                          "markCompleted",
-                                          payload
-                                        );
-                                      } else {
-                                        let value = selected[key];
-                                        payload["completed"] = {
-                                          name: key,
-                                          value: value,
-                                        };
-                                        self.$store.commit(
-                                          "markCompleted",
-                                          payload
-                                        );
-                                      }
+                                      let value = selected[key];
+                                      payload["completed"] = {
+                                        name: key,
+                                        value: value,
+                                      };
+                                      self.$store.commit(
+                                        "markCompleted",
+                                        payload
+                                      );
                                     }
                                   }
                                   self.$store.commit("formPreviewForGuide");
@@ -1687,6 +1678,72 @@ export default {
             }
           }
         });
+    },
+    // check if "edit" param is available
+    // then autoload that ID into the guide
+    checkEditID(){
+      let self = this;
+      //check if edit param is available
+      if(this.$route.query.edit){
+        let editID = this.$route.query.edit;
+        if (editID){
+          // get the dataset by ID and load it into the guide
+          axios.get(this.apiUrl + "/api/dataset/" + editID)
+          .then((res) => {
+            for (let key in res.data) {
+                if (
+                  !["@context", "@type", "_id"].includes(
+                    key
+                  )
+                ) {
+                  //check existing identifier for edit mode
+                  if (key == "identifier") {
+                    self.checkOverriddenID(res.data[key]);
+                  }
+                  var payload = {};
+                  if (typeof res.data[key] === "object") {
+                    let value = res.data[key];
+                    payload["completed"] = {
+                      name: key,
+                      value: value,
+                    };
+                    self.$store.commit(
+                      "markCompleted",
+                      payload
+                    );
+                  } else {
+                    let value = res.data[key];
+                    payload["completed"] = {
+                      name: key,
+                      value: value,
+                    };
+                    self.$store.commit(
+                      "markCompleted",
+                      payload
+                    );
+                  }
+                }
+              }
+               new Notify({
+                status: "success",
+                title: "Import successful",
+                text: "Edit data loaded into the guide. You can now make changes and submit.",
+                effect: "fade",
+                speed: 300,
+                customClass: null,
+                customIcon: null,
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: true,
+                autotimeout: 3000,
+                gap: 20,
+                distance: 20,
+                type: 1,
+                position: "right top",
+              });
+          });
+        }
+      }
     },
     checkAutoLoad() {
       console.log(
@@ -2018,6 +2075,9 @@ export default {
       this.guideQuery = this.guide_query;
     }
     this.checkAutoLoad();
+    setTimeout(() => {
+      this.checkEditID();
+    }, 1000);
 
     tippy(".bar", {
       content: "Loading...",

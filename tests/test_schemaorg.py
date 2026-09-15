@@ -355,6 +355,92 @@ class TestMonthlySchemaOrgUpdate:
         # Version should remain unchanged
         assert schemas.get_stored_schema_org_version() == latest_version
 
+    def test_monthly_update_repairs_missing_classes_despite_matching_version(self, ensure_schema_org, es_client):
+        """
+        Regression test.
+
+        If the schema.org class documents are wiped (e.g. an index reset
+        or partial restore) but the stored version metadata is left
+        untouched, a version-only check would wrongly conclude schema.org
+        is already up to date and skip reloading it - leaving every
+        namespace that inherits from schema.org with broken ancestry
+        lookups (404s). exists("schema") must catch this independently
+        of the version check, and the monthly job must repair it.
+        """
+        # Establish a known-good baseline: version stored, classes present
+        latest_version = get_latest_schema_org_version()
+        save_schema_index_meta({"schema_org_version": latest_version})
+        assert schemas.exists("schema")
+
+        # Simulate the failure mode: classes gone, version metadata intact
+        schemas.delete_classes("schema")
+        es_client.indices.refresh(index="discover_schema_class")
+
+        assert schemas.get_stored_schema_org_version() == latest_version, (
+            "version metadata should be untouched by the simulated wipe"
+        )
+        assert not schemas.exists("schema"), (
+            "exists('schema') must detect the missing classes even though "
+            "the stored version still matches latest"
+        )
+
+        # The monthly job must repair this instead of skipping
+        monthly_schemaorg_update()
+        es_client.indices.refresh(index="discover_schema_class")
+
+        assert schemas.exists("schema")
+        schema_classes = list(schemas.get_classes("schema"))
+        assert len(schema_classes) > 0, "schema.org classes should be reloaded"
+
+        thing_class = schemas.get_class("schema", "schema:Thing", raise_on_error=False)
+        assert thing_class is not None, "schema:Thing should exist after repair"
+
+    def test_monthly_update_bug_reproduces_without_exists_check(self, ensure_schema_org, es_client):
+        """
+        Negative counterpart to the regression test above.
+
+        Simulates the pre-PR-420 guard, which only compared version
+        strings and never checked whether the schema.org classes were
+        actually indexed. We patch schemas.exists() to always report
+        True at the gate in monthly_schemaorg_update() - exactly what
+        the old "current_version == latest_version: return" logic
+        amounted to - and confirm that under that (buggy) condition the
+        job wrongly skips the reload, leaving schema.org classes missing.
+
+        If this test ever starts failing, the exists("schema") gate in
+        monthly_schemaorg_update() has likely been refactored away from
+        this call path, and this test needs to be updated alongside it.
+        """
+        # Establish a known-good baseline: version stored, classes present
+        latest_version = get_latest_schema_org_version()
+        save_schema_index_meta({"schema_org_version": latest_version})
+        assert schemas.exists("schema")
+
+        # Simulate the failure mode: classes gone, version metadata intact
+        schemas.delete_classes("schema")
+        es_client.indices.refresh(index="discover_schema_class")
+        assert not schemas.exists("schema")  # real check correctly sees the wipe
+
+        try:
+            # Simulate the OLD buggy guard: pretend exists() always says
+            # "yes", i.e. only the version string was ever consulted
+            with patch("discovery.registry.schemas.exists", return_value=True):
+                monthly_schemaorg_update()
+
+            # Bug reproduced: the job skipped the repair because the
+            # (patched) guard never reported the classes as missing
+            assert not schemas.exists("schema"), (
+                "expected the update to have been skipped under the old "
+                "version-only check, leaving schema.org classes still missing"
+            )
+        finally:
+            # Repair for real using the actual (unpatched) guard so we
+            # don't leave the session-scoped schema.org fixture broken
+            # for tests that run after this one.
+            monthly_schemaorg_update()
+            es_client.indices.refresh(index="discover_schema_class")
+            assert schemas.exists("schema")
+
     def test_monthly_update_validates_before_update(self, ensure_test_data):
         """Test that monthly update performs validation before updating"""
 
@@ -446,6 +532,38 @@ class TestMonthlySchemaOrgUpdate:
         exception_records = [r for r in error_records if r.exc_info is not None]
         assert len(exception_records) > 0, "logger.exception() should attach exc_info"
         assert exception_records[0].exc_info[0] is AttributeError
+
+    def test_monthly_update_handles_update_failure(self, ensure_test_data, caplog):
+        """
+        Test that a failure during the real (post-validation) update is
+        caught and logged instead of propagating uncaught.
+
+        Regression coverage: schemas.add_core() used to be called with no
+        try/except around it, so a failure mid-reload (e.g. an ES timeout)
+        would escape monthly_schemaorg_update() entirely and be silently
+        swallowed by the bare daemon thread that runs it in index.py.
+        """
+        # Set an old version so validation passes and the real update path runs
+        save_schema_index_meta({"schema_org_version": "23.0"})
+
+        with caplog.at_level(logging.ERROR):
+            with patch('discovery.registry.schemas.add_core') as mock_add_core:
+                mock_add_core.side_effect = RuntimeError("simulated ES failure mid-reload")
+                monthly_schemaorg_update()  # must not raise
+
+        # Verify the update was actually attempted (i.e. validation passed first)
+        mock_add_core.assert_called_once()
+
+        # Verify the failure was logged clearly, with traceback attached
+        error_records = [r for r in caplog.records if r.levelno == logging.ERROR]
+        assert any("Update failed" in r.message for r in error_records)
+        exception_records = [r for r in error_records if r.exc_info is not None]
+        assert len(exception_records) > 0, "logger.exception() should attach exc_info"
+        assert exception_records[0].exc_info[0] is RuntimeError
+
+        # store_schema_org_version() is only reached after add_core()
+        # succeeds, so the pre-failure version must be left untouched
+        assert schemas.get_stored_schema_org_version() == "23.0"
 
         # Version should remain unchanged (update was aborted)
         assert schemas.get_stored_schema_org_version() == "23.0"
