@@ -28,6 +28,10 @@ class SchemaMeta(DiscoveryMeta):
     last_updated = Date()
     date_created = Date()
     version = Text()
+    # ownership audit trail, written by registry.schemas.transfer_ownership.
+    # absent on documents whose owner has never changed.
+    previous_username = Keyword()
+    owner_changed_ts = Date()
 
 
 class SchemaStatusMeta(InnerDoc):
