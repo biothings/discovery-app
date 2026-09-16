@@ -93,7 +93,7 @@
                 <col span="1" style="width: 10%" />
               </colgroup>
               <tbody style="max-height: 500px; overflow: scroll">
-                <template v-for="(item, i) in jsonItems">
+                <template v-for="(item, i) in jsonItems" :key="item?.name + i || i">
                   <JSONItem
                     :item="item"
                     :number="i"
@@ -649,36 +649,41 @@ export default {
       this.$store.commit("toggleExpandUI");
     },
     checkOverriddenID(id) {
-      let self = this;
-      // check if id is string or array
-      // if array take first element
       if (Array.isArray(id)) {
         id = id[0];
       }
-      axios
-        .get(
-          self.apiUrl +
-            `/api/dataset/query?size=100&q=identifier:"${encodeURIComponent(
-              id
-            )}"&meta=true`+'&timestamp=' + new Date().getTime()
-        )
+
+      if (typeof id !== "string" || !id) {
+        return Promise.resolve(false);
+      }
+
+      return axios
+        .get(`${this.apiUrl}/api/dataset/query`, {
+          params: {
+            size: 100,
+            q: `identifier:"${id}"`,
+            meta: true,
+            timestamp: Date.now(),
+          },
+        })
         .then((res) => {
           if (
-            res.data.hits.length == 1 &&
-            Object.hasOwnProperty.call(res.data.hits[0], "_id")
+            res.data.hits.length === 1 &&
+            Object.hasOwn(res.data.hits[0], "_id")
           ) {
-            //turn on edit mode
-            self.$store.commit("setEditMode", { id: res.data.hits[0]["_id"] });
-            console.log("Edit mode enabled for ID: ", res.data.hits[0]["_id"]);
+            this.$store.commit("setEditMode", {
+              id: res.data.hits[0]._id,
+            });
+
+            console.log("Edit mode enabled for ID:", res.data.hits[0]._id);
+
             return true;
-          } else {
-            console.log("No existing record found for identifier: ", id);
-            return false;
           }
-        })
-        .catch((err) => {
+
+          console.log("No existing record found for identifier:", id);
           return false;
-        });
+        })
+        .catch(() => false);
     },
     handleEdits() {
       var self = this;
