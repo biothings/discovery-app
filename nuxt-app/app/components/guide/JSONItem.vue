@@ -240,42 +240,48 @@ export default {
   props: ["item", "number", "username"],
   methods: {
     checkAlreadyExists(item) {
-      let self = this;
-      if (Object.hasOwnProperty.call(item, "identifier")) {
-        //check if identifier is a string or an array and get the first value
-        let id = "";
-        if (item.identifier.constructor == String) {
-          id = item.identifier;
-        } else if (item.identifier.constructor == Array) {
-          id = item.identifier[0];
-        }
-        id = id.replace("&", "%26");
-        const runtimeConfig = useRuntimeConfig();
-        axios
-          .get(
-            runtimeConfig.public.apiUrl +
-              `/api/dataset/query?q=(identifier:("${id}"))`
-          )
-          .then((res) => {
-            if (res.data.total == 1) {
-              self.exists = res.data.hits[0]["_id"];
-              self.$store.commit("addBulkReport", {
-                field: "Exists",
-                value: self.exists,
-              });
-              if (self.username == res.data.hits[0]["_meta"]["username"]) {
-                self.canOverwrite = true;
-              } else {
-                self.canOverwrite = false;
-              }
-            } else {
-              self.registerJSONItem();
-            }
-          })
-          .catch((err) => {
-            throw err;
-          });
+      if (!Object.hasOwn(item, "identifier")) {
+        return;
       }
+
+      let id = "";
+
+      if (typeof item.identifier === "string") {
+        id = item.identifier;
+      } else if (Array.isArray(item.identifier)) {
+        id = item.identifier[0];
+      }
+
+      if (!id) {
+        return;
+      }
+
+      const runtimeConfig = useRuntimeConfig();
+
+      axios
+        .get(`${runtimeConfig.public.apiUrl}/api/dataset/query`, {
+          params: {
+            q: `(identifier:("${id}"))`,
+          },
+        })
+        .then((res) => {
+          if (res.data.total === 1) {
+            this.exists = res.data.hits[0]._id;
+
+            this.$store.commit("addBulkReport", {
+              field: "Exists",
+              value: this.exists,
+            });
+
+            this.canOverwrite =
+              this.username === res.data.hits[0]._meta.username;
+          } else {
+            this.registerJSONItem();
+          }
+        })
+        .catch((err) => {
+          throw err;
+        });
     },
     checkRequirements(item) {
       let self = this;
