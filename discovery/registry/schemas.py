@@ -64,16 +64,13 @@ def _add_schema_class(schema, namespace, dryrun=False, schema_org_version=None):
         except Exception as exc:  # TODO not sure what could go wrong
             raise RegistryError(str(exc))
 
-    # TODO: validate all classes first before deleting the namespace
-    # delete the existing classes under the namespace
-    if dryrun:
-        logger.info(
-            f'Deleting existing "{namespace}" classes... (Dryrun only, not actually deleting anything.'
-        )
-    else:
-        delete_classes(namespace)
-        logger.debug(f'"{namespace}" classes were deleted.')
-    # save classes
+    # Save the new/updated classes first, then prune only the classes that
+    # no longer exist in the new version. Since each class's _id is
+    # deterministic (f"{namespace}::{prefix}:{label}"), re-saving a class
+    # that already exists is a no-op upsert. This avoids ever leaving the
+    # namespace with zero classes if saving fails partway through: nothing
+    # is deleted until every new class has been saved successfully.
+    saved_ids = []
     for schema_class in schema_classes:
         cls = ESSchemaClass(namespace=namespace, **schema_class)
         if dryrun:
@@ -85,8 +82,15 @@ def _add_schema_class(schema, namespace, dryrun=False, schema_org_version=None):
                 raise
         else:
             cls.save()
+            saved_ids.append(cls.meta.id)
+
     if dryrun:
-        logger.info("This is a dryrun, no classes are actually saved")
+        logger.info("This is a dryrun, no classes are actually saved or deleted")
+    else:
+        # remove classes that existed under this namespace previously but
+        # are not part of the newly saved set (e.g. types removed upstream)
+        delete_classes(namespace, exclude_ids=saved_ids)
+        logger.debug(f'Stale "{namespace}" classes were pruned.')
 
     return len(schema_classes)
 
@@ -117,7 +121,7 @@ def exists(anyid):
     return is_namepace or is_url
 
 
-def add(namespace, url, user, doc=None, overwrite=False):
+def add(namespace, url, user=None, doc=None, overwrite=False):
     """
     Add a schema record to schema index.
     Also add its schema class records to schema_class index.
@@ -127,6 +131,11 @@ def add(namespace, url, user, doc=None, overwrite=False):
     to detect if the schema has changed, we have overwrite switch
     here instead of differentiating created, updated, or noop result.
 
+    'user' assigns the owner and is required when registering a new
+    namespace. When overwrite=True it is ignored: refreshing content must
+    never reassign ownership, otherwise a slow url fetch leaves a window in
+    which a concurrent transfer can be captured stale and written back.
+    Use transfer_ownership to change the owner.
     """
     if not namespace or not isinstance(namespace, str):
         raise RegistryError("invalid namespace value")
@@ -137,7 +146,11 @@ def add(namespace, url, user, doc=None, overwrite=False):
     if not url or not isinstance(url, str) or not url.startswith("http"):
         raise RegistryError("invalid url or protocol")
 
-    if not user or not isinstance(user, str):
+    if user is not None and not isinstance(user, str):
+        raise RegistryError("user name is required")
+
+    if not overwrite and not user:
+        # only a new registration needs an owner; see docstring
         raise RegistryError("user name is required")
 
     if not doc:
@@ -178,7 +191,15 @@ def add(namespace, url, user, doc=None, overwrite=False):
                 original_last_updated = meta_data.last_updated
             file = ESSchemaFile(**doc)
             file.meta.id = namespace
-            file._meta.username = user
+            # the document is rebuilt from the fetched content, so every
+            # ownership field has to be carried over explicitly. A content
+            # refresh does not reassign ownership (see transfer_ownership)
+            # and must not erase the audit trail of a past transfer.
+            file._meta.username = meta_data.get("username") or user
+            if meta_data.get("previous_username"):
+                file._meta.previous_username = meta_data.get("previous_username")
+            if meta_data.get("owner_changed_ts"):
+                file._meta.owner_changed_ts = meta_data.get("owner_changed_ts")
             file._meta.url = url
             file._meta.date_created = (
                 original_date_created or original_last_updated or current_date
@@ -189,14 +210,6 @@ def add(namespace, url, user, doc=None, overwrite=False):
             file.save()
             count = _add_schema_class(doc, namespace)
             return count
-        elif is_ownership_changed(namespace, user):
-            schema = ESSchemaFile.get(id=namespace)
-            schema._meta.username = user
-            schema._status.refresh_ts = current_date
-            schema._status.refresh_status = 299
-            schema._status.refresh_msg = "ownership updated, no content changes"
-            schema.save(skip_ts=True)
-            return len(list(get_classes(namespace)))
         else:
             return 0
 
@@ -290,13 +303,16 @@ def get_all(start=0, size=10, user=None, fields="_meta.url"):
         yield RegistryDocument.wraps(hit)
 
 
-def update(namespace, user, url, doc=None):
+def update(namespace, user=None, url=None, doc=None):
     """
     Update the document or metadata associated with a namespace.
     Return the number of classes in this document.
 
     Cannot determine if there's substantial content updated.
     Timestamp will be updated as well.
+
+    This never changes the registered owner, whatever 'user' is set to.
+    Use transfer_ownership for that.
     """
     if not exists(namespace):
         raise NoEntityError(f"namespace '{namespace}'' does not exist.")
@@ -345,14 +361,55 @@ def is_schema_updated(namespace, current_doc):
     return False
 
 
-def is_ownership_changed(namespace, user):
+def transfer_ownership(namespace, new_owner):
     """
-    Comparison method
-    Compare the existing schema's registered owner (username) with the given user.
-    Return True if the owner differs (ownership change), else False.
+    Change the registered owner (username) of a schema namespace.
+
+    Ownership is deliberately decoupled from schema content: this never
+    fetches the schema url and never touches the schema document body or its
+    classes, a transfer cannot fail because the url is briefly
+    unreachable and it raises on failure rather than recording the error in
+    _status, so a caller cannot mistake a failed transfer for a successful
+    one.
+
+    The change is recorded in _meta.previous_username and
+    _meta.owner_changed_ts. _meta.last_updated is deliberately left alone:
+    because the content did not change, and it is the field used to compare an index
+    against a backup.
+
+    Return the previous owner. If new_owner already owns the namespace this
+    is a no-op and the current owner is returned unchanged.
     """
-    meta_data = get_meta(namespace)
-    return meta_data.get("username") != user
+    if not namespace or not isinstance(namespace, str):
+        raise RegistryError("invalid namespace value")
+
+    if not new_owner or not isinstance(new_owner, str):
+        raise RegistryError("new owner is required")
+
+    # realtime GET rather than exists(), which is search-backed and would
+    # miss a namespace registered since the last index refresh
+    schema = ESSchemaFile.get(id=namespace, ignore=404)
+    if not schema:
+        raise NoEntityError(f"namespace '{namespace}' does not exist.")
+
+    previous_owner = schema._meta.username
+
+    if previous_owner == new_owner:
+        logger.info("namespace '%s' is already owned by %s.", namespace, new_owner)
+        return previous_owner
+
+    schema._meta.username = new_owner
+    schema._meta.previous_username = previous_owner
+    schema._meta.owner_changed_ts = datetime.now().astimezone()
+    schema.save(skip_ts=True)  # content unchanged, do not move last_updated
+
+    logger.info(
+        "ownership of namespace '%s' changed: %s -> %s",
+        namespace,
+        previous_owner,
+        new_owner,
+    )
+    return previous_owner
 
 
 def delete(namespace):
@@ -491,18 +548,27 @@ def get_schema_org_property(property_label, raise_on_error=True):
         return None
 
 
-def delete_classes(namespace):
+def delete_classes(namespace, exclude_ids=None):
     """
-    Delete all classes of the specified namespace.
+    Delete classes of the specified namespace.
     Operation only applies to the class index.
+
+    If `exclude_ids` is given, only classes whose _id is NOT in that
+    collection are deleted (used to prune stale classes after a reload
+    without ever leaving the namespace empty). Otherwise all classes
+    under the namespace are deleted.
     """
     search = ESSchemaClass.search()
     search = search.query("match", namespace=namespace)
+    if exclude_ids:
+        search = search.exclude("ids", values=list(exclude_ids))
+
+    count = search.count()
     search.delete()
 
-    logging.info("Deleted %s classes from namespace %s.", search.count(), namespace)
+    logging.info("Deleted %s classes from namespace %s.", count, namespace)
 
-    return search.count()
+    return count
 
 
 def get_all_contexts():

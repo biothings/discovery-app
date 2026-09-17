@@ -211,7 +211,7 @@
             <small class="text-success bold">Ready to proceed!</small>
             <button
               class="btn themeButton text-light"
-              @click="nextStep()"
+              @click="nextStep(); scrollToTop()"
               :class="{ heartbeat: isComplete }"
               :disabled="!isComplete"
             >
@@ -224,7 +224,7 @@
             >
             <button
               class="btn themeButton text-light"
-              @click="nextStep()"
+              @click="nextStep(); scrollToTop()"
               :class="{ heartbeat: isComplete, notallowed: !isComplete }"
               :disabled="!isComplete"
             >
@@ -249,7 +249,7 @@
               <font-awesome-icon icon="fas fa-chevron-left"></font-awesome-icon>
               BACK
             </button>
-            <button class="btn themeButton text-light" @click="nextStep()">
+            <button class="btn themeButton text-light" @click="nextStep(); scrollToTop()">
               NEXT
               <font-awesome-icon
                 icon="fas fa-chevron-right"
@@ -292,6 +292,9 @@ export default {
     },
   },
   methods: {
+    scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
     isRequired(propname) {
       let req = this.$store.getters.getValidation["required"];
       if (req.includes(propname)) {

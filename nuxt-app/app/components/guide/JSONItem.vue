@@ -122,7 +122,7 @@
           <button
             role="button"
             @click="register()"
-            class="btn btn-sm btn-block mainBackLight text-light m-1"
+            class="btn btn-sm btn-block bg-warning text-dark m-1"
             title="Try to registered your metadata again with latest changes"
           >
             Retry Registration
@@ -134,7 +134,7 @@
           <button
             role="button"
             @click="updateJSONItem()"
-            class="btn btn-sm btn-info btn-block text-light m-1"
+            class="btn btn-sm btn-warning btn-block text-dark m-1"
             title="Update registered metadata with new changes made here"
           >
             Update Registration
@@ -240,35 +240,48 @@ export default {
   props: ["item", "number", "username"],
   methods: {
     checkAlreadyExists(item) {
-      let self = this;
-      if (Object.hasOwnProperty.call(item, "identifier")) {
-        let id = item.identifier.replace("&", "%26");
-        const runtimeConfig = useRuntimeConfig();
-        axios
-          .get(
-            runtimeConfig.public.apiUrl +
-              `/api/dataset/query?q=(identifier:("${id}"))`
-          )
-          .then((res) => {
-            if (res.data.total == 1) {
-              self.exists = res.data.hits[0]["_id"];
-              self.$store.commit("addBulkReport", {
-                field: "Exists",
-                value: self.exists,
-              });
-              if (self.username == res.data.hits[0]["_meta"]["username"]) {
-                self.canOverwrite = true;
-              } else {
-                self.canOverwrite = false;
-              }
-            } else {
-              self.registerJSONItem();
-            }
-          })
-          .catch((err) => {
-            throw err;
-          });
+      if (!Object.hasOwn(item, "identifier")) {
+        return;
       }
+
+      let id = "";
+
+      if (typeof item.identifier === "string") {
+        id = item.identifier;
+      } else if (Array.isArray(item.identifier)) {
+        id = item.identifier[0];
+      }
+
+      if (!id) {
+        return;
+      }
+
+      const runtimeConfig = useRuntimeConfig();
+
+      axios
+        .get(`${runtimeConfig.public.apiUrl}/api/dataset/query`, {
+          params: {
+            q: `(identifier:("${id}"))`,
+          },
+        })
+        .then((res) => {
+          if (res.data.total === 1) {
+            this.exists = res.data.hits[0]._id;
+
+            this.$store.commit("addBulkReport", {
+              field: "Exists",
+              value: this.exists,
+            });
+
+            this.canOverwrite =
+              this.username === res.data.hits[0]._meta.username;
+          } else {
+            this.registerJSONItem();
+          }
+        })
+        .catch((err) => {
+          throw err;
+        });
     },
     checkRequirements(item) {
       let self = this;
@@ -433,10 +446,15 @@ export default {
       };
       const runtimeConfig = useRuntimeConfig();
 
+      //remove _id and _meta from item before sending to API
+      let itemToUpdate = Object.assign({}, self.item);
+      delete itemToUpdate["_id"];
+      delete itemToUpdate["_meta"];
+
       axios
         .put(
           runtimeConfig.public.apiUrl + "/api/dataset/" + self.exists,
-          self.item,
+          itemToUpdate,
           config
         )
         .then((res) => {
@@ -569,12 +587,28 @@ export default {
       var ajv = new Ajv({ allErrors: true, strict: false });
       addFormats(ajv);
       var schema = this.validation;
-      var data = this.item;
-      const isValid = ajv.validate(schema, data);
-      if (!isValid && ajv?.errors) {
-        this.getPreview(ajv.errors);
-      } else {
-        this.getPreview({ result: "ALL GOOD!" });
+
+      // Defensively dedupe "required" arrays anywhere in the schema
+      const dedupeRequired = (node) => {
+        if (node && typeof node === 'object') {
+          if (Array.isArray(node.required)) {
+            node.required = [...new Set(node.required)];
+          }
+          Object.values(node).forEach(dedupeRequired);
+        }
+      };
+      const cleanSchema = JSON.parse(JSON.stringify(schema));
+      dedupeRequired(cleanSchema);
+
+      try {
+        const isValid = ajv.validate(cleanSchema, this.item);
+        if (!isValid && ajv?.errors) {
+          this.getPreview(ajv.errors);
+        } else {
+          this.getPreview({ result: "ALL GOOD!" });
+        }
+      } catch (e) {
+        this.getPreview({ result: `Schema error: ${e.message}` });
       }
     },
     validateAPI() {
