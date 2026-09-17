@@ -59,7 +59,7 @@ def ensure_test_data(es_client):
     """Prepare ES indices once per test session."""
     # Always restore to ensure clean state - don't skip based on existing data
     print("Restoring test data for clean state")
-    restore_from_file(BACKUP_FILE)
+    restore_from_file(BACKUP_FILE, force=True)
     es_client.indices.refresh(index=",".join(INDEX_NAMES))
 
 
@@ -91,12 +91,12 @@ def with_clean_schema_state(ensure_test_data, es_client):
     session (e.g. `pytest tests/test_*`). Restoring before AND after keeps each
     module self-contained regardless of what ran before or after it.
     """
-    restore_from_file(BACKUP_FILE)
+    restore_from_file(BACKUP_FILE, force=True)
     es_client.indices.refresh(index=",".join(INDEX_NAMES))
 
     yield
 
-    restore_from_file(BACKUP_FILE)
+    restore_from_file(BACKUP_FILE, force=True)
     es_client.indices.refresh(index=",".join(INDEX_NAMES))
 
 
@@ -125,7 +125,7 @@ def with_clean_datasets(with_clean_schema_state, es_client):
 
     # Teardown: restore clean state after tests complete
     # This ensures next run starts fresh
-    restore_from_file(BACKUP_FILE)
+    restore_from_file(BACKUP_FILE, force=True)
     es_client.indices.refresh(index="discover_dataset")
 
 
