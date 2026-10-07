@@ -363,10 +363,21 @@ class SchemaNotifier(Notifier):
         await self.broadcast(
             Message(
                 {
-                    "title": "Schema Updated",
-                    "body": f'Schema "{namespace}" updated. {num_classes} current classes.',
+                    "title": "✅ Schema Updated",
+                    "body": f"Schema `{namespace}` updated successfully. {num_classes} current classes.",
                     "url": f"https://discovery.biothings.io/view/{namespace}",
                     "url_text": "Visualize Schema",
+                }
+            )
+        )
+
+    async def update_failed(self, namespace, error):
+        await self.broadcast(
+            Message(
+                {
+                    "title": "❌ Schema Update Failed",
+                    # slack limits section text to 3000 characters
+                    "body": f"Failed to update schema `{namespace}`.\nError: ```{error[:2800]}```",
                 }
             )
         )

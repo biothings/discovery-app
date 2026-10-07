@@ -1,6 +1,9 @@
+import asyncio
 import logging
 import time
 
+import config
+from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
 from discovery.registry.schemas import _add_schema_class
 from discovery.model import Schema
@@ -9,6 +12,15 @@ from discovery.registry.common import RegistryError
 
 logger = logging.getLogger(__name__)
 
+
+def _notify(action, **details):
+    """Send a SchemaNotifier message from sync code. Never raises."""
+    try:
+        asyncio.run(getattr(SchemaNotifier(config), action)(**details))
+    except Exception:
+        logger.exception(f"failed to send '{action}' notification for {details.get('namespace')} schema")
+
+
 def schema_update(namespace):
     """ Update registered schemas by namespace.
         To run a schema update manually:
@@ -16,14 +28,26 @@ def schema_update(namespace):
         schema_update(namespace="n3c")
     """
     logger.info(f"starting updating process for {namespace} schema")
-    meta = schemas.get_meta(namespace)
     try:
+        meta = schemas.get_meta(namespace)
         # deliberately does not pass a user: a content refresh must not be
         # able to reassign ownership. See registry.schemas.transfer_ownership.
-        schemas.update(namespace, url=meta["url"])
-        logger.info(f'update of {namespace} schema complete')
+        count = schemas.update(namespace, url=meta["url"])
+        status = Schema.get(id=namespace)._status
+        if not isinstance(count, int):
+            # schemas.update records a RegistryError in _status instead of raising
+            raise RegistryError(status.refresh_msg)
     except Exception as e:
-        logger.error(e)
+        logger.exception(f'update of {namespace} schema failed')
+        _notify("update_failed", namespace=namespace, error=str(e) or type(e).__name__)
+    else:
+        if status.refresh_status == 299:
+            # 299 is only set when new content was fetched and saved
+            logger.info(f'update of {namespace} schema complete')
+            _notify("update", namespace=namespace, num_classes=count)
+        else:
+            # unchanged schemas are refreshed daily; don't notify for them
+            logger.info(f'{namespace} schema already at latest version')
 
 
 def daily_schema_update():
