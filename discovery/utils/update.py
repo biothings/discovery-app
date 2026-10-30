@@ -18,14 +18,18 @@ def _notify(action, **details):
     try:
         asyncio.run(getattr(SchemaNotifier(config), action)(**details))
     except Exception:
-        logger.exception(f"failed to send '{action}' notification for {details.get('namespace')} schema")
+        logger.exception(f"failed to send '{action}' notification")
 
 
-def schema_update(namespace):
+def schema_update(namespace, notify=True):
     """ Update registered schemas by namespace.
         To run a schema update manually:
         from discovery.utils.update import schema_update
         schema_update(namespace="n3c")
+
+        Returns the error message if the update failed, otherwise None.
+        notify=False skips the per-schema Slack alert, so a caller
+        updating many schemas can send one summary instead.
     """
     logger.info(f"starting updating process for {namespace} schema")
     try:
@@ -39,14 +43,16 @@ def schema_update(namespace):
             raise RegistryError(status.refresh_msg)
     except Exception as e:
         logger.exception(f'update of {namespace} schema failed')
-        _notify("update_failed", namespace=namespace, error=str(e) or type(e).__name__)
+        error = str(e) or type(e).__name__
+        if notify:
+            _notify("update_failed", namespace=namespace, error=error)
+        return error
     else:
+        # only failures are sent to slack; successful updates are just logged
         if status.refresh_status == 299:
             # 299 is only set when new content was fetched and saved
             logger.info(f'update of {namespace} schema complete')
-            _notify("update", namespace=namespace, num_classes=count)
         else:
-            # unchanged schemas are refreshed daily; don't notify for them
             logger.info(f'{namespace} schema already at latest version')
 
 
@@ -55,14 +61,25 @@ def daily_schema_update():
     Gather a list of schemas, and update schemas
     by namespace
     """
-    all_schemas = Schema.search()
     excluded_namespace = ['schema']
     start = time.process_time()
     schema_count = 0
-    for schema in all_schemas.scan():
-        if schema.meta.id not in excluded_namespace:
-            schema_update(schema.meta.id)
-            schema_count += 1
+    failures = {}
+    job_error = None
+    try:
+        for schema in Schema.search().scan():
+            if schema.meta.id not in excluded_namespace:
+                error = schema_update(schema.meta.id, notify=False)
+                schema_count += 1
+                if error:
+                    failures[schema.meta.id] = error
+    except Exception as e:
+        # e.g. elasticsearch is down, so the schema list can't be read
+        logger.exception(f'daily schema update stopped after {schema_count} schemas')
+        job_error = str(e) or type(e).__name__
+    if failures or job_error:
+        # one summary per run, not one message per failing schema
+        _notify("update_failed_summary", failures=failures, total=schema_count, job_error=job_error)
     total_time = time.process_time() - start
     logger.info(f'update process complete, total processing time was {total_time} seconds for {schema_count} schemas')
 
@@ -111,16 +128,26 @@ def monthly_schemaorg_update():
         if hasattr(exc, 'status_code'):
             logger.error(f"Status code: {exc.status_code}")
         logger.exception(f"Validation failed for schema.org version {latest_version}. DDE schema.org will not be updated.")
+        _notify(
+            "update_failed",
+            namespace="schema",
+            error=f"schema.org {latest_version} failed validation, DDE schema.org was not updated.\n{exc}",
+        )
         return
 
     # Validation passed - perform the actual update
     logger.info(f"Updating schema.org from {current_version} to {latest_version}")
     try:
         schemas.add_core(update=True, schema_org_version=latest_version)
-    except Exception:
+    except Exception as exc:
         logger.exception(
             f"Update failed while reloading schema.org version {latest_version}. "
             "DDE schema.org may be left in a partially updated state."
+        )
+        _notify(
+            "update_failed",
+            namespace="schema",
+            error=f"Reloading schema.org {latest_version} failed, DDE schema.org may be partially updated.\n{exc}",
         )
         return
 
@@ -128,8 +155,16 @@ def monthly_schemaorg_update():
     new_version = schemas.get_stored_schema_org_version()
     if new_version == latest_version:
         logger.info(f"Update verified - schema.org is now at version {new_version}")
+        # a reload at the same version only repairs missing classes; don't notify for it
+        if current_version != new_version:
+            _notify("schemaorg_update", old_version=current_version, new_version=new_version, num_classes=class_count)
     else:
         logger.warning(f"Version mismatch: expected {latest_version}, got {new_version}")
+        _notify(
+            "update_failed",
+            namespace="schema",
+            error=f"schema.org version mismatch after update: expected {latest_version}, got {new_version}",
+        )
 
     total_time = time.process_time() - start
     logger.info(f'Monthly schema.org update complete, processing time: {total_time:.2f} seconds')
