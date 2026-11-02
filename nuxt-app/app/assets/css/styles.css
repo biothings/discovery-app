@@ -311,6 +311,10 @@ body {
   color: var(--dde-light) !important;
 }
 
+.strikethrough-text {
+  text-decoration: line-through;
+}
+
 /* CodeMirror */
 .cm-editor {
   height: 800px;

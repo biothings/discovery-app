@@ -185,6 +185,7 @@ class SchemaAdapter:
             "parent_classes",
             "properties",
             "validation",
+            "superseded_by",
         ):
             try:
                 ans[key] = getattr(schema_class, key)
