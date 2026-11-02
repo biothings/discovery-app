@@ -74,8 +74,8 @@ async def test_schema_notifier_update(mock_settings):
 
     event_message = Message(
         {
-            "title": "Schema Updated",
-            "body": 'Schema "test_namespace" updated. 10 current classes.',
+            "title": "✅ Schema Updated",
+            "body": "Schema `test_namespace` updated successfully. 10 current classes.",
             "url": "https://discovery.biothings.io/view/test_namespace",
             "url_text": "Visualize Schema",
         }

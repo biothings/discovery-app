@@ -129,6 +129,20 @@ def with_clean_datasets(with_clean_schema_state, es_client):
     es_client.indices.refresh(index="discover_dataset")
 
 
+@pytest.fixture(autouse=True)
+def no_slack(monkeypatch):
+    """Never post to Slack during tests, whatever SLACK_WEBHOOKS is set to.
+
+    Every notifier (API handlers, scheduled updates) sends through
+    biothings' SlackChannel, so stubbing its send covers all of them.
+    Tests that mock channel.send on an instance still see their own mock.
+    """
+    async def _skip_send(self, event):
+        return None
+
+    monkeypatch.setattr("biothings.web.analytics.channels.SlackChannel.send", _skip_send)
+
+
 # -----------------------------------------------------------------------------
 # Async test support without pytest-asyncio plugin
 # -----------------------------------------------------------------------------
