@@ -24,7 +24,7 @@ ES_INDICES = {
 # Web Application
 # *****************************************************************************
 APP_LIST = [
-    (r"/api/query/?", "biothings.web.handlers.QueryHandler", {"biothing_type": "schema"}),
+    (r"/api/query/?", "biothings.web.handlers.QueryHandler", {"biothing_type": "schema", "cache": 3600}),
     (r"/api/registry/query/?", "biothings.web.handlers.QueryHandler", {"biothing_type": "schema"}),
     (r"/api/registry/([^/]+)/([^/]+)/?", "discovery.handlers.api.SchemaRegistryHandler"),
     (r"/api/registry/([^/]+)/?", "discovery.handlers.api.SchemaRegistryHandler"),

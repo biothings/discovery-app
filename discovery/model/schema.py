@@ -132,7 +132,8 @@ class SchemaClassProp(InnerDoc):
         "range": [ "schema:Text" ],
         "curie": "schema:healthPlanNetworkTier",
         "label": "healthPlanNetworkTier",
-        "uri": "http://schema.org/healthPlanNetworkTier"
+        "uri": "http://schema.org/healthPlanNetworkTier",
+        "superseded_by": []
     }
     """
 
@@ -141,6 +142,7 @@ class SchemaClassProp(InnerDoc):
     label = Text(fields={"raw": Keyword()})
     range = Text(multi=True, fields={"raw": Keyword()})
     description = Text()
+    superseded_by = Keyword(multi=True)  # curie(s) of the replacing property, empty if not superseded
 
 
 class SchemaClass(DiscoveryDoc):
@@ -156,7 +158,8 @@ class SchemaClass(DiscoveryDoc):
         "ref": false,
         "uri": "http://schema.org/ViewAction",
         "prefix": "schema",
-        "namespace": "schema"
+        "namespace": "schema",
+        "superseded_by": []
     }
     """
 
@@ -178,6 +181,7 @@ class SchemaClass(DiscoveryDoc):
         properties={"$schema": Text(fields={"raw": Keyword()}), "type": Keyword()},
     )  # nested properties for filter
     ref = Boolean()  # not defined in this schema
+    superseded_by = Keyword(multi=True)  # curie(s) of the replacing class, empty if not superseded
 
     class Index:
         """
