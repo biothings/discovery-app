@@ -363,10 +363,56 @@ class SchemaNotifier(Notifier):
         await self.broadcast(
             Message(
                 {
-                    "title": "Schema Updated",
-                    "body": f'Schema "{namespace}" updated. {num_classes} current classes.',
+                    "title": "✅ Schema Updated",
+                    "body": f"Schema `{namespace}` updated successfully. {num_classes} current classes.",
                     "url": f"https://discovery.biothings.io/view/{namespace}",
                     "url_text": "Visualize Schema",
+                }
+            )
+        )
+
+    async def schemaorg_update(self, old_version, new_version, num_classes):
+        await self.broadcast(
+            Message(
+                {
+                    "title": "✅ Schema.org Version Updated",
+                    "body": f"Schema.org updated from version `{old_version}` to `{new_version}`. {num_classes} current classes.",
+                    "url": "https://discovery.biothings.io/view/schema",
+                    "url_text": "Visualize Schema",
+                }
+            )
+        )
+
+    async def update_failed(self, namespace, error):
+        await self.broadcast(
+            Message(
+                {
+                    "title": "❌ Schema Update Failed",
+                    # slack limits section text to 3000 characters
+                    "body": f"Failed to update schema `{namespace}`.\nError: ```{error[:2800]}```",
+                }
+            )
+        )
+
+    async def update_failed_summary(self, failures, total, job_error=None):
+        """One message for a whole daily run, so a shared outage doesn't post once per schema."""
+        lines = [f"{len(failures)} of {total} schema updates failed."]
+        if job_error:
+            lines.append(f"The daily update stopped early: ```{job_error[:500]}```")
+        # slack limits section text to 3000 characters
+        budget = 2800 - sum(len(line) for line in lines)
+        for i, (namespace, error) in enumerate(failures.items()):
+            line = f"• `{namespace}`: {error.splitlines()[0][:150] if error else ''}"
+            if len(line) + 30 > budget:
+                lines.append(f"…and {len(failures) - i} more, see the logs.")
+                break
+            lines.append(line)
+            budget -= len(line) + 1
+        await self.broadcast(
+            Message(
+                {
+                    "title": "❌ Daily Schema Update Failures",
+                    "body": "\n".join(lines),
                 }
             )
         )
