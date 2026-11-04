@@ -182,6 +182,7 @@ class SchemaClass(DiscoveryDoc):
     )  # nested properties for filter
     ref = Boolean()  # not defined in this schema
     superseded_by = Keyword(multi=True)  # curie(s) of the replacing class, empty if not superseded
+    provenance = Text()  # dct:provenance, schema change notes (issue #209)
 
     class Index:
         """
