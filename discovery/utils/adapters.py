@@ -186,6 +186,7 @@ class SchemaAdapter:
             "properties",
             "validation",
             "superseded_by",
+            "deprecated",
         ):
             try:
                 ans[key] = getattr(schema_class, key)

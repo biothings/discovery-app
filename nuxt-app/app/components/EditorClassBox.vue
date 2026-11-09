@@ -161,6 +161,23 @@
                       v-html="prop.description || 'No description provided'"
                     ></span>
                   </template>
+                  <!-- show deprecated badge -->
+                  <template v-if="prop?.deprecated">
+                    <small class="badge badge-danger ml-1" data-tippy-content="This property is deprecated and should not be used">
+                      <font-awesome-icon icon="fas fa-exclamation-circle" />
+                    </small>
+                  </template>
+                <!-- show superseded items -->
+                <template v-if="prop?.superseded_by">
+                  <small class="ml-1 text-muted" data-tippy-content="This property is superseded by another property">
+                    <small class="ml-1">Use instead:
+                      <strong v-for="superseded in prop.superseded_by" :key="superseded"
+                        class="ml-1" data-tippy-content="You should use this property instead of the deprecated one">
+                        {{ superseded }}
+                      </strong>
+                    </small>
+                  </small>
+                </template>
                 </span>
               </div>
               <div
@@ -233,6 +250,23 @@
                     <MarkdownParser
                       :description="prop?.description"
                     ></MarkdownParser>
+                  </small>
+                </template>
+                <!-- show deprecated badge -->
+                  <template v-if="prop?.deprecated">
+                    <small class="badge badge-danger ml-1" data-tippy-content="This property is deprecated and should not be used">
+                      <font-awesome-icon icon="fas fa-exclamation-circle" />
+                    </small>
+                  </template>
+                <!-- show superseded items -->
+                <template v-if="prop?.superseded_by">
+                  <small class="ml-1 text-muted" data-tippy-content="This property is superseded by another property">
+                    <small class="ml-1">Use instead:
+                      <strong v-for="superseded in prop.superseded_by" :key="superseded"
+                        class="ml-1" data-tippy-content="You should use this property instead of the deprecated one">
+                        {{ superseded }}
+                      </strong>
+                    </small>
                   </small>
                 </template>
               </span>
