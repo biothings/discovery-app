@@ -4,21 +4,46 @@
       <a class="d-inline text-primary" :href="'/ns/' + q.name.split(':')[0]">
         <h3
           class="bold d-inline"
+          :class="{ 'strikethrough-text': q?.superseded_by }"
           :id="q.name"
           v-text="q.name.split(':')[0] + ':'"
         ></h3>
       </a>
       <h3
         class="bold d-inline"
-        :class="textColor"
+        :class="[textColor, { 'strikethrough-text': q?.superseded_by }]"
         :id="q.name"
         v-text="q.name.split(':')[1]"
       ></h3>
+      <template v-if="q?.deprecated">
+        <span class="badge badge-danger ml-1" data-tippy-content="This class is deprecated and should not be used">
+          Deprecated
+        </span>
+      </template> 
+      <!-- render simple list of superseded classes -->
+      <template v-if="q?.superseded_by">
+        <span class="text-dark ml-1">
+          <font-awesome-icon icon="fas fa-arrow-right"> </font-awesome-icon> Use instead:
+          <span v-for="superseded in q.superseded_by" :key="superseded"
+           class="text-primary ml-1" data-tippy-content="You should use this class instead of the deprecated one">
+            <!-- search the registry for the replacing class; searched by label
+                 since a "prefix:label" query is parsed as field:value syntax -->
+            <RouterLink
+              class="d-inline bold"
+              :to="{
+                path: '/registry',
+                query: { query: superseded.split(':').pop() },
+              }"
+              v-text="superseded"
+            ></RouterLink>
+          </span>
+        </span>
+      </template> 
     </div>
     <div v-else-if="q && q.label">
       <h3
         class="bold d-inline"
-        :class="textColor"
+        :class="[textColor, { 'strikethrough-text': q?.superseded_by }]"
         :id="q.label"
         v-text="q.label.split(':')[0]"
       ></h3>
@@ -138,6 +163,18 @@
               <a class="font-weight-bold" :href="'./' + item.label">
                 <span v-html="item.label"></span>
               </a>
+              <small v-if="item?.deprecated" class="badge badge-danger ml-1" data-tippy-content="This property is deprecated and should not be used">
+                Deprecated
+              </small>
+              <!-- show superseded items -->
+              <div v-if="item?.superseded_by" class="alert alert-warning p-1 mt-1 mb-1">
+                <small class="ml-1">Use instead:
+                  <strong v-for="superseded in item.superseded_by" :key="superseded"
+                    class="ml-1" data-tippy-content="You should use this property instead of the deprecated one">
+                    {{ superseded }}
+                  </strong>
+                </small>
+              </div>
             </td>
             <td class="text-dark">
               <MarkdownParser :description="item.description"></MarkdownParser>
@@ -320,6 +357,10 @@ export default {
     },
     reorderByLabel(objects) {
       return objects.sort((a, b) => {
+        // deprecated properties go last
+        if (!!a.deprecated !== !!b.deprecated) {
+          return a.deprecated ? 1 : -1;
+        }
         // Ensure that both objects have a 'label' property before comparing
         if (a.label && b.label) {
           return a.label.localeCompare(b.label);

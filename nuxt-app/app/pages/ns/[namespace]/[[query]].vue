@@ -262,6 +262,14 @@
                         <b v-text="def['name'].split(':')[1]"></b>
                         <font-awesome-icon icon="fas fa-chevron-right" />
                       </nuxt-link>
+                      <!-- show deprecated badge -->
+                      <span
+                        v-if="def['deprecated']"
+                        class="badge badge-danger ml-1"
+                        data-tippy-content="This class is deprecated and should not be used"
+                      >
+                        Deprecated
+                      </span>
                       <p class="text-muted">
                         <MarkdownParser :description="def['description']"></MarkdownParser>
                       </p>

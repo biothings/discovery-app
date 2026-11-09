@@ -12,6 +12,7 @@ import logging
 from datetime import datetime
 
 import requests
+from biothings_schema.dataload import construct_schemaorg_url
 
 from discovery.model import Schema as ESSchemaFile
 from discovery.model import SchemaClass as ESSchemaClass
@@ -242,8 +243,11 @@ def get(namespace):
 
     if namespace == "schema":
         schema = RegistryDocument(_id="schema")
-        schema.meta.url = "https://schema.org/docs/tree.jsonld"
-        schema.meta.version = get_latest_schema_org_version()
+        # the version actually loaded into the class index, falling back
+        # to the latest release if it was never stored
+        version = get_stored_schema_org_version() or get_latest_schema_org_version()
+        schema.meta.url = construct_schemaorg_url(version)
+        schema.meta.version = version
         schema["$comment"] = "internally provided by biothings.schema"
         schema["@context"] = {"schema": "http://schema.org/"}
         return schema
