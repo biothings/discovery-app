@@ -105,7 +105,7 @@
                 <select
                   class="form-control form-control-sm w-25 float-right"
                   id="exampleFormControlSelect1"
-                  @change="search()"
+                  @change="changeSort()"
                   v-model="sortChange"
                 >
                   <option>Choose one</option>
@@ -124,23 +124,31 @@
                 >
                 <small>View/Extend</small>
               </div>
-              <ul class="list-group context" id="regTippyParent">
-                <template
-                  v-if="registry.length"
-                  v-for="item in registry"
-                  :key="item._id"
-                >
-                  <SchemaRegistryItem :item="item"></SchemaRegistryItem>
-                </template>
-              </ul>
+              <table class="table context table-striped table-bordered table-hover table-sm table-responsive-sm">
+                <thead class="bg-dde-dark text-light">
+                  <tr>
+                    <th scope="col" class="text-center">Status</th>
+                    <th scope="col" class="text-left">Namespace:Class Name</th>
+                    <th scope="col" class="text-left">Custom Properties</th>
+                    <th scope="col" class="text-left">Parent Class</th>
+                    <th scope="col" class="text-left">View/Extend</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template
+                    v-if="registry.length"
+                    v-for="item in registry"
+                    :key="item._id"
+                  >
+                    <SchemaRegistryItem :item="item"></SchemaRegistryItem>
+                  </template>
+                </tbody>
+              </table>
               <div>
                 <select
                   class="form-control form-control-sm m-auto w-25"
                   v-model="perPage"
-                  @change="
-                    calculatePages();
-                    search();
-                  "
+                  @change="changePerPage()"
                   id="perPage"
                 >
                   <option value="" disabled selected>Shown Per Page</option>
@@ -155,10 +163,7 @@
                   >
                     <a
                       class="page-link p-1"
-                      @click.prevent="
-                        prevPage();
-                        search();
-                      "
+                      @click.prevent="prevPage()"
                       ><font-awesome-icon icon="fas fa-step-backward"
                     /></a>
                   </div>
@@ -170,17 +175,14 @@
                       <a
                         href="#"
                         class="page-link p-1"
-                        @click.prevent="
-                          previousGroup();
-                          search();
-                        "
+                        @click.prevent="previousGroup()"
                         >Previous 20</a
                       >
                     </div>
                   </template>
                   <template v-for="n in pages">
                     <div
-                      v-if="n >= startCap && n <= endCap"
+                      v-if="n > startCap && n <= endCap"
                       class="page-item rounded-0"
                       :class="{
                         active: page == n,
@@ -191,10 +193,7 @@
                       <a
                         href="#"
                         class="page-link p-1"
-                        @click.prevent="
-                          page = n;
-                          search();
-                        "
+                        @click.prevent="goToPage(n)"
                         v-text="n"
                       ></a>
                     </div>
@@ -207,10 +206,7 @@
                       <a
                         href="#"
                         class="page-link p-1"
-                        @click.prevent="
-                          nextGroup();
-                          search();
-                        "
+                        @click.prevent="nextGroup()"
                         >Next 20</a
                       >
                     </div>
@@ -221,10 +217,7 @@
                   >
                     <a
                       class="page-link p-1"
-                      @click.prevent="
-                        nextPage();
-                        search();
-                      "
+                      @click.prevent="nextPage()"
                       ><font-awesome-icon icon="fas fa-step-forward"
                     /></a>
                   </div>
@@ -465,7 +458,6 @@ export default {
   data: function () {
     return {
       choice: "",
-      finalQ: "",
       alphabet: [
         "ALL",
         "A",
@@ -537,28 +529,17 @@ export default {
     };
   },
   watch: {
-    "$route.query.search": {
+    // the URL is the source of truth for the search state, so shared links,
+    // reloads and back/forward all go through here
+    "$route.query": {
       immediate: true,
-      handler: function (v) {
-        this.choice = v;
-        if (!v) {
-          this.choice = "classes";
+      handler: function () {
+        this.readRoute();
+        // results are only fetched client side, after mount (see mounted)
+        if (this.highlighter && this.choice == "classes") {
+          this.fetchResults();
         }
       },
-    },
-    "$route.query.q": {
-      immediate: true,
-      handler: function (v) {
-        if (v) {
-          this.query = v;
-        }
-      },
-    },
-    finalQ: function (v) {
-      this.$router.push({
-        name: "SchemaRegistry",
-        query: { search: this.$route.query.search, q: v },
-      });
     },
   },
   methods: {
@@ -624,48 +605,79 @@ export default {
 
       return finalFilters;
     },
+    readRoute() {
+      // copy the URL params into the form, falling back to defaults
+      // for missing or invalid values
+      let q = this.$route.query;
+      this.choice = q.search || "classes";
+      // "q" is the old param name, kept so existing links still work
+      this.query = q.query || q.q || "";
+      this.sortChange = ["A-Z", "Z-A"].includes(q.sort) ? q.sort : "relevance";
+      this.perPage = ["10", "25", "100"].includes(q.size) ? parseInt(q.size) : 10;
+      this.page = Math.max(parseInt(q.page) || 1, 1);
+    },
+    updateRoute(changes) {
+      // push the new state to the URL; the $route.query watcher fetches it.
+      // defaults are left out to keep shared links short.
+      let query = { ...this.$route.query, ...changes };
+      delete query.q;
+      Object.keys(query).forEach((key) => {
+        if (query[key] === undefined || query[key] === "") delete query[key];
+      });
+      this.$router.push({ query });
+    },
     search() {
-      var self = this;
-
-      let query = self.query || "__all__";
-      if (query !== "__all__") {
-        self.finalQ = query;
+      // a new search starts back on the first page
+      if (this.query) {
+        this.sendGAEvent("class_search", this.query);
       }
+      this.updateRoute({ query: this.query, page: undefined });
+    },
+    changeSort() {
+      this.updateRoute({
+        sort: this.sortChange == "relevance" ? undefined : this.sortChange,
+        page: undefined,
+      });
+    },
+    changePerPage() {
+      this.updateRoute({
+        size: this.perPage == 10 ? undefined : String(this.perPage),
+        page: undefined,
+      });
+    },
+    goToPage(n) {
+      this.updateRoute({ page: n > 1 ? String(n) : undefined });
+    },
+    fetchResults() {
+      var self = this;
       const runtimeConfig = useRuntimeConfig();
 
-      let url = runtimeConfig.public.apiUrl + `/api/registry/query?q=${query}`;
+      let url = runtimeConfig.public.apiUrl + "/api/registry/query";
 
       self.$store.commit("setLoading", { value: true });
       self.registry = [];
       self.highlighter.unmark();
 
-      //query analytics
-      if (query !== "__all__") {
-        self.sendGAEvent("class_search", query);
-      }
+      var params = {
+        params: {
+          q: self.query || "__all__",
+          size: self.perPage,
+          from: (self.page - 1) * self.perPage,
+        },
+      };
 
       // sorting
       switch (self.sortChange) {
-        case "relevance":
-          //default behavior
-          break;
         case "A-Z":
-          url += "&sort=label.raw";
+          params.params.sort = "label.raw";
           break;
         case "Z-A":
-          url += "&sort=-label.raw";
+          params.params.sort = "-label.raw";
           break;
         default:
-          //no matching sort
+          // relevance is the default behavior
           break;
       }
-
-      var params = {
-        params: {
-          size: self.perPage,
-          from: self.page == 1 ? self.page - 1 : (self.page - 1) * self.perPage,
-        },
-      };
 
       axios
         .get(url, params)
@@ -702,54 +714,33 @@ export default {
     calculatePages: function () {
       var self = this;
       self.pages = Math.ceil(this.total / self.perPage);
+      self.groupPages = self.pages > self.pageLimit;
 
-      if (self.pages > self.pageLimit) {
-        self.groupPages = true;
-      }
+      // show the group of pageLimit page links that contains the current
+      // page, so a shared link to a later page shows the right group
+      self.startCap =
+        Math.floor((self.page - 1) / self.pageLimit) * self.pageLimit;
+      self.endCap = Math.min(self.startCap + self.pageLimit, self.pages);
+      self.startCapLimitReached = self.startCap == 0;
+      self.endCapLimitReached = self.endCap >= self.pages;
     },
     previousGroup: function () {
-      var self = this;
-
-      if (!self.startCapLimitReached) {
-        if (self.startCap - 20 > 0) {
-          self.page = self.startCap - 20;
-          self.startCap = self.startCap - 20;
-          self.endCap = self.endCap - 20;
-          self.endCapLimitReached = false;
-        } else {
-          self.page = 1;
-          self.startCap = 0;
-          self.endCap = 20;
-          self.startCapLimitReached = true;
-          self.endCapLimitReached = false;
-        }
+      // first page of the previous group
+      if (!this.startCapLimitReached) {
+        this.goToPage(this.startCap - this.pageLimit + 1);
       }
     },
     nextGroup: function () {
-      var self = this;
-
-      if (!self.endCapLimitReached) {
-        if (self.endCap + 20 < self.pages) {
-          self.page = self.startCap + 20;
-          self.startCap = self.startCap + 20;
-          self.endCap = self.endCap + 20;
-          self.startCapLimitReached = false;
-        } else {
-          self.page = self.startCap + 20;
-          self.startCap = self.startCap + 20;
-          self.endCap = self.pages;
-          self.endCapLimitReached = true;
-          self.startCapLimitReached = false;
-        }
+      // first page of the next group
+      if (!this.endCapLimitReached) {
+        this.goToPage(this.startCap + this.pageLimit + 1);
       }
     },
     prevPage: function () {
-      var self = this;
-      if (self.page > 1) self.page -= 1;
+      if (this.page > 1) this.goToPage(this.page - 1);
     },
     nextPage: function () {
-      var self = this;
-      if (self.page < self.pages) self.page += 1;
+      if (this.page < this.pages) this.goToPage(this.page + 1);
     },
     sortResults(e) {
       this.sort = e.target.value;
@@ -783,13 +774,11 @@ export default {
     this.mark(this.query);
   },
   mounted: function () {
-    let self = this;
     this.highlighter = new Mark(document.querySelector(".context"));
-    this.search();
+    if (this.choice == "classes") {
+      this.fetchResults();
+    }
     this.getNameSpaces();
-    window.onpopstate = function () {
-      self.search();
-    };
   },
 };
 </script>

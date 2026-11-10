@@ -133,7 +133,8 @@ class SchemaClassProp(InnerDoc):
         "curie": "schema:healthPlanNetworkTier",
         "label": "healthPlanNetworkTier",
         "uri": "http://schema.org/healthPlanNetworkTier",
-        "superseded_by": []
+        "superseded_by": [],
+        "deprecated": false
     }
     """
 
@@ -143,6 +144,7 @@ class SchemaClassProp(InnerDoc):
     range = Text(multi=True, fields={"raw": Keyword()})
     description = Text()
     superseded_by = Keyword(multi=True)  # curie(s) of the replacing property, empty if not superseded
+    deprecated = Boolean()  # in the schema.org attic or superseded
 
 
 class SchemaClass(DiscoveryDoc):
@@ -159,7 +161,8 @@ class SchemaClass(DiscoveryDoc):
         "uri": "http://schema.org/ViewAction",
         "prefix": "schema",
         "namespace": "schema",
-        "superseded_by": []
+        "superseded_by": [],
+        "deprecated": false
     }
     """
 
@@ -183,6 +186,7 @@ class SchemaClass(DiscoveryDoc):
     ref = Boolean()  # not defined in this schema
     superseded_by = Keyword(multi=True)  # curie(s) of the replacing class, empty if not superseded
     provenance = Text()  # dct:provenance, schema change notes (issue #209)
+    deprecated = Boolean()  # in the schema.org attic or superseded
 
     class Index:
         """

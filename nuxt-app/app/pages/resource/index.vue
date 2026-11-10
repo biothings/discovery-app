@@ -9,7 +9,7 @@
           <router-link to="/faq/n3c">PPRL FAQ</router-link>
         </p>
         <div>
-          <form @submit.prevent="search(query)">
+          <form @submit.prevent="submitSearch()">
             <div class="row m-0 cBox actions bg-dde-mid">
               <div class="col-sm-10 p-2">
                 <div class="">
@@ -29,7 +29,7 @@
                 <span
                   data-tippy-content="search"
                   class="fa-stack fa-1x pointer unselectable tip"
-                  @click.prevent="search()"
+                  @click.prevent="submitSearch()"
                 >
                   <font-awesome-icon
                     icon="fas fa-circle"
@@ -45,7 +45,7 @@
                   class="fa-stack fa-1x pointer unselectable tip"
                   @click.prevent="
                     query = '';
-                    search();
+                    submitSearch();
                   "
                 >
                   <font-awesome-icon
@@ -370,7 +370,6 @@ export default {
   data: function () {
     return {
       perPage: 10,
-      finalQ: "",
       page: 1,
       pages: 1,
       startCap: 0,
@@ -806,14 +805,15 @@ export default {
       this.search();
     },
     buildURL() {
-      // match url to search filters
-      let url = new URL(window.location.href);
+      // match url to search filters. goes through the router (not
+      // window.history) so $route.query stays in sync with the address bar
+      let query = { ...this.$route.query };
       let active_list = [];
       let pprl_active = [];
 
-      url.searchParams.delete("guide");
-      url.searchParams.delete("template");
-      url.searchParams.delete("dataset_type");
+      delete query.guide;
+      delete query.template;
+      delete query.dataset_type;
 
       this.all_filters["_meta.guide"].forEach((item) => {
         if (item.active) {
@@ -828,16 +828,29 @@ export default {
       });
 
       if (active_list.length) {
-        url = url + "?template=" + active_list.toString();
+        query.template = active_list.toString();
       }
       if (pprl_active.length) {
-        if (active_list.length) {
-          url = url + "&dataset_type=" + pprl_active.toString();
-        } else {
-          url = url + "?dataset_type=" + pprl_active.toString();
-        }
+        query.dataset_type = pprl_active.toString();
       }
-      window.history.pushState({ html: "content", pageTitle: "DDE" }, "", url);
+      this.$router.push({ query });
+    },
+    submitSearch() {
+      // put the search term in the URL so it survives reloads and gets its
+      // own history entry; the routeQuery watcher then runs the search.
+      // "q" is the old param name, replaced by "query"
+      let query = { ...this.$route.query };
+      delete query.q;
+      delete query.query;
+      if (this.query) {
+        query.query = this.query;
+      }
+      if (this.query === this.routeQuery) {
+        // same term, so the URL won't change; search again directly
+        this.search();
+      } else {
+        this.$router.push({ query });
+      }
     },
     getFilters() {
       let self = this;
@@ -864,7 +877,6 @@ export default {
       //query analytics
       if (self.query !== "__all__") {
         self.sendGAEvent("dataset_search", self.query);
-        self.finalQ = self.query;
       }
       //look for existing active filters and
       let filters = self.getFilters();
@@ -993,10 +1005,7 @@ export default {
       let url_string = window.location.href;
       let url = new URL(url_string);
 
-      let q = url.searchParams.get("q");
-      if (q) {
-        this.query = q;
-      }
+      this.query = this.routeQuery;
       this.searchForFilterAndToggle(url, "guide", "_meta.guide");
       this.searchForFilterAndToggle(url, "template", "_meta.guide");
       this.searchForFilterAndToggle(url, "dataset_type", "name");
@@ -1023,12 +1032,24 @@ export default {
         this.$store.commit("clearDownloadList");
       }
     },
-    finalQ: function (v) {
-      this.$router.push({ name: "ResourceRegistry", query: { q: v } });
+    // the search term in the URL changed (new search, back/forward):
+    // show it and search from the first page
+    routeQuery: function (v) {
+      this.query = v;
+      this.page = 1;
+      this.startCap = 0;
+      this.endCap = this.pageLimit;
+      this.startCapLimitReached = true;
+      this.endCapLimitReached = false;
+      this.search();
     },
   },
   computed: {
     ...mapGetters(["loading", "downloadList"]),
+    routeQuery() {
+      // "q" is the old param name, kept so existing links still work
+      return this.$route.query.query || this.$route.query.q || "";
+    },
     downloadMode: {
       get() {
         return this.$store.getters.downloadMode;
@@ -1045,9 +1066,6 @@ export default {
     this.checkURLQuery();
     this.search();
     this.aggregate("_n3c.status");
-    window.onpopstate = () => {
-      this.search();
-    };
   },
   updated: function () {
     // Highlight matches in results

@@ -1,6 +1,24 @@
 import axios from "axios";
 import Notify from "simple-notify";
 
+// sort a class's props alphabetically, with deprecated props last
+function sortProperties(cls) {
+  if (Object.hasOwnProperty.call(cls, "properties")) {
+    cls.properties.sort((a, b) => {
+      if (!!a["deprecated"] !== !!b["deprecated"]) {
+        return a["deprecated"] ? 1 : -1;
+      }
+      if (a["label"] < b["label"]) {
+        return -1;
+      }
+      if (a["label"] > b["label"]) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+}
+
 export const editor = {
   state: {
     schema: [],
@@ -96,6 +114,7 @@ export const editor = {
       // console.log(names)
       if (!names.includes(payload["schema"].name)) {
         console.log("✅ Adding Class: ", payload["schema"].name);
+        sortProperties(payload["schema"]);
         state.schema.push(payload["schema"]);
         state.startingPoint = payload["start"];
         if (payload["schema"].hasOwnProperty("validation")) {
@@ -178,20 +197,7 @@ export const editor = {
     },
     saveParent(state, payload) {
       let parent = payload["parent"];
-      // sort props alphabetically
-      if (Object.hasOwnProperty.call(parent, "properties")) {
-        // parent.properties = $_.orderBy(parent.properties, ["label"], ["asc"]);
-        function compare(a, b) {
-          if (a["label"] < b["label"]) {
-            return -1;
-          }
-          if (a["label"] > b["label"]) {
-            return 1;
-          }
-          return 0;
-        }
-        parent.properties.sort(compare);
-      }
+      sortProperties(parent);
       let names = state.schema.map((cls) => cls.name);
       // console.log(names)
       if (!names.includes(parent.name)) {
@@ -352,7 +358,7 @@ export const editor = {
                 state.schema[i]["properties"][x]["isOptional"]
               ) {
                 state.schema[i]["properties"][x]["isRequired"] = false;
-                state.schema[i]["properties"][x]["isRecommneded"] = false;
+                state.schema[i]["properties"][x]["isRecommended"] = false;
               }
             }
           }
@@ -861,9 +867,11 @@ export const editor = {
       }
       let uniqueParents = new Set(list);
       let pList = [...uniqueParents];
+      let config = useRuntimeConfig();
       let requests = pList.map((parent) =>
         axios.get(
-          "https://discovery.biothings.io/api/registry/" +
+          config.public.apiUrl +
+            "/api/registry/" +
             parent.split(":")[0] +
             "/" +
             parent

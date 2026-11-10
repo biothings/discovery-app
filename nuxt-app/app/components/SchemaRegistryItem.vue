@@ -1,37 +1,57 @@
 <template>
-  <li class="list-group-item p-0">
-    <div class="d-flex flex-wrap">
-      <div class="flex-grow-1 d-flex align-items-center">
-        <div class="d-inline mr-1 ml-2">
-          <template v-if="item.validation">
-            <img
-              src="@/assets/img/cube.svg"
-              width="15"
-              title="validation available"
-              class="ml-1 tip"
-              data-tippy-content="Validation available"
-            />
-          </template>
-          <h6 class="m-1 mainTextDark d-inline">
-            <small class="text-dde-dark">
-              <NuxtLink :to="'/ns/' + item.namespace">{{
-                item.namespace
-              }}</NuxtLink
-              >: </small
-            ><b>{{ item.label }}</b>
-          </h6>
-        </div>
-        <p v-if="propTotal" class="m-0 text-dde-dark d-none d-md-inline">
-          <small class="text-info">
-            <span :data-tippy-content="propNames">
-              + <span v-text="propTotal"></span> Properties added</span
-            >
-          </small>
-        </p>
-        <small class="text-muted"
-          >&nbsp; | Subclass of: {{ getSubclass(item.parent_classes) }}</small
-        >
-      </div>
+  <!-- display status (deprecated, validation), name, properties added, parent class and extend/view actions -->
+  <tr>
+    <td class="text-center" colspan="1" style="width: 3%">
+      <font-awesome-icon v-if="item?.deprecated" icon="fas fa-circle" class="text-danger" data-tippy-content="This class is deprecated and should not be used"></font-awesome-icon>
+      <font-awesome-icon v-else icon="fas fa-circle" class="text-success" data-tippy-content="This class is current"></font-awesome-icon>
+    </td>
+    <td>
+      <img
+          v-if="item.validation"
+          src="@/assets/img/cube.svg"
+          width="15"
+          title="validation available"
+          class="ml-1 tip"
+          data-tippy-content="Validation available"
+        />
+      <h6 class="m-1 mainTextDark d-inline">
+        <small class="text-dde-dark" 
+        :class="{ 'strikethrough-text': item?.superseded_by }">
+          <NuxtLink :to="'/ns/' + item.namespace">{{
+            item.namespace
+          }}</NuxtLink
+          >: </small
+        ><b :class="{ 'strikethrough-text': item?.superseded_by, 'text-danger': item?.deprecated }">{{ item.label }}</b>
+      </h6>
+      <template v-if="item?.superseded_by">
+        <small class="float-right">
+          <font-awesome-icon icon="fas fa-arrow-right"> </font-awesome-icon> Use instead:
+          <strong v-for="superseded in item.superseded_by" :key="superseded"
+            class="mainTextDark ml-1">
+            <!-- search the registry for the replacing class; searched by label
+                 since a "prefix:label" query is parsed as field:value syntax -->
+            <NuxtLink
+              :to="{
+                path: '/registry',
+                query: { query: superseded.split(':').pop() },
+              }"
+              v-text="superseded"
+            ></NuxtLink>
+          </strong>
+        </small>
+      </template>
+    </td>
+    <td>
+      <template v-if="propTotal">
+        <span>+ {{ propTotal }}
+          <font-awesome-icon icon="fas fa-info-circle" class="text-info" :data-tippy-content="propNames"> </font-awesome-icon>
+        </span>
+      </template>
+    </td>
+    <td>
+      {{ getSubclass(item.parent_classes)}}
+    </td>
+    <td>
       <div
         class="p-1 bg-dde-mid d-flex align-items-center justify-content-around"
       >
@@ -51,8 +71,8 @@
           ></ExtendClassBtn>
         </div>
       </div>
-    </div>
-  </li>
+    </td>
+  </tr>
 </template>
 
 <script>
@@ -138,3 +158,10 @@ export default {
   },
 };
 </script>
+
+<style lang="css" module>
+td {
+  padding: 0 5px !important;
+  vertical-align: middle !important;
+}
+</style>
