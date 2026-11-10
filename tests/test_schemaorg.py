@@ -7,6 +7,7 @@ onto the base schema loader, ensuring version consistency during validation.
 from unittest.mock import patch
 import pytest
 import logging
+import requests
 
 
 from discovery.registry import schemas
@@ -266,6 +267,9 @@ class TestSchemaOrgVersionIntegration:
         if not schemas.exists("bts"):
             bts_url = "https://raw.githubusercontent.com/data2health/schemas/biothings/biothings/biothings_curie.jsonld"
             schemas.add(namespace="bts", url=bts_url, user="test@example.com")
+            # new classes are not searchable until the index refreshes (~1s),
+            # and get_classes() searches, so without this it can see 0 classes
+            refresh()
 
         bts_classes = list(schemas.get_classes("bts"))
         assert len(bts_classes) > 0
@@ -567,3 +571,65 @@ class TestMonthlySchemaOrgUpdate:
 
         # Version should remain unchanged (update was aborted)
         assert schemas.get_stored_schema_org_version() == "23.0"
+
+
+class TestSchemaClassProvenance:
+    """dct:provenance change notes are captured on class definitions (issue #209)"""
+
+    NDE_SCHEMA_URL = "https://raw.githubusercontent.com/NIAID-Data-Ecosystem/nde-schemas/main/NDE_schema.jsonld"
+
+    @staticmethod
+    def _class_defs(class_extra=None, context_extra=None):
+        doc = {
+            "@context": {"schema": "http://schema.org/", "test": "http://example.org/test/", **(context_extra or {})},
+            "@graph": [
+                {
+                    "@id": "test:TestClass",
+                    "@type": "rdfs:Class",
+                    "rdfs:label": "TestClass",
+                    "rdfs:comment": "A test class for provenance capture",
+                    "rdfs:subClassOf": {"@id": "schema:Thing"},
+                    **(class_extra or {}),
+                }
+            ],
+        }
+        return {c["name"]: c for c in SchemaAdapter(doc).get_class_defs()}
+
+    @pytest.mark.parametrize(
+        "class_extra, context_extra, expected",
+        [
+            # dct prefix defined in @context, so the key is expanded to the full URI
+            ({"dct:provenance": "Added property foo"}, {"dct": "http://purl.org/dc/terms/"}, "Added property foo"),
+            # dct prefix not defined, so the key stays as written
+            ({"dct:provenance": "Added property foo"}, None, "Added property foo"),
+            # JSON-LD value object: only @value is kept
+            (
+                {"dcterms:provenance": {"@value": "Made bar required", "@language": "en"}},
+                {"dcterms": "http://purl.org/dc/terms/"},
+                "Made bar required",
+            ),
+        ],
+    )
+    def test_provenance_captured(self, class_extra, context_extra, expected):
+        assert self._class_defs(class_extra, context_extra)["test:TestClass"]["provenance"] == expected
+
+    def test_no_provenance(self):
+        assert "provenance" not in self._class_defs()["test:TestClass"]
+
+    def test_nde_schema_provenance(self):
+        """Real-world schema: NDE sets dct:provenance on each of its classes"""
+        doc = requests.get(self.NDE_SCHEMA_URL, timeout=30).json()
+        # expected values come from the fetched file, so this keeps passing as NDE publishes new versions
+        expected = {
+            record["@id"]: record["dct:provenance"]
+            for record in doc["@graph"]
+            if record.get("@type") == "rdfs:Class" and "dct:provenance" in record
+        }
+        assert "nde:Dataset" in expected, "NDE schema no longer has dct:provenance on nde:Dataset"
+
+        # NDE extends niaid/bioschemas classes the test ES doesn't fully have, so don't
+        # raise on validation errors; this test is about provenance, not inheritance
+        adapter = SchemaAdapter(doc, validator_options={"raise_on_validation_error": False})
+        classes = {c["name"]: c for c in adapter.get_class_defs()}
+
+        assert {name: c["provenance"] for name, c in classes.items() if "provenance" in c} == expected
