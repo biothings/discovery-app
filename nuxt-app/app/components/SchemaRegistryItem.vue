@@ -73,74 +73,6 @@
       </div>
     </td>
   </tr>
-  <!-- <li class="list-group-item p-0">
-    <div class="d-flex flex-wrap">
-      <div class="flex-grow-1 d-flex align-items-center">
-        <div class="d-inline mr-1 ml-2">
-          <template v-if="item.validation">
-            <img
-              src="@/assets/img/cube.svg"
-              width="15"
-              title="validation available"
-              class="ml-1 tip"
-              data-tippy-content="Validation available"
-            />
-          </template>
-          <h6 class="m-1 mainTextDark d-inline">
-            <small class="text-dde-dark" :class="{ 'strikethrough-text': item?.superseded_by }">
-              <NuxtLink :to="'/ns/' + item.namespace">{{
-                item.namespace
-              }}</NuxtLink
-              >: </small
-            ><b :class="{ 'strikethrough-text': item?.superseded_by }">{{ item.label }}</b>
-          </h6>
-          <template v-if="item?.deprecated">
-            <span class="badge badge-danger ml-1" data-tippy-content="This class is deprecated and should not be used">
-              Deprecated
-            </span>
-          </template> 
-          <template v-if="item?.superseded_by">
-            <span class="text-info ml-1">
-              Use instead:
-              <strong v-for="superseded in item.superseded_by" :key="superseded"
-               class="mainTextDark ml-1" data-tippy-content="You should use this class instead of the deprecated one">
-                {{ superseded }}
-              </strong>
-            </span>
-          </template>
-        </div>
-        <p v-if="propTotal" class="m-0 text-dde-dark d-none d-md-inline">
-          <small class="text-info">
-            <span :data-tippy-content="propNames">
-              + <span v-text="propTotal"></span> Properties added</span
-            >
-          </small>
-        </p>
-        <small class="text-muted"
-          >&nbsp; | Subclass of: {{ getSubclass(item.parent_classes) }}</small
-        >
-      </div>
-      <div
-        class="p-1 bg-dde-mid d-flex align-items-center justify-content-around"
-      >
-        <div>
-          <button
-            class="btn btn-sm themeButton text-light m-1"
-            @click.prevent="saveDataAndRedirect(item)"
-            data-tippy-content="Visualize class in detail"
-          >
-            View
-          </button>
-        </div>
-        <div>
-          <ExtendClassBtn
-            :ns="item.namespace"
-            :curie="item.prefix + ':' + item.label"
-          ></ExtendClassBtn>
-        </div>
-      </div>
-    </div>
-  </li> -->
 </template>
 
 <script>
@@ -229,7 +161,7 @@ export default {
 
 <style lang="css" module>
 td {
-  padding: 0 !important;
+  padding: 0 5px !important;
   vertical-align: middle !important;
 }
 </style>

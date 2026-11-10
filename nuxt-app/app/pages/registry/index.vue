@@ -124,7 +124,7 @@
                 >
                 <small>View/Extend</small>
               </div>
-              <table class="table context">
+              <table class="table context table-striped table-bordered table-hover table-sm table-responsive-sm">
                 <thead class="bg-dde-dark text-light">
                   <tr>
                     <th scope="col" class="text-center">Status</th>
@@ -144,15 +144,6 @@
                   </template>
                 </tbody>
               </table>
-              <!-- <ul class="list-group context" id="regTippyParent">
-                <template
-                  v-if="registry.length"
-                  v-for="item in registry"
-                  :key="item._id"
-                >
-                  <SchemaRegistryItem :item="item"></SchemaRegistryItem>
-                </template>
-              </ul> -->
               <div>
                 <select
                   class="form-control form-control-sm m-auto w-25"
