@@ -17,6 +17,9 @@ BTS_URL = "https://raw.githubusercontent.com/data2health/schemas/biothings/bioth
 def setup(with_clean_schema_state):
     if not schemas.exists("bts"):
         schemas.add(namespace="bts", url=BTS_URL, user="minions@example.com")
+    # new classes are not searchable until the index refreshes (~1s); the tests
+    # below search for them right away (registry total, /api/query)
+    indices.refresh()
 
 class DiscoveryAPITest(DiscoveryTestCase):
     def refresh(self):
@@ -102,11 +105,13 @@ class DiscoveryAPITest(DiscoveryTestCase):
     def test_30_post(self):
         if schemas.exists("bts"):
             schemas.delete("bts")
+        self.refresh()
         doc = {"url": BTS_URL, "namespace": "bts"}
         self.query(q="BiologicalEntity", hits=False)
         self.request("registry/bts", expect=404)
         self.request("registry", method="POST", json=doc, headers=self.auth_user)
         self.request("registry/bts", expect=200)
+        self.refresh()
         self.query(q="BiologicalEntity")
 
     def test_40_schema_org_version_initially_none(self):

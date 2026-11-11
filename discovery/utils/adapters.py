@@ -34,6 +34,13 @@ from discovery.registry import schemas
 # the underlying package uses warnings
 logging.captureWarnings(True)
 
+# dct:provenance, expanded or not depending on the schema @context
+PROVENANCE_KEYS = (
+    "http://purl.org/dc/terms/provenance",
+    "dct:provenance",
+    "dcterms:provenance",
+)
+
 
 def get_latest_schema_org_version():
     """return the current schema_org schema version"""
@@ -95,6 +102,26 @@ class SchemaClassWrapper:
             ", ".join(map(str, parent_line))
             for parent_line in self._parser_class.parent_classes
         ]
+
+    @property
+    def provenance(self):
+        """
+        Schema change notes captured as dct:provenance on the class definition.
+        biothings_schema does not keep this field in its graph, so read it
+        from the preprocessed source record (keys may be expanded to URIs).
+        Introduced from issue #209 on github
+        """
+        uri = self._parser_class.uri
+        for record in self._parser_class.se.schema["@graph"]:
+            if record.get("@id") != uri:
+                continue
+            for key in PROVENANCE_KEYS:
+                if key in record:
+                    value = record[key]
+                    if isinstance(value, dict):
+                        value = value.get("@value")
+                    return value
+        raise AttributeError("provenance")
 
     @property
     def properties(self):
@@ -186,6 +213,7 @@ class SchemaAdapter:
             "properties",
             "validation",
             "superseded_by",
+            "provenance",
             "deprecated",
         ):
             try:
