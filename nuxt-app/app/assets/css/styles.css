@@ -313,6 +313,9 @@ body {
 
 .strikethrough-text {
   text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-style: wavy;
+  text-decoration-color: #2b1b3c;
 }
 
 /* CodeMirror */

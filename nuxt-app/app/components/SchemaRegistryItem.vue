@@ -16,12 +16,12 @@
         />
       <h6 class="m-1 mainTextDark d-inline">
         <small class="text-dde-dark" 
-        :class="{ 'strikethrough-text': item?.superseded_by }">
+        :class="{ 'strikethrough-text': item?.deprecated, 'text-danger': item?.deprecated }">
           <NuxtLink :to="'/ns/' + item.namespace">{{
             item.namespace
           }}</NuxtLink
           >: </small
-        ><b :class="{ 'strikethrough-text': item?.superseded_by, 'text-danger': item?.deprecated }">{{ item.label }}</b>
+        ><b :class="{ 'strikethrough-text': item?.deprecated, 'text-danger': item?.deprecated }">{{ item.label }}</b>
       </h6>
       <template v-if="item?.superseded_by">
         <small class="float-right">
