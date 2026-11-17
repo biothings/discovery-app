@@ -27,7 +27,7 @@ from discovery.model.schema import Schema
 from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
 from discovery.registry.common import NoEntityError
-from discovery.utils.adapters import SchemaAdapter
+from discovery.utils.adapters import SchemaAdapter, parent_lines
 
 from .base import APIBaseHandler, authenticated, registryOperation
 
@@ -86,15 +86,15 @@ def trace_root(klass):
     queue = [klass]
     index = 0
     while index < len(queue):
-        for parent_line_string in klass.get("parent_classes", []):
-            parents = parent_line_string.split(", ")
-            ids = [
-                (parent.split(":")[0], parent) for parent in parents if ":" in parent
-            ][::-1]
-            for _id in ids:
-                klass = schemas.get_class(_id[0], _id[1])
-                if klass and klass not in queue:
-                    queue.append(klass)
+        current = queue[index]
+        for parent_line in parent_lines(current.get("parent_classes")):
+            # walk each path from the immediate parent up to the root
+            for parent in reversed(parent_line):
+                if ":" not in parent:
+                    continue
+                parent_klass = schemas.get_class(parent.split(":")[0], parent)
+                if parent_klass and parent_klass not in queue:
+                    queue.append(parent_klass)
         index += 1
     return queue
 
@@ -583,7 +583,13 @@ class SchemaHandler(APIBaseHandler):
             "@type": "rdfs:Class",
             "rdfs:comment": metadata["description"],
             "rdfs:label": metadata["label"],
-            "rdfs:subClassOf": [{"@id": value} for value in metadata["parent_classes"]],
+            # only the immediate parents, i.e. the last curie of each path
+            "rdfs:subClassOf": [
+                {"@id": curie}
+                for curie in dict.fromkeys(
+                    line[-1] for line in parent_lines(metadata.get("parent_classes"))
+                )
+            ],
         }
 
         property_list.append(class_dict)
