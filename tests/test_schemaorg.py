@@ -278,7 +278,7 @@ class TestSchemaOrgVersionIntegration:
         has_schema_parent = False
         for cls in bts_classes:
             parent_classes = cls.get("parent_classes", [])
-            if any("schema:" in str(pc) for pc in parent_classes):
+            if any(pc.startswith("schema:") for line in parent_classes for pc in line):
                 has_schema_parent = True
                 break
 

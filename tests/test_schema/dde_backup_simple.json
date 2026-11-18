@@ -473,7 +473,7 @@
                 "label": "Dataset",
                 "description": "A schema describing a minimal Dataset for the National Institute of Allergy and Infectious Disease (NIAID). A dataset is a collection of data of a particular experimental type. Additional schema.org and/or custom properties could be added.",
                 "parent_classes": [
-                    "schema:Thing, schema:CreativeWork, schema:Dataset"
+                    ["schema:Thing", "schema:CreativeWork", "schema:Dataset"]
                 ],
                 "properties": [
                     {
@@ -1762,7 +1762,7 @@
                 "label": "Dataset",
                 "description": "This is the schema for describing the Dataset schema used for N3C.",
                 "parent_classes": [
-                    "schema:Thing, schema:CreativeWork, schema:Dataset"
+                    ["schema:Thing", "schema:CreativeWork", "schema:Dataset"]
                 ],
                 "properties": [
                     {
@@ -2868,7 +2868,7 @@
                 "label": "Google",
                 "description": "A body of structured information describing some topic(s) of interest.",
                 "parent_classes": [
-                    "schema:Thing, schema:CreativeWork, schema:Dataset"
+                    ["schema:Thing", "schema:CreativeWork", "schema:Dataset"]
                 ],
                 "validation": {
                     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -3059,7 +3059,7 @@
                 "label": "Google",
                 "description": "A body of structured information describing some topic(s) of interest.",
                 "parent_classes": [
-                    "schema:Thing, schema:CreativeWork, schema:Dataset"
+                    ["schema:Thing", "schema:CreativeWork", "schema:Dataset"]
                 ],
                 "validation": {
                     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -3092,7 +3092,7 @@
                 "label": "CTSADataset",
                 "description": "A schema describing Dataset from CTSA center",
                 "parent_classes": [
-                    "schema:Thing, schema:CreativeWork, schema:Dataset"
+                    ["schema:Thing", "schema:CreativeWork", "schema:Dataset"]
                 ],
                 "properties": [
                     {

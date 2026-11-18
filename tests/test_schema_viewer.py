@@ -1,5 +1,41 @@
 from pathlib import Path
+
 from biothings.tests.web import BiothingsTestCase
+
+from discovery.handlers.api import schema as schema_api
+
+INHERITANCE_SCHEMA_PATH = Path(__file__).parent / "test_schema" / "validation_merge_test_schema.json"
+
+# "parent_classes" is a list of inheritance paths. Each path is a list of curies
+# ordered from the root down to the immediate parent; the class itself is not
+# included. A class with more than one parent has one path per parent.
+# Previously each path was a single comma-joined string, e.g.
+#   "schema:Thing, test:GrandParentClass, test:ParentClass"
+#
+# Real output of /api/view for validation_merge_test_schema.json:
+EXPECTED_PARENT_CLASSES = {
+    "test:GrandParentClass": [
+        ["schema:Thing"],
+    ],
+    "test:ParentClass": [
+        ["schema:Thing", "test:GrandParentClass"],
+    ],
+    "test:ChildClass": [
+        ["schema:Thing", "test:GrandParentClass", "test:ParentClass"],
+    ],
+    "test:SecondParentClass": [
+        ["schema:Thing"],
+    ],
+    "test:MultiParentChildClass": [
+        ["schema:Thing", "test:GrandParentClass", "test:ParentClass"],
+        ["schema:Thing", "test:SecondParentClass"],
+    ],
+}
+
+NEW_FORMAT = [
+    ["schema:Thing", "schema:Organization", "schema:LocalBusiness"],
+    ["schema:Thing", "schema:Place", "schema:LocalBusiness"],
+]
 
 
 class TestSchemaViewer(BiothingsTestCase):
@@ -127,6 +163,10 @@ class TestSchemaViewer(BiothingsTestCase):
         # Verify it has multiple parents
         parent_classes = multi_parent_child.get("parent_classes", [])
         assert len(parent_classes) == 2, f"Expected 2 parents, got {len(parent_classes)}"
+        assert parent_classes == [
+            ["schema:Thing", "test:GrandParentClass", "test:ParentClass"],
+            ["schema:Thing", "test:SecondParentClass"],
+        ]
 
         # With validation_merge=False (used in /api/view), the child's validation
         # should only contain its own required fields, not inherited ones
@@ -161,7 +201,7 @@ class TestSchemaViewer(BiothingsTestCase):
         # Verify single parent relationship
         parent_classes = child_class.get("parent_classes", [])
         assert len(parent_classes) == 1, f"Expected 1 parent, got {len(parent_classes)}"
-        assert "ParentClass" in str(parent_classes)
+        assert parent_classes == [["schema:Thing", "test:GrandParentClass", "test:ParentClass"]]
 
         # With validation_merge=False, child should only have its own required fields
         validation_schema = child_class.get("validation", {})
@@ -199,6 +239,10 @@ class TestSchemaViewer(BiothingsTestCase):
         # Verify it has multiple parents
         parent_classes = multi_parent_child.get("parent_classes", [])
         assert len(parent_classes) == 2, f"Expected 2 parents, got {len(parent_classes)}"
+        assert parent_classes == [
+            ["schema:Thing", "test:GrandParentClass", "test:ParentClass"],
+            ["schema:Thing", "test:SecondParentClass"],
+        ]
 
         # With validation_merge=True, the child's validation should contain
         # its own required fields AND inherited ones from BOTH parents
@@ -235,7 +279,7 @@ class TestSchemaViewer(BiothingsTestCase):
         # Verify single parent relationship
         parent_classes = child_class.get("parent_classes", [])
         assert len(parent_classes) == 1, f"Expected 1 parent, got {len(parent_classes)}"
-        assert "ParentClass" in str(parent_classes)
+        assert parent_classes == [["schema:Thing", "test:GrandParentClass", "test:ParentClass"]]
 
         # With validation_merge=True, child should have its own AND parent's required fields
         validation_schema = child_class.get("validation", {})
@@ -302,3 +346,96 @@ class TestSchemaViewer(BiothingsTestCase):
         assert "parentProp1" in parent_required, "ParentClass should have its own required field"
         assert "parentProp2" in parent_required, "ParentClass should have its own required field"
         assert "grandParentProp1" in parent_required, "ParentClass should inherit grandparent's required field when validation_merge=True"
+
+    def _inheritance_view_hits(self):
+        res = self.request(
+            "/api/view", method="GET", data=INHERITANCE_SCHEMA_PATH.read_text()
+        ).json()
+        assert res["total"] > 0
+        return {hit["name"]: hit for hit in res["hits"]}
+
+    def test_11_parent_classes_exact_output(self):
+        """Every defined class has its full nested parent_classes value."""
+        hits = self._inheritance_view_hits()
+        for name, expected in EXPECTED_PARENT_CLASSES.items():
+            assert name in hits, f"{name} not found in /api/view output"
+            assert hits[name]["parent_classes"] == expected, name
+
+    def test_12_parent_classes_is_list_of_lists(self):
+        """Every path is a list of curies, not a comma-joined string."""
+        for name, hit in self._inheritance_view_hits().items():
+            for line in hit.get("parent_classes", []):
+                assert isinstance(line, list), f"{name}: expected a list, got {line!r}"
+                assert all(isinstance(curie, str) and "," not in curie for curie in line)
+
+    def test_13_parent_paths_start_at_root_and_end_at_immediate_parent(self):
+        """Each path starts at schema:Thing and ends with a declared rdfs:subClassOf."""
+        hits = self._inheritance_view_hits()
+        multi = hits["test:MultiParentChildClass"]["parent_classes"]
+        assert all(line[0] == "schema:Thing" for line in multi)
+        assert [line[-1] for line in multi] == ["test:ParentClass", "test:SecondParentClass"]
+        # the class itself is not part of its own paths
+        assert all("test:MultiParentChildClass" not in line for line in multi)
+
+
+class TestTraceRoot:
+    """trace_root() collects every ancestor of a class, across all paths."""
+
+    def test_collects_all_ancestors(self, monkeypatch):
+        registry = {
+            name: {"name": name, "parent_classes": parents}
+            for name, parents in EXPECTED_PARENT_CLASSES.items()
+        }
+        registry["schema:Thing"] = {"name": "schema:Thing", "parent_classes": []}
+
+        class FakeSchemas:
+            @staticmethod
+            def get_class(namespace, curie):
+                return registry.get(curie)
+
+        monkeypatch.setattr(schema_api, "schemas", FakeSchemas)
+
+        child = registry["test:MultiParentChildClass"]
+        names = [klass["name"] for klass in schema_api.trace_root(child)]
+
+        assert names[0] == "test:MultiParentChildClass"
+        assert sorted(names[1:]) == sorted([
+            "test:ParentClass",
+            "test:GrandParentClass",
+            "test:SecondParentClass",
+            "schema:Thing",
+        ])
+        assert len(names) == len(set(names)), "ancestors should not repeat"
+
+
+class TestSchemaOrgExport:
+    """rdfs:subClassOf in the schema.org export lists only immediate parents."""
+
+    def test_sub_class_of_is_immediate_parents(self):
+        handler = schema_api.SchemaHandler.__new__(schema_api.SchemaHandler)
+        metadata = {
+            "_id": "schema::schema:Library",
+            "description": "A library.",
+            "label": "Library",
+            "parent_classes": NEW_FORMAT,
+            "properties": [],
+        }
+        graph = handler.filter_schema_org_class_with_properties(metadata, [])
+        assert graph[0]["@id"] == "schema:Library"
+        # both paths end at LocalBusiness, so it appears once
+        assert graph[0]["rdfs:subClassOf"] == [{"@id": "schema:LocalBusiness"}]
+
+    def test_multiple_immediate_parents(self):
+        handler = schema_api.SchemaHandler.__new__(schema_api.SchemaHandler)
+        metadata = {
+            "_id": "test::test:MultiParentChildClass",
+            "description": "",
+            "label": "MultiParentChildClass",
+            "parent_classes": EXPECTED_PARENT_CLASSES["test:MultiParentChildClass"],
+            "properties": [],
+        }
+        graph = handler.filter_schema_org_class_with_properties(metadata, [])
+        assert graph[0]["rdfs:subClassOf"] == [
+            {"@id": "test:ParentClass"},
+            {"@id": "test:SecondParentClass"},
+        ]

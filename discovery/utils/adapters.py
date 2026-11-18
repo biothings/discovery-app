@@ -67,21 +67,6 @@ class DDEBaseSchemaLoader(BaseSchemaLoader):
         return schema_source
 
 
-def parent_lines(parent_classes):
-    """
-    Normalize a class's "parent_classes" value to a list of lists.
-    Accepts the current format, [["schema:Thing", "schema:CreativeWork"], ...],
-    and the legacy format of comma-joined strings, ["schema:Thing, schema:CreativeWork", ...],
-    which may still exist in documents indexed before the format change.
-    """
-    lines = []
-    for line in parent_classes or []:
-        if isinstance(line, str):
-            line = [part.strip() for part in line.split(",")]
-        lines.append([str(part) for part in line if part])
-    return [line for line in lines if line]
-
-
 class SchemaClassWrapper:
     """
     Wraps a biothings_schema.SchemaClass instance.

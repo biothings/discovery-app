@@ -27,7 +27,7 @@ from discovery.model.schema import Schema
 from discovery.notify import SchemaNotifier
 from discovery.registry import schemas
 from discovery.registry.common import NoEntityError
-from discovery.utils.adapters import SchemaAdapter, parent_lines
+from discovery.utils.adapters import SchemaAdapter
 
 from .base import APIBaseHandler, authenticated, registryOperation
 
@@ -87,7 +87,7 @@ def trace_root(klass):
     index = 0
     while index < len(queue):
         current = queue[index]
-        for parent_line in parent_lines(current.get("parent_classes")):
+        for parent_line in current.get("parent_classes") or []:
             # walk each path from the immediate parent up to the root
             for parent in reversed(parent_line):
                 if ":" not in parent:
@@ -587,7 +587,7 @@ class SchemaHandler(APIBaseHandler):
             "rdfs:subClassOf": [
                 {"@id": curie}
                 for curie in dict.fromkeys(
-                    line[-1] for line in parent_lines(metadata.get("parent_classes"))
+                    line[-1] for line in metadata.get("parent_classes") or [] if line
                 )
             ],
         }
