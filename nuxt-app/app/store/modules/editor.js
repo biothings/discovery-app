@@ -212,7 +212,8 @@ export const editor = {
       newClass["description"] = payload["description"];
       newClass["name"] = state.prefix + ":" + payload["name"];
       newClass["prefix"] = state.prefix;
-      newClass["parent_classes"] = [state.schema[0].name];
+      // one inheritance path (list of curies) ending at the class it extends
+      newClass["parent_classes"] = [[state.schema[0].name]];
       console.log("🟠 Adding User Class: ", payload["name"]);
       state.schema.unshift(newClass);
     },
@@ -861,9 +862,8 @@ export const editor = {
     async getParents({ commit, state }) {
       let list = [];
       for (var i = 0; i < state.schema[0].parent_classes.length; i++) {
-        list = list.concat(
-          state.schema[0].parent_classes[i].split(", ").reverse()
-        );
+        // copy before reversing, reverse() changes the array in place
+        list = list.concat([...state.schema[0].parent_classes[i]].reverse());
       }
       let uniqueParents = new Set(list);
       let pList = [...uniqueParents];

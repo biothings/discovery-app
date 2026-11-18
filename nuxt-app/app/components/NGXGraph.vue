@@ -132,8 +132,10 @@ export default {
         if (self.classesAvailable[i].hasOwnProperty("parent_classes")) {
           let parents = self.classesAvailable[i]["parent_classes"];
           for (let p = 0; p < parents.length; p++) {
-            let branch_parents = parents[p].split(",");
-            let parent = branch_parents[branch_parents.length - 1].trim();
+            // each path is a list of curies, root first; the last is the
+            // immediate parent
+            let parent = parents[p].at(-1);
+            if (!parent) continue;
             let edge = {
               // edge ab
               group: "edges",

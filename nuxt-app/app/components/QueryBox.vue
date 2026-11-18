@@ -265,9 +265,9 @@ export default {
       let res = [];
       for (var i = 0; i < classInfo["parent_classes"].length; i++) {
         if (classInfo["parent_classes"][i]) {
-          let parents = classInfo["parent_classes"][i].split(", ");
-          parents.push(classInfo.name);
-          res.push(parents);
+          // each path is a list of curies, root first; copy it so the
+          // stored hit isn't changed
+          res.push([...classInfo["parent_classes"][i], classInfo.name]);
         }
       }
       return res;
