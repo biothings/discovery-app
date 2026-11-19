@@ -633,3 +633,62 @@ class TestSchemaClassProvenance:
         classes = {c["name"]: c for c in adapter.get_class_defs()}
 
         assert {name: c["provenance"] for name, c in classes.items() if "provenance" in c} == expected
+
+
+class TestReindexClasses:
+    """schemas.reindex_classes() rebuilds class docs from the stored schema docs."""
+
+    NAMESPACE = "ctsa"  # the schema stored in dde_backup_simple.json
+    CLASS_ID = "ctsa::bts:CTSADataset"
+    INDEX = "discover_schema_class"
+
+    def _set_legacy_parent_classes(self, es_client):
+        """Write the old comma-joined string format onto an existing class doc."""
+        es_client.update(
+            index=self.INDEX,
+            id=self.CLASS_ID,
+            doc={"parent_classes": ["schema:Thing, schema:CreativeWork, schema:Dataset"]},
+            refresh=True,
+        )
+
+    def _parent_classes(self, es_client):
+        return es_client.get(index=self.INDEX, id=self.CLASS_ID)["_source"]["parent_classes"]
+
+    def test_rebuilds_parent_classes_in_new_format(self, ensure_test_data, es_client):
+        self._set_legacy_parent_classes(es_client)
+        meta_before = dict(schemas.get_meta(self.NAMESPACE))
+
+        result = schemas.reindex_classes([self.NAMESPACE])
+        refresh()
+
+        assert result["failed"] == {}
+        assert result["reindexed"][self.NAMESPACE] > 0
+        parent_classes = self._parent_classes(es_client)
+        assert parent_classes, "rebuilt class should have parent classes"
+        assert all(isinstance(line, list) for line in parent_classes), parent_classes
+        assert parent_classes[0][0] == "schema:Thing"
+        # the schema document itself (owner, url, timestamps) is not touched
+        assert dict(schemas.get_meta(self.NAMESPACE)) == meta_before
+
+    def test_dryrun_saves_nothing(self, ensure_test_data, es_client):
+        self._set_legacy_parent_classes(es_client)
+        try:
+            result = schemas.reindex_classes([self.NAMESPACE], dryrun=True)
+            refresh()
+
+            assert result["failed"] == {}
+            assert result["reindexed"][self.NAMESPACE] > 0
+            assert self._parent_classes(es_client) == [
+                "schema:Thing, schema:CreativeWork, schema:Dataset"
+            ]
+        finally:
+            # don't leave the legacy format behind for other tests
+            schemas.reindex_classes([self.NAMESPACE])
+            refresh()
+
+    def test_one_failure_does_not_stop_the_rest(self, ensure_test_data):
+        result = schemas.reindex_classes(["does_not_exist", self.NAMESPACE])
+        refresh()
+
+        assert "does_not_exist" in result["failed"]
+        assert self.NAMESPACE in result["reindexed"]
