@@ -1,18 +1,17 @@
-"""
-    Rebuild Schema Class Documents
+"""Rebuild schema class documents from the stored schemas.
 
-    - Rebuilds every class in the discover_schema_class index from the
-      schema documents already stored in discover_schema
-    - Does not fetch schema urls, and does not change schema documents,
-      owners, timestamps or datasets (unlike scripts.reset, nothing is lost)
-    - schema.org stays at the version already loaded
-    - Run it after a change to how classes are built, e.g. a field format change
+- Rebuilds every class in the discover_schema_class index from the
+  schema documents already stored in discover_schema
+- Does not fetch schema urls, and does not change schema documents,
+  owners, timestamps or datasets (unlike scripts.reset, nothing is lost)
+- schema.org stays at the version already loaded
+- Run it after a change to how classes are built, e.g. a field format change
 
-    python -m scripts.reindex_classes --dryrun                   # validate only, nothing saved
-    python -m scripts.reindex_classes                            # all namespaces
-    python -m scripts.reindex_classes --namespace=niaid,schema   # specific namespaces
+python -m scripts.reindex_classes --dryrun                   # validate only, nothing saved
+python -m scripts.reindex_classes                            # all namespaces
+python -m scripts.reindex_classes --namespace=niaid,schema   # specific namespaces
 
-    Exits with status 1 if any namespace failed.
+Exits with status 1 if any namespace failed.
 """
 
 import json
