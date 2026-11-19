@@ -81,14 +81,6 @@ export default {
   },
   props: ["item"],
   methods: {
-    getSubclass(parents) {
-      if (parents) {
-        let sub = parents[0].split(", ");
-        return sub[sub.length - 1];
-      } else {
-        return "This class has no subclass";
-      }
-    },
     getPropTotal() {
       if (this.item.hasOwnProperty("properties")) {
         return this.item.properties.length;

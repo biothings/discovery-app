@@ -18,7 +18,7 @@
             <b>{{ item?.name }}</b>
           </summary>
           <template v-for="tree in item?.parent_classes">
-            <template v-for="(name, i) in getSubclass(tree)" :key="i + 'sc'">
+            <template v-for="(name, i) in tree" :key="i + 'sc'">
               <span v-text="name"></span>
               <span
                 ><font-awesome-icon
@@ -40,49 +40,51 @@
         <!-- 🌈 prop totals 🌈 -->
         <div v-if="totals" class="col-sm-12 p-0">
           <table style="font-size: small">
-            <tr>
-              <td v-for="(val, name) in totals" class="px-1">
-                <span v-if="val">
-                  <template v-if="name == 'required'">
-                    <font-awesome-icon
-                      title="required"
-                      icon="fas fa-asterisk"
-                      class="text-danger"
-                    ></font-awesome-icon>
-                    required
-                  </template>
-                  <template v-else-if="name == 'selected'">
-                    <font-awesome-icon
-                      title="selected"
-                      icon="fas fa-check-circle"
-                      class="text-success"
-                    ></font-awesome-icon>
-                    selected
-                  </template>
-                  <template v-else-if="name == 'optional'">
-                    <font-awesome-icon
-                      title="optional"
-                      icon="fas fa-square"
-                      class="text-info"
-                    ></font-awesome-icon>
-                    optional
-                  </template>
-                  <template v-else-if="name == 'recommended'">
-                    <font-awesome-icon
-                      title="recommended"
-                      icon="fas fa-circle"
-                      class="text-warning"
-                    ></font-awesome-icon>
-                    recommended
-                  </template>
-                  <i v-else v-text="name"></i> :
-                  <b
-                    v-text="val"
-                    :class="[val ? 'text-primary' : 'text-muted']"
-                  ></b>
-                </span>
-              </td>
-            </tr>
+            <tbody>
+              <tr>
+                <td v-for="(val, name) in totals" class="px-1">
+                  <span v-if="val">
+                    <template v-if="name == 'required'">
+                      <font-awesome-icon
+                        title="required"
+                        icon="fas fa-asterisk"
+                        class="text-danger"
+                      ></font-awesome-icon>
+                      required
+                    </template>
+                    <template v-else-if="name == 'selected'">
+                      <font-awesome-icon
+                        title="selected"
+                        icon="fas fa-check-circle"
+                        class="text-success"
+                      ></font-awesome-icon>
+                      selected
+                    </template>
+                    <template v-else-if="name == 'optional'">
+                      <font-awesome-icon
+                        title="optional"
+                        icon="fas fa-square"
+                        class="text-info"
+                      ></font-awesome-icon>
+                      optional
+                    </template>
+                    <template v-else-if="name == 'recommended'">
+                      <font-awesome-icon
+                        title="recommended"
+                        icon="fas fa-circle"
+                        class="text-warning"
+                      ></font-awesome-icon>
+                      recommended
+                    </template>
+                    <i v-else v-text="name"></i> :
+                    <b
+                      v-text="val"
+                      :class="[val ? 'text-primary' : 'text-muted']"
+                    ></b>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
         <span
@@ -132,7 +134,7 @@
       <div v-show="expand" class="mt-1">
         <div
           class="p-1 bg-secondary"
-          v-if="!item.special && item.properties.length > perPage"
+          v-if="!item.special && properties.length > perPage"
         >
           <!-- 🌈 filter by name 🌈 -->
           <div>
@@ -163,7 +165,7 @@
                   </template>
                   <!-- show deprecated badge -->
                   <template v-if="prop?.deprecated">
-                    <small class="badge badge-danger ml-1" data-tippy-content="This property is deprecated and should not be used">
+                    <small class="badge badge-danger ml-1">
                       <font-awesome-icon icon="fas fa-exclamation-circle" />
                     </small>
                   </template>
@@ -172,7 +174,7 @@
                   <small class="ml-1 text-muted" data-tippy-content="This property is superseded by another property">
                     <small class="ml-1">Use instead:
                       <strong v-for="superseded in prop.superseded_by" :key="superseded"
-                        class="ml-1" data-tippy-content="You should use this property instead of the deprecated one">
+                        class="ml-1">
                         {{ superseded }}
                       </strong>
                     </small>
@@ -263,7 +265,7 @@
                   <small class="ml-1 text-muted" data-tippy-content="This property is superseded by another property">
                     <small class="ml-1">Use instead:
                       <strong v-for="superseded in prop.superseded_by" :key="superseded"
-                        class="ml-1" data-tippy-content="You should use this property instead of the deprecated one">
+                        class="ml-1">
                         {{ superseded }}
                       </strong>
                     </small>
@@ -333,7 +335,7 @@
         </template>
 
         <!-- 🌈 pagination 🌈 -->
-        <template v-if="!item.special && item.properties.length > perPage">
+        <template v-if="!item.special && properties.length > perPage">
           <div class="d-flex flex-wrap justify-content-center p-1 mt-2">
             <div class="page-item rounded-0" :class="{ disabled: page <= 1 }">
               <a class="page-link p-1" @click.prevent="prevPage()"
@@ -427,7 +429,7 @@
         @click="expand = !expand"
       >
         {{ expand ? "Hide" : "Show" }}
-        <span class="text-warning">({{ item.properties.length }})</span>
+        <span class="text-warning">({{ properties.length }})</span>
       </button>
     </div>
 
@@ -618,10 +620,14 @@ export default {
           : false
         : false;
     },
+    properties: function () {
+      // classes with no properties of their own may not have the field at all
+      return this.item?.properties || [];
+    },
     paginatedResults: function () {
       var start = (this.page - 1) * this.perPage,
         end = start + this.perPage;
-      return this.item.properties && this.item.properties.slice(start, end);
+      return this.properties.slice(start, end);
     },
   },
   watch: {
@@ -630,7 +636,7 @@ export default {
     },
     query: function (q) {
       if (q) {
-        this.filtered = this.item.properties.filter((prop) =>
+        this.filtered = this.properties.filter((prop) =>
           prop["label"].toLocaleLowerCase().includes(q.toLocaleLowerCase())
         );
       } else {
@@ -724,7 +730,7 @@ export default {
         optional: 0,
       };
       if (this.item.hasOwnProperty("properties")) {
-        this.item.properties.forEach((prop) => {
+        this.properties.forEach((prop) => {
           // totals.properties++;
           if (prop && prop.selected) {
             totals.selected++;
@@ -773,7 +779,7 @@ export default {
     },
     calculatePages: function () {
       var self = this;
-      self.pages = Math.ceil(self.item.properties.length / self.perPage);
+      self.pages = Math.ceil(self.properties.length / self.perPage);
       if (self.pages > self.pageLimit) {
         self.groupPages = true;
       }
@@ -822,9 +828,6 @@ export default {
       var self = this;
       if (self.page < self.pages) self.page += 1;
     },
-    getSubclass(item) {
-      return item.split(", ");
-    },
     markSelected(propLabel) {
       let self = this;
       var payload = {};
@@ -834,17 +837,17 @@ export default {
     },
     markRequired(propLabel) {
       var self = this;
-      for (var i = 0; i < self.item.properties.length; i++) {
+      for (var i = 0; i < self.properties.length; i++) {
         if (
-          self.item.properties[i].label === propLabel &&
-          self.item.properties[i].selected
+          self.properties[i].label === propLabel &&
+          self.properties[i].selected
         ) {
           var payload = {};
           payload["label"] = propLabel;
           self.$store.commit("requireProp", payload);
         } else if (
-          self.item.properties[i].label === propLabel &&
-          !self.item.properties[i].selected
+          self.properties[i].label === propLabel &&
+          !self.properties[i].selected
         ) {
           new Notify({
             status: "error",
@@ -858,17 +861,17 @@ export default {
     },
     markOptional(propLabel) {
       var self = this;
-      for (var i = 0; i < self.item.properties.length; i++) {
+      for (var i = 0; i < self.properties.length; i++) {
         if (
-          self.item.properties[i].label === propLabel &&
-          self.item.properties[i].selected
+          self.properties[i].label === propLabel &&
+          self.properties[i].selected
         ) {
           var payload = {};
           payload["label"] = propLabel;
           self.$store.commit("optionalProp", payload);
         } else if (
-          self.item.properties[i].label === propLabel &&
-          !self.item.properties[i].selected
+          self.properties[i].label === propLabel &&
+          !self.properties[i].selected
         ) {
           new Notify({
             status: "error",
@@ -882,17 +885,17 @@ export default {
     },
     markRecommended(propLabel) {
       var self = this;
-      for (var i = 0; i < self.item.properties.length; i++) {
+      for (var i = 0; i < self.properties.length; i++) {
         if (
-          self.item.properties[i].label === propLabel &&
-          self.item.properties[i].selected
+          self.properties[i].label === propLabel &&
+          self.properties[i].selected
         ) {
           var payload = {};
           payload["label"] = propLabel;
           self.$store.commit("recommendProp", payload);
         } else if (
-          self.item.properties[i].label === propLabel &&
-          !self.item.properties[i].selected
+          self.properties[i].label === propLabel &&
+          !self.properties[i].selected
         ) {
           new Notify({
             status: "error",

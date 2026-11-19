@@ -112,9 +112,10 @@ export default {
       }
     },
     getSubclass(parents) {
-      if (parents) {
-        let sub = parents[0].split(", ");
-        return sub[sub.length - 1];
+      // parent_classes is a list of paths (root first), so the last curie
+      // of each path is an immediate parent
+      if (parents?.length) {
+        return [...new Set(parents.map((path) => path.at(-1)))].join(", ");
       } else {
         return "This class has no subclass";
       }
