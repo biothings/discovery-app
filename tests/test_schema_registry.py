@@ -76,7 +76,7 @@ class DiscoveryAPITest(DiscoveryTestCase):
             "uri": "http://schema.biothings.io/BiologicalEntity",
             "prefix": "bts",
             "label": "BiologicalEntity",
-            "parent_classes": [ "schema:Thing" ],
+            "parent_classes": [ [ "schema:Thing" ] ],
             "properties": [ ... ],
             "ref": true
         }

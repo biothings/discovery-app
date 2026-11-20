@@ -459,6 +459,66 @@ def add_core(update=False, schema_org_version=None):
         store_schema_org_version()
 
 
+def reindex_classes(namespaces=None, dryrun=False):
+    # Rebuild the class index (discover_schema_class) from the schema documents
+    # already stored in the schema index (discover_schema).
+
+    # Use this after a change to how classes are built, for example the
+    # "parent_classes" format change, so existing class documents pick it up.
+    # Unlike update(), it does not fetch schema urls or compare versions, and it
+    # does not change the schema documents themselves (owner, timestamps, etc.).
+    # Classes are saved over their existing docs (same _id) before stale ones are
+    # pruned, so a namespace is never left empty part way through.
+
+    # namespaces: list of namespaces to rebuild. None rebuilds all of them,
+    #             including the core "schema" namespace from schema.org.
+    # dryrun:     validate every rebuilt class without saving or deleting anything.
+
+    # Returns {"reindexed": {namespace: class_count}, "failed": {namespace: error}}.
+
+    # Example:
+    # >>> from discovery.registry import schemas
+    # >>> schemas.reindex_classes(dryrun=True)
+    # >>> schemas.reindex_classes()
+    # >>> schemas.reindex_classes(["niaid"])
+
+    # keep the schema.org version that is already loaded, so a reindex only
+    # rebuilds classes and never upgrades schema.org as a side effect
+    schema_org_version = get_stored_schema_org_version() or get_latest_schema_org_version()
+
+    if namespaces is None:
+        namespaces = ["schema"] + [
+            doc.meta.id for doc in ESSchemaFile.search().source(False).scan()
+        ]
+
+    result = {"reindexed": {}, "failed": {}}
+    for namespace in namespaces:
+        try:
+            if namespace == "schema":
+                doc = None  # schema.org core is not stored, see _add_schema_class
+            else:
+                doc = get(namespace)
+                doc.pop("_id", None)
+                doc = ValidatedDict(doc)
+            count = _add_schema_class(
+                doc, namespace, dryrun=dryrun, schema_org_version=schema_org_version
+            )
+            result["reindexed"][namespace] = count
+            logger.info(
+                'Reindexed %s classes of "%s"%s.', count, namespace, " (dryrun)" if dryrun else ""
+            )
+        except Exception as exc:  # one failing schema should not stop the rest
+            result["failed"][namespace] = str(exc) or type(exc).__name__
+            logger.exception('Failed to reindex classes of "%s".', namespace)
+
+    logger.info(
+        "Class reindex complete: %s namespaces reindexed, %s failed.",
+        len(result["reindexed"]),
+        len(result["failed"]),
+    )
+    return result
+
+
 def add_core_extension(schema, update=False):
     """add a widely used schema we know."""
 

@@ -155,7 +155,7 @@ class SchemaClass(DiscoveryDoc):
         "label": "ViewAction",
         "name": "schema:ViewAction",
         "description": "The act of consuming static visual content.",
-        "parent_classes": ["schema:Thing, schema:Action, schema:ConsumeAction"],
+        "parent_classes": [["schema:Thing", "schema:Action", "schema:ConsumeAction"]],
         "properties": [ ... ],
         "ref": false,
         "uri": "http://schema.org/ViewAction",
@@ -176,7 +176,9 @@ class SchemaClass(DiscoveryDoc):
     prefix = Text(required=True, fields={"raw": Keyword()})
     label = Text(required=True, fields={"raw": Keyword()})
     uri = Text(fields={"raw": Keyword()})
-    parent_classes = Text(multi=True, analyzer="simple")  # immediate ones only
+    # list of inheritance paths, each a list of curies from the root down to the
+    # immediate parent. ES flattens the nested arrays for indexing, but _source keeps them.
+    parent_classes = Text(multi=True, analyzer="simple")
     properties = Object(SchemaClassProp)  # immediate ones only
     validation = Object(
         dynamic=False,  # only index fields listed

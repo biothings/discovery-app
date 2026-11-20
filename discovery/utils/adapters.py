@@ -16,7 +16,7 @@ Schema Viewer JSON
         "name": ... ,
         "description": ... ,
         "validation": { ... },
-        "parent_classes": [ ... ],
+        "parent_classes": [ [ ... ], ... ],
         "properties": [ ... ],
         ...
     }, ...
@@ -88,18 +88,20 @@ class SchemaClassWrapper:
     @property
     def parent_classes(self):
         """
+        One list per inheritance path, ordered root first and ending with
+        the immediate parent. The class itself is not included.
         {
             "_id": "schema::schema:Library",
             ...
             "parent_classes": [
-                "schema:Thing, schema:Organization, schema:LocalBusiness",
-                "schema:Thing, schema:Place, schema:LocalBusiness"
+                ["schema:Thing", "schema:Organization", "schema:LocalBusiness"],
+                ["schema:Thing", "schema:Place", "schema:LocalBusiness"]
             ],
             ...
         }
         """
         return [
-            ", ".join(map(str, parent_line))
+            [str(parent) for parent in parent_line]
             for parent_line in self._parser_class.parent_classes
         ]
 

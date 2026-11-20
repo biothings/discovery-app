@@ -878,8 +878,8 @@ export default {
           if (self.userSchema["hits"][i].hasOwnProperty("parent_classes")) {
             let parents = self.userSchema["hits"][i]["parent_classes"][0];
             if (parents) {
-              let parentList = parents.split(", ");
-              parentList.push(topLevel);
+              // a list of curies, root first; copy so the hit isn't changed
+              let parentList = [...parents, topLevel];
               for (
                 var currentParent = 0;
                 currentParent < parentList.length;
@@ -1082,12 +1082,8 @@ export default {
       const pcs = classInfo?.parent_classes;
       if (!Array.isArray(pcs) || pcs.length === 0) return [];
 
-      const names = pcs.flatMap((s) =>
-        s
-          .split(/\s*,\s*/)
-          .map((t) => t.trim())
-          .filter(Boolean)
-      );
+      // every curie from every inheritance path
+      const names = pcs.flat().filter(Boolean);
 
       const parent_names = [...new Set(names)].reverse();
 
